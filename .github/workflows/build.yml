@@ -3,8 +3,7 @@ name: SonarCloud Analysis
 on:
   push:
     branches:
-      - main
-      - develop
+      - '**'  # in modo da far sattare la pipeline a ogni push su qualsiasi branch
   pull_request:
     types: [opened, synchronize, reopened]
 

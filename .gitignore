@@ -72,3 +72,6 @@ typings/
 !.vscode/launch.json
 !.vscode/extensions.json
 .history/
+
+# local documentation / notes
+.ignore/

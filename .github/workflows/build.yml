@@ -3,7 +3,7 @@ name: SonarCloud Analysis
 on:
   push:
     branches:
-      - '**'  # in modo da far sattare la pipeline a ogni push su qualsiasi branch
+      - '**' # in modo da far startare la pipeline a ogni push su qualsiasi branch
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -32,7 +32,7 @@ jobs:
         working-directory: ./frontend
         run: |
           npm ci
-          npm run test -- --no-watch --code-coverage
+          npm run test:sonar
 
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

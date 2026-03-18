@@ -1,7 +1,19 @@
-import { UpdateUserCmd } from './update-user-cmd/update-user-cmd';
+import { UpdateUserCmd } from './update-user-cmd';
 
 describe('UpdateUserCmd', () => {
   it('should be defined', () => {
-    expect(new UpdateUserCmd()).toBeDefined();
+    expect(new UpdateUserCmd(1, '', '', '', '')).toBeDefined();
+  });
+
+  it('should have all properties defined', () => {
+    const cmd = new UpdateUserCmd(1, 'u', 's', 'n', 'r');
+
+    expect(cmd).toMatchObject({
+      id: 1,
+      username: 'u',
+      surname: 's',
+      name: 'n',
+      role: 'r'
+    });
   });
 });

@@ -26,4 +26,7 @@ export class UsersService implements FindAllUsersUseCase, UpdateUserUseCase, Cre
     
 }
 
-export const USERS_SERVICE = 'USER_SERVICE';
+export const FIND_ALL_USERS_USE_CASE = 'FIND_ALL_USERS_USE_CASE';
+export const UPDATE_USER_USE_CASE = 'UPDATE_USER_USE_CASE';
+export const CREATE_USER_USE_CASE = 'CREATE_USER_USE_CASE';
+export const DELETE_USER_USE_CASE = 'DELETE_USER_USE_CASE';

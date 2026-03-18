@@ -1,12 +1,30 @@
 import { Module } from '@nestjs/common';
 import { UsersController } from './adapters/in/users.controller';
-import { USERS_SERVICE, UsersService } from './application/services/users.service';
+import { 
+  CREATE_USER_USE_CASE, 
+  DELETE_USER_USE_CASE, 
+  FIND_ALL_USERS_USE_CASE, 
+  UPDATE_USER_USE_CASE, 
+  UsersService 
+} from './application/services/users.service';
 
 @Module({
   controllers: [UsersController],
   providers: [
     {
-      provide: USERS_SERVICE,
+      provide: FIND_ALL_USERS_USE_CASE,
+      useClass: UsersService
+    },
+    {
+      provide: UPDATE_USER_USE_CASE,
+      useClass: UsersService
+    },
+    {
+      provide: CREATE_USER_USE_CASE,
+      useClass: UsersService
+    },
+    {
+      provide: DELETE_USER_USE_CASE,
       useClass: UsersService
     }
   ]

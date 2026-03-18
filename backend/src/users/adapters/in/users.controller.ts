@@ -1,7 +1,12 @@
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put } from '@nestjs/common';
 import { UpdateUserReqDto } from '../../infrastructure/dtos/in/update-user-req.dto';
 import { CreateUserReqDto } from '../../infrastructure/dtos/in/create-user-req.dto';
-import { USERS_SERVICE } from '../../application/services/users.service';
+import { 
+    CREATE_USER_USE_CASE, 
+    DELETE_USER_USE_CASE, 
+    FIND_ALL_USERS_USE_CASE, 
+    UPDATE_USER_USE_CASE 
+} from '../../application/services/users.service';
 import { FindAllUsersUseCase } from '../../application/ports/in/find-all-users-use-case.interface';
 import { UpdateUserUseCase } from '../../application/ports/in/update-user-use-case.interface';
 import { CreateUserUseCase } from '../../application/ports/in/create-user-use-case.interface';
@@ -14,10 +19,10 @@ import { DeleteUserCmd } from '../../application/commands/delete-user-cmd';
 export class UsersController {
 
     constructor(
-        @Inject(USERS_SERVICE) private readonly findAllUsersUseCase: FindAllUsersUseCase,
-        @Inject(USERS_SERVICE) private readonly updateUserUseCase: UpdateUserUseCase,
-        @Inject(USERS_SERVICE) private readonly createUserUseCase: CreateUserUseCase,
-        @Inject(USERS_SERVICE) private readonly deleteUserUseCase: DeleteUserUseCase,
+        @Inject(CREATE_USER_USE_CASE) private readonly findAllUsersUseCase: FindAllUsersUseCase,
+        @Inject(DELETE_USER_USE_CASE) private readonly updateUserUseCase: UpdateUserUseCase,
+        @Inject(FIND_ALL_USERS_USE_CASE) private readonly createUserUseCase: CreateUserUseCase,
+        @Inject(UPDATE_USER_USE_CASE) private readonly deleteUserUseCase: DeleteUserUseCase,
     ){}
 
     @Get()

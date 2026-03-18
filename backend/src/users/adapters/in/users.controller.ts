@@ -33,30 +33,30 @@ export class UsersController {
     @Put('/:id')
     async updateUser(
         @Param('id') id: number,
-        @Body() updateUserReqDto: UpdateUserReqDto
+        @Body() req: UpdateUserReqDto
     ){
         return this.updateUserUseCase.updateUser(
             new UpdateUserCmd(
                 id,
-                updateUserReqDto.username,
-                updateUserReqDto.surname,
-                updateUserReqDto.name,
-                updateUserReqDto.role
+                req.username,
+                req.surname,
+                req.name,
+                req.role
             )
         );
     }
 
     @Post()
     async createUser(
-        @Body() createUserReqDto: CreateUserReqDto
+        @Body() req: CreateUserReqDto
     ){
         return this.createUserUseCase.createUser(
             new CreateUserCmd(
-                createUserReqDto.name,
-                createUserReqDto.surname,
-                createUserReqDto.name,
-                createUserReqDto.role,
-                createUserReqDto.tempPassword
+                req.name,
+                req.surname,
+                req.name,
+                req.role,
+                req.tempPassword
             )
         );
     }

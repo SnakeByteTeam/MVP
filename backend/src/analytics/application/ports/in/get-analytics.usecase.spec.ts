@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getAnalyticsUseCase } from './get-analytics.usecase';
+import { GetAnalyticsUseCase } from './get-analytics.usecase';
 
 describe('In', () => {
-  let provider: getAnalyticsUseCase;
+  let provider: GetAnalyticsUseCase;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [getAnalyticsUseCase],
     }).compile();
 
-    provider = module.get<getAnalyticsUseCase>(getAnalyticsUseCase);
+    provider = module.get<GetAnalyticsUseCase>(getAnalyticsUseCase);
   });
 
   it('should be defined', () => {

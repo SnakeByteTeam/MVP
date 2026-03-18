@@ -4,9 +4,10 @@ import { firstValueFrom } from "rxjs";
 
 import { GetTokensFromApiPort } from "src/tokens/application/ports/out/get-tokens-from-api.port";
 import { TokensDto } from "src/tokens/infrastructure/dtos/tokens.dto";
+import { RefreshTokensFromApiPort } from "src/tokens/application/ports/out/refresh-tokens-from-api.port";
 
 @Injectable()
-export class GetTokensFromApiImpl implements GetTokensFromApiPort {
+export class GetTokensFromApiImpl implements GetTokensFromApiPort, RefreshTokensFromApiPort{
 
     constructor(
         private readonly httpService: HttpService,
@@ -38,4 +39,32 @@ export class GetTokensFromApiImpl implements GetTokensFromApiPort {
 
         return tokensDto;
     }
+
+    async refresh(refreshToken: string): Promise<TokensDto | null> {
+        const TOKEN_ENDPOINT: string = process.env.HOST2 || "";
+        const basicAuth =   "Basic " + Buffer.from(`${process.env.CLIENTID}:${process.env.CLIENTSECRET}`).toString("base64");
+        
+        const data = new URLSearchParams({
+            grant_type: "refresh_token",
+            refresh_token: refreshToken,
+        });
+
+        const response = await firstValueFrom(
+            this.httpService.post(TOKEN_ENDPOINT, data.toString(), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded', 
+                    Authorization: basicAuth
+                }
+            })
+        );
+
+        const tokensDto: TokensDto = {
+            accessToken: response.data?.access_token,
+            refreshToken: response.data?.refresh_token,
+            expiresIn: response.data?.expires_in
+        };
+
+        return tokensDto;
+    }   
+
 }

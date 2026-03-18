@@ -19,6 +19,15 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile
+    develop: 
+      watch: 
+        - path: ./package.json
+          action: rebuild
+        - path: ./package-lock.json
+          action: rebuild
+        - path: ./Dockerfile
+          action: rebuild
+
     image: backend
     ports: 
       - 3000:3000

@@ -8,7 +8,6 @@ node_modules/
 # build outputs
 dist/
 build/
-out/
 out-tsc/
 bazel-out/
 *.tsbuildinfo

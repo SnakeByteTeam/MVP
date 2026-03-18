@@ -24,7 +24,7 @@ describe('ApiAuthVimarService', () => {
     const parsedUrl = new URL(loginUrl);
 
     expect(parsedUrl.origin + parsedUrl.pathname).toBe(
-      'https://vimar.example.com/oauth/authorize',
+      'https://example.example.com/oauth/authorize',
     );
     expect(parsedUrl.searchParams.get('response_type')).toBe('code');
     expect(parsedUrl.searchParams.get('client_id')).toBe('client-123');

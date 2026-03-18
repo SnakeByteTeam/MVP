@@ -17,7 +17,7 @@ export class TokenCacheImpl implements WriteTokensCachePort {
         try{
             await client.query(
                 `INSERT INTO TOKEN_CACHE (access_token, refresh_token, expires_at) 
-                VALUES ($1, $2, $3)
+                VALUES ($1, $2, $3) RETURNING access_token
                 ON CONFLICT (lock) DO UPDATE
                     SET access_token = EXCLUDED.access_token,
                         refresh_token = EXCLUDED.refresh_token,

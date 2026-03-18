@@ -17,7 +17,7 @@ export const PG_POOL = Symbol("PG_POOL")
                 });
 
                 pool.on('error', (err) =>{
-                    console.error("Erron on PostreSQL Pool");
+                    console.error("Error on PostreSQL Pool");
                 });
 
                 return pool;

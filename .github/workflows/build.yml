@@ -11,31 +11,34 @@ jobs:
   sonarcloud:
     name: Build, Test and Analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '24.14'
 
       - name: Install dependencies & Test Backend
         working-directory: ./backend
         run: |
-          npm ci
+          npm ci --ignore-scripts
           npm run test:cov
 
       - name: Install dependencies & Test Frontend
         working-directory: ./frontend
         run: |
-          npm ci
+          npm ci --ignore-scripts
+          npm rebuild esbuild
           npm run test:sonar
 
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -232,11 +232,12 @@ export class EventSubscriptionService implements OnDestroy {
 	}
 
 	private resolveSocketUrl(): string {
-		if (this.apiBaseUrl && this.apiBaseUrl.trim()) {
-			return this.apiBaseUrl;
+		const normalizedApiBaseUrl = this.apiBaseUrl?.trim();
+		if (normalizedApiBaseUrl) {
+			return normalizedApiBaseUrl;
 		}
 
-		return window.location.origin;
+		return globalThis.location.origin;
 	}
 
 	private isPushEventType(value: unknown): value is PushEventType {

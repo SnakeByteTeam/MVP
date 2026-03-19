@@ -22,60 +22,21 @@ import { TokenService } from './application/services/tokens.service';
 import { RefreshTokensAdapter } from './adapters/out/refresh-tokens.adapter';
 import { REFRESHTOKENSFROMAPIPORT } from './application/ports/out/refresh-tokens-from-api.port';
 
-
-
 @Module({
-    imports: [HttpModule],
-    controllers: [TokensController],
-    providers: [
-        {
-            provide: GETTOKENSCALLBACKUSECASE, 
-            useClass: ApiAuthTokensService
-        }, 
-        {
-            provide: WRITETOKENSREPOPORT, 
-            useClass: WriteTokensRepoAdapter
-        }, 
-        {
-            provide: WRITETOKENSCACHEPORT,
-            useClass: TokenCacheImpl
-        },
-        {
-            provide: GETTOKENSWITHCODEPORT,   
-            useClass: GetTokenWithCodeAdapter
-        },
-        {
-            provide: GETTOKENSFROMAPIPORT, 
-            useClass: GetTokensFromApiImpl
-        },
-        {
-            provide: GETVALIDTOKENPORT, 
-            useClass: TokenService
-        },
-        {
-            provide: READTOKENSFROMREPOPORT, 
-            useClass: ReadTokensFromRepoAdapter
-        },
-        {
-            provide: READTOKENSCACHEPORT, 
-            useClass: TokenCacheImpl
-        },
-        {
-            provide: REFRESHTOKENSPORT, 
-            useClass: RefreshTokensAdapter
-        },
-        {
-            provide: REFRESHTOKENSFROMAPIPORT, 
-            useClass: GetTokensFromApiImpl
-        },
-        ApiAuthTokensService, 
-        WriteTokensRepoAdapter, 
-        TokenCacheImpl, 
-        GetTokenWithCodeAdapter,
-        GetTokensFromApiImpl, 
-        TokenService,
-        ReadTokensFromRepoAdapter,
-        RefreshTokensAdapter
-        ]
+  imports: [HttpModule],
+  controllers: [TokensController],
+  providers: [
+    { provide: GETTOKENSCALLBACKUSECASE,  useClass: ApiAuthTokensService },
+    { provide: WRITETOKENSREPOPORT,       useClass: WriteTokensRepoAdapter },
+    { provide: WRITETOKENSCACHEPORT,      useClass: TokenCacheImpl },
+    { provide: READTOKENSCACHEPORT,       useClass: TokenCacheImpl },
+    { provide: GETTOKENSWITHCODEPORT,     useClass: GetTokenWithCodeAdapter },
+    { provide: GETTOKENSFROMAPIPORT,      useClass: GetTokensFromApiImpl },
+    { provide: REFRESHTOKENSFROMAPIPORT,  useClass: GetTokensFromApiImpl },
+    { provide: GETVALIDTOKENPORT,         useClass: TokenService },
+    { provide: READTOKENSFROMREPOPORT,    useClass: ReadTokensFromRepoAdapter },
+    { provide: REFRESHTOKENSPORT,         useClass: RefreshTokensAdapter },
+  ],
+  exports: [REFRESHTOKENSPORT],
 })
 export class TokensModule {}

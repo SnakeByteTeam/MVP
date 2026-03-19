@@ -1,17 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserCreatedDialog } from './user-created-dialog';
+import { UserCreatedDialogComponent } from './user-created-dialog';
+import { UserRole } from '../../../../core/models/user-role.enum';
 
-describe('UserCreatedDialog', () => {
-  let component: UserCreatedDialog;
-  let fixture: ComponentFixture<UserCreatedDialog>;
+describe('UserCreatedDialogComponent', () => {
+  let component: UserCreatedDialogComponent;
+  let fixture: ComponentFixture<UserCreatedDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UserCreatedDialog],
+      imports: [UserCreatedDialogComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UserCreatedDialog);
+    fixture = TestBed.createComponent(UserCreatedDialogComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

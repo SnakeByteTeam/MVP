@@ -13,6 +13,10 @@ out-tsc/
 bazel-out/
 *.tsbuildinfo
 
+# keep frontend API DTOs under features/*/models/out tracked
+!frontend/src/app/features/user-management/models/out/
+!frontend/src/app/features/user-management/models/out/*.ts
+
 # temporary files
 tmp/
 .temp/

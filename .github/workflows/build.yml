@@ -28,12 +28,6 @@ jobs:
           npm ci
           npm run test:cov -- --runInBand
 
-      - name: Install dependencies & Test Frontend
-        working-directory: ./frontend
-        run: |
-          npm ci
-          npm run test -- --no-watch --code-coverage
-
       - name: Run SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

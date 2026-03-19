@@ -12,13 +12,10 @@ import { CreateWardCmd } from '../../application/commands/create-ward-cmd';
 import { UpdateWardCmd } from '../../application/commands/update-ward-cmd';
 import { 
     CREATE_WARD_USE_CASE, 
-    DELETE_WARD_USE_CASE, 
-    FIND_ALL_PLANTS_BY_WARD_ID_USE_CASE, 
-    FIND_ALL_USERS_BY_WARD_ID_USE_CASE, 
+    DELETE_WARD_USE_CASE,
     FIND_ALL_WARD_USE_CASE, 
     UPDATE_WARD_USE_CASE 
-} from '../../application/services/ward-service';
-
+} from '../../application/services/ward.service';
 
 @Controller('wards')
 export class WardsController {
@@ -26,10 +23,8 @@ export class WardsController {
     constructor(
         @Inject(CREATE_WARD_USE_CASE) private readonly createWardUseCase: CreateWardUseCase,
         @Inject(FIND_ALL_WARD_USE_CASE) private readonly findAllWardUseCase: FindAllWardsUseCase,
-        @Inject(FIND_ALL_USERS_BY_WARD_ID_USE_CASE) private readonly findAllUsersByWardIdUseCase: FindAllUsersByWardIdUseCase,
-        @Inject(FIND_ALL_PLANTS_BY_WARD_ID_USE_CASE) private readonly findAllPlantsByWardIdUseCase: FindAllPlantsByWardIdResDto,
         @Inject(UPDATE_WARD_USE_CASE) private readonly updateWardUseCase: UpdateWardUseCase,
-        @Inject(DELETE_WARD_USE_CASE) private readonly deleteWardUseCase: DeleteWardCmd
+        @Inject(DELETE_WARD_USE_CASE) private readonly deleteWardUseCase: DeleteWardCmd,
     ){}
 
     @Post()
@@ -44,16 +39,6 @@ export class WardsController {
     @Get()
     async findAllWards(){
         return this.findAllWardUseCase.findAllWard();
-    }
-
-    @Get('/users')
-    async findAllUsersByWardId(@Body() req: FindAllUsersByWardIdResDto){
-
-    }
-
-    @Get('/plants')
-    async findAllPlantsByWardId(@Body() req: FindAllPlantsByWardIdResDto){
-        
     }
 
     @Put('/:id')

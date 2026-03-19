@@ -1,4 +1,4 @@
-import { WardService } from './ward-service';
+import { WardService } from './ward.service';
 
 describe('WardService', () => {
   it('should be defined', () => {

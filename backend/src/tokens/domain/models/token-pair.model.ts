@@ -1,7 +1,7 @@
 export class TokenPair {
-    private accessToken: string; 
-    private refreshToken: string; 
-    private expiresAt: Date;
+    private readonly accessToken: string; 
+    private readonly refreshToken: string; 
+    private readonly expiresAt: Date;
 
     constructor(accessToken: string, refreshToken: string, expiresAt: Date) {
         this.accessToken = accessToken;

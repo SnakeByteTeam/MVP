@@ -4,7 +4,7 @@ import { GETTOKENSCALLBACKUSECASE, type GetTokensCallbackUseCase } from 'src/tok
 @Controller('tokens')
 export class TokensController {
     constructor(
-        @Inject(GETTOKENSCALLBACKUSECASE) private getTokensCallbackUseCase: GetTokensCallbackUseCase
+        @Inject(GETTOKENSCALLBACKUSECASE) private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase
     ) {}
     
     @Get('callback')

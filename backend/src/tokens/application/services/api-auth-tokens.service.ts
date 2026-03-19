@@ -8,8 +8,8 @@ import { TokenPair } from "src/tokens/domain/models/token-pair.model";
 export class ApiAuthTokensService implements GetTokensCallbackUseCase {
 
     constructor(
-        @Inject(GETTOKENSWITHCODEPORT) private getTokensWithCodePort: GetTokensWithCodePort, 
-        @Inject(WRITETOKENSREPOPORT) private writeTokensRepoPort: WriteTokensRepoPort,
+        @Inject(GETTOKENSWITHCODEPORT) private readonly getTokensWithCodePort: GetTokensWithCodePort, 
+        @Inject(WRITETOKENSREPOPORT) private readonly writeTokensRepoPort: WriteTokensRepoPort,
     ) {}
 
     async getTokens(code: string) {

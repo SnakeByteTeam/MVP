@@ -1,6 +1,12 @@
 import { provideHttpClient } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  inject,
+  provideAppInitializer,
+  provideBrowserGlobalErrorListeners,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { EventSubscriptionService } from './core/alarm/services/event-subscription.service';
 
 import { routes } from './app.routes';
 import { API_BASE_URL } from './core/tokens/api-base-url.token';
@@ -14,5 +20,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     { provide: API_BASE_URL, useValue: apiBaseUrl },
+    provideAppInitializer(() => {
+      inject(EventSubscriptionService).initialize([]);
+    }),
   ]
 };

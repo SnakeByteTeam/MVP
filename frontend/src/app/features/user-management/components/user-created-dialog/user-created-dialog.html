@@ -1,0 +1,34 @@
+<div class="dialog-overlay">
+    <div class="dialog-content">
+
+        <header>
+            <h1>Utente Creato con Successo</h1>
+        </header>
+
+        <div class="dialog-body">
+            <p>
+                L'operatore sanitario <strong>{{ response().user.firstName }}</strong>
+                (Username: <strong>{{ response().user.username }}</strong>) è stato creato correttamente nel sistema.
+            </p>
+
+            <div class="alert-warning">
+                <h2>⚠️ Attenzione: Password Temporanea</h2>
+                <p>
+                    Comunica questa password all'utente. <strong>Non sarà più possibile recuperarla</strong>
+                    una volta chiusa questa finestra.
+                </p>
+
+                <div class="password-box">
+                    <code>{{ response().temporaryPassword }}</code>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <button type="button" class="btn-primary" (click)="closeDialog()">
+                Ho comunicato la password (Chiudi)
+            </button>
+        </footer>
+
+    </div>
+</div>

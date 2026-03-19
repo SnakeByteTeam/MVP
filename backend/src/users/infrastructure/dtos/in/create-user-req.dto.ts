@@ -26,15 +26,6 @@ export class CreateUserReqDto {
     name!: string;
 
     @IsString()
-    @MinLength(2, {
-        message: 'Role is too short. Minimal length is $constraint1 characters, but actual is $value',
-    })
-    @MaxLength(255, {
-        message: 'Role is too long. Maximal length is $constraint1 characters, but actual is $value',
-    })
-    role!: string;
-
-    @IsString()
     @Length(128, 128, {
         message: 'Temporary password is too short. Minimal length is $constraint1 characters, but actual is $value',
     })

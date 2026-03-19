@@ -13,7 +13,7 @@ export class UsersRepositoryImpl implements
     findAllUsers(): UserEntity[] {
         throw new Error("Method not implemented.");
     }
-    updateUser(id: number, username: string, surname: string, name: string, role: string): UserEntity {
+    updateUser(id: number, username: string, surname: string, name: string): UserEntity {
         throw new Error("Method not implemented.");
     }
     createUser(username: string, surname: string, name: string, tempPassword: string): UserEntity {

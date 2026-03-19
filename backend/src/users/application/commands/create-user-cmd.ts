@@ -3,7 +3,6 @@ export class CreateUserCmd {
         public username: string,
         public surname: string,
         public name: string,
-        public role: string,
         public tempPassword: string
     ){}
 }

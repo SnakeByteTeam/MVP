@@ -7,6 +7,11 @@ import {
   UPDATE_USER_USE_CASE, 
   UsersService 
 } from './application/services/users.service';
+import { UsersRepositoryImpl } from './infrastructure/persistence/users-repository-impl';
+import { CREATE_USER_REPOSITORY } from './application/repository/create-user-repository.interface';
+import { DELETE_USER_REPOSITORY } from './application/repository/delete-user-repository.interface';
+import { FIND_ALL_USERS_REPOSITORY } from './application/repository/find-all-users-repository.interface';
+import { UPDATE_USER_REPOSITORY } from './application/repository/update-user-repository.interface';
 
 @Module({
   controllers: [UsersController],
@@ -26,6 +31,22 @@ import {
     {
       provide: DELETE_USER_USE_CASE,
       useClass: UsersService
+    },
+    {
+      provide: CREATE_USER_REPOSITORY,
+      useClass: UsersRepositoryImpl
+    },
+    {
+      provide: DELETE_USER_REPOSITORY,
+      useClass: UsersRepositoryImpl
+    },
+    {
+      provide: FIND_ALL_USERS_REPOSITORY,
+      useClass: UsersRepositoryImpl
+    },
+    {
+      provide: UPDATE_USER_REPOSITORY,
+      useClass: UsersRepositoryImpl
     }
   ]
 })

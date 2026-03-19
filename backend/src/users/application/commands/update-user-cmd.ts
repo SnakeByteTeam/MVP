@@ -3,7 +3,6 @@ export class UpdateUserCmd {
         public id: number,
         public username: string,
         public surname: string,
-        public name: string,
-        public role: string
+        public name: string
     ){}
 }

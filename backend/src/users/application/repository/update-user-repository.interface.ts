@@ -5,7 +5,8 @@ export interface UpdateUserRepository {
         id: number,
         username: string,
         surname: string,
-        name: string,
-        role: string
+        name: string
     ): UserEntity;
 }
+
+export const UPDATE_USER_REPOSITORY = 'UPDATE_USER_REPOSITORY';

@@ -8,3 +8,5 @@ export interface CreateUserRepository {
         tempPassword: string
     ): UserEntity;
 }
+
+export const CREATE_USER_REPOSITORY = 'CREATE_USER_REPOSITORY';

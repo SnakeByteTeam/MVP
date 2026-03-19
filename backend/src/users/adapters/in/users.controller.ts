@@ -40,8 +40,7 @@ export class UsersController {
                 id,
                 req.username,
                 req.surname,
-                req.name,
-                req.role
+                req.name
             )
         );
     }
@@ -55,7 +54,6 @@ export class UsersController {
                 req.name,
                 req.surname,
                 req.name,
-                req.role,
                 req.tempPassword
             )
         );

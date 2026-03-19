@@ -1,0 +1,61 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+
+    <div class="form-group">
+        <label for="firstName">Nome</label>
+        <input id="firstName" type="text" formControlName="firstName">
+
+        @if (form.controls['firstName'].invalid && form.controls['firstName'].touched) {
+        <div class="error-msg">
+            @if (form.controls['firstName'].hasError('required')) {
+            <small>Il nome è obbligatorio.</small>
+            }
+            @if (form.controls['firstName'].hasError('minlength')) {
+            <small>Il nome deve essere di almeno 2 caratteri.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Cognome</label>
+        <input id="lastName" type="text" formControlName="lastName">
+
+        @if (form.controls['lastName'].invalid && form.controls['lastName'].touched) {
+        <div class="error-msg">
+            @if (form.controls['lastName'].hasError('required')) {
+            <small>Il cognome è obbligatorio.</small>
+            }
+            @if (form.controls['lastName'].hasError('minlength')) {
+            <small>Il cognome deve essere di almeno 2 caratteri.</small>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" type="text" formControlName="username">
+
+        @if (form.controls['username'].invalid && form.controls['username'].touched) {
+        <div class="error-msg">
+            @if (form.controls['username'].hasError('required')) {
+            <small>L'username è obbligatorio.</small>
+            }
+            @if (form.controls['username'].hasError('minlength')) {
+            <small>L'username deve essere di almeno 4 caratteri.</small>
+            }
+        </div>
+        }
+
+        @if (errorType() === 'USERNAME_ALREADY_IN_USE') {
+        <div class="error-msg business-error">
+            <small>Attenzione: Questo username è già in uso. Scegline un altro.</small>
+        </div>
+        }
+    </div>
+
+    <button type="submit" [disabled]="form.invalid">
+        Crea Utente
+    </button>
+
+</form>

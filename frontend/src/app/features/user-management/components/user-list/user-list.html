@@ -1,0 +1,37 @@
+<div class="user-list-container">
+    <h1>Elenco Operatori Sanitari</h1>
+
+    <table class="table-users">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Username</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @for (user of users(); track user.id) {
+            <tr>
+                <td>{{ user.firstName }}</td>
+                <td>{{ user.lastName }}</td>
+                <td>{{ user.username }}</td>
+
+                <td>
+                    <button type="button" class="btn-danger" (click)="onDelete(user)">
+                        Elimina
+                    </button>
+                </td>
+            </tr>
+            } @empty {
+            <tr>
+                <td colspan="4" class="empty-state-message text-center">
+                    Nessun operatore sanitario presente a sistema.
+                </td>
+            </tr>
+            }
+
+        </tbody>
+    </table>
+</div>

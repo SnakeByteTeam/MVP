@@ -11,7 +11,9 @@ export class GetTokenWithCodeAdapter implements GetTokensWithCodePort {
     ) {}
 
     async getTokensWithCode(code: string): Promise<TokenPair> {
-        const tokensDto: TokensDto = await this.getTokensFromApiPort.getTokensWithCode(code);
+        const tokensDto: TokensDto | null = await this.getTokensFromApiPort.getTokensWithCode(code);
+
+        if(!tokensDto) throw(new Error('Tokens not found'));
 
         const expiresAt: Date = new Date(Date.now() + tokensDto.expiresIn * 1000);
 

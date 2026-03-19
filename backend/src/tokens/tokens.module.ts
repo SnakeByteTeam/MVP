@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TokensController } from './adapters/in/tokens.controller';
-import { HttpModule } from '@nestjs/axios/dist/http.module';
+import { HttpModule } from '@nestjs/axios';
 
 import { GETTOKENSCALLBACKUSECASE } from './application/ports/in/get-tokens.usecase';
 import { WRITETOKENSREPOPORT } from './application/ports/out/write-tokens-repo.port';

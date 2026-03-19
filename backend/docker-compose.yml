@@ -32,7 +32,7 @@ services:
     ports: 
       - 3000:3000
     volumes: 
-      - ./src:/app/src
+      - ./src:/usr/src/app/src
     depends_on:
       - database
 

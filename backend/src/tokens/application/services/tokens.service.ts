@@ -17,14 +17,13 @@ export class TokenService implements GetValidTokenPort {
     async getValidToken(): Promise<string | null> {
         try{
             let tokens: TokenPair | null = await this.readTokensFromRepo.readTokens();
-    
+            if(!tokens) return null;
+
             if(tokens.getExpiresAt() < new Date(Date.now() + 10000)) {
                 tokens =  await this.refreshTokens.refreshTokens(tokens.getRefreshToken());
+                if(!tokens) return null;
             }
-
-            if(!tokens) return null;
-            
-            this.writeTokensOnRepo.writeTokens(tokens);
+            await this.writeTokensOnRepo.writeTokens(tokens);
             return tokens.getAccessToken();
 
         } catch(err) {

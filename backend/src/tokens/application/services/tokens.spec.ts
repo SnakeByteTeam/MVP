@@ -51,7 +51,6 @@ describe('TokenService', () => {
 
     const returnedValue = await service.getValidToken();
 
-    expect(writeTokens.writeTokens).toHaveBeenCalledTimes(1);
     expect(readTokenFromRepo.readTokens).toHaveBeenCalledTimes(1);
     expect(refreshTokens.refreshTokens).toHaveBeenCalledTimes(1);
     expect(writeTokens.writeTokens).toHaveBeenCalledTimes(1);

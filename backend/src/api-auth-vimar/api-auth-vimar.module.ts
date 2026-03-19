@@ -7,10 +7,9 @@ import { ApiAuthVimarService } from './application/services/api-auth-vimar.servi
   controllers: [ApiAuthVimarController],
   providers: [
     {
-      provide: APIAUTHUSECASE,
-      useClass: ApiAuthVimarService
-    }, 
-    ApiAuthVimarService],  
-  exports: [APIAUTHUSECASE, ApiAuthVimarService]
+      provide: APIAUTHUSECASE,  useClass: ApiAuthVimarService
+    }
+  ],  
+  exports: [APIAUTHUSECASE]
 })
 export class ApiAuthVimarModule {}

@@ -28,11 +28,7 @@ jobs:
         working-directory: ./backend
         run: |
           npm ci --ignore-scripts
-<<<<<<< HEAD
           npm run test:cov -- --runInBand
-=======
-          npm run test:cov
->>>>>>> origin/feature/eventSubscription
 
       - name: Install dependencies & Test Frontend
         working-directory: ./frontend

@@ -21,19 +21,33 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
       true,
     );
 
-    if (resolvedByDay.size === 0) {
+    const sentByDay = await this.analyticsPort.getAlarmsByWardId(
+      cmd.id,
+      startDate,
+      false,
+    );
+
+    const allDays = Array.from(
+      new Set([...resolvedByDay.keys(), ...sentByDay.keys()]),
+    ).sort();
+
+    if (allDays.length === 0) {
       return new Plot('Ward Resolved Alarm Analytics', cmd.metric, [], []);
     }
 
-    const sorted = Array.from(resolvedByDay.entries()).sort(([a], [b]) =>
-      a.localeCompare(b),
-    );
+    const series = new Map<string, string[]>([
+      [
+        'resolved',
+        allDays.map((day) => (resolvedByDay.get(day) ?? 0).toString()),
+      ],
+    ]);
 
     return new Plot(
       'Ward Resolved Alarm Analytics',
       cmd.metric,
-      sorted.map(([day]) => day),
-      sorted.map(([, count]) => count.toString()),
+      allDays,
+      allDays.map((day) => (sentByDay.get(day) ?? 0).toString()),
+      series,
     );
   }
 }

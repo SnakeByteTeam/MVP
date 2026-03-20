@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { UserCreatedDialogComponent } from './user-created-dialog';
-import { UserRole } from '../../../../core/models/user-role.enum';
 
 describe('UserCreatedDialogComponent', () => {
   let component: UserCreatedDialogComponent;

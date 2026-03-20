@@ -26,6 +26,12 @@ import {
   REMOVE_PLANT_FROM_WARD_USE_CASE, 
   WardsPlantsRelationshipsService 
 } from './application/services/wards-plants-relationships.service';
+import { ADD_USER_TO_WARD_PORT, AddUserToWardAdapter } from './adapters/out/add-user-to-ward-adapter';
+import { FIND_ALL_USERS_BY_WARD_ID_PORT, FindAllUsersByWardIdAdapter } from './adapters/out/find-all-users-by-ward-id-adapter';
+import { REMOVE_USER_FROM_WARD_PORT, RemoveUserFromWardAdapter } from './adapters/out/remove-user-from-ward-adapter';
+import { ADD_PLANT_TO_WARD_PORT, AddPlantToWardAdapter } from './adapters/out/add-plant-to-ward-adapter';
+import { FIND_ALL_PLANTS_BY_WARD_ID_PORT, FindAllPlantsByWardIdAdapter } from './adapters/out/find-all-plants-by-ward-id-adapter';
+import { REMOVE_PLANT_FROM_WARD_PORT, RemovePlantFromWardAdapter } from './adapters/out/remove-plant-from-ward-adapter';
 
 @Module({
   controllers: [WardsController, WardsPlantsRelationshipsController, WardsUsersRelationshipsController],
@@ -85,6 +91,30 @@ import {
     {
       provide: REMOVE_PLANT_FROM_WARD_USE_CASE,
       useClass: WardsPlantsRelationshipsService
+    },
+    {
+      provide: ADD_USER_TO_WARD_PORT,
+      useClass: AddUserToWardAdapter
+    },
+    {
+      provide: FIND_ALL_USERS_BY_WARD_ID_PORT,
+      useClass: FindAllUsersByWardIdAdapter
+    },
+    {
+      provide: REMOVE_USER_FROM_WARD_PORT,
+      useClass: RemoveUserFromWardAdapter
+    },
+    {
+      provide: ADD_PLANT_TO_WARD_PORT,
+      useClass: AddPlantToWardAdapter
+    },
+    {
+      provide: FIND_ALL_PLANTS_BY_WARD_ID_PORT,
+      useClass: FindAllPlantsByWardIdAdapter
+    },
+    {
+      provide: REMOVE_PLANT_FROM_WARD_PORT,
+      useClass: RemovePlantFromWardAdapter
     }
   ]
 })

@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AddUserToWardUseCase } from '../ports/in/add-user-to-ward-use-case.interface';
 import { FindAllUsersByWardIdUseCase } from '../ports/in/find-all-users-by-ward-id-use-case.interface';
 import { RemoveUserFromWardUseCase } from '../ports/in/remove-user-from-ward-use-case.interface';
 import { AddUserToWardCmd } from '../commands/add-user-to-ward-cmd';
 import { FindAllUsersByWardIdCmd } from '../commands/find-all-users-by-ward-id-cmd';
 import { RemoveUserFromWardCmd } from '../commands/remove-user-from-ward-cmd';
+import { AddUserToWardPort } from '../ports/out/add-user-to-ward-port.interface';
+import { ADD_USER_TO_WARD_PORT } from '../../adapters/out/add-user-to-ward-adapter';
+import { FIND_ALL_USERS_BY_WARD_ID_PORT } from '../../adapters/out/find-all-users-by-ward-id-adapter';
+import { FindAllUsersByWardIdPort } from '../ports/out/find-all-users-by-ward-id-port.interface';
+import { REMOVE_USER_FROM_WARD_PORT } from '../../adapters/out/remove-user-from-ward-adapter';
+import { RemoveUserFromWardPort } from '../ports/out/remove-user-from-ward-port.interface';
 
 @Injectable()
 export class WardsUsersRelationshipsService implements 
@@ -12,14 +18,20 @@ export class WardsUsersRelationshipsService implements
     FindAllUsersByWardIdUseCase, 
     RemoveUserFromWardUseCase {
 
+    constructor(
+        @Inject(ADD_USER_TO_WARD_PORT) private readonly addUserToWardAdapter: AddUserToWardPort,
+        @Inject(FIND_ALL_USERS_BY_WARD_ID_PORT) private readonly findAllUsersByWardIdPort: FindAllUsersByWardIdPort,
+        @Inject(REMOVE_USER_FROM_WARD_PORT) private readonly removeUserFromWardPort: RemoveUserFromWardPort
+    ){}
+
     addUserToWard(req: AddUserToWardCmd) {
-        throw new Error('Method not implemented.');
+        return this.addUserToWardAdapter.addUserToWard(req);
     }
     findAllUsersByWardId(req: FindAllUsersByWardIdCmd) {
-        throw new Error('Method not implemented.');
+        return this.findAllUsersByWardIdPort.findAllUsersByWardId(req);
     }
     removeUserFromWard(req: RemoveUserFromWardCmd) {
-        throw new Error('Method not implemented.');
+        return this.removeUserFromWardPort.removeUserFromWard(req);
     }
 }
 

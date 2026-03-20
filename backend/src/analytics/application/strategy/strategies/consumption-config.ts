@@ -6,6 +6,8 @@ export const DEVICE_WATT: Record<string, number> = {
   SF_Thermostat: 1000, // più fan coil stimato (media riscaldamento/raffreddamento)
 };
 
+export const ANOMALY_THRESHOLD_WH = 12000; // 50% in più del normale consumo giornaliero
+
 export function isDeviceActive(device: VimarDevice): boolean {
   for (const dp of device.datapoints) {
     if (dp.sfeType === 'SFE_State_OnOff' && dp.value === 'On') return true;

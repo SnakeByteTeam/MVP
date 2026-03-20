@@ -4,6 +4,6 @@ export class Plot {
     public readonly metric: string,
     public readonly labels: string[],
     public readonly data: string[],
-    public readonly series?: Map<string, string[]>, // serie aggiuntive
+    public readonly series?: Record<string, string[]>, // serie aggiuntive
   ) {}
 }

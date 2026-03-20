@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { CreateWardDto } from '../../models/plant-api.dto';
 import type { Ward } from '../../models/ward.model';
@@ -10,7 +10,7 @@ import type { Ward } from '../../models/ward.model';
   styleUrl: './ward-form-dialog-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WardFormDialogComponent implements OnInit {
+export class WardFormDialogComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   public readonly ward = input<Ward | null>(null);
@@ -21,14 +21,12 @@ export class WardFormDialogComponent implements OnInit {
     name: ['', [Validators.required, Validators.maxLength(100)]],
   });
 
-  public readonly isEditMode = computed(() => this.ward() !== null);
-
-  public ngOnInit(): void {
+  private readonly syncFormWithWard = effect(() => {
     const ward = this.ward();
-    if (ward) {
-      this.form.patchValue({ name: ward.name });
-    }
-  }
+    this.form.patchValue({ name: ward?.name ?? '' }, { emitEvent: false });
+  });
+
+  public readonly isEditMode = computed(() => this.ward() !== null);
 
   public onSubmit(): void {
     if (this.form.invalid) {

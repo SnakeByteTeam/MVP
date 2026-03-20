@@ -8,7 +8,7 @@ import type { Ward } from '../../models/ward.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PlantManagementStore } from '../../services/plant-management.store';
 import { AssignApartmentDialogComponent } from '../assign-apartment-dialog-component/assign-apartment-dialog-component';
-import { AssingnOperatorDialogComponent } from '../assingn-operator-dialog-component/assingn-operator-dialog-component';
+import { AssignOperatorDialogComponent } from '../assign-operator-dialog-component/assign-operator-dialog-component';
 import { WardCardComponent } from '../ward-card-component/ward-card-component';
 import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form-dialog-component';
 
@@ -18,7 +18,7 @@ import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form
     AsyncPipe,
     WardCardComponent,
     WardFormDialogComponent,
-    AssingnOperatorDialogComponent,
+    AssignOperatorDialogComponent,
     AssignApartmentDialogComponent,
     ConfirmDialogComponent,
   ],

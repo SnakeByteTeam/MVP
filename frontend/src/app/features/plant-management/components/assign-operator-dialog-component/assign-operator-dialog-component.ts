@@ -8,13 +8,13 @@ import type { AssignOperatorDto } from '../../models/plant-api.dto';
 import type { Ward } from '../../models/ward.model';
 
 @Component({
-  selector: 'app-assingn-operator-dialog-component',
+  selector: 'app-assign-operator-dialog-component',
   imports: [ReactiveFormsModule, AsyncPipe],
-  templateUrl: './assingn-operator-dialog-component.html',
-  styleUrl: './assingn-operator-dialog-component.css',
+  templateUrl: './assign-operator-dialog-component.html',
+  styleUrl: './assign-operator-dialog-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssingnOperatorDialogComponent implements OnInit {
+export class AssignOperatorDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly userApiService = inject(UserApiService);
 

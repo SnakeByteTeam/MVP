@@ -37,7 +37,7 @@
     }
 
     @if (operatorWardId(); as activeWardId) {
-    <app-assingn-operator-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
+    <app-assign-operator-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
         (submitted)="onAssignOperatorSubmit($event)" (cancelled)="onCloseAssignOperatorDialog()" />
     }
 

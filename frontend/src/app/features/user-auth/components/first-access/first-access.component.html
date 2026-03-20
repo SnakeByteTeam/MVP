@@ -1,0 +1,26 @@
+<form [formGroup]="firstAccessForm" (ngSubmit)="onSubmit()">
+  <input
+    type="text"
+    formControlName="username"
+    (input)="onUsernameChange($any($event.target).value)"
+    placeholder="Username"
+  />
+  <input
+    type="password"
+    formControlName="temporaryPassword"
+    (input)="onTempPasswordChange($any($event.target).value)"
+    placeholder="Password temporanea"
+  />
+  <input
+    type="password"
+    formControlName="newPassword"
+    (input)="onNewPasswordChange($any($event.target).value)"
+    placeholder="Nuova password"
+  />
+
+  <button type="submit" [disabled]="isLoading">Conferma</button>
+
+  @if (errorType) {
+    <p>{{ errorType }}</p>
+  }
+</form>

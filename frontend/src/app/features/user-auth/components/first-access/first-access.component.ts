@@ -6,34 +6,7 @@ import { AuthErrorType } from '../../models/auth-error-type.enum';
 @Component({
 	selector: 'app-first-access',
 	imports: [ReactiveFormsModule],
-	template: `
-		<form [formGroup]="firstAccessForm" (ngSubmit)="onSubmit()">
-			<input
-				type="text"
-				formControlName="username"
-				(input)="onUsernameChange($any($event.target).value)"
-				placeholder="Username"
-			/>
-			<input
-				type="password"
-				formControlName="temporaryPassword"
-				(input)="onTempPasswordChange($any($event.target).value)"
-				placeholder="Password temporanea"
-			/>
-			<input
-				type="password"
-				formControlName="newPassword"
-				(input)="onNewPasswordChange($any($event.target).value)"
-				placeholder="Nuova password"
-			/>
-
-			<button type="submit" [disabled]="isLoading">Conferma</button>
-
-			@if (errorType) {
-				<p>{{ errorType }}</p>
-			}
-		</form>
-	`,
+	templateUrl: './first-access.component.html',
 })
 export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 	private readonly fb = inject(FormBuilder);

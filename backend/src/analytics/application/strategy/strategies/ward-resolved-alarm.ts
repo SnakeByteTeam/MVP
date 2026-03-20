@@ -35,12 +35,9 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
       return new Plot('Ward Resolved Alarm Analytics', cmd.metric, [], []);
     }
 
-    const series = new Map<string, string[]>([
-      [
-        'resolved',
-        allDays.map((day) => (resolvedByDay.get(day) ?? 0).toString()),
-      ],
-    ]);
+    const series: Record<string, string[]> = {
+      resolved: allDays.map((day) => (resolvedByDay.get(day) ?? 0).toString()),
+    };
 
     return new Plot(
       'Ward Resolved Alarm Analytics',

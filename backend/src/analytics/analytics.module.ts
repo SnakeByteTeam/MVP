@@ -11,6 +11,7 @@ import { WardAlarmsFrequency } from './application/strategy/strategies/ward-alar
 import { WardFalls } from './application/strategy/strategies/ward-falls';
 import { WardResolvedAlarm } from './application/strategy/strategies/ward-resolved-alarm';
 import { GetTimeseriesData } from './adapters/out/timeseries/get-timeseries-data.adapter';
+import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
 
 @Module({
   controllers: [AnalyticsController],
@@ -24,16 +25,47 @@ import { GetTimeseriesData } from './adapters/out/timeseries/get-timeseries-data
     WardFalls,
     WardResolvedAlarm,
     {
-      provide: 'GET_ANALYTICS_USECASE',
-      useClass: AnalyticsService,
-    },
-    {
       provide: 'GET_ANALYTICS_PORT',
       useClass: GetTimeseriesData,
     },
     {
-      provide: 'READ_TIMESERIES_REPOSITORY_INTERFACE',
+      provide: 'READ_TIMESERIES_REPOSITORY_PORT',
       useClass: TimeseriesRepository,
+    },
+    {
+      provide: 'GET_ANALYTICS_USECASE',
+      useFactory: (
+        plantConsumption: PlantConsumption,
+        plantAnomalies: PlantAnomalies,
+        sensorLongPresence: SensorLongPresence,
+        sensorPresence: SensorPresence,
+        thermostatTemperature: PlantThermostatTemperature,
+        wardAlarmsFrequency: WardAlarmsFrequency,
+        wardFalls: WardFalls,
+        wardResolvedAlarm: WardResolvedAlarm,
+      ): AnalyticsService => {
+        const strategies = new Map<string, AnalyticsStrategy>([
+          ['plant-consumption', plantConsumption],
+          ['plant-anomalies', plantAnomalies],
+          ['sensor-long-presence', sensorLongPresence],
+          ['sensor-presence', sensorPresence],
+          ['thermostat-temperature', thermostatTemperature],
+          ['ward-alarms-frequency', wardAlarmsFrequency],
+          ['ward-falls', wardFalls],
+          ['ward-resolved-alarm', wardResolvedAlarm],
+        ]);
+        return new AnalyticsService(strategies);
+      },
+      inject: [
+        PlantConsumption,
+        PlantAnomalies,
+        SensorLongPresence,
+        SensorPresence,
+        PlantThermostatTemperature,
+        WardAlarmsFrequency,
+        WardFalls,
+        WardResolvedAlarm,
+      ],
     },
   ],
 })

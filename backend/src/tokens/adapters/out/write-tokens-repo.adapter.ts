@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { WriteTokensCachePort, WRITETOKENSCACHEPORT } from "src/tokens/application/ports/out/write-tokens-cache.port";
+import { WriteTokensCachePort, WRITETOKENSCACHEPORT } from "src/tokens/application/repository/write-tokens-cache.port";
 import { WriteTokensRepoPort } from "src/tokens/application/ports/out/write-tokens-repo.port";
 import { TokenPair } from "src/tokens/domain/models/token-pair.model";
 

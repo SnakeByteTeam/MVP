@@ -6,16 +6,14 @@ import { Plot } from 'src/analytics/domain/plot.model';
 
 @Injectable()
 export class AnalyticsService implements GetAnalyticsUseCase {
-    constructor(
-        private readonly strategies: Map<string, AnalyticsStrategy>,
-    ) {}
+  constructor(private readonly strategies: Map<string, AnalyticsStrategy>) {}
 
-    async getAnalytics(cmd: GetAnalyticsCmd): Promise<Plot> {
-        const strategy = this.strategies.get(cmd.metric);
+  async getAnalytics(cmd: GetAnalyticsCmd): Promise<Plot> {
+    const strategy = this.strategies.get(cmd.metric);
 
-        if (!strategy) {
-            throw new Error(`No strategy found for metric: ${cmd.metric}`);
-        }
-        return strategy.execute(cmd);
+    if (!strategy) {
+      throw new Error(`No strategy found for metric: ${cmd.metric}`);
     }
+    return strategy.execute(cmd);
+  }
 }

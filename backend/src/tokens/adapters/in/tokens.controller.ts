@@ -13,7 +13,7 @@ export class TokensController {
             throw new BadRequestException('Code is required');
         }
         try{
-            return this.getTokensCallbackUseCase.getTokens(code);
+            return await this.getTokensCallbackUseCase.getTokens(code);
         }
         catch (err) {
             throw new InternalServerErrorException('Internal server error');

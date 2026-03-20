@@ -28,3 +28,5 @@ export class FindAllUsersAdapter implements FindAllUsersPort {
         return users;
     }
 }
+
+export const FIND_ALL_USERS_PORT = 'FIND_ALL_USERS_PORT';

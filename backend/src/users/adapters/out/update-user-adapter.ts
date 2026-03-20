@@ -28,3 +28,5 @@ export class UpdateUserAdapter implements UpdateUserPort {
         )
     }
 }
+
+export const UPDATE_USER_PORT = 'UPDATE_USER_PORT';

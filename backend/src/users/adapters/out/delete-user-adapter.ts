@@ -15,3 +15,5 @@ export class DeleteUserAdapter implements DeleteUserPort {
         );
     }
 }
+
+export const DELETE_USER_PORT = 'DELETE_USER_PORT';

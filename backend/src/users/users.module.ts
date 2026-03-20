@@ -12,20 +12,25 @@ import { CREATE_USER_REPOSITORY } from './application/repository/create-user-rep
 import { DELETE_USER_REPOSITORY } from './application/repository/delete-user-repository.interface';
 import { FIND_ALL_USERS_REPOSITORY } from './application/repository/find-all-users-repository.interface';
 import { UPDATE_USER_REPOSITORY } from './application/repository/update-user-repository.interface';
+import { CREATE_USER_PORT, CreateUserAdapter } from './adapters/out/create-user-adapter';
+import { FIND_ALL_USERS_PORT, FindAllUsersAdapter } from './adapters/out/find-all-users-adapter';
+import { UPDATE_USER_PORT, UpdateUserAdapter } from './adapters/out/update-user-adapter';
+import { DELETE_USER_PORT, DeleteUserAdapter } from './adapters/out/delete-user-adapter';
+import { PASSWORD_GENERATOR_PORT, PasswordGenerator } from './infrastructure/password-generator/password-generator';
 
 @Module({
   controllers: [UsersController],
   providers: [
+    {
+      provide: CREATE_USER_USE_CASE,
+      useClass: UsersService
+    },
     {
       provide: FIND_ALL_USERS_USE_CASE,
       useClass: UsersService
     },
     {
       provide: UPDATE_USER_USE_CASE,
-      useClass: UsersService
-    },
-    {
-      provide: CREATE_USER_USE_CASE,
       useClass: UsersService
     },
     {
@@ -37,16 +42,36 @@ import { UPDATE_USER_REPOSITORY } from './application/repository/update-user-rep
       useClass: UsersRepositoryImpl
     },
     {
-      provide: DELETE_USER_REPOSITORY,
-      useClass: UsersRepositoryImpl
-    },
-    {
       provide: FIND_ALL_USERS_REPOSITORY,
       useClass: UsersRepositoryImpl
     },
     {
       provide: UPDATE_USER_REPOSITORY,
       useClass: UsersRepositoryImpl
+    },
+    {
+      provide: DELETE_USER_REPOSITORY,
+      useClass: UsersRepositoryImpl
+    },
+    {
+      provide: CREATE_USER_PORT,
+      useClass: CreateUserAdapter
+    },
+    {
+      provide: FIND_ALL_USERS_PORT,
+      useClass: FindAllUsersAdapter
+    },
+    {
+      provide: UPDATE_USER_PORT,
+      useClass: UpdateUserAdapter
+    },
+    {
+      provide: DELETE_USER_PORT,
+      useClass: DeleteUserAdapter
+    },
+    {
+      provide: PASSWORD_GENERATOR_PORT,
+      useClass: PasswordGenerator
     }
   ]
 })

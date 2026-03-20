@@ -28,3 +28,5 @@ export class CreateUserAdapter implements CreateUserPort {
         )
     }
 }
+
+export const CREATE_USER_PORT = 'CREATE_USER_PORT';

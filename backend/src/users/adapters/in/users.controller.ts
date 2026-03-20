@@ -54,7 +54,7 @@ export class UsersController {
                 req.name,
                 req.surname,
                 req.name,
-                req.tempPassword
+                ""
             )
         );
     }

@@ -1,0 +1,57 @@
+@if (ward(); as currentWard) {
+<article aria-label="Reparto {{ currentWard.name }}">
+    <header>
+        <h2>{{ currentWard.name }}</h2>
+        <div>
+            <button type="button" (click)="toggleExpanded()" [attr.aria-expanded]="isExpanded()">
+                {{ isExpanded() ? 'Comprimi' : 'Espandi' }}
+            </button>
+            <button type="button" (click)="onEditWardClick()">Modifica nome</button>
+            <button type="button" (click)="onDeleteWardClick()">Elimina</button>
+        </div>
+    </header>
+
+    @if (isExpanded()) {
+    <section aria-label="Operatori assegnati">
+        <div>
+            <h3>Operatori</h3>
+            <button type="button" (click)="onAssignOperatorClick()">Aggiungi operatore</button>
+        </div>
+
+        @if (currentWard.operators.length === 0) {
+        <p>Nessun operatore assegnato.</p>
+        } @else {
+        <ul>
+            @for (operator of currentWard.operators; track operator.id) {
+            <li>
+                <span>{{ operator.firstName }} {{ operator.lastName }}</span>
+                <button type="button" (click)="onRemoveOperatorClick(operator.id)">Rimuovi</button>
+            </li>
+            }
+        </ul>
+        }
+    </section>
+
+    <section aria-label="Appartamenti assegnati">
+        <div>
+            <h3>Appartamenti</h3>
+            <button type="button" (click)="onAssignApartmentClick()">Assegna appartamento</button>
+        </div>
+
+        @if (currentWard.apartments.length === 0) {
+        <p>Nessun appartamento assegnato.</p>
+        } @else {
+        <ul>
+            @for (apartment of currentWard.apartments; track apartment.id) {
+            <li>
+                <app-apartment-row-component [apartment]="apartment" [wardId]="currentWard.id"
+                    (enable)="onEnableApartment($event)" (disable)="onDisableApartment($event)" />
+                <button type="button" (click)="onRemoveApartmentClick(apartment.id)">Rimuovi</button>
+            </li>
+            }
+        </ul>
+        }
+    </section>
+    }
+</article>
+}

@@ -1,0 +1,24 @@
+<dialog open aria-labelledby="ward-dialog-title">
+    <h2 id="ward-dialog-title">{{ isEditMode() ? 'Modifica reparto' : 'Crea reparto' }}</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <label for="ward-name">Nome reparto</label>
+        <input id="ward-name" type="text" formControlName="name" maxlength="100" />
+
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+        <p role="alert">
+            @if (form.controls.name.errors?.['required']) {
+            <span>Il nome reparto e obbligatorio.</span>
+            }
+            @if (form.controls.name.errors?.['maxlength']) {
+            <span>Il nome reparto non puo superare 100 caratteri.</span>
+            }
+        </p>
+        }
+
+        <div>
+            <button type="button" (click)="onCancel()">Annulla</button>
+            <button type="submit">{{ isEditMode() ? 'Salva' : 'Crea' }}</button>
+        </div>
+    </form>
+</dialog>

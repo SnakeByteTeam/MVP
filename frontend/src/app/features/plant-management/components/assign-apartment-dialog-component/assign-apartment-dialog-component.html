@@ -1,0 +1,24 @@
+<dialog open aria-labelledby="assign-apartment-title">
+    <h2 id="assign-apartment-title">Assegna appartamento</h2>
+
+    <p>Reparto selezionato: <strong>{{ wardId() }}</strong></p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <label for="apartment-id">Appartamento</label>
+        <select id="apartment-id" formControlName="apartmentId">
+            <option value="">Seleziona un appartamento</option>
+            @for (apartment of availableApartments(); track apartment.id) {
+            <option [value]="apartment.id">{{ apartment.name }}</option>
+            }
+        </select>
+
+        @if (form.controls.apartmentId.touched && form.controls.apartmentId.invalid) {
+        <p role="alert">Seleziona un appartamento.</p>
+        }
+
+        <div>
+            <button type="button" (click)="onCancel()">Annulla</button>
+            <button type="submit">Assegna</button>
+        </div>
+    </form>
+</dialog>

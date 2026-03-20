@@ -1,0 +1,54 @@
+<section aria-label="Gestione reparti">
+    <header>
+        <h1>Plant Management</h1>
+        <button type="button" (click)="onCreateWard()">Nuovo reparto</button>
+    </header>
+
+    @if (snackbarMessage(); as errorMessage) {
+    <div role="alert" aria-live="assertive">
+        <span>{{ errorMessage }}</span>
+        <button type="button" (click)="dismissSnackbar()" aria-label="Chiudi messaggio errore">Chiudi</button>
+    </div>
+    }
+
+    @if (isLoading$ | async) {
+    <p aria-live="polite">Caricamento in corso...</p>
+    }
+
+    @if (wards$ | async; as wards) {
+    @if (wards.length === 0) {
+    <p>Nessun reparto disponibile.</p>
+    } @else {
+    <div>
+        @for (ward of wards; track ward.id) {
+        <app-ward-card-component [ward]="ward" (editWard)="onEditWard($event)" (deleteWard)="onDeleteWard($event)"
+            (assignOperator)="onAssignOperator($event)" (removeOperator)="onRemoveOperator($event)"
+            (assignApartment)="onAssignApartment($event)" (removeApartment)="onRemoveApartment($event)"
+            (enableApartment)="onEnableApartment($event)" (disableApartment)="onDisableApartment($event)" />
+        }
+    </div>
+    }
+    }
+
+    @if (wardDialogMode() !== 'closed') {
+    <app-ward-form-dialog-component [ward]="wardDialogValue()"
+        (submitted)="wardDialogMode() === 'create' ? onCreateWardSubmit($event) : onEditWardSubmit($event)"
+        (cancelled)="onCloseWardDialog()" />
+    }
+
+    @if (operatorWardId(); as activeWardId) {
+    <app-assingn-operator-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
+        (submitted)="onAssignOperatorSubmit($event)" (cancelled)="onCloseAssignOperatorDialog()" />
+    }
+
+    @if (apartmentWardId(); as activeWardId) {
+    <app-assign-apartment-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
+        [availableApartments]="availableApartments()" (submitted)="onAssignApartmentSubmit($event)"
+        (cancelled)="onCloseAssignApartmentDialog()" />
+    }
+
+    @if (confirmState()) {
+    <app-confirm-dialog [message]="getConfirmMessage()" [confirmLabel]="getConfirmLabel()" cancelLabel="Annulla"
+        (confirmed)="onConfirmDialogConfirmed()" (cancelled)="onConfirmDialogCancelled()" />
+    }
+</section>

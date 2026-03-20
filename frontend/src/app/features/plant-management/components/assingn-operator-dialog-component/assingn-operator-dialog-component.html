@@ -1,0 +1,26 @@
+<dialog open aria-labelledby="assign-operator-title">
+    <h2 id="assign-operator-title">Assegna operatore sanitario</h2>
+
+    <p>Reparto selezionato: <strong>{{ wardId() }}</strong></p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <label for="operator-id">Operatore</label>
+        <select id="operator-id" formControlName="userId">
+            <option value="">Seleziona un operatore</option>
+            @if (operators$ | async; as operators) {
+            @for (operator of operators; track operator.id) {
+            <option [value]="operator.id">{{ operator.firstName }} {{ operator.lastName }}</option>
+            }
+            }
+        </select>
+
+        @if (form.controls.userId.touched && form.controls.userId.invalid) {
+        <p role="alert">Seleziona un operatore.</p>
+        }
+
+        <div>
+            <button type="button" (click)="onCancel()">Annulla</button>
+            <button type="submit">Assegna</button>
+        </div>
+    </form>
+</dialog>

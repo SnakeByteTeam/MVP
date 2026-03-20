@@ -1,4 +1,15 @@
-export interface CreateWardDto {}
-export interface UpdateWardDto {}
-export interface AssignOperatorDto {}
-export interface AssignApartmentDto {}
+export interface CreateWardDto {
+    name: string;
+}
+
+export interface UpdateWardDto {
+    name: string;
+}
+
+export interface AssignOperatorDto {
+    userId: string;
+}
+
+export interface AssignApartmentDto {
+    apartmentId: string;
+}

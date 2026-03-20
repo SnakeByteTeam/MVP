@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, input, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { UserListComponent } from '../user-list/user-list';
 import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
 import { UserCreatedDialogComponent } from '../user-created-dialog/user-created-dialog';

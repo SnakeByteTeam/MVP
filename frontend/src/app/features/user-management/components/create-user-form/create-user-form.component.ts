@@ -1,5 +1,5 @@
 import { Component, input, output, inject, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
 import { CreateUserDto } from '../../models/out/create-user.model.dto';
 import { UserManagementErrorType } from '../../models/user-management-error-type.enum';
 
@@ -23,7 +23,7 @@ export class CreateUserFormComponent implements OnInit {
   errorType = input<UserManagementErrorType | null>(null);
   formSubmit = output<CreateUserDto>();
 
-  private fb = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
   public form!: FormGroup;
 
 

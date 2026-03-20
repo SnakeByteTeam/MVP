@@ -5,28 +5,7 @@ import { AuthBaseComponent } from '../auth-base/auth-base.component';
 @Component({
 	selector: 'app-login',
 	imports: [ReactiveFormsModule],
-	template: `
-		<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-			<input
-				type="text"
-				formControlName="username"
-				(input)="onUsernameChange($any($event.target).value)"
-				placeholder="Username"
-			/>
-			<input
-				type="password"
-				formControlName="password"
-				(input)="onPasswordChange($any($event.target).value)"
-				placeholder="Password"
-			/>
-
-			<button type="submit" [disabled]="isLoading">Accedi</button>
-
-			@if (errorType) {
-				<p>{{ errorType }}</p>
-			}
-		</form>
-	`,
+	templateUrl: './login.component.html',
 })
 export class LoginComponent extends AuthBaseComponent implements OnInit {
 	private readonly fb = inject(FormBuilder);

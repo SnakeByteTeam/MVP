@@ -14,7 +14,7 @@ export class ApiAuthTokensService implements GetTokensCallbackUseCase {
 
     async getTokens(code: string) {
         const tokens: TokenPair = await this.getTokensWithCodePort.getTokensWithCode(code);
-        
+    
         await this.writeTokensRepoPort.writeTokens(tokens);
     }
 }

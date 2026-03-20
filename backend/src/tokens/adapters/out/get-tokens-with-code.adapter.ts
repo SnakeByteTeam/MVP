@@ -2,7 +2,7 @@ import { Injectable, Inject } from "@nestjs/common";
 import { type GetTokensWithCodePort, GETTOKENSWITHCODEPORT } from "src/tokens/application/ports/out/get-tokens-with-code.port";
 import { TokenPair } from "src/tokens/domain/models/token-pair.model";
 import { TokensDto } from "src/tokens/infrastructure/dtos/tokens.dto";
-import { GETTOKENSFROMAPIPORT, type GetTokensFromApiPort } from "src/tokens/application/ports/out/get-tokens-from-api.port";
+import { GETTOKENSFROMAPIPORT, type GetTokensFromApiPort } from "src/tokens/application/repository/get-tokens-from-api.port";
 
 @Injectable()
 export class GetTokenWithCodeAdapter implements GetTokensWithCodePort {

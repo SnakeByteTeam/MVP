@@ -15,19 +15,13 @@ export class TokenService implements GetValidTokenPort {
     ) {}
 
     async getValidToken(): Promise<string | null> {
-        try{
-            let tokens: TokenPair | null = await this.readTokensFromRepo.readTokens();
-            if(!tokens) return null;
+        let tokens: TokenPair | null = await this.readTokensFromRepo.readTokens();
 
-            if(tokens.getExpiresAt() < new Date(Date.now() + 10000)) {
-                tokens =  await this.refreshTokens.refreshTokens(tokens.getRefreshToken());
-                if(!tokens) return null;
-            }
-            await this.writeTokensOnRepo.writeTokens(tokens);
-            return tokens.getAccessToken();
-
-        } catch(err) {
-            throw(err);
+        if(tokens.getExpiresAt() < new Date(Date.now() + 10000)) {
+            tokens =  await this.refreshTokens.refreshTokens(tokens.getRefreshToken());
+            if(!tokens) throw(new Error('Can\'t get tokens from API'))
         }
+        await this.writeTokensOnRepo.writeTokens(tokens);
+        return tokens.getAccessToken();
     }
 }

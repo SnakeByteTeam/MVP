@@ -42,11 +42,10 @@ describe('TokenService', () => {
   });
 
   it('should fetch tokens from repo, found them invalid and refresh new tokens', async () => {
-
-    const validToken = new TokenPair('access_token_1', 'refresh_token_1', new Date(Date.now()));
+    const notValidToken = new TokenPair('access_token_1', 'refresh_token_1', new Date(Date.now()));
     const apiReturnedToken = new TokenPair('access_token_2', 'refresh_token_2', new Date(Date.now() + 30000))
 
-    readTokenFromRepo.readTokens.mockResolvedValue(validToken);
+    readTokenFromRepo.readTokens.mockResolvedValue(notValidToken);
     refreshTokens.refreshTokens.mockResolvedValue(apiReturnedToken);
 
     const returnedValue = await service.getValidToken();
@@ -56,4 +55,18 @@ describe('TokenService', () => {
     expect(writeTokens.writeTokens).toHaveBeenCalledTimes(1);
     expect(returnedValue).toBe(apiReturnedToken.getAccessToken());
   });
+
+  it('should throw an error when tokens from API are null', async () => {
+    const notValidToken = new TokenPair('access_token_1', 'refresh_token_1', new Date(Date.now()));
+    readTokenFromRepo.readTokens.mockResolvedValue(notValidToken);
+    refreshTokens.refreshTokens.mockResolvedValue(null);
+
+    await expect(service.getValidToken()).rejects.toThrow();
+
+    expect(readTokenFromRepo.readTokens).toHaveBeenCalledTimes(1);
+    expect(refreshTokens.refreshTokens).toHaveBeenCalledTimes(1);
+    expect(writeTokens.writeTokens).toHaveBeenCalledTimes(0);
+
+  });
+  
 });

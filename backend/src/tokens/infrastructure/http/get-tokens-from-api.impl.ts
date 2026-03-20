@@ -3,9 +3,9 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { ConfigService } from "@nestjs/config";
 
-import { GetTokensFromApiPort } from "src/tokens/application/ports/out/get-tokens-from-api.port";
+import { GetTokensFromApiPort } from "src/tokens/application/repository/get-tokens-from-api.port";
 import { TokensDto } from "src/tokens/infrastructure/dtos/tokens.dto";
-import { RefreshTokensFromApiPort } from "src/tokens/application/ports/out/refresh-tokens-from-api.port";
+import { RefreshTokensFromApiPort } from "src/tokens/application/repository/refresh-tokens-from-api.port";
 
 
 @Injectable()

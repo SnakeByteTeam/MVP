@@ -6,6 +6,7 @@ export class PlotDto {
     public readonly metric: string,
     public readonly labels: string[],
     public readonly data: string[],
+    public readonly series?: Map<string, string[]>, // serie aggiuntive
   ) {}
 
   static fromDomain(p: Plot): PlotDto {

@@ -1,9 +1,11 @@
-export class GetAnalyticsDto {
-    readonly metric: string;
-    readonly id: string;
+import { IsString, IsNotEmpty } from 'class-validator';
 
-    constructor(metric: string, id: string) {
-        this.metric = metric;
-        this.id = id;
-    }
+export class GetAnalyticsDto {
+  @IsString()
+  @IsNotEmpty()
+  readonly metric: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly id: string;
 }

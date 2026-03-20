@@ -15,9 +15,10 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const resolvedByDay = await this.analyticsPort.getResolvedAlarmsByWardId(
+    const resolvedByDay = await this.analyticsPort.getAlarmsByWardId(
       cmd.id,
       startDate,
+      true,
     );
 
     if (resolvedByDay.size === 0) {

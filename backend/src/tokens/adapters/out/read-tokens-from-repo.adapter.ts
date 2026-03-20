@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { type ReadTokensCachePort, READTOKENSCACHEPORT } from "src/tokens/application/ports/out/read-tokens-cache.port";
+import { type ReadTokensCachePort, READTOKENSCACHEPORT } from "src/tokens/application/repository/read-tokens-cache.port";
 import { ReadTokensFromRepoPort } from "src/tokens/application/ports/out/read-tokens-from-repo.port";
 import { TokenPair } from "src/tokens/domain/models/token-pair.model";
 import { TokenEntity } from "src/tokens/infrastructure/persistence/entities/tokens.entity";

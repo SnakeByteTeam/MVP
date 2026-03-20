@@ -1,9 +1,9 @@
 import { Injectable , Inject} from "@nestjs/common";
 import { Pool } from "pg";
 
-import { WriteTokensCachePort } from "src/tokens/application/ports/out/write-tokens-cache.port";
+import { WriteTokensCachePort } from "src/tokens/application/repository/write-tokens-cache.port";
 import { PG_POOL } from "src/database/database.module"; 
-import { ReadTokensCachePort } from "src/tokens/application/ports/out/read-tokens-cache.port";
+import { ReadTokensCachePort } from "src/tokens/application/repository/read-tokens-cache.port";
 import { TokenEntity } from "./entities/tokens.entity";
 
 

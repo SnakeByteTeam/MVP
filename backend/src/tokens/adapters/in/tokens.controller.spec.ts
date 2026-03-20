@@ -39,4 +39,18 @@ describe('TokensController', () => {
     expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith('auth-code');
     expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledTimes(1);
   });
+
+  it('should throw an error when use case throw an error', async () => {
+    await expect(controller.getTokens(null as unknown as string)).rejects.toThrow();
+  });
+
+  it('should throw an error when use case throw an error', async () => {
+    getTokensCallbackUseCase.getTokens.mockRejectedValue(new Error());
+
+    await expect(controller.getTokens('auth-code')).rejects.toThrow();
+
+    expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith('auth-code');
+    expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledTimes(1);
+
+  });
 });

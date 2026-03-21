@@ -1,7 +1,10 @@
+import { AlarmStatus } from "./alarm-status.enum";
+
 export interface ActiveAlarm {
 	alarmId: string;
 	alarmName: string;
-	dangerSignal: string;
-	triggeredAt: string;
-	elapsedTime: number;
+	activationTime: string;
+	resolutionTime: string;
+	status: AlarmStatus;
+	// elapsedTime: number; non serve perchè calcolato dalla pipe 
 }

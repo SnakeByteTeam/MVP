@@ -16,7 +16,7 @@ export class AlarmApiService {
     }
 
     public getAlarm(id: string): Observable<AlarmRule> {
-        return this.http.get<AlarmRule>(`${this.alarmsBaseUrl}/${id}`);
+        return this.http.get<AlarmRule>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`);
     }
 
     public createAlarm(payload: CreateAlarmRequestDto): Observable<AlarmRule> {
@@ -24,14 +24,14 @@ export class AlarmApiService {
     }
 
     public updateAlarm(id: string, payload: UpdateAlarmRequestDto): Observable<AlarmRule> {
-        return this.http.patch<AlarmRule>(`${this.alarmsBaseUrl}/${id}`, payload);
+        return this.http.patch<AlarmRule>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`, payload);
     }
 
     public deleteAlarm(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.alarmsBaseUrl}/${id}`);
+        return this.http.delete<void>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`);
     }
 
     public resolveAlarm(activeAlarmId: string): Observable<void> {
-        return this.http.patch<void>(`${this.activeAlarmsBaseUrl}/${activeAlarmId}/resolve`, {});
+        return this.http.patch<void>(`${this.activeAlarmsBaseUrl}/${encodeURIComponent(activeAlarmId)}/resolve`, {});
     }
 }

@@ -15,9 +15,12 @@ import { AlarmConfigStateService } from '../../services/alarm-config-state.servi
 	imports: [ReactiveFormsModule],
 })
 export class AlarmConfigFormComponent implements OnInit {
+
+	//form, costruisco con funzione helper
 	public form!:
 		ReturnType<AlarmConfigFormComponent['buildForm']>;
 	public isEditMode = false;
+	//per le enum
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
 		(value): value is AlarmPriority => typeof value === 'number'
 	);
@@ -27,6 +30,36 @@ export class AlarmConfigFormComponent implements OnInit {
 	private readonly stateService = inject(AlarmConfigStateService);
 	private readonly route = inject(ActivatedRoute);
 	private readonly router = inject(Router);
+
+
+	//helper
+	private buildForm() {
+		return this.fb.nonNullable.group({
+			name: [''],
+			apartmentId: [''],
+			sensorId: ['', [Validators.required]],
+			priority: [null as AlarmPriority | null, [Validators.required]],
+			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
+			threshold: [null as number | null, [Validators.required]],
+			activationTime: [''],
+			deactivationTime: [''],
+			enabled: [true],
+		});
+	}
+
+	private toFormValue(rule: AlarmRule): AlarmConfigFormValue {
+		return {
+			name: rule.name,
+			apartmentId: rule.apartmentId,
+			sensorId: rule.deviceId,
+			priority: rule.priority,
+			thresholdOperator: rule.thresholdOperator,
+			threshold: rule.threshold,
+			activationTime: rule.activationTime,
+			deactivationTime: rule.deactivationTime,
+			enabled: rule.enabled,
+		};
+	}
 
 	public ngOnInit(): void {
 		const id = this.route.snapshot.paramMap.get('id');
@@ -81,31 +114,4 @@ export class AlarmConfigFormComponent implements OnInit {
 		void this.router.navigate(['../'], { relativeTo: this.route });
 	}
 
-	private buildForm() {
-		return this.fb.nonNullable.group({
-			name: [''],
-			apartmentId: [''],
-			sensorId: ['', [Validators.required]],
-			priority: [null as AlarmPriority | null, [Validators.required]],
-			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
-			threshold: [null as number | null, [Validators.required]],
-			activationTime: [''],
-			deactivationTime: [''],
-			enabled: [true],
-		});
-	}
-
-	private toFormValue(rule: AlarmRule): AlarmConfigFormValue {
-		return {
-			name: rule.name,
-			apartmentId: rule.apartmentId,
-			sensorId: rule.deviceId,
-			priority: rule.priority,
-			thresholdOperator: rule.thresholdOperator,
-			threshold: rule.threshold,
-			activationTime: rule.activationTime,
-			deactivationTime: rule.deactivationTime,
-			enabled: rule.enabled,
-		};
-	}
 }

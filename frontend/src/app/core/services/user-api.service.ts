@@ -21,6 +21,6 @@ export class UserApiService {
     }
 
     public deleteUser(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/users/${id}`);
+        return this.http.delete<void>(`${this.baseUrl}/users/${encodeURIComponent(id)}`);
     }
 }

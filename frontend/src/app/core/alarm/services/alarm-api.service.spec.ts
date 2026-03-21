@@ -63,6 +63,16 @@ describe('AlarmApiService', () => {
         request.flush(alarm);
     });
 
+    it('getAlarm codifica id con caratteri riservati', () => {
+        service.getAlarm('alarm/1').subscribe((result) => {
+            expect(result).toEqual(alarm);
+        });
+
+        const request = httpController.expectOne(`${baseUrl}/alarm%2F1`);
+        expect(request.request.method).toBe('GET');
+        request.flush(alarm);
+    });
+
     it('createAlarm chiama POST /api/alarms con payload corretto', () => {
         const payload: CreateAlarmRequestDto = {
             name: 'Nuovo allarme',
@@ -122,6 +132,17 @@ describe('AlarmApiService', () => {
         });
 
         const request = httpController.expectOne('/api/active-alarms/active-1/resolve');
+        expect(request.request.method).toBe('PATCH');
+        expect(request.request.body).toEqual({});
+        request.flush(null);
+    });
+
+    it('resolveAlarm codifica activeAlarmId con caratteri riservati', () => {
+        service.resolveAlarm('active/1').subscribe((result) => {
+            expect(result).toBeNull();
+        });
+
+        const request = httpController.expectOne('/api/active-alarms/active%2F1/resolve');
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({});
         request.flush(null);

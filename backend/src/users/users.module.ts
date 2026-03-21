@@ -16,7 +16,8 @@ import { CREATE_USER_PORT, CreateUserAdapter } from './adapters/out/create-user-
 import { FIND_ALL_USERS_PORT, FindAllUsersAdapter } from './adapters/out/find-all-users-adapter';
 import { UPDATE_USER_PORT, UpdateUserAdapter } from './adapters/out/update-user-adapter';
 import { DELETE_USER_PORT, DeleteUserAdapter } from './adapters/out/delete-user-adapter';
-import { PASSWORD_GENERATOR_PORT, PasswordGenerator } from './infrastructure/password-generator/password-generator';
+import { GENERATE_PASSWORD_PORT, GeneratePasswordImpl } from './infrastructure/password-generator/generate-password-impl';
+import { HASH_PASSWORD_PORT, HashPasswordImpl } from './infrastructure/hash-password-impl/hash-password-impl';
 
 @Module({
   controllers: [UsersController],
@@ -70,8 +71,12 @@ import { PASSWORD_GENERATOR_PORT, PasswordGenerator } from './infrastructure/pas
       useClass: DeleteUserAdapter
     },
     {
-      provide: PASSWORD_GENERATOR_PORT,
-      useClass: PasswordGenerator
+      provide: GENERATE_PASSWORD_PORT,
+      useClass: GeneratePasswordImpl
+    },
+    {
+      provide: HASH_PASSWORD_PORT,
+      useClass: HashPasswordImpl
     }
   ]
 })

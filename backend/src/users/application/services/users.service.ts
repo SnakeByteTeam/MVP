@@ -15,8 +15,10 @@ import { CREATE_USER_PORT } from '../../adapters/out/create-user-adapter';
 import { CreateUserPort } from '../ports/out/create-user-port.interface';
 import { DELETE_USER_PORT } from '../../adapters/out/delete-user-adapter';
 import { DeleteUserPort } from '../ports/out/delete-user-port.interface';
-import { PASSWORD_GENERATOR_PORT } from '../../infrastructure/password-generator/password-generator';
-import { PasswordGeneratorPort } from '../ports/out/password-generator-port.interface';
+import { GENERATE_PASSWORD_PORT } from '../../infrastructure/password-generator/generate-password-impl';
+import { GeneratePasswordPort } from '../ports/out/password-generator-port.interface';
+import { HASH_PASSWORD_PORT } from '../../infrastructure/hash-password-impl/hash-password-impl';
+import { HashPasswordPort } from '../ports/out/hash-password-port.interface';
 
 @Injectable()
 export class UsersService implements FindAllUsersUseCase, UpdateUserUseCase, CreateUserUseCase, DeleteUserUseCase
@@ -27,7 +29,8 @@ export class UsersService implements FindAllUsersUseCase, UpdateUserUseCase, Cre
         @Inject(UPDATE_USER_PORT) private readonly updateUserPort: UpdateUserPort,
         @Inject(CREATE_USER_PORT) private readonly createUserPort: CreateUserPort,
         @Inject(DELETE_USER_PORT) private readonly deleteUserPort: DeleteUserPort,
-        @Inject(PASSWORD_GENERATOR_PORT) private readonly passwordGeneratorPort: PasswordGeneratorPort
+        @Inject(GENERATE_PASSWORD_PORT) private readonly generatePasswordPort: GeneratePasswordPort,
+        @Inject(HASH_PASSWORD_PORT) private readonly hashPasswordPort: HashPasswordPort
     ){}
 
     findAllUsers(): User[] {
@@ -37,7 +40,8 @@ export class UsersService implements FindAllUsersUseCase, UpdateUserUseCase, Cre
         return this.updateUserPort.updateUser(req);
     }
     createUser(req: CreateUserCmd): User {
-        req.tempPassword = this.passwordGeneratorPort.generatePassword(128);
+        const password: string = this.generatePasswordPort.generatePassword(128);
+        req.tempPassword = this.hashPasswordPort.hashPassword(password);
         return this.createUserPort.createUser(req);
     }
     deleteUser(req: DeleteUserCmd) {

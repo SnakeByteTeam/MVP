@@ -1,6 +1,6 @@
-import { PasswordGeneratorPort } from "../../application/ports/out/password-generator-port.interface";
+import { GeneratePasswordPort } from "../../application/ports/out/password-generator-port.interface";
 
-export class PasswordGenerator implements PasswordGeneratorPort {
+export class GeneratePasswordImpl implements GeneratePasswordPort {
     generatePassword(length: number): string {
         return require('generate-password').generate({
             length: length,
@@ -11,4 +11,4 @@ export class PasswordGenerator implements PasswordGeneratorPort {
     }
 }
 
-export const PASSWORD_GENERATOR_PORT = 'PASSWORD_GENERATOR_PORT';
+export const GENERATE_PASSWORD_PORT = 'GENERATE_PASSWORD_PORT';

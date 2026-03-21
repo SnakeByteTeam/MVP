@@ -1,3 +1,3 @@
-export interface PasswordGeneratorPort {
+export interface GeneratePasswordPort {
     generatePassword(length: number): string
 }

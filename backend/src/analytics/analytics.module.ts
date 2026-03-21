@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AnalyticsController } from './adapters/in/analytics.controller';
 import { AnalyticsService } from './application/services/analytics.service';
-import { TimeseriesRepository } from './adapters/out/timeseries/timeseries-repository.impl';
+import { TimeseriesRepository } from './infrastructure/persistence/timeseries-repository-impl';
 import { PlantConsumption } from './application/strategy/strategies/plant-consumption';
 import { PlantAnomalies } from './application/strategy/strategies/plant-anomalies';
 import { SensorLongPresence } from './application/strategy/strategies/sensor-long-presence';

@@ -1,7 +1,5 @@
 export enum ThresholdOperator {
-    minore = '<',
-    maggiore = '>',
-    minore_uguale = '<=',
-    maggiore_uguale = '>=',
-    uguale = '='
+    GREATER_THAN = 'GR',
+    LESS_THAN = 'LT',
+    EQUAL_TO = 'EQ'
 }

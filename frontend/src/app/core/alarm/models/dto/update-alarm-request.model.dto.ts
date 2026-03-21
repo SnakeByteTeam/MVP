@@ -3,8 +3,6 @@
 // responsabilità esclusiva di `AlarmConfigStateService`, che li produce a
 // partire da `AlarmConfigFormValue` prima di delegare la chiamata HTTP.
 
-import { AlarmPriority } from "./alarm-priority.enum";
-import { ThresholdOperator } from "./threshold-operator.enum";
 
 // Trasporta i dati per l'aggiornamento parziale di una regola di allarme
 // esistente. È un DTO a campi opzionali — implementa semantiche `PATCH`:
@@ -18,10 +16,11 @@ import { ThresholdOperator } from "./threshold-operator.enum";
 
 
 export interface UpdateAlarmRequestDto {
-    priority: AlarmPriority;
-    thresholdOperator: ThresholdOperator;
+    name: string;
+    priority: number;
+    thresholdOperator: string;
     threshold: string;
-    armingTime: string;
-    dearmingTime: string;
-    isArmed: boolean;
+    activationTime: string;
+    deactivationTime: string;
+    enabled: boolean;
 }

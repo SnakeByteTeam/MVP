@@ -10,14 +10,14 @@ import { ThresholdOperator } from "./threshold-operator.enum";
 // NOTA BENE: Va distinto da `ActiveAlarm`, che rappresenta invece un **evento di allarme scattato** in tempo reale. !!!
 
 export interface AlarmRule {
-  id: string,
+  id: string, //identificatore univoo della regola
   name: string,
-  // apartmentId: string,
+  apartmentId: string,
   deviceId: string;
   priority: AlarmPriority;
   thresholdOperator: ThresholdOperator;
   threshold: number; //o string
-  armingTime: string;
-  dearmingTime: string;
-  isArmed: boolean;
+  activationTime: string;
+  deactivationTime: string;
+  enabled: boolean;
 }

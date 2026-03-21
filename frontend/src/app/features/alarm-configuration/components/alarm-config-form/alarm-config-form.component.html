@@ -1,0 +1,85 @@
+<section aria-labelledby="alarm-config-form-title">
+    <h1 id="alarm-config-form-title">
+        {{ isEditMode ? 'Modifica regola allarme' : 'Nuova regola allarme' }}
+    </h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div>
+            <label for="name">Nome regola</label>
+            <input id="name" type="text" formControlName="name" />
+        </div>
+
+        <div>
+            <label for="apartmentId">Appartamento</label>
+            <input id="apartmentId" type="text" formControlName="apartmentId" />
+        </div>
+
+        <div>
+            <label for="sensorId">Sensore</label>
+            <input id="sensorId" type="text" formControlName="sensorId"
+                [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched" />
+            @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
+            <p role="alert">Il sensore e obbligatorio.</p>
+            }
+        </div>
+
+        <div>
+            <label for="priority">Priorita</label>
+            <select id="priority" formControlName="priority"
+                [attr.aria-invalid]="form.controls.priority.invalid && form.controls.priority.touched">
+                <option [ngValue]="null">Seleziona priorita</option>
+                @for (priority of priorityOptions; track priority) {
+                <option [ngValue]="priority">{{ priority }}</option>
+                }
+            </select>
+            @if (form.controls.priority.invalid && form.controls.priority.touched) {
+            <p role="alert">La priorita e obbligatoria.</p>
+            }
+        </div>
+
+        <div>
+            <label for="thresholdOperator">Operatore soglia</label>
+            <select id="thresholdOperator" formControlName="thresholdOperator"
+                [attr.aria-invalid]="form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched">
+                <option [ngValue]="null">Seleziona operatore</option>
+                @for (operator of thresholdOperatorOptions; track operator) {
+                <option [ngValue]="operator">{{ operator }}</option>
+                }
+            </select>
+            @if (form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched) {
+            <p role="alert">L'operatore di soglia e obbligatorio.</p>
+            }
+        </div>
+
+        <div>
+            <label for="threshold">Soglia</label>
+            <input id="threshold" type="number" formControlName="threshold"
+                [attr.aria-invalid]="form.controls.threshold.invalid && form.controls.threshold.touched" />
+            @if (form.controls.threshold.invalid && form.controls.threshold.touched) {
+            <p role="alert">La soglia e obbligatoria.</p>
+            }
+        </div>
+
+        <div>
+            <label for="activationTime">Ora attivazione</label>
+            <input id="activationTime" type="time" formControlName="activationTime" />
+        </div>
+
+        <div>
+            <label for="deactivationTime">Ora disattivazione</label>
+            <input id="deactivationTime" type="time" formControlName="deactivationTime" />
+        </div>
+
+        <div>
+            <label for="enabled">Abilitato</label>
+            <input id="enabled" type="checkbox" formControlName="enabled" />
+        </div>
+
+        <div>
+            <button type="submit">
+                {{ isEditMode ? 'Salva modifiche' : 'Crea regola' }}
+            </button>
+            <button type="button" (click)="onCancel()">Annulla</button>
+        </div>
+    </form>
+</section>

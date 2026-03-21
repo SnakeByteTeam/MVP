@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Socket, io } from 'socket.io-client';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
+import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
 import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
@@ -147,33 +148,35 @@ describe('EventSubscriptionService', () => {
       eventType: PushEventType.ALARM_TRIGGERED,
       timestamp: '2026-03-19T10:00:00.000Z',
       payload: {
-        alarmId: 'alarm-123',
+        activeAlarmId: 'active-alarm-123',
+        alarmRuleId: 'alarm-rule-123',
         alarmName: 'Caduta rilevata',
-        dangerSignal: 'HIGH',
+        priority: AlarmPriority.RED,
         triggeredAt: '2026-03-19T10:00:00.000Z',
       },
     });
 
     expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith({
-      alarmId: 'alarm-123',
+      activeAlarmId: 'active-alarm-123',
+      alarmRuleId: 'alarm-rule-123',
       alarmName: 'Caduta rilevata',
-      dangerSignal: 'HIGH',
+      priority: AlarmPriority.RED,
       triggeredAt: '2026-03-19T10:00:00.000Z',
     });
   });
 
-  it('dispatcha gli eventi ALARM_RESOLVED con alarmId', () => {
+  it('dispatcha gli eventi ALARM_RESOLVED con activeAlarmId', () => {
     service.initialize([]);
 
     fakeSocket.trigger('push-event', {
       eventType: PushEventType.ALARM_RESOLVED,
       timestamp: '2026-03-19T10:00:00.000Z',
       payload: {
-        alarmId: 'alarm-123',
+        activeAlarmId: 'active-alarm-123',
       },
     });
 
-    expect(alarmStateSpy.onAlarmResolved).toHaveBeenCalledWith('alarm-123');
+    expect(alarmStateSpy.onAlarmResolved).toHaveBeenCalledWith('active-alarm-123');
   });
 
   it('dispatcha gli eventi NOTIFICATION verso AlarmStateService', () => {
@@ -209,7 +212,7 @@ describe('EventSubscriptionService', () => {
       eventType: PushEventType.ALARM_TRIGGERED,
       timestamp: '2026-03-19T10:00:00.000Z',
       payload: {
-        alarmId: 'alarm-123',
+        activeAlarmId: 'active-alarm-123',
       },
     });
 

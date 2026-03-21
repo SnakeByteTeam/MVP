@@ -3,8 +3,8 @@
 // UC33.4–UC33.7
 
 export enum AlarmPriority {
-    WHITE = 'WHITE',
-    GREEN = 'GREEN',
-    ORANGE = 'ORANGE',
-    RED = 'RED',
+    WHITE = 1,
+    GREEN,
+    ORANGE,
+    RED
 }

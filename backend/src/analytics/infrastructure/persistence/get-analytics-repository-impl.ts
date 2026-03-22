@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from 'src/database/database.module';
-import { ReadTimeseriesRepositoryPort } from 'src/analytics/application/repository/read-timeseries-repository.interface';
+import { GetAnalyticsRepositoryPort } from 'src/analytics/application/repository/get-analytics-repository.interface';
 
 @Injectable()
-export class TimeseriesRepository implements ReadTimeseriesRepositoryPort {
+export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
   constructor(
     @Inject(PG_POOL)
     private readonly pool: Pool,
@@ -53,7 +53,7 @@ export class TimeseriesRepository implements ReadTimeseriesRepositoryPort {
       const { rows } = await this.pool.query(
         `SELECT cached_at AS timestamp, data
                 FROM structure_cache
-                WHERE unit_id = $1 AND cached_at >= $2
+                WHERE ward_id = $1 AND cached_at >= $2
                 ORDER BY cached_at ASC`,
         [wardId, startDate],
       );

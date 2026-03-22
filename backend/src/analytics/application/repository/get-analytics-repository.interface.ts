@@ -1,4 +1,4 @@
-export interface ReadTimeseriesRepositoryPort {
+export interface GetAnalyticsRepositoryPort {
   query(params: string): Promise<any>;
 }
 

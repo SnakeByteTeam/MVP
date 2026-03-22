@@ -10,7 +10,7 @@ import { PlantThermostatTemperature } from './application/strategy/strategies/pl
 import { WardAlarmsFrequency } from './application/strategy/strategies/ward-alarms-frequency';
 import { WardFalls } from './application/strategy/strategies/ward-falls';
 import { WardResolvedAlarm } from './application/strategy/strategies/ward-resolved-alarm';
-import { GetTimeseriesData } from './adapters/out/timeseries/get-timeseries-data.adapter';
+import { GetAnalyticsData } from './adapters/out/get-analytics-data.adapter';
 import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
 
 @Module({
@@ -26,7 +26,7 @@ import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
     WardResolvedAlarm,
     {
       provide: 'GET_ANALYTICS_PORT',
-      useClass: GetTimeseriesData,
+      useClass: GetAnalyticsData,
     },
     {
       provide: 'READ_TIMESERIES_REPOSITORY_PORT',

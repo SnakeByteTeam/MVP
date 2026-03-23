@@ -37,6 +37,6 @@ import { REFRESHTOKENSFROMAPIPORT } from './application/repository/refresh-token
     { provide: READTOKENSFROMREPOPORT,    useClass: ReadTokensFromRepoAdapter },
     { provide: REFRESHTOKENSPORT,         useClass: RefreshTokensAdapter },
   ],
-  exports: [REFRESHTOKENSPORT],
+  exports: [GETVALIDTOKENPORT],
 })
 export class TokensModule {}

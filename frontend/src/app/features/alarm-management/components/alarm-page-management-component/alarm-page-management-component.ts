@@ -11,6 +11,7 @@ import { AlarmItemComponent } from '../alarm-item-component/alarm-item-component
   templateUrl: './alarm-page-management-component.html',
   styleUrl: './alarm-page-management-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export class AlarmPageManagementComponent implements OnInit {
   private readonly alarmManagementService = inject(AlarmManagementService);

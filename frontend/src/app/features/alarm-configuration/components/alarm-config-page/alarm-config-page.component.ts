@@ -10,6 +10,7 @@ import { AlarmConfigStateService } from '../../services/alarm-config-state.servi
 	templateUrl: './alarm-config-page.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [AsyncPipe],
+	standalone: true
 })
 export class AlarmConfigPageComponent implements OnInit {
 	public alarms$!: Observable<AlarmRule[]>;

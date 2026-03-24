@@ -21,6 +21,7 @@ const PRIORITY_UI: Readonly<Record<AlarmPriority, PriorityUi>> = {
   templateUrl: './alarm-item-component.html',
   styleUrl: './alarm-item-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true
 })
 export class AlarmItemComponent {
   public readonly alarm = input.required<ActiveAlarm>();

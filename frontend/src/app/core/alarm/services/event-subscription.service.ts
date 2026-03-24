@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { AlarmEvent } from '../models/alarm-event.model';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
-import { NotificationEvent } from '../models/notification-event.model';
+import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { PushEvent } from '../models/push-event.model';
 import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';

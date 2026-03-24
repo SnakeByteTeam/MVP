@@ -6,6 +6,6 @@ export const NOTIFICATION_ROUTES: Routes = [
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./components/notification-page/notification-page.component').then((m) => m.NotificationPageComponent)
+      import('./components/notification-page-component/notification-page-component').then((m) => m.NotificationPageComponent)
   }
 ];

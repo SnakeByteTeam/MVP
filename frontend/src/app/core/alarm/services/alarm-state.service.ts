@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { ActiveAlarm } from '../models/active-alarm.model';
 import { AlarmEvent } from '../models/alarm-event.model';
-import { NotificationEvent } from '../models/notification-event.model';
+import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 
 @Injectable({ providedIn: 'root' })
 export class AlarmStateService {

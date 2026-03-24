@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AlarmEvent } from '../models/alarm-event.model';
 import { AlarmPriority } from '../models/alarm-priority.enum';
-import { NotificationEvent } from '../models/notification-event.model';
+import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { AlarmStateService } from './alarm-state.service';
 
 describe('AlarmStateService', () => {

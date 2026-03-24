@@ -13,6 +13,7 @@ import { AlarmConfigStateService } from '../../services/alarm-config-state.servi
 	templateUrl: './alarm-config-form.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [ReactiveFormsModule],
+	standalone: true
 })
 export class AlarmConfigFormComponent implements OnInit {
 

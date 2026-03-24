@@ -79,3 +79,4 @@ typings/
 
 # local documentation / notes
 .ignore/
+.vscode/settings.json

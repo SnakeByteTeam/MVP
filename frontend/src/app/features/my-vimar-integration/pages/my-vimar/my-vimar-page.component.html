@@ -1,0 +1,18 @@
+<section class="my-vimar-page">
+  <header class="my-vimar-page__header">
+    <h1>Integrazione MyVimar</h1>
+    <p>Collega o rimuovi l'account MyVimar associato al sistema.</p>
+  </header>
+
+  @if (account$ | async; as account) {
+    <app-my-vimar-account-status
+      [account]="account"
+      [isLoading]="isLoading"
+      [error]="error"
+      (linkClicked)="onLinkAccount()"
+      (unlinkClicked)="onUnlinkAccount()"
+    />
+  } @else {
+    <p>Caricamento stato account in corso...</p>
+  }
+</section>

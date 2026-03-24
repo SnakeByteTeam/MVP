@@ -1,1 +1,4 @@
-export interface MyVimarAccount {}
+export interface MyVimarAccount {
+	email: string;
+	isLinked: boolean;
+}

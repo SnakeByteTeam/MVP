@@ -9,6 +9,10 @@ import {
   JWT_REFRESH_TOKEN_GENERATOR, 
   JwtTokenGenerator 
 } from './infrastructure/jwt-token-generator/jwt-token-generator';
+import { GENERATE_ACCESS_TOKEN_PORT, GenerateAccessTokenAdapter } from './adapters/out/generate-access-token-adapter';
+import { GENERATE_REFRESH_TOKEN_PORT, GenerateRefreshTokenAdapter } from './adapters/out/generate-refresh-token-adapter';
+import { EXTRACT_FROM_ACCESS_TOKEN_PORT, ExtractFromAccessTokenAdapter } from './adapters/out/extract-from-access-token-adapter';
+import { EXTRACT_FROM_REFRESH_TOKEN_PORT, ExtractFromRefreshTokenAdapter } from './adapters/out/extract-from-refresh-token-adapter';
 
 @Module({
   controllers: [AuthController],
@@ -44,6 +48,22 @@ import {
     {
       provide: JWT_REFRESH_TOKEN_EXTRACTOR,
       useClass: JwtTokenGenerator
+    },
+    {
+      provide: GENERATE_ACCESS_TOKEN_PORT,
+      useClass: GenerateAccessTokenAdapter
+    },
+    {
+      provide: GENERATE_REFRESH_TOKEN_PORT,
+      useClass: GenerateRefreshTokenAdapter
+    },
+    {
+      provide: EXTRACT_FROM_ACCESS_TOKEN_PORT,
+      useClass: ExtractFromAccessTokenAdapter
+    },
+    {
+      provide: EXTRACT_FROM_REFRESH_TOKEN_PORT,
+      useClass: ExtractFromRefreshTokenAdapter
     }
   ]
 })

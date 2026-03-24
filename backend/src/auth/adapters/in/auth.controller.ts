@@ -9,6 +9,9 @@ import { RefreshCmd } from '../../application/commands/refresh-cmd';
 import { LogoutCmd } from '../../application/commands/logout-cmd';
 import { LoginResDto } from '../../infrastructure/dtos/out/login-res-dto';
 import { RefreshReqDto } from '../../infrastructure/dtos/in/refresh-req-dto';
+import { Tokens } from '../../domain/tokens';
+import { plainToInstance } from 'class-transformer';
+import { RefreshResDto } from '../../infrastructure/dtos/out/refresh-res-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,21 +24,23 @@ export class AuthController {
 
     @Post('/login')
     login(req: LoginReqDto): LoginResDto{
-        return this.loginUseCase.login(
+        const tokens: Tokens = this.loginUseCase.login(
             new LoginCmd(
                 req.username,
                 req.password
             )
         )
+        return plainToInstance(LoginResDto, tokens);
     }
 
     @Post('/refresh')
-    refresh(req: RefreshReqDto){
-        return this.refreshUseCase.refresh(
+    refresh(req: RefreshReqDto): RefreshResDto{
+        const accessToken = this.refreshUseCase.refresh(
             new RefreshCmd(
                 req.refreshToken
             )
         );
+        return plainToInstance(RefreshResDto, {"refreshToken": accessToken});
     }
 
     @Post('/logout')

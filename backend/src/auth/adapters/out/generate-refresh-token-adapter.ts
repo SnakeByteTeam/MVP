@@ -14,3 +14,5 @@ export class GenerateRefreshTokenAdapter implements GenerateRefreshTokenPort {
         return this.jwtRefreshTokenGenerator.generateRefreshToken(req.payload);
     }
 }
+
+export const GENERATE_REFRESH_TOKEN_PORT = 'GENERATE_REFRESH_TOKEN_PORT';

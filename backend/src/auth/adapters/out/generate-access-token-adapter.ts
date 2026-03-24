@@ -13,3 +13,5 @@ export class GenerateAccessTokenAdapter implements GenerateAccessTokenPort {
         return this.jwtAccessTokenGenerator.generateAccessToken(req.payload);
     }
 }
+
+export const GENERATE_ACCESS_TOKEN_PORT = 'GENERATE_ACCESS_TOKEN_PORT';

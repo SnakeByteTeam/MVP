@@ -1,3 +1,4 @@
+import { UnauthorizedException } from "@nestjs/common";
 import { JwtAccessTokenExtractor } from "../../application/token/jwt-access-token-extractor.interface";
 import { JwtAccessTokenGenerator } from "../../application/token/jwt-access-token-generator.interface";
 import { JwtRefreshTokenExtractor } from "../../application/token/jwt-refresh-token-extractor.interface";
@@ -26,10 +27,23 @@ export class JwtTokenGenerator implements
         });
     }
     extractAccessTokenPayload(token: string): Payload {
-        throw new Error("Method not implemented.");
+        try {
+            return this.jwt.verify<Payload>(token, {
+                secret: process.env.ACCESS_SECRET,
+            });
+        } catch (err) {
+            throw new UnauthorizedException('Invalid or expired access token');
+        }
     }
+
     extractRefreshTokenPayload(token: string): Payload {
-        throw new Error("Method not implemented.");
+        try {
+            return this.jwt.verify<Payload>(token, {
+                secret: process.env.REFRESH_SECRET,
+            });
+        } catch (err) {
+            throw new UnauthorizedException('Invalid or expired refresh token');
+        }
     }
 }
 

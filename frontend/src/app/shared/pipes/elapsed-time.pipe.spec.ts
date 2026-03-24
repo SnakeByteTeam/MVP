@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ElapsedTimePipe } from './elapsed-time.pipe';
 
 describe('ElapsedTimePipe', () => {
@@ -8,6 +8,10 @@ describe('ElapsedTimePipe', () => {
         vi.useFakeTimers();
         vi.setSystemTime(new Date('2026-03-24T12:00:00.000Z'));
         pipe = new ElapsedTimePipe();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     it('ritorna il valore originale se la data non e valida', () => {

@@ -24,7 +24,7 @@ describe('app.routes', () => {
       'analytics',
       'apartment-monitor',
       'device-interaction',
-      'my-vimar',
+      'vimar-link',
       'notifications',
       'plant-management',
       'user-management',

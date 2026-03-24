@@ -11,7 +11,7 @@ describe('MyVimarCloudApiFeatureService', () => {
   let httpController: HttpTestingController;
 
   const baseUrl = 'http://api.example.test';
-  const mockLocation = { href: 'http://localhost:4200/my-vimar' };
+  const mockLocation = { href: 'http://localhost:4200/vimar-link' };
   const mockDocument = {
     defaultView: {
       location: mockLocation,

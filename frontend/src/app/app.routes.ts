@@ -39,7 +39,7 @@ export const routes: Routes = [
 			import('./features/device-interaction/device-interaction.routes').then((m) => m.DEVICE_INTERACTION_ROUTES)
 	},
 	{
-		path: 'my-vimar',
+		path: 'vimar-link',
 		canActivate: [authGuard, roleGuard],
 		data: { requiredRole: UserRole.AMMINISTRATORE },
 		loadChildren: () =>

@@ -1,12 +1,12 @@
 import { Datapoint } from "./datapoint.model";
 
 export class Device {
-    private id: string;
-    private plantId: string;
-    private name: string;
-    private type: string;
-    private subType: string;
-    private datapoints: Datapoint[];
+    private readonly id: string;
+    private readonly plantId: string;
+    private readonly name: string;
+    private readonly type: string;
+    private readonly subType: string;
+    private readonly datapoints: Datapoint[];
 
     constructor(
         id: string, 

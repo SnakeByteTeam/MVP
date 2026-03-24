@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { FindDeviceByPlantIdCmd } from "src/device/application/commands/find-device-by-plantid.command";
 import { FindDeviceByPlantIdPort } from "src/device/application/ports/out/find-device-by-plantid.port";
 import { DEVICE_MAPPER_REPO_PORT, DeviceMapperRepoPort } from "src/device/application/repository/device-mapper.repository";

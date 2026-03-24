@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString, IsUUID } from "class-validator";
+import { IsArray, IsNotEmpty, IsString } from "class-validator";
 import { DatapointDto } from "./datapoint.dto";
 
 export class DeviceDto {

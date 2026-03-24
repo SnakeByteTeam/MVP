@@ -1,11 +1,11 @@
 export class Datapoint {
-    private id: string;
-    private name: string;
-    private readable: boolean;
-    private writable: boolean;
-    private valueType: string;
-    private enum: string[];
-    private sfeType: string;  
+    private readonly id: string;
+    private readonly name: string;
+    private readonly readable: boolean;
+    private readonly writable: boolean;
+    private readonly valueType: string;
+    private readonly enum: string[];
+    private readonly sfeType: string;  
 
     constructor(
         id: string,

@@ -1,12 +1,10 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from "@nestjs/common";
+import { Injectable, Inject} from "@nestjs/common";
 
 import { FindDeviceByIdCmd } from "src/device/application/commands/find-device-by-id.command";
 import { FindDeviceByIdPort } from "src/device/application/ports/out/find-device-by-id.port";
 import { type DeviceMapperRepoPort, DEVICE_MAPPER_REPO_PORT } from "src/device/application/repository/device-mapper.repository";
 import { type FindDeviceByIdRepoPort, FIND_DEVICE_BY_ID_REPO_PORT } from "src/device/application/repository/find-device-by-id.repository";
-import { Datapoint } from "src/device/domain/models/datapoint.model";
 import { Device } from "src/device/domain/models/device.model";
-import { DatapointEntity } from "src/device/infrastructure/entities/datapoint.entity";
 import { DeviceEntity } from "src/device/infrastructure/entities/device.entity";
 
 

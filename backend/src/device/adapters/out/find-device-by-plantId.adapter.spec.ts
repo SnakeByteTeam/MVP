@@ -5,7 +5,6 @@ import { DeviceEntity } from "src/device/infrastructure/entities/device.entity";
 import { Device } from "src/device/domain/models/device.model";
 import { Datapoint } from "src/device/domain/models/datapoint.model";
 import { FindDeviceByIdCmd } from "src/device/application/commands/find-device-by-id.command";
-import { BadRequestException } from "@nestjs/common";
 
 
 describe('FindByDeviceIdAdapter', () => {

@@ -6,4 +6,6 @@ export interface AlarmEvent {
 	alarmName: string;
 	priority: AlarmPriority;
 	triggeredAt: string;
+	resolvedAt: string | null;
+	user_id: string | null;
 }

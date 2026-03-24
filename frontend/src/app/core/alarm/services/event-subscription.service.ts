@@ -176,13 +176,17 @@ export class EventSubscriptionService implements OnDestroy {
 		const alarmName = payload['alarmName'];
 		const priority = payload['priority'];
 		const triggeredAt = payload['triggeredAt'];
+		const resolvedAt = payload['resolvedAt'];
+		const userId = payload['user_id'];
 
 		if (
 			typeof activeAlarmId !== 'string' ||
 			typeof alarmRuleId !== 'string' ||
 			typeof alarmName !== 'string' ||
 			!this.isAlarmPriority(priority) ||
-			typeof triggeredAt !== 'string'
+			typeof triggeredAt !== 'string' ||
+			!(typeof resolvedAt === 'string' || resolvedAt === null) ||
+			!(typeof userId === 'string' || userId === null)
 		) {
 			return null;
 		}
@@ -193,6 +197,8 @@ export class EventSubscriptionService implements OnDestroy {
 			alarmName,
 			priority,
 			triggeredAt,
+			resolvedAt,
+			user_id: userId,
 		};
 	}
 

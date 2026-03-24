@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Subscription } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AlarmEvent } from '../models/alarm-event.model';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import { NotificationEvent } from '../models/notification-event.model';
@@ -16,6 +16,8 @@ describe('AlarmStateService', () => {
     alarmName: 'Pulsante antipanico',
     priority: AlarmPriority.RED,
     triggeredAt: '2026-03-19T10:00:00.000Z',
+    resolvedAt: null,
+    user_id: 'user-1',
   };
 
   const alarmEventB: AlarmEvent = {
@@ -24,6 +26,8 @@ describe('AlarmStateService', () => {
     alarmName: 'Sensore porta',
     priority: AlarmPriority.ORANGE,
     triggeredAt: '2026-03-19T10:01:00.000Z',
+    resolvedAt: null,
+    user_id: null,
   };
 
   const notificationA: NotificationEvent = {
@@ -89,6 +93,8 @@ describe('AlarmStateService', () => {
     expect(latestAlarms[0].alarmRuleId).toBe(alarmEventA.alarmRuleId);
     expect(latestAlarms[0].alarmName).toBe(alarmEventA.alarmName);
     expect(latestAlarms[0].priority).toBe(alarmEventA.priority);
+    expect(latestAlarms[0].resolvedAt).toBe(alarmEventA.resolvedAt);
+    expect(latestAlarms[0].user_id).toBe(alarmEventA.user_id);
   });
 
   it("aggiorna un allarme esistente senza duplicarlo per id istanza", () => {
@@ -113,6 +119,8 @@ describe('AlarmStateService', () => {
     expect(latestAlarms[0].id).toBe(alarmEventA.activeAlarmId);
     expect(latestAlarms[0].alarmName).toBe('Nome allarme aggiornato');
     expect(latestAlarms[0].priority).toBe(AlarmPriority.WHITE);
+    expect(latestAlarms[0].resolvedAt).toBe(updatedEvent.resolvedAt);
+    expect(latestAlarms[0].user_id).toBe(updatedEvent.user_id);
   });
 
   it('rimuove solo l allarme target quando viene chiamato onAlarmResolved', () => {
@@ -182,6 +190,8 @@ function createAlarmCollector(
     alarmName: string;
     priority: AlarmPriority;
     triggeredAt: string;
+    resolvedAt: string | null;
+    user_id: string | null;
   }>
 ): Array<{
   id: string;
@@ -189,6 +199,8 @@ function createAlarmCollector(
   alarmName: string;
   priority: AlarmPriority;
   triggeredAt: string;
+  resolvedAt: string | null;
+  user_id: string | null;
 }> {
   return alarms.map((alarm) => ({
     id: alarm.id,
@@ -196,5 +208,7 @@ function createAlarmCollector(
     alarmName: alarm.alarmName,
     priority: alarm.priority,
     triggeredAt: alarm.triggeredAt,
+    resolvedAt: alarm.resolvedAt,
+    user_id: alarm.user_id,
   }));
 }

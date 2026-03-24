@@ -153,6 +153,8 @@ describe('EventSubscriptionService', () => {
         alarmName: 'Caduta rilevata',
         priority: AlarmPriority.RED,
         triggeredAt: '2026-03-19T10:00:00.000Z',
+        resolvedAt: null,
+        user_id: 'user-123',
       },
     });
 
@@ -162,6 +164,8 @@ describe('EventSubscriptionService', () => {
       alarmName: 'Caduta rilevata',
       priority: AlarmPriority.RED,
       triggeredAt: '2026-03-19T10:00:00.000Z',
+      resolvedAt: null,
+      user_id: 'user-123',
     });
   });
 

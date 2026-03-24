@@ -10,4 +10,19 @@ describe('GenerateTokenAdapter', () => {
   it('should be defined', () => {
     expect(new GenerateAccessTokenAdapter(mockJwtAccessTokenGenerator)).toBeDefined();
   });
+
+  it('should generate refresh token from payload', () => {
+    const adapter = new GenerateAccessTokenAdapter(
+      mockJwtAccessTokenGenerator as any
+    );
+
+    const result = adapter.generateAccessToken({
+      payload: { id: 1, role: "admin" },
+    });
+
+    expect(mockJwtAccessTokenGenerator.generateAccessToken)
+      .toHaveBeenCalledWith({ id: 1, role: "admin" });
+
+    expect(result).toEqual(mockToken);
+  });
 });

@@ -68,4 +68,22 @@ describe("AuthService", () => {
       refreshToken,
     });
   });
+
+  it('should refresh access token', () => {
+    const payload = { userId: '1' };
+    const newAccessToken = 'new-access-token';
+
+    mockExtractFromRefreshToken.extractFromRefreshToken.mockReturnValue(payload);
+    mockGenerateAccessToken.generateAccessToken.mockReturnValue(newAccessToken);
+
+    const result = service.refresh({ refreshToken: 'r-token' });
+
+    expect(mockExtractFromRefreshToken.extractFromRefreshToken)
+      .toHaveBeenCalled();
+
+    expect(mockGenerateAccessToken.generateAccessToken)
+      .toHaveBeenCalled();
+
+    expect(result).toBe(newAccessToken);
+  });
 });

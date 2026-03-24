@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Subscription } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Socket, io } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
@@ -9,9 +9,9 @@ import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { EventSubscriptionService } from './event-subscription.service';
 
-vi.mock('socket.io-client', () => ({
-  io: vi.fn(),
-}));
+const { io } = vi.hoisted(() => ({ io: vi.fn() }));
+vi.mock('socket.io-client', () => ({ io }));
+
 
 type SocketEventHandler = (payload?: unknown) => void;
 

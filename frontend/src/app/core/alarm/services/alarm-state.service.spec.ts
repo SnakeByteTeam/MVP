@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Subscription } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AlarmEvent } from '../models/alarm-event.model';
+import { AlarmPriority } from '../models/alarm-priority.enum';
 import { NotificationEvent } from '../models/notification-event.model';
 import { AlarmStateService } from './alarm-state.service';
 
@@ -10,17 +11,23 @@ describe('AlarmStateService', () => {
   let subscriptions: Subscription[];
 
   const alarmEventA: AlarmEvent = {
-    alarmId: 'alarm-1',
+    activeAlarmId: 'active-alarm-1',
+    alarmRuleId: 'alarm-rule-1',
     alarmName: 'Pulsante antipanico',
-    dangerSignal: 'HIGH',
+    priority: AlarmPriority.RED,
     triggeredAt: '2026-03-19T10:00:00.000Z',
+    resolvedAt: null,
+    user_id: 'user-1',
   };
 
   const alarmEventB: AlarmEvent = {
-    alarmId: 'alarm-2',
+    activeAlarmId: 'active-alarm-2',
+    alarmRuleId: 'alarm-rule-2',
     alarmName: 'Sensore porta',
-    dangerSignal: 'MEDIUM',
+    priority: AlarmPriority.ORANGE,
     triggeredAt: '2026-03-19T10:01:00.000Z',
+    resolvedAt: null,
+    user_id: null,
   };
 
   const notificationA: NotificationEvent = {
@@ -36,8 +43,6 @@ describe('AlarmStateService', () => {
   };
 
   beforeEach(() => {
-    vi.useFakeTimers();
-
     TestBed.configureTestingModule({
       providers: [AlarmStateService],
     });
@@ -50,9 +55,6 @@ describe('AlarmStateService', () => {
     for (const subscription of subscriptions) {
       subscription.unsubscribe();
     }
-
-    service.ngOnDestroy();
-    vi.useRealTimers();
   });
 
   it('inizializza lo stato con allarmi e notifiche vuoti', () => {
@@ -87,15 +89,19 @@ describe('AlarmStateService', () => {
     }
 
     expect(latestAlarms.length).toBe(1);
-    expect(latestAlarms[0].alarmId).toBe(alarmEventA.alarmId);
+    expect(latestAlarms[0].id).toBe(alarmEventA.activeAlarmId);
+    expect(latestAlarms[0].alarmRuleId).toBe(alarmEventA.alarmRuleId);
     expect(latestAlarms[0].alarmName).toBe(alarmEventA.alarmName);
+    expect(latestAlarms[0].priority).toBe(alarmEventA.priority);
+    expect(latestAlarms[0].resolvedAt).toBe(alarmEventA.resolvedAt);
+    expect(latestAlarms[0].user_id).toBe(alarmEventA.user_id);
   });
 
-  it("aggiorna un allarme esistente senza duplicarlo per alarmId", () => {
+  it("aggiorna un allarme esistente senza duplicarlo per id istanza", () => {
     const updatedEvent: AlarmEvent = {
       ...alarmEventA,
       alarmName: 'Nome allarme aggiornato',
-      dangerSignal: 'CRITICAL',
+      priority: AlarmPriority.WHITE,
     };
 
     let latestAlarms = [] as ReturnType<typeof createAlarmCollector>;
@@ -110,26 +116,28 @@ describe('AlarmStateService', () => {
     service.onAlarmTriggered(updatedEvent);
 
     expect(latestAlarms.length).toBe(1);
-    expect(latestAlarms[0].alarmId).toBe(alarmEventA.alarmId);
+    expect(latestAlarms[0].id).toBe(alarmEventA.activeAlarmId);
     expect(latestAlarms[0].alarmName).toBe('Nome allarme aggiornato');
-    expect(latestAlarms[0].dangerSignal).toBe('CRITICAL');
+    expect(latestAlarms[0].priority).toBe(AlarmPriority.WHITE);
+    expect(latestAlarms[0].resolvedAt).toBe(updatedEvent.resolvedAt);
+    expect(latestAlarms[0].user_id).toBe(updatedEvent.user_id);
   });
 
   it('rimuove solo l allarme target quando viene chiamato onAlarmResolved', () => {
-    let latestAlarmIds: string[] = [];
+    let latestActiveAlarmIds: string[] = [];
 
     subscriptions.push(
       service.getActiveAlarms$().subscribe((alarms) => {
-        latestAlarmIds = alarms.map((alarm) => alarm.alarmId);
+        latestActiveAlarmIds = alarms.map((alarm) => alarm.id);
       })
     );
 
     service.onAlarmTriggered(alarmEventA);
     service.onAlarmTriggered(alarmEventB);
 
-    service.onAlarmResolved(alarmEventA.alarmId);
+    service.onAlarmResolved(alarmEventA.activeAlarmId);
 
-    expect(latestAlarmIds).toEqual([alarmEventB.alarmId]);
+    expect(latestActiveAlarmIds).toEqual([alarmEventB.activeAlarmId]);
   });
 
   it('antepone le notifiche in modo che la piu recente sia la prima', () => {
@@ -167,56 +175,40 @@ describe('AlarmStateService', () => {
     expect(activeAlarmsCount).toBe(2);
     expect(unreadNotificationsCount).toBe(1);
 
-    service.onAlarmResolved(alarmEventA.alarmId);
+    service.onAlarmResolved(alarmEventA.activeAlarmId);
     service.onNotificationReceived(notificationB);
 
     expect(activeAlarmsCount).toBe(1);
     expect(unreadNotificationsCount).toBe(2);
   });
-
-  it('ricalcola elapsedTime nel tempo', () => {
-    const now = new Date('2026-03-19T10:00:10.000Z');
-    vi.setSystemTime(now);
-
-    const alarmAtNow: AlarmEvent = {
-      ...alarmEventA,
-      triggeredAt: now.toISOString(),
-    };
-
-    let latestElapsedTime = -1;
-
-    subscriptions.push(
-      service.getActiveAlarms$().subscribe((alarms) => {
-        latestElapsedTime = alarms[0]?.elapsedTime ?? -1;
-      })
-    );
-
-    service.onAlarmTriggered(alarmAtNow);
-    expect(latestElapsedTime).toBe(0);
-
-    vi.advanceTimersByTime(3000);
-
-    expect(latestElapsedTime).toBe(3000);
-  });
 });
 
 function createAlarmCollector(
   alarms: Array<{
-    alarmId: string;
+    id: string;
+    alarmRuleId: string;
     alarmName: string;
-    dangerSignal: string;
-    elapsedTime: number;
+    priority: AlarmPriority;
+    triggeredAt: string;
+    resolvedAt: string | null;
+    user_id: string | null;
   }>
 ): Array<{
-  alarmId: string;
+  id: string;
+  alarmRuleId: string;
   alarmName: string;
-  dangerSignal: string;
-  elapsedTime: number;
+  priority: AlarmPriority;
+  triggeredAt: string;
+  resolvedAt: string | null;
+  user_id: string | null;
 }> {
   return alarms.map((alarm) => ({
-    alarmId: alarm.alarmId,
+    id: alarm.id,
+    alarmRuleId: alarm.alarmRuleId,
     alarmName: alarm.alarmName,
-    dangerSignal: alarm.dangerSignal,
-    elapsedTime: alarm.elapsedTime,
+    priority: alarm.priority,
+    triggeredAt: alarm.triggeredAt,
+    resolvedAt: alarm.resolvedAt,
+    user_id: alarm.user_id,
   }));
 }

@@ -1,0 +1,29 @@
+<article class="alarm-item" [class.resolving]="isResolving()" [attr.data-priority]="priorityUi().className"
+    aria-label="Allarme {{ alarm().alarmName }}">
+    <header class="alarm-item__header">
+        <h2 class="alarm-item__title">{{ alarm().alarmName }}</h2>
+        <span class="alarm-item__priority">Priorità: {{ priorityUi().label }}</span>
+    </header>
+
+    <dl class="alarm-item__meta">
+        <div>
+            <dt>Priorità</dt>
+            <dd>{{ priorityUi().label }}</dd>
+        </div>
+        <div>
+            <dt>Attivo da</dt>
+            <dd>{{ alarm().triggeredAt | elapsedTime }}</dd>
+        </div>
+    </dl>
+
+    <div class="alarm-item__actions">
+        <button type="button" (click)="onResolveClick()" [disabled]="isResolving()"
+            [attr.aria-busy]="isResolving() ? 'true' : null">
+            {{ isResolving() ? 'Risoluzione...' : 'Risolvi' }}
+        </button>
+
+        @if (isResolving()) {
+        <span class="alarm-item__status" aria-live="polite">Operazione in corso</span>
+        }
+    </div>
+</article>

@@ -1,0 +1,44 @@
+<section aria-labelledby="alarm-config-title">
+    <header>
+        <h1 id="alarm-config-title">Configurazione allarmi</h1>
+        <button type="button" (click)="onCreateNew()" aria-label="Crea una nuova regola di allarme">
+            Nuova regola
+        </button>
+    </header>
+
+    @if (error$ | async; as error) {
+    @if (error) {
+    <p role="alert" aria-live="polite">{{ error }}</p>
+    }
+    }
+
+    @if (alarms$ | async; as alarms) {
+    @if (alarms.length === 0) {
+    <p>Nessuna regola configurata.</p>
+    } @else {
+    <ul aria-label="Lista regole allarme">
+        @for (rule of alarms; track rule.id) {
+        <li>
+            <article>
+                <h2>{{ rule.name }}</h2>
+                <p>Priorita: {{ rule.priority }}</p>
+                <p>Stato: {{ rule.enabled ? 'Attivo' : 'Disattivo' }}</p>
+                <div>
+                    <button type="button" (click)="onEdit(rule)" [attr.aria-label]="'Modifica regola ' + rule.name">
+                        Modifica
+                    </button>
+                    <button type="button" (click)="onToggleEnabled(rule)"
+                        [attr.aria-label]="(rule.enabled ? 'Disabilita ' : 'Abilita ') + rule.name">
+                        {{ rule.enabled ? 'Disabilita' : 'Abilita' }}
+                    </button>
+                    <button type="button" (click)="onDelete(rule.id)" [attr.aria-label]="'Elimina regola ' + rule.name">
+                        Elimina
+                    </button>
+                </div>
+            </article>
+        </li>
+        }
+    </ul>
+    }
+    }
+</section>

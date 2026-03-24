@@ -28,7 +28,8 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
         COUNT(*) AS alarm_count
         FROM alarm_event aa
         JOIN alarm_rule a ON a.id = aa.alarm_id
-        WHERE a.ward_id = $1
+        JOIN plant p ON a.plant_id = p.id
+        WHERE p.ward_id = $1
         AND aa.activation_time >= $2
         ${onlyResolved ? 'AND aa.resolution_time IS NOT NULL' : ''}
         GROUP BY DATE(aa.activation_time)
@@ -51,10 +52,11 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
 
     if (wardId) {
       const { rows } = await this.pool.query(
-        `SELECT cached_at AS timestamp, data
-                FROM structure_cache
-                WHERE ward_id = $1 AND cached_at >= $2
-                ORDER BY cached_at ASC`,
+        `SELECT s.cached_at AS timestamp, s.data
+                FROM structure_cache s
+                JOIN plant p ON p.id = s.plant_id
+                WHERE p.ward_id = $1 AND s.cached_at >= $2
+                ORDER BY s.cached_at ASC`,
         [wardId, startDate],
       );
       return rows;

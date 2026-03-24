@@ -1,1 +1,31 @@
-<p>alarm-page-management-component works!</p>
+<section class="alarm-management" aria-label="Gestione allarmi">
+    <header class="alarm-management__header">
+        <h1>Allarmi attivi</h1>
+        <p>Monitora gli allarmi attivi e risolvi quelli gestiti.</p>
+    </header>
+
+    @if (vm$ | async; as vm) {
+    @if (vm.resolveError) {
+    <p class="alarm-management__error" role="alert" aria-live="assertive">
+        {{ vm.resolveError }}
+    </p>
+    }
+
+    @if (vm.isResolving) {
+    <p class="alarm-management__status" aria-live="polite">Risoluzione allarme in corso...</p>
+    }
+
+    @if (vm.alarms.length === 0) {
+    <p class="alarm-management__empty">Nessun allarme attivo al momento.</p>
+    } @else {
+    <ul class="alarm-management__list" aria-label="Lista allarmi attivi">
+        @for (alarm of vm.alarms; track alarm.id) {
+        <li>
+            <app-alarm-item-component [alarm]="alarm" [isResolving]="vm.resolvingId === alarm.id"
+                (resolve)="onResolve($event)" />
+        </li>
+        }
+    </ul>
+    }
+    }
+</section>

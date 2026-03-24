@@ -23,7 +23,7 @@ export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
     if (!location) {
       throw new Error('Browser location is not available for OAuth redirection.');
     }
-
+    // inserire i veri endpoint
     location.href = `${this.baseUrl}/api/vimar-account/oauth/authorize`;
   }
 

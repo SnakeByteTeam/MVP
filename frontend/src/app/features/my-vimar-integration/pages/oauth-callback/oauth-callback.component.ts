@@ -37,7 +37,7 @@ export class OAuthCallbackComponent implements OnInit {
 			.subscribe({
 				next: () => {
 					this.isProcessing = false;
-					void this.router.navigate(['/my-vimar']);
+					void this.router.navigate(['/vimar-link']);
 				},
 				error: (err) => {
 					console.error('Errore durante la gestione della callback OAuth2:', err);

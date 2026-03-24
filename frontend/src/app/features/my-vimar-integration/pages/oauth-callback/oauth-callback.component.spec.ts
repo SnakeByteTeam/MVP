@@ -57,13 +57,13 @@ describe('OAuthCallbackComponent', () => {
     expect(serviceStub.handleOAuthCallback).not.toHaveBeenCalled();
   });
 
-  it('chiama handleOAuthCallback e naviga verso /my-vimar in caso di successo', async () => {
+  it('chiama handleOAuthCallback e naviga verso /vimar-link in caso di successo', async () => {
     await buildComponent({ code: 'abc', state: 'def' });
 
     fixture.detectChanges();
 
     expect(serviceStub.handleOAuthCallback).toHaveBeenCalledWith({ code: 'abc', state: 'def' });
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/my-vimar']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/vimar-link']);
     expect(component.callbackError).toBeNull();
   });
 

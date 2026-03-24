@@ -1,1 +1,4 @@
-export interface OAuthCallbackParams {}
+export interface OAuthCallbackParams {
+	code: string;
+	state: string;
+}

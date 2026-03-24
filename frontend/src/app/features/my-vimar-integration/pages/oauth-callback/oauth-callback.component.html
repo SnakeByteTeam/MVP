@@ -1,0 +1,12 @@
+<section class="oauth-callback-page">
+  <h1>Collegamento MyVimar</h1>
+
+  @if (isProcessing) {
+    <p>Conferma del collegamento in corso...</p>
+  }
+
+  @if (callbackError) {
+    <p class="oauth-callback-page__error">{{ callbackError }}</p>
+    <p>Ricarica la pagina o riprova dal pannello MyVimar.</p>
+  }
+</section>

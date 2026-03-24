@@ -1,0 +1,21 @@
+<section class="my-vimar-status">
+  @if (error()) {
+    <p class="my-vimar-status__error">{{ error() }}</p>
+  }
+
+  @if (account().isLinked) {
+    <p>Account collegato: <strong>{{ account().email }}</strong></p>
+    <button type="button" [disabled]="isLoading()" (click)="onUnlinkAccount()">
+      @if (isLoading()) {
+        Rimozione in corso...
+      } @else {
+        Rimuovi account
+      }
+    </button>
+  } @else {
+    <p>Nessun account MyVimar collegato.</p>
+    <button type="button" [disabled]="isLoading()" (click)="onLinkAccount()">
+      Collega account MyVimar
+    </button>
+  }
+</section>

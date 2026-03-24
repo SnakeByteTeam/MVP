@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { UpdateUserReqDto } from '../../infrastructure/dtos/in/update-user-req.dto';
 import { CreateUserReqDto } from '../../infrastructure/dtos/in/create-user-req.dto';
 import { 
@@ -14,28 +14,33 @@ import { DeleteUserUseCase } from '../../application/ports/in/delete-user-use-ca
 import { UpdateUserCmd } from '../../application/commands/update-user-cmd';
 import { CreateUserCmd } from '../../application/commands/create-user-cmd';
 import { DeleteUserCmd } from '../../application/commands/delete-user-cmd';
+import { UpdateUserResDto } from '../../infrastructure/dtos/out/update-user-res.dto';
+import { CreateUserResDto } from '../../infrastructure/dtos/out/create-user-res.dto';
+import { plainToInstance } from 'class-transformer';
+import { FindAllUserResDto } from '../../infrastructure/dtos/out/find-all-user-res.dto';
 
 @Controller('users')
 export class UsersController {
 
     constructor(
-        @Inject(CREATE_USER_USE_CASE) private readonly findAllUsersUseCase: FindAllUsersUseCase,
-        @Inject(DELETE_USER_USE_CASE) private readonly updateUserUseCase: UpdateUserUseCase,
-        @Inject(FIND_ALL_USERS_USE_CASE) private readonly createUserUseCase: CreateUserUseCase,
-        @Inject(UPDATE_USER_USE_CASE) private readonly deleteUserUseCase: DeleteUserUseCase,
+        @Inject(FIND_ALL_USERS_USE_CASE) private readonly findAllUsersUseCase: FindAllUsersUseCase,
+        @Inject(UPDATE_USER_USE_CASE) private readonly updateUserUseCase: UpdateUserUseCase,
+        @Inject(CREATE_USER_USE_CASE) private readonly createUserUseCase: CreateUserUseCase,
+        @Inject(DELETE_USER_USE_CASE) private readonly deleteUserUseCase: DeleteUserUseCase,
     ){}
 
     @Get()
-    async findAll(){
-        return this.findAllUsersUseCase.findAllUsers();
+    async findAll() : Promise <FindAllUserResDto[]>{
+        const users = this.findAllUsersUseCase.findAllUsers();
+        return plainToInstance(FindAllUserResDto, users);
     }
 
     @Put('/:id')
     async updateUser(
-        @Param('id') id: number,
+        @Param('id', ParseIntPipe) id: number,
         @Body() req: UpdateUserReqDto
-    ){
-        return this.updateUserUseCase.updateUser(
+    ): Promise<UpdateUserResDto> {
+        const user = this.updateUserUseCase.updateUser(
             new UpdateUserCmd(
                 id,
                 req.username,
@@ -43,26 +48,27 @@ export class UsersController {
                 req.name
             )
         );
+        return plainToInstance(UpdateUserResDto, user);
     }
 
     @Post()
     async createUser(
         @Body() req: CreateUserReqDto
-    ){
-        return this.createUserUseCase.createUser(
+    ): Promise<CreateUserResDto>{
+        const createdUser = this.createUserUseCase.createUser(
             new CreateUserCmd(
-                req.name,
+                req.username,
                 req.surname,
-                req.name,
-                ""
+                req.name
             )
         );
+        return plainToInstance(CreateUserResDto, createdUser);
     }
 
     @Delete('/:id')
     async deleteUser(
-        @Param('id') id: number
-    ){
+        @Param('id', ParseIntPipe) id: number
+    ) {
         return this.deleteUserUseCase.deleteUser(
             new DeleteUserCmd(
                 id

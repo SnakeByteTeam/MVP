@@ -1,6 +1,6 @@
-import { User } from "../../../domain/user";
+import { CreatedUser } from "../../../domain/created-user";
 import { CreateUserCmd } from "../../commands/create-user-cmd";
 
 export interface CreateUserUseCase {
-    createUser(req: CreateUserCmd): User;
+    createUser(req: CreateUserCmd): CreatedUser;
 }

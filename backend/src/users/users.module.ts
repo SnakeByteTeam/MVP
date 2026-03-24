@@ -18,6 +18,7 @@ import { UPDATE_USER_PORT, UpdateUserAdapter } from './adapters/out/update-user-
 import { DELETE_USER_PORT, DeleteUserAdapter } from './adapters/out/delete-user-adapter';
 import { GENERATE_PASSWORD_PORT, GeneratePasswordImpl } from './infrastructure/password-generator/generate-password-impl';
 import { HASH_PASSWORD_PORT, HashPasswordImpl } from './infrastructure/hash-password-impl/hash-password-impl';
+import { CONVERT_BASE_64_PORT, ConvertBase64Impl } from './infrastructure/convert-base-64-impl/convert-base-64-impl';
 
 @Module({
   controllers: [UsersController],
@@ -77,6 +78,10 @@ import { HASH_PASSWORD_PORT, HashPasswordImpl } from './infrastructure/hash-pass
     {
       provide: HASH_PASSWORD_PORT,
       useClass: HashPasswordImpl
+    },
+    {
+      provide: CONVERT_BASE_64_PORT,
+      useClass: ConvertBase64Impl
     }
   ]
 })

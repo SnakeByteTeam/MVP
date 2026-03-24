@@ -1,6 +1,6 @@
 import { User } from "../../../domain/user";
-import { CreateUserCmd } from "../../commands/create-user-cmd";
+import { CreateUserWithTempPasswordCmd } from "../../commands/create-user-with-temp-password-cmd";
 
 export interface CreateUserPort {
-    createUser(req: CreateUserCmd): User;
+    createUser(req: CreateUserWithTempPasswordCmd): User;
 }

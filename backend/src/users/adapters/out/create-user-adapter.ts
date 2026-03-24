@@ -1,9 +1,9 @@
 import { Inject } from "@nestjs/common";
-import { CreateUserCmd } from "../../application/commands/create-user-cmd";
 import { CreateUserPort } from "../../application/ports/out/create-user-port.interface";
 import { User } from "../../domain/user";
 import { CREATE_USER_REPOSITORY, CreateUserRepository } from "../../application/repository/create-user-repository.interface";
 import { UserEntity } from "../../infrastructure/entities/user-entity";
+import { CreateUserWithTempPasswordCmd } from "../../application/commands/create-user-with-temp-password-cmd";
 
 export class CreateUserAdapter implements CreateUserPort {
 
@@ -11,7 +11,7 @@ export class CreateUserAdapter implements CreateUserPort {
         @Inject(CREATE_USER_REPOSITORY) private readonly createUserRepository: CreateUserRepository
     ){}
 
-    createUser(req: CreateUserCmd): User {
+    createUser(req: CreateUserWithTempPasswordCmd): User {
         const res: UserEntity = this.createUserRepository.createUser(
             req.username,
             req.surname,

@@ -10,7 +10,7 @@ export class DeleteUserAdapter implements DeleteUserPort {
     ){}
 
     deleteUser(req: DeleteUserCmd): void {
-        return this.deleteUserRepository.DeleteUserAdapter(
+        return this.deleteUserRepository.deleteUser(
             req.id
         );
     }

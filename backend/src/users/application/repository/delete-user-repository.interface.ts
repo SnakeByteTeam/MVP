@@ -1,5 +1,5 @@
 export interface DeleteUserRepository {
-    DeleteUserAdapter(
+    deleteUser(
         id: number
     ): void;
 }

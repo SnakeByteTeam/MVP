@@ -1,3 +1,4 @@
+import { CreatedUser } from "../../domain/created-user";
 import { UserEntity } from "../../infrastructure/entities/user-entity";
 
 export interface CreateUserRepository {

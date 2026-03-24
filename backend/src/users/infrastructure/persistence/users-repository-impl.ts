@@ -19,7 +19,7 @@ export class UsersRepositoryImpl implements
     createUser(username: string, surname: string, name: string, tempPassword: string): UserEntity {
         throw new Error("Method not implemented.");
     }
-    DeleteUserAdapter(id: number): void {
+    deleteUser(id: number): void {
         throw new Error("Method not implemented.");
     }
 }

@@ -5,7 +5,7 @@ import { FindDeviceByPlantIdUseCase } from "../ports/in/find-device-by-plantid.u
 import { FindDeviceByPlantIdCmd } from "../commands/find-device-by-plantid.command";
 import { Inject, Injectable } from "@nestjs/common";
 import { FIND_DEVICE_BY_ID_PORT, type FindDeviceByIdPort } from "../ports/out/find-device-by-id.port";
-import { FIND_DEVICE_BY_PLANTID_PORT, FindDeviceByPlantIdPort } from "../ports/out/find-device-by-plantid.port";
+import { FIND_DEVICE_BY_PLANTID_PORT, type FindDeviceByPlantIdPort } from "../ports/out/find-device-by-plantid.port";
 
 @Injectable()
 export class DeviceService implements 

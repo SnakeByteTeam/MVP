@@ -3,6 +3,18 @@ import { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.model';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 
+type PriorityUi = {
+  label: string;
+  className: string;
+};
+
+const PRIORITY_UI: Readonly<Record<AlarmPriority, PriorityUi>> = {
+  [AlarmPriority.WHITE]: { label: 'Informativa', className: 'priority-white' },
+  [AlarmPriority.GREEN]: { label: 'Bassa', className: 'priority-green' },
+  [AlarmPriority.ORANGE]: { label: 'Media', className: 'priority-orange' },
+  [AlarmPriority.RED]: { label: 'Alta', className: 'priority-red' },
+};
+
 @Component({
   selector: 'app-alarm-item-component',
   imports: [ElapsedTimePipe],
@@ -15,41 +27,7 @@ export class AlarmItemComponent {
   public readonly isResolving = input<boolean>(false);
   public readonly resolve = output<string>();
 
-  public readonly priorityLabel = computed(() => {
-    const priority = this.alarm().priority;
-
-    if (priority === AlarmPriority.RED) {
-      return 'Alta';
-    }
-
-    if (priority === AlarmPriority.ORANGE) {
-      return 'Media';
-    }
-
-    if (priority === AlarmPriority.GREEN) {
-      return 'Bassa';
-    }
-
-    return 'Informativa';
-  });
-
-  public readonly priorityClass = computed(() => {
-    const priority = this.alarm().priority;
-
-    if (priority === AlarmPriority.RED) {
-      return 'priority-red';
-    }
-
-    if (priority === AlarmPriority.ORANGE) {
-      return 'priority-orange';
-    }
-
-    if (priority === AlarmPriority.GREEN) {
-      return 'priority-green';
-    }
-
-    return 'priority-white';
-  });
+  public readonly priorityUi = computed(() => PRIORITY_UI[this.alarm().priority]);
 
   public onResolveClick(): void {
     this.resolve.emit(this.alarm().id);

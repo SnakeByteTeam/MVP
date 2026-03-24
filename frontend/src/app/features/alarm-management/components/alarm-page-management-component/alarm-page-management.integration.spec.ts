@@ -49,7 +49,7 @@ describe('AlarmManagement feature integration', () => {
         triggeredAt: '2026-03-24T10:01:00.000Z',
     };
 
-    const facadeStub = {
+    const alarmManagementStub = {
         vm$: undefined as unknown,
         resolveAlarm: vi.fn(),
     };
@@ -64,11 +64,11 @@ describe('AlarmManagement feature integration', () => {
             resolveError: null,
         });
 
-        facadeStub.vm$ = vmSubject.asObservable();
+        alarmManagementStub.vm$ = vmSubject.asObservable();
 
         await TestBed.configureTestingModule({
             imports: [AlarmPageManagementComponent],
-            providers: [{ provide: AlarmManagementService, useValue: facadeStub }],
+            providers: [{ provide: AlarmManagementService, useValue: alarmManagementStub }],
         })
             .overrideComponent(AlarmPageManagementComponent, {
                 remove: { imports: [AlarmItemComponent] },
@@ -89,8 +89,8 @@ describe('AlarmManagement feature integration', () => {
         expect(nativeElement.textContent).toContain('Allarmi attivi');
 
         resolveButtons[0].dispatchEvent(new MouseEvent('click'));
-        expect(facadeStub.resolveAlarm).toHaveBeenCalledWith('active-1');
-        expect(facadeStub.resolveAlarm).toHaveBeenCalledTimes(1);
+        expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledWith('active-1');
+        expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledTimes(1);
 
         vmSubject.next({
             alarms: [alarm1, alarm2],

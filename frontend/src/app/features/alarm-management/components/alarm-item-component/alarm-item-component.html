@@ -1,14 +1,14 @@
-<article class="alarm-item" [class.resolving]="isResolving()" [attr.data-priority]="priorityClass()"
+<article class="alarm-item" [class.resolving]="isResolving()" [attr.data-priority]="priorityUi().className"
     aria-label="Allarme {{ alarm().alarmName }}">
     <header class="alarm-item__header">
         <h2 class="alarm-item__title">{{ alarm().alarmName }}</h2>
-        <span class="alarm-item__priority">Priorita: {{ priorityLabel() }}</span>
+        <span class="alarm-item__priority">Priorità: {{ priorityUi().label }}</span>
     </header>
 
     <dl class="alarm-item__meta">
         <div>
-            <dt>Priorita</dt>
-            <dd>{{ priorityLabel() }}</dd>
+            <dt>Priorità</dt>
+            <dd>{{ priorityUi().label }}</dd>
         </div>
         <div>
             <dt>Attivo da</dt>

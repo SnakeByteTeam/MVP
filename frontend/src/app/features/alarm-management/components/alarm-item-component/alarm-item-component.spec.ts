@@ -50,32 +50,32 @@ describe('AlarmItemComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('priorityLabel mappa correttamente tutti i livelli', () => {
+  it('priorityUi mappa correttamente label per tutti i livelli', () => {
     setInputs({ ...baseAlarm, priority: AlarmPriority.RED });
-    expect(component.priorityLabel()).toBe('Alta');
+    expect(component.priorityUi().label).toBe('Alta');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.ORANGE });
-    expect(component.priorityLabel()).toBe('Media');
+    expect(component.priorityUi().label).toBe('Media');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.GREEN });
-    expect(component.priorityLabel()).toBe('Bassa');
+    expect(component.priorityUi().label).toBe('Bassa');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.WHITE });
-    expect(component.priorityLabel()).toBe('Informativa');
+    expect(component.priorityUi().label).toBe('Informativa');
   });
 
-  it('priorityClass mappa correttamente tutti i livelli', () => {
+  it('priorityUi mappa correttamente className per tutti i livelli', () => {
     setInputs({ ...baseAlarm, priority: AlarmPriority.RED });
-    expect(component.priorityClass()).toBe('priority-red');
+    expect(component.priorityUi().className).toBe('priority-red');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.ORANGE });
-    expect(component.priorityClass()).toBe('priority-orange');
+    expect(component.priorityUi().className).toBe('priority-orange');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.GREEN });
-    expect(component.priorityClass()).toBe('priority-green');
+    expect(component.priorityUi().className).toBe('priority-green');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.WHITE });
-    expect(component.priorityClass()).toBe('priority-white');
+    expect(component.priorityUi().className).toBe('priority-white');
   });
 
   it('onResolveClick emette alarm.id', () => {

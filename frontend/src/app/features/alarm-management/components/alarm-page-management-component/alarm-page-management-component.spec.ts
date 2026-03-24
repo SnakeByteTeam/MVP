@@ -45,7 +45,7 @@ describe('AlarmPageManagementComponent', () => {
     triggeredAt: '2026-03-24T10:01:00.000Z',
   };
 
-  const facadeStub = {
+  const alarmManagementStub = {
     vm$: undefined as unknown,
     resolveAlarm: vi.fn(),
   };
@@ -60,11 +60,11 @@ describe('AlarmPageManagementComponent', () => {
       resolveError: null,
     });
 
-    facadeStub.vm$ = vmSubject.asObservable();
+    alarmManagementStub.vm$ = vmSubject.asObservable();
 
     await TestBed.configureTestingModule({
       imports: [AlarmPageManagementComponent],
-      providers: [{ provide: AlarmManagementService, useValue: facadeStub }],
+      providers: [{ provide: AlarmManagementService, useValue: alarmManagementStub }],
     })
       .overrideComponent(AlarmPageManagementComponent, {
         remove: { imports: [AlarmItemComponent] },
@@ -86,14 +86,14 @@ describe('AlarmPageManagementComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.vm$).toBe(facadeStub.vm$);
+    expect(component.vm$).toBe(alarmManagementStub.vm$);
   });
 
   it('onResolve delega a facade.resolveAlarm', () => {
     component.onResolve('active-2');
 
-    expect(facadeStub.resolveAlarm).toHaveBeenCalledWith('active-2');
-    expect(facadeStub.resolveAlarm).toHaveBeenCalledTimes(1);
+    expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledWith('active-2');
+    expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledTimes(1);
   });
 
   it('renderizza stato lista vuota quando non ci sono allarmi', () => {
@@ -168,7 +168,7 @@ describe('AlarmPageManagementComponent', () => {
 
     childComponent.emitResolve();
 
-    expect(facadeStub.resolveAlarm).toHaveBeenCalledWith('active-1');
-    expect(facadeStub.resolveAlarm).toHaveBeenCalledTimes(1);
+    expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledWith('active-1');
+    expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledTimes(1);
   });
 });

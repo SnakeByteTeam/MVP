@@ -13,15 +13,15 @@ import { AlarmItemComponent } from '../alarm-item-component/alarm-item-component
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AlarmPageManagementComponent implements OnInit {
-  private readonly facade = inject(AlarmManagementService);
+  private readonly alarmManagementService = inject(AlarmManagementService);
 
   public vm$!: Observable<AlarmListVm>;
 
   public ngOnInit(): void {
-    this.vm$ = this.facade.vm$;
+    this.vm$ = this.alarmManagementService.vm$;
   }
 
   public onResolve(activeAlarmId: string): void {
-    this.facade.resolveAlarm(activeAlarmId);
+    this.alarmManagementService.resolveAlarm(activeAlarmId);
   }
 }

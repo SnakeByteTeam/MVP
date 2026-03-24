@@ -1,4 +1,4 @@
-import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, fromEvent, takeUntil } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { AlarmEvent } from '../models/alarm-event.model';
@@ -10,14 +10,8 @@ import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 
-export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>('SOCKET_IO_FACTORY', {
-	providedIn: 'root',
-	factory: () => io,
-});
-
 @Injectable({ providedIn: 'root' })
 export class EventSubscriptionService implements OnDestroy {
-	private readonly socketIoFactory = inject(SOCKET_IO_FACTORY);
 	private readonly alarmStateService = inject(AlarmStateService);
 	private readonly apiBaseUrl = inject(API_BASE_URL, { optional: true });
 
@@ -69,7 +63,7 @@ export class EventSubscriptionService implements OnDestroy {
 			return;
 		}
 
-		this.socket = this.socketIoFactory(this.resolveSocketUrl(), {
+		this.socket = io(this.resolveSocketUrl(), {
 			transports: ['websocket'],
 			reconnection: true,
 			autoConnect: true,

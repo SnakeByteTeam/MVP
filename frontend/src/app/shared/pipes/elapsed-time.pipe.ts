@@ -6,7 +6,7 @@ type ElapsedUnit = {
   plural: string;
 };
 
-//per fargli scrivere le cose con la giusta distizione
+//per fargli scrivere le cose con la giusta distizionee
 const ELAPSED_UNITS: readonly ElapsedUnit[] = [
   { seconds: 365 * 24 * 60 * 60, singular: 'anno', plural: 'anni' },
   { seconds: 30 * 24 * 60 * 60, singular: 'mese', plural: 'mesi' },

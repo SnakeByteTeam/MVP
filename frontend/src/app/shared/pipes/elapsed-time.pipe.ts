@@ -1,19 +1,10 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-type ElapsedUnit = {
-  seconds: number;
-  singular: string;
-  plural: string;
-};
-
-//per fargli scrivere le cose con la giusta distizionee
-const ELAPSED_UNITS: readonly ElapsedUnit[] = [
-  { seconds: 365 * 24 * 60 * 60, singular: 'anno', plural: 'anni' },
-  { seconds: 30 * 24 * 60 * 60, singular: 'mese', plural: 'mesi' },
-  { seconds: 24 * 60 * 60, singular: 'giorno', plural: 'giorni' },
-  { seconds: 60 * 60, singular: 'ora', plural: 'ore' },
-  { seconds: 60, singular: 'minuto', plural: 'minuti' },
-];
+const SECONDS_PER_MINUTE = 60;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+const SECONDS_PER_DAY = SECONDS_PER_HOUR * HOURS_PER_DAY;
 
 @Pipe({ name: 'elapsedTime', standalone: true, pure: true })
 export class ElapsedTimePipe implements PipeTransform {
@@ -29,25 +20,26 @@ export class ElapsedTimePipe implements PipeTransform {
     }
 
     const deltaSeconds = Math.floor(deltaMs / 1000);
-    if (deltaSeconds < 60) {
-      return 'meno di 1 minuto fa';
+    if (deltaSeconds < SECONDS_PER_MINUTE) {
+      return `${deltaSeconds}s fa`;
     }
 
-    for (const unit of ELAPSED_UNITS) {
-      const amount = Math.floor(deltaSeconds / unit.seconds);
-      if (amount >= 1) {
-        return this.formatElapsed(amount, unit.singular, unit.plural);
+    const deltaMinutes = Math.floor(deltaSeconds / SECONDS_PER_MINUTE);
+    if (deltaSeconds < SECONDS_PER_HOUR) {
+      return `${deltaMinutes}m fa`;
+    }
+
+    const deltaHours = Math.floor(deltaSeconds / SECONDS_PER_HOUR);
+    if (deltaSeconds < SECONDS_PER_DAY) {
+      const remainingMinutes = deltaMinutes % MINUTES_PER_HOUR;
+      if (remainingMinutes > 0) {
+        return `${deltaHours}h ${remainingMinutes}m fa`;
       }
+
+      return `${deltaHours}h fa`;
     }
 
-    return 'meno di 1 minuto fa';
-  }
-
-  private formatElapsed(amount: number, singular: string, plural: string): string {
-    if (amount === 1) {
-      return `1 ${singular} fa`;
-    }
-
-    return `${amount} ${plural} fa`;
+    const deltaDays = Math.floor(deltaSeconds / SECONDS_PER_DAY);
+    return `${deltaDays}g fa`;
   }
 }

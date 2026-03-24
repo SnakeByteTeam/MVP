@@ -1,1 +1,5 @@
-<p>notification-badge-component works!</p>
+@if (isVisible()) {
+<span class="notification-badge" role="status" aria-live="polite" aria-atomic="true" [attr.aria-label]="ariaLabel()">
+    {{ displayCount() }}
+</span>
+}

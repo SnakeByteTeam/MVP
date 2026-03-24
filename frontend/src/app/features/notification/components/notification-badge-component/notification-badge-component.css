@@ -1,0 +1,14 @@
+.notification-badge {
+    align-items: center;
+    background: #b91c1c;
+    border-radius: 999px;
+    color: #ffffff;
+    display: inline-flex;
+    font-size: 0.75rem;
+    font-weight: 700;
+    justify-content: center;
+    line-height: 1;
+    min-height: 1.5rem;
+    min-width: 1.5rem;
+    padding: 0.25rem 0.4rem;
+}

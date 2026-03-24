@@ -1,1 +1,25 @@
-<p>notification-page-component works!</p>
+<section class="notification-page" aria-labelledby="notification-page-title">
+    <header class="notification-page__header">
+        <h1 id="notification-page-title">Notifiche</h1>
+    </header>
+
+    @if (vm$ | async; as vm) {
+    <p class="notification-page__summary" aria-live="polite">
+        {{ vm.unreadCount }} notifiche non lette
+    </p>
+
+    @if (vm.notifications.length > 0) {
+    <ul class="notification-page__list" aria-label="Elenco notifiche">
+        @for (notification of vm.notifications; track notification.notificationId) {
+        <li class="notification-page__list-item">
+            <app-notification-item-component [notification]="notification"></app-notification-item-component>
+        </li>
+        }
+    </ul>
+    } @else {
+    <output class="notification-page__empty" aria-live="polite">
+        Nessuna notifica disponibile.
+    </output>
+    }
+    }
+</section>

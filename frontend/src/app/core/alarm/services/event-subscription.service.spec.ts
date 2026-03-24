@@ -7,10 +7,7 @@ import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
 import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
-import { EventSubscriptionService } from './event-subscription.service';
-
-const { io } = vi.hoisted(() => ({ io: vi.fn() }));
-vi.mock('socket.io-client', () => ({ io }));
+import { EventSubscriptionService, SOCKET_IO_FACTORY } from './event-subscription.service';
 
 
 type SocketEventHandler = (payload?: unknown) => void;
@@ -29,7 +26,7 @@ type FakeSocket = {
 describe('EventSubscriptionService', () => {
   let service: EventSubscriptionService;
   let fakeSocket: FakeSocket;
-  let ioMock: ReturnType<typeof vi.mocked<typeof io>>;
+  let socketIoFactoryMock: ReturnType<typeof vi.fn>;
   let subscriptions: Subscription[];
 
   const alarmStateSpy = {
@@ -42,12 +39,15 @@ describe('EventSubscriptionService', () => {
     vi.clearAllMocks();
 
     fakeSocket = createFakeSocket();
-    ioMock = vi.mocked(io);
-    ioMock.mockReturnValue(fakeSocket as unknown as Socket);
+    socketIoFactoryMock = vi.fn(() => fakeSocket as unknown as Socket);
 
     TestBed.configureTestingModule({
       providers: [
         EventSubscriptionService,
+        {
+          provide: SOCKET_IO_FACTORY,
+          useValue: socketIoFactoryMock,
+        },
         {
           provide: AlarmStateService,
           useValue: alarmStateSpy,
@@ -74,7 +74,7 @@ describe('EventSubscriptionService', () => {
   it('crea la connessione socket in initialize usando API_BASE_URL normalizzato', () => {
     service.initialize([]);
 
-    expect(ioMock).toHaveBeenCalledWith('http://api.example.local', {
+    expect(socketIoFactoryMock).toHaveBeenCalledWith('http://api.example.local', {
       transports: ['websocket'],
       reconnection: true,
       autoConnect: true,

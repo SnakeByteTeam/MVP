@@ -1,4 +1,5 @@
 import { HttpService } from "@nestjs/axios";
+import { Injectable } from "@nestjs/common";
 import { firstValueFrom } from "rxjs";
 
 import { FetchPlantStructureRepo } from "src/plant/application/repository/fetch-plant-structure.repository";
@@ -9,6 +10,7 @@ import { DatapointDto } from "src/device/infrastructure/dtos/datapoint.dto";
 
 
 
+@Injectable()
 export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
 
     private readonly API_DOMAIN = process.env.HOST3 || "";
@@ -29,8 +31,12 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
         if(!response.data) return null;
 
         plantdto.id = plantId; 
-        plantdto.name = response.data?.data?.attributes?.title; 
-        plantdto.rooms = response.data?.data.map(async ( room: any ) => await this.fetchRoom(validToken, plantId, room))
+        plantdto.name = response.data?.data[0]?.attributes?.title; 
+        plantdto.rooms = await Promise.all(
+            response.data?.data
+            .filter((room: any) => room?.meta?.['@type']?.includes('loc:Location'))
+            .map(async ( room: any ) => await this.fetchRoom(validToken, plantId, room))
+        );
 
         return plantdto;
     }
@@ -49,7 +55,9 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
 
         if(!response.data) return null;
 
-        roomdto.devices = response.data?.data.map(async (device: any) => await this.fetchDevice(validToken, plantId, device));
+        roomdto.devices = await Promise.all(
+            response.data?.data.map(async (device: any) => await this.fetchDevice(validToken, plantId, device))
+            );
 
         return roomdto;
     }
@@ -61,7 +69,7 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
         devicedto.name = device?.attributes?.title;
         devicedto.plantId = plantId;
         devicedto.type = device?.meta['vimar:ssType'];
-        devicedto.type = device?.meta['vimar:sfType'];
+        devicedto.subType = device?.meta['vimar:sfType'];
 
         const response  = await firstValueFrom(this.httpService.get(
                 `${this.API_DOMAIN}/${plantId}/functions/${devicedto.id}/datapoints`, 
@@ -71,7 +79,9 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
 
         if(!response.data) return null;
 
-        devicedto.datapoints = response.data?.data.map(async (dp: any) => await this.fetchDatapoint(dp));
+        devicedto.datapoints = await Promise.all(
+            response.data?.data.map(async (dp: any) => await this.fetchDatapoint(dp))
+        );
 
         return devicedto;
     }

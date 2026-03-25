@@ -23,9 +23,13 @@ describe('TokenCacheImpl', () => {
 
   it('should write tokens in cache and return true when query succeeds', async () => {
     queryMock.mockResolvedValue({ rows: [] });
-    
+
     const expiresAt = new Date('2030-01-01T00:00:00.000Z');
-    const result = await cacheImpl.writeTokens('access-1', 'refresh-1', expiresAt);
+    const result = await cacheImpl.writeTokens(
+      'access-1',
+      'refresh-1',
+      expiresAt,
+    );
 
     expect(result).toBe(true);
     expect(pool.connect).toHaveBeenCalledTimes(1);

@@ -1,104 +1,112 @@
-import { HttpService } from "@nestjs/axios";
-import { Injectable } from "@nestjs/common";
-import { firstValueFrom } from "rxjs";
+import { HttpService } from '@nestjs/axios';
+import { Injectable } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 
-import { FetchPlantStructureRepo } from "src/plant/application/repository/fetch-plant-structure.repository";
-import { PlantDto } from "./dtos/plant.dto";
-import { RoomDto } from "./dtos/room.dto";
-import { DeviceDto } from "src/device/infrastructure/dtos/device.dto";
-import { DatapointDto } from "src/device/infrastructure/dtos/datapoint.dto";
-
-
+import { FetchPlantStructureRepo } from 'src/plant/application/repository/fetch-plant-structure.repository';
+import { PlantDto } from './dtos/plant.dto';
+import { RoomDto } from './dtos/room.dto';
+import { DeviceDto } from 'src/device/infrastructure/dtos/device.dto';
+import { DatapointDto } from 'src/device/infrastructure/dtos/datapoint.dto';
 
 @Injectable()
 export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
+  private readonly API_DOMAIN = process.env.HOST3 || '';
 
-    private readonly API_DOMAIN = process.env.HOST3 || "";
+  constructor(private readonly httpService: HttpService) {}
 
-    constructor(
-        private readonly httpService: HttpService
-    ) {}
+  async fetch(validToken: string, plantId: string): Promise<PlantDto | null> {
+    const plantdto: PlantDto = new PlantDto();
 
-    async fetch(validToken: string, plantId: string): Promise<PlantDto | null> {
-        let plantdto: PlantDto = new PlantDto();
+    const response = await firstValueFrom(
+      this.httpService.get(`${this.API_DOMAIN}/${plantId}/locations`, {
+        headers: { Authorization: `Bearer ${validToken}` },
+      }),
+    );
 
-        const response  = await firstValueFrom(this.httpService.get(
-                `${this.API_DOMAIN}/${plantId}/locations`, 
-                { headers: {Authorization: `Bearer ${validToken}`}},
-            )
-        );
+    if (!response.data) return null;
 
-        if(!response.data) return null;
+    plantdto.id = plantId;
+    plantdto.name = response.data?.data[0]?.attributes?.title;
+    plantdto.rooms = await Promise.all(
+      response.data?.data
+        .filter((room: any) => room?.meta?.['@type']?.includes('loc:Location'))
+        .map(
+          async (room: any) => await this.fetchRoom(validToken, plantId, room),
+        ),
+    );
 
-        plantdto.id = plantId; 
-        plantdto.name = response.data?.data[0]?.attributes?.title; 
-        plantdto.rooms = await Promise.all(
-            response.data?.data
-            .filter((room: any) => room?.meta?.['@type']?.includes('loc:Location'))
-            .map(async ( room: any ) => await this.fetchRoom(validToken, plantId, room))
-        );
+    return plantdto;
+  }
 
-        return plantdto;
-    }
-    
-    private async fetchRoom(validToken: string, plantId: string, room: any): Promise<RoomDto | null> {
-        let roomdto: RoomDto = new RoomDto();
+  private async fetchRoom(
+    validToken: string,
+    plantId: string,
+    room: any,
+  ): Promise<RoomDto | null> {
+    const roomdto: RoomDto = new RoomDto();
 
-        roomdto.id = room?.id;
-        roomdto.name = room?.attributes?.title;
+    roomdto.id = room?.id;
+    roomdto.name = room?.attributes?.title;
 
-        const response  = await firstValueFrom(this.httpService.get(
-                `${this.API_DOMAIN}/${plantId}/locations/${roomdto.id}/functions`, 
-                { headers: {Authorization: `Bearer ${validToken}`}},
-            )
-        );
+    const response = await firstValueFrom(
+      this.httpService.get(
+        `${this.API_DOMAIN}/${plantId}/locations/${roomdto.id}/functions`,
+        { headers: { Authorization: `Bearer ${validToken}` } },
+      ),
+    );
 
-        if(!response.data) return null;
+    if (!response.data) return null;
 
-        roomdto.devices = await Promise.all(
-            response.data?.data.map(async (device: any) => await this.fetchDevice(validToken, plantId, device))
-            );
+    roomdto.devices = await Promise.all(
+      response.data?.data.map(
+        async (device: any) =>
+          await this.fetchDevice(validToken, plantId, device),
+      ),
+    );
 
-        return roomdto;
-    }
+    return roomdto;
+  }
 
-    private async fetchDevice(validToken: string, plantId: string, device: any): Promise<DeviceDto | null> {
-        let devicedto: DeviceDto = new DeviceDto();
+  private async fetchDevice(
+    validToken: string,
+    plantId: string,
+    device: any,
+  ): Promise<DeviceDto | null> {
+    const devicedto: DeviceDto = new DeviceDto();
 
-        devicedto.id = device?.id;
-        devicedto.name = device?.attributes?.title;
-        devicedto.plantId = plantId;
-        devicedto.type = device?.meta['vimar:ssType'];
-        devicedto.subType = device?.meta['vimar:sfType'];
+    devicedto.id = device?.id;
+    devicedto.name = device?.attributes?.title;
+    devicedto.plantId = plantId;
+    devicedto.type = device?.meta['vimar:ssType'];
+    devicedto.subType = device?.meta['vimar:sfType'];
 
-        const response  = await firstValueFrom(this.httpService.get(
-                `${this.API_DOMAIN}/${plantId}/functions/${devicedto.id}/datapoints`, 
-                { headers: {Authorization: `Bearer ${validToken}`}},
-            )
-        );
+    const response = await firstValueFrom(
+      this.httpService.get(
+        `${this.API_DOMAIN}/${plantId}/functions/${devicedto.id}/datapoints`,
+        { headers: { Authorization: `Bearer ${validToken}` } },
+      ),
+    );
 
-        if(!response.data) return null;
+    if (!response.data) return null;
 
-        devicedto.datapoints = await Promise.all(
-            response.data?.data.map(async (dp: any) => await this.fetchDatapoint(dp))
-        );
+    devicedto.datapoints = await Promise.all(
+      response.data?.data.map(async (dp: any) => await this.fetchDatapoint(dp)),
+    );
 
-        return devicedto;
-    }
+    return devicedto;
+  }
 
-    private async fetchDatapoint(datapoint: any): Promise<DatapointDto | null> {
-        let datapointdto: DatapointDto = {
-            id: datapoint?.id, 
-            name: datapoint?.attributes?.title,
-            readable: datapoint?.attributes?.readable,
-            writable: datapoint?.attributes?.writable,
-            enum: datapoint?.attributes?.enum,
-            valueType: datapoint?.attributes?.valueType,
-            sfeType: datapoint?.meta['vimar:sfeType']
-        }
+  private async fetchDatapoint(datapoint: any): Promise<DatapointDto | null> {
+    const datapointdto: DatapointDto = {
+      id: datapoint?.id,
+      name: datapoint?.attributes?.title,
+      readable: datapoint?.attributes?.readable,
+      writable: datapoint?.attributes?.writable,
+      enum: datapoint?.attributes?.enum,
+      valueType: datapoint?.attributes?.valueType,
+      sfeType: datapoint?.meta['vimar:sfeType'],
+    };
 
-        if(!datapointdto) return null;
-
-        return datapointdto;
-    }
+    return datapointdto;
+  }
 }

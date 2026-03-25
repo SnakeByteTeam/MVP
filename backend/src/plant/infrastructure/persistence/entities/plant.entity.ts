@@ -1,12 +1,12 @@
-import { Plant } from "src/plant/domain/models/plant.model";
-import { RoomEntity } from "./room.entity";
+import { Plant } from 'src/plant/domain/models/plant.model';
+import { RoomEntity } from './room.entity';
 
 export class PlantEntity {
-    cached_at: Date;
-    data: {
-        id: string;
-        name: string;
-        rooms: RoomEntity[];
+  cached_at: Date;
+  data: {
+    id: string;
+    name: string;
+    rooms: RoomEntity[];
   };
 
   static toDomain(entity: PlantEntity): Plant {

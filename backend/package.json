@@ -71,8 +71,8 @@
     "coveragePathIgnorePatterns": [
       ".module.ts",
       ".dto.ts",
-      ".entity.ts",
-      "index.ts"
+      ".entity.ts", 
+      "main.ts"
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",

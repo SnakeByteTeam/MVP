@@ -1,23 +1,23 @@
 export class TokenPair {
-    private readonly accessToken: string; 
-    private readonly refreshToken: string; 
-    private readonly expiresAt: Date;
+  private readonly accessToken: string;
+  private readonly refreshToken: string;
+  private readonly expiresAt: Date;
 
-    constructor(accessToken: string, refreshToken: string, expiresAt: Date) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.expiresAt = expiresAt;
-    }
+  constructor(accessToken: string, refreshToken: string, expiresAt: Date) {
+    this.accessToken = accessToken;
+    this.refreshToken = refreshToken;
+    this.expiresAt = expiresAt;
+  }
 
-    getAccessToken(): string {
-        return this.accessToken;
-    }
+  getAccessToken(): string {
+    return this.accessToken;
+  }
 
-    getRefreshToken(): string {
-        return this.refreshToken;
-    }
+  getRefreshToken(): string {
+    return this.refreshToken;
+  }
 
-    getExpiresAt(): Date {
-        return this.expiresAt;
-    }
+  getExpiresAt(): Date {
+    return this.expiresAt;
+  }
 }

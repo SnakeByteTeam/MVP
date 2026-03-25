@@ -1,3 +1,3 @@
 export interface SyncPlantCmd {
-    id: string;
+  id: string;
 }

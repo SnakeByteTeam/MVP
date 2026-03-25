@@ -16,18 +16,23 @@ import { FindDeviceByPlantIdAdapter } from './adapters/out/find-device-by-plantI
 import { DeviceRepositoryImpl } from './infrastructure/persistence/device-repository-impl';
 import { DeviceMapper } from './infrastructure/mappers/device-mapper';
 
-
 @Module({
-    imports: [TokensModule], 
-    controllers: [DeviceController], 
-    providers: [
-        {provide: FIND_DEVICE_BY_ID_USECASE,          useClass: DeviceService}, 
-        {provide: FIND_DEVICE_BY_PLANTID_USECASE,     useClass: DeviceService}, 
-        {provide: FIND_DEVICE_BY_ID_PORT,             useClass: FindDeviceByIdAdapter}, 
-        {provide: FIND_DEVICE_BY_PLANTID_PORT,        useClass: FindDeviceByPlantIdAdapter}, 
-        {provide: FIND_DEVICE_BY_ID_REPO_PORT,        useClass: DeviceRepositoryImpl}, 
-        {provide: FIND_DEVICE_BY_PLANTID_REPO_PORT,   useClass: DeviceRepositoryImpl}, 
-        {provide: DEVICE_MAPPER_REPO_PORT,            useClass: DeviceMapper}, 
-    ]
+  imports: [TokensModule],
+  controllers: [DeviceController],
+  providers: [
+    { provide: FIND_DEVICE_BY_ID_USECASE, useClass: DeviceService },
+    { provide: FIND_DEVICE_BY_PLANTID_USECASE, useClass: DeviceService },
+    { provide: FIND_DEVICE_BY_ID_PORT, useClass: FindDeviceByIdAdapter },
+    {
+      provide: FIND_DEVICE_BY_PLANTID_PORT,
+      useClass: FindDeviceByPlantIdAdapter,
+    },
+    { provide: FIND_DEVICE_BY_ID_REPO_PORT, useClass: DeviceRepositoryImpl },
+    {
+      provide: FIND_DEVICE_BY_PLANTID_REPO_PORT,
+      useClass: DeviceRepositoryImpl,
+    },
+    { provide: DEVICE_MAPPER_REPO_PORT, useClass: DeviceMapper },
+  ],
 })
 export class DeviceModule {}

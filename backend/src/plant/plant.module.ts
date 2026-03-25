@@ -21,19 +21,23 @@ import { FetchPlantStructureImpl } from './infrastructure/http/fetch-plant-struc
 import { PlantRepository } from './infrastructure/persistence/plant-repository-impl';
 
 @Module({
-    imports: [TokensModule, HttpModule],
-    controllers: [PlantController],
-    providers: [
-        {provide: FIND_PLANT_BY_ID_USECASE,         useClass: PlantService},
-        {provide: FIND_PLANT_BY_ID_PORT,            useClass: FindPlantByIdAdapter},
-        {provide: FIND_PLANT_BY_ID_REPO_PORT,       useClass: PlantRepository},
-        {provide: SYNC_PLANT_STRUCTURE_USECASE,     useClass: SyncPlantService},
-        {provide: FETCH_PLANT_STRUCTURE_PORT,       useClass: FetchPlantStructureAdapter},
-        {provide: FETCH_PLANT_STRUCTURE_REPO_PORT,  useClass: FetchPlantStructureImpl },
-        {provide: WRITE_STRUCTURE_PORT,             useClass: WritePlantStructureAdapter},
-        {provide: WRITE_PLANT_STRUCTURE_REPO_PORT,  useClass: PlantRepository},
-    ]
+  imports: [TokensModule, HttpModule],
+  controllers: [PlantController],
+  providers: [
+    { provide: FIND_PLANT_BY_ID_USECASE, useClass: PlantService },
+    { provide: FIND_PLANT_BY_ID_PORT, useClass: FindPlantByIdAdapter },
+    { provide: FIND_PLANT_BY_ID_REPO_PORT, useClass: PlantRepository },
+    { provide: SYNC_PLANT_STRUCTURE_USECASE, useClass: SyncPlantService },
+    {
+      provide: FETCH_PLANT_STRUCTURE_PORT,
+      useClass: FetchPlantStructureAdapter,
+    },
+    {
+      provide: FETCH_PLANT_STRUCTURE_REPO_PORT,
+      useClass: FetchPlantStructureImpl,
+    },
+    { provide: WRITE_STRUCTURE_PORT, useClass: WritePlantStructureAdapter },
+    { provide: WRITE_PLANT_STRUCTURE_REPO_PORT, useClass: PlantRepository },
+  ],
 })
-export class PlantModule {
-    
-}
+export class PlantModule {}

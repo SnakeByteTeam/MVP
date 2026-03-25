@@ -12,13 +12,17 @@ import { DeviceModule } from './device/device.module';
 import { PlantModule } from './plant/plant.module';
 
 @Module({
-  imports: [ApiAuthVimarModule,
-            TokensModule, 
-            ConfigModule.forRoot({
-              isGlobal: true, 
-              load: [envConfig]
-            }), 
-            DatabaseModule, DeviceModule, PlantModule],
+  imports: [
+    ApiAuthVimarModule,
+    TokensModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [envConfig],
+    }),
+    DatabaseModule,
+    DeviceModule,
+    PlantModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

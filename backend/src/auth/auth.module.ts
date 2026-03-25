@@ -13,6 +13,8 @@ import { GENERATE_ACCESS_TOKEN_PORT, GenerateAccessTokenAdapter } from './adapte
 import { GENERATE_REFRESH_TOKEN_PORT, GenerateRefreshTokenAdapter } from './adapters/out/generate-refresh-token-adapter';
 import { EXTRACT_FROM_ACCESS_TOKEN_PORT, ExtractFromAccessTokenAdapter } from './adapters/out/extract-from-access-token-adapter';
 import { EXTRACT_FROM_REFRESH_TOKEN_PORT, ExtractFromRefreshTokenAdapter } from './adapters/out/extract-from-refresh-token-adapter';
+import { CHECK_CREDENTIALS_REPOSITORY } from './application/repository/check-credentials-repository.interface';
+import { CheckCredentialsRepositoryImpl } from './infrastructure/persistence/check-credentials-repository-impl';
 
 @Module({
   controllers: [AuthController],
@@ -64,6 +66,10 @@ import { EXTRACT_FROM_REFRESH_TOKEN_PORT, ExtractFromRefreshTokenAdapter } from 
     {
       provide: EXTRACT_FROM_REFRESH_TOKEN_PORT,
       useClass: ExtractFromRefreshTokenAdapter
+    },
+    {
+      provide: CHECK_CREDENTIALS_REPOSITORY,
+      useClass: CheckCredentialsRepositoryImpl
     }
   ]
 })

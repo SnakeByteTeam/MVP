@@ -22,7 +22,7 @@ import { ExtractFromRefreshTokenPort } from '../ports/out/extract-from-refresh-t
 import { ExtractFromRefreshTokenCmd } from '../commands/extract-from-refresh-token-cmd';
 
 @Injectable()
-export class AuthService implements LoginUseCase, RefreshUseCase, LogoutUseCase {
+export class AuthService implements LoginUseCase, RefreshUseCase/* , LogoutUseCase */ {
 
     constructor(
         @Inject(CHECK_CREDENTIALS_PORT) private readonly checkCredentialsPort: CheckCredentialsPort,
@@ -32,8 +32,8 @@ export class AuthService implements LoginUseCase, RefreshUseCase, LogoutUseCase 
         @Inject(EXTRACT_FROM_REFRESH_TOKEN_PORT) private readonly extractFromRefreshTokenPort: ExtractFromRefreshTokenPort
     ){}
 
-    login(req: LoginCmd): Tokens {
-        const payload: Payload = this.checkCredentialsPort.checkCredentials(req);
+    async login(req: LoginCmd): Promise<Tokens> {
+        const payload: Payload = await this.checkCredentialsPort.checkCredentials(req);
 
         const accessToken = this.generateAccessTokenPort.generateAccessToken(
             new GenerateAccessTokenCmd(
@@ -64,9 +64,9 @@ export class AuthService implements LoginUseCase, RefreshUseCase, LogoutUseCase 
         );
     }
 
-    logout(req: LogoutCmd) {
+/*     logout(req: LogoutCmd) {
         throw new Error('Method not implemented.');
-    }
+    } */
 }
 
 export const LOGIN_USE_CASE = 'LOGIN_USE_CASE';

@@ -48,7 +48,7 @@ describe("AuthService", () => {
     expect(service).toBeDefined();
   });
 
-  it("should login and return tokens", () => {
+  it("should login and return tokens", async () => {
     const payload = { userId: 1, role: "admin" };
     const accessToken = "access-token";
     const refreshToken = "refresh-token";
@@ -57,7 +57,7 @@ describe("AuthService", () => {
     mockGenerateAccessToken.generateAccessToken.mockReturnValue(accessToken);
     mockGenerateRefreshToken.generateRefreshToken.mockReturnValue(refreshToken);
 
-    const result = service.login({ username: "u", password: "p" });
+    const result = await service.login({ username: "u", password: "p" });
 
     expect(mockCheckCredentials.checkCredentials).toHaveBeenCalled();
     expect(mockGenerateAccessToken.generateAccessToken).toHaveBeenCalled();

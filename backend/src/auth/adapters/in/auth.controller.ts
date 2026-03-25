@@ -1,4 +1,4 @@
-import { Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { LoginReqDto } from '../../infrastructure/dtos/in/login-req.dto';
 import { LOGIN_USE_CASE, LOGOUT_USE_CASE, REFRESH_USE_CASE } from '../../application/services/auth.service';
 import { LoginUseCase } from '../../application/ports/in/login-use-case.interface';
@@ -23,8 +23,8 @@ export class AuthController {
     ){}
 
     @Post('/login')
-    login(req: LoginReqDto): LoginResDto{
-        const tokens: Tokens = this.loginUseCase.login(
+    async login(@Body() req: LoginReqDto): Promise<LoginResDto>{
+        const tokens: Tokens = await this.loginUseCase.login(
             new LoginCmd(
                 req.username,
                 req.password
@@ -34,7 +34,7 @@ export class AuthController {
     }
 
     @Post('/refresh')
-    refresh(req: RefreshReqDto): RefreshResDto{
+    refresh(@Body() req: RefreshReqDto): RefreshResDto{
         const accessToken = this.refreshUseCase.refresh(
             new RefreshCmd(
                 req.refreshToken
@@ -43,12 +43,12 @@ export class AuthController {
         return plainToInstance(RefreshResDto, {"refreshToken": accessToken});
     }
 
-    @Post('/logout')
+/*     @Post('/logout')
     logout(){
         return this.logoutUseCase.logout(
             new LogoutCmd(
                 ""
             )
         );
-    }
+    } */
 }

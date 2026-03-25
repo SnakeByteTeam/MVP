@@ -1,0 +1,35 @@
+<!-- temporaneo per far visualizzare la topbar anche senza utente vero 
+ TO DELETE-->
+<app-topbar
+    class=" block h-[10vh]"
+    [user]="currentUser"
+    (logoutClicked)="logout()">
+</app-topbar>
+
+<app-notification-badge-component [count]="(unreadNotificationsCount$ | async) ?? 0"></app-notification-badge-component>
+
+<!--
+CORRETTO
+
+<app-topbar
+  *ngIf="currentUser$ | async as user"
+  [user]="user"
+  (logoutClicked)="logout()">
+</app-topbar>
+-->
+
+<div class="flex h-[90vh] overflow-hidden">
+    
+    <app-sidebar
+        class=" block h-full border-r border-black"
+        [navItems]="navItems"
+        [isCollapsed]="isCollapsed"
+        [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
+        (collapsed)="toggleSidebar()">
+    </app-sidebar>
+
+    <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
+        <router-outlet></router-outlet>
+    </main>
+    
+</div>

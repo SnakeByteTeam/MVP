@@ -10,6 +10,7 @@
     },
     "include": [
         "src/**/*.spec.ts",
-        "src/**/*.d.ts"
+        "src/**/*.d.ts",
+        "src/app/features/dashboard/components/dashboard-page.component.spec.ts"
     ]
 }

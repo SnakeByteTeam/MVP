@@ -34,7 +34,12 @@ export class AssignWardDialogComponent implements OnInit {
       return;
     }
 
-    this.submitted.emit({ plantId: this.form.controls.plantId.value! });
+    const plantId = this.form.controls.plantId.value;
+    if (plantId === null) {
+      return;
+    }
+
+    this.submitted.emit({ plantId });
   }
 
   public onCancel(): void {

@@ -12,7 +12,7 @@ describe('UpdateUserCmd', () => {
       id: 1,
       username: 'u',
       surname: 's',
-      name: 'n'
+      name: 'n',
     });
   });
 });

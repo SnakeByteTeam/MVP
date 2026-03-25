@@ -1,7 +1,7 @@
 export class CreateUserCmd {
-    constructor(
-        public username: string,
-        public surname: string,
-        public name: string
-    ){}
+  constructor(
+    public username: string,
+    public surname: string,
+    public name: string,
+  ) {}
 }

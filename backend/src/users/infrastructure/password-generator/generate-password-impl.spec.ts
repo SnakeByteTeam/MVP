@@ -6,6 +6,8 @@ describe('PasswordGenerator', () => {
   });
 
   it('should generate correct length', () => {
-    expect(new GeneratePasswordImpl().generatePassword(128).length).toBeLessThanOrEqual(128);
-  })
+    expect(
+      new GeneratePasswordImpl().generatePassword(128).length,
+    ).toBeLessThanOrEqual(128);
+  });
 });

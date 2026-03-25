@@ -1,3 +1,3 @@
 export class CreateUserResDto {
-    tempPassword!: string;
+  tempPassword!: string;
 }

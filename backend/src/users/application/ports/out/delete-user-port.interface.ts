@@ -1,5 +1,5 @@
-import { DeleteUserCmd } from "../../commands/delete-user-cmd";
+import { DeleteUserCmd } from '../../commands/delete-user-cmd';
 
 export interface DeleteUserPort {
-    deleteUser(req: DeleteUserCmd): void;
+  deleteUser(req: DeleteUserCmd): void;
 }

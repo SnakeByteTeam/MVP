@@ -2,6 +2,6 @@ import { CreateUserWithTempPasswordCmd } from './create-user-with-temp-password-
 
 describe('CreateUserTempPasswordCmd', () => {
   it('should be defined', () => {
-    expect(new CreateUserWithTempPasswordCmd("","","","")).toBeDefined();
+    expect(new CreateUserWithTempPasswordCmd('', '', '', '')).toBeDefined();
   });
 });

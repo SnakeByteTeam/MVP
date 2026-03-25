@@ -1,5 +1,5 @@
-import { User } from "../../../domain/user";
+import { User } from '../../../domain/user';
 
 export interface FindAllUsersPort {
-    findAllUsers(): User[];
+  findAllUsers(): Promise<User[]>;
 }

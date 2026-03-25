@@ -9,7 +9,7 @@ describe('DeleteUserCmd', () => {
     const cmd = new DeleteUserCmd(1);
 
     expect(cmd).toMatchObject({
-      id: 1
+      id: 1,
     });
   });
 });

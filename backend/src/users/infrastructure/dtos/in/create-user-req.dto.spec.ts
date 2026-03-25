@@ -8,17 +8,19 @@ describe('CreateUserReqDto', () => {
 });
 
 describe('CreateUserReqDto validation', () => {
-  const char128 = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
-      'aaaaa';
+  const char128 =
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaa';
 
-  const char256 = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + 
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + 
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' + 
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
-      'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+  const char256 =
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' +
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
   it('should succeed with valid data', async () => {
     const dto = new CreateUserReqDto();
@@ -108,5 +110,4 @@ describe('CreateUserReqDto validation', () => {
     expect(errors[0].property).toBe('tempPassword');
     expect(errors[0].constraints).toHaveProperty('isLength');
   });
-
 });

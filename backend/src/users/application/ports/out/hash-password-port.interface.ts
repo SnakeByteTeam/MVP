@@ -1,3 +1,3 @@
 export interface HashPasswordPort {
-    hashPassword(password: string): string
+  hashPassword(password: string): string;
 }

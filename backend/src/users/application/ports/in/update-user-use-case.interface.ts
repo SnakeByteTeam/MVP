@@ -1,6 +1,6 @@
-import { User } from "../../../domain/user";
-import { UpdateUserCmd } from "../../commands/update-user-cmd";
+import { User } from '../../../domain/user';
+import { UpdateUserCmd } from '../../commands/update-user-cmd';
 
 export interface UpdateUserUseCase {
-    updateUser(req: UpdateUserCmd): User
+  updateUser(req: UpdateUserCmd): Promise<User>;
 }

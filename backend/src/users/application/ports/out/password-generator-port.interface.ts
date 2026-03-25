@@ -1,3 +1,3 @@
 export interface GeneratePasswordPort {
-    generatePassword(length: number): string
+  generatePassword(length: number): string;
 }

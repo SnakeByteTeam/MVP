@@ -1,5 +1,3 @@
 export class DeleteUserCmd {
-    constructor(
-        public id: number
-    ){}
+  constructor(public id: number) {}
 }

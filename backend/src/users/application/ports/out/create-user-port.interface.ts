@@ -1,6 +1,6 @@
-import { User } from "../../../domain/user";
-import { CreateUserWithTempPasswordCmd } from "../../commands/create-user-with-temp-password-cmd";
+import { User } from '../../../domain/user';
+import { CreateUserWithTempPasswordCmd } from '../../commands/create-user-with-temp-password-cmd';
 
 export interface CreateUserPort {
-    createUser(req: CreateUserWithTempPasswordCmd): User;
+  createUser(req: CreateUserWithTempPasswordCmd): Promise<User>;
 }

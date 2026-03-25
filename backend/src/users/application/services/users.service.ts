@@ -26,51 +26,58 @@ import { CreatedUser } from '../../domain/created-user';
 import { CreateUserWithTempPasswordCmd } from '../commands/create-user-with-temp-password-cmd';
 
 @Injectable()
-export class UsersService implements FindAllUsersUseCase, UpdateUserUseCase, CreateUserUseCase, DeleteUserUseCase
+export class UsersService
+  implements
+    FindAllUsersUseCase,
+    UpdateUserUseCase,
+    CreateUserUseCase,
+    DeleteUserUseCase
 {
+  constructor(
+    @Inject(FIND_ALL_USERS_PORT)
+    private readonly findAllUsersPort: FindAllUsersPort,
+    @Inject(UPDATE_USER_PORT) private readonly updateUserPort: UpdateUserPort,
+    @Inject(CREATE_USER_PORT) private readonly createUserPort: CreateUserPort,
+    @Inject(DELETE_USER_PORT) private readonly deleteUserPort: DeleteUserPort,
+    @Inject(GENERATE_PASSWORD_PORT)
+    private readonly generatePasswordPort: GeneratePasswordPort,
+    @Inject(HASH_PASSWORD_PORT)
+    private readonly hashPasswordPort: HashPasswordPort,
+    @Inject(CONVERT_BASE_64_PORT)
+    private readonly convertBase64Port: ConvertBase64Port,
+  ) {}
 
-    constructor(
-        @Inject(FIND_ALL_USERS_PORT) private readonly findAllUsersPort: FindAllUsersPort,
-        @Inject(UPDATE_USER_PORT) private readonly updateUserPort: UpdateUserPort,
-        @Inject(CREATE_USER_PORT) private readonly createUserPort: CreateUserPort,
-        @Inject(DELETE_USER_PORT) private readonly deleteUserPort: DeleteUserPort,
-        @Inject(GENERATE_PASSWORD_PORT) private readonly generatePasswordPort: GeneratePasswordPort,
-        @Inject(HASH_PASSWORD_PORT) private readonly hashPasswordPort: HashPasswordPort,
-        @Inject(CONVERT_BASE_64_PORT) private readonly convertBase64Port: ConvertBase64Port
-    ){}
+  async findAllUsers(): Promise<User[]> {
+    return await this.findAllUsersPort.findAllUsers();
+  }
+  async updateUser(req: UpdateUserCmd): Promise<User> {
+    return await this.updateUserPort.updateUser(req);
+  }
+  async createUser(req: CreateUserCmd): Promise<CreatedUser> {
+    const password: string = this.generatePasswordPort.generatePassword(128);
+    const userEntity: UserEntity = await this.createUserPort.createUser(
+      new CreateUserWithTempPasswordCmd(
+        req.username,
+        req.surname,
+        req.name,
+        this.hashPasswordPort.hashPassword(password),
+      ),
+    );
 
-    findAllUsers(): User[] {
-        return this.findAllUsersPort.findAllUsers();
-    }
-    updateUser(req: UpdateUserCmd): User {
-        return this.updateUserPort.updateUser(req);
-    }
-    createUser(req: CreateUserCmd): CreatedUser {
-        const password: string = this.generatePasswordPort.generatePassword(128);
-        const userEntity: UserEntity = this.createUserPort.createUser(
-            new CreateUserWithTempPasswordCmd(
-                req.username,
-                req.surname,
-                req.name,
-                this.hashPasswordPort.hashPassword(password)
-            )
-        );
+    const base64Password: string = this.convertBase64Port.toBase64(password);
 
-        const base64Password: string = this.convertBase64Port.toBase64(password);
-
-        return new CreatedUser(
-            userEntity.id,
-            userEntity.username,
-            userEntity.surname,
-            userEntity.name,
-            userEntity.role,
-            base64Password
-        )
-    }
-    deleteUser(req: DeleteUserCmd) {
-        return this.deleteUserPort.deleteUser(req);
-    }
-    
+    return new CreatedUser(
+      userEntity.id,
+      userEntity.username,
+      userEntity.surname,
+      userEntity.name,
+      userEntity.role,
+      base64Password,
+    );
+  }
+  deleteUser(req: DeleteUserCmd) {
+    return this.deleteUserPort.deleteUser(req);
+  }
 }
 
 export const FIND_ALL_USERS_USE_CASE = 'FIND_ALL_USERS_USE_CASE';

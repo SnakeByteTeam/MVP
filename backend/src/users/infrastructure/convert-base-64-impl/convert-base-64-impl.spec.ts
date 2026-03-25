@@ -6,10 +6,10 @@ describe('ConvertBase64Impl', () => {
   });
 
   it('should convert plain text to base64', () => {
-    expect(new ConvertBase64Impl().toBase64('test')).toEqual("dGVzdA==");
+    expect(new ConvertBase64Impl().toBase64('test')).toEqual('dGVzdA==');
   });
 
   it('should convert base64 to plain text', () => {
-    expect(new ConvertBase64Impl().toPlain('dGVzdA==')).toEqual("test");
+    expect(new ConvertBase64Impl().toPlain('dGVzdA==')).toEqual('test');
   });
 });

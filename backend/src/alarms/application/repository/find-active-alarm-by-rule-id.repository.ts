@@ -11,7 +11,7 @@ export class FindActiveAlarmByRuleIdRepository implements FindActiveAlarmByRuleI
   constructor(@InjectPool() private readonly pool: Pool) {}
 
   // Controlla se esiste già un allarme attivo (non risolto) per questa regola.
-  // Questo è il controllo che evita duplicati quando il sensore continua
+  // Questo controllo evita duplicati quando il sensore continua
   // a mandare valori oltre soglia.
   async findActiveByRuleId(alarmRuleId: string): Promise<ActiveAlarm | null> {
     const { rows } = await this.pool.query<ActiveAlarmEntity>(

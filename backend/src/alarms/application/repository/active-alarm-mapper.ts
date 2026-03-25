@@ -7,7 +7,7 @@ import { ActiveAlarmEntity } from '../../infrastructure/entities/alarm.entity';
 export function toActiveModel(row: ActiveAlarmEntity): ActiveAlarm {
   return new ActiveAlarm(
     row.id,
-    row.alarm_rule_id,
+    row.alarm_id,
     row.alarm_name,
     row.danger_signal,
     row.triggered_at,

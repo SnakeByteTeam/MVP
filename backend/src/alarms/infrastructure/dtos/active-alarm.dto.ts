@@ -2,7 +2,7 @@ import { ActiveAlarm } from '../../domain/models/active-alarm.model';
 
 export class ActiveAlarmDto {
   id: string;
-  alarmRuleId: string;
+  alarmId: string;
   alarmName: string;
   dangerSignal: string;
   triggeredAt: string; 
@@ -11,7 +11,7 @@ export class ActiveAlarmDto {
   static fromDomain(alarm: ActiveAlarm): ActiveAlarmDto {
     const dto = new ActiveAlarmDto();
     dto.id = alarm.id;
-    dto.alarmRuleId = alarm.alarmRuleId;
+    dto.alarmId = alarm.alarmId;
     dto.alarmName = alarm.alarmName;
     dto.dangerSignal = alarm.dangerSignal;
     dto.triggeredAt = alarm.triggeredAt.toISOString();

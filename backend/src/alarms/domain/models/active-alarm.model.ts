@@ -2,7 +2,7 @@
 export class ActiveAlarm {
   constructor(
     public readonly id: string,
-    public readonly alarmRuleId: string,  // riferimento alla regola che ha scattato
+    public readonly alarmId: string,  // riferimento alla regola che ha scattato
     public readonly alarmName: string,    // nome copiato dalla regola al momento dello scatto
     public readonly dangerSignal: string, // descrizione del segnale di pericolo 
     public readonly triggeredAt: Date,

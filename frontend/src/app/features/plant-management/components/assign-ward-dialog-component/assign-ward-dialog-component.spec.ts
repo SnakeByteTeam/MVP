@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AssignApartmentDialogComponent } from './assign-apartment-dialog-component';
+import { AssignWardDialogComponent } from './assign-ward-dialog-component';
 
-describe('AssignApartmentDialogComponent', () => {
-  let component: AssignApartmentDialogComponent;
-  let fixture: ComponentFixture<AssignApartmentDialogComponent>;
+describe('AssignWardDialogComponent', () => {
+  let component: AssignWardDialogComponent;
+  let fixture: ComponentFixture<AssignWardDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AssignApartmentDialogComponent],
+      imports: [AssignWardDialogComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AssignApartmentDialogComponent);
+    fixture = TestBed.createComponent(AssignWardDialogComponent);
     component = fixture.componentInstance;
   });
 

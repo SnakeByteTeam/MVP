@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import type { Apartment } from '../../models/apartment.model';
 
 @Component({
-  selector: 'app-apartment-row-component',
+  selector: 'app-ward-row-component',
   imports: [],
-  templateUrl: './apartment-row-component.html',
-  styleUrl: './apartment-row-component.css',
+  templateUrl: './ward-row-component.html',
+  styleUrl: './ward-row-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ApartmentRowComponent {
+export class WardRowComponent {
   public readonly apartment = input<Apartment | null>(null);
   public readonly wardId = input<number>(0);
 

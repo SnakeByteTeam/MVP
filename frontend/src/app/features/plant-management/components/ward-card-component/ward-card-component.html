@@ -44,7 +44,7 @@
         <ul>
             @for (apartment of currentWard.apartments; track apartment.id) {
             <li>
-                <app-apartment-row-component [apartment]="apartment" [wardId]="currentWard.id"
+                <app-ward-row-component [apartment]="apartment" [wardId]="currentWard.id"
                     (enable)="onEnablePlant($event)" (disable)="onDisablePlant($event)" />
                 <button type="button" (click)="onRemovePlantClick(apartment.id)">Rimuovi</button>
             </li>

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ApartmentRowComponent } from './apartment-row-component';
+import { WardRowComponent } from './ward-row-component';
 
-describe('ApartmentRowComponent', () => {
-  let component: ApartmentRowComponent;
-  let fixture: ComponentFixture<ApartmentRowComponent>;
+describe('WardRowComponent', () => {
+  let component: WardRowComponent;
+  let fixture: ComponentFixture<WardRowComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ApartmentRowComponent],
+      imports: [WardRowComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ApartmentRowComponent);
+    fixture = TestBed.createComponent(WardRowComponent);
     component = fixture.componentInstance;
   });
 

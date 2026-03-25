@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/plant-management.events';
 import type { Ward } from '../../models/ward.model';
-import { ApartmentRowComponent } from '../apartment-row-component/apartment-row-component';
+import { WardRowComponent } from '../ward-row-component/ward-row-component';
 
 @Component({
   selector: 'app-ward-card-component',
-  imports: [ApartmentRowComponent],
+  imports: [WardRowComponent],
   templateUrl: './ward-card-component.html',
   styleUrl: './ward-card-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

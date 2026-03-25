@@ -7,7 +7,7 @@ import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/plant-m
 import type { Ward } from '../../models/ward.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PlantManagementStore } from '../../services/plant-management.store';
-import { AssignApartmentDialogComponent } from '../assign-apartment-dialog-component/assign-apartment-dialog-component';
+import { AssignWardDialogComponent } from '../assign-ward-dialog-component/assign-ward-dialog-component';
 import { AssignOperatorDialogComponent } from '../assign-operator-dialog-component/assign-operator-dialog-component';
 import { WardCardComponent } from '../ward-card-component/ward-card-component';
 import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form-dialog-component';
@@ -19,7 +19,7 @@ import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form
     WardCardComponent,
     WardFormDialogComponent,
     AssignOperatorDialogComponent,
-    AssignApartmentDialogComponent,
+    AssignWardDialogComponent,
     ConfirmDialogComponent,
   ],
   templateUrl: './plant-management-page-component.html',

@@ -42,7 +42,7 @@
     }
 
     @if (plantWardId(); as activeWardId) {
-    <app-assign-apartment-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
+    <app-assign-ward-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
         [availablePlants]="availablePlants()" (submitted)="onAssignPlantSubmit($event)"
         (cancelled)="onCloseAssignPlantDialog()" />
     }

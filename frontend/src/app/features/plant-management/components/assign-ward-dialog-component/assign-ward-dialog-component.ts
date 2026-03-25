@@ -5,13 +5,13 @@ import type { AssignPlantDto } from '../../models/plant-api.dto';
 import type { Ward } from '../../models/ward.model';
 
 @Component({
-  selector: 'app-assign-apartment-dialog-component',
+  selector: 'app-assign-ward-dialog-component',
   imports: [ReactiveFormsModule],
-  templateUrl: './assign-apartment-dialog-component.html',
-  styleUrl: './assign-apartment-dialog-component.css',
+  templateUrl: './assign-ward-dialog-component.html',
+  styleUrl: './assign-ward-dialog-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssignApartmentDialogComponent implements OnInit {
+export class AssignWardDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
 
   public readonly wardId = input<number>(0);
@@ -34,7 +34,7 @@ export class AssignApartmentDialogComponent implements OnInit {
       return;
     }
 
-    this.submitted.emit({ plantId: this.form.controls.plantId.value as number });
+    this.submitted.emit({ plantId: this.form.controls.plantId.value! });
   }
 
   public onCancel(): void {

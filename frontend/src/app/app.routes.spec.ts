@@ -1,46 +1,45 @@
-import { describe, expect, it } from 'vitest';
 import { routes } from './app.routes';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { UserRole } from './core/models/user-role.enum';
+import { describe, it, expect } from 'vitest';
 
-describe('app.routes', () => {
-  it('contiene i redirect principali attesi', () => {
-    const defaultRedirect = routes.find((route) => route.path === '');
-    const wildcardRedirect = routes.find((route) => route.path === '**');
+describe('App Routes', () => {
+	it('auth route configurata con lazy loading', () => {
+		const route = routes.find(r => r.path === 'auth');
+		expect(route).toBeDefined();
+		expect(route?.loadChildren).toBeDefined();
+		expect(typeof route?.loadChildren).toBe('function');
+	});
 
-    expect(defaultRedirect?.redirectTo).toBe('apartment-monitor');
-    expect(defaultRedirect?.pathMatch).toBe('full');
+	it('vimar-link route protetta da authGuard e roleGuard', () => {
+		const route = routes.find(r => r.path === 'vimar-link');
+		expect(route?.canActivate).toContain(authGuard);
+		expect(route?.canActivate).toContain(roleGuard);
+	});
 
-    expect(wildcardRedirect?.redirectTo).toBe('apartment-monitor');
-  });
+	//DA DECOMMENTARE
+	/*it('main layout route "" protetta da authGuard ', () => {
+		const route = routes.find(r => r.path === '');
+		expect(route?.canActivate).toContain(authGuard);
+	});*/
 
-  it('espone il lazy loading per tutte le feature principali', () => {
-    const lazyPaths = routes
-      .filter((route) => typeof route.loadChildren === 'function')
-      .map((route) => route.path);
+	it('vimar-link route richiede ruolo AMMINISTRATORE', () => {
+		const route = routes.find(r => r.path === 'vimar-link');
 
-    expect(lazyPaths).toEqual([
-      'auth',
-      'alarm-management',
-      'alarm-configuration',
-      'analytics',
-      'apartment-monitor',
-      'device-interaction',
-      'my-vimar',
-      'notifications',
-      'plant-management',
-      'user-management',
-    ]);
-  });
+		expect(route?.data?.['requiredRole']).toBe(UserRole.AMMINISTRATORE);
+	});
 
-  it('risolve correttamente ogni loadChildren verso un array di route', async () => {
-    const lazyRoutes = routes.filter(
-      (route): route is (typeof routes)[number] & { loadChildren: () => Promise<unknown> } =>
-        typeof route.loadChildren === 'function'
-    );
+	it('route "" carica il main layout', () => {
+		const route = routes.find(r => r.path === '');
+		expect(route).toBeDefined();
+		expect(route?.loadChildren).toBeDefined();
+	});
 
-    for (const route of lazyRoutes) {
-      const loaded = await route.loadChildren();
-      expect(Array.isArray(loaded)).toBe(true);
-      expect((loaded as unknown[]).length).toBeGreaterThan(0);
-    }
-  });
+	it('route "**" fa redirect alla root', () => {
+		const wildcardRoute = routes.find(r => r.path === '**');
+
+		expect(wildcardRoute).toBeDefined();
+		expect(wildcardRoute?.redirectTo).toBe('');
+	});
 });

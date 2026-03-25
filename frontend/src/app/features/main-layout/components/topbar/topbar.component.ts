@@ -1,4 +1,12 @@
-import { Component } from '@angular/core';
+import { Component,EventEmitter, Input, Output } from '@angular/core';
+import { UserInfo } from '../../../../core/models/user-info.model';
 
-@Component({ selector: 'app-topbar', standalone: true, template: '' })
-export class TopbarComponent {}
+@Component({ 
+    selector: 'app-topbar', 
+    standalone: true, 
+    templateUrl: './topbar.component.html',
+    styleUrl: './topbar.component.css'})
+export class TopbarComponent {
+    @Input() user!: UserInfo;
+    @Output() logoutClicked = new EventEmitter<void>();
+}

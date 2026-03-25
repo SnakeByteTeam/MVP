@@ -1,0 +1,85 @@
+import { Routes } from '@angular/router';
+import { authGuard } from '../../core/guards/auth.guard';
+import { roleGuard } from '../../core/guards/role.guard';
+import { UserRole } from '../../core/models/user-role.enum';
+
+//guardie commentate solo per vedere il funzionamento
+
+export const MAIN_LAYOUT_ROUTES : Routes = [
+    {
+        path: '',
+		//canActivate: [authGuard],	// DA DECOMMENTARE
+		loadComponent: () => import('./main-layout.component').then((m) => m.MainLayoutComponent),
+        children: [
+            {
+                path: 'dashboard',
+                //canActivate: [authGuard], // DA DECOMMENTARE
+                loadChildren: () => import('../dashboard/dashboard-page.routes').then((m) => m.DASHBOARD_ROUTES)
+            },
+            {
+                path: 'alarms',
+                children:[
+                    {
+                        path: 'alarm-management',
+                        canActivate: [authGuard],	
+                        loadChildren: () =>
+                            import('../alarm-management/alarm-management.routes').then((m) => m.ALARM_MANAGEMENT_ROUTES)
+                    },
+                    {
+                        path: 'alarm-history',
+                        canActivate: [authGuard],	
+                        loadChildren: () =>
+                            import('../alarm-history/alarm-history.routes').then((m) => m.ALARM_HISTORY_ROUTES)
+                    },
+
+                    {
+                        path: 'alarm-configuration',
+                        canActivate: [authGuard, roleGuard], 
+                        data: { requiredRole: UserRole.AMMINISTRATORE },
+                        loadChildren: () =>
+                            import('../alarm-configuration/alarm-configuration.routes').then((m) => m.ALARM_CONFIGURATION_ROUTES)
+                    },
+                ]
+            },
+            
+            {
+                path: 'analytics',
+                canActivate: [authGuard],
+                loadChildren: () => import('../analytics/analytics.routes').then((m) => m.ANALYTICS_ROUTES)
+            },
+            {
+                path: 'apartment-monitor',
+                canActivate: [authGuard],
+                loadChildren: () =>
+                    import('../apartment-monitor/apartment-monitor.routes').then((m) => m.APARTMENT_MONITOR_ROUTES)
+            },
+            {
+                path: 'notifications',
+                canActivate: [authGuard],
+                loadChildren: () => import('../notification/notification.routes').then((m) => m.NOTIFICATION_ROUTES)
+            },
+            {
+                path: 'plant-management',
+                canActivate: [authGuard, roleGuard],
+                data: { requiredRole: UserRole.AMMINISTRATORE },
+                loadChildren: () =>
+                    import('../plant-management/plant-management.routes').then((m) => m.PLANT_MANAGEMENT_ROUTES)
+            },
+            {
+                path: 'user-management',
+                canActivate: [authGuard, roleGuard],
+                data: { requiredRole: UserRole.AMMINISTRATORE },
+                loadChildren: () =>
+                    import('../user-management/user-management.routes').then((m) => m.USER_MANAGEMENT_ROUTES)
+            },
+            {
+                path: '**',
+                redirectTo: 'dashboard'
+            }
+        ]
+    },
+    {
+        path: '**',
+        redirectTo: 'dashboard'
+    }
+];

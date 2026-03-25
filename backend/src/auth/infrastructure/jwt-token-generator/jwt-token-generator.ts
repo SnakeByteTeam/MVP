@@ -15,13 +15,13 @@ export class JwtTokenGenerator implements
     private jwt = new JwtService();
 
     generateAccessToken(payload: Payload): string {
-        return this.jwt.sign(payload, {
+        return this.jwt.sign(JSON.parse(JSON.stringify(payload)), {
             secret: process.env.ACCESS_SECRET,
             expiresIn: '10m',
         });
     }
     generateRefreshToken(payload: Payload): string {
-        return this.jwt.sign(payload, {
+        return this.jwt.sign(JSON.parse(JSON.stringify(payload)), {
             secret: process.env.REFRESH_SECRET,
             expiresIn: '7d',
         });

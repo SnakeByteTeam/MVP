@@ -11,12 +11,12 @@ export class CheckCredentialsRepositoryImpl implements CheckCredentialsRepositor
 
     async checkCredentials(username: string, password: string): Promise<PayloadEntity> {
         const result = await this.conn.query(
-            `SELECT id, role FROM users WHERE username = $1 AND password = $2`,
+            "SELECT u.id, r.name FROM \"user\" u JOIN role r ON r.id = u.roleId WHERE u.username = $1 AND u.password = $2",
             [username, password]
         );
 
         if (result.rowCount === 0) {
-            throw new Error('User not found');
+            throw new Error("User not found");
         }
 
         const user = result.rows[0];

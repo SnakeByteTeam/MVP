@@ -4,6 +4,7 @@ import { Plant } from "src/plant/domain/models/plant.model";
 
 import { FETCH_PLANT_STRUCTURE_PORT, type FetchPlantStructurePort } from "../ports/out/fetch-plant-structure.port";
 import { WRITE_STRUCTURE_PORT, type WritePlantStructurePort } from "../ports/out/write-plant-structure.port";
+import { SyncPlantCmd } from "../commands/sync-plant.command";
 
 @Injectable()
 export class SyncPlantService implements SyncPlantStructureUseCase {
@@ -13,9 +14,11 @@ export class SyncPlantService implements SyncPlantStructureUseCase {
         @Inject(WRITE_STRUCTURE_PORT) private readonly writeStructurePort: WritePlantStructurePort
     ) {}
 
-    async sync(plantId: string): Promise<boolean> {
-        const newPlant: Plant = await this.fetchStructurePort.fetch(plantId);
+    async sync(cmd: SyncPlantCmd): Promise<boolean> {
+        const plantId: string = cmd?.id;
+        if(!plantId) throw(new Error('PlantId is null'));
 
+        const newPlant: Plant = await this.fetchStructurePort.fetch(plantId);
         return await this.writeStructurePort.writeStructure(newPlant);
     }
 }

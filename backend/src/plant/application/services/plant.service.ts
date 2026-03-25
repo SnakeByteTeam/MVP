@@ -3,6 +3,8 @@ import { Plant } from "src/plant/domain/models/plant.model";
 import { FindPlantByIdUseCase } from "../ports/in/find-plant-by-id.usecase";
 import { FIND_PLANT_BY_ID_PORT, type FindPlantByIdPort } from "../ports/out/find-plant-by-id.port";
 import { SYNC_PLANT_STRUCTURE_USECASE, type SyncPlantStructureUseCase } from "../ports/in/sync-plant-structure.usecase";
+import { FindPlantByIdCmd } from "../commands/find-plant-by-id.command";
+import { SyncPlantCmd } from "../commands/sync-plant.command";
 
 @Injectable()
 export class PlantService implements FindPlantByIdUseCase {
@@ -13,9 +15,9 @@ export class PlantService implements FindPlantByIdUseCase {
         @Inject(FIND_PLANT_BY_ID_PORT) private readonly findByIdPort: FindPlantByIdPort
     ) {}
     
-    async findById(plantId: string): Promise<Plant> {
+    async findById(cmd: FindPlantByIdCmd): Promise<Plant> {
         try{    
-            const plant: Plant = await this.findByIdPort.findById(plantId);
+            const plant: Plant = await this.findByIdPort.findById(cmd);
 
             const cacheIsStale = plant.getCachedAt().getTime() < (Date.now() - PlantService.TWELVE_HOURS_MS);
 
@@ -23,18 +25,20 @@ export class PlantService implements FindPlantByIdUseCase {
                 return plant;
             }
 
-            const synced = await this.syncPlantStructure.sync(plantId);
+            const syncCmd: SyncPlantCmd = { id: cmd?.id }
+            const synced = await this.syncPlantStructure.sync(syncCmd);
             if (!synced) {
                 return plant;
             }
 
-            return await this.findByIdPort.findById(plantId);
+            return await this.findByIdPort.findById(cmd);
 
         } catch( err ) {
-            if (!await this.syncPlantStructure.sync(plantId)) {
+            const syncCmd: SyncPlantCmd = { id: cmd?.id }
+            if (!await this.syncPlantStructure.sync(syncCmd)) {
                 throw(err);
             }
-            return await this.findByIdPort.findById(plantId);
+            return await this.findByIdPort.findById(cmd);
         }
         
     }

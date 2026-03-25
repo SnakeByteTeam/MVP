@@ -19,6 +19,7 @@ export class AlarmPageManagementComponent implements OnInit {
   public vm$!: Observable<AlarmListVm>;
 
   public ngOnInit(): void {
+    this.alarmManagementService.initialize();
     this.vm$ = this.alarmManagementService.vm$;
   }
 

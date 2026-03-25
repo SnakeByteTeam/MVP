@@ -8,8 +8,22 @@ import { NotificationEvent } from '../../../features/notification/models/notific
 export class AlarmStateService {
 	private readonly activeAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
 	private readonly notifications$ = new BehaviorSubject<NotificationEvent[]>([]);
+	private readonly locallyResolvedActiveAlarmIds = new Set<string>();
+
+	public setActiveAlarms(alarms: ActiveAlarm[]): void {
+		const filteredIncoming = alarms.filter((alarm) => !this.locallyResolvedActiveAlarmIds.has(alarm.id));
+		const current = this.activeAlarms$.getValue();
+		const incomingIds = new Set(filteredIncoming.map((alarm) => alarm.id));
+		const currentOnly = current.filter(
+			(alarm) => !incomingIds.has(alarm.id) && !this.locallyResolvedActiveAlarmIds.has(alarm.id)
+		);
+
+		this.activeAlarms$.next([...filteredIncoming, ...currentOnly]);
+	}
 
 	public onAlarmTriggered(event: AlarmEvent): void {
+		this.locallyResolvedActiveAlarmIds.delete(event.activeAlarmId);
+
 		const current = this.activeAlarms$.getValue();
 		const nextAlarm: ActiveAlarm = {
 			id: event.activeAlarmId,
@@ -33,6 +47,7 @@ export class AlarmStateService {
 	}
 
 	public onAlarmResolved(id: string): void {
+		this.locallyResolvedActiveAlarmIds.add(id);
 		const updated = this.activeAlarms$.getValue().filter((alarm) => alarm.id !== id);
 		this.activeAlarms$.next(updated);
 	}

@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AlarmEvent } from '../models/alarm-event.model';
 import { AlarmPriority } from '../models/alarm-priority.enum';
+import { ActiveAlarm } from '../models/active-alarm.model';
 import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { AlarmStateService } from './alarm-state.service';
 
@@ -153,6 +154,87 @@ describe('AlarmStateService', () => {
     service.onNotificationReceived(notificationB);
 
     expect(latestNotificationIds).toEqual([notificationB.notificationId, notificationA.notificationId]);
+  });
+
+  it('setActiveAlarms imposta snapshot iniziale degli allarmi attivi', () => {
+    let latestActiveAlarmIds: string[] = [];
+
+    const snapshot: ActiveAlarm[] = [
+      {
+        id: 'snapshot-1',
+        alarmRuleId: 'rule-1',
+        alarmName: 'Snapshot allarme',
+        priority: AlarmPriority.RED,
+        triggeredAt: '2026-03-19T10:00:00.000Z',
+        resolvedAt: null,
+        user_id: null,
+      },
+    ];
+
+    subscriptions.push(
+      service.getActiveAlarms$().subscribe((alarms) => {
+        latestActiveAlarmIds = alarms.map((alarm) => alarm.id);
+      })
+    );
+
+    service.setActiveAlarms(snapshot);
+
+    expect(latestActiveAlarmIds).toEqual(['snapshot-1']);
+  });
+
+  it('setActiveAlarms preserva eventuali allarmi locali non inclusi nello snapshot', () => {
+    let latestActiveAlarmIds: string[] = [];
+
+    const snapshot: ActiveAlarm[] = [
+      {
+        id: 'snapshot-1',
+        alarmRuleId: 'rule-1',
+        alarmName: 'Snapshot allarme',
+        priority: AlarmPriority.RED,
+        triggeredAt: '2026-03-19T10:00:00.000Z',
+        resolvedAt: null,
+        user_id: null,
+      },
+    ];
+
+    subscriptions.push(
+      service.getActiveAlarms$().subscribe((alarms) => {
+        latestActiveAlarmIds = alarms.map((alarm) => alarm.id);
+      })
+    );
+
+    service.onAlarmTriggered(alarmEventA);
+    service.setActiveAlarms(snapshot);
+
+    expect(latestActiveAlarmIds).toEqual(['snapshot-1', alarmEventA.activeAlarmId]);
+  });
+
+  it('setActiveAlarms non reintroduce allarmi gia risolti localmente', () => {
+    let latestActiveAlarmIds: string[] = [];
+
+    const staleSnapshot: ActiveAlarm[] = [
+      {
+        id: alarmEventA.activeAlarmId,
+        alarmRuleId: alarmEventA.alarmRuleId,
+        alarmName: alarmEventA.alarmName,
+        priority: alarmEventA.priority,
+        triggeredAt: alarmEventA.triggeredAt,
+        resolvedAt: null,
+        user_id: alarmEventA.user_id,
+      },
+    ];
+
+    subscriptions.push(
+      service.getActiveAlarms$().subscribe((alarms) => {
+        latestActiveAlarmIds = alarms.map((alarm) => alarm.id);
+      })
+    );
+
+    service.onAlarmTriggered(alarmEventA);
+    service.onAlarmResolved(alarmEventA.activeAlarmId);
+    service.setActiveAlarms(staleSnapshot);
+
+    expect(latestActiveAlarmIds).toEqual([]);
   });
 
   it('emette conteggi derivati corretti per allarmi e notifiche non lette', () => {

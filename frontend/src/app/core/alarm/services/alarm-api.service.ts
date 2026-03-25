@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { AlarmRule } from '../models/alarm-rule.model';
 import { CreateAlarmRequestDto } from '../models/dto/create-alarm-request.model.dto';
 import { UpdateAlarmRequestDto } from '../models/dto/update-alarm-request.model.dto';
+import { ActiveAlarm } from '../models/active-alarm.model';
 
 @Injectable({ providedIn: 'root' })
 export class AlarmApiService {
@@ -29,6 +30,10 @@ export class AlarmApiService {
 
     public deleteAlarm(id: string): Observable<void> {
         return this.http.delete<void>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`);
+    }
+
+    public getActiveAlarms(): Observable<ActiveAlarm[]> {
+        return this.http.get<ActiveAlarm[]>(this.activeAlarmsBaseUrl);
     }
 
     public resolveAlarm(activeAlarmId: string): Observable<void> {

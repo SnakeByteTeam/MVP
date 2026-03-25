@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import type { AlarmRule } from '../models/alarm-rule.model';
+import type { ActiveAlarm } from '../models/active-alarm.model';
 import type { CreateAlarmRequestDto } from '../models/dto/create-alarm-request.model.dto';
 import { ThresholdOperator } from '../models/threshold-operator.enum';
 import type { UpdateAlarmRequestDto } from '../models/dto/update-alarm-request.model.dto';
@@ -26,6 +27,16 @@ describe('AlarmApiService', () => {
         activationTime: '08:00',
         deactivationTime: '20:00',
         enabled: true,
+    };
+
+    const activeAlarm: ActiveAlarm = {
+        id: 'active-1',
+        alarmRuleId: 'alarm-1',
+        alarmName: 'Temperatura alta',
+        priority: AlarmPriority.RED,
+        triggeredAt: '2026-03-24T10:00:00.000Z',
+        resolvedAt: null,
+        user_id: null,
     };
 
     beforeEach(() => {
@@ -124,6 +135,17 @@ describe('AlarmApiService', () => {
         const request = httpController.expectOne(`${baseUrl}/alarm-3`);
         expect(request.request.method).toBe('DELETE');
         request.flush(null);
+    });
+
+    it('getActiveAlarms chiama GET /api/active-alarms e restituisce la lista', () => {
+        service.getActiveAlarms().subscribe((result) => {
+            expect(result).toEqual([activeAlarm]);
+            expect(result).toHaveLength(1);
+        });
+
+        const request = httpController.expectOne('/api/active-alarms');
+        expect(request.request.method).toBe('GET');
+        request.flush([activeAlarm]);
     });
 
     it('resolveAlarm chiama PATCH /api/active-alarms/:id/resolve', () => {

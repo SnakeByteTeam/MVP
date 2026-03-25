@@ -55,6 +55,7 @@ describe('AlarmManagement feature integration', () => {
 
     const alarmManagementStub = {
         vm$: undefined as unknown,
+        initialize: vi.fn(),
         resolveAlarm: vi.fn(),
     };
 
@@ -85,6 +86,8 @@ describe('AlarmManagement feature integration', () => {
 
     it('gestisce il flusso completo: render lista, resolve event e aggiornamento vm', () => {
         fixture.detectChanges();
+
+        expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
 
         let nativeElement = fixture.nativeElement as HTMLElement;
         let resolveButtons = nativeElement.querySelectorAll('.stub-resolve-btn');

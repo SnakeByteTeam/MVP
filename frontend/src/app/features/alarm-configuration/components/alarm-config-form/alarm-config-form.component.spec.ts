@@ -150,6 +150,17 @@ describe('AlarmConfigFormComponent', () => {
         expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
     });
 
+    it('onSubmit in create mode non naviga se createAlarm non emette (errore gestito)', () => {
+        stateServiceStub.createAlarm.mockReturnValueOnce(EMPTY);
+        fixture.detectChanges();
+        component.form.setValue(validFormValue);
+
+        component.onSubmit();
+
+        expect(stateServiceStub.createAlarm).toHaveBeenCalledWith(validFormValue);
+        expect(routerStub.navigate).not.toHaveBeenCalled();
+    });
+
     it('onSubmit in edit mode invoca updateAlarm con id route e naviga alla lista', () => {
         routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
         fixture.detectChanges();
@@ -159,6 +170,18 @@ describe('AlarmConfigFormComponent', () => {
 
         expect(stateServiceStub.updateAlarm).toHaveBeenCalledWith('alarm-42', validFormValue);
         expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
+    });
+
+    it('onSubmit in edit mode non naviga se updateAlarm non emette (errore gestito)', () => {
+        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
+        stateServiceStub.updateAlarm.mockReturnValueOnce(EMPTY);
+        fixture.detectChanges();
+        component.form.setValue(validFormValue);
+
+        component.onSubmit();
+
+        expect(stateServiceStub.updateAlarm).toHaveBeenCalledWith('alarm-42', validFormValue);
+        expect(routerStub.navigate).not.toHaveBeenCalled();
     });
 
     it('onSubmit non invia se il form e invalido', () => {

@@ -51,6 +51,7 @@ describe('AlarmPageManagementComponent', () => {
 
   const alarmManagementStub = {
     vm$: undefined as unknown,
+    initialize: vi.fn(),
     resolveAlarm: vi.fn(),
   };
 
@@ -90,6 +91,7 @@ describe('AlarmPageManagementComponent', () => {
 
     component.ngOnInit();
 
+    expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
     expect(component.vm$).toBe(alarmManagementStub.vm$);
   });
 

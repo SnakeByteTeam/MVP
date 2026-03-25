@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
-import { BehaviorSubject, EMPTY, combineLatest, map, shareReplay, tap, catchError, finalize } from 'rxjs';
+import { BehaviorSubject, EMPTY, combineLatest, map, shareReplay, tap, catchError, finalize, take } from 'rxjs';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
 
 // Nasconde la complessità della composizione tra `AlarmStateService` e
@@ -47,6 +47,28 @@ export class AlarmManagementService {
         shareReplay({ bufferSize: 1, refCount: true })
     );
 
+
+    //carica storico allarmi attivi per vederli
+    private loadInitialActiveAlarms(): void {
+        this.alarmApiService
+            .getActiveAlarms()
+            .pipe(
+                take(1),
+                tap((alarms) => {
+                    this.alarmStateService.setActiveAlarms(alarms);
+                }),
+                catchError((error: unknown) => {
+                    this.resolveError$.next(this.mapResolveError(error));
+                    return EMPTY; //da fare meglio sti errori
+                })
+            )
+            .subscribe();
+    }
+
+    public initialize(): void {
+        this.loadInitialActiveAlarms();
+    }
+
     public resolveAlarm(activeAlarmId: string): void {
         this.pendingResolveRequests += 1;
         this.resolvingId$.next(activeAlarmId);
@@ -71,6 +93,8 @@ export class AlarmManagementService {
             )
             .subscribe();
     }
+
+
 
     private mapResolveError(error: unknown): string {
         if (error instanceof Error && error.message.trim().length > 0) {

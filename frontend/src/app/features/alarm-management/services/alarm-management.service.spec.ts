@@ -13,10 +13,12 @@ describe('AlarmManagementService', () => {
 
     const alarmStateStub = {
         getActiveAlarms$: vi.fn(),
+        setActiveAlarms: vi.fn(),
         onAlarmResolved: vi.fn(),
     };
 
     const alarmApiStub = {
+        getActiveAlarms: vi.fn(),
         resolveAlarm: vi.fn(),
     };
 
@@ -45,6 +47,7 @@ describe('AlarmManagementService', () => {
 
         activeAlarmsSubject = new BehaviorSubject<ActiveAlarm[]>([]);
         alarmStateStub.getActiveAlarms$.mockReturnValue(activeAlarmsSubject.asObservable());
+        alarmApiStub.getActiveAlarms.mockReturnValue(of([]));
 
         TestBed.configureTestingModule({
             providers: [
@@ -53,11 +56,42 @@ describe('AlarmManagementService', () => {
                 { provide: AlarmApiService, useValue: alarmApiStub },
             ],
         });
+    });
 
-        service = TestBed.inject(AlarmManagementService);
+    const createService = (): AlarmManagementService => TestBed.inject(AlarmManagementService);
+
+    it('non carica lo snapshot iniziale automaticamente alla creazione', () => {
+        service = createService();
+
+        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
+        expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
+    });
+
+    it('initialize carica gli allarmi attivi iniziali via API e idrata AlarmStateService', () => {
+        const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
+
+        service = createService();
+        service.initialize();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
+    });
+
+    it('se initialize fallisce non propaga eccezioni e valorizza l errore nel vm', async () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(throwError(() => new Error('bootstrap error')));
+
+        service = createService();
+
+        expect(() => service.initialize()).not.toThrow();
+        expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.resolveError).toBe('bootstrap error');
     });
 
     it('espone vm iniziale con lista vuota e nessuna risoluzione in corso', async () => {
+        service = createService();
         const vm = await firstValueFrom(service.vm$);
 
         expect(vm).toEqual({
@@ -69,6 +103,7 @@ describe('AlarmManagementService', () => {
     });
 
     it('resolveAlarm segue il flusso successo: resolving true, API call, update state, resolving false', async () => {
+        service = createService();
         activeAlarmsSubject.next([alarmA, alarmB]);
         const resolveRequest$ = new Subject<void>();
         alarmApiStub.resolveAlarm.mockReturnValue(resolveRequest$.asObservable());
@@ -108,6 +143,7 @@ describe('AlarmManagementService', () => {
     });
 
     it('non mantiene copia locale degli allarmi: vm riflette solo AlarmStateService', async () => {
+        service = createService();
         const vmHistory: ActiveAlarm[][] = [];
         const subscription = service.vm$.subscribe((vm) => {
             vmHistory.push(vm.alarms);
@@ -124,6 +160,7 @@ describe('AlarmManagementService', () => {
     });
 
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {
+        service = createService();
         alarmApiStub.resolveAlarm.mockReturnValue(throwError(() => new Error('timeout rete')));
 
         service.resolveAlarm('active-err');
@@ -136,6 +173,7 @@ describe('AlarmManagementService', () => {
     });
 
     it('consente richieste concorrenti e termina lo stato di resolving solo a completamento di tutte', async () => {
+        service = createService();
         const reqA$ = new Subject<void>();
         const reqB$ = new Subject<void>();
 
@@ -165,6 +203,7 @@ describe('AlarmManagementService', () => {
     });
 
     it('resetta eventuale errore precedente quando parte una nuova resolveAlarm', async () => {
+        service = createService();
         alarmApiStub.resolveAlarm.mockReturnValueOnce(throwError(() => new Error('errore precedente')));
 
         service.resolveAlarm('active-x');

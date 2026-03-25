@@ -8,7 +8,15 @@ describe('PlantEntity', () => {
   it('should map from domain to entity preserving cached_at', () => {
     const cachedAt = new Date('2026-03-24T10:00:00.000Z');
     const datapoints: Datapoint[] = [
-      new Datapoint('dp-1', 'brightness', true, true, 'number', ['0', '100'], 'slider'),
+      new Datapoint(
+        'dp-1',
+        'brightness',
+        true,
+        true,
+        'number',
+        ['0', '100'],
+        'slider',
+      ),
     ];
     const devices: Device[] = [
       new Device('dev-1', 'plant-1', 'Lamp', 'light', 'dimmer', datapoints),

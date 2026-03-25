@@ -23,7 +23,9 @@ describe('FetchPlantStructureAdapter', () => {
   it('should throw when token is not valid', async () => {
     tokenPort.getValidToken.mockResolvedValue(null);
 
-    await expect(adapter.fetch('plant-1')).rejects.toThrow(Error('Token is not valid'));
+    await expect(adapter.fetch('plant-1')).rejects.toThrow(
+      Error('Token is not valid'),
+    );
     expect(repoPort.fetch).toHaveBeenCalledTimes(0);
   });
 
@@ -31,7 +33,9 @@ describe('FetchPlantStructureAdapter', () => {
     tokenPort.getValidToken.mockResolvedValue('valid-token');
     repoPort.fetch.mockResolvedValue(null);
 
-    await expect(adapter.fetch('plant-1')).rejects.toThrow(Error("Can't get plant info from API"));
+    await expect(adapter.fetch('plant-1')).rejects.toThrow(
+      Error("Can't get plant info from API"),
+    );
     expect(repoPort.fetch).toHaveBeenCalledWith('valid-token', 'plant-1');
   });
 

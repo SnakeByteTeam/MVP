@@ -15,7 +15,9 @@ describe('FindPlantByIdAdapter', () => {
   });
 
   it('should throw PlantId is null when cmd.id is absent', async () => {
-    await expect(adapter.findById({ id: '' })).rejects.toThrow(Error('PlantId is null'));
+    await expect(adapter.findById({ id: '' })).rejects.toThrow(
+      Error('PlantId is null'),
+    );
   });
 
   it('should throw when repository returns null', async () => {

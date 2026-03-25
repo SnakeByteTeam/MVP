@@ -1,31 +1,39 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
 
 export class DatapointDto {
+  @ApiProperty({ example: 'dp-1' })
   @IsString()
   @IsNotEmpty()
   id: string;
 
+  @ApiProperty({ example: 'Power' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ example: true })
   @IsBoolean()
   @IsNotEmpty()
   readable: boolean;
 
+  @ApiProperty({ example: true })
   @IsBoolean()
   @IsNotEmpty()
   writable: boolean;
 
+  @ApiProperty({ example: 'string' })
   @IsString()
   @IsNotEmpty()
   valueType: string;
 
+  @ApiProperty({ example: ['Off', 'On'], isArray: true, type: String })
   @IsArray()
   @IsNotEmpty()
   enum: string[];
 
+  @ApiProperty({ example: 'SFE_Cmd_OnOff' })
   @IsString()
   @IsNotEmpty()
   sfeType: string;

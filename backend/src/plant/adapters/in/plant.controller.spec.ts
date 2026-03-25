@@ -22,7 +22,9 @@ describe('PlantController', () => {
 
     const dto = await controller.findById('plant-1');
 
-    expect(findPlantByIdUseCase.findById).toHaveBeenCalledWith({ id: 'plant-1' });
+    expect(findPlantByIdUseCase.findById).toHaveBeenCalledWith({
+      id: 'plant-1',
+    });
     expect(findPlantByIdUseCase.findById).toHaveBeenCalledTimes(1);
     expect(dto.id).toBe('plant-1');
     expect(dto.name).toBe('My Plant');

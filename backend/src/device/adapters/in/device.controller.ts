@@ -5,6 +5,13 @@ import {
   Inject,
   InternalServerErrorException,
 } from '@nestjs/common';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-by-id.command';
 import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-device-by-plantid.command';
 import {
@@ -20,6 +27,7 @@ import { Device } from 'src/device/domain/models/device.model';
 import { DatapointDto } from 'src/device/infrastructure/dtos/datapoint.dto';
 import { DeviceDto } from 'src/device/infrastructure/dtos/device.dto';
 
+@ApiTags('device')
 @Controller('device')
 export class DeviceController {
   constructor(
@@ -30,6 +38,32 @@ export class DeviceController {
   ) {}
 
   @Get('id')
+  @ApiOperation({
+    summary: 'Get device by id',
+    description:
+      'Expected query parameter: deviceId. Returned payload: one DeviceDto.',
+  })
+  @ApiQuery({
+    name: 'deviceId',
+    required: true,
+    type: String,
+    description: 'Unique identifier of the device.',
+    example: 'fct-012923FAB00624-1090564616',
+  })
+  @ApiOkResponse({
+    description: 'Device found and returned.',
+    type: DeviceDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Unexpected error while reading device information.',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+        error: 'Internal Server Error',
+      },
+    },
+  })
   async findById(@Query('deviceId') deviceId: string): Promise<DeviceDto> {
     const findByIdCmd: FindDeviceByIdCmd = {
       id: deviceId,
@@ -44,6 +78,33 @@ export class DeviceController {
   }
 
   @Get('plantId')
+  @ApiOperation({
+    summary: 'Get all devices by plant id',
+    description:
+      'Expected query parameter: plantId. Returned payload: list of DeviceDto.',
+  })
+  @ApiQuery({
+    name: 'plantId',
+    required: true,
+    type: String,
+    description: 'Unique identifier of the plant.',
+    example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+  })
+  @ApiOkResponse({
+    description: 'Devices found and returned.',
+    type: DeviceDto,
+    isArray: true,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Unexpected error while reading plant devices.',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+        error: 'Internal Server Error',
+      },
+    },
+  })
   async findByPlantId(@Query('plantId') plantId: string): Promise<DeviceDto[]> {
     const findByPlantIdCmd: FindDeviceByPlantIdCmd = {
       id: plantId,

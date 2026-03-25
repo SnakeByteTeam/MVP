@@ -21,7 +21,9 @@ describe('SyncPlantService', () => {
   });
 
   it('should throw PlantId is null when cmd.id is absent', async () => {
-    await expect(service.sync({ id: '' })).rejects.toThrow(Error('PlantId is null'));
+    await expect(service.sync({ id: '' })).rejects.toThrow(
+      Error('PlantId is null'),
+    );
   });
 
   it('should fetch and write plant structure when cmd is valid', async () => {

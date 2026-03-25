@@ -34,7 +34,12 @@ describe('PlantService', () => {
   });
 
   it('should sync and return refreshed plant when cache is stale (> 12h) and sync succeeds', async () => {
-    const stalePlant = new Plant('plant-1', 'Old Plant', [], new Date(Date.now() - 13 * 60 * 60 * 1000));
+    const stalePlant = new Plant(
+      'plant-1',
+      'Old Plant',
+      [],
+      new Date(Date.now() - 13 * 60 * 60 * 1000),
+    );
     const refreshedPlant = new Plant('plant-1', 'New Plant', [], new Date());
 
     findByIdPort.findById
@@ -51,7 +56,12 @@ describe('PlantService', () => {
   });
 
   it('should return stale cached plant when sync fails', async () => {
-    const stalePlant = new Plant('plant-1', 'Old Plant', [], new Date(Date.now() - 13 * 60 * 60 * 1000));
+    const stalePlant = new Plant(
+      'plant-1',
+      'Old Plant',
+      [],
+      new Date(Date.now() - 13 * 60 * 60 * 1000),
+    );
 
     findByIdPort.findById.mockResolvedValue(stalePlant);
     syncUseCase.sync.mockResolvedValue(false);
@@ -68,7 +78,9 @@ describe('PlantService', () => {
     findByIdPort.findById.mockRejectedValue(expectedError);
     syncUseCase.sync.mockResolvedValue(false);
 
-    await expect(service.findById({ id: 'plant-1' })).rejects.toThrow(expectedError);
+    await expect(service.findById({ id: 'plant-1' })).rejects.toThrow(
+      expectedError,
+    );
 
     expect(syncUseCase.sync).toHaveBeenCalledWith({ id: 'plant-1' });
     expect(syncUseCase.sync).toHaveBeenCalledTimes(1);

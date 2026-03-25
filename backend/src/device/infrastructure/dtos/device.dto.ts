@@ -1,28 +1,35 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 import { Device } from 'src/device/domain/models/device.model';
 import { DatapointDto } from './datapoint.dto';
 
 export class DeviceDto {
+  @ApiProperty({ example: 'device-1' })
   @IsString()
   @IsNotEmpty()
   id: string;
 
+  @ApiProperty({ example: 'Living Room Lamp' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ example: 'plant-1' })
   @IsString()
   @IsNotEmpty()
   plantId: string;
 
+  @ApiProperty({ example: 'SF_Light' })
   @IsString()
   @IsNotEmpty()
   type: string;
 
+  @ApiProperty({ example: 'SS_Light_Switch' })
   @IsString()
   @IsNotEmpty()
   subType: string;
 
+  @ApiProperty({ type: () => DatapointDto, isArray: true })
   @IsArray()
   @IsNotEmpty()
   datapoints: DatapointDto[];

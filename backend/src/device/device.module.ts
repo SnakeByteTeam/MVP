@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TokensModule } from 'src/tokens/tokens.module';
 import { DeviceController } from './adapters/in/device.controller';
+import { HttpModule } from '@nestjs/axios';
 
 import { FIND_DEVICE_BY_ID_USECASE } from './application/ports/in/find-device-by-id.usecase';
 import { FIND_DEVICE_BY_PLANTID_USECASE } from './application/ports/in/find-device-by-plantid.usecase';
@@ -18,7 +19,7 @@ import { DeviceMapper } from './infrastructure/mappers/device-mapper';
 
 
 @Module({
-    imports: [TokensModule], 
+    imports: [TokensModule, HttpModule], 
     controllers: [DeviceController], 
     providers: [
         {provide: FIND_DEVICE_BY_ID_USECASE,          useClass: DeviceService}, 
@@ -27,7 +28,7 @@ import { DeviceMapper } from './infrastructure/mappers/device-mapper';
         {provide: FIND_DEVICE_BY_PLANTID_PORT,        useClass: FindDeviceByPlantIdAdapter}, 
         {provide: FIND_DEVICE_BY_ID_REPO_PORT,        useClass: DeviceRepositoryImpl}, 
         {provide: FIND_DEVICE_BY_PLANTID_REPO_PORT,   useClass: DeviceRepositoryImpl}, 
-        {provide: DEVICE_MAPPER_REPO_PORT,            useClass: DeviceMapper}
+        {provide: DEVICE_MAPPER_REPO_PORT,            useClass: DeviceMapper}, 
     ]
 })
 export class DeviceModule {}

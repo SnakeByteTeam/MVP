@@ -5,6 +5,7 @@ import { FindDeviceByPlantIdCmd } from "../commands/find-device-by-plantid.comma
 import { Device } from "src/device/domain/models/device.model";
 import { Datapoint } from "src/device/domain/models/datapoint.model";
 import { DeviceService } from "./device.service"
+import { FetchPlantStructurePort } from "../../../plant/application/ports/out/fetch-plant-structure.port";
 
 describe('DeviceService', () => {
     let service: DeviceService; 

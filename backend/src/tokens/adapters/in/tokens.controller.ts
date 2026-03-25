@@ -19,6 +19,5 @@ export class TokensController {
             throw new InternalServerErrorException('Internal server error');
         }
 
-        
     }
 }

@@ -1,4 +1,4 @@
-import { PlantDto } from "src/plant/infrastructure/dtos/plant.dto";
+import { PlantDto } from "src/plant/infrastructure/http/dtos/plant.dto";
 
 export interface FetchPlantStructureRepo {
     fetch(validToken: string, plantId: string): Promise<PlantDto | null>;

@@ -17,7 +17,7 @@ CREATE TABLE STRUCTURE_CACHE (
     data JSONB NOT NULL, 
     ward_id VARCHAR(36) DEFAULT NULL,
 
-    PRIMARY KEY (cached_at, plant_id)
+    PRIMARY KEY (plant_id)
 );
 
 INSERT INTO structure_cache (cached_at, plant_id, data)

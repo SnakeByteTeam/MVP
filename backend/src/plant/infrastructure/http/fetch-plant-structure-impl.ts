@@ -3,8 +3,8 @@ import { Injectable } from "@nestjs/common";
 import { firstValueFrom } from "rxjs";
 
 import { FetchPlantStructureRepo } from "src/plant/application/repository/fetch-plant-structure.repository";
-import { PlantDto } from "../dtos/plant.dto";
-import { RoomDto } from "../dtos/room.dto";
+import { PlantDto } from "./dtos/plant.dto";
+import { RoomDto } from "./dtos/room.dto";
 import { DeviceDto } from "src/device/infrastructure/dtos/device.dto";
 import { DatapointDto } from "src/device/infrastructure/dtos/datapoint.dto";
 

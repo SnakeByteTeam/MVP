@@ -5,14 +5,14 @@
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <label for="apartment-id">Appartamento</label>
-        <select id="apartment-id" formControlName="apartmentId">
-            <option value="">Seleziona un appartamento</option>
-            @for (apartment of availableApartments(); track apartment.id) {
-            <option [value]="apartment.id">{{ apartment.name }}</option>
+        <select id="apartment-id" formControlName="plantId">
+            <option [ngValue]="null">Seleziona un appartamento</option>
+            @for (apartment of availablePlants(); track apartment.id) {
+            <option [ngValue]="apartment.id">{{ apartment.name }}</option>
             }
         </select>
 
-        @if (form.controls.apartmentId.touched && form.controls.apartmentId.invalid) {
+        @if (form.controls.plantId.touched && form.controls.plantId.invalid) {
         <p role="alert">Seleziona un appartamento.</p>
         }
 

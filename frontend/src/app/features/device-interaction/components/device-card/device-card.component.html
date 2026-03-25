@@ -1,0 +1,7 @@
+<article class="device-card">
+  <header>
+    <h3>{{ device().name }}</h3>
+    <p>{{ getTypeLabel(device().type) }} · {{ device().status }}</p>
+  </header>
+  <p class="device-card__id">ID stanza: {{ roomId() }} · ID device: {{ device().id }}</p>
+</article>

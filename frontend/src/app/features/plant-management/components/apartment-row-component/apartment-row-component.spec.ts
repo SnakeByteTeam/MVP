@@ -39,7 +39,7 @@ describe('ApartmentRowComponent', () => {
     const enableSpy = vi.spyOn(component.enable, 'emit');
     const disableSpy = vi.spyOn(component.disable, 'emit');
     fixture.componentRef.setInput('apartment', {
-      id: 'apt-1',
+      id: 101,
       name: 'App',
       isEnabled: true,
     });
@@ -48,7 +48,7 @@ describe('ApartmentRowComponent', () => {
     component.onToggle();
 
     //assert
-    expect(disableSpy).toHaveBeenCalledWith('apt-1');
+    expect(disableSpy).toHaveBeenCalledWith(101);
     expect(disableSpy).toHaveBeenCalledTimes(1);
     expect(enableSpy).not.toHaveBeenCalled();
   });
@@ -57,7 +57,7 @@ describe('ApartmentRowComponent', () => {
     const enableSpy = vi.spyOn(component.enable, 'emit');
     const disableSpy = vi.spyOn(component.disable, 'emit');
     fixture.componentRef.setInput('apartment', {
-      id: 'apt-1',
+      id: 101,
       name: 'App',
       isEnabled: false,
     });
@@ -66,7 +66,7 @@ describe('ApartmentRowComponent', () => {
     component.onToggle();
 
     //assert
-    expect(enableSpy).toHaveBeenCalledWith('apt-1');
+    expect(enableSpy).toHaveBeenCalledWith(101);
     expect(enableSpy).toHaveBeenCalledTimes(1);
     expect(disableSpy).not.toHaveBeenCalled();
   });

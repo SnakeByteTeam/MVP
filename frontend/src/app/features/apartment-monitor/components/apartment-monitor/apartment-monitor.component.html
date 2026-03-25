@@ -1,0 +1,27 @@
+<section class="apartment-monitor" aria-label="Monitor appartamento">
+  <header class="apartment-monitor__header">
+    @if (apartment$ | async; as apartment) {
+      <div>
+        <h1>{{ apartment.name }}</h1>
+        <p>Monitoraggio stato appartamento e accesso rapido alle stanze.</p>
+      </div>
+    }
+  </header>
+
+  @if (error) {
+    <p class="apartment-monitor__error" role="alert">{{ error }}</p>
+  }
+
+  @if (apartment$ | async; as apartment) {
+    @if (activeAlarms$ | async; as activeAlarms) {
+      <div class="apartment-monitor__content">
+        <app-alarm-map [rooms]="apartment.rooms" [activeAlarms]="activeAlarms" />
+        <app-room-list [rooms]="apartment.rooms" (roomSelected)="onRoomSelected($event)" />
+      </div>
+    }
+  } @else {
+    @if (!error) {
+      <p>Caricamento appartamento...</p>
+    }
+  }
+</section>

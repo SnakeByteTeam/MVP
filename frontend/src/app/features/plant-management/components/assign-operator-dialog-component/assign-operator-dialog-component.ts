@@ -18,15 +18,15 @@ export class AssignOperatorDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly userApiService = inject(UserApiService);
 
-  public readonly wardId = input<string>('');
+  public readonly wardId = input<number>(0);
   public readonly availableWards = input<Ward[]>([]);
   public readonly submitted = output<AssignOperatorDto>();
   public readonly cancelled = output<void>();
 
   public operators$!: Observable<User[]>;
 
-  public readonly form = this.formBuilder.nonNullable.group({
-    userId: ['', [Validators.required]],
+  public readonly form = this.formBuilder.group({
+    userId: this.formBuilder.control<number | null>(null, { validators: [Validators.required] }),
   });
 
   public ngOnInit(): void {
@@ -39,7 +39,7 @@ export class AssignOperatorDialogComponent implements OnInit {
       return;
     }
 
-    this.submitted.emit({ userId: this.form.controls.userId.value });
+    this.submitted.emit({ userId: this.form.controls.userId.value as number });
   }
 
   public onCancel(): void {

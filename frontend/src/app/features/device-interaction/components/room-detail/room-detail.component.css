@@ -1,0 +1,20 @@
+.room-detail {
+  display: grid;
+  gap: 1rem;
+}
+
+.room-detail__header h1,
+.room-detail__header p {
+  margin: 0;
+}
+
+.room-detail__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+
+.room-detail__error {
+  margin: 0;
+  color: #a40000;
+}

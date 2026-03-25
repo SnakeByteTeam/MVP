@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
-import type { RemoveApartmentEvent, RemoveOperatorEvent } from '../../models/plant-management.events';
+import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/plant-management.events';
 import type { Ward } from '../../models/ward.model';
 import { ApartmentRowComponent } from '../apartment-row-component/apartment-row-component';
 
@@ -14,13 +14,13 @@ export class WardCardComponent {
   public readonly ward = input<Ward | null>(null);
 
   public readonly editWard = output<Ward>();
-  public readonly deleteWard = output<string>();
-  public readonly assignOperator = output<string>();
+  public readonly deleteWard = output<number>();
+  public readonly assignOperator = output<number>();
   public readonly removeOperator = output<RemoveOperatorEvent>();
-  public readonly assignApartment = output<string>();
-  public readonly removeApartment = output<RemoveApartmentEvent>();
-  public readonly enableApartment = output<string>();
-  public readonly disableApartment = output<string>();
+  public readonly assignPlant = output<number>();
+  public readonly removePlant = output<RemovePlantEvent>();
+  public readonly enablePlant = output<number>();
+  public readonly disablePlant = output<number>();
 
   private readonly isExpandedSignal = signal(false);
   public readonly isExpanded = computed(() => this.isExpandedSignal());
@@ -50,32 +50,32 @@ export class WardCardComponent {
     }
   }
 
-  public onRemoveOperatorClick(userId: string): void {
+  public onRemoveOperatorClick(userId: number): void {
     const ward = this.ward();
     if (ward) {
       this.removeOperator.emit({ wardId: ward.id, userId });
     }
   }
 
-  public onAssignApartmentClick(): void {
+  public onAssignPlantClick(): void {
     const ward = this.ward();
     if (ward) {
-      this.assignApartment.emit(ward.id);
+      this.assignPlant.emit(ward.id);
     }
   }
 
-  public onRemoveApartmentClick(apartmentId: string): void {
+  public onRemovePlantClick(plantId: number): void {
     const ward = this.ward();
     if (ward) {
-      this.removeApartment.emit({ wardId: ward.id, apartmentId });
+      this.removePlant.emit({ wardId: ward.id, plantId });
     }
   }
 
-  public onEnableApartment(apartmentId: string): void {
-    this.enableApartment.emit(apartmentId);
+  public onEnablePlant(plantId: number): void {
+    this.enablePlant.emit(plantId);
   }
 
-  public onDisableApartment(apartmentId: string): void {
-    this.disableApartment.emit(apartmentId);
+  public onDisablePlant(plantId: number): void {
+    this.disablePlant.emit(plantId);
   }
 }

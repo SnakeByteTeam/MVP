@@ -16,11 +16,11 @@ describe('PlantManagementPageComponent', () => {
   let errorSubject: BehaviorSubject<string | null>;
 
   const wardA: Ward = {
-    id: 'ward-1',
+    id: 1,
     name: 'Cardiologia',
     apartments: [
-      { id: 'apt-1', name: 'App. 101', isEnabled: true },
-      { id: 'apt-2', name: 'App. 102', isEnabled: false },
+      { id: 101, name: 'App. 101', isEnabled: true },
+      { id: 102, name: 'App. 102', isEnabled: false },
     ],
     operators: [
       {
@@ -34,11 +34,11 @@ describe('PlantManagementPageComponent', () => {
   };
 
   const wardB: Ward = {
-    id: 'ward-2',
+    id: 2,
     name: 'Neurologia',
     apartments: [
-      { id: 'apt-2', name: 'App. 102', isEnabled: false },
-      { id: 'apt-3', name: 'App. 103', isEnabled: true },
+      { id: 102, name: 'App. 102', isEnabled: false },
+      { id: 103, name: 'App. 103', isEnabled: true },
     ],
     operators: [],
   };
@@ -53,10 +53,10 @@ describe('PlantManagementPageComponent', () => {
     deleteWard: vi.fn(),
     assignOperator: vi.fn(),
     removeOperator: vi.fn(),
-    assignApartment: vi.fn(),
-    removeApartment: vi.fn(),
-    enableApartment: vi.fn(),
-    disableApartment: vi.fn(),
+    assignPlant: vi.fn(),
+    removePlant: vi.fn(),
+    enablePlant: vi.fn(),
+    disablePlant: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -143,7 +143,7 @@ describe('PlantManagementPageComponent', () => {
 
     component.onEditWardSubmit({ name: 'Cardiologia A' });
 
-    expect(storeStub.updateWard).toHaveBeenCalledWith('ward-1', { name: 'Cardiologia A' });
+    expect(storeStub.updateWard).toHaveBeenCalledWith(1, { name: 'Cardiologia A' });
     expect(component.selectedWard()).toBeNull();
     expect(component.wardDialogMode()).toBe('closed');
   });
@@ -167,15 +167,15 @@ describe('PlantManagementPageComponent', () => {
   });
 
   it('flow operator dovrebbe impostare wardId, submit e chiudere', () => {
-    component.onAssignOperator('ward-1');
-    expect(component.operatorWardId()).toBe('ward-1');
+    component.onAssignOperator(1);
+    expect(component.operatorWardId()).toBe(1);
 
-    component.onAssignOperatorSubmit({ userId: 'user-2' });
+    component.onAssignOperatorSubmit({ userId: 2 });
 
-    expect(storeStub.assignOperator).toHaveBeenCalledWith('ward-1', { userId: 'user-2' });
+    expect(storeStub.assignOperator).toHaveBeenCalledWith(1, { userId: 2 });
     expect(component.operatorWardId()).toBeNull();
 
-    component.onAssignOperator('ward-2');
+    component.onAssignOperator(2);
     component.onCloseAssignOperatorDialog();
     expect(component.operatorWardId()).toBeNull();
   });
@@ -183,66 +183,66 @@ describe('PlantManagementPageComponent', () => {
   it('onAssignOperatorSubmit non dovrebbe chiamare store senza wardId', () => {
     component.operatorWardId.set(null);
 
-    component.onAssignOperatorSubmit({ userId: 'user-2' });
+    component.onAssignOperatorSubmit({ userId: 2 });
 
     expect(storeStub.assignOperator).not.toHaveBeenCalled();
   });
 
-  it('flow apartment dovrebbe impostare wardId, submit e chiudere', () => {
-    component.onAssignApartment('ward-2');
-    expect(component.apartmentWardId()).toBe('ward-2');
+  it('flow plant dovrebbe impostare wardId, submit e chiudere', () => {
+    component.onAssignPlant(2);
+    expect(component.plantWardId()).toBe(2);
 
-    component.onAssignApartmentSubmit({ apartmentId: 'apt-3' });
+    component.onAssignPlantSubmit({ plantId: 103 });
 
-    expect(storeStub.assignApartment).toHaveBeenCalledWith('ward-2', { apartmentId: 'apt-3' });
-    expect(component.apartmentWardId()).toBeNull();
+    expect(storeStub.assignPlant).toHaveBeenCalledWith(2, { plantId: 103 });
+    expect(component.plantWardId()).toBeNull();
 
-    component.onAssignApartment('ward-1');
-    component.onCloseAssignApartmentDialog();
-    expect(component.apartmentWardId()).toBeNull();
+    component.onAssignPlant(1);
+    component.onCloseAssignPlantDialog();
+    expect(component.plantWardId()).toBeNull();
   });
 
-  it('onAssignApartmentSubmit non dovrebbe chiamare store senza wardId', () => {
-    component.apartmentWardId.set(null);
+  it('onAssignPlantSubmit non dovrebbe chiamare store senza wardId', () => {
+    component.plantWardId.set(null);
 
-    component.onAssignApartmentSubmit({ apartmentId: 'apt-1' });
+    component.onAssignPlantSubmit({ plantId: 101 });
 
-    expect(storeStub.assignApartment).not.toHaveBeenCalled();
+    expect(storeStub.assignPlant).not.toHaveBeenCalled();
   });
 
-  it('onEnableApartment e onDisableApartment dovrebbero delegare allo store', () => {
-    component.onEnableApartment('apt-9');
-    component.onDisableApartment('apt-10');
+  it('onEnablePlant e onDisablePlant dovrebbero delegare allo store', () => {
+    component.onEnablePlant(109);
+    component.onDisablePlant(110);
 
-    expect(storeStub.enableApartment).toHaveBeenCalledWith('apt-9');
-    expect(storeStub.disableApartment).toHaveBeenCalledWith('apt-10');
+    expect(storeStub.enablePlant).toHaveBeenCalledWith(109);
+    expect(storeStub.disablePlant).toHaveBeenCalledWith(110);
   });
 
   it('confirmState + onConfirmDialogConfirmed dovrebbero gestire i 3 rami', () => {
-    component.onDeleteWard('ward-1');
-    expect(component.confirmState()).toEqual({ kind: 'delete-ward', wardId: 'ward-1' });
+    component.onDeleteWard(1);
+    expect(component.confirmState()).toEqual({ kind: 'delete-ward', wardId: 1 });
     component.onConfirmDialogConfirmed();
-    expect(storeStub.deleteWard).toHaveBeenCalledWith('ward-1');
+    expect(storeStub.deleteWard).toHaveBeenCalledWith(1);
     expect(component.confirmState()).toBeNull();
 
-    component.onRemoveOperator({ wardId: 'ward-1', userId: 'user-2' });
+    component.onRemoveOperator({ wardId: 1, userId: 2 });
     expect(component.confirmState()).toEqual({
       kind: 'remove-operator',
-      wardId: 'ward-1',
-      userId: 'user-2',
+      wardId: 1,
+      userId: 2,
     });
     component.onConfirmDialogConfirmed();
-    expect(storeStub.removeOperator).toHaveBeenCalledWith('ward-1', 'user-2');
+    expect(storeStub.removeOperator).toHaveBeenCalledWith(1, 2);
     expect(component.confirmState()).toBeNull();
 
-    component.onRemoveApartment({ wardId: 'ward-2', apartmentId: 'apt-3' });
+    component.onRemovePlant({ wardId: 2, plantId: 103 });
     expect(component.confirmState()).toEqual({
-      kind: 'remove-apartment',
-      wardId: 'ward-2',
-      apartmentId: 'apt-3',
+      kind: 'remove-plant',
+      wardId: 2,
+      plantId: 103,
     });
     component.onConfirmDialogConfirmed();
-    expect(storeStub.removeApartment).toHaveBeenCalledWith('ward-2', 'apt-3');
+    expect(storeStub.removePlant).toHaveBeenCalledWith(2, 103);
     expect(component.confirmState()).toBeNull();
   });
 
@@ -253,11 +253,11 @@ describe('PlantManagementPageComponent', () => {
 
     expect(storeStub.deleteWard).not.toHaveBeenCalled();
     expect(storeStub.removeOperator).not.toHaveBeenCalled();
-    expect(storeStub.removeApartment).not.toHaveBeenCalled();
+    expect(storeStub.removePlant).not.toHaveBeenCalled();
   });
 
   it('onConfirmDialogCancelled dovrebbe pulire confirmState', () => {
-    component.confirmState.set({ kind: 'delete-ward', wardId: 'ward-1' });
+    component.confirmState.set({ kind: 'delete-ward', wardId: 1 });
 
     component.onConfirmDialogCancelled();
 
@@ -268,29 +268,29 @@ describe('PlantManagementPageComponent', () => {
     component.confirmState.set(null);
     expect(component.getConfirmMessage()).toBe('Confermi questa operazione?');
 
-    component.confirmState.set({ kind: 'delete-ward', wardId: 'ward-1' });
+    component.confirmState.set({ kind: 'delete-ward', wardId: 1 });
     expect(component.getConfirmMessage()).toBe('Confermi l\'eliminazione del reparto?');
 
-    component.confirmState.set({ kind: 'remove-operator', wardId: 'ward-1', userId: 'user-2' });
+    component.confirmState.set({ kind: 'remove-operator', wardId: 1, userId: 2 });
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'operatore dal reparto?');
 
-    component.confirmState.set({ kind: 'remove-apartment', wardId: 'ward-1', apartmentId: 'apt-1' });
+    component.confirmState.set({ kind: 'remove-plant', wardId: 1, plantId: 101 });
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'appartamento dal reparto?');
     expect(component.getConfirmLabel()).toBe('Conferma');
   });
 
-  it('availableApartments dovrebbe deduplicare e escludere quelli gia assegnati al ward selezionato', () => {
+  it('availablePlants dovrebbe deduplicare e escludere quelli gia assegnati al ward selezionato', () => {
     component.wardsSnapshot.set([wardA, wardB]);
 
-    component.apartmentWardId.set(null);
-    expect(component.availableApartments()).toEqual([]);
+    component.plantWardId.set(null);
+    expect(component.availablePlants()).toEqual([]);
 
-    component.apartmentWardId.set('ward-1');
-    expect(component.availableApartments()).toEqual([
-      { id: 'apt-3', name: 'App. 103', isEnabled: true },
+    component.plantWardId.set(1);
+    expect(component.availablePlants()).toEqual([
+      { id: 103, name: 'App. 103', isEnabled: true },
     ]);
 
-    component.apartmentWardId.set('ward-unknown');
-    expect(component.availableApartments()).toEqual([]);
+    component.plantWardId.set(9999);
+    expect(component.availablePlants()).toEqual([]);
   });
 });

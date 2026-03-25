@@ -12,9 +12,9 @@ describe('WardOperationsService', () => {
     let service: WardOperationsService;
 
     const ward: Ward = {
-        id: 'ward-1',
+        id: 1,
         name: 'Cardiologia',
-        apartments: [{ id: 'apt-1', name: 'App. 101', isEnabled: true }],
+        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
         operators: [
             {
                 id: 'user-1',
@@ -92,9 +92,9 @@ describe('WardOperationsService', () => {
         const updatedWard: Ward = { ...ward, name: 'Cardiologia A' };
         apiStub.updateWard.mockReturnValue(of(updatedWard));
 
-        service.updateWard('ward-1', { name: 'Cardiologia A' }).subscribe();
+        service.updateWard(1, { name: 'Cardiologia A' }).subscribe();
 
-        expect(apiStub.updateWard).toHaveBeenCalledWith('ward-1', { name: 'Cardiologia A' });
+        expect(apiStub.updateWard).toHaveBeenCalledWith(1, { name: 'Cardiologia A' });
         expect(storeStub.replaceWard).toHaveBeenCalledWith(updatedWard);
         expect(storeStub.replaceWard).toHaveBeenCalledTimes(1);
         expect(storeStub.setLoading).toHaveBeenCalledWith(false);
@@ -104,10 +104,10 @@ describe('WardOperationsService', () => {
     it('deleteWard rimuove il ward dal store', () => {
         apiStub.deleteWard.mockReturnValue(of(void 0));
 
-        service.deleteWard('ward-1').subscribe();
+        service.deleteWard(1).subscribe();
 
-        expect(apiStub.deleteWard).toHaveBeenCalledWith('ward-1');
-        expect(storeStub.removeWard).toHaveBeenCalledWith('ward-1');
+        expect(apiStub.deleteWard).toHaveBeenCalledWith(1);
+        expect(storeStub.removeWard).toHaveBeenCalledWith(1);
         expect(storeStub.removeWard).toHaveBeenCalledTimes(1);
         expect(storeStub.setLoading).toHaveBeenCalledWith(false);
         expect(storeStub.setError).not.toHaveBeenCalled();

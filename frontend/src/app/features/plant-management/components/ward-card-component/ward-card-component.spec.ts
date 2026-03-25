@@ -9,9 +9,9 @@ describe('WardCardComponent', () => {
   let fixture: ComponentFixture<WardCardComponent>;
 
   const ward = {
-    id: 'ward-1',
+    id: 1,
     name: 'Cardiologia',
-    apartments: [{ id: 'apt-1', name: 'App. 101', isEnabled: true }],
+    apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
     operators: [
       {
         id: 'user-1',
@@ -62,7 +62,7 @@ describe('WardCardComponent', () => {
 
     component.onDeleteWardClick();
 
-    expect(deleteWardSpy).toHaveBeenCalledWith('ward-1');
+    expect(deleteWardSpy).toHaveBeenCalledWith(1);
     expect(deleteWardSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -72,7 +72,7 @@ describe('WardCardComponent', () => {
 
     component.onAssignOperatorClick();
 
-    expect(assignOperatorSpy).toHaveBeenCalledWith('ward-1');
+    expect(assignOperatorSpy).toHaveBeenCalledWith(1);
     expect(assignOperatorSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -80,54 +80,54 @@ describe('WardCardComponent', () => {
     const removeOperatorSpy = vi.spyOn(component.removeOperator, 'emit');
     fixture.componentRef.setInput('ward', ward);
 
-    component.onRemoveOperatorClick('user-2');
+    component.onRemoveOperatorClick(2);
 
     expect(removeOperatorSpy).toHaveBeenCalledWith({
-      wardId: 'ward-1',
-      userId: 'user-2',
+      wardId: 1,
+      userId: 2,
     });
     expect(removeOperatorSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('onAssignApartmentClick dovrebbe emettere assignApartment con ward.id', () => {
-    const assignApartmentSpy = vi.spyOn(component.assignApartment, 'emit');
+  it('onAssignPlantClick dovrebbe emettere assignPlant con ward.id', () => {
+    const assignPlantSpy = vi.spyOn(component.assignPlant, 'emit');
     fixture.componentRef.setInput('ward', ward);
 
-    component.onAssignApartmentClick();
+    component.onAssignPlantClick();
 
-    expect(assignApartmentSpy).toHaveBeenCalledWith('ward-1');
-    expect(assignApartmentSpy).toHaveBeenCalledTimes(1);
+    expect(assignPlantSpy).toHaveBeenCalledWith(1);
+    expect(assignPlantSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('onRemoveApartmentClick dovrebbe emettere payload completo', () => {
-    const removeApartmentSpy = vi.spyOn(component.removeApartment, 'emit');
+  it('onRemovePlantClick dovrebbe emettere payload completo', () => {
+    const removePlantSpy = vi.spyOn(component.removePlant, 'emit');
     fixture.componentRef.setInput('ward', ward);
 
-    component.onRemoveApartmentClick('apt-2');
+    component.onRemovePlantClick(102);
 
-    expect(removeApartmentSpy).toHaveBeenCalledWith({
-      wardId: 'ward-1',
-      apartmentId: 'apt-2',
+    expect(removePlantSpy).toHaveBeenCalledWith({
+      wardId: 1,
+      plantId: 102,
     });
-    expect(removeApartmentSpy).toHaveBeenCalledTimes(1);
+    expect(removePlantSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('onEnableApartment dovrebbe inoltrare l id appartamento', () => {
-    const enableApartmentSpy = vi.spyOn(component.enableApartment, 'emit');
+  it('onEnableApartment dovrebbe inoltrare l id plant', () => {
+    const enablePlantSpy = vi.spyOn(component.enablePlant, 'emit');
 
-    component.onEnableApartment('apt-10');
+    component.onEnablePlant(110);
 
-    expect(enableApartmentSpy).toHaveBeenCalledWith('apt-10');
-    expect(enableApartmentSpy).toHaveBeenCalledTimes(1);
+    expect(enablePlantSpy).toHaveBeenCalledWith(110);
+    expect(enablePlantSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('onDisableApartment dovrebbe inoltrare l id appartamento', () => {
-    const disableApartmentSpy = vi.spyOn(component.disableApartment, 'emit');
+  it('onDisableApartment dovrebbe inoltrare l id plant', () => {
+    const disablePlantSpy = vi.spyOn(component.disablePlant, 'emit');
 
-    component.onDisableApartment('apt-11');
+    component.onDisablePlant(111);
 
-    expect(disableApartmentSpy).toHaveBeenCalledWith('apt-11');
-    expect(disableApartmentSpy).toHaveBeenCalledTimes(1);
+    expect(disablePlantSpy).toHaveBeenCalledWith(111);
+    expect(disablePlantSpy).toHaveBeenCalledTimes(1);
   });
 
   it('non dovrebbe emettere eventi legati al ward quando ward e null', () => {
@@ -135,23 +135,23 @@ describe('WardCardComponent', () => {
     const deleteWardSpy = vi.spyOn(component.deleteWard, 'emit');
     const assignOperatorSpy = vi.spyOn(component.assignOperator, 'emit');
     const removeOperatorSpy = vi.spyOn(component.removeOperator, 'emit');
-    const assignApartmentSpy = vi.spyOn(component.assignApartment, 'emit');
-    const removeApartmentSpy = vi.spyOn(component.removeApartment, 'emit');
+    const assignPlantSpy = vi.spyOn(component.assignPlant, 'emit');
+    const removePlantSpy = vi.spyOn(component.removePlant, 'emit');
 
     fixture.componentRef.setInput('ward', null);
 
     component.onEditWardClick();
     component.onDeleteWardClick();
     component.onAssignOperatorClick();
-    component.onRemoveOperatorClick('user-1');
-    component.onAssignApartmentClick();
-    component.onRemoveApartmentClick('apt-1');
+    component.onRemoveOperatorClick(1);
+    component.onAssignPlantClick();
+    component.onRemovePlantClick(101);
 
     expect(editWardSpy).not.toHaveBeenCalled();
     expect(deleteWardSpy).not.toHaveBeenCalled();
     expect(assignOperatorSpy).not.toHaveBeenCalled();
     expect(removeOperatorSpy).not.toHaveBeenCalled();
-    expect(assignApartmentSpy).not.toHaveBeenCalled();
-    expect(removeApartmentSpy).not.toHaveBeenCalled();
+    expect(assignPlantSpy).not.toHaveBeenCalled();
+    expect(removePlantSpy).not.toHaveBeenCalled();
   });
 });

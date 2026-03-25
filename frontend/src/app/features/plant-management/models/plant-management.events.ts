@@ -1,9 +1,9 @@
 export interface RemoveOperatorEvent {
-    wardId: string;
-    userId: string;
+    wardId: number;
+    userId: number;
 }
 
-export interface RemoveApartmentEvent {
-    wardId: string;
-    apartmentId: string;
+export interface RemovePlantEvent {
+    wardId: number;
+    plantId: number;
 }

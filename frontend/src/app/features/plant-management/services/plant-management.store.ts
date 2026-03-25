@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { EMPTY, Subject, catchError, map, takeUntil, tap } from 'rxjs';
 import { ApartmentApiService } from '../../apartment-monitor/services/apartment-api.service';
-import type { AssignApartmentDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../models/plant-api.dto';
+import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../models/plant-api.dto';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardOperationsService } from './ward-operations.service';
 import { WardStore } from './ward.store';
@@ -39,7 +39,7 @@ export class PlantManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public updateWard(wardId: string, dto: UpdateWardDto): void {
+    public updateWard(wardId: number, dto: UpdateWardDto): void {
         this.wardStore.setLoading(true);
         this.wardOperations
             .updateWard(wardId, dto)
@@ -47,7 +47,7 @@ export class PlantManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public deleteWard(wardId: string): void {
+    public deleteWard(wardId: number): void {
         this.wardStore.setLoading(true);
         this.wardOperations
             .deleteWard(wardId)
@@ -55,7 +55,7 @@ export class PlantManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public assignOperator(wardId: string, dto: AssignOperatorDto): void {
+    public assignOperator(wardId: number, dto: AssignOperatorDto): void {
         this.wardStore.setLoading(true);
         this.wardAssignmentOperations
             .assignOperator(wardId, dto)
@@ -63,7 +63,7 @@ export class PlantManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public removeOperator(wardId: string, userId: string): void {
+    public removeOperator(wardId: number, userId: number): void {
         this.wardStore.setLoading(true);
         this.wardAssignmentOperations
             .removeOperator(wardId, userId)
@@ -71,28 +71,28 @@ export class PlantManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public assignApartment(wardId: string, dto: AssignApartmentDto): void {
+    public assignPlant(wardId: number, dto: AssignPlantDto): void {
         this.wardStore.setLoading(true);
         this.wardAssignmentOperations
-            .assignApartment(wardId, dto)
+            .assignPlant(wardId, dto)
             .pipe(takeUntil(this.destroy$))
             .subscribe();
     }
 
-    public removeApartment(wardId: string, apartmentId: string): void {
+    public removePlant(wardId: number, plantId: number): void {
         this.wardStore.setLoading(true);
         this.wardAssignmentOperations
-            .removeApartment(wardId, apartmentId)
+            .removePlant(wardId, plantId)
             .pipe(takeUntil(this.destroy$))
             .subscribe();
     }
 
-    public enableApartment(apartmentId: string): void {
+    public enablePlant(plantId: number): void {
         this.wardStore.setLoading(true);
         this.apartmentApi
-            .enableApartment(apartmentId)
+            .enableApartment(String(plantId))
             .pipe(
-                tap(() => this.wardStore.patchApartment(apartmentId, { isEnabled: true })),
+                tap(() => this.wardStore.patchPlant(plantId, { isEnabled: true })),
                 tap(() => this.wardStore.setLoading(false)),
                 map(() => void 0),
                 catchError((error) => {
@@ -104,12 +104,12 @@ export class PlantManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public disableApartment(apartmentId: string): void {
+    public disablePlant(plantId: number): void {
         this.wardStore.setLoading(true);
         this.apartmentApi
-            .disableApartment(apartmentId)
+            .disableApartment(String(plantId))
             .pipe(
-                tap(() => this.wardStore.patchApartment(apartmentId, { isEnabled: false })),
+                tap(() => this.wardStore.patchPlant(plantId, { isEnabled: false })),
                 tap(() => this.wardStore.setLoading(false)),
                 map(() => void 0),
                 catchError((error) => {
@@ -126,6 +126,6 @@ export class PlantManagementStore implements OnDestroy {
             return error.message;
         }
 
-        return 'Operazione appartamento non riuscita.';
+        return 'Operazione plant non riuscita.';
     }
 }

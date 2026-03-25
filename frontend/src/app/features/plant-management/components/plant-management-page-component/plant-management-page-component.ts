@@ -2,8 +2,8 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import type { Apartment } from '../../models/apartment.model';
-import type { AssignApartmentDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../../models/plant-api.dto';
-import type { RemoveApartmentEvent, RemoveOperatorEvent } from '../../models/plant-management.events';
+import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../../models/plant-api.dto';
+import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/plant-management.events';
 import type { Ward } from '../../models/ward.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PlantManagementStore } from '../../services/plant-management.store';
@@ -37,12 +37,12 @@ export class PlantManagementPageComponent implements OnInit, OnDestroy {
   public readonly snackbarMessage = signal<string | null>(null);
   public readonly wardDialogMode = signal<'closed' | 'create' | 'edit'>('closed');
   public readonly selectedWard = signal<Ward | null>(null);
-  public readonly operatorWardId = signal<string | null>(null);
-  public readonly apartmentWardId = signal<string | null>(null);
+  public readonly operatorWardId = signal<number | null>(null);
+  public readonly plantWardId = signal<number | null>(null);
   public readonly confirmState = signal<
-    | { kind: 'delete-ward'; wardId: string }
-    | { kind: 'remove-operator'; wardId: string; userId: string }
-    | { kind: 'remove-apartment'; wardId: string; apartmentId: string }
+    | { kind: 'delete-ward'; wardId: number }
+    | { kind: 'remove-operator'; wardId: number; userId: number }
+    | { kind: 'remove-plant'; wardId: number; plantId: number }
     | null
   >(null);
 
@@ -55,8 +55,8 @@ export class PlantManagementPageComponent implements OnInit, OnDestroy {
     return this.selectedWard();
   });
 
-  public readonly availableApartments = computed<Apartment[]>(() => {
-    const selectedWardId = this.apartmentWardId();
+  public readonly availablePlants = computed<Apartment[]>(() => {
+    const selectedWardId = this.plantWardId();
     if (!selectedWardId) {
       return [];
     }
@@ -69,7 +69,7 @@ export class PlantManagementPageComponent implements OnInit, OnDestroy {
 
     const assignedToSelected = new Set(selectedWard.apartments.map((apartment) => apartment.id));
     const knownApartments = wards.flatMap((ward) => ward.apartments);
-    const uniqueApartments = new Map<string, Apartment>();
+    const uniqueApartments = new Map<number, Apartment>();
     for (const apartment of knownApartments) {
       if (!uniqueApartments.has(apartment.id) && !assignedToSelected.has(apartment.id)) {
         uniqueApartments.set(apartment.id, apartment);
@@ -131,11 +131,11 @@ export class PlantManagementPageComponent implements OnInit, OnDestroy {
     this.wardDialogMode.set('closed');
   }
 
-  public onDeleteWard(wardId: string): void {
+  public onDeleteWard(wardId: number): void {
     this.confirmState.set({ kind: 'delete-ward', wardId });
   }
 
-  public onAssignOperator(wardId: string): void {
+  public onAssignOperator(wardId: number): void {
     this.operatorWardId.set(wardId);
   }
 
@@ -157,38 +157,38 @@ export class PlantManagementPageComponent implements OnInit, OnDestroy {
     this.confirmState.set({ kind: 'remove-operator', wardId: event.wardId, userId: event.userId });
   }
 
-  public onAssignApartment(wardId: string): void {
-    this.apartmentWardId.set(wardId);
+  public onAssignPlant(wardId: number): void {
+    this.plantWardId.set(wardId);
   }
 
-  public onAssignApartmentSubmit(dto: AssignApartmentDto): void {
-    const wardId = this.apartmentWardId();
+  public onAssignPlantSubmit(dto: AssignPlantDto): void {
+    const wardId = this.plantWardId();
     if (!wardId) {
       return;
     }
 
-    this.store.assignApartment(wardId, dto);
-    this.apartmentWardId.set(null);
+    this.store.assignPlant(wardId, dto);
+    this.plantWardId.set(null);
   }
 
-  public onCloseAssignApartmentDialog(): void {
-    this.apartmentWardId.set(null);
+  public onCloseAssignPlantDialog(): void {
+    this.plantWardId.set(null);
   }
 
-  public onRemoveApartment(event: RemoveApartmentEvent): void {
+  public onRemovePlant(event: RemovePlantEvent): void {
     this.confirmState.set({
-      kind: 'remove-apartment',
+      kind: 'remove-plant',
       wardId: event.wardId,
-      apartmentId: event.apartmentId,
+      plantId: event.plantId,
     });
   }
 
-  public onEnableApartment(apartmentId: string): void {
-    this.store.enableApartment(apartmentId);
+  public onEnablePlant(plantId: number): void {
+    this.store.enablePlant(plantId);
   }
 
-  public onDisableApartment(apartmentId: string): void {
-    this.store.disableApartment(apartmentId);
+  public onDisablePlant(plantId: number): void {
+    this.store.disablePlant(plantId);
   }
 
   public onConfirmDialogConfirmed(): void {
@@ -205,8 +205,8 @@ export class PlantManagementPageComponent implements OnInit, OnDestroy {
       this.store.removeOperator(state.wardId, state.userId);
     }
 
-    if (state.kind === 'remove-apartment') {
-      this.store.removeApartment(state.wardId, state.apartmentId);
+    if (state.kind === 'remove-plant') {
+      this.store.removePlant(state.wardId, state.plantId);
     }
 
     this.confirmState.set(null);

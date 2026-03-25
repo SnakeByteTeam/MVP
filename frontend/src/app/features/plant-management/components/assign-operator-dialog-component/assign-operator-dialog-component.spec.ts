@@ -56,7 +56,7 @@ describe('AssignOperatorDialogComponent', () => {
     // Arrange
     fixture.detectChanges();
     const submittedSpy = vi.spyOn(component.submitted, 'emit');
-    component.form.controls.userId.setValue('');
+    component.form.controls.userId.setValue(null);
 
     // Act
     component.onSubmit();
@@ -71,13 +71,13 @@ describe('AssignOperatorDialogComponent', () => {
     // Arrange
     fixture.detectChanges();
     const submittedSpy = vi.spyOn(component.submitted, 'emit');
-    component.form.controls.userId.setValue('u-1');
+    component.form.controls.userId.setValue(1);
 
     // Act
     component.onSubmit();
 
     // Assert
-    expect(submittedSpy).toHaveBeenCalledWith({ userId: 'u-1' });
+    expect(submittedSpy).toHaveBeenCalledWith({ userId: 1 });
     expect(submittedSpy).toHaveBeenCalledTimes(1);
   });
 

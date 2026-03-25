@@ -7,9 +7,9 @@ export interface UpdateWardDto {
 }
 
 export interface AssignOperatorDto {
-    userId: string;
+    userId: number;
 }
 
-export interface AssignApartmentDto {
-    apartmentId: string;
+export interface AssignPlantDto {
+    plantId: number;
 }

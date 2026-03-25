@@ -13,9 +13,9 @@ describe('AssignmentOperationsService', () => {
 
     const wards: Ward[] = [
         {
-            id: 'ward-1',
+            id: 1,
             name: 'Cardiologia',
-            apartments: [{ id: 'apt-1', name: 'App. 101', isEnabled: true }],
+            apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
             operators: [
                 {
                     id: 'user-1',
@@ -31,8 +31,8 @@ describe('AssignmentOperationsService', () => {
     const apiStub = {
         assignOperatorToWard: vi.fn(),
         removeOperatorFromWard: vi.fn(),
-        assignApartmentToWard: vi.fn(),
-        removeApartmentFromWard: vi.fn(),
+        assignPlantToWard: vi.fn(),
+        removePlantFromWard: vi.fn(),
         getWards: vi.fn(),
     };
 
@@ -60,11 +60,11 @@ describe('AssignmentOperationsService', () => {
         apiStub.assignOperatorToWard.mockReturnValue(of(void 0));
         apiStub.getWards.mockReturnValue(of(wards));
 
-        service.assignOperator('ward-1', { userId: 'user-2' }).subscribe((result) => {
+        service.assignOperator(1, { userId: 2 }).subscribe((result) => {
             expect(result).toBeUndefined();
         });
 
-        expect(apiStub.assignOperatorToWard).toHaveBeenCalledWith('ward-1', { userId: 'user-2' });
+        expect(apiStub.assignOperatorToWard).toHaveBeenCalledWith(1, { userId: 2 });
         expect(apiStub.getWards).toHaveBeenCalledOnce();
         expect(storeStub.setWards).toHaveBeenCalledWith(wards);
         expect(storeStub.setWards).toHaveBeenCalledTimes(1);
@@ -81,7 +81,7 @@ describe('AssignmentOperationsService', () => {
         );
 
         let emitted = false;
-        service.removeOperator('ward-1', 'user-2').subscribe(() => {
+        service.removeOperator(1, 2).subscribe(() => {
             emitted = true;
         });
 
@@ -92,12 +92,12 @@ describe('AssignmentOperationsService', () => {
         expect(storeStub.setWards).not.toHaveBeenCalled();
     });
 
-    it('assignApartment in errore usa HttpErrorResponse.message quando non c e error string', () => {
-        apiStub.assignApartmentToWard.mockReturnValue(
+    it('assignPlant in errore usa HttpErrorResponse.message quando non c e error string', () => {
+        apiStub.assignPlantToWard.mockReturnValue(
             throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' }))
         );
 
-        service.assignApartment('ward-1', { apartmentId: 'apt-2' }).subscribe();
+        service.assignPlant(1, { plantId: 102 }).subscribe();
 
         const messageArg = vi.mocked(storeStub.setError).mock.calls[0]?.[0] as string;
         expect(messageArg.length).toBeGreaterThan(0);
@@ -105,10 +105,10 @@ describe('AssignmentOperationsService', () => {
         expect(storeStub.setWards).not.toHaveBeenCalled();
     });
 
-    it('removeApartment in errore non-http usa fallback message', () => {
-        apiStub.removeApartmentFromWard.mockReturnValue(throwError(() => ({ bad: true })));
+    it('removePlant in errore non-http usa fallback message', () => {
+        apiStub.removePlantFromWard.mockReturnValue(throwError(() => ({ bad: true })));
 
-        service.removeApartment('ward-1', 'apt-2').subscribe();
+        service.removePlant(1, 102).subscribe();
 
         expect(storeStub.setError).toHaveBeenCalledWith('Operazione di assegnazione non riuscita.');
         expect(storeStub.setError).toHaveBeenCalledTimes(1);

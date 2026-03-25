@@ -46,7 +46,7 @@ export class WardStore {
     });
   }
 
-  public removeWard(wardId: string): void {
+  public removeWard(wardId: number): void {
     const current = this.state$.value;
     this.setState({
       wards: current.wards.filter((ward) => ward.id !== wardId),
@@ -55,12 +55,12 @@ export class WardStore {
     });
   }
 
-  public patchApartment(apartmentId: string, patch: Partial<Apartment>): void {
+  public patchPlant(plantId: number, patch: Partial<Apartment>): void {
     const current = this.state$.value;
     const wards = current.wards.map((ward) => ({
       ...ward,
       apartments: ward.apartments.map((apartment) =>
-        apartment.id === apartmentId ? { ...apartment, ...patch } : apartment,
+        apartment.id === plantId ? { ...apartment, ...patch } : apartment,
       ),
     }));
 

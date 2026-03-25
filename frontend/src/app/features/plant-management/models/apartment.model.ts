@@ -1,5 +1,5 @@
 export interface Apartment {
-    id: string;
+    id: number;
     name: string;
     isEnabled: boolean;
 }

@@ -10,10 +10,10 @@ import type { Apartment } from '../../models/apartment.model';
 })
 export class ApartmentRowComponent {
   public readonly apartment = input<Apartment | null>(null);
-  public readonly wardId = input<string>('');
+  public readonly wardId = input<number>(0);
 
-  public readonly enable = output<string>();
-  public readonly disable = output<string>();
+  public readonly enable = output<number>();
+  public readonly disable = output<number>();
 
   public onToggle(): void {
     const apartment = this.apartment();

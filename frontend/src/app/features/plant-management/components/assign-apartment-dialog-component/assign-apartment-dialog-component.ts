@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { Apartment } from '../../models/apartment.model';
-import type { AssignApartmentDto } from '../../models/plant-api.dto';
+import type { AssignPlantDto } from '../../models/plant-api.dto';
 import type { Ward } from '../../models/ward.model';
 
 @Component({
@@ -14,18 +14,18 @@ import type { Ward } from '../../models/ward.model';
 export class AssignApartmentDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
 
-  public readonly wardId = input<string>('');
+  public readonly wardId = input<number>(0);
   public readonly availableWards = input<Ward[]>([]);
-  public readonly availableApartments = input<Apartment[]>([]);
-  public readonly submitted = output<AssignApartmentDto>();
+  public readonly availablePlants = input<Apartment[]>([]);
+  public readonly submitted = output<AssignPlantDto>();
   public readonly cancelled = output<void>();
 
-  public readonly form = this.formBuilder.nonNullable.group({
-    apartmentId: ['', [Validators.required]],
+  public readonly form = this.formBuilder.group({
+    plantId: this.formBuilder.control<number | null>(null, { validators: [Validators.required] }),
   });
 
   public ngOnInit(): void {
-    this.form.reset({ apartmentId: '' });
+    this.form.reset({ plantId: null });
   }
 
   public onSubmit(): void {
@@ -34,7 +34,7 @@ export class AssignApartmentDialogComponent implements OnInit {
       return;
     }
 
-    this.submitted.emit({ apartmentId: this.form.controls.apartmentId.value });
+    this.submitted.emit({ plantId: this.form.controls.plantId.value as number });
   }
 
   public onCancel(): void {

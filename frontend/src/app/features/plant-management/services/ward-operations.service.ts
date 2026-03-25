@@ -39,7 +39,7 @@ export class WardOperationsService {
     );
   }
 
-  public updateWard(wardId: string, dto: UpdateWardDto): Observable<void> {
+  public updateWard(wardId: number, dto: UpdateWardDto): Observable<void> {
     return this.api.updateWard(wardId, dto).pipe(
       tap((ward) => this.store.replaceWard(ward)),
       tap(() => this.store.setLoading(false)),
@@ -51,7 +51,7 @@ export class WardOperationsService {
     );
   }
 
-  public deleteWard(wardId: string): Observable<void> {
+  public deleteWard(wardId: number): Observable<void> {
     return this.api.deleteWard(wardId).pipe(
       tap(() => this.store.removeWard(wardId)),
       tap(() => this.store.setLoading(false)),

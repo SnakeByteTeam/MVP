@@ -1,27 +1,30 @@
-import { GenerateAccessTokenAdapter } from "./generate-access-token-adapter";
+import { GenerateAccessTokenAdapter } from './generate-access-token-adapter';
 
 describe('GenerateTokenAdapter', () => {
-  const mockToken = "test"
+  const mockToken = 'test';
 
   const mockJwtAccessTokenGenerator = {
-    generateAccessToken: jest.fn().mockReturnValue("test"),
+    generateAccessToken: jest.fn().mockReturnValue('test'),
   };
 
   it('should be defined', () => {
-    expect(new GenerateAccessTokenAdapter(mockJwtAccessTokenGenerator)).toBeDefined();
+    expect(
+      new GenerateAccessTokenAdapter(mockJwtAccessTokenGenerator),
+    ).toBeDefined();
   });
 
   it('should generate refresh token from payload', () => {
     const adapter = new GenerateAccessTokenAdapter(
-      mockJwtAccessTokenGenerator as any
+      mockJwtAccessTokenGenerator as any,
     );
 
     const result = adapter.generateAccessToken({
-      payload: { id: 1, role: "admin" },
+      payload: { id: 1, role: 'admin' },
     });
 
-    expect(mockJwtAccessTokenGenerator.generateAccessToken)
-      .toHaveBeenCalledWith({ id: 1, role: "admin" });
+    expect(
+      mockJwtAccessTokenGenerator.generateAccessToken,
+    ).toHaveBeenCalledWith({ id: 1, role: 'admin' });
 
     expect(result).toEqual(mockToken);
   });

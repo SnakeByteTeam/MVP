@@ -1,5 +1,3 @@
 export class RefreshCmd {
-    constructor(
-        public refreshToken: string
-    ){}
+  constructor(public refreshToken: string) {}
 }

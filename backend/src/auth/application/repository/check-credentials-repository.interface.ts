@@ -1,4 +1,4 @@
-import { PayloadEntity } from "../../infrastructure/entities/payload-entity";
+import { PayloadEntity } from '../../infrastructure/entities/payload-entity';
 
 export interface CheckCredentialsRepository {
   checkCredentials(username: string, password: string): Promise<PayloadEntity>;

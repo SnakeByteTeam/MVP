@@ -1,5 +1,5 @@
-import { RefreshCmd } from "../../commands/refresh-cmd";
+import { RefreshCmd } from '../../commands/refresh-cmd';
 
 export interface RefreshUseCase {
-    refresh(req: RefreshCmd);
+  refresh(req: RefreshCmd);
 }

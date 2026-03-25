@@ -8,20 +8,23 @@ describe('ExtractFromRefreshTokenAdapter', () => {
   };
 
   it('should be defined', () => {
-    expect(new ExtractFromRefreshTokenAdapter(mockJwtRefreshTokenExtractor)).toBeDefined();
+    expect(
+      new ExtractFromRefreshTokenAdapter(mockJwtRefreshTokenExtractor),
+    ).toBeDefined();
   });
 
   it('should extract payload from refresh token', () => {
     const adapter = new ExtractFromRefreshTokenAdapter(
-      mockJwtRefreshTokenExtractor as any
+      mockJwtRefreshTokenExtractor as any,
     );
 
     const result = adapter.extractFromRefreshToken({
       token: 'fake-token',
     });
 
-    expect(mockJwtRefreshTokenExtractor.extractRefreshTokenPayload)
-      .toHaveBeenCalledWith('fake-token');
+    expect(
+      mockJwtRefreshTokenExtractor.extractRefreshTokenPayload,
+    ).toHaveBeenCalledWith('fake-token');
 
     expect(result).toEqual(mockPayload);
   });
@@ -36,7 +39,7 @@ describe('ExtractFromRefreshTokenAdapter', () => {
     const adapter = new ExtractFromRefreshTokenAdapter(mock as any);
 
     expect(() =>
-      adapter.extractFromRefreshToken({ token: 'bad-token' })
+      adapter.extractFromRefreshToken({ token: 'bad-token' }),
     ).toThrow('Invalid token');
   });
 });

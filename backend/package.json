@@ -64,6 +64,11 @@
       "json",
       "ts"
     ],
+    "coveragePathIgnorePatterns": [
+      ".module.ts",
+      ".entity.ts",
+      "main.ts"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {

@@ -1,6 +1,6 @@
 export class Payload {
-    constructor(
-        public id: number,
-        public role: string
-    ){}
+  constructor(
+    public id: number,
+    public role: string,
+  ) {}
 }

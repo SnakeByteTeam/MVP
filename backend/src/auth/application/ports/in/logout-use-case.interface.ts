@@ -1,5 +1,5 @@
-import { LogoutCmd } from "../../commands/logout-cmd";
+import { LogoutCmd } from '../../commands/logout-cmd';
 
 export interface LogoutUseCase {
-    logout(req: LogoutCmd);
+  logout(req: LogoutCmd);
 }

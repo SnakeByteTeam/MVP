@@ -1,6 +1,6 @@
 export class PayloadEntity {
-    constructor(
-        public id: number,
-        public role: string
-    ){}
+  constructor(
+    public id: number,
+    public role: string,
+  ) {}
 }

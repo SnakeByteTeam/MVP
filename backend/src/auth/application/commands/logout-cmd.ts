@@ -1,5 +1,3 @@
 export class LogoutCmd {
-    constructor(
-        public token: string
-    ){}
+  constructor(public token: string) {}
 }

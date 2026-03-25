@@ -11,7 +11,7 @@ describe('CheckCredentialsAdapter', () => {
 
   beforeEach(() => {
     adapter = new CheckCredentialsAdapter(
-      mockCheckCredentialsRepository as any
+      mockCheckCredentialsRepository as any,
     );
   });
 
@@ -25,16 +25,17 @@ describe('CheckCredentialsAdapter', () => {
       role: 'admin',
     };
 
-    mockCheckCredentialsRepository.checkCredentials.mockResolvedValue(repoResponse);
+    mockCheckCredentialsRepository.checkCredentials.mockResolvedValue(
+      repoResponse,
+    );
 
     const cmd = new CheckCredentialsCmd('user', 'pass');
 
     const result = await adapter.checkCredentials(cmd);
 
-    expect(mockCheckCredentialsRepository.checkCredentials).toHaveBeenCalledWith(
-      'user',
-      'pass'
-    );
+    expect(
+      mockCheckCredentialsRepository.checkCredentials,
+    ).toHaveBeenCalledWith('user', 'pass');
 
     expect(result).toBeInstanceOf(Payload);
     expect(result).toEqual(new Payload(1, 'admin'));
@@ -42,13 +43,11 @@ describe('CheckCredentialsAdapter', () => {
 
   it('should propagate error from repository', async () => {
     mockCheckCredentialsRepository.checkCredentials.mockRejectedValue(
-      new Error('DB error')
+      new Error('DB error'),
     );
 
     const cmd = new CheckCredentialsCmd('user', 'pass');
 
-    await expect(adapter.checkCredentials(cmd))
-      .rejects
-      .toThrow('DB error');
+    await expect(adapter.checkCredentials(cmd)).rejects.toThrow('DB error');
   });
 });

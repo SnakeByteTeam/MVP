@@ -1,5 +1,5 @@
-import { GenerateRefreshTokenCmd } from "../../commands/generate-refresh-token-cmd";
+import { GenerateRefreshTokenCmd } from '../../commands/generate-refresh-token-cmd';
 
 export interface GenerateRefreshTokenPort {
-    generateRefreshToken(req: GenerateRefreshTokenCmd): string;
+  generateRefreshToken(req: GenerateRefreshTokenCmd): string;
 }

@@ -1,5 +1,3 @@
 export class ExtractFromRefreshTokenCmd {
-    constructor(
-        public token: string
-    ){}
+  constructor(public token: string) {}
 }

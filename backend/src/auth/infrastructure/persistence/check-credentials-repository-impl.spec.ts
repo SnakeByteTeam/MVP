@@ -35,8 +35,8 @@ describe('CheckCredentialsRepositoryImpl', () => {
     expect(result).toEqual(new PayloadEntity(1, 'admin'));
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      'SELECT id, role FROM users WHERE username = $1 AND password = $2',
-      ['testuser', 'password']
+      'SELECT u.id, r.name FROM "user" u JOIN role r ON r.id = u.roleId WHERE u.username = $1 AND u.password = $2',
+      ['testuser', 'password'],
     );
   });
 
@@ -47,7 +47,7 @@ describe('CheckCredentialsRepositoryImpl', () => {
     });
 
     await expect(
-      repo.checkCredentials('wronguser', 'password')
+      repo.checkCredentials('wronguser', 'password'),
     ).rejects.toThrow('User not found');
   });
 });

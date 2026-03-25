@@ -6,7 +6,7 @@ import { GENERATE_REFRESH_TOKEN_PORT } from '../../adapters/out/generate-refresh
 import { EXTRACT_FROM_ACCESS_TOKEN_PORT } from '../../adapters/out/extract-from-access-token-adapter';
 import { EXTRACT_FROM_REFRESH_TOKEN_PORT } from '../../adapters/out/extract-from-refresh-token-adapter';
 
-describe("AuthService", () => {
+describe('AuthService', () => {
   let service: AuthService;
 
   const mockCheckCredentials = {
@@ -34,30 +34,42 @@ describe("AuthService", () => {
       providers: [
         AuthService,
         { provide: CHECK_CREDENTIALS_PORT, useValue: mockCheckCredentials },
-        { provide: GENERATE_ACCESS_TOKEN_PORT, useValue: mockGenerateAccessToken },
-        { provide: GENERATE_REFRESH_TOKEN_PORT, useValue: mockGenerateRefreshToken },
-        { provide: EXTRACT_FROM_ACCESS_TOKEN_PORT, useValue: mockExtractFromAccessToken },
-        { provide: EXTRACT_FROM_REFRESH_TOKEN_PORT, useValue: mockExtractFromRefreshToken },
+        {
+          provide: GENERATE_ACCESS_TOKEN_PORT,
+          useValue: mockGenerateAccessToken,
+        },
+        {
+          provide: GENERATE_REFRESH_TOKEN_PORT,
+          useValue: mockGenerateRefreshToken,
+        },
+        {
+          provide: EXTRACT_FROM_ACCESS_TOKEN_PORT,
+          useValue: mockExtractFromAccessToken,
+        },
+        {
+          provide: EXTRACT_FROM_REFRESH_TOKEN_PORT,
+          useValue: mockExtractFromRefreshToken,
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
   });
 
-  it("should be defined", () => {
+  it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it("should login and return tokens", async () => {
-    const payload = { userId: 1, role: "admin" };
-    const accessToken = "access-token";
-    const refreshToken = "refresh-token";
+  it('should login and return tokens', async () => {
+    const payload = { userId: 1, role: 'admin' };
+    const accessToken = 'access-token';
+    const refreshToken = 'refresh-token';
 
     mockCheckCredentials.checkCredentials.mockReturnValue(payload);
     mockGenerateAccessToken.generateAccessToken.mockReturnValue(accessToken);
     mockGenerateRefreshToken.generateRefreshToken.mockReturnValue(refreshToken);
 
-    const result = await service.login({ username: "u", password: "p" });
+    const result = await service.login({ username: 'u', password: 'p' });
 
     expect(mockCheckCredentials.checkCredentials).toHaveBeenCalled();
     expect(mockGenerateAccessToken.generateAccessToken).toHaveBeenCalled();
@@ -73,16 +85,18 @@ describe("AuthService", () => {
     const payload = { userId: '1' };
     const newAccessToken = 'new-access-token';
 
-    mockExtractFromRefreshToken.extractFromRefreshToken.mockReturnValue(payload);
+    mockExtractFromRefreshToken.extractFromRefreshToken.mockReturnValue(
+      payload,
+    );
     mockGenerateAccessToken.generateAccessToken.mockReturnValue(newAccessToken);
 
     const result = service.refresh({ refreshToken: 'r-token' });
 
-    expect(mockExtractFromRefreshToken.extractFromRefreshToken)
-      .toHaveBeenCalled();
+    expect(
+      mockExtractFromRefreshToken.extractFromRefreshToken,
+    ).toHaveBeenCalled();
 
-    expect(mockGenerateAccessToken.generateAccessToken)
-      .toHaveBeenCalled();
+    expect(mockGenerateAccessToken.generateAccessToken).toHaveBeenCalled();
 
     expect(result).toBe(newAccessToken);
   });

@@ -1,7 +1,5 @@
-import { Payload } from "../../domain/payload";
+import { Payload } from '../../domain/payload';
 
 export class GenerateRefreshTokenCmd {
-    constructor(
-        public payload: Payload,
-    ){}
+  constructor(public payload: Payload) {}
 }

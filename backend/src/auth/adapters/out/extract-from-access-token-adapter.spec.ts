@@ -8,20 +8,23 @@ describe('ExtractFromAccessTokenAdapter', () => {
   };
 
   it('should be defined', () => {
-    expect(new ExtractFromAccessTokenAdapter(mockJwtAccessTokenExtractor)).toBeDefined();
+    expect(
+      new ExtractFromAccessTokenAdapter(mockJwtAccessTokenExtractor),
+    ).toBeDefined();
   });
 
   it('should extract payload from refresh token', () => {
     const adapter = new ExtractFromAccessTokenAdapter(
-      mockJwtAccessTokenExtractor as any
+      mockJwtAccessTokenExtractor as any,
     );
 
     const result = adapter.extractFromAccessToken({
       token: 'fake-token',
     });
 
-    expect(mockJwtAccessTokenExtractor.extractAccessTokenPayload)
-      .toHaveBeenCalledWith('fake-token');
+    expect(
+      mockJwtAccessTokenExtractor.extractAccessTokenPayload,
+    ).toHaveBeenCalledWith('fake-token');
 
     expect(result).toEqual(mockPayload);
   });
@@ -36,7 +39,7 @@ describe('ExtractFromAccessTokenAdapter', () => {
     const adapter = new ExtractFromAccessTokenAdapter(mock as any);
 
     expect(() =>
-      adapter.extractFromAccessToken({ token: 'bad-token' })
+      adapter.extractFromAccessToken({ token: 'bad-token' }),
     ).toThrow('Invalid token');
   });
 });

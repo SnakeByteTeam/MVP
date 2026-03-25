@@ -1,5 +1,5 @@
-import { Payload } from "../../domain/payload";
+import { Payload } from '../../domain/payload';
 
 export interface JwtRefreshTokenGenerator {
-    generateRefreshToken(payload: Payload): string;
+  generateRefreshToken(payload: Payload): string;
 }

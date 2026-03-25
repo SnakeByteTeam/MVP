@@ -3,7 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 
 describe('JwtTokenGenerator', () => {
   let generator: JwtTokenGenerator;
-  const payload = { id: 1, role: "admin" };
+  const payload = { id: 1, role: 'admin' };
 
   beforeEach(() => {
     process.env.ACCESS_SECRET = 'access-secret';
@@ -50,13 +50,13 @@ describe('JwtTokenGenerator', () => {
   describe('error handling', () => {
     it('should throw for invalid access token', () => {
       expect(() =>
-        generator.extractAccessTokenPayload('invalid-token')
+        generator.extractAccessTokenPayload('invalid-token'),
       ).toThrow(UnauthorizedException);
     });
 
     it('should throw for invalid refresh token', () => {
       expect(() =>
-        generator.extractRefreshTokenPayload('invalid-token')
+        generator.extractRefreshTokenPayload('invalid-token'),
       ).toThrow(UnauthorizedException);
     });
 
@@ -65,9 +65,9 @@ describe('JwtTokenGenerator', () => {
 
       process.env.ACCESS_SECRET = 'different-secret';
 
-      expect(() =>
-        generator.extractAccessTokenPayload(token)
-      ).toThrow(UnauthorizedException);
+      expect(() => generator.extractAccessTokenPayload(token)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw if refresh token is signed with different secret', () => {
@@ -75,9 +75,9 @@ describe('JwtTokenGenerator', () => {
 
       process.env.REFRESH_SECRET = 'different-secret';
 
-      expect(() =>
-        generator.extractRefreshTokenPayload(token)
-      ).toThrow(UnauthorizedException);
+      expect(() => generator.extractRefreshTokenPayload(token)).toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

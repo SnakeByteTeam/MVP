@@ -1,5 +1,3 @@
 export class ExtractFromAccessTokenCmd {
-    constructor(
-        public token: string
-    ){}
+  constructor(public token: string) {}
 }

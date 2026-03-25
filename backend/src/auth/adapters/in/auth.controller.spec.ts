@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
-import { 
-  LOGIN_USE_CASE, 
-  REFRESH_USE_CASE, 
-  LOGOUT_USE_CASE 
+import {
+  LOGIN_USE_CASE,
+  REFRESH_USE_CASE,
+  LOGOUT_USE_CASE,
 } from '../../application/services/auth.service';
 
 describe('AuthController', () => {
@@ -70,7 +70,7 @@ describe('AuthController', () => {
     });
   });
 
-/*   it('should call logout use case', () => {
+  /*   it('should call logout use case', () => {
     mockLogoutUseCase.logout.mockReturnValue(undefined);
 
     const result = controller.logout();

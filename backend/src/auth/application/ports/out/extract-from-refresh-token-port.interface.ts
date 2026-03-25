@@ -1,6 +1,6 @@
-import { Payload } from "../../../domain/payload";
-import { ExtractFromRefreshTokenCmd } from "../../commands/extract-from-refresh-token-cmd";
+import { Payload } from '../../../domain/payload';
+import { ExtractFromRefreshTokenCmd } from '../../commands/extract-from-refresh-token-cmd';
 
 export interface ExtractFromRefreshTokenPort {
-    extractFromRefreshToken(req: ExtractFromRefreshTokenCmd): Payload
+  extractFromRefreshToken(req: ExtractFromRefreshTokenCmd): Payload;
 }

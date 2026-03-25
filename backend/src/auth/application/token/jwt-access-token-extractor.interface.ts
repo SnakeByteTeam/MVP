@@ -1,5 +1,5 @@
-import { Payload } from "../../domain/payload";
+import { Payload } from '../../domain/payload';
 
 export interface JwtAccessTokenExtractor {
-    extractAccessTokenPayload(token: string): Payload
+  extractAccessTokenPayload(token: string): Payload;
 }

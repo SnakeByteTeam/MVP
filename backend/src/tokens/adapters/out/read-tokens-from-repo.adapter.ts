@@ -7,20 +7,16 @@ import { TokenEntity } from "src/tokens/infrastructure/persistence/entities/toke
 @Injectable()
 export class ReadTokensFromRepoAdapter implements ReadTokensFromRepoPort{
     constructor(
-        @Inject(READTOKENSCACHEPORT) private readTokensCachePort: ReadTokensCachePort
+        @Inject(READTOKENSCACHEPORT) private readonly readTokensCachePort: ReadTokensCachePort
     ) {}
 
     async readTokens(): Promise<TokenPair> {
-        try{
-            const tokens: TokenEntity | null = await this.readTokensCachePort.readTokens();
+        const tokens: TokenEntity | null = await this.readTokensCachePort.readTokens();
 
-            if (!tokens) {
-                throw new Error('No tokens found in cache');
-            }
-
-            return new TokenPair(tokens.accessToken, tokens.refreshToken, tokens.expiresAt);
-        } catch(err) {
-            throw(err);
+        if (!tokens) {
+            throw new Error('No tokens found in cache');
         }
+
+        return new TokenPair(tokens.accessToken, tokens.refreshToken, tokens.expiresAt);
     }
 }

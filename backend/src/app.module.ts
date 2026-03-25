@@ -8,6 +8,8 @@ import { ApiAuthVimarModule } from './api-auth-vimar/api-auth-vimar.module';
 
 import { TokensModule } from './tokens/tokens.module';
 import { DatabaseModule } from './database/database.module';
+import { DeviceModule } from './device/device.module';
+import { PlantModule } from './plant/plant.module';
 
 @Module({
   imports: [ApiAuthVimarModule,
@@ -16,7 +18,7 @@ import { DatabaseModule } from './database/database.module';
               isGlobal: true, 
               load: [envConfig]
             }), 
-            DatabaseModule],
+            DatabaseModule, DeviceModule, PlantModule],
   controllers: [AppController],
   providers: [AppService],
 })

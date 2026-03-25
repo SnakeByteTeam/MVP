@@ -7,7 +7,7 @@ import { TokensDto } from "src/tokens/infrastructure/dtos/tokens.dto";
 @Injectable()
 export class RefreshTokensAdapter implements RefreshTokensPort {
     constructor(
-        @Inject(REFRESHTOKENSFROMAPIPORT) private refreshTokensFromApi: RefreshTokensFromApiPort
+        @Inject(REFRESHTOKENSFROMAPIPORT) private readonly refreshTokensFromApi: RefreshTokensFromApiPort
     ) {}
 
     async refreshTokens(refreshToken: string): Promise<TokenPair | null> {

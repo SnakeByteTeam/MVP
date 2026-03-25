@@ -1,5 +1,3 @@
-import { Plant } from "src/plant/domain/models/plant.model";
-
 export interface SyncPlantStructureUseCase {
     sync(plantId: string): Promise<boolean>;
 }

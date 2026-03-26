@@ -9,13 +9,13 @@ CREATE TABLE "user" (
     surname VARCHAR(255),
     name VARCHAR(255),
     password VARCHAR(255),
-    temp_password VARCHAR(255),
+    first_access BOOLEAN DEFAULT TRUE,
     roleId INTEGER,
     FOREIGN KEY (roleId) REFERENCES role(id)
 );
 
 INSERT INTO role (name) VALUES 
-('Operatore sanitario'),
-('Amministratore');
+('OPERATORE_SANITARIO'),
+('AMMINISTRATORE');
 
-INSERT INTO "user" (username, surname, name, password, temp_password, roleId) VALUES ('test', 'test', 'test', 'test', 'test', 1);
+INSERT INTO "user" (username, surname, name, password, first_access, roleId) VALUES ('test', 'test', 'test', 'test', TRUE, 1);

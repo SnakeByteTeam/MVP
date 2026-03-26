@@ -13,6 +13,8 @@ import {
 import {
   JWT_ACCESS_TOKEN_EXTRACTOR,
   JWT_ACCESS_TOKEN_GENERATOR,
+  JWT_CHANGE_PASSWORD_ACCESS_TOKEN_GENERATOR,
+  JWT_CHANGE_PASSWORD_REFRESH_TOKEN_GENERATOR,
   JWT_REFRESH_TOKEN_EXTRACTOR,
   JWT_REFRESH_TOKEN_GENERATOR,
   JwtTokenGenerator,
@@ -35,6 +37,11 @@ import {
 } from './adapters/out/extract-from-refresh-token-adapter';
 import { CHECK_CREDENTIALS_REPOSITORY } from './application/repository/check-credentials-repository.interface';
 import { CheckCredentialsRepositoryImpl } from './infrastructure/persistence/check-credentials-repository-impl';
+import { CHANGE_CREDENTIALS_REPOSITORY } from './application/repository/change-credentials-repository.interface';
+import { ChangeCredentialsRepositoryImpl } from './infrastructure/persistence/change-credentials-repository-impl';
+import { GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT, GenerateChangePasswordAccessTokenAdapter } from './adapters/out/generate-change-password-access-token-adapter';
+import { GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT, GenerateChangePasswordRefreshTokenAdapter } from './adapters/out/generate-change-password-refresh-token-adapter';
+import { CHANGE_CREDENTIALS_PORT } from './adapters/out/change-credentials-adapter';
 
 @Module({
   controllers: [AuthController],
@@ -56,11 +63,31 @@ import { CheckCredentialsRepositoryImpl } from './infrastructure/persistence/che
       useClass: CheckCredentialsAdapter,
     },
     {
+      provide: CHANGE_CREDENTIALS_PORT,
+      useClass: CheckCredentialsAdapter,
+    },
+    {
+      provide: GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT,
+      useClass: GenerateChangePasswordAccessTokenAdapter,
+    },
+    {
+      provide: GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT,
+      useClass: GenerateChangePasswordRefreshTokenAdapter,
+    },
+    {
       provide: JWT_ACCESS_TOKEN_GENERATOR,
       useClass: JwtTokenGenerator,
     },
     {
       provide: JWT_REFRESH_TOKEN_GENERATOR,
+      useClass: JwtTokenGenerator,
+    },
+    {
+      provide: JWT_CHANGE_PASSWORD_ACCESS_TOKEN_GENERATOR,
+      useClass: JwtTokenGenerator,
+    },
+    {
+      provide: JWT_CHANGE_PASSWORD_REFRESH_TOKEN_GENERATOR,
       useClass: JwtTokenGenerator,
     },
     {
@@ -91,6 +118,10 @@ import { CheckCredentialsRepositoryImpl } from './infrastructure/persistence/che
       provide: CHECK_CREDENTIALS_REPOSITORY,
       useClass: CheckCredentialsRepositoryImpl,
     },
+    {
+      provide: CHANGE_CREDENTIALS_REPOSITORY,
+      useClass: ChangeCredentialsRepositoryImpl
+    }
   ],
 })
 export class AuthModule {}

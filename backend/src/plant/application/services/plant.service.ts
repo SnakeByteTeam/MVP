@@ -14,7 +14,6 @@ import { SyncPlantCmd } from '../commands/sync-plant.command';
 
 @Injectable()
 export class PlantService implements FindPlantByIdUseCase {
-  private static readonly TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
 
   constructor(
     @Inject(SYNC_PLANT_STRUCTURE_USECASE)
@@ -24,30 +23,18 @@ export class PlantService implements FindPlantByIdUseCase {
   ) {}
 
   async findById(cmd: FindPlantByIdCmd): Promise<Plant> {
-    try {
-      const plant: Plant = await this.findByIdPort.findById(cmd);
+    const cached: Plant | null = await this.findByIdPort.findById(cmd);
 
-      const cacheIsStale =
-        plant.getCachedAt().getTime() <
-        Date.now() - PlantService.TWELVE_HOURS_MS;
+    if(cached) return cached;
 
-      if (!cacheIsStale) {
-        return plant;
-      }
+    const synced = await this.syncPlantStructure.sync({id: cmd?.id});
+    if (!synced) throw(new Error(`Failed to sync plant ${cmd.id}`));
 
-      const syncCmd: SyncPlantCmd = { id: cmd?.id };
-      const synced = await this.syncPlantStructure.sync(syncCmd);
-      if (!synced) {
-        return plant;
-      }
+    const plant: Plant | null = await this.findByIdPort.findById(cmd);
 
-      return await this.findByIdPort.findById(cmd);
-    } catch (err) {
-      const syncCmd: SyncPlantCmd = { id: cmd?.id };
-      if (!(await this.syncPlantStructure.sync(syncCmd))) {
-        throw err;
-      }
-      return await this.findByIdPort.findById(cmd);
-    }
+    if(!plant) throw(new Error(`Plant ${cmd.id} not found after sync`));
+
+    return plant
+
   }
 }

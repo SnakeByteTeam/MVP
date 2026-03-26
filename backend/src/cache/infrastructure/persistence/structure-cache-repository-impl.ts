@@ -1,0 +1,60 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { PG_POOL } from 'src/database/database.module';
+import { Pool } from 'pg';
+
+import { PlantEntity } from './entities/plant.entity';
+import { ReadCacheRepoPort } from 'src/cache/application/repository/read-cache.repository';
+import { WriteCacheRepoPort } from 'src/cache/application/repository/write-cache.repository';
+
+@Injectable()
+export class StructureCacheImpl
+  implements ReadCacheRepoPort, WriteCacheRepoPort
+{
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+
+  async read(plantId: string): Promise<PlantEntity | null> {
+    const client = await this.pool.connect();
+
+    try {
+      const { rows } = await client.query<PlantEntity>(
+        `SELECT plant_id, data, cached_at 
+                FROM structure_cache 
+                WHERE plant_id = $1`,
+        [plantId],
+      );
+      if (rows.length === 0) return null;
+
+      const row = rows[0];
+
+      const entity: PlantEntity = {
+        cached_at: row.cached_at,
+        data: row.data,
+      };
+      return entity;
+    } catch {
+      return null;
+    } finally {
+      client.release();
+    }
+  }
+
+  async write(plant: PlantEntity): Promise<boolean> {
+    const client = await this.pool.connect();
+
+    try {
+      await client.query(
+        `INSERT INTO structure_cache (plant_id, data, cached_at)
+                VALUES ($1, $2, NOW())
+                ON CONFLICT (plant_id) DO UPDATE
+                SET data      = EXCLUDED.data,
+                    cached_at = NOW()`,
+        [plant.data.id, JSON.stringify(plant.data)],
+      );
+      return true;
+    } catch {
+      return false;
+    } finally {
+      client.release();
+    }
+  }
+}

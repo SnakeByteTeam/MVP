@@ -10,19 +10,26 @@ import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant
 
 @Injectable()
 export class FindPlantByIdAdapter implements FindPlantByIdPort {
+  private readonly CACHE_TTL_MS: number = 12 * 60 * 60 * 1000;
+
   constructor(
     @Inject(FIND_PLANT_BY_ID_REPO_PORT)
     private readonly findByIdRepo: FindPlantByIdRepoPort,
   ) {}
-  async findById(cmd: FindPlantByIdCmd): Promise<Plant> {
+  async findById(cmd: FindPlantByIdCmd): Promise<Plant | null> {
     const plantId: string = cmd?.id;
     if (!plantId) throw new Error('PlantId is null');
 
     const entity: PlantEntity | null =
       await this.findByIdRepo.findById(plantId);
 
-    if (!entity) throw new Error("Can't get plant info from db");
+    if (!entity) return null;
+    if(this.isCacheStale(entity.cached_at)) return null;
 
-    return PlantEntity.toDomain(entity);
+    return PlantEntity.toDomain(entity);;
+  }
+
+  private isCacheStale(cachedAt: Date): boolean {
+    return cachedAt.getTime() < Date.now() - this.CACHE_TTL_MS;
   }
 }

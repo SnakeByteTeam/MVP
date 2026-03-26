@@ -23,7 +23,8 @@ services:
     ports: 
       - 3000:3000
     volumes: 
-      - ./backend/src:/app/src
+      - ./backend:/app
+      - /app/node_modules
     command: npm run start:dev
     depends_on:
       - database

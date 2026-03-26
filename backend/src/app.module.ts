@@ -21,7 +21,9 @@ import { PlantModule } from './plant/plant.module';
     }),
     DatabaseModule,
     DeviceModule,
-    PlantModule, AuthModule, DatabaseModule, WardsModule
+    PlantModule,
+    AuthModule,
+    WardsModule
   ],
 })
 export class AppModule { }

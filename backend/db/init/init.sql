@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -51,7 +50,6 @@ CREATE TABLE ward_plant (
 
 
 
-=======
 DROP TABLE IF EXISTS TOKEN_CACHE;
 DROP TABLE IF EXISTS STRUCTURE_CACHE;
 
@@ -159,4 +157,3 @@ VALUES (
 );
 
 
->>>>>>> backend

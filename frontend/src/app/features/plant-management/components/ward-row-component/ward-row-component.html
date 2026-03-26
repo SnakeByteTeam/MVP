@@ -1,8 +1,0 @@
-@if (apartment(); as currentApartment) {
-<div>
-    <span>{{ currentApartment.name }}</span>
-    <button type="button" (click)="onToggle()">
-        {{ currentApartment.isEnabled ? 'Disabilita' : 'Abilita' }}
-    </button>
-</div>
-}

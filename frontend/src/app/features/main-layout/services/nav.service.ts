@@ -41,7 +41,7 @@ export class NavService {
             {
                 label: "Gestione Reparti",
                 icon: "",
-                route: "plant-management",
+                route: "ward-management",
                 requiredRole: UserRole.AMMINISTRATORE
             },
             {

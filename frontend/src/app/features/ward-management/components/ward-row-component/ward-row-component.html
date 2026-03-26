@@ -1,0 +1,8 @@
+@if (plant(); as currentPlant) {
+<div>
+    <span>{{ currentPlant.name }}</span>
+    <button type="button" (click)="onToggle()">
+        {{ currentPlant.isEnabled ? 'Disabilita' : 'Abilita' }}
+    </button>
+</div>
+}

@@ -36,17 +36,17 @@ describe('Main Layout Routes', () => {
         });
 
         it('gestione e storico allarmi richiedono authGuard', () => {
-        const mgmt = alarmsRoute?.children?.find(c => c.path === 'alarm-management');
-        const history = alarmsRoute?.children?.find(c => c.path === 'alarm-history');
+            const mgmt = alarmsRoute?.children?.find(c => c.path === 'alarm-management');
+            const history = alarmsRoute?.children?.find(c => c.path === 'alarm-history');
 
-        expect(mgmt?.canActivate).toContain(authGuard);
-        expect(history?.canActivate).toContain(authGuard);
+            expect(mgmt?.canActivate).toContain(authGuard);
+            expect(history?.canActivate).toContain(authGuard);
         });
     });
 
     describe('Sicurezza e Ruoli', () => {
         it('routes riservate con roleGuard e ruolo AMMINISTRATORE', () => {
-            const sensitivePaths = ['plant-management', 'user-management'];
+            const sensitivePaths = ['ward-management', 'user-management'];
 
             sensitivePaths.forEach(path => {
                 const route = children.find(c => c.path === path);

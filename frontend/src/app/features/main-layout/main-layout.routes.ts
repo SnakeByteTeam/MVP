@@ -5,11 +5,11 @@ import { UserRole } from '../../core/models/user-role.enum';
 
 //guardie commentate solo per vedere il funzionamento
 
-export const MAIN_LAYOUT_ROUTES : Routes = [
+export const MAIN_LAYOUT_ROUTES: Routes = [
     {
         path: '',
-		//canActivate: [authGuard],	// DA DECOMMENTARE
-		loadComponent: () => import('./main-layout.component').then((m) => m.MainLayoutComponent),
+        //canActivate: [authGuard],	// DA DECOMMENTARE
+        loadComponent: () => import('./main-layout.component').then((m) => m.MainLayoutComponent),
         children: [
             {
                 path: 'dashboard',
@@ -18,30 +18,30 @@ export const MAIN_LAYOUT_ROUTES : Routes = [
             },
             {
                 path: 'alarms',
-                children:[
+                children: [
                     {
                         path: 'alarm-management',
-                        canActivate: [authGuard],	
+                        canActivate: [authGuard],
                         loadChildren: () =>
                             import('../alarm-management/alarm-management.routes').then((m) => m.ALARM_MANAGEMENT_ROUTES)
                     },
                     {
                         path: 'alarm-history',
-                        canActivate: [authGuard],	
+                        canActivate: [authGuard],
                         loadChildren: () =>
                             import('../alarm-history/alarm-history.routes').then((m) => m.ALARM_HISTORY_ROUTES)
                     },
 
                     {
                         path: 'alarm-configuration',
-                        canActivate: [authGuard, roleGuard], 
+                        canActivate: [authGuard, roleGuard],
                         data: { requiredRole: UserRole.AMMINISTRATORE },
                         loadChildren: () =>
                             import('../alarm-configuration/alarm-configuration.routes').then((m) => m.ALARM_CONFIGURATION_ROUTES)
                     },
                 ]
             },
-            
+
             {
                 path: 'analytics',
                 canActivate: [authGuard],
@@ -59,11 +59,11 @@ export const MAIN_LAYOUT_ROUTES : Routes = [
                 loadChildren: () => import('../notification/notification.routes').then((m) => m.NOTIFICATION_ROUTES)
             },
             {
-                path: 'plant-management',
+                path: 'ward-management',
                 canActivate: [authGuard, roleGuard],
                 data: { requiredRole: UserRole.AMMINISTRATORE },
                 loadChildren: () =>
-                    import('../plant-management/plant-management.routes').then((m) => m.PLANT_MANAGEMENT_ROUTES)
+                    import('../ward-management/ward-management.routes').then((m) => m.WARD_MANAGEMENT_ROUTES)
             },
             {
                 path: 'user-management',

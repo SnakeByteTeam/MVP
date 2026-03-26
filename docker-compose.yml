@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${DBPASSWORD}
       POSTGRES_DB: ${DBNAME}
     ports:
-      - 127.0.0.1:5433:5432
+      - 127.0.0.1:5434:5432
     volumes: 
       - postgres_data:/var/lib/postgresql/data
       - ./backend/db/init:/docker-entrypoint-initdb.d

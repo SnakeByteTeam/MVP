@@ -1,12 +1,13 @@
-import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
-import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { WardAlarmsFrequency } from './ward-alarms-frequency';
+import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
+import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
   return d.toISOString().slice(0, 10);
 };
+
 const yesterday = toISO(1);
 const twoDaysAgo = toISO(2);
 const threeDaysAgo = toISO(3);
@@ -17,7 +18,7 @@ describe('WardAlarmsFrequency', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByDatapointId: jest.fn(),
+      getDataByPlantId: jest.fn(),
       getDataByWardId: jest.fn(),
       getAlarmsByWardId: jest.fn(),
       getDataBySensorId: jest.fn(),
@@ -25,7 +26,7 @@ describe('WardAlarmsFrequency', () => {
     strategy = new WardAlarmsFrequency(mockPort);
   });
 
-  it('should return an empty Plot if there are no snapshots', async () => {
+  it('should return an empty Plot if there are no alarms', async () => {
     mockPort.getAlarmsByWardId.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
@@ -35,6 +36,7 @@ describe('WardAlarmsFrequency', () => {
     expect(result.labels).toHaveLength(0);
     expect(result.data).toHaveLength(0);
   });
+
   it('should return the number of alarms for a single day', async () => {
     mockPort.getAlarmsByWardId.mockResolvedValue(new Map([[yesterday, 3]]));
 
@@ -82,7 +84,6 @@ describe('WardAlarmsFrequency', () => {
   });
 
   it('should return labels sorted by date ascending', async () => {
-    // Map non ordinata intenzionalmente
     mockPort.getAlarmsByWardId.mockResolvedValue(
       new Map([
         [yesterday, 2],

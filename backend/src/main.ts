@@ -5,6 +5,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  //permette al frontend (in 4200) di chiamare il backend (in 3000)
+  app.enableCors();
+
+
   const config = new DocumentBuilder()
     .setTitle('Backend view4life')
     .setDescription('The backend API description')

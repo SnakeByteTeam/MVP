@@ -11,7 +11,7 @@ services:
       - 127.0.0.1:5433:5432
     volumes: 
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d
+      - ./backend/db/init:/docker-entrypoint-initdb.d
     env_file: 
       - .env
 
@@ -23,7 +23,8 @@ services:
     ports: 
       - 3000:3000
     volumes: 
-      - ./src:/app/src
+      - ./backend/src:/app/src
+    command: npm run start:dev
     depends_on:
       - database
     env_file: 

@@ -1,25 +1,42 @@
-<section aria-label="Gestione reparti">
-    <header>
-        <h1>Ward Management</h1>
-        <button type="button" (click)="onCreateWard()">Nuovo reparto</button>
+<section aria-label="Gestione reparti" class="min-h-screen bg-[#d9d9d9] px-4 py-5">
+    <header
+        class="mx-auto flex w-full max-w-[1260px] flex-col gap-3 rounded-xl border border-neutral-500 bg-[#efefef] p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-neutral-900">Ward Management</h1>
+            <p class="mt-1 text-xs text-neutral-600">Gestione reparti, operatori e appartamenti</p>
+        </div>
+        <button type="button" (click)="onCreateWard()"
+            class="inline-flex items-center justify-center rounded-full border border-green-700 bg-green-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2">
+            Nuovo reparto
+        </button>
     </header>
 
     @if (snackbarMessage(); as errorMessage) {
-    <div role="alert" aria-live="assertive">
+    <div role="alert" aria-live="assertive"
+        class="mx-auto flex w-full max-w-[1260px] items-start justify-between gap-3 rounded-xl border border-rose-300 bg-rose-100 px-4 py-3 text-sm text-rose-900">
         <span>{{ errorMessage }}</span>
-        <button type="button" (click)="dismissSnackbar()" aria-label="Chiudi messaggio errore">Chiudi</button>
+        <button type="button" (click)="dismissSnackbar()" aria-label="Chiudi messaggio errore"
+            class="rounded-md px-2 py-1 font-medium text-rose-700 hover:bg-rose-100">
+            Chiudi
+        </button>
     </div>
     }
 
     @if (isLoading$ | async) {
-    <p aria-live="polite">Caricamento in corso...</p>
+    <p aria-live="polite"
+        class="mx-auto w-full max-w-[1260px] rounded-lg border border-neutral-400 bg-white px-4 py-3 text-sm text-neutral-700">
+        Caricamento in corso...
+    </p>
     }
 
     @if (wards$ | async; as wards) {
     @if (wards.length === 0) {
-    <p>Nessun reparto disponibile.</p>
+    <p
+        class="mx-auto w-full max-w-[1260px] rounded-xl border border-dashed border-neutral-500 bg-[#efefef] px-5 py-8 text-center text-sm text-neutral-700">
+        Nessun reparto disponibile.
+    </p>
     } @else {
-    <div>
+    <div class="mx-auto grid w-full max-w-[1260px] gap-3">
         @for (ward of wards; track ward.id) {
         <app-ward-card-component [ward]="ward" (editWard)="onEditWard($event)" (deleteWard)="onDeleteWard($event)"
             (assignOperator)="onAssignOperator($event)" (removeOperator)="onRemoveOperator($event)"

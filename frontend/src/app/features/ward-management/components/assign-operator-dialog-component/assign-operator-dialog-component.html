@@ -1,26 +1,44 @@
-<dialog open aria-labelledby="assign-operator-title">
-    <h2 id="assign-operator-title">Assegna operatore sanitario</h2>
+<dialog open aria-labelledby="assign-operator-title"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md rounded-lg border border-neutral-500 bg-[#efefef] p-4 shadow-2xl backdrop:bg-black/45 focus:outline-none">
+    <div class="mb-3 flex items-start justify-between gap-3 border-b border-neutral-400 pb-2">
+        <div>
+            <h2 id="assign-operator-title" class="text-base font-bold text-neutral-900">Assegna operatore sanitario</h2>
+            <p class="text-xs text-neutral-700">Seleziona un operatore dall'elenco disponibile.</p>
+        </div>
+        <button type="button" (click)="onCancel()" aria-label="Chiudi"
+            class="rounded-md border border-neutral-600 bg-white px-2 py-0.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-100">
+            x
+        </button>
+    </div>
 
-    <p>Reparto selezionato: <strong>{{ wardId() }}</strong></p>
+    <p class="mt-1 text-sm text-neutral-700">Reparto selezionato: <strong>{{ wardId() }}</strong></p>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <label for="operator-id">Operatore</label>
-        <select id="operator-id" formControlName="userId">
-            <option [ngValue]="null">Seleziona un operatore</option>
-            @if (operators$ | async; as operators) {
-            @for (operator of operators; track operator.id) {
-            <option [ngValue]="+operator.id">{{ operator.firstName }} {{ operator.lastName }}</option>
-            }
-            }
-        </select>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-3 space-y-3">
+        <div>
+            <label for="operator-id" class="mb-1 block text-sm font-semibold text-neutral-800">Operatore <span
+                    class="text-rose-700">*</span></label>
+            <select id="operator-id" formControlName="userId"
+                class="w-full rounded-md border border-neutral-500 bg-white px-3 py-1.5 text-sm text-neutral-900 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-300">
+                <option [ngValue]="null">Seleziona un operatore</option>
+                @if (operators$ | async; as operators) {
+                @for (operator of operators; track operator.id) {
+                <option [ngValue]="+operator.id">{{ operator.firstName }} {{ operator.lastName }}</option>
+                }
+                }
+            </select>
+            <p class="mt-1 text-xs text-neutral-600">Campo obbligatorio.</p>
+        </div>
 
         @if (form.controls.userId.touched && form.controls.userId.invalid) {
-        <p role="alert">Seleziona un operatore.</p>
+        <p role="alert" class="rounded-md border border-rose-300 bg-rose-100 px-3 py-2 text-sm text-rose-900">Seleziona
+            un operatore.</p>
         }
 
-        <div>
-            <button type="button" (click)="onCancel()">Annulla</button>
-            <button type="submit">Assegna</button>
+        <div class="flex items-center justify-end gap-2 pt-1">
+            <button type="button" (click)="onCancel()"
+                class="rounded-md border border-neutral-600 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-800 hover:bg-neutral-100">Annulla</button>
+            <button type="submit" [disabled]="form.invalid"
+                class="rounded-md border border-green-700 bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:border-neutral-400 disabled:bg-neutral-400">Assegna</button>
         </div>
     </form>
 </dialog>

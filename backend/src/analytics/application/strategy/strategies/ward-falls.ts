@@ -22,40 +22,30 @@ export class WardFalls implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Ward Falls', cmd.metric, [], []);
+      return new Plot('Ward Falls Analytics', cmd.metric, [], []);
     }
 
-    const snapshots = Array.from(snapshotsMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([timestamp, data]) => ({
-        timestamp: new Date(timestamp),
-        data: data as VimarStructure,
-      }));
+    const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
+      a.localeCompare(b),
+    );
 
     const fallsByDay = new Map<string, number>();
-
     const previousState = new Map<string, string>();
 
-    for (const snapshot of snapshots) {
-      const day = snapshot.timestamp.toISOString().slice(0, 10);
+    for (const [timestamp, datapoints] of snapshots) {
+      const day = timestamp.slice(0, 10);
 
-      for (const room of snapshot.data.rooms) {
-        for (const device of room.devices) {
-          if (device.type !== 'SF_FallDetector') continue;
+      for (const dp of datapoints) {
+        if (dp.sfeType !== 'SFE_State_Fall') continue;
 
-          for (const dp of device.datapoints) {
-            if (dp.sfeType !== 'SFE_State_Fall') continue;
+        const previous = previousState.get(dp.datapointId);
+        const current = dp.value ?? 'NoFall';
 
-            const previous = previousState.get(dp.id);
-            const current = dp.value ?? 'NoFall';
-
-            if (previous === 'NoFall' && current === 'Fall') {
-              fallsByDay.set(day, (fallsByDay.get(day) ?? 0) + 1);
-            }
-
-            previousState.set(dp.id, current);
-          }
+        if (previous === 'NoFall' && current === 'Fall') {
+          fallsByDay.set(day, (fallsByDay.get(day) ?? 0) + 1);
         }
+
+        previousState.set(dp.datapointId, current);
       }
     }
 
@@ -64,7 +54,7 @@ export class WardFalls implements AnalyticsStrategy {
     );
 
     return new Plot(
-      'Ward Falls',
+      'Ward Falls Analytics',
       cmd.metric,
       sorted.map(([day]) => day),
       sorted.map(([, count]) => count.toString()),

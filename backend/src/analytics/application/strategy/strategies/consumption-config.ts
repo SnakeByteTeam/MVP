@@ -1,19 +1,15 @@
-import { VimarDevice } from 'src/analytics/domain/vimar/vimar-device.model';
+import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
 
 export const DEVICE_WATT: Record<string, number> = {
-  SF_Light: 10, // watt medi luci
+  SF_Light: 10,
 };
 
-const NORMAL_DAILY_LIGHT_WH = DEVICE_WATT.SF_Light * 6.5; // 6.5 ore in media
-export const ANOMALY_THRESHOLD_WH = NORMAL_DAILY_LIGHT_WH * 1.5; // 50% in più
+export const ANOMALY_THRESHOLD_WH = DEVICE_WATT.SF_Light * 6.5 * 1.5;
 
-export function isDeviceActive(device: VimarDevice): boolean {
-  for (const dp of device.datapoints) {
-    if (dp.sfeType === 'SFE_State_OnOff' && dp.value === 'On') return true;
-  }
-  return false;
+export function isDeviceActive(dp: DatapointValue): boolean {
+  return dp.sfeType === 'SFE_State_OnOff' && dp.value === 'On';
 }
 
-export function getDeviceWatt(device: VimarDevice): number {
-  return DEVICE_WATT[device.type] ?? 0;
+export function getDeviceWatt(deviceType: string): number {
+  return DEVICE_WATT[deviceType] ?? 0;
 }

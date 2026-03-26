@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { GetAnalyticsPort } from 'src/analytics/application/ports/out/get-analytics.port';
 import { GetAnalyticsRepositoryPort } from 'src/analytics/application/repository/get-analytics-repository.interface';
+import { DatapointRow } from 'src/analytics/domain/datapoint-row.model';
 
 @Injectable()
 export class GetAnalyticsData implements GetAnalyticsPort {
@@ -9,11 +10,11 @@ export class GetAnalyticsData implements GetAnalyticsPort {
     private readonly repository: GetAnalyticsRepositoryPort,
   ) {}
 
-  async getDataByDatapointId(
-    datapointId: string,
+  async getDataByPlantId(
+    plantId: string,
     startDate: Date,
   ): Promise<Map<string, any>> {
-    const params = JSON.stringify({ datapointId, startDate });
+    const params = JSON.stringify({ plantId, startDate });
     const result = await this.repository.query(params);
     return this.toMap(result);
   }
@@ -59,10 +60,34 @@ export class GetAnalyticsData implements GetAnalyticsPort {
     return this.toMap(result);
   }
 
-  private toMap(rows: any[]): Map<string, any> {
-    const map = new Map<string, any>();
+  private toMap(rows: DatapointRow[]): Map<
+    string,
+    {
+      datapointId: string;
+      value: string;
+      sfeType: string;
+      deviceType: string;
+    }[]
+  > {
+    const map = new Map<
+      string,
+      {
+        datapointId: string;
+        value: string;
+        sfeType: string;
+        deviceType: string;
+      }[]
+    >();
     for (const row of rows) {
-      map.set(new Date(row.timestamp).toISOString(), row.data);
+      const key = new Date(row.timestamp).toISOString();
+      const existing = map.get(key) ?? [];
+      existing.push({
+        datapointId: row.datapoint_id,
+        value: row.value,
+        sfeType: row.sfe_type,
+        deviceType: row.device_type,
+      });
+      map.set(key, existing);
     }
     return map;
   }

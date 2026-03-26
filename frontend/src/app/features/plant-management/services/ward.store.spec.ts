@@ -8,9 +8,9 @@ describe('WardStore', () => {
     let store: WardStore;
 
     const wardA: Ward = {
-        id: 'ward-1',
+        id: 1,
         name: 'Cardiologia',
-        apartments: [{ id: 'apt-1', name: 'App. 101', isEnabled: true }],
+        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
         operators: [
             {
                 id: 'user-1',
@@ -23,9 +23,9 @@ describe('WardStore', () => {
     };
 
     const wardB: Ward = {
-        id: 'ward-2',
+        id: 2,
         name: 'Neurologia',
-        apartments: [{ id: 'apt-2', name: 'App. 102', isEnabled: false }],
+        apartments: [{ id: 102, name: 'App. 102', isEnabled: false }],
         operators: [],
     };
 
@@ -75,21 +75,21 @@ describe('WardStore', () => {
     it('removeWard elimina il reparto target', async () => {
         store.setWards([wardA, wardB]);
 
-        store.removeWard('ward-1');
+        store.removeWard(1);
 
         const wards = await firstValueFrom(store.wards$);
         expect(wards).toEqual([wardB]);
         expect(wards).toHaveLength(1);
     });
 
-    it('patchApartment aggiorna solo l appartamento richiesto', async () => {
+    it('patchPlant aggiorna solo l appartamento richiesto', async () => {
         store.setWards([wardA, wardB]);
 
-        store.patchApartment('apt-2', { isEnabled: true, name: 'App. 102A' });
+        store.patchPlant(102, { isEnabled: true, name: 'App. 102A' });
 
         const wards = await firstValueFrom(store.wards$);
         expect(wards).toHaveLength(2);
         expect(wards[0].apartments[0]).toEqual(wardA.apartments[0]);
-        expect(wards[1].apartments[0]).toEqual({ id: 'apt-2', name: 'App. 102A', isEnabled: true });
+        expect(wards[1].apartments[0]).toEqual({ id: 102, name: 'App. 102A', isEnabled: true });
     });
 });

@@ -1,0 +1,20 @@
+<section class="alarm-map" aria-label="Mappa allarmi">
+  <header>
+    <h2>Panoramica allarmi</h2>
+    <p>Allarmi attivi: <strong>{{ activeAlarms().length }}</strong></p>
+  </header>
+
+  <div class="alarm-map__grid">
+    @for (room of rooms(); track room.id) {
+      <article class="alarm-map__room" [class.alarm-map__room--alert]="room.hasActiveAlarm">
+        <h3>{{ room.name }}</h3>
+        <p>{{ room.devices.length }} dispositivi</p>
+        @if (room.hasActiveAlarm) {
+          <p class="alarm-map__alert">Stanza con allarme attivo</p>
+        }
+      </article>
+    }
+  </div>
+
+  <p class="alarm-map__summary">Stanze in allarme: {{ alarmedRoomsCount() }}</p>
+</section>

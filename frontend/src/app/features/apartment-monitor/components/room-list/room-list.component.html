@@ -1,0 +1,19 @@
+<section class="room-list" aria-label="Lista stanze">
+  <h2>Stanze</h2>
+  @if (rooms().length === 0) {
+    <p class="room-list__empty">Nessuna stanza disponibile.</p>
+  } @else {
+    <ul>
+      @for (room of rooms(); track room.id) {
+        <li>
+          <button type="button" class="room-list__item" (click)="onRoomSelect(room.id)">
+            <span>{{ room.name }}</span>
+            @if (room.hasActiveAlarm) {
+              <span class="room-list__alarm">Allarme attivo</span>
+            }
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

@@ -6,10 +6,10 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <label for="operator-id">Operatore</label>
         <select id="operator-id" formControlName="userId">
-            <option value="">Seleziona un operatore</option>
+            <option [ngValue]="null">Seleziona un operatore</option>
             @if (operators$ | async; as operators) {
             @for (operator of operators; track operator.id) {
-            <option [value]="operator.id">{{ operator.firstName }} {{ operator.lastName }}</option>
+            <option [ngValue]="+operator.id">{{ operator.firstName }} {{ operator.lastName }}</option>
             }
             }
         </select>

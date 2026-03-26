@@ -16,7 +16,7 @@ describe('PlantManagementStore', () => {
         error$: of(null),
         setLoading: vi.fn(),
         setError: vi.fn(),
-        patchApartment: vi.fn(),
+        patchPlant: vi.fn(),
     };
 
     const wardOperationsStub = {
@@ -29,8 +29,8 @@ describe('PlantManagementStore', () => {
     const assignmentOperationsStub = {
         assignOperator: vi.fn(),
         removeOperator: vi.fn(),
-        assignApartment: vi.fn(),
-        removeApartment: vi.fn(),
+        assignPlant: vi.fn(),
+        removePlant: vi.fn(),
     };
 
     const apartmentApiStub = {
@@ -48,8 +48,8 @@ describe('PlantManagementStore', () => {
 
         assignmentOperationsStub.assignOperator.mockReturnValue(of(void 0));
         assignmentOperationsStub.removeOperator.mockReturnValue(of(void 0));
-        assignmentOperationsStub.assignApartment.mockReturnValue(of(void 0));
-        assignmentOperationsStub.removeApartment.mockReturnValue(of(void 0));
+        assignmentOperationsStub.assignPlant.mockReturnValue(of(void 0));
+        assignmentOperationsStub.removePlant.mockReturnValue(of(void 0));
 
         apartmentApiStub.enableApartment.mockReturnValue(of(void 0));
         apartmentApiStub.disableApartment.mockReturnValue(of(void 0));
@@ -77,48 +77,48 @@ describe('PlantManagementStore', () => {
 
     it('create/update/delete delegano al service corretto', () => {
         store.createWard({ name: 'Cardio' });
-        store.updateWard('ward-1', { name: 'Cardio A' });
-        store.deleteWard('ward-1');
+        store.updateWard(1, { name: 'Cardio A' });
+        store.deleteWard(1);
 
         expect(wardOperationsStub.createWard).toHaveBeenCalledWith({ name: 'Cardio' });
-        expect(wardOperationsStub.updateWard).toHaveBeenCalledWith('ward-1', { name: 'Cardio A' });
-        expect(wardOperationsStub.deleteWard).toHaveBeenCalledWith('ward-1');
+        expect(wardOperationsStub.updateWard).toHaveBeenCalledWith(1, { name: 'Cardio A' });
+        expect(wardOperationsStub.deleteWard).toHaveBeenCalledWith(1);
         expect(wardStoreStub.setLoading).toHaveBeenCalledTimes(3);
     });
 
-    it('assign/remove operator e apartment delegano ad AssignmentOperationsService', () => {
-        store.assignOperator('ward-1', { userId: 'user-2' });
-        store.removeOperator('ward-1', 'user-2');
-        store.assignApartment('ward-1', { apartmentId: 'apt-2' });
-        store.removeApartment('ward-1', 'apt-2');
+    it('assign/remove operator e plant delegano ad AssignmentOperationsService', () => {
+        store.assignOperator(1, { userId: 2 });
+        store.removeOperator(1, 2);
+        store.assignPlant(1, { plantId: 102 });
+        store.removePlant(1, 102);
 
-        expect(assignmentOperationsStub.assignOperator).toHaveBeenCalledWith('ward-1', {
-            userId: 'user-2',
+        expect(assignmentOperationsStub.assignOperator).toHaveBeenCalledWith(1, {
+            userId: 2,
         });
-        expect(assignmentOperationsStub.removeOperator).toHaveBeenCalledWith('ward-1', 'user-2');
-        expect(assignmentOperationsStub.assignApartment).toHaveBeenCalledWith('ward-1', {
-            apartmentId: 'apt-2',
+        expect(assignmentOperationsStub.removeOperator).toHaveBeenCalledWith(1, 2);
+        expect(assignmentOperationsStub.assignPlant).toHaveBeenCalledWith(1, {
+            plantId: 102,
         });
-        expect(assignmentOperationsStub.removeApartment).toHaveBeenCalledWith('ward-1', 'apt-2');
+        expect(assignmentOperationsStub.removePlant).toHaveBeenCalledWith(1, 102);
         expect(wardStoreStub.setLoading).toHaveBeenCalledTimes(4);
     });
 
-    it('enableApartment aggiorna store con isEnabled=true e loading=false', () => {
-        store.enableApartment('apt-1');
+    it('enablePlant aggiorna store con isEnabled=true e loading=false', () => {
+        store.enablePlant(101);
 
-        expect(apartmentApiStub.enableApartment).toHaveBeenCalledWith('apt-1');
-        expect(wardStoreStub.patchApartment).toHaveBeenCalledWith('apt-1', { isEnabled: true });
+        expect(apartmentApiStub.enableApartment).toHaveBeenCalledWith('101');
+        expect(wardStoreStub.patchPlant).toHaveBeenCalledWith(101, { isEnabled: true });
         expect(wardStoreStub.setLoading).toHaveBeenCalledWith(false);
         expect(wardStoreStub.setError).not.toHaveBeenCalled();
     });
 
-    it('disableApartment in errore salva messaggio di errore', () => {
+    it('disablePlant in errore salva messaggio di errore', () => {
         apartmentApiStub.disableApartment.mockReturnValue(throwError(() => new Error('No network')));
 
-        store.disableApartment('apt-1');
+        store.disablePlant(101);
 
         expect(wardStoreStub.setError).toHaveBeenCalledWith('No network');
-        expect(wardStoreStub.patchApartment).not.toHaveBeenCalled();
+        expect(wardStoreStub.patchPlant).not.toHaveBeenCalled();
         expect(wardStoreStub.setLoading).toHaveBeenCalledWith(true);
     });
 });

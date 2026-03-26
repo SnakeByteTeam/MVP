@@ -23,8 +23,8 @@
         @for (ward of wards; track ward.id) {
         <app-ward-card-component [ward]="ward" (editWard)="onEditWard($event)" (deleteWard)="onDeleteWard($event)"
             (assignOperator)="onAssignOperator($event)" (removeOperator)="onRemoveOperator($event)"
-            (assignApartment)="onAssignApartment($event)" (removeApartment)="onRemoveApartment($event)"
-            (enableApartment)="onEnableApartment($event)" (disableApartment)="onDisableApartment($event)" />
+            (assignPlant)="onAssignPlant($event)" (removePlant)="onRemovePlant($event)"
+            (enablePlant)="onEnablePlant($event)" (disablePlant)="onDisablePlant($event)" />
         }
     </div>
     }
@@ -41,10 +41,10 @@
         (submitted)="onAssignOperatorSubmit($event)" (cancelled)="onCloseAssignOperatorDialog()" />
     }
 
-    @if (apartmentWardId(); as activeWardId) {
-    <app-assign-apartment-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
-        [availableApartments]="availableApartments()" (submitted)="onAssignApartmentSubmit($event)"
-        (cancelled)="onCloseAssignApartmentDialog()" />
+    @if (plantWardId(); as activeWardId) {
+    <app-assign-ward-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
+        [availablePlants]="availablePlants()" (submitted)="onAssignPlantSubmit($event)"
+        (cancelled)="onCloseAssignPlantDialog()" />
     }
 
     @if (confirmState()) {

@@ -1,0 +1,25 @@
+<section class="room-detail" aria-label="Dettaglio stanza">
+  <header class="room-detail__header">
+    <div>
+      <a routerLink="/apartment-monitor">Torna al monitor appartamento</a>
+      @if (room$ | async; as room) {
+        <h1>{{ room.name }}</h1>
+        <p>{{ room.devices.length }} dispositivi disponibili</p>
+      }
+    </div>
+  </header>
+
+  @if (error) {
+    <p class="room-detail__error" role="alert">{{ error }}</p>
+  }
+
+  @if (room$ | async; as room) {
+    <div class="room-detail__grid">
+      @for (device of room.devices; track device.id) {
+        <app-device-card [roomId]="room.id" [device]="device" />
+      }
+    </div>
+  } @else {
+    <p>Caricamento stanza...</p>
+  }
+</section>

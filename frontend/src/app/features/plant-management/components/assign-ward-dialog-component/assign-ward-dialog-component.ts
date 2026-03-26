@@ -1,31 +1,31 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import type { Apartment } from '../../models/apartment.model';
-import type { AssignApartmentDto } from '../../models/plant-api.dto';
+import type { AssignPlantDto } from '../../models/plant-api.dto';
 import type { Ward } from '../../models/ward.model';
 
 @Component({
-  selector: 'app-assign-apartment-dialog-component',
+  selector: 'app-assign-ward-dialog-component',
   imports: [ReactiveFormsModule],
-  templateUrl: './assign-apartment-dialog-component.html',
-  styleUrl: './assign-apartment-dialog-component.css',
+  templateUrl: './assign-ward-dialog-component.html',
+  styleUrl: './assign-ward-dialog-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssignApartmentDialogComponent implements OnInit {
+export class AssignWardDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
 
-  public readonly wardId = input<string>('');
+  public readonly wardId = input<number>(0);
   public readonly availableWards = input<Ward[]>([]);
-  public readonly availableApartments = input<Apartment[]>([]);
-  public readonly submitted = output<AssignApartmentDto>();
+  public readonly availablePlants = input<Apartment[]>([]);
+  public readonly submitted = output<AssignPlantDto>();
   public readonly cancelled = output<void>();
 
-  public readonly form = this.formBuilder.nonNullable.group({
-    apartmentId: ['', [Validators.required]],
+  public readonly form = this.formBuilder.group({
+    plantId: this.formBuilder.control<number | null>(null, { validators: [Validators.required] }),
   });
 
   public ngOnInit(): void {
-    this.form.reset({ apartmentId: '' });
+    this.form.reset({ plantId: null });
   }
 
   public onSubmit(): void {
@@ -34,7 +34,12 @@ export class AssignApartmentDialogComponent implements OnInit {
       return;
     }
 
-    this.submitted.emit({ apartmentId: this.form.controls.apartmentId.value });
+    const plantId = this.form.controls.plantId.value;
+    if (plantId === null) {
+      return;
+    }
+
+    this.submitted.emit({ plantId });
   }
 
   public onCancel(): void {

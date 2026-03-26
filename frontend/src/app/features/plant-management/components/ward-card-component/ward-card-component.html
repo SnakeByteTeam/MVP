@@ -25,7 +25,7 @@
             @for (operator of currentWard.operators; track operator.id) {
             <li>
                 <span>{{ operator.firstName }} {{ operator.lastName }}</span>
-                <button type="button" (click)="onRemoveOperatorClick(operator.id)">Rimuovi</button>
+                <button type="button" (click)="onRemoveOperatorClick(+operator.id)">Rimuovi</button>
             </li>
             }
         </ul>
@@ -35,7 +35,7 @@
     <section aria-label="Appartamenti assegnati">
         <div>
             <h3>Appartamenti</h3>
-            <button type="button" (click)="onAssignApartmentClick()">Assegna appartamento</button>
+            <button type="button" (click)="onAssignPlantClick()">Assegna appartamento</button>
         </div>
 
         @if (currentWard.apartments.length === 0) {
@@ -44,9 +44,9 @@
         <ul>
             @for (apartment of currentWard.apartments; track apartment.id) {
             <li>
-                <app-apartment-row-component [apartment]="apartment" [wardId]="currentWard.id"
-                    (enable)="onEnableApartment($event)" (disable)="onDisableApartment($event)" />
-                <button type="button" (click)="onRemoveApartmentClick(apartment.id)">Rimuovi</button>
+                <app-ward-row-component [apartment]="apartment" [wardId]="currentWard.id"
+                    (enable)="onEnablePlant($event)" (disable)="onDisablePlant($event)" />
+                <button type="button" (click)="onRemovePlantClick(apartment.id)">Rimuovi</button>
             </li>
             }
         </ul>

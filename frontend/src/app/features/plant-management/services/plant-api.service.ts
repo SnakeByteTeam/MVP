@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import type {
-    AssignApartmentDto,
+    AssignPlantDto,
     AssignOperatorDto,
     CreateWardDto,
     UpdateWardDto,
@@ -15,6 +15,8 @@ export class PlantApiService {
     private readonly http = inject(HttpClient);
     private readonly baseUrl: string = inject(API_BASE_URL);
     private readonly wardsEndpoint = `${this.baseUrl}/api/wards`;
+    private readonly wardUsersRelationshipsEndpoint = `${this.baseUrl}/api/wards-users-relationships`;
+    private readonly wardPlantsRelationshipsEndpoint = `${this.baseUrl}/api/wards-plants-relationships`;
 
     public getWards(): Observable<Ward[]> {
         return this.http.get<Ward[]>(this.wardsEndpoint);
@@ -24,37 +26,37 @@ export class PlantApiService {
         return this.http.post<Ward>(this.wardsEndpoint, dto);
     }
 
-    public updateWard(wardId: string, dto: UpdateWardDto): Observable<Ward> {
-        return this.http.put<Ward>(`${this.wardsEndpoint}/${encodeURIComponent(wardId)}`, dto);
+    public updateWard(wardId: number, dto: UpdateWardDto): Observable<Ward> {
+        return this.http.put<Ward>(`${this.wardsEndpoint}/${encodeURIComponent(String(wardId))}`, dto);
     }
 
-    public deleteWard(wardId: string): Observable<void> {
-        return this.http.delete<void>(`${this.wardsEndpoint}/${encodeURIComponent(wardId)}`);
+    public deleteWard(wardId: number): Observable<void> {
+        return this.http.delete<void>(`${this.wardsEndpoint}/${encodeURIComponent(String(wardId))}`);
     }
 
-    public assignOperatorToWard(wardId: string, dto: AssignOperatorDto): Observable<void> {
-        return this.http.post<void>(
-            `${this.wardsEndpoint}/${encodeURIComponent(wardId)}/operators`,
-            dto,
-        );
+    public assignOperatorToWard(wardId: number, dto: AssignOperatorDto): Observable<void> {
+        return this.http.post<void>(this.wardUsersRelationshipsEndpoint, {
+            wardId,
+            userId: dto.userId,
+        });
     }
 
-    public removeOperatorFromWard(wardId: string, userId: string): Observable<void> {
+    public removeOperatorFromWard(wardId: number, userId: number): Observable<void> {
         return this.http.delete<void>(
-            `${this.wardsEndpoint}/${encodeURIComponent(wardId)}/operators/${encodeURIComponent(userId)}`,
+            `${this.wardUsersRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}/${encodeURIComponent(String(userId))}`,
         );
     }
 
-    public assignApartmentToWard(wardId: string, dto: AssignApartmentDto): Observable<void> {
-        return this.http.post<void>(
-            `${this.wardsEndpoint}/${encodeURIComponent(wardId)}/apartments`,
-            dto,
-        );
+    public assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void> {
+        return this.http.post<void>(this.wardPlantsRelationshipsEndpoint, {
+            wardId,
+            plantId: dto.plantId,
+        });
     }
 
-    public removeApartmentFromWard(wardId: string, apartmentId: string): Observable<void> {
+    public removePlantFromWard(wardId: number, plantId: number): Observable<void> {
         return this.http.delete<void>(
-            `${this.wardsEndpoint}/${encodeURIComponent(wardId)}/apartments/${encodeURIComponent(apartmentId)}`,
+            `${this.wardPlantsRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}/${encodeURIComponent(String(plantId))}`,
         );
     }
 }

@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, catchError, map, switchMap, tap } from 'rxjs';
-import type { AssignApartmentDto, AssignOperatorDto } from '../models/plant-api.dto';
+import type { AssignPlantDto, AssignOperatorDto } from '../models/plant-api.dto';
 import { PlantApiService } from './plant-api.service';
 import { WardStore } from './ward.store';
 
@@ -10,20 +10,20 @@ export class AssignmentOperationsService {
   private readonly api = inject(PlantApiService);
   private readonly store = inject(WardStore);
 
-  public assignOperator(wardId: string, dto: AssignOperatorDto): Observable<void> {
+  public assignOperator(wardId: number, dto: AssignOperatorDto): Observable<void> {
     return this.reloadAfter(this.api.assignOperatorToWard(wardId, dto));
   }
 
-  public removeOperator(wardId: string, userId: string): Observable<void> {
+  public removeOperator(wardId: number, userId: number): Observable<void> {
     return this.reloadAfter(this.api.removeOperatorFromWard(wardId, userId));
   }
 
-  public assignApartment(wardId: string, dto: AssignApartmentDto): Observable<void> {
-    return this.reloadAfter(this.api.assignApartmentToWard(wardId, dto));
+  public assignPlant(wardId: number, dto: AssignPlantDto): Observable<void> {
+    return this.reloadAfter(this.api.assignPlantToWard(wardId, dto));
   }
 
-  public removeApartment(wardId: string, apartmentId: string): Observable<void> {
-    return this.reloadAfter(this.api.removeApartmentFromWard(wardId, apartmentId));
+  public removePlant(wardId: number, plantId: number): Observable<void> {
+    return this.reloadAfter(this.api.removePlantFromWard(wardId, plantId));
   }
 
   private reloadAfter(operation$: Observable<void>): Observable<void> {

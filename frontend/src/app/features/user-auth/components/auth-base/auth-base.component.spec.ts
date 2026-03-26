@@ -61,7 +61,7 @@ describe('AuthBaseComponent', () => {
       userId: 'u1',
       username: 'mrossi',
       role: UserRole.OPERATORE_SANITARIO,
-      token: 'jwt',
+      accessToken: 'jwt',
       isFirstAccess: true,
     });
 
@@ -75,7 +75,7 @@ describe('AuthBaseComponent', () => {
       userId: 'u1',
       username: 'mrossi',
       role: UserRole.OPERATORE_SANITARIO,
-      token: 'jwt',
+      accessToken: 'jwt',
       isFirstAccess: false,
     });
 

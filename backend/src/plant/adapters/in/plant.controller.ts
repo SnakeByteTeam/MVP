@@ -12,7 +12,7 @@ import {
   type FindPlantByIdUseCase,
 } from 'src/plant/application/ports/in/find-plant-by-id.usecase';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantDto } from 'src/plant/infrastructure/http/dtos/out/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/dtos/plant.dto';
 
 @ApiTags('plant')
 @Controller('plant')
@@ -51,11 +51,11 @@ export class PlantController {
     },
   })
   async findById(@Query('plantid') plantId: string) {
-    const findByIdCmd: FindPlantByIdCmd = {
+    const findByPlantIdCmd: FindPlantByIdCmd = {
       id: plantId,
     };
 
-    const plant: Plant = await this.findPlantById.findById(findByIdCmd);
+    const plant: Plant = await this.findPlantById.findById(findByPlantIdCmd);
     return PlantDto.fromDomain(plant);
   }
 }

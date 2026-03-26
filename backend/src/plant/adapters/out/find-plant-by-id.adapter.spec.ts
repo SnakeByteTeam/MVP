@@ -43,8 +43,8 @@ describe('FindPlantByIdAdapter', () => {
 
     expect(repoPort.findById).toHaveBeenCalledWith('plant-1');
     expect(repoPort.findById).toHaveBeenCalledTimes(1);
-    expect(plant.getId()).toBe('plant-1');
-    expect(plant.getName()).toBe('My Plant');
-    expect(plant.getCachedAt().toISOString()).toBe('2026-03-24T12:00:00.000Z');
+    expect(plant?.getId()).toBe('plant-1');
+    expect(plant?.getName()).toBe('My Plant');
+    expect(plant?.getCachedAt().toISOString()).toBe('2026-03-24T12:00:00.000Z');
   });
 });

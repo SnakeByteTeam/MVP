@@ -3,8 +3,8 @@ import { FindDeviceByIdUseCase } from 'src/device/application/ports/in/find-devi
 import { FindDeviceByPlantIdUseCase } from 'src/device/application/ports/in/find-device-by-plantid.usecase';
 import { Device } from 'src/device/domain/models/device.model';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
-import { DeviceDto } from 'src/device/infrastructure/dtos/device.dto';
-import { DatapointDto } from 'src/device/infrastructure/dtos/datapoint.dto';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
+import { DatapointDto } from 'src/device/infrastructure/http/dtos/datapoint.dto';
 import { InternalServerErrorException } from '@nestjs/common';
 
 describe('DeviceController', () => {

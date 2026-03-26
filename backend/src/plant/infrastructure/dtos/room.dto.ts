@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
 import { Room } from 'src/plant/domain/models/room.model';
-import { DeviceDto } from '../../../../../device/infrastructure/dtos/device.dto';
+
 
 export class RoomDto {
   @ApiProperty({ example: 'room-1' })

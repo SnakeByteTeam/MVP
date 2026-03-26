@@ -1,38 +1,35 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { GET_VALID_CACHE_PORT, GetValidCachePort } from 'src/cache/application/ports/out/get-valid-cache.port';
 import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-device-by-plantid.command';
 import { FindDeviceByPlantIdPort } from 'src/device/application/ports/out/find-device-by-plantid.port';
-import {
-  DEVICE_MAPPER_REPO_PORT,
-  DeviceMapperRepoPort,
-} from 'src/device/application/repository/device-mapper.repository';
-import {
-  type FindDeviceByPlantIdRepoPort,
-  FIND_DEVICE_BY_PLANTID_REPO_PORT,
-} from 'src/device/application/repository/find-device-by-plantId.repository';
+
 import { Device } from 'src/device/domain/models/device.model';
-import { DeviceEntity } from 'src/device/infrastructure/entities/device.entity';
+import { Plant } from 'src/plant/domain/models/plant.model';
+
 
 @Injectable()
 export class FindDeviceByPlantIdAdapter implements FindDeviceByPlantIdPort {
   constructor(
-    @Inject(DEVICE_MAPPER_REPO_PORT)
-    private readonly mapper: DeviceMapperRepoPort,
-    @Inject(FIND_DEVICE_BY_PLANTID_REPO_PORT)
-    private readonly findDeviceRepo: FindDeviceByPlantIdRepoPort,
+    @Inject(GET_VALID_CACHE_PORT)
+    private readonly getValidCachePort: GetValidCachePort,
   ) {}
 
   async findByPlantId(cmd: FindDeviceByPlantIdCmd): Promise<Device[]> {
     const plantId: string = cmd?.id;
     if (!plantId) throw new Error('PlantId is null');
 
-    const deviceEntities: DeviceEntity[] | null =
-      await this.findDeviceRepo.findByPlantId(plantId);
+    console.log(`[FindDeviceByPlantIdAdapter] Finding devices for plantId: ${plantId}`);
 
-    if (!deviceEntities) throw new Error(`Plant ${plantId} not found`);
+    const plant: Plant = await this.getValidCachePort.getValidCache({ plantId: plantId });
+    console.log(`[FindDeviceByPlantIdAdapter] Got plant:`, plant ? 'found' : 'not found');
+    
+    if(!plant) throw new Error(`Plant ${plantId} not found`);
 
-    const devices: Device[] = deviceEntities.map((entity) =>
-      this.mapper.toDomain(entity),
-    );
+    const devices: Device[] = plant.getRooms()
+      .flatMap((room) => room.getDevices())
+      .map((device) => device);
+    
+    console.log(`[FindDeviceByPlantIdAdapter] Returning ${devices.length} devices`);
     return devices;
   }
 }

@@ -9,6 +9,10 @@ interface LoginResponse {
 	accessToken: string;
 }
 
+interface RefreshResponse {
+	accessToken: string;
+}
+
 interface AuthClaims {
 	userId?: string | number;
 	sub?: string | number;
@@ -44,6 +48,20 @@ export class InternalAuthService {
 			temporaryPassword,
 			newPassword,
 		});
+	}
+
+	public refreshAccessToken(): Observable<string> {
+		return this.http
+			.post<RefreshResponse>(
+				`${this.baseUrl}/auth/refresh`,
+				{},
+				{ withCredentials: true }
+			)
+			.pipe(map((response) => this.buildSessionFromAccessToken(response.accessToken)))
+			.pipe(
+				tap((session) => this.setSession(session)),
+				map((session) => session.accessToken)
+			);
 	}
 
 	public logout(): void {

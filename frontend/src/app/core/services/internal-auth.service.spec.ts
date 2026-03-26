@@ -80,6 +80,27 @@ describe('InternalAuthService', () => {
     await callPromise;
   });
 
+  it('chiama refresh, aggiorna il token e restituisce il nuovo accessToken', async () => {
+    const refreshPromise = firstValueFrom(service.refreshAccessToken());
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/refresh');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.body).toEqual({});
+
+    const accessToken = createAccessToken({
+      userId: 'user-1',
+      username: 'mrossi',
+      role: UserRole.OPERATORE_SANITARIO,
+      isFirstAccess: false,
+    });
+    request.flush({ accessToken });
+
+    const refreshedToken = await refreshPromise;
+    expect(refreshedToken).toBe(accessToken);
+    expect(service.getToken()).toBe(accessToken);
+  });
+
   it('resetta token e utente al logout', () => {
     const requestSub = service.login('mrossi', loginCredential).subscribe();
     const request = httpMock.expectOne('http://localhost:3000/auth/login');

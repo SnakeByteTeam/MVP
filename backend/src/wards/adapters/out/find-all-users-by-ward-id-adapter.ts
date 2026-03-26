@@ -1,10 +1,27 @@
-import { FindAllUsersByWardIdCmd } from "../../application/commands/find-all-users-by-ward-id-cmd";
-import { FindAllUsersByWardIdPort } from "../../application/ports/out/find-all-users-by-ward-id-port.interface";
+import { Inject } from '@nestjs/common';
+import { FindAllUsersByWardIdCmd } from '../../application/commands/find-all-users-by-ward-id-cmd';
+import { FindAllUsersByWardIdPort } from '../../application/ports/out/find-all-users-by-ward-id-port.interface';
+import {
+  FIND_ALL_USERS_BY_WARD_ID_REPOSITORY,
+  FindAllUsersByWardIdRepository,
+} from '../../application/repository/find-all-users-by-ward-id-repository.interface';
+import { UserEntity } from '../../infrastructure/entities/user-entity';
 
 export class FindAllUsersByWardIdAdapter implements FindAllUsersByWardIdPort {
-    findAllUsersByWardId(req: FindAllUsersByWardIdCmd) {
-        throw new Error("Method not implemented.");
-    }
+  constructor(
+    @Inject(FIND_ALL_USERS_BY_WARD_ID_REPOSITORY)
+    private readonly findAllUsersByWardIdRepository: FindAllUsersByWardIdRepository,
+  ) {}
+
+  async findAllUsersByWardId(req: FindAllUsersByWardIdCmd) {
+    const userEntities: UserEntity[] =
+      await this.findAllUsersByWardIdRepository.findAllUsersByWardId(req.id);
+
+    return userEntities.map((userEntity) => ({
+      id: userEntity.id,
+      username: userEntity.username,
+    }));
+  }
 }
 
 export const FIND_ALL_USERS_BY_WARD_ID_PORT = 'FIND_ALL_USERS_BY_WARD_ID_PORT';

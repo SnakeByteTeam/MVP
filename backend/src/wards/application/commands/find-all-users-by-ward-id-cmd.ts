@@ -1,5 +1,3 @@
 export class FindAllUsersByWardIdCmd {
-    constructor(
-        public id: number
-    ){}
+  constructor(public id: number) {}
 }

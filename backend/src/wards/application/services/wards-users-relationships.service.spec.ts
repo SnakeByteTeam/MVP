@@ -9,7 +9,9 @@ describe('WardsUsersRelationshipsServiceService', () => {
       providers: [WardsUsersRelationshipsServiceService],
     }).compile();
 
-    service = module.get<WardsUsersRelationshipsServiceService>(WardsUsersRelationshipsServiceService);
+    service = module.get<WardsUsersRelationshipsServiceService>(
+      WardsUsersRelationshipsServiceService,
+    );
   });
 
   it('should be defined', () => {

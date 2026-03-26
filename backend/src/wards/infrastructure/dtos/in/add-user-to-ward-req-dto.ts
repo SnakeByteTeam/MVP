@@ -1,4 +1,12 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber } from 'class-validator';
+
 export class AddUserToWardReqDto {
-    userId!: number;
-    wardId!: number;
+  @ApiProperty()
+  @IsNumber()
+  userId!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  wardId!: number;
 }

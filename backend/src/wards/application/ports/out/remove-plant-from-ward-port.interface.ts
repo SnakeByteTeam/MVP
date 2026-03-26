@@ -1,5 +1,5 @@
-import { RemovePlantFromWardCmd } from "../../commands/remove-plant-from-ward-cmd";
+import { RemovePlantFromWardCmd } from '../../commands/remove-plant-from-ward-cmd';
 
 export interface RemovePlantFromWardPort {
-    removePlantFromWard(req: RemovePlantFromWardCmd);
+  removePlantFromWard(req: RemovePlantFromWardCmd);
 }

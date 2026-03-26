@@ -11,30 +11,37 @@ import { FIND_ALL_PLANTS_BY_WARD_ID_PORT } from '../../adapters/out/find-all-pla
 import { FindAllPlantsByWardIdPort } from '../ports/out/find-all-plants-by-ward-id-port.interface';
 import { REMOVE_PLANT_FROM_WARD_PORT } from '../../adapters/out/remove-plant-from-ward-adapter';
 import { RemovePlantFromWardPort } from '../ports/out/remove-plant-from-ward-port.interface';
+import { Plant } from '../../domain/plant';
 
 @Injectable()
-export class WardsPlantsRelationshipsService implements 
-    AddPlantToWardUseCase, 
-    FindAllPlantsByWardIdUseCase, 
-    RemovePlantFromWardUseCase {
-    
-    constructor(
-        @Inject(ADD_PLANT_TO_WARD_PORT) private readonly addPlantToWardPort: AddPlantToWardPort,
-        @Inject(FIND_ALL_PLANTS_BY_WARD_ID_PORT) private readonly findAllPlantsByWardIdPort: FindAllPlantsByWardIdPort,
-        @Inject(REMOVE_PLANT_FROM_WARD_PORT) private readonly removePlantFromWardPort: RemovePlantFromWardPort
-    ){}
+export class WardsPlantsRelationshipsService
+  implements
+    AddPlantToWardUseCase,
+    FindAllPlantsByWardIdUseCase,
+    RemovePlantFromWardUseCase
+{
+  constructor(
+    @Inject(ADD_PLANT_TO_WARD_PORT)
+    private readonly addPlantToWardPort: AddPlantToWardPort,
+    @Inject(FIND_ALL_PLANTS_BY_WARD_ID_PORT)
+    private readonly findAllPlantsByWardIdPort: FindAllPlantsByWardIdPort,
+    @Inject(REMOVE_PLANT_FROM_WARD_PORT)
+    private readonly removePlantFromWardPort: RemovePlantFromWardPort,
+  ) {}
 
-    addPlantToWard(req: AddPlantToWardCmd) {
-        return this.addPlantToWardPort.addPlantToWard(req);
-    }
-    findAllPlantsByWardId(req: FindAllPlantsByWardIdCmd) {
-        return this.findAllPlantsByWardIdPort.findAllPlantsByWardId(req);
-    }
-    removePlantFromWard(req: RemovePlantFromWardCmd) {
-        return this.removePlantFromWardPort.removePlantFromWard(req);
-    }
+  async addPlantToWard(req: AddPlantToWardCmd): Promise<Plant> {
+    return await this.addPlantToWardPort.addPlantToWard(req);
+  }
+  findAllPlantsByWardId(req: FindAllPlantsByWardIdCmd): Promise<Plant[]> {
+    return this.findAllPlantsByWardIdPort.findAllPlantsByWardId(req);
+  }
+  removePlantFromWard(req: RemovePlantFromWardCmd) {
+    return this.removePlantFromWardPort.removePlantFromWard(req);
+  }
 }
 
 export const ADD_PLANT_TO_WARD_USE_CASE = 'ADD_PLANT_TO_WARD_USE_CASE';
-export const FIND_ALL_PLANTS_BY_WARD_ID_USE_CASE = 'FIND_ALL_PLANTS_BY_WARD_ID_USE_CASE';
-export const REMOVE_PLANT_FROM_WARD_USE_CASE = 'REMOVE_PLANT_FROM_WARD_USE_CASE';
+export const FIND_ALL_PLANTS_BY_WARD_ID_USE_CASE =
+  'FIND_ALL_PLANTS_BY_WARD_ID_USE_CASE';
+export const REMOVE_PLANT_FROM_WARD_USE_CASE =
+  'REMOVE_PLANT_FROM_WARD_USE_CASE';

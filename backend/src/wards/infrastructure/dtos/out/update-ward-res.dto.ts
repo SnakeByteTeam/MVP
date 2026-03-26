@@ -1,4 +1,9 @@
+import { ApiProperty } from '@nestjs/swagger/dist/decorators';
+
 export class UpdateWardResDto {
-    id!: number;
-    name!: string;
+  @ApiProperty()
+  id!: number;
+
+  @ApiProperty()
+  name!: string;
 }

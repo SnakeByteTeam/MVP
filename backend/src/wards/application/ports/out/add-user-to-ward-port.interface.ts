@@ -1,5 +1,5 @@
-import { AddUserToWardCmd } from "../../commands/add-user-to-ward-cmd";
+import { AddUserToWardCmd } from '../../commands/add-user-to-ward-cmd';
 
 export interface AddUserToWardPort {
-    addUserToWard(req: AddUserToWardCmd);
+  addUserToWard(req: AddUserToWardCmd);
 }

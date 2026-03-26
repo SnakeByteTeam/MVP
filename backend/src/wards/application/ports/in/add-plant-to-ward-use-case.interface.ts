@@ -1,5 +1,5 @@
-import { AddPlantToWardCmd } from "../../commands/add-plant-to-ward-cmd";
+import { AddPlantToWardCmd } from '../../commands/add-plant-to-ward-cmd';
 
 export interface AddPlantToWardUseCase {
-    addPlantToWard(req: AddPlantToWardCmd);
+  addPlantToWard(req: AddPlantToWardCmd);
 }

@@ -1,3 +1,6 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class FindAllUsersByWardIdResDto {
-    id!: number;
+  @ApiProperty()
+  id!: number;
 }

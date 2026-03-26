@@ -1,5 +1,3 @@
 export class FindAllPlantsByWardIdCmd {
-    constructor(
-        public id: number
-    ){}
+  constructor(public id: number) {}
 }

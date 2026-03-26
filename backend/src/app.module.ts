@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { WardsModule } from './wards/wards.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [WardsModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [WardsModule, DatabaseModule],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

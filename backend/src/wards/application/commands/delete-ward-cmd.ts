@@ -1,5 +1,6 @@
 export class DeleteWardCmd {
-    constructor(
-        public id: number
-    ){}
+  deleteWard(arg0: DeleteWardCmd) {
+    throw new Error('Method not implemented.');
+  }
+  constructor(public id: number) {}
 }

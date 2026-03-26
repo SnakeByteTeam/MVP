@@ -1,5 +1,5 @@
-import { FindAllUsersByWardIdCmd } from "../../commands/find-all-users-by-ward-id-cmd";
+import { FindAllUsersByWardIdCmd } from '../../commands/find-all-users-by-ward-id-cmd';
 
 export interface FindAllUsersByWardIdUseCase {
-    findAllUsersByWardId(req: FindAllUsersByWardIdCmd);
+  findAllUsersByWardId(req: FindAllUsersByWardIdCmd);
 }

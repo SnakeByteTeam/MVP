@@ -9,7 +9,9 @@ describe('WardsUsersRelationshipsController', () => {
       controllers: [WardsUsersRelationshipsController],
     }).compile();
 
-    controller = module.get<WardsUsersRelationshipsController>(WardsUsersRelationshipsController);
+    controller = module.get<WardsUsersRelationshipsController>(
+      WardsUsersRelationshipsController,
+    );
   });
 
   it('should be defined', () => {

@@ -1,5 +1,5 @@
-import { Ward } from "../../../domain/ward";
+import { Ward } from '../../../domain/ward';
 
 export interface FindAllWardsUseCase {
-    findAllWard(): Ward[];
+  findAllWard(): Promise<Ward[]>;
 }

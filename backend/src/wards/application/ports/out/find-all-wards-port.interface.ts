@@ -1,5 +1,5 @@
-import { Ward } from "../../../domain/ward";
+import { Ward } from '../../../domain/ward';
 
 export interface FindAllWardsPort {
-    findAllWard(): Ward[];
+  findAllWard(): Promise<Ward[]>;
 }

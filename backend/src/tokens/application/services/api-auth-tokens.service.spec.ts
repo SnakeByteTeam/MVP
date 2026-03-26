@@ -17,17 +17,26 @@ describe('ApiAuthTokensService', () => {
       writeTokens: jest.fn(),
     };
 
-    service = new ApiAuthTokensService(getTokensWithCodePort, writeTokensRepoPort);
+    service = new ApiAuthTokensService(
+      getTokensWithCodePort,
+      writeTokensRepoPort,
+    );
   });
 
   it('should fetch tokens with code and persist them', async () => {
-    const tokens = new TokenPair('access-token', 'refresh-token', new Date('2030-01-01T00:00:00.000Z'));
+    const tokens = new TokenPair(
+      'access-token',
+      'refresh-token',
+      new Date('2030-01-01T00:00:00.000Z'),
+    );
     getTokensWithCodePort.getTokensWithCode.mockResolvedValue(tokens);
     writeTokensRepoPort.writeTokens.mockResolvedValue(true);
 
     await service.getTokens('auth-code');
 
-    expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledWith('auth-code');
+    expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledWith(
+      'auth-code',
+    );
     expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledTimes(1);
     expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledWith(tokens);
     expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledTimes(1);

@@ -1,3 +1,4 @@
 export interface FindDeviceByIdCmd {
-    id: string
+  plantId: string;
+  id: string;
 }

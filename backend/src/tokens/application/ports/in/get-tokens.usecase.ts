@@ -1,5 +1,5 @@
 export interface GetTokensCallbackUseCase {
-    getTokens(code: string);
+  getTokens(code: string);
 }
 
 export const GETTOKENSCALLBACKUSECASE = Symbol('GetTokensCallbackUseCase');

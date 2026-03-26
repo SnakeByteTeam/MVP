@@ -21,15 +21,22 @@ describe('TokenService', () => {
 
     writeTokens = {
       writeTokens: jest.fn(),
-    }
+    };
 
     service = new TokenService(writeTokens, readTokenFromRepo, refreshTokens);
   });
 
   it('should fetch tokens from repo and return them', async () => {
-
-    const validToken = new TokenPair('access_token_1', 'refresh_token_1', new Date(Date.now() + 20000));
-    const apiReturnedToken = new TokenPair('access_token_2', 'refresh_token_2', new Date(Date.now()))
+    const validToken = new TokenPair(
+      'access_token_1',
+      'refresh_token_1',
+      new Date(Date.now() + 20000),
+    );
+    const apiReturnedToken = new TokenPair(
+      'access_token_2',
+      'refresh_token_2',
+      new Date(Date.now()),
+    );
 
     readTokenFromRepo.readTokens.mockResolvedValue(validToken);
     refreshTokens.refreshTokens.mockResolvedValue(apiReturnedToken);
@@ -42,8 +49,16 @@ describe('TokenService', () => {
   });
 
   it('should fetch tokens from repo, found them invalid and refresh new tokens', async () => {
-    const notValidToken = new TokenPair('access_token_1', 'refresh_token_1', new Date(Date.now()));
-    const apiReturnedToken = new TokenPair('access_token_2', 'refresh_token_2', new Date(Date.now() + 30000))
+    const notValidToken = new TokenPair(
+      'access_token_1',
+      'refresh_token_1',
+      new Date(Date.now()),
+    );
+    const apiReturnedToken = new TokenPair(
+      'access_token_2',
+      'refresh_token_2',
+      new Date(Date.now() + 30000),
+    );
 
     readTokenFromRepo.readTokens.mockResolvedValue(notValidToken);
     refreshTokens.refreshTokens.mockResolvedValue(apiReturnedToken);
@@ -57,7 +72,11 @@ describe('TokenService', () => {
   });
 
   it('should throw an error when tokens from API are null', async () => {
-    const notValidToken = new TokenPair('access_token_1', 'refresh_token_1', new Date(Date.now()));
+    const notValidToken = new TokenPair(
+      'access_token_1',
+      'refresh_token_1',
+      new Date(Date.now()),
+    );
     readTokenFromRepo.readTokens.mockResolvedValue(notValidToken);
     refreshTokens.refreshTokens.mockResolvedValue(null);
 
@@ -66,7 +85,5 @@ describe('TokenService', () => {
     expect(readTokenFromRepo.readTokens).toHaveBeenCalledTimes(1);
     expect(refreshTokens.refreshTokens).toHaveBeenCalledTimes(1);
     expect(writeTokens.writeTokens).toHaveBeenCalledTimes(0);
-
   });
-  
 });

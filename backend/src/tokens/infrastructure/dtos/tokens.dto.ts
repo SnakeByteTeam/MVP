@@ -1,15 +1,19 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class TokensDto {
-    @IsString()
-    @IsNotEmpty()
-    accessToken: string; 
+  @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+  @IsString()
+  @IsNotEmpty()
+  accessToken: string;
 
-    @IsString()
-    @IsNotEmpty()
-    refreshToken: string;
+  @ApiProperty({ example: 'def50200b95f...' })
+  @IsString()
+  @IsNotEmpty()
+  refreshToken: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    expiresIn: number;
+  @ApiProperty({ example: 3600 })
+  @IsNumber()
+  @IsNotEmpty()
+  expiresIn: number;
 }

@@ -1,5 +1,5 @@
 
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { NavItem } from '../../core/models/nav-item.model';
 import { Observable } from 'rxjs';
 import { NavService } from './services/nav.service';
@@ -27,13 +27,13 @@ import { NotificationBadgeComponent } from '../notification/components/notificat
     ],
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css'})
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
     public isCollapsed: boolean = false;
     public navItems!: NavItem[];
 
-    private navService = inject(NavService);
-    private internalAuthService = inject(InternalAuthService);
-    private alarmStateService = inject(AlarmStateService);
+    private readonly navService = inject(NavService);
+    private readonly internalAuthService = inject(InternalAuthService);
+    private readonly alarmStateService = inject(AlarmStateService);
 
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
 
@@ -68,8 +68,6 @@ export class MainLayoutComponent {
             this.navItems = this.navService.getNavItems(UserRole.AMMINISTRATORE);//solo di prova
         }
     }
-
-    public ngOnDestroy(): void{}
 
     public toggleSidebar(): void{
         this.isCollapsed = !this.isCollapsed;

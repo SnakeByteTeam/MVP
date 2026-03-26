@@ -1,15 +1,20 @@
-<<<<<<< HEAD
+
 CREATE TABLE role (
-=======
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE
+);
+
+INSERT INTO role (name) VALUES 
+('Operatore sanitario'),
+('Amministratore');
+
 CREATE TABLE ward (
->>>>>>> feature/wards
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
-<<<<<<< HEAD
     username VARCHAR(255) UNIQUE,
     surname VARCHAR(255),
     name VARCHAR(255),
@@ -19,19 +24,17 @@ CREATE TABLE "user" (
     FOREIGN KEY (roleId) REFERENCES role(id)
 );
 
-INSERT INTO role (name) VALUES 
-('Operatore sanitario'),
-('Amministratore');
-
 INSERT INTO "user" (username, surname, name, password, temp_password, roleId) VALUES ('test', 'test', 'test', 'test', 'test', 1);
-=======
-    username VARCHAR(255) UNIQUE
-);
+
+
 
 CREATE TABLE plant (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE
 );
+
+INSERT INTO plant (name) VALUES ('test-plant');
+
 
 CREATE TABLE ward_user (
     id SERIAL PRIMARY KEY,
@@ -46,6 +49,4 @@ CREATE TABLE ward_plant (
 );
 
 
-INSERT INTO "user" (username) VALUES ('test');
-INSERT INTO plant (name) VALUES ('test-plant');
->>>>>>> feature/wards
+

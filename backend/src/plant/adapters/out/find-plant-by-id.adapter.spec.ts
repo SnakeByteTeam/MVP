@@ -1,15 +1,15 @@
 import { FindPlantByIdAdapter } from './find-plant-by-id.adapter';
-import { GetValidCachePort } from 'src/cache/application/ports/out/get-valid-cache.port';
+import { UpdateCacheUseCase } from 'src/cache/application/ports/in/get-valid-cache.usecase';
 import { Plant } from 'src/plant/domain/models/plant.model';
 import { Room } from 'src/plant/domain/models/room.model';
 
 describe('FindPlantByIdAdapter', () => {
   let adapter: FindPlantByIdAdapter;
-  let cachePort: jest.Mocked<GetValidCachePort>;
+  let cachePort: jest.Mocked<UpdateCacheUseCase>;
 
   beforeEach(() => {
     cachePort = {
-      getValidCache: jest.fn(),
+      updateCache: jest.fn(),
     };
 
     adapter = new FindPlantByIdAdapter(cachePort);
@@ -22,12 +22,12 @@ describe('FindPlantByIdAdapter', () => {
   });
 
   it('should return null when plant not found in cache', async () => {
-    cachePort.getValidCache.mockResolvedValue(null as any);
+    cachePort.updateCache.mockResolvedValue(null as any);
 
     const result = await adapter.findById({ id: 'plant-1' });
 
     expect(result).toBeNull();
-    expect(cachePort.getValidCache).toHaveBeenCalledWith({
+    expect(cachePort.updateCache).toHaveBeenCalledWith({
       plantId: 'plant-1',
     });
   });
@@ -36,12 +36,12 @@ describe('FindPlantByIdAdapter', () => {
     const room = new Room('room-1', 'Living Room', []);
     const plant = new Plant('plant-1', 'My Plant', [room]);
 
-    cachePort.getValidCache.mockResolvedValue(plant);
+    cachePort.updateCache.mockResolvedValue(plant);
 
     const result = await adapter.findById({ id: 'plant-1' });
 
     expect(result).toBe(plant);
-    expect(cachePort.getValidCache).toHaveBeenCalledWith({
+    expect(cachePort.updateCache).toHaveBeenCalledWith({
       plantId: 'plant-1',
     });
   });

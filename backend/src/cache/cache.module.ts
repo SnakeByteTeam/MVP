@@ -14,7 +14,7 @@ import { WRITE_CACHE_PORT } from './application/ports/out/write-cache.port';
 import { WRITE_CACHE_REPO_PORT } from './application/repository/write-cache.repository';
 import { READ_CACHE_REPO_PORT } from './application/repository/read-cache.repository';
 import { FETCH_NEW_CACHE_REPO_PORT } from './application/repository/fetch-new-cache.repository';
-import { GET_VALID_CACHE_PORT } from './application/ports/out/get-valid-cache.port';
+import { UPDATE_CACHE_USE_CASE } from './application/ports/in/get-valid-cache.usecase';
 import { FetchStructureCacheImpl } from './infrastructure/http/fetch-plant-structure-impl';
 
 @Module({
@@ -26,8 +26,8 @@ import { FetchStructureCacheImpl } from './infrastructure/http/fetch-plant-struc
     { provide: FETCH_NEW_CACHE_REPO_PORT, useClass: FetchStructureCacheImpl },
     { provide: WRITE_CACHE_REPO_PORT, useClass: StructureCacheImpl },
     { provide: READ_CACHE_REPO_PORT, useClass: StructureCacheImpl },
-    { provide: GET_VALID_CACHE_PORT, useClass: SyncCacheService },
+    { provide: UPDATE_CACHE_USE_CASE, useClass: SyncCacheService },
   ],
-  exports: [GET_VALID_CACHE_PORT],
+  exports: [UPDATE_CACHE_USE_CASE],
 })
 export class CacheModule {}

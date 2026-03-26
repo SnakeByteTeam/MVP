@@ -1,5 +1,5 @@
 import { FindDeviceByPlantIdAdapter } from './find-device-by-plantId.adapter';
-import { GetValidCachePort } from 'src/cache/application/ports/out/get-valid-cache.port';
+import { UpdateCacheUseCase } from 'src/cache/application/ports/in/get-valid-cache.usecase';
 import { Device } from 'src/device/domain/models/device.model';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
 import { Plant } from 'src/plant/domain/models/plant.model';
@@ -8,11 +8,11 @@ import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-dev
 
 describe('FindDeviceByPlantIdAdapter', () => {
   let adapter: FindDeviceByPlantIdAdapter;
-  let cachePort: jest.Mocked<GetValidCachePort>;
+  let cachePort: jest.Mocked<UpdateCacheUseCase>;
 
   beforeEach(() => {
     cachePort = {
-      getValidCache: jest.fn(),
+      updateCache: jest.fn(),
     };
 
     adapter = new FindDeviceByPlantIdAdapter(cachePort);
@@ -49,7 +49,7 @@ describe('FindDeviceByPlantIdAdapter', () => {
     const room = new Room('room-1', 'Living Room', [device1, device2]);
     const plant = new Plant('plant-01', 'My Plant', [room]);
 
-    cachePort.getValidCache.mockResolvedValue(plant);
+    cachePort.updateCache.mockResolvedValue(plant);
 
     const cmd: FindDeviceByPlantIdCmd = { id: 'plant-01' };
     const result = await adapter.findByPlantId(cmd);
@@ -57,23 +57,23 @@ describe('FindDeviceByPlantIdAdapter', () => {
     expect(result).toHaveLength(2);
     expect(result).toContain(device1);
     expect(result).toContain(device2);
-    expect(cachePort.getValidCache).toHaveBeenCalledWith({
+    expect(cachePort.updateCache).toHaveBeenCalledWith({
       plantId: 'plant-01',
     });
-    expect(cachePort.getValidCache).toHaveBeenCalledTimes(1);
+    expect(cachePort.updateCache).toHaveBeenCalledTimes(1);
   });
 
   it('should return empty array when no devices found', async () => {
     const room = new Room('room-1', 'Living Room', []);
     const plant = new Plant('plant-01', 'My Plant', [room]);
 
-    cachePort.getValidCache.mockResolvedValue(plant);
+    cachePort.updateCache.mockResolvedValue(plant);
 
     const cmd: FindDeviceByPlantIdCmd = { id: 'plant-01' };
     const result = await adapter.findByPlantId(cmd);
 
     expect(result).toHaveLength(0);
-    expect(cachePort.getValidCache).toHaveBeenCalledTimes(1);
+    expect(cachePort.updateCache).toHaveBeenCalledTimes(1);
   });
 
   it('should throw error when plant id is null', async () => {
@@ -85,7 +85,7 @@ describe('FindDeviceByPlantIdAdapter', () => {
   });
 
   it('should throw error when plant is not found', async () => {
-    cachePort.getValidCache.mockResolvedValue(null as any);
+    cachePort.updateCache.mockResolvedValue(null as any);
 
     const cmd: FindDeviceByPlantIdCmd = { id: 'non-existent-plant' };
 

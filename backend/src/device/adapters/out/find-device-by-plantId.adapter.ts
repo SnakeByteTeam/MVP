@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import {
-  GET_VALID_CACHE_PORT,
-  GetValidCachePort,
-} from 'src/cache/application/ports/out/get-valid-cache.port';
+  UPDATE_CACHE_USE_CASE,
+  UpdateCacheUseCase,
+} from 'src/cache/application/ports/in/get-valid-cache.usecase';
 import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-device-by-plantid.command';
 import { FindDeviceByPlantIdPort } from 'src/device/application/ports/out/find-device-by-plantid.port';
 
@@ -12,8 +12,8 @@ import { Plant } from 'src/plant/domain/models/plant.model';
 @Injectable()
 export class FindDeviceByPlantIdAdapter implements FindDeviceByPlantIdPort {
   constructor(
-    @Inject(GET_VALID_CACHE_PORT)
-    private readonly getValidCachePort: GetValidCachePort,
+    @Inject(UPDATE_CACHE_USE_CASE)
+    private readonly getValidCachePort: UpdateCacheUseCase,
   ) {}
 
   async findByPlantId(cmd: FindDeviceByPlantIdCmd): Promise<Device[]> {
@@ -24,7 +24,7 @@ export class FindDeviceByPlantIdAdapter implements FindDeviceByPlantIdPort {
       `[FindDeviceByPlantIdAdapter] Finding devices for plantId: ${plantId}`,
     );
 
-    const plant: Plant = await this.getValidCachePort.getValidCache({
+    const plant: Plant = await this.getValidCachePort.updateCache({
       plantId: plantId,
     });
     console.log(

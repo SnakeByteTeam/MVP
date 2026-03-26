@@ -7,6 +7,16 @@ import { API_BASE_URL } from '../tokens/api-base-url.token';
 import { UserRole } from '../models/user-role.enum';
 import { InternalAuthService } from './internal-auth.service';
 
+function toBase64Url(value: string): string {
+  return btoa(value).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+}
+
+function createAccessToken(claims: Record<string, unknown>): string {
+  const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = toBase64Url(JSON.stringify(claims));
+  return `${header}.${payload}.signature`;
+}
+
 describe('InternalAuthService', () => {
   let service: InternalAuthService;
   let httpMock: HttpTestingController;
@@ -35,17 +45,18 @@ describe('InternalAuthService', () => {
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ username: 'mrossi', password: loginCredential });
 
-    request.flush({
+    const accessToken = createAccessToken({
       userId: 'user-1',
       username: 'mrossi',
       role: UserRole.OPERATORE_SANITARIO,
-      token: 'jwt-token',
       isFirstAccess: false,
     });
 
+    request.flush({ accessToken });
+
     const session = await loginPromise;
     expect(session.username).toBe('mrossi');
-    expect(service.getToken()).toBe('jwt-token');
+    expect(service.getToken()).toBe(accessToken);
     expect(service.getRole()).toBe(UserRole.OPERATORE_SANITARIO);
     expect(service.isAuthenticated()).toBe(true);
     expect(service.hasRole(UserRole.OPERATORE_SANITARIO)).toBe(true);
@@ -73,11 +84,12 @@ describe('InternalAuthService', () => {
     const requestSub = service.login('mrossi', loginCredential).subscribe();
     const request = httpMock.expectOne('http://localhost:3000/auth/login');
     request.flush({
-      userId: 'user-1',
-      username: 'mrossi',
-      role: UserRole.AMMINISTRATORE,
-      token: 'jwt-token',
-      isFirstAccess: false,
+      accessToken: createAccessToken({
+        userId: 'user-1',
+        username: 'mrossi',
+        role: UserRole.AMMINISTRATORE,
+        isFirstAccess: false,
+      }),
     });
     requestSub.unsubscribe();
 

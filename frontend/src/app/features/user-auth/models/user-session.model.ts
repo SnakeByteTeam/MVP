@@ -4,6 +4,6 @@ export interface UserSession {
 	userId: string;
 	username: string;
 	role: UserRole;
-	token: string;
+	accessToken: string;
 	isFirstAccess: boolean;
 }

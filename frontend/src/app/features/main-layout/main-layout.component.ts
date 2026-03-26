@@ -45,7 +45,7 @@ export class MainLayoutComponent {
         userId: "1",
         username: "username",
         role: UserRole.AMMINISTRATORE,
-        token: "aa",
+        accessToken: "aa",
         isFirstAccess: false
     };
 

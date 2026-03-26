@@ -1,9 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
+import { FetchStructureCacheImpl } from './fetch-plant-structure-impl';
 
-
-describe('FetchPlantStructureImpl', () => {
-  let impl: FetchPlantStructureImpl;
+describe('FetchStructureCacheImpl', () => {
+  let impl: FetchStructureCacheImpl;
   let httpService: jest.Mocked<Pick<HttpService, 'get'>>;
 
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe('FetchPlantStructureImpl', () => {
 
     process.env.HOST3 = 'https://api.example.com';
 
-    impl = new FetchPlantStructureImpl(httpService as unknown as HttpService);
+    impl = new FetchStructureCacheImpl(httpService as unknown as HttpService);
   });
 
   it('should return null when locations response has no data', async () => {
@@ -127,7 +127,7 @@ describe('FetchPlantStructureImpl', () => {
 
   it('should fallback to empty host when HOST3 is not set', async () => {
     delete process.env.HOST3;
-    const localImpl = new FetchPlantStructureImpl(
+    const localImpl = new FetchStructureCacheImpl(
       httpService as unknown as HttpService,
     );
 
@@ -158,7 +158,6 @@ describe('FetchPlantStructureImpl', () => {
       .mockReturnValueOnce(of({ data: null } as any));
 
     await expect(() => impl.fetch('valid-token', 'plant-1')).rejects.toThrow();
-
   });
 
   it('should map device as null when datapoints response has no data', async () => {
@@ -194,6 +193,6 @@ describe('FetchPlantStructureImpl', () => {
       )
       .mockReturnValueOnce(of({ data: null } as any));
 
-    await expect(() =>  impl.fetch('valid-token', 'plant-1')).rejects.toThrow();
+    await expect(() => impl.fetch('valid-token', 'plant-1')).rejects.toThrow();
   });
 });

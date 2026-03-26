@@ -38,7 +38,8 @@ export class DeviceController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get a single device by ID',
-    description: 'Retrieves a specific device within a plant by its unique identifier.',
+    description:
+      'Retrieves a specific device within a plant by its unique identifier.',
   })
   @ApiParam({
     name: 'plantId',

@@ -9,7 +9,6 @@ import { FindPlantByIdCmd } from '../commands/find-plant-by-id.command';
 
 @Injectable()
 export class PlantService implements FindPlantByIdUseCase {
-
   constructor(
     @Inject(FIND_PLANT_BY_ID_PORT)
     private readonly findByIdPort: FindPlantByIdPort,

@@ -12,7 +12,6 @@ import { FindDeviceByIdAdapter } from './adapters/out/find-device-by-id.adapter'
 import { DeviceService } from './application/services/device.service';
 import { FindDeviceByPlantIdAdapter } from './adapters/out/find-device-by-plantId.adapter';
 
-
 @Module({
   imports: [TokensModule, CacheModule],
   controllers: [DeviceController],
@@ -23,7 +22,7 @@ import { FindDeviceByPlantIdAdapter } from './adapters/out/find-device-by-plantI
     {
       provide: FIND_DEVICE_BY_PLANTID_PORT,
       useClass: FindDeviceByPlantIdAdapter,
-    }
+    },
   ],
 })
 export class DeviceModule {}

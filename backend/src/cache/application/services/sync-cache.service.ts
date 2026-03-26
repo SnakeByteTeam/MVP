@@ -11,7 +11,10 @@ import {
 } from '../ports/out/write-cache.port';
 import { GetValidCachePort } from '../ports/out/get-valid-cache.port';
 import { GetValidCacheCmd } from '../commands/get-valid-cache.command';
-import { READ_CACHE_PORT, type ReadCachePort } from '../ports/out/read-cache.port';
+import {
+  READ_CACHE_PORT,
+  type ReadCachePort,
+} from '../ports/out/read-cache.port';
 
 @Injectable()
 export class SyncCacheService implements GetValidCachePort {
@@ -27,25 +30,43 @@ export class SyncCacheService implements GetValidCachePort {
   async getValidCache(cmd: GetValidCacheCmd): Promise<Plant> {
     if (!cmd?.plantId) throw new Error('PlantId is null');
 
-    console.log(`[SyncCacheService] Getting valid cache for plantId: ${cmd.plantId}`);
+    console.log(
+      `[SyncCacheService] Getting valid cache for plantId: ${cmd.plantId}`,
+    );
 
-    const plant: Plant | null = await this.readCachePort.readCache({ plantId: cmd.plantId });
-    console.log(`[SyncCacheService] Read cache result:`, plant ? 'found' : 'not found');
-    
-    if(plant && plant.getCachedAt() > new Date(Date.now() - 12 * 60 * 60 *1000)) {
+    const plant: Plant | null = await this.readCachePort.readCache({
+      plantId: cmd.plantId,
+    });
+    console.log(
+      `[SyncCacheService] Read cache result:`,
+      plant ? 'found' : 'not found',
+    );
+
+    if (
+      plant &&
+      plant.getCachedAt() > new Date(Date.now() - 12 * 60 * 60 * 1000)
+    ) {
       console.log(`[SyncCacheService] Cache is valid, returning`);
       return plant;
     }
 
-    console.log(`[SyncCacheService] Cache is stale or missing, fetching new...`);
+    console.log(
+      `[SyncCacheService] Cache is stale or missing, fetching new...`,
+    );
     try {
-      const fetchedPlant: Plant = await this.fetchCachePort.fetch({ plantId: cmd.plantId });
-      console.log(`[SyncCacheService] Fetched plant:`, fetchedPlant ? 'success' : 'failed');
-      
-      const writeResult = await this.writeStructurePort.writeStructure(fetchedPlant);
+      const fetchedPlant: Plant = await this.fetchCachePort.fetch({
+        plantId: cmd.plantId,
+      });
+      console.log(
+        `[SyncCacheService] Fetched plant:`,
+        fetchedPlant ? 'success' : 'failed',
+      );
+
+      const writeResult =
+        await this.writeStructurePort.writeStructure(fetchedPlant);
       console.log(`[SyncCacheService] Write result:`, writeResult);
-      
-      if(!writeResult) throw new Error('Failed to write cache');
+
+      if (!writeResult) throw new Error('Failed to write cache');
 
       console.log(`[SyncCacheService] Cache written successfully`);
       return fetchedPlant;
@@ -54,6 +75,4 @@ export class SyncCacheService implements GetValidCachePort {
       throw error;
     }
   }
-
-  
 }

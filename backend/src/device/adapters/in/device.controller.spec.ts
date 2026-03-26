@@ -47,7 +47,7 @@ describe('DeviceController', () => {
 
     findDeviceById.findById.mockResolvedValue(returnedDevice);
 
-    const deviceDto: DeviceDto = await controller.findById('123');
+    const deviceDto: DeviceDto = await controller.findById('plant-123', '123');
     const datapointsDto: DatapointDto[] = deviceDto.datapoints;
 
     const expectedDatapointsDto: DatapointDto[] = returnedDatapoints.map(
@@ -62,7 +62,10 @@ describe('DeviceController', () => {
       }),
     );
 
-    expect(findDeviceById.findById).toHaveBeenCalledWith({ id: '123' });
+    expect(findDeviceById.findById).toHaveBeenCalledWith({
+      id: '123',
+      plantId: 'plant-123',
+    });
     expect(findDeviceById.findById).toHaveBeenCalledTimes(1);
     expect(findDeviceByPlantId.findByPlantId).toHaveBeenCalledTimes(0);
 
@@ -197,9 +200,9 @@ describe('DeviceController', () => {
   it('should throw an InternalServerErrorException when catch an error', async () => {
     findDeviceById.findById.mockRejectedValue(new Error('Error'));
 
-    await expect(() => controller.findById('someId')).rejects.toThrow(
-      InternalServerErrorException,
-    );
+    await expect(() =>
+      controller.findById('plant-123', 'someId'),
+    ).rejects.toThrow(InternalServerErrorException);
   });
 
   it('should throw an InternalServerErrorException when catch an error', async () => {

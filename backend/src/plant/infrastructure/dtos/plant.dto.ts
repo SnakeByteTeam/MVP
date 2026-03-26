@@ -3,7 +3,6 @@ import { Plant } from 'src/plant/domain/models/plant.model';
 import { IsArray, IsDate, IsNotEmpty, IsString } from 'class-validator';
 import { RoomDto } from './room.dto';
 
-
 export class PlantDto {
   @ApiProperty({ example: 'plant-1' })
   @IsString()

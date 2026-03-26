@@ -1,3 +1,3 @@
 export interface ReadCacheCmd {
-    plantId: string;
+  plantId: string;
 }

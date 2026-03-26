@@ -1,4 +1,4 @@
-import { PlantEntity } from "src/cache/infrastructure/persistence/entities/plant.entity";
+import { PlantEntity } from 'src/cache/infrastructure/persistence/entities/plant.entity';
 
 export interface FindPlantByIdRepoPort {
   findById(plantId: string): Promise<PlantEntity | null>;

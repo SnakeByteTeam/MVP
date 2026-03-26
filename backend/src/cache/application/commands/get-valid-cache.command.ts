@@ -1,3 +1,3 @@
 export interface GetValidCacheCmd {
-    plantId: string;
+  plantId: string;
 }

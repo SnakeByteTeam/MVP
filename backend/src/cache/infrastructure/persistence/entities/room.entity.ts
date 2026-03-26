@@ -1,7 +1,6 @@
 import { DeviceEntity } from 'src/device/infrastructure/persistence/entities/device.entity';
 import { Room } from 'src/plant/domain/models/room.model';
 
-
 export class RoomEntity {
   id: string;
   name: string;

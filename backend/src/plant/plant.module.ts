@@ -6,7 +6,6 @@ import { PlantController } from './adapters/in/plant.controller';
 import { FIND_PLANT_BY_ID_USECASE } from './application/ports/in/find-plant-by-id.usecase';
 import { FIND_PLANT_BY_ID_PORT } from './application/ports/out/find-plant-by-id.port';
 
-
 import { PlantService } from './application/services/plant.service';
 import { FindPlantByIdAdapter } from './adapters/out/find-plant-by-id.adapter';
 import { CacheModule } from 'src/cache/cache.module';
@@ -16,7 +15,7 @@ import { CacheModule } from 'src/cache/cache.module';
   controllers: [PlantController],
   providers: [
     { provide: FIND_PLANT_BY_ID_USECASE, useClass: PlantService },
-    { provide: FIND_PLANT_BY_ID_PORT, useClass: FindPlantByIdAdapter }
+    { provide: FIND_PLANT_BY_ID_PORT, useClass: FindPlantByIdAdapter },
   ],
 })
 export class PlantModule {}

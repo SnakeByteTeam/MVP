@@ -17,18 +17,17 @@ import { FETCH_NEW_CACHE_REPO_PORT } from './application/repository/fetch-new-ca
 import { GET_VALID_CACHE_PORT } from './application/ports/out/get-valid-cache.port';
 import { FetchStructureCacheImpl } from './infrastructure/http/fetch-plant-structure-impl';
 
-
 @Module({
-    imports: [TokensModule, HttpModule],
-    providers: [
-        {provide: FETCH_NEW_CACHE_PORT,      useClass: FetchNewCacheAdapter},
-        {provide: READ_CACHE_PORT,           useClass: ReadCacheAdapter},
-        {provide: WRITE_CACHE_PORT,          useClass: WriteCacheAdapter}, 
-        {provide: FETCH_NEW_CACHE_REPO_PORT, useClass: FetchStructureCacheImpl},
-        {provide: WRITE_CACHE_REPO_PORT,     useClass: StructureCacheImpl},
-        {provide: READ_CACHE_REPO_PORT,      useClass: StructureCacheImpl},
-        {provide: GET_VALID_CACHE_PORT,      useClass: SyncCacheService}
-    ],
-    exports: [GET_VALID_CACHE_PORT]
+  imports: [TokensModule, HttpModule],
+  providers: [
+    { provide: FETCH_NEW_CACHE_PORT, useClass: FetchNewCacheAdapter },
+    { provide: READ_CACHE_PORT, useClass: ReadCacheAdapter },
+    { provide: WRITE_CACHE_PORT, useClass: WriteCacheAdapter },
+    { provide: FETCH_NEW_CACHE_REPO_PORT, useClass: FetchStructureCacheImpl },
+    { provide: WRITE_CACHE_REPO_PORT, useClass: StructureCacheImpl },
+    { provide: READ_CACHE_REPO_PORT, useClass: StructureCacheImpl },
+    { provide: GET_VALID_CACHE_PORT, useClass: SyncCacheService },
+  ],
+  exports: [GET_VALID_CACHE_PORT],
 })
 export class CacheModule {}

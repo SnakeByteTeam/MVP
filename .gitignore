@@ -8,7 +8,6 @@ node_modules/
 # build outputs
 dist/
 build/
-out/
 out-tsc/
 bazel-out/
 *.tsbuildinfo
@@ -72,3 +71,6 @@ typings/
 !.vscode/launch.json
 !.vscode/extensions.json
 .history/
+
+# local documentation / notes
+.ignore/

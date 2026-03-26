@@ -12,7 +12,7 @@ import {
   type FindPlantByIdUseCase,
 } from 'src/plant/application/ports/in/find-plant-by-id.usecase';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/out/plant.dto';
 
 @ApiTags('plant')
 @Controller('plant')

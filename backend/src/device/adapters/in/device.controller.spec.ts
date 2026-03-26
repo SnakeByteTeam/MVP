@@ -197,7 +197,7 @@ describe('DeviceController', () => {
   it('should throw an InternalServerErrorException when catch an error', async () => {
     findDeviceById.findById.mockRejectedValue(new Error('Error'));
 
-    await expect(controller.findById).rejects.toThrow(
+    await expect(() => controller.findById('someId')).rejects.toThrow(
       InternalServerErrorException,
     );
   });
@@ -205,7 +205,7 @@ describe('DeviceController', () => {
   it('should throw an InternalServerErrorException when catch an error', async () => {
     findDeviceByPlantId.findByPlantId.mockRejectedValue(new Error('Error'));
 
-    await expect(controller.findByPlantId).rejects.toThrow(
+    await expect(() => controller.findByPlantId('plant-id')).rejects.toThrow(
       InternalServerErrorException,
     );
   });

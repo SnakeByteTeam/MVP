@@ -50,7 +50,7 @@ export class GetTokensFromApiImpl
       };
 
       return tokensDto;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -82,7 +82,7 @@ export class GetTokensFromApiImpl
       };
 
       return tokensDto;
-    } catch (err) {
+    } catch {
       return null;
     }
   }

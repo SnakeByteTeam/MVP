@@ -1,7 +1,7 @@
 import { FetchPlantStructureAdapter } from './fetch-plant-structure.adapter';
 import { GetValidTokenPort } from 'src/tokens/application/ports/out/get-valid-token.port';
 import { FetchPlantStructureRepo } from 'src/plant/application/repository/fetch-plant-structure.repository';
-import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/out/plant.dto';
 
 describe('FetchPlantStructureAdapter', () => {
   let adapter: FetchPlantStructureAdapter;

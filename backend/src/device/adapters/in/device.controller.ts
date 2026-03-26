@@ -72,7 +72,7 @@ export class DeviceController {
     try {
       const device: Device = await this.findByIdUseCase.findById(findByIdCmd);
       return this.deviceToDto(device);
-    } catch (err) {
+    } catch {
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -114,7 +114,7 @@ export class DeviceController {
       const devices: Device[] =
         await this.findByPlantIdUseCase.findByPlantId(findByPlantIdCmd);
       return devices.map((device) => this.deviceToDto(device));
-    } catch (err) {
+    } catch {
       throw new InternalServerErrorException('Internal server error');
     }
   }

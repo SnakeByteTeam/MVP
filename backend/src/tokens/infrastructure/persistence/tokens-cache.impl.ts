@@ -31,7 +31,7 @@ export class TokenCacheImpl
         [accessToken, refreshToken, expiresAt],
       );
       return true;
-    } catch (err) {
+    } catch {
       return false;
     } finally {
       client.release();
@@ -56,8 +56,6 @@ export class TokenCacheImpl
       };
 
       return tokens;
-    } catch (err) {
-      throw err;
     } finally {
       client.release();
     }

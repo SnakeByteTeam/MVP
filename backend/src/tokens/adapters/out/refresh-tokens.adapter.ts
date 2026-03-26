@@ -15,17 +15,13 @@ export class RefreshTokensAdapter implements RefreshTokensPort {
   ) {}
 
   async refreshTokens(refreshToken: string): Promise<TokenPair | null> {
-    try {
-      const tokens: TokensDto | null =
-        await this.refreshTokensFromApi.refresh(refreshToken);
+    const tokens: TokensDto | null =
+      await this.refreshTokensFromApi.refresh(refreshToken);
 
-      if (!tokens) throw new Error('Problem requesting tokens to API');
+    if (!tokens) throw new Error('Problem requesting tokens to API');
 
-      const expiresAt: Date = new Date(Date.now() + tokens.expiresIn * 1000);
+    const expiresAt: Date = new Date(Date.now() + tokens.expiresIn * 1000);
 
-      return new TokenPair(tokens.accessToken, tokens.refreshToken, expiresAt);
-    } catch (err) {
-      throw err;
-    }
+    return new TokenPair(tokens.accessToken, tokens.refreshToken, expiresAt);
   }
 }

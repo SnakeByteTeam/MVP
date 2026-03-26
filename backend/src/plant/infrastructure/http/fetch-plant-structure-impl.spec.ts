@@ -140,7 +140,7 @@ describe('FetchPlantStructureImpl', () => {
     });
   });
 
-  it('should map room as null when room functions response has no data', async () => {
+  it('should throw an error when room functions response has no data', async () => {
     httpService.get
       .mockReturnValueOnce(
         of({
@@ -157,11 +157,8 @@ describe('FetchPlantStructureImpl', () => {
       )
       .mockReturnValueOnce(of({ data: null } as any));
 
-    const result = await impl.fetch('valid-token', 'plant-1');
+    await expect(() => impl.fetch('valid-token', 'plant-1')).rejects.toThrow();
 
-    expect(result).not.toBeNull();
-    expect(result?.rooms).toHaveLength(1);
-    expect(result?.rooms[0]).toBeNull();
   });
 
   it('should map device as null when datapoints response has no data', async () => {
@@ -197,11 +194,6 @@ describe('FetchPlantStructureImpl', () => {
       )
       .mockReturnValueOnce(of({ data: null } as any));
 
-    const result = await impl.fetch('valid-token', 'plant-1');
-
-    expect(result).not.toBeNull();
-    expect(result?.rooms).toHaveLength(1);
-    expect(result?.rooms[0]?.devices).toHaveLength(1);
-    expect(result?.rooms[0]?.devices[0]).toBeNull();
+    await expect(() =>  impl.fetch('valid-token', 'plant-1')).rejects.toThrow();
   });
 });

@@ -31,7 +31,7 @@ export class PlantRepository
         data: row.data,
       };
       return entity;
-    } catch (err) {
+    } catch {
       return null;
     } finally {
       client.release();
@@ -51,7 +51,7 @@ export class PlantRepository
         [plant.data.id, JSON.stringify(plant.data)],
       );
       return true;
-    } catch (err) {
+    } catch {
       return false;
     } finally {
       client.release();

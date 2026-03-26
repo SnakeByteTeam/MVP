@@ -5,7 +5,7 @@ import {
   FETCH_PLANT_STRUCTURE_REPO_PORT,
 } from 'src/plant/application/repository/fetch-plant-structure.repository';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/out/plant.dto';
 import {
   type GetValidTokenPort,
   GETVALIDTOKENPORT,

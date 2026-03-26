@@ -19,7 +19,7 @@ describe('WriteTokensRepoAdapter', () => {
     writeTokensAdapter = new WriteTokensRepoAdapter(writeTokensOnCache);
   });
 
-  it('received the tokens should call the cache impl function', async () => {
+  it('received the tokens should call the cache impl function', () => {
     writeTokensOnCache.writeTokens.mockResolvedValue(true);
 
     expect(writeTokensAdapter.writeTokens(tokens)).toBeTruthy();

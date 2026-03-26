@@ -16,7 +16,7 @@ export const PG_POOL = Symbol('PG_POOL');
           connectionTimeoutMillis: 2000,
         });
 
-        pool.on('error', (err) => {
+        pool.on('error', () => {
           console.error('Error on PostreSQL Pool');
         });
 

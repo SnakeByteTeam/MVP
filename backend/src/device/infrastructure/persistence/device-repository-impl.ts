@@ -30,7 +30,7 @@ export class DeviceRepositoryImpl
       const device: DeviceEntity = rows[0]?.device;
       return device;
     } catch (err) {
-      throw new Error(`Database error: ${err.message}`);
+      throw new Error(`Database error: ${err}`);
     } finally {
       client.release();
     }
@@ -52,7 +52,7 @@ export class DeviceRepositoryImpl
       const devices: DeviceEntity[] = rows.map((row) => row.device);
       return devices;
     } catch (err) {
-      throw new Error(`Database error: ${err.message}`);
+      throw new Error(`Database error: ${err}`);
     } finally {
       client.release();
     }

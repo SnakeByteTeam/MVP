@@ -68,7 +68,7 @@ describe('DeviceMapper', () => {
     };
   });
 
-  it('should return Device when receive a DeviceEntity', async () => {
+  it('should return Device when receive a DeviceEntity', () => {
     const returnedDevice = mapper.toDomain(deviceEntity);
 
     expect(returnedDevice).toEqual(expectedDevice);

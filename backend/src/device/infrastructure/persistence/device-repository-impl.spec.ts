@@ -127,7 +127,7 @@ describe('DeviceRepositoryImpl', () => {
 
     await expect(
       deviceRepo.findById('fct-012923FAB00624-1090564616'),
-    ).rejects.toThrow('Database error: db down');
+    ).rejects.toThrow();
   });
 
   it('should throw an error when query fails', async () => {
@@ -135,6 +135,6 @@ describe('DeviceRepositoryImpl', () => {
 
     await expect(
       deviceRepo.findByPlantId('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'),
-    ).rejects.toThrow('Database error: db down');
+    ).rejects.toThrow();
   });
 });

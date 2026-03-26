@@ -3,10 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
 import { FetchPlantStructureRepo } from 'src/plant/application/repository/fetch-plant-structure.repository';
-import { PlantDto } from './dtos/plant.dto';
-import { RoomDto } from './dtos/room.dto';
+import { PlantDto } from './dtos/out/plant.dto';
+import { RoomDto } from './dtos/out/room.dto';
 import { DeviceDto } from 'src/device/infrastructure/dtos/device.dto';
 import { DatapointDto } from 'src/device/infrastructure/dtos/datapoint.dto';
+import { plainToInstance } from 'class-transformer';
+import { ApiRoomDto, ApiPlantResponseDto } from './dtos/in/api-plant.dto';
+import { DeviceResponseDto, ApiDeviceDto } from './dtos/in/api-device.dto';
+import { DatapointResponseDto, ApiDatapointDto } from './dtos/in/api-datapoint.dto';
 
 @Injectable()
 export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
@@ -15,8 +19,6 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
   constructor(private readonly httpService: HttpService) {}
 
   async fetch(validToken: string, plantId: string): Promise<PlantDto | null> {
-    const plantdto: PlantDto = new PlantDto();
-
     const response = await firstValueFrom(
       this.httpService.get(`${this.API_DOMAIN}/${plantId}/locations`, {
         headers: { Authorization: `Bearer ${validToken}` },
@@ -25,13 +27,21 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
 
     if (!response.data) return null;
 
+    const apiResponse: ApiPlantResponseDto = plainToInstance(
+      ApiPlantResponseDto,
+      response.data,
+      { excludeExtraneousValues: true },
+    );
+
+    const plantdto = new PlantDto();
     plantdto.id = plantId;
-    plantdto.name = response.data?.data[0]?.attributes?.title;
+    plantdto.name = apiResponse.data[0].attributes.title;
     plantdto.rooms = await Promise.all(
-      response.data?.data
-        .filter((room: any) => room?.meta?.['@type']?.includes('loc:Location'))
+      apiResponse.data
+        .filter((room: ApiRoomDto) => room.meta.type.includes('loc:Location'))
         .map(
-          async (room: any) => await this.fetchRoom(validToken, plantId, room),
+          async (room: ApiRoomDto) =>
+            await this.fetchRoom(validToken, plantId, room),
         ),
     );
 
@@ -41,25 +51,30 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
   private async fetchRoom(
     validToken: string,
     plantId: string,
-    room: any,
-  ): Promise<RoomDto | null> {
-    const roomdto: RoomDto = new RoomDto();
-
-    roomdto.id = room?.id;
-    roomdto.name = room?.attributes?.title;
-
+    room: ApiRoomDto,
+  ): Promise<RoomDto> {
     const response = await firstValueFrom(
       this.httpService.get(
-        `${this.API_DOMAIN}/${plantId}/locations/${roomdto.id}/functions`,
+        `${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`,
         { headers: { Authorization: `Bearer ${validToken}` } },
       ),
     );
 
-    if (!response.data) return null;
+    if (!response.data)
+      throw new Error(`Failed to fetch devices for room ${room.id}`);
+
+    const deviceResponse = plainToInstance(DeviceResponseDto, response.data, {
+      excludeExtraneousValues: true,
+    });
+
+    const roomdto: RoomDto = new RoomDto();
+
+    roomdto.id = room.id;
+    roomdto.name = room.attributes.title;
 
     roomdto.devices = await Promise.all(
-      response.data?.data.map(
-        async (device: any) =>
+      deviceResponse.data.map(
+        async (device: ApiDeviceDto) =>
           await this.fetchDevice(validToken, plantId, device),
       ),
     );
@@ -71,40 +86,52 @@ export class FetchPlantStructureImpl implements FetchPlantStructureRepo {
     validToken: string,
     plantId: string,
     device: any,
-  ): Promise<DeviceDto | null> {
-    const devicedto: DeviceDto = new DeviceDto();
-
-    devicedto.id = device?.id;
-    devicedto.name = device?.attributes?.title;
-    devicedto.plantId = plantId;
-    devicedto.type = device?.meta['vimar:ssType'];
-    devicedto.subType = device?.meta['vimar:sfType'];
-
+  ): Promise<DeviceDto> {
     const response = await firstValueFrom(
       this.httpService.get(
-        `${this.API_DOMAIN}/${plantId}/functions/${devicedto.id}/datapoints`,
+        `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
         { headers: { Authorization: `Bearer ${validToken}` } },
       ),
     );
 
-    if (!response.data) return null;
+    if (!response.data)
+      throw new Error(`Failed to fetch datapoints for device ${device.id}`);
+
+    const datapointReponse = plainToInstance(
+      DatapointResponseDto,
+      response.data,
+      {
+        excludeExtraneousValues: true,
+      },
+    );
+
+    const devicedto: DeviceDto = new DeviceDto();
+    devicedto.id = device.id;
+    devicedto.name = device.attributes.title;
+    devicedto.plantId = plantId;
+    devicedto.type = device.meta.ssType;
+    devicedto.subType = device.meta.sfType;
 
     devicedto.datapoints = await Promise.all(
-      response.data?.data.map(async (dp: any) => await this.fetchDatapoint(dp)),
+      datapointReponse.data.map(
+        async (dp: ApiDatapointDto) => await this.fetchDatapoint(dp),
+      ),
     );
 
     return devicedto;
   }
 
-  private async fetchDatapoint(datapoint: any): Promise<DatapointDto | null> {
+  private async fetchDatapoint(
+    datapoint: ApiDatapointDto,
+  ): Promise<DatapointDto> {
     const datapointdto: DatapointDto = {
-      id: datapoint?.id,
-      name: datapoint?.attributes?.title,
-      readable: datapoint?.attributes?.readable,
-      writable: datapoint?.attributes?.writable,
-      enum: datapoint?.attributes?.enum,
-      valueType: datapoint?.attributes?.valueType,
-      sfeType: datapoint?.meta['vimar:sfeType'],
+      id: datapoint.id,
+      name: datapoint.attributes.title,
+      readable: datapoint.attributes.readable,
+      writable: datapoint.attributes.writable,
+      enum: datapoint.attributes.enum,
+      valueType: datapoint.attributes.valueType,
+      sfeType: datapoint.meta.sfeType,
     };
 
     return datapointdto;

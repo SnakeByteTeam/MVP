@@ -25,7 +25,7 @@ describe('DatapointDto', () => {
     dto.readable = true;
     dto.writable = true;
     dto.valueType = 'number';
-    (dto as any).enum = undefined;
+    dto.enum = undefined as unknown as string[];
     dto.sfeType = 'SFE_Cmd_Dimmer';
 
     const datapoint = DatapointDto.toDomain(dto);

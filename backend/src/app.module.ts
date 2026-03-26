@@ -19,6 +19,6 @@ import { PlantModule } from './plant/plant.module';
     DatabaseModule,
     DeviceModule,
     PlantModule,
-  ]
+  ],
 })
 export class AppModule {}

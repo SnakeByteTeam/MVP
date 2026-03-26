@@ -82,7 +82,7 @@ export class TokensController {
         url: `${process.env.FRONTEND_URL}/my-vimar?linked=ok`,
         statusCode: 302,
       };
-    } catch (err) {
+    } catch {
       throw new InternalServerErrorException('Internal server error');
     }
   }

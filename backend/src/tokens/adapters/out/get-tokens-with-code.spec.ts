@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { GetTokensFromApiPort } from 'src/tokens/application/repository/get-tokens-from-api.port';
 import { GetTokenWithCodeAdapter } from './get-tokens-with-code.adapter';
 import { TokensDto } from 'src/tokens/infrastructure/dtos/tokens.dto';
@@ -10,7 +9,7 @@ describe('GetTokensWithCodeAdapter', () => {
   let takenTokens: TokensDto;
   let returnedTokens: TokenPair;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     takenTokens = {
       accessToken: 'access_token_1',
       refreshToken: 'refresh_token_1',

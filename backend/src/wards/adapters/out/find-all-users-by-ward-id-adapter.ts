@@ -6,6 +6,7 @@ import {
   FindAllUsersByWardIdRepository,
 } from '../../application/repository/find-all-users-by-ward-id-repository.interface';
 import { UserEntity } from '../../infrastructure/entities/user-entity';
+import { User } from '../../domain/user';
 
 export class FindAllUsersByWardIdAdapter implements FindAllUsersByWardIdPort {
   constructor(
@@ -13,7 +14,7 @@ export class FindAllUsersByWardIdAdapter implements FindAllUsersByWardIdPort {
     private readonly findAllUsersByWardIdRepository: FindAllUsersByWardIdRepository,
   ) {}
 
-  async findAllUsersByWardId(req: FindAllUsersByWardIdCmd) {
+  async findAllUsersByWardId(req: FindAllUsersByWardIdCmd): Promise<User[]> {
     const userEntities: UserEntity[] =
       await this.findAllUsersByWardIdRepository.findAllUsersByWardId(req.id);
 

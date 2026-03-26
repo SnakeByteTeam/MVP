@@ -32,11 +32,11 @@ export class WardsPlantsRelationshipsService
   async addPlantToWard(req: AddPlantToWardCmd): Promise<Plant> {
     return await this.addPlantToWardPort.addPlantToWard(req);
   }
-  findAllPlantsByWardId(req: FindAllPlantsByWardIdCmd): Promise<Plant[]> {
-    return this.findAllPlantsByWardIdPort.findAllPlantsByWardId(req);
+  async findAllPlantsByWardId(req: FindAllPlantsByWardIdCmd): Promise<Plant[]> {
+    return await this.findAllPlantsByWardIdPort.findAllPlantsByWardId(req);
   }
-  removePlantFromWard(req: RemovePlantFromWardCmd) {
-    return this.removePlantFromWardPort.removePlantFromWard(req);
+  async removePlantFromWard(req: RemovePlantFromWardCmd): Promise<void> {
+    return await this.removePlantFromWardPort.removePlantFromWard(req);
   }
 }
 

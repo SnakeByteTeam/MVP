@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WardsUsersRelationshipsServiceService } from './wards-users-relationships.service';
+import { WardsUsersRelationshipsService } from './wards-users-relationships.service';
 
 describe('WardsUsersRelationshipsServiceService', () => {
-  let service: WardsUsersRelationshipsServiceService;
+  let service: WardsUsersRelationshipsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WardsUsersRelationshipsServiceService],
+      providers: [WardsUsersRelationshipsService],
     }).compile();
 
-    service = module.get<WardsUsersRelationshipsServiceService>(
-      WardsUsersRelationshipsServiceService,
+    service = module.get<WardsUsersRelationshipsService>(
+      WardsUsersRelationshipsService,
     );
   });
 

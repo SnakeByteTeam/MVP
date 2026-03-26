@@ -13,10 +13,7 @@ export class WardsPlantsRelationshipsRepositoryImpl
 {
   constructor(@Inject(PG_POOL) private readonly conn) {}
 
-  async addPlantToWard(
-    wardId: number,
-    plantId: number,
-  ): Promise<PlantEntity> {
+  async addPlantToWard(wardId: number, plantId: number): Promise<PlantEntity> {
     const result = await this.conn.query(
       'WITH inserted AS ( INSERT INTO ward_plant (ward_id, plant_id) VALUES ($1, $2) RETURNING plant_id) SELECT id, name FROM plant WHERE id = (SELECT plant_id FROM inserted)',
       [wardId, plantId],
@@ -26,7 +23,7 @@ export class WardsPlantsRelationshipsRepositoryImpl
       throw new Error('Add plant not found');
     }
 
-    return result.rows;
+    return result.rows[0];
   }
   async findAllPlantsByWardId(wardId: number): Promise<PlantEntity[]> {
     const result = await this.conn.query(
@@ -36,7 +33,10 @@ export class WardsPlantsRelationshipsRepositoryImpl
 
     return result.rows;
   }
-  removePlantToWard(wardId: number, plantId: number) {
-    throw new Error('Method not implemented.');
+  async removePlantFromWard(wardId: number, plantId: number): Promise<void> {
+    await this.conn.query(
+      'DELETE FROM ward_plant WHERE ward_id = $1 AND plant_id = $2',
+      [wardId, plantId],
+    );
   }
 }

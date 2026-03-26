@@ -17,7 +17,7 @@ export class FindAllPlantsByWardIdAdapter implements FindAllPlantsByWardIdPort {
   async findAllPlantsByWardId(req: FindAllPlantsByWardIdCmd): Promise<Plant[]> {
     const plantEntities: PlantEntity[] =
       await this.findAllPlantsByWardIdRepository.findAllPlantsByWardId(req.id);
-      
+
     return plantEntities.map(
       (plantEntity) => new Plant(plantEntity.id, plantEntity.name),
     );

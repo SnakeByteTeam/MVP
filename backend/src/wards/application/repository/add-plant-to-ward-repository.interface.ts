@@ -1,4 +1,4 @@
-import { PlantEntity } from "../../infrastructure/entities/plant-entity";
+import { PlantEntity } from '../../infrastructure/entities/plant-entity';
 
 export interface AddPlantToWardRepository {
   addPlantToWard(wardId: number, plantId: number): Promise<PlantEntity>;

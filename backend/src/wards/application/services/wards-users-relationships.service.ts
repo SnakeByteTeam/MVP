@@ -22,21 +22,21 @@ export class WardsUsersRelationshipsService
 {
   constructor(
     @Inject(ADD_USER_TO_WARD_PORT)
-    private readonly addUserToWardAdapter: AddUserToWardPort,
+    private readonly addUserToWardPort: AddUserToWardPort,
     @Inject(FIND_ALL_USERS_BY_WARD_ID_PORT)
     private readonly findAllUsersByWardIdPort: FindAllUsersByWardIdPort,
     @Inject(REMOVE_USER_FROM_WARD_PORT)
     private readonly removeUserFromWardPort: RemoveUserFromWardPort,
   ) {}
 
-  addUserToWard(req: AddUserToWardCmd): Promise<User> {
-    return this.addUserToWardAdapter.addUserToWard(req);
+  async addUserToWard(req: AddUserToWardCmd): Promise<User> {
+    return await this.addUserToWardPort.addUserToWard(req);
   }
-  findAllUsersByWardId(req: FindAllUsersByWardIdCmd): Promise<User[]> {
-    return this.findAllUsersByWardIdPort.findAllUsersByWardId(req);
+  async findAllUsersByWardId(req: FindAllUsersByWardIdCmd): Promise<User[]> {
+    return await this.findAllUsersByWardIdPort.findAllUsersByWardId(req);
   }
-  removeUserFromWard(req: RemoveUserFromWardCmd) {
-    return this.removeUserFromWardPort.removeUserFromWard(req);
+  async removeUserFromWard(req: RemoveUserFromWardCmd): Promise<void> {
+    return await this.removeUserFromWardPort.removeUserFromWard(req);
   }
 }
 

@@ -69,6 +69,11 @@ import {
 import { ADD_USER_TO_WARD_REPOSITORY } from './application/repository/add-user-to-ward-repository.interface';
 import { WardsUsersRelationshipsRepositoryImpl } from './infrastructure/persistence/wards-users-relationships-repository-impl';
 import { WardsPlantsRelationshipsRepositoryImpl } from './infrastructure/persistence/wards-plants-relationships-repository-impl';
+import { FIND_ALL_USERS_BY_WARD_ID_REPOSITORY } from './application/repository/find-all-users-by-ward-id-repository.interface';
+import { REMOVE_USER_FROM_WARD_REPOSITORY } from './application/repository/remove-user-from-ward-repository.interface';
+import { ADD_PLANT_TO_WARD_REPOSITORY } from './application/repository/add-plant-to-ward-repository.interface';
+import { FIND_ALL_PLANTS_BY_WARD_ID_REPOSITORY } from './application/repository/find-all-plants-by-ward-id-repository.interface';
+import { REMOVE_PLANT_FROM_WARD_REPOSITORY } from './application/repository/remove-plant-from-ward-repository.interface';
 
 @Module({
   controllers: [
@@ -178,23 +183,23 @@ import { WardsPlantsRelationshipsRepositoryImpl } from './infrastructure/persist
       useClass: WardsUsersRelationshipsRepositoryImpl,
     },
     {
-      provide: FIND_ALL_USERS_BY_WARD_ID_PORT,
+      provide: FIND_ALL_USERS_BY_WARD_ID_REPOSITORY,
       useClass: WardsUsersRelationshipsRepositoryImpl,
     },
     {
-      provide: REMOVE_USER_FROM_WARD_PORT,
+      provide: REMOVE_USER_FROM_WARD_REPOSITORY,
       useClass: WardsUsersRelationshipsRepositoryImpl,
     },
     {
-      provide: ADD_PLANT_TO_WARD_PORT,
+      provide: ADD_PLANT_TO_WARD_REPOSITORY,
       useClass: WardsPlantsRelationshipsRepositoryImpl,
     },
     {
-      provide: FIND_ALL_PLANTS_BY_WARD_ID_PORT,
+      provide: FIND_ALL_PLANTS_BY_WARD_ID_REPOSITORY,
       useClass: WardsPlantsRelationshipsRepositoryImpl,
     },
     {
-      provide: REMOVE_PLANT_FROM_WARD_PORT,
+      provide: REMOVE_PLANT_FROM_WARD_REPOSITORY,
       useClass: WardsPlantsRelationshipsRepositoryImpl,
     },
   ],

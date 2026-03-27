@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserRole } from '../../../core/models/user-role.enum';
+import type { WardSummaryDto } from '../models/ward-api.dto';
 import type { Ward } from '../models/ward.model';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardApiService } from './ward-api.service';
@@ -18,9 +19,9 @@ describe('AssignmentOperationsService', () => {
             apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
             operators: [
                 {
-                    id: 'user-1',
-                    firstName: 'Mario',
-                    lastName: 'Rossi',
+                    id: '1',
+                    firstName: 'mrossi',
+                    lastName: '',
                     username: 'mrossi',
                     role: UserRole.OPERATORE_SANITARIO,
                 },
@@ -28,12 +29,16 @@ describe('AssignmentOperationsService', () => {
         },
     ];
 
+    const wardSummaries: WardSummaryDto[] = [{ id: 1, name: 'Cardiologia' }];
+
     const apiStub = {
         assignOperatorToWard: vi.fn(),
         removeOperatorFromWard: vi.fn(),
         assignPlantToWard: vi.fn(),
         removePlantFromWard: vi.fn(),
         getWards: vi.fn(),
+        getPlantsByWardId: vi.fn(),
+        getOperatorsByWardId: vi.fn(),
     };
 
     const storeStub = {
@@ -58,7 +63,9 @@ describe('AssignmentOperationsService', () => {
 
     it('assignOperator esegue operazione e poi ricarica i wards', () => {
         apiStub.assignOperatorToWard.mockReturnValue(of(void 0));
-        apiStub.getWards.mockReturnValue(of(wards));
+        apiStub.getWards.mockReturnValue(of(wardSummaries));
+        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
+        apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
 
         service.assignOperator(1, { userId: 2 }).subscribe((result) => {
             expect(result).toBeUndefined();
@@ -66,6 +73,8 @@ describe('AssignmentOperationsService', () => {
 
         expect(apiStub.assignOperatorToWard).toHaveBeenCalledWith(1, { userId: 2 });
         expect(apiStub.getWards).toHaveBeenCalledOnce();
+        expect(apiStub.getPlantsByWardId).toHaveBeenCalledWith(1);
+        expect(apiStub.getOperatorsByWardId).toHaveBeenCalledWith(1);
         expect(storeStub.setWards).toHaveBeenCalledWith(wards);
         expect(storeStub.setWards).toHaveBeenCalledTimes(1);
         expect(storeStub.setLoading).toHaveBeenCalledWith(false);

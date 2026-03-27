@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserRole } from '../../../core/models/user-role.enum';
+import type { WardSummaryDto } from '../models/ward-api.dto';
 import type { Ward } from '../models/ward.model';
 import { WardApiService } from './ward-api.service';
 import { WardOperationsService } from './ward-operations.service';
@@ -26,8 +27,27 @@ describe('WardOperationsService', () => {
         ],
     };
 
+    const hydratedWard: Ward = {
+        id: 1,
+        name: 'Cardiologia',
+        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+        operators: [
+            {
+                id: '1',
+                firstName: 'mrossi',
+                lastName: '',
+                username: 'mrossi',
+                role: UserRole.OPERATORE_SANITARIO,
+            },
+        ],
+    };
+
+    const wardSummaries: WardSummaryDto[] = [{ id: 1, name: 'Cardiologia' }];
+
     const apiStub = {
         getWards: vi.fn(),
+        getPlantsByWardId: vi.fn(),
+        getOperatorsByWardId: vi.fn(),
         createWard: vi.fn(),
         updateWard: vi.fn(),
         deleteWard: vi.fn(),
@@ -57,17 +77,34 @@ describe('WardOperationsService', () => {
     });
 
     it('loadWards aggiorna store e termina senza valore', () => {
-        apiStub.getWards.mockReturnValue(of([ward]));
+        apiStub.getWards.mockReturnValue(of(wardSummaries));
+        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
+        apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
 
         service.loadWards().subscribe((result) => {
             expect(result).toBeUndefined();
         });
 
         expect(apiStub.getWards).toHaveBeenCalledOnce();
-        expect(storeStub.setWards).toHaveBeenCalledWith([ward]);
+        expect(apiStub.getPlantsByWardId).toHaveBeenCalledWith(1);
+        expect(apiStub.getOperatorsByWardId).toHaveBeenCalledWith(1);
+        expect(storeStub.setWards).toHaveBeenCalledWith([hydratedWard]);
         expect(storeStub.setWards).toHaveBeenCalledTimes(1);
         expect(storeStub.setLoading).toHaveBeenCalledWith(false);
         expect(storeStub.setLoading).toHaveBeenCalledTimes(1);
+        expect(storeStub.setError).not.toHaveBeenCalled();
+    });
+
+    it('loadWards con lista vuota non richiama le relationship API', () => {
+        apiStub.getWards.mockReturnValue(of([]));
+
+        service.loadWards().subscribe();
+
+        expect(apiStub.getWards).toHaveBeenCalledOnce();
+        expect(apiStub.getPlantsByWardId).not.toHaveBeenCalled();
+        expect(apiStub.getOperatorsByWardId).not.toHaveBeenCalled();
+        expect(storeStub.setWards).toHaveBeenCalledWith([]);
+        expect(storeStub.setLoading).toHaveBeenCalledWith(false);
         expect(storeStub.setError).not.toHaveBeenCalled();
     });
 

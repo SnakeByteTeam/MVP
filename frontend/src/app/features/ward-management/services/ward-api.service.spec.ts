@@ -13,9 +13,9 @@ describe('WardApiService', () => {
     let httpController: HttpTestingController;
 
     const baseUrl = 'http://api.example.test';
-    const wardsEndpoint = `${baseUrl}/api/wards`;
-    const wardUsersRelationshipsEndpoint = `${baseUrl}/api/wards-users-relationships`;
-    const wardPlantsRelationshipsEndpoint = `${baseUrl}/api/wards-plants-relationships`;
+    const wardsEndpoint = `${baseUrl}/wards`;
+    const wardUsersRelationshipsEndpoint = `${baseUrl}/wards-users-relationships`;
+    const wardPlantsRelationshipsEndpoint = `${baseUrl}/wards-plants-relationships`;
 
     const ward: Ward = {
         id: 1,
@@ -55,13 +55,38 @@ describe('WardApiService', () => {
 
     it('chiama GET /api/wards in getWards', () => {
         service.getWards().subscribe((result) => {
-            expect(result).toEqual([ward]);
+            expect(result).toEqual([
+                {
+                    id: 1,
+                    name: 'Cardiologia',
+                },
+            ]);
             expect(result).toHaveLength(1);
         });
 
         const request = httpController.expectOne(wardsEndpoint);
         expect(request.request.method).toBe('GET');
-        request.flush([ward]);
+        request.flush([{ id: 1, name: 'Cardiologia' }]);
+    });
+
+    it('chiama GET /api/wards-users-relationships/:wardId in getOperatorsByWardId', () => {
+        service.getOperatorsByWardId(10).subscribe((result) => {
+            expect(result).toEqual([{ id: 1, username: 'mrossi' }]);
+        });
+
+        const request = httpController.expectOne(`${wardUsersRelationshipsEndpoint}/10`);
+        expect(request.request.method).toBe('GET');
+        request.flush([{ id: 1, username: 'mrossi' }]);
+    });
+
+    it('chiama GET /api/wards-plants-relationships/:wardId in getPlantsByWardId', () => {
+        service.getPlantsByWardId(10).subscribe((result) => {
+            expect(result).toEqual([{ id: 101, name: 'App. 101' }]);
+        });
+
+        const request = httpController.expectOne(`${wardPlantsRelationshipsEndpoint}/10`);
+        expect(request.request.method).toBe('GET');
+        request.flush([{ id: 101, name: 'App. 101' }]);
     });
 
     it('chiama POST /api/wards in createWard', () => {

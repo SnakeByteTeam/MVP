@@ -1,7 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { EMPTY, Observable, catchError, map, switchMap, tap } from 'rxjs';
-import type { AssignPlantDto, AssignOperatorDto } from '../models/ward-api.dto';
+import { EMPTY, Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { UserRole } from '../../../core/models/user-role.enum';
+import type {
+  AssignPlantDto,
+  AssignOperatorDto,
+  WardPlantDto,
+  WardSummaryDto,
+  WardUserDto,
+} from '../models/ward-api.dto';
+import type { Ward } from '../models/ward.model';
 import { WardApiService } from './ward-api.service';
 import { WardStore } from './ward.store';
 
@@ -29,6 +37,13 @@ export class AssignmentOperationsService {
   private reloadAfter(operation$: Observable<void>): Observable<void> {
     return operation$.pipe(
       switchMap(() => this.api.getWards()),
+      switchMap((wardSummaries) => {
+        if (wardSummaries.length === 0) {
+          return of([] as Ward[]);
+        }
+
+        return forkJoin(wardSummaries.map((wardSummary) => this.toWard(wardSummary)));
+      }),
       tap((wards) => this.store.setWards(wards)),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
@@ -37,6 +52,38 @@ export class AssignmentOperationsService {
         return EMPTY;
       }),
     );
+  }
+
+  private toWard(wardSummary: WardSummaryDto): Observable<Ward> {
+    return forkJoin({
+      apartmentsDto: this.api.getPlantsByWardId(wardSummary.id),
+      operatorsDto: this.api.getOperatorsByWardId(wardSummary.id),
+    }).pipe(
+      map(({ apartmentsDto, operatorsDto }) => ({
+        id: wardSummary.id,
+        name: wardSummary.name,
+        apartments: this.toApartments(apartmentsDto),
+        operators: this.toOperators(operatorsDto),
+      })),
+    );
+  }
+
+  private toApartments(apartmentsDto: WardPlantDto[]): Ward['apartments'] {
+    return apartmentsDto.map((plant) => ({
+      id: plant.id,
+      name: plant.name,
+      isEnabled: true,
+    }));
+  }
+
+  private toOperators(operatorsDto: WardUserDto[]): Ward['operators'] {
+    return operatorsDto.map((user) => ({
+      id: String(user.id),
+      firstName: user.username,
+      lastName: '',
+      username: user.username,
+      role: UserRole.OPERATORE_SANITARIO,
+    }));
   }
 
   private getErrorMessage(error: unknown): string {

@@ -8,6 +8,7 @@ export interface UpdateWardDto {
 
 export interface AssignOperatorDto {
     userId: number;
+    //vedere dto backend
 }
 
 export interface AssignPlantDto {

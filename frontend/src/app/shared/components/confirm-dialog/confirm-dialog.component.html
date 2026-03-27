@@ -1,9 +1,19 @@
-<dialog open aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message">
-    <h2 id="confirm-dialog-title">Conferma operazione</h2>
-    <p id="confirm-dialog-message">{{ message() }}</p>
+<dialog open aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md rounded-lg border border-neutral-500 bg-[#efefef] p-4 shadow-2xl backdrop:bg-black/45 focus:outline-none">
+    <div class="mb-3 border-b border-neutral-400 pb-2">
+        <h2 id="confirm-dialog-title" class="text-base font-bold text-neutral-900">Conferma operazione</h2>
+    </div>
 
-    <div>
-        <button type="button" (click)="onCancel()">{{ cancelLabel() }}</button>
-        <button type="button" (click)="onConfirm()">{{ confirmLabel() }}</button>
+    <p id="confirm-dialog-message" class="text-sm text-neutral-800">{{ message() }}</p>
+
+    <div class="mt-4 flex items-center justify-end gap-2">
+        <button type="button" (click)="onCancel()"
+            class="rounded-md border border-neutral-600 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-800 hover:bg-neutral-100">
+            {{ cancelLabel() }}
+        </button>
+        <button type="button" (click)="onConfirm()"
+            class="rounded-md border border-red-700 bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700">
+            {{ confirmLabel() }}
+        </button>
     </div>
 </dialog>

@@ -28,7 +28,7 @@ jobs:
         working-directory: ./backend
         run: |
           npm ci --ignore-scripts
-          npm run test:cov
+          npm run test:cov -- --runInBand
 
       - name: Install dependencies & Test Frontend
         working-directory: ./frontend

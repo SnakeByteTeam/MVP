@@ -1,12 +1,29 @@
-<dialog open aria-labelledby="ward-dialog-title">
-    <h2 id="ward-dialog-title">{{ isEditMode() ? 'Modifica reparto' : 'Crea reparto' }}</h2>
+<dialog open aria-labelledby="ward-dialog-title"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md rounded-lg border border-neutral-500 bg-[#efefef] p-4 shadow-2xl backdrop:bg-black/45 focus:outline-none">
+    <div class="mb-3 flex items-start justify-between gap-3 border-b border-neutral-400 pb-2">
+        <div>
+            <h2 id="ward-dialog-title" class="text-base font-bold text-neutral-900">{{ isEditMode() ? 'Modifica reparto'
+                : 'Crea reparto' }}</h2>
+            <p class="text-xs text-neutral-700">Compila il nome del reparto e conferma.</p>
+        </div>
+        <button type="button" (click)="onCancel()" aria-label="Chiudi"
+            class="rounded-md border border-neutral-600 bg-white px-2 py-0.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-100">
+            x
+        </button>
+    </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <label for="ward-name">Nome reparto</label>
-        <input id="ward-name" type="text" formControlName="name" maxlength="100" />
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mt-3 space-y-3">
+        <div>
+            <label for="ward-name" class="mb-1 block text-sm font-semibold text-neutral-800">Nome reparto <span
+                    class="text-rose-700">*</span></label>
+            <input id="ward-name" type="text" formControlName="name" maxlength="100"
+                class="w-full rounded-md border border-neutral-500 bg-white px-3 py-1.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-sky-600 focus:ring-2 focus:ring-sky-300"
+                placeholder="Es. Reparto autosufficienti" />
+            <p class="mt-1 text-xs text-neutral-600">Campo obbligatorio. Massimo 100 caratteri.</p>
+        </div>
 
         @if (form.controls.name.touched && form.controls.name.invalid) {
-        <p role="alert">
+        <p role="alert" class="rounded-md border border-rose-300 bg-rose-100 px-3 py-2 text-sm text-rose-900">
             @if (form.controls.name.errors?.['required']) {
             <span>Il nome reparto e obbligatorio.</span>
             }
@@ -16,9 +33,12 @@
         </p>
         }
 
-        <div>
-            <button type="button" (click)="onCancel()">Annulla</button>
-            <button type="submit">{{ isEditMode() ? 'Salva' : 'Crea' }}</button>
+        <div class="flex items-center justify-end gap-2 pt-1">
+            <button type="button" (click)="onCancel()"
+                class="rounded-md border border-neutral-600 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-800 hover:bg-neutral-100">Annulla</button>
+            <button type="submit" [disabled]="form.invalid"
+                class="rounded-md border border-green-700 bg-green-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:border-neutral-400 disabled:bg-neutral-400">{{
+                isEditMode() ? 'Salva' : 'Crea' }}</button>
         </div>
     </form>
 </dialog>

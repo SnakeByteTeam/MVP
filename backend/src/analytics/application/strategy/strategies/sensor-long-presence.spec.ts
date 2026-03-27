@@ -47,8 +47,8 @@ describe('SensorLongPresence', () => {
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should not detect long presence if duration is less than 30 minutes', async () => {
@@ -64,7 +64,7 @@ describe('SensorLongPresence', () => {
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
   });
 
   it('should detect long presence if duration exceeds 30 minutes', async () => {
@@ -80,8 +80,8 @@ describe('SensorLongPresence', () => {
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('1');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('1');
   });
 
   it('should count only one event per long presence session', async () => {
@@ -98,8 +98,8 @@ describe('SensorLongPresence', () => {
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('1');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('1');
   });
 
   it('should reset and count a new event after NotDetected', async () => {
@@ -118,7 +118,7 @@ describe('SensorLongPresence', () => {
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('2');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('2');
   });
 });

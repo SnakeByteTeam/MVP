@@ -15,10 +15,10 @@ export class PlantAnomalies implements AnalyticsStrategy {
     const anomalyLabels: string[] = [];
     const anomalyValues: string[] = [];
 
-    for (let i = 0; i < consumptionPlot.labels.length; i++) {
-      const wh = Number.parseFloat(consumptionPlot.data[i]);
+    for (let i = 0; i < consumptionPlot.getLabels().length; i++) {
+      const wh = Number.parseFloat(consumptionPlot.getData()[i]);
       if (wh > ANOMALY_THRESHOLD_WH) {
-        anomalyLabels.push(consumptionPlot.labels[i]);
+        anomalyLabels.push(consumptionPlot.getLabels()[i]);
         anomalyValues.push(wh.toFixed(2));
       }
     }

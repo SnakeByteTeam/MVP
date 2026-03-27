@@ -34,8 +34,8 @@ describe('WardResolvedAlarm', () => {
       new GetAnalyticsCmd('ward-resolved-alarm', '1'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should return sent and resolved alarms for the same day', async () => {
@@ -46,9 +46,9 @@ describe('WardResolvedAlarm', () => {
       new GetAnalyticsCmd('ward-resolved-alarm', '1'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('3');
-    expect(result.series?.resolved[0]).toBe('2');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('3');
+    expect(result.getSeries()?.resolved[0]).toBe('2');
   });
 
   it('should return 0 for resolved if no alarms were resolved that day', async () => {
@@ -59,9 +59,9 @@ describe('WardResolvedAlarm', () => {
       new GetAnalyticsCmd('ward-resolved-alarm', '1'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('5');
-    expect(result.series?.resolved[0]).toBe('0');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('5');
+    expect(result.getSeries()?.resolved[0]).toBe('0');
   });
 
   it('should correctly aggregate alarms over multiple days', async () => {
@@ -84,18 +84,18 @@ describe('WardResolvedAlarm', () => {
       new GetAnalyticsCmd('ward-resolved-alarm', '1'),
     );
 
-    expect(result.labels).toHaveLength(3);
-    expect(result.labels[0]).toBe(threeDaysAgo);
-    expect(result.labels[1]).toBe(twoDaysAgo);
-    expect(result.labels[2]).toBe(yesterday);
+    expect(result.getLabels()).toHaveLength(3);
+    expect(result.getLabels()[0]).toBe(threeDaysAgo);
+    expect(result.getLabels()[1]).toBe(twoDaysAgo);
+    expect(result.getLabels()[2]).toBe(yesterday);
 
-    expect(result.data[0]).toBe('2'); // inviati
-    expect(result.data[1]).toBe('4');
-    expect(result.data[2]).toBe('2');
+    expect(result.getData()[0]).toBe('2'); // inviati
+    expect(result.getData()[1]).toBe('4');
+    expect(result.getData()[2]).toBe('2');
 
-    expect(result.series?.resolved[0]).toBe('1'); // risolti
-    expect(result.series?.resolved[1]).toBe('3');
-    expect(result.series?.resolved[2]).toBe('2');
+    expect(result.getSeries()?.resolved[0]).toBe('1'); // risolti
+    expect(result.getSeries()?.resolved[1]).toBe('3');
+    expect(result.getSeries()?.resolved[2]).toBe('2');
   });
 
   it('should call getAlarmsByWardId twice — once for resolved and once for sent', async () => {
@@ -124,8 +124,8 @@ describe('WardResolvedAlarm', () => {
       new GetAnalyticsCmd('ward-resolved-alarm', '1'),
     );
 
-    const sent = parseInt(result.data[0]);
-    const resolved = parseInt(result.series?.resolved[0] ?? '0');
+    const sent = parseInt(result.getData()[0]);
+    const resolved = parseInt(result.getSeries()?.resolved[0] ?? '0');
 
     expect(resolved).toBeLessThanOrEqual(sent);
   });

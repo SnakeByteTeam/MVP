@@ -33,8 +33,8 @@ describe('WardAlarmsFrequency', () => {
       new GetAnalyticsCmd('ward-alarms-frequency', '1'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should return the number of alarms for a single day', async () => {
@@ -44,8 +44,8 @@ describe('WardAlarmsFrequency', () => {
       new GetAnalyticsCmd('ward-alarms-frequency', '1'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('3');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('3');
   });
 
   it('should correctly aggregate alarms over multiple days', async () => {
@@ -61,13 +61,13 @@ describe('WardAlarmsFrequency', () => {
       new GetAnalyticsCmd('ward-alarms-frequency', '1'),
     );
 
-    expect(result.labels).toHaveLength(3);
-    expect(result.labels[0]).toBe(threeDaysAgo);
-    expect(result.labels[1]).toBe(twoDaysAgo);
-    expect(result.labels[2]).toBe(yesterday);
-    expect(result.data[0]).toBe('1');
-    expect(result.data[1]).toBe('4');
-    expect(result.data[2]).toBe('2');
+    expect(result.getLabels()).toHaveLength(3);
+    expect(result.getLabels()[0]).toBe(threeDaysAgo);
+    expect(result.getLabels()[1]).toBe(twoDaysAgo);
+    expect(result.getLabels()[2]).toBe(yesterday);
+    expect(result.getData()[0]).toBe('1');
+    expect(result.getData()[1]).toBe('4');
+    expect(result.getData()[2]).toBe('2');
   });
 
   it('should call getAlarmsByWardId with onlyResolved=false', async () => {
@@ -96,8 +96,8 @@ describe('WardAlarmsFrequency', () => {
       new GetAnalyticsCmd('ward-alarms-frequency', '1'),
     );
 
-    expect(result.labels[0]).toBe(threeDaysAgo);
-    expect(result.labels[1]).toBe(twoDaysAgo);
-    expect(result.labels[2]).toBe(yesterday);
+    expect(result.getLabels()[0]).toBe(threeDaysAgo);
+    expect(result.getLabels()[1]).toBe(twoDaysAgo);
+    expect(result.getLabels()[2]).toBe(yesterday);
   });
 });

@@ -1,9 +1,29 @@
 export class Plot {
   constructor(
-    public readonly title: string,
-    public readonly metric: string,
-    public readonly labels: string[],
-    public readonly data: string[],
-    public readonly series?: Record<string, string[]>, // serie aggiuntive
+    private readonly title: string,
+    private readonly metric: string,
+    private readonly labels: string[],
+    private readonly data: string[],
+    private readonly series?: Record<string, string[]>, // serie aggiuntive
   ) {}
+
+  getTitle(): string {
+    return this.title;
+  }
+
+  getMetric(): string {
+    return this.metric;
+  }
+
+  getLabels(): string[] {
+    return this.labels;
+  }
+
+  getData(): string[] {
+    return this.data;
+  }
+
+  getSeries(): Record<string, string[]>|undefined {
+    return this.series;
+  }
 }

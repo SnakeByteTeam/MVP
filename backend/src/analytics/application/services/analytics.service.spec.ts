@@ -4,12 +4,12 @@ import { AnalyticsStrategy } from '../strategy/analytics.strategy';
 import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
 
-const mockPlot: Plot = {
-  title: 'Plant Consumption Analytics',
-  metric: 'plant-consumption',
-  data: [],
-  labels: [],
-};
+const mockPlot = new Plot(
+  'Plant Consumption Analytics',
+  'plant-consumption',
+  [],
+  [],
+);
 
 const mockCmd: GetAnalyticsCmd = {
   id: 'plant-001-a',
@@ -80,12 +80,12 @@ describe('AnalyticsService', () => {
     });
 
     it('should call the correct strategy when multiple strategies are registered', async () => {
-      const wardFallsPlot: Plot = {
-        title: 'Ward Falls Analytics',
-        metric: 'ward-falls',
-        data: [],
-        labels: [],
-      };
+      const wardFallsPlot = new Plot(
+        'Ward Falls Analytics',
+        'ward-falls',
+        [],
+        [],
+      );
       const wardFallsStrategy: jest.Mocked<AnalyticsStrategy> = {
         execute: jest.fn().mockResolvedValue(wardFallsPlot),
       };

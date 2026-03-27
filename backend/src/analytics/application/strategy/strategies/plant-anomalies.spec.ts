@@ -36,8 +36,8 @@ describe('PlantAnomalies', () => {
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should detect anomaly when consumption exceeds threshold', async () => {
@@ -54,8 +54,8 @@ describe('PlantAnomalies', () => {
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe(anomalyValue);
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe(anomalyValue);
   });
 
   it('should not detect anomaly when consumption is below threshold', async () => {
@@ -72,7 +72,7 @@ describe('PlantAnomalies', () => {
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
   });
 
   it('should detect anomalies only on days that exceed threshold', async () => {
@@ -90,8 +90,8 @@ describe('PlantAnomalies', () => {
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(1);
-    expect(result.labels[0]).toBe(yesterday);
-    expect(result.data[0]).toBe(anomalyValue);
+    expect(result.getLabels()).toHaveLength(1);
+    expect(result.getLabels()[0]).toBe(yesterday);
+    expect(result.getData()[0]).toBe(anomalyValue);
   });
 });

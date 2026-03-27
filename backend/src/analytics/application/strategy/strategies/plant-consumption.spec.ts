@@ -42,8 +42,8 @@ describe('PlantConsumption', () => {
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should calculate consumption when light is On', async () => {
@@ -59,8 +59,8 @@ describe('PlantConsumption', () => {
     );
 
     // 10W * 2h = 20Wh
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('20.00');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('20.00');
   });
 
   it('should not calculate consumption when light is Off', async () => {
@@ -75,8 +75,8 @@ describe('PlantConsumption', () => {
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('0.00');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('0.00');
   });
 
   it('should correctly aggregate consumption over multiple days', async () => {
@@ -93,11 +93,11 @@ describe('PlantConsumption', () => {
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(2);
-    expect(result.labels[0]).toBe(twoDaysAgo);
-    expect(result.labels[1]).toBe(yesterday);
-    expect(result.data[0]).toBe('20.00');
-    expect(result.data[1]).toBe('40.00');
+    expect(result.getLabels()).toHaveLength(2);
+    expect(result.getLabels()[0]).toBe(twoDaysAgo);
+    expect(result.getLabels()[1]).toBe(yesterday);
+    expect(result.getData()[0]).toBe('20.00');
+    expect(result.getData()[1]).toBe('40.00');
   });
 
   it('should not consider non-light datapoints', async () => {
@@ -132,6 +132,6 @@ describe('PlantConsumption', () => {
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
     );
 
-    expect(result.data[0]).toBe('0.00');
+    expect(result.getData()[0]).toBe('0.00');
   });
 });

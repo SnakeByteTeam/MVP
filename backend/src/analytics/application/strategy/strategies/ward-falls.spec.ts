@@ -51,8 +51,8 @@ describe('WardFalls', () => {
       new GetAnalyticsCmd('ward-falls', '1'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should detect a Fall when it changes from NoFall to Fall', async () => {
@@ -67,8 +67,8 @@ describe('WardFalls', () => {
       new GetAnalyticsCmd('ward-falls', '1'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('1');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('1');
   });
 
   it('should not count a fall if the value stays to Fall', async () => {
@@ -84,7 +84,7 @@ describe('WardFalls', () => {
       new GetAnalyticsCmd('ward-falls', '1'),
     );
 
-    expect(result.labels).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
   });
 
   it('should count two separate falls on the same day', async () => {
@@ -101,8 +101,8 @@ describe('WardFalls', () => {
       new GetAnalyticsCmd('ward-falls', '1'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('2');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('2');
   });
 
   it('should correctly aggregate falls per day', async () => {
@@ -122,11 +122,11 @@ describe('WardFalls', () => {
       new GetAnalyticsCmd('ward-falls', '1'),
     );
 
-    expect(result.labels).toHaveLength(2);
-    expect(result.labels[0]).toBe(twoDaysAgo);
-    expect(result.labels[1]).toBe(yesterday);
-    expect(result.data[0]).toBe('1');
-    expect(result.data[1]).toBe('2');
+    expect(result.getLabels()).toHaveLength(2);
+    expect(result.getLabels()[0]).toBe(twoDaysAgo);
+    expect(result.getLabels()[1]).toBe(yesterday);
+    expect(result.getData()[0]).toBe('1');
+    expect(result.getData()[1]).toBe('2');
   });
 
   it('should not consider a fall if the datapoint is not SFE_State_Fall', async () => {
@@ -140,6 +140,6 @@ describe('WardFalls', () => {
       new GetAnalyticsCmd('ward-falls', '1'),
     );
 
-    expect(result.labels).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
   });
 });

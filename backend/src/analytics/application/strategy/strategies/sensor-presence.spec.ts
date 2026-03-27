@@ -44,8 +44,8 @@ describe('SensorPresence', () => {
       new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should detect presence when it changes from NotDetected to Detected', async () => {
@@ -60,8 +60,8 @@ describe('SensorPresence', () => {
       new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('1');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('1');
   });
 
   it('should not count presence if value stays Detected', async () => {
@@ -77,7 +77,7 @@ describe('SensorPresence', () => {
       new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
   });
 
   it('should count two separate presences on the same day', async () => {
@@ -94,8 +94,8 @@ describe('SensorPresence', () => {
       new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('2');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('2');
   });
 
   it('should correctly aggregate presences over multiple days', async () => {
@@ -114,10 +114,10 @@ describe('SensorPresence', () => {
       new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
     );
 
-    expect(result.labels).toHaveLength(2);
-    expect(result.labels[0]).toBe(twoDaysAgo);
-    expect(result.labels[1]).toBe(yesterday);
-    expect(result.data[0]).toBe('1');
-    expect(result.data[1]).toBe('2');
+    expect(result.getLabels()).toHaveLength(2);
+    expect(result.getLabels()[0]).toBe(twoDaysAgo);
+    expect(result.getLabels()[1]).toBe(yesterday);
+    expect(result.getData()[0]).toBe('1');
+    expect(result.getData()[1]).toBe('2');
   });
 });

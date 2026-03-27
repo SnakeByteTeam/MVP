@@ -42,8 +42,8 @@ describe('PlantThermostatTemperature', () => {
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
-    expect(result.data).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getData()).toHaveLength(0);
   });
 
   it('should calculate daily average temperature', async () => {
@@ -60,8 +60,8 @@ describe('PlantThermostatTemperature', () => {
     );
 
     // media: (20 + 22 + 21) / 3 = 21.0
-    expect(result.labels).toContain(yesterday);
-    expect(result.data[0]).toBe('21.0');
+    expect(result.getLabels()).toContain(yesterday);
+    expect(result.getData()[0]).toBe('21.0');
   });
 
   it('should correctly aggregate average temperature over multiple days', async () => {
@@ -78,11 +78,11 @@ describe('PlantThermostatTemperature', () => {
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(2);
-    expect(result.labels[0]).toBe(twoDaysAgo);
-    expect(result.labels[1]).toBe(yesterday);
-    expect(result.data[0]).toBe('19.0');
-    expect(result.data[1]).toBe('23.0');
+    expect(result.getLabels()).toHaveLength(2);
+    expect(result.getLabels()[0]).toBe(twoDaysAgo);
+    expect(result.getLabels()[1]).toBe(yesterday);
+    expect(result.getData()[0]).toBe('19.0');
+    expect(result.getData()[1]).toBe('23.0');
   });
 
   it('should not consider non-temperature datapoints', async () => {
@@ -106,6 +106,6 @@ describe('PlantThermostatTemperature', () => {
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
     );
 
-    expect(result.labels).toHaveLength(0);
+    expect(result.getLabels()).toHaveLength(0);
   });
 });

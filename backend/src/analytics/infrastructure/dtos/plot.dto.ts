@@ -10,6 +10,12 @@ export class PlotDto {
   ) {}
 
   static fromDomain(p: Plot): PlotDto {
-    return new PlotDto(p.title, p.metric, p.labels, p.data, p.series);
+    return new PlotDto(
+      p.getTitle(),
+      p.getMetric(),
+      p.getLabels(),
+      p.getData(),
+      p.getSeries(),
+    );
   }
 }

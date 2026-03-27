@@ -2,6 +2,7 @@ import { PlantAnomalies } from './plant-anomalies';
 import { PlantConsumption } from './plant-consumption';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { ANOMALY_THRESHOLD_WH } from './consumption-config';
+import { Plot } from 'src/analytics/domain/plot.model';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -25,12 +26,13 @@ describe('PlantAnomalies', () => {
   });
 
   it('should return an empty Plot if there are no consumption data', async () => {
-    mockPlantConsumption.execute.mockResolvedValue({
-      title: 'Plant Consumption Analytics',
-      metric: 'plant-consumption',
-      labels: [],
-      data: [],
-    } as any);
+    const emptyPlot = new Plot(
+      'Plant Consumption Analytics',
+      'plant-consumption',
+      [],
+      [],
+    );
+    mockPlantConsumption.execute.mockResolvedValue(emptyPlot);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
@@ -43,12 +45,14 @@ describe('PlantAnomalies', () => {
   it('should detect anomaly when consumption exceeds threshold', async () => {
     const anomalyValue = (ANOMALY_THRESHOLD_WH + 10).toFixed(2);
 
-    mockPlantConsumption.execute.mockResolvedValue({
-      title: 'Plant Consumption Analytics',
-      metric: 'plant-consumption',
-      labels: [yesterday],
-      data: [anomalyValue],
-    } as any);
+    const plotWithData = new Plot(
+      'Plant Consumption Analytics',
+      'plant-consumption',
+      [yesterday],
+      [anomalyValue],
+    );
+
+    mockPlantConsumption.execute.mockResolvedValue(plotWithData);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
@@ -60,13 +64,14 @@ describe('PlantAnomalies', () => {
 
   it('should not detect anomaly when consumption is below threshold', async () => {
     const normalValue = (ANOMALY_THRESHOLD_WH - 10).toFixed(2);
+    const plotWithData = new Plot(
+      'Plant Consumption Analytics',
+      'plant-consumption',
+      [yesterday],
+      [normalValue],
+    );
 
-    mockPlantConsumption.execute.mockResolvedValue({
-      title: 'Plant Consumption Analytics',
-      metric: 'plant-consumption',
-      labels: [yesterday],
-      data: [normalValue],
-    } as any);
+    mockPlantConsumption.execute.mockResolvedValue(plotWithData);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
@@ -79,12 +84,14 @@ describe('PlantAnomalies', () => {
     const anomalyValue = (ANOMALY_THRESHOLD_WH + 10).toFixed(2);
     const normalValue = (ANOMALY_THRESHOLD_WH - 10).toFixed(2);
 
-    mockPlantConsumption.execute.mockResolvedValue({
-      title: 'Plant Consumption Analytics',
-      metric: 'plant-consumption',
-      labels: [twoDaysAgo, yesterday],
-      data: [normalValue, anomalyValue],
-    } as any);
+    const plotWithData = new Plot(
+      'Plant Consumption Analytics',
+      'plant-consumption',
+      [twoDaysAgo, yesterday],
+      [normalValue, anomalyValue],
+    );
+
+    mockPlantConsumption.execute.mockResolvedValue(plotWithData);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-anomalies', 'plant-001'),

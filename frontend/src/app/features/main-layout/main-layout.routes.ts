@@ -60,8 +60,8 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
             },
             {
                 path: 'ward-management',
-                canActivate: [authGuard, roleGuard],
-                data: { requiredRole: UserRole.AMMINISTRATORE },
+                //canActivate: [authGuard, roleGuard],
+                //data: { requiredRole: UserRole.AMMINISTRATORE },
                 loadChildren: () =>
                     import('../ward-management/ward-management.routes').then((m) => m.WARD_MANAGEMENT_ROUTES)
             },

@@ -94,6 +94,7 @@ describe('WardManagementPageComponent', () => {
     errorSubject.next('Errore rete');
 
     expect(component.wardsSnapshot()).toHaveLength(2);
+    expect(component.selectedWardId()).toBe(1);
     expect(component.snackbarMessage()).toBe('Errore rete');
   });
 
@@ -118,11 +119,11 @@ describe('WardManagementPageComponent', () => {
   });
 
   it('onCreateWard dovrebbe aprire dialog in create mode', () => {
-    component.selectedWard.set(wardA);
+    component.selectedWardId.set(wardA.id);
 
     component.onCreateWard();
 
-    expect(component.selectedWard()).toBeNull();
+    expect(component.selectedWardId()).toBe(wardA.id);
     expect(component.wardDialogMode()).toBe('create');
   });
 
@@ -137,19 +138,22 @@ describe('WardManagementPageComponent', () => {
   });
 
   it('onEditWard e onEditWardSubmit dovrebbero aggiornare il reparto selezionato', () => {
+    component.wardsSnapshot.set([wardA, wardB]);
+
     component.onEditWard(wardA);
-    expect(component.selectedWard()).toEqual(wardA);
+    expect(component.selectedWardId()).toBe(wardA.id);
     expect(component.wardDialogMode()).toBe('edit');
 
     component.onEditWardSubmit({ name: 'Cardiologia A' });
 
     expect(storeStub.updateWard).toHaveBeenCalledWith(1, { name: 'Cardiologia A' });
-    expect(component.selectedWard()).toBeNull();
+    expect(component.selectedWardId()).toBe(wardA.id);
     expect(component.wardDialogMode()).toBe('closed');
   });
 
   it('onEditWardSubmit non dovrebbe chiamare store se selectedWard e null', () => {
-    component.selectedWard.set(null);
+    component.wardsSnapshot.set([wardB]);
+    component.selectedWardId.set(null);
 
     component.onEditWardSubmit({ name: 'X' });
 
@@ -157,13 +161,34 @@ describe('WardManagementPageComponent', () => {
   });
 
   it('onCloseWardDialog dovrebbe chiudere dialog e pulire selezione', () => {
-    component.selectedWard.set(wardA);
+    component.selectedWardId.set(wardA.id);
     component.wardDialogMode.set('edit');
 
     component.onCloseWardDialog();
 
-    expect(component.selectedWard()).toBeNull();
+    expect(component.selectedWardId()).toBe(wardA.id);
     expect(component.wardDialogMode()).toBe('closed');
+  });
+
+  it('selectWard dovrebbe aggiornare ward attivo e step mobile', () => {
+    component.selectWard(2);
+
+    expect(component.selectedWardId()).toBe(2);
+    expect(component.mobileStep()).toBe('apartments');
+  });
+
+  it('selectApartment e step helpers dovrebbero aggiornare lo stato ui', () => {
+    component.selectApartment(101);
+    expect(component.selectedApartmentId()).toBe(101);
+
+    component.showWardListStep();
+    expect(component.mobileStep()).toBe('wards');
+
+    component.showApartmentsStep();
+    expect(component.mobileStep()).toBe('apartments');
+
+    component.showOperatorsStep();
+    expect(component.mobileStep()).toBe('operators');
   });
 
   it('flow operator dovrebbe impostare wardId, submit e chiudere', () => {

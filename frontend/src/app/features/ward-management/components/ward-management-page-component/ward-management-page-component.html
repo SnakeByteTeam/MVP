@@ -1,32 +1,210 @@
-<section aria-label="Gestione reparti">
-    <header>
-        <h1>Ward Management</h1>
-        <button type="button" (click)="onCreateWard()">Nuovo reparto</button>
+<section aria-label="Gestione reparti" class="flex h-full min-h-0 flex-col gap-4 bg-slate-100 p-4 lg:p-6">
+    <header class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900">Gestione Reparti</h1>
+            <p class="text-sm text-slate-600">Navigazione a colonne: Reparti, Appartamenti, Operatori.</p>
+        </div>
+
+        <button type="button" (click)="onCreateWard()"
+            class="inline-flex items-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
+            Nuovo reparto
+        </button>
     </header>
 
     @if (snackbarMessage(); as errorMessage) {
-    <div role="alert" aria-live="assertive">
+    <div role="alert" aria-live="assertive"
+        class="flex items-center justify-between rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
         <span>{{ errorMessage }}</span>
-        <button type="button" (click)="dismissSnackbar()" aria-label="Chiudi messaggio errore">Chiudi</button>
+        <button type="button" (click)="dismissSnackbar()" aria-label="Chiudi messaggio errore"
+            class="rounded px-2 py-1 font-medium hover:bg-red-100">
+            Chiudi
+        </button>
     </div>
     }
 
     @if (isLoading$ | async) {
-    <p aria-live="polite">Caricamento in corso...</p>
+    <p aria-live="polite" class="text-sm text-slate-600">Caricamento in corso...</p>
     }
 
     @if (wards$ | async; as wards) {
     @if (wards.length === 0) {
-    <p>Nessun reparto disponibile.</p>
-    } @else {
-    <div>
-        @for (ward of wards; track ward.id) {
-        <app-ward-card-component [ward]="ward" (editWard)="onEditWard($event)" (deleteWard)="onDeleteWard($event)"
-            (assignOperator)="onAssignOperator($event)" (removeOperator)="onRemoveOperator($event)"
-            (assignPlant)="onAssignPlant($event)" (removePlant)="onRemovePlant($event)"
-            (enablePlant)="onEnablePlant($event)" (disablePlant)="onDisablePlant($event)" />
-        }
+    <div class="rounded-lg border border-slate-300 bg-white p-8 text-center text-slate-600">Nessun reparto disponibile.
     </div>
+    } @else {
+    @if (selectedWard(); as activeWard) {
+    <div class="rounded-xl border border-slate-300 bg-slate-200 p-2 lg:hidden">
+        <div class="grid grid-cols-3 gap-2 text-xs font-semibold uppercase tracking-wide text-slate-700">
+            <button type="button" (click)="showWardListStep()" class="rounded-md px-3 py-2 transition"
+                [ngClass]="mobileStep() === 'wards' ? 'bg-white text-slate-950 shadow-sm' : 'bg-transparent hover:bg-slate-300'">
+                Reparti
+            </button>
+            <button type="button" (click)="showApartmentsStep()" class="rounded-md px-3 py-2 transition"
+                [ngClass]="mobileStep() === 'apartments' ? 'bg-white text-slate-950 shadow-sm' : 'bg-transparent hover:bg-slate-300'">
+                Appartamenti
+            </button>
+            <button type="button" (click)="showOperatorsStep()" class="rounded-md px-3 py-2 transition"
+                [ngClass]="mobileStep() === 'operators' ? 'bg-white text-slate-950 shadow-sm' : 'bg-transparent hover:bg-slate-300'">
+                Operatori
+            </button>
+        </div>
+        <p class="mt-2 truncate px-1 text-xs text-slate-600">Reparto attivo: {{ activeWard.name }}</p>
+    </div>
+    }
+
+    <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[18rem_minmax(0,1fr)_minmax(0,1fr)]">
+        <aside aria-label="Elenco reparti"
+            class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
+            [class.hidden]="mobileStep() !== 'wards'">
+            <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                <h2 class="text-base font-semibold text-slate-900">Reparti</h2>
+                <button type="button" (click)="onCreateWard()" aria-label="Nuovo reparto"
+                    class="rounded-full bg-emerald-500 px-2.5 py-0.5 text-lg leading-none text-white transition hover:bg-emerald-400">
+                    +
+                </button>
+            </div>
+
+            <ul class="max-h-[28rem] space-y-2 overflow-y-auto p-3">
+                @for (ward of wards; track ward.id) {
+                <li>
+                    <button type="button" (click)="selectWard(ward.id)"
+                        class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition"
+                        [ngClass]="selectedWardId() === ward.id ? 'border-amber-400 bg-amber-100 text-slate-950' : 'border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100'">
+                        <span class="truncate font-medium">{{ ward.name }}</span>
+                        <span class="rounded bg-slate-200 px-2 py-0.5 text-xs text-slate-700">{{ ward.apartments.length
+                            }}</span>
+                    </button>
+                </li>
+                }
+            </ul>
+        </aside>
+
+        <section aria-label="Dettagli reparto e appartamenti"
+            class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
+            [class.hidden]="mobileStep() !== 'apartments'">
+            @if (selectedWard(); as activeWard) {
+            <div class="border-b border-slate-200 px-4 py-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">{{ activeWard.name }}</h2>
+                        <p class="text-sm text-slate-600">Dettaglio appartamenti assegnati al reparto.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="button" (click)="onEditWard(activeWard)"
+                            class="rounded-md border border-slate-400 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
+                            Modifica
+                        </button>
+                        <button type="button" (click)="onDeleteWard(activeWard.id)"
+                            class="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-100">
+                            Elimina
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3">
+                <div class="mb-3 flex items-center justify-between gap-2">
+                    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Appartamenti del reparto
+                    </h3>
+                    <button type="button" (click)="onAssignPlant(activeWard.id)"
+                        class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-blue-500">
+                        Assegna appartamento
+                    </button>
+                </div>
+
+                @if (activeWard.apartments.length === 0) {
+                <p class="rounded-md border border-dashed border-slate-300 px-3 py-5 text-sm text-slate-600">Nessun
+                    appartamento assegnato.</p>
+                } @else {
+                <ul class="max-h-[24rem] space-y-2 overflow-y-auto">
+                    @for (apartment of activeWard.apartments; track apartment.id) {
+                    <li>
+                        <div class="flex items-center gap-2 rounded-md border px-3 py-2"
+                            [ngClass]="selectedApartmentId() === apartment.id ? 'border-blue-400 bg-blue-50' : 'border-slate-300 bg-slate-50'">
+                            <button type="button" (click)="selectApartment(apartment.id)"
+                                class="min-w-0 flex-1 truncate text-left text-sm font-medium text-slate-900">
+                                {{ apartment.name }}
+                            </button>
+                            <button type="button"
+                                (click)="apartment.isEnabled ? onDisablePlant(apartment.id) : onEnablePlant(apartment.id)"
+                                class="rounded-md px-2 py-1 text-xs font-semibold"
+                                [ngClass]="apartment.isEnabled ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'">
+                                {{ apartment.isEnabled ? 'Attivo' : 'Disattivo' }}
+                            </button>
+                            <button type="button"
+                                (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
+                                aria-label="Rimuovi appartamento"
+                                class="rounded-full bg-red-500 px-2 py-0.5 text-sm font-semibold text-white transition hover:bg-red-400">
+                                x
+                            </button>
+                        </div>
+                    </li>
+                    }
+                </ul>
+                }
+            </div>
+            } @else {
+            <div class="p-6 text-sm text-slate-600">Seleziona un reparto per visualizzare gli appartamenti.</div>
+            }
+        </section>
+
+        <section aria-label="Operatori assegnati"
+            class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
+            [class.hidden]="mobileStep() !== 'operators'">
+            @if (selectedWard(); as activeWard) {
+            <div class="border-b border-slate-200 px-4 py-3">
+                <div class="flex items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Operatori Socio Sanitari</h2>
+                        <p class="text-sm text-slate-600">{{ activeWard.name }}</p>
+                    </div>
+                    <button type="button" (click)="onAssignOperator(activeWard.id)"
+                        class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-500">
+                        Aggiungi operatore
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3">
+                @if (activeWard.operators.length === 0) {
+                <p class="rounded-md border border-dashed border-slate-300 px-3 py-5 text-sm text-slate-600">Nessun
+                    operatore assegnato.</p>
+                } @else {
+                <ul class="max-h-[24rem] space-y-2 overflow-y-auto">
+                    @for (operator of activeWard.operators; track operator.id) {
+                    <li>
+                        <div
+                            class="flex items-center justify-between gap-2 rounded-md border border-slate-300 bg-slate-50 px-3 py-2">
+                            <span class="truncate text-sm font-medium text-slate-900">{{
+                                getOperatorDisplayName(operator.firstName, operator.lastName) }}</span>
+                            <button type="button"
+                                (click)="onRemoveOperator({ wardId: activeWard.id, userId: +operator.id })"
+                                aria-label="Rimuovi operatore"
+                                class="rounded-full bg-red-500 px-2 py-0.5 text-sm font-semibold text-white transition hover:bg-red-400">
+                                x
+                            </button>
+                        </div>
+                    </li>
+                    }
+                </ul>
+                }
+            </div>
+            } @else {
+            <div class="p-6 text-sm text-slate-600">Seleziona un reparto per visualizzare gli operatori assegnati.</div>
+            }
+        </section>
+    </div>
+
+    @if (selectedWard()) {
+    <div
+        class="flex items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700 lg:hidden">
+        <button type="button" (click)="showWardListStep()"
+            class="rounded-md border border-slate-300 px-3 py-1.5">Reparti</button>
+        <button type="button" (click)="showApartmentsStep()"
+            class="rounded-md border border-slate-300 px-3 py-1.5">Appartamenti</button>
+        <button type="button" (click)="showOperatorsStep()"
+            class="rounded-md border border-slate-300 px-3 py-1.5">Operatori</button>
+    </div>
+    }
     }
     }
 

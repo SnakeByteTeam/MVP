@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import type { Plant } from '../../models/plant.model';
@@ -9,14 +9,13 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 import { WardManagementStore } from '../../services/ward-management.store';
 import { AssignWardDialogComponent } from '../assign-ward-dialog-component/assign-ward-dialog-component';
 import { AssignOperatorDialogComponent } from '../assign-operator-dialog-component/assign-operator-dialog-component';
-import { WardCardComponent } from '../ward-card-component/ward-card-component';
 import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form-dialog-component';
 
 @Component({
   selector: 'app-ward-management-page-component',
   imports: [
     AsyncPipe,
-    WardCardComponent,
+    NgClass,
     WardFormDialogComponent,
     AssignOperatorDialogComponent,
     AssignWardDialogComponent,
@@ -36,7 +35,9 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public readonly snackbarMessage = signal<string | null>(null);
   public readonly wardDialogMode = signal<'closed' | 'create' | 'edit'>('closed');
-  public readonly selectedWard = signal<Ward | null>(null);
+  public readonly selectedWardId = signal<number | null>(null);
+  public readonly selectedApartmentId = signal<number | null>(null);
+  public readonly mobileStep = signal<'wards' | 'apartments' | 'operators'>('wards');
   public readonly operatorWardId = signal<number | null>(null);
   public readonly plantWardId = signal<number | null>(null);
   public readonly confirmState = signal<
@@ -47,6 +48,25 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   >(null);
 
   public readonly wardsSnapshot = signal<Ward[]>([]);
+  public readonly selectedWard = computed<Ward | null>(() => {
+    const wardId = this.selectedWardId();
+    if (!wardId) {
+      return null;
+    }
+
+    return this.wardsSnapshot().find((ward) => ward.id === wardId) ?? null;
+  });
+
+  public readonly selectedApartment = computed<Plant | null>(() => {
+    const apartmentId = this.selectedApartmentId();
+    const ward = this.selectedWard();
+    if (!apartmentId || !ward) {
+      return null;
+    }
+
+    return ward.apartments.find((apartment) => apartment.id === apartmentId) ?? null;
+  });
+
   public readonly wardDialogValue = computed<Ward | null>(() => {
     if (this.wardDialogMode() !== 'edit') {
       return null;
@@ -84,6 +104,30 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
     this.wards$.pipe(takeUntil(this.destroy$)).subscribe((wards) => {
       this.wardsSnapshot.set(wards);
+
+      if (wards.length === 0) {
+        this.selectedWardId.set(null);
+        this.selectedApartmentId.set(null);
+        this.mobileStep.set('wards');
+        return;
+      }
+
+      const selectedWardId = this.selectedWardId();
+      const selectedWardExists = selectedWardId !== null && wards.some((ward) => ward.id === selectedWardId);
+
+      if (!selectedWardExists) {
+        this.selectedWardId.set(wards[0].id);
+        this.selectedApartmentId.set(null);
+      }
+
+      const selectedApartmentId = this.selectedApartmentId();
+      if (selectedApartmentId !== null) {
+        const activeWard = wards.find((ward) => ward.id === this.selectedWardId());
+        const apartmentStillExists = activeWard?.apartments.some((apartment) => apartment.id === selectedApartmentId) ?? false;
+        if (!apartmentStillExists) {
+          this.selectedApartmentId.set(null);
+        }
+      }
     });
 
     this.error$.pipe(takeUntil(this.destroy$)).subscribe((message) => {
@@ -100,8 +144,34 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     this.snackbarMessage.set(null);
   }
 
+  public selectWard(wardId: number): void {
+    if (this.selectedWardId() === wardId) {
+      this.mobileStep.set('apartments');
+      return;
+    }
+
+    this.selectedWardId.set(wardId);
+    this.selectedApartmentId.set(null);
+    this.mobileStep.set('apartments');
+  }
+
+  public selectApartment(apartmentId: number): void {
+    this.selectedApartmentId.set(apartmentId);
+  }
+
+  public showWardListStep(): void {
+    this.mobileStep.set('wards');
+  }
+
+  public showApartmentsStep(): void {
+    this.mobileStep.set('apartments');
+  }
+
+  public showOperatorsStep(): void {
+    this.mobileStep.set('operators');
+  }
+
   public onCreateWard(): void {
-    this.selectedWard.set(null);
     this.wardDialogMode.set('create');
   }
 
@@ -111,7 +181,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   }
 
   public onEditWard(ward: Ward): void {
-    this.selectedWard.set(ward);
+    this.selectedWardId.set(ward.id);
     this.wardDialogMode.set('edit');
   }
 
@@ -122,12 +192,10 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     }
 
     this.store.updateWard(ward.id, dto);
-    this.selectedWard.set(null);
     this.wardDialogMode.set('closed');
   }
 
   public onCloseWardDialog(): void {
-    this.selectedWard.set(null);
     this.wardDialogMode.set('closed');
   }
 
@@ -235,5 +303,9 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public getConfirmLabel(): string {
     return 'Conferma';
+  }
+
+  public getOperatorDisplayName(firstName: string, lastName: string): string {
+    return `${firstName} ${lastName}`.trim();
   }
 }

@@ -11,8 +11,8 @@ import {
   DatapointResponseDto,
   ApiDatapointDto,
 } from './dtos/in/api-datapoint.dto';
-import { PlantDto } from 'src/plant/infrastructure/dtos/plant.dto';
-import { RoomDto } from 'src/plant/infrastructure/dtos/room.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
+import { RoomDto } from 'src/plant/infrastructure/http/dtos/room.dto';
 import { FetchNewCacheRepoPort } from 'src/cache/application/repository/fetch-new-cache.repository';
 
 @Injectable()

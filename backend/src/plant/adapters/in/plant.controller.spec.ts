@@ -16,7 +16,7 @@ describe('PlantController', () => {
 
   it('should return PlantDto mapped from domain model', async () => {
     const cachedAt = new Date('2026-03-24T12:00:00.000Z');
-    const plant = new Plant('plant-1', 'My Plant', [], cachedAt);
+    const plant = new Plant('plant-1', 'My Plant', [], 1);
 
     findPlantByIdUseCase.findById.mockResolvedValue(plant);
 
@@ -28,7 +28,7 @@ describe('PlantController', () => {
     expect(findPlantByIdUseCase.findById).toHaveBeenCalledTimes(1);
     expect(dto.id).toBe('plant-1');
     expect(dto.name).toBe('My Plant');
-    expect(dto.cached_at.toISOString()).toBe(cachedAt.toISOString());
+    expect(dto.wardId).toBe(1);
     expect(dto.rooms).toEqual([]);
   });
 });

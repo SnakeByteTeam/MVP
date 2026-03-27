@@ -24,7 +24,7 @@ describe('DeviceService', () => {
   });
 
   it('should return the same device that FindByIdPort returns', async () => {
-    const cmd: FindDeviceByIdCmd = { id: 'device-123', plantId: 'plant-01' };
+    const cmd: FindDeviceByIdCmd = { id: 'device-123' };
     const returnedDevice: Device = new Device(
       'device-123',
       'plant-01',

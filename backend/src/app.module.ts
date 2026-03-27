@@ -7,6 +7,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { DatabaseModule } from './database/database.module';
 import { DeviceModule } from './device/device.module';
 import { PlantModule } from './plant/plant.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PlantModule } from './plant/plant.module';
     DatabaseModule,
     DeviceModule,
     PlantModule,
+    CacheModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,3 @@
-
 import { GetValidCacheCmd } from '../../commands/get-valid-cache.command';
 
 export interface UpdateCacheUseCase {

@@ -4,18 +4,13 @@ export class Plant {
   private readonly id: string;
   private readonly name: string;
   private readonly rooms: Room[];
-  private readonly cached_at: Date;
+  private readonly wardId: number;
 
-  constructor(
-    id: string,
-    name: string,
-    rooms: Room[],
-    cached_at: Date = new Date(),
-  ) {
+  constructor(id: string, name: string, rooms: Room[], wardId: number) {
     this.id = id;
     this.name = name;
     this.rooms = [...rooms];
-    this.cached_at = cached_at;
+    this.wardId = wardId;
   }
 
   getId(): string {
@@ -30,7 +25,7 @@ export class Plant {
     return [...this.rooms];
   }
 
-  getCachedAt(): Date {
-    return new Date(this.cached_at);
+  getWardId(): number {
+    return this.wardId;
   }
 }

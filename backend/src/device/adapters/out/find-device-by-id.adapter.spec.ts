@@ -1,98 +1,77 @@
 import { FindDeviceByIdAdapter } from './find-device-by-id.adapter';
-import { UpdateCacheUseCase } from 'src/cache/application/ports/in/get-valid-cache.usecase';
-import { Device } from 'src/device/domain/models/device.model';
-import { Datapoint } from 'src/device/domain/models/datapoint.model';
-import { Plant } from 'src/plant/domain/models/plant.model';
-import { Room } from 'src/plant/domain/models/room.model';
+import { FindDeviceByIdRepoPort } from 'src/device/application/repository/find-device-by-id.repository';
+import { DeviceEntity } from 'src/device/infrastructure/persistence/entities/device.entity';
+import { DatapointEntity } from 'src/device/infrastructure/persistence/entities/datapoint.entity';
 import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-by-id.command';
 
 describe('FindDeviceByIdAdapter', () => {
   let adapter: FindDeviceByIdAdapter;
-  let cachePort: jest.Mocked<UpdateCacheUseCase>;
+  let repo: jest.Mocked<FindDeviceByIdRepoPort>;
 
   beforeEach(() => {
-    cachePort = {
-      updateCache: jest.fn(),
+    repo = {
+      findById: jest.fn(),
     };
 
-    adapter = new FindDeviceByIdAdapter(cachePort);
+    adapter = new FindDeviceByIdAdapter(repo);
   });
 
-  it('should return a device when found', async () => {
-    const datapoints = [
-      new Datapoint(
-        'dp-1',
-        'brightness',
-        true,
-        true,
-        'number',
-        ['0', '100'],
-        'slider',
-      ),
-    ];
-    const device = new Device(
-      '123',
-      'plant-01',
-      'living-room-light',
-      'light',
-      'dimmer',
-      datapoints,
-    );
-    const room = new Room('room-1', 'Living Room', [device]);
-    const plant = new Plant('plant-01', 'My Plant', [room]);
+  it('should return mapped device when repository finds entity', async () => {
+    const datapointEntity = new DatapointEntity();
+    datapointEntity.id = 'dp-1';
+    datapointEntity.name = 'brightness';
+    datapointEntity.readable = true;
+    datapointEntity.writable = true;
+    datapointEntity.valueType = 'number';
+    datapointEntity.enum = ['0', '100'];
+    datapointEntity.sfeType = 'slider';
 
-    cachePort.updateCache.mockResolvedValue(plant);
+    const deviceEntity = new DeviceEntity();
+    deviceEntity.id = 'device-123';
+    deviceEntity.plantId = 'plant-01';
+    deviceEntity.name = 'living-room-light';
+    deviceEntity.type = 'light';
+    deviceEntity.subType = 'dimmer';
+    deviceEntity.datapoints = [datapointEntity];
 
-    const cmd: FindDeviceByIdCmd = { id: '123', plantId: 'plant-01' };
+    repo.findById.mockResolvedValue(deviceEntity);
+
+    const cmd: FindDeviceByIdCmd = { id: 'device-123' };
     const result = await adapter.findById(cmd);
 
-    expect(result).toBe(device);
-    expect(cachePort.updateCache).toHaveBeenCalledWith({
-      plantId: 'plant-01',
-    });
-    expect(cachePort.updateCache).toHaveBeenCalledTimes(1);
+    expect(result.getId()).toBe('device-123');
+    expect(result.getName()).toBe('living-room-light');
+    expect(result.getType()).toBe('light');
+    expect(result.getSubType()).toBe('dimmer');
+    expect(result.getDatapoints()).toHaveLength(1);
+    expect(repo.findById).toHaveBeenCalledWith('device-123');
+    expect(repo.findById).toHaveBeenCalledTimes(1);
   });
 
-  it('should throw error when device id is null', async () => {
-    const plant = new Plant('plant-01', 'My Plant', []);
-
-    cachePort.updateCache.mockResolvedValue(plant);
-
-    const cmd: FindDeviceByIdCmd = { id: '', plantId: 'plant-01' };
+  it('should throw error when device id is empty', async () => {
+    const cmd: FindDeviceByIdCmd = { id: '' };
 
     await expect(adapter.findById(cmd)).rejects.toThrow(
-      Error('DeviceId is null'),
+      '[FindDeviceByIdAdapter] Id is empty',
     );
   });
 
-  it('should throw error when device is not found', async () => {
-    const room = new Room('room-1', 'Living Room', []);
-    const plant = new Plant('plant-01', 'My Plant', [room]);
+  it('should throw error when repository returns null', async () => {
+    repo.findById.mockResolvedValue(null);
 
-    cachePort.updateCache.mockResolvedValue(plant);
-
-    const cmd: FindDeviceByIdCmd = { id: 'non-existent', plantId: 'plant-01' };
+    const cmd: FindDeviceByIdCmd = { id: 'non-existent' };
 
     await expect(adapter.findById(cmd)).rejects.toThrow(
-      Error('Device non-existent not found'),
+      "[FindDeviceByIdAdapter] Can't find device on db",
     );
   });
 
-  it('should throw error when plant id is null', async () => {
-    const cmd: FindDeviceByIdCmd = { id: '123', plantId: '' };
+  it('should propagate repository errors', async () => {
+    const dbError = new Error('Database connection failed');
+    repo.findById.mockRejectedValue(dbError);
 
-    await expect(adapter.findById(cmd)).rejects.toThrow(
-      Error('PlantId is null'),
-    );
-  });
+    const cmd: FindDeviceByIdCmd = { id: 'device-123' };
 
-  it('should throw error when plant is not found', async () => {
-    cachePort.updateCache.mockResolvedValue(null as any);
-
-    const cmd: FindDeviceByIdCmd = { id: '123', plantId: 'non-existent-plant' };
-
-    await expect(adapter.findById(cmd)).rejects.toThrow(
-      Error('Plant non-existent-plant not found'),
-    );
+    await expect(adapter.findById(cmd)).rejects.toThrow(dbError);
   });
 });

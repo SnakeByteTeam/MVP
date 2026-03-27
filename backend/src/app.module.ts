@@ -8,6 +8,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { DatabaseModule } from './database/database.module';
 import { DeviceModule } from './device/device.module';
 import { PlantModule } from './plant/plant.module';
+import { SuggestionModule } from './suggestion/suggestion.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PlantModule } from './plant/plant.module';
     DatabaseModule,
     DeviceModule,
     PlantModule,
+    SuggestionModule,
   ],
 })
 export class AppModule {}

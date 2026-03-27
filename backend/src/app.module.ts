@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import envConfig from 'config/env.config';
 import { ApiAuthVimarModule } from './api-auth-vimar/api-auth-vimar.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 import { TokensModule } from './tokens/tokens.module';
 import { DatabaseModule } from './database/database.module';
@@ -10,6 +11,7 @@ import { PlantModule } from './plant/plant.module';
 
 @Module({
   imports: [
+    AnalyticsModule,
     ApiAuthVimarModule,
     TokensModule,
     ConfigModule.forRoot({

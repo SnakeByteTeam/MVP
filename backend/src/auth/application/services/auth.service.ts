@@ -2,9 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { LoginUseCase } from '../ports/in/login-use-case.interface';
 import { LoginCmd } from '../commands/login-cmd';
 import { RefreshUseCase } from '../ports/in/refresh-use-case.interface';
-import { LogoutUseCase } from '../ports/in/logout-use-case.interface';
 import { RefreshCmd } from '../commands/refresh-cmd';
-import { LogoutCmd } from '../commands/logout-cmd';
 import { CHECK_CREDENTIALS_PORT } from '../../adapters/out/check-credentials-adapter';
 import { CheckCredentialsPort } from '../ports/out/check-credentials-port.interface';
 import { Tokens } from '../../domain/tokens';
@@ -34,7 +32,6 @@ import { ChangeCredentialsPort } from '../ports/out/change-credentials-port.inte
 import { ChangeCredentialsCmd } from '../commands/change-credentials-cmd';
 
 @Injectable()
-/* , LogoutUseCase */
 export class AuthService
   implements FirstLoginUseCase, LoginUseCase, RefreshUseCase
 {
@@ -120,13 +117,8 @@ export class AuthService
       new GenerateAccessTokenCmd(payload),
     );
   }
-
-  /*     logout(req: LogoutCmd) {
-        throw new Error('Method not implemented.');
-    } */
 }
 
 export const FIRST_LOGIN_USE_CASE = 'FIRST_LOGIN_USE_CASE';
 export const LOGIN_USE_CASE = 'LOGIN_USE_CASE';
 export const REFRESH_USE_CASE = 'REFRESH_USE_CASE';
-export const LOGOUT_USE_CASE = 'LOGOUT_USE_CASE';

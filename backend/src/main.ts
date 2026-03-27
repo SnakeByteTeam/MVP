@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
 
   const config = new DocumentBuilder()
     .setTitle('Backend view4life')
@@ -16,9 +18,10 @@ async function bootstrap() {
         bearerFormat: 'JWT',
         scheme: 'Bearer',
         type: 'http',
-        in: 'Header'
+        in: 'Header',
       },
-      'access-token')
+      'access-token',
+    )
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

@@ -23,6 +23,7 @@ describe('CheckCredentialsAdapter', () => {
     const repoResponse = {
       id: 1,
       role: 'admin',
+      firstAccess: true,
     };
 
     mockCheckCredentialsRepository.checkCredentials.mockResolvedValue(
@@ -38,7 +39,7 @@ describe('CheckCredentialsAdapter', () => {
     ).toHaveBeenCalledWith('user', 'pass');
 
     expect(result).toBeInstanceOf(Payload);
-    expect(result).toEqual(new Payload(1, 'admin'));
+    expect(result).toEqual(new Payload(1, 'admin', true));
   });
 
   it('should propagate error from repository', async () => {

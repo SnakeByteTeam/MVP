@@ -4,7 +4,6 @@ import {
   AuthService,
   FIRST_LOGIN_USE_CASE,
   LOGIN_USE_CASE,
-  LOGOUT_USE_CASE,
   REFRESH_USE_CASE,
 } from './application/services/auth.service';
 import {
@@ -66,10 +65,6 @@ import {
     },
     {
       provide: REFRESH_USE_CASE,
-      useClass: AuthService,
-    },
-    {
-      provide: LOGOUT_USE_CASE,
       useClass: AuthService,
     },
     {

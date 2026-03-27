@@ -1,5 +1,3 @@
 export class CheckFirstAccessCmd {
-    constructor(
-        public username: string
-    ){}
+  constructor(public username: string) {}
 }

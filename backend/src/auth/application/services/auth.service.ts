@@ -35,7 +35,9 @@ import { ChangeCredentialsCmd } from '../commands/change-credentials-cmd';
 
 @Injectable()
 /* , LogoutUseCase */
-export class AuthService implements FirstLoginUseCase, LoginUseCase, RefreshUseCase {
+export class AuthService
+  implements FirstLoginUseCase, LoginUseCase, RefreshUseCase
+{
   constructor(
     @Inject(CHANGE_CREDENTIALS_PORT)
     private readonly changeCredentialsPort: ChangeCredentialsPort,
@@ -57,13 +59,15 @@ export class AuthService implements FirstLoginUseCase, LoginUseCase, RefreshUseC
 
   async firstLogin(req: FirstLoginCmd): Promise<Tokens> {
     const payload: Payload = await this.checkCredentialsPort.checkCredentials(
-      new CheckCredentialsCmd(req.username, req.tempPassword)
+      new CheckCredentialsCmd(req.username, req.tempPassword),
     );
 
-    await this.changeCredentialsPort.changeCredentials(new ChangeCredentialsCmd(req.username, req.tempPassword, false));
+    await this.changeCredentialsPort.changeCredentials(
+      new ChangeCredentialsCmd(req.username, req.password, false),
+    );
 
     payload.firstAccess = false;
-    
+
     const accessToken = this.generateAccessTokenPort.generateAccessToken(
       new GenerateAccessTokenCmd(payload),
     );
@@ -71,27 +75,28 @@ export class AuthService implements FirstLoginUseCase, LoginUseCase, RefreshUseC
     const refreshToken = this.generateRefreshTokenPort.generateRefreshToken(
       new GenerateRefreshTokenCmd(payload),
     );
-    
+
     return new Tokens(accessToken, refreshToken);
   }
 
   async login(req: LoginCmd): Promise<Tokens> {
-
     const payload: Payload = await this.checkCredentialsPort.checkCredentials(
-      new CheckCredentialsCmd(req.username, req.password)
+      new CheckCredentialsCmd(req.username, req.password),
     );
 
-    let accessToken: string = "";
-    let refreshToken: string = "";
+    let accessToken: string = '';
+    let refreshToken: string = '';
 
     if (payload.firstAccess) {
-      accessToken = this.generateChangePasswordAccessTokenPort.generateChangePasswordAccessToken(
-        new GenerateChangePasswordAccessTokenCmd(payload)
-      );
+      accessToken =
+        this.generateChangePasswordAccessTokenPort.generateChangePasswordAccessToken(
+          new GenerateChangePasswordAccessTokenCmd(payload),
+        );
 
-      refreshToken = this.generateChangePasswordRefreshTokenPort.generateChangePasswordRefreshToken(
-        new GenerateChangePasswordRefreshTokenCmd(payload)
-      );
+      refreshToken =
+        this.generateChangePasswordRefreshTokenPort.generateChangePasswordRefreshToken(
+          new GenerateChangePasswordRefreshTokenCmd(payload),
+        );
     } else {
       accessToken = this.generateAccessTokenPort.generateAccessToken(
         new GenerateAccessTokenCmd(payload),
@@ -121,6 +126,7 @@ export class AuthService implements FirstLoginUseCase, LoginUseCase, RefreshUseC
     } */
 }
 
+export const FIRST_LOGIN_USE_CASE = 'FIRST_LOGIN_USE_CASE';
 export const LOGIN_USE_CASE = 'LOGIN_USE_CASE';
 export const REFRESH_USE_CASE = 'REFRESH_USE_CASE';
 export const LOGOUT_USE_CASE = 'LOGOUT_USE_CASE';

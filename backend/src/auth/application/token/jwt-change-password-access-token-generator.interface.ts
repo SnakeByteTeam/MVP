@@ -1,5 +1,5 @@
-import { Payload } from "../../domain/payload";
+import { Payload } from '../../domain/payload';
 
 export interface JwtChangePasswordAccessTokenGenerator {
-    generateChangePasswordAccessToken(payload: Payload): string;
+  generateChangePasswordAccessToken(payload: Payload): string;
 }

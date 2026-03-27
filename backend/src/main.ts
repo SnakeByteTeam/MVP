@@ -9,6 +9,16 @@ async function bootstrap() {
     .setTitle('Backend view4life')
     .setDescription('The backend API description')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        description: `[just text field] Please enter token in following format: Bearer <JWT>`,
+        name: 'Authorization',
+        bearerFormat: 'JWT',
+        scheme: 'Bearer',
+        type: 'http',
+        in: 'Header'
+      },
+      'access-token')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);

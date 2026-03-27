@@ -1,6 +1,7 @@
-import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Res, UseGuards } from '@nestjs/common';
 import { LoginReqDto } from '../../infrastructure/dtos/in/login-req.dto';
 import {
+  FIRST_LOGIN_USE_CASE,
   LOGIN_USE_CASE,
   LOGOUT_USE_CASE,
   REFRESH_USE_CASE,
@@ -16,15 +17,19 @@ import { RefreshReqDto } from '../../infrastructure/dtos/in/refresh-req-dto';
 import { Tokens } from '../../domain/tokens';
 import { plainToInstance } from 'class-transformer';
 import { RefreshResDto } from '../../infrastructure/dtos/out/refresh-res-dto';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { FirstLoginReqDto } from '../../infrastructure/dtos/in/first-login-req.dto';
 import { FirstLoginResDto } from '../../infrastructure/dtos/out/first-login-res.dto';
 import { FirstLoginCmd } from '../../application/commands/first-login-cmd';
 import { Response } from 'express';
+import { FirstLoginUseCase } from '../../application/ports/in/first-login-use-case.interface';
+import { FirstLoginGuard } from '../../infrastructure/guards/first-login.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(
+    @Inject(FIRST_LOGIN_USE_CASE)
+    private readonly firstLoginUseCase: FirstLoginUseCase,
     @Inject(LOGIN_USE_CASE) private readonly loginUseCase: LoginUseCase,
     @Inject(REFRESH_USE_CASE) private readonly refreshUseCase: RefreshUseCase,
     // @Inject(LOGOUT_USE_CASE) private readonly logoutUseCase: LogoutUseCase,
@@ -34,7 +39,7 @@ export class AuthController {
   @Post('/login')
   async login(
     @Body() req: LoginReqDto,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<LoginResDto> {
     const tokens: Tokens = await this.loginUseCase.login(
       new LoginCmd(req.username, req.password),
@@ -49,13 +54,15 @@ export class AuthController {
 
     return plainToInstance(LoginResDto, { accessToken: tokens.accessToken });
   }
-
+  
+  @ApiBearerAuth('access-token')
+  @UseGuards(FirstLoginGuard)
   @Post('/first-login')
   async firstLogin(
     @Body() req: FirstLoginReqDto,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ): Promise<FirstLoginResDto> {
-    const tokens: Tokens = await this.loginUseCase.login(
+    const tokens: Tokens = await this.firstLoginUseCase.firstLogin(
       new FirstLoginCmd(req.username, req.password, req.tempPassword),
     );
 
@@ -66,7 +73,9 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return plainToInstance(FirstLoginResDto, { accessToken: tokens.accessToken });
+    return plainToInstance(FirstLoginResDto, {
+      accessToken: tokens.accessToken,
+    });
   }
 
   @ApiOkResponse({ type: RefreshResDto })

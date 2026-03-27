@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './adapters/in/auth.controller';
 import {
   AuthService,
+  FIRST_LOGIN_USE_CASE,
   LOGIN_USE_CASE,
   LOGOUT_USE_CASE,
   REFRESH_USE_CASE,
@@ -39,13 +40,26 @@ import { CHECK_CREDENTIALS_REPOSITORY } from './application/repository/check-cre
 import { CheckCredentialsRepositoryImpl } from './infrastructure/persistence/check-credentials-repository-impl';
 import { CHANGE_CREDENTIALS_REPOSITORY } from './application/repository/change-credentials-repository.interface';
 import { ChangeCredentialsRepositoryImpl } from './infrastructure/persistence/change-credentials-repository-impl';
-import { GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT, GenerateChangePasswordAccessTokenAdapter } from './adapters/out/generate-change-password-access-token-adapter';
-import { GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT, GenerateChangePasswordRefreshTokenAdapter } from './adapters/out/generate-change-password-refresh-token-adapter';
-import { CHANGE_CREDENTIALS_PORT } from './adapters/out/change-credentials-adapter';
+import {
+  GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT,
+  GenerateChangePasswordAccessTokenAdapter,
+} from './adapters/out/generate-change-password-access-token-adapter';
+import {
+  GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT,
+  GenerateChangePasswordRefreshTokenAdapter,
+} from './adapters/out/generate-change-password-refresh-token-adapter';
+import {
+  CHANGE_CREDENTIALS_PORT,
+  ChangeCredentialsAdapter,
+} from './adapters/out/change-credentials-adapter';
 
 @Module({
   controllers: [AuthController],
   providers: [
+    {
+      provide: FIRST_LOGIN_USE_CASE,
+      useClass: AuthService,
+    },
     {
       provide: LOGIN_USE_CASE,
       useClass: AuthService,
@@ -64,7 +78,7 @@ import { CHANGE_CREDENTIALS_PORT } from './adapters/out/change-credentials-adapt
     },
     {
       provide: CHANGE_CREDENTIALS_PORT,
-      useClass: CheckCredentialsAdapter,
+      useClass: ChangeCredentialsAdapter,
     },
     {
       provide: GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT,
@@ -120,8 +134,8 @@ import { CHANGE_CREDENTIALS_PORT } from './adapters/out/change-credentials-adapt
     },
     {
       provide: CHANGE_CREDENTIALS_REPOSITORY,
-      useClass: ChangeCredentialsRepositoryImpl
-    }
+      useClass: ChangeCredentialsRepositoryImpl,
+    },
   ],
 })
 export class AuthModule {}

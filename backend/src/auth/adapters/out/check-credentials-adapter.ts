@@ -20,7 +20,11 @@ export class CheckCredentialsAdapter implements CheckCredentialsPort {
         req.username,
         req.password,
       );
-    return new Payload(credentials.id, credentials.role, credentials.firstAccess);
+    return new Payload(
+      credentials.id,
+      credentials.role,
+      credentials.firstAccess,
+    );
   }
 }
 

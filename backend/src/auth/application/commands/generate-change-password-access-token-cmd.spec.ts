@@ -3,6 +3,8 @@ import { GenerateChangePasswordAccessTokenCmd } from './generate-change-password
 
 describe('GenerateChangePasswordAccessTokenCmd', () => {
   it('should be defined', () => {
-    expect(new GenerateChangePasswordAccessTokenCmd(new Payload(1, "", false))).toBeDefined();
+    expect(
+      new GenerateChangePasswordAccessTokenCmd(new Payload(1, '', false)),
+    ).toBeDefined();
   });
 });

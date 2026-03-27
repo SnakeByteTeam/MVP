@@ -1,5 +1,5 @@
-import { ChangeCredentialsCmd } from "../../commands/change-credentials-cmd";
+import { ChangeCredentialsCmd } from '../../commands/change-credentials-cmd';
 
 export interface ChangeCredentialsPort {
-    changeCredentials(req: ChangeCredentialsCmd): Promise<void>;
+  changeCredentials(req: ChangeCredentialsCmd): Promise<void>;
 }

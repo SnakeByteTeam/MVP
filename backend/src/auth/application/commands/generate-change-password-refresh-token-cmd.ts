@@ -1,5 +1,5 @@
-import { Payload } from "../../domain/payload";
+import { Payload } from '../../domain/payload';
 
 export class GenerateChangePasswordRefreshTokenCmd {
-    constructor(public payload: Payload) {}
+  constructor(public payload: Payload) {}
 }

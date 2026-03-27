@@ -41,8 +41,8 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
       for (const dp of datapoints) {
         if (dp.sfeType !== 'SFE_State_Temperature') continue;
 
-        const temp = parseFloat(dp.value ?? '');
-        if (isNaN(temp)) continue;
+        const temp = Number.parseFloat(dp.value ?? '');
+        if (Number.isNaN(temp)) continue;
 
         const existing = tempByDay.get(day) ?? { sum: 0, count: 0 };
         tempByDay.set(day, {

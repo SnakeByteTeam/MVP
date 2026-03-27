@@ -46,7 +46,7 @@ export class GetAnalyticsData implements GetAnalyticsPort {
         row.day instanceof Date
           ? row.day.toISOString().slice(0, 10)
           : String(row.day);
-      map.set(day, parseInt(row.alarm_count));
+      map.set(day, Number.parseInt(row.alarm_count));
     }
     return map;
   }

@@ -1,9 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
-import { Plot } from 'src/analytics/domain/plot.model';
+import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { AnalyticsStrategy } from '../analytics.strategy';
-import { VimarStructure } from 'src/analytics/domain/vimar/vimar-structure.model';
 
 @Injectable()
 export class WardFalls implements AnalyticsStrategy {

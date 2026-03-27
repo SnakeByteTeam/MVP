@@ -33,7 +33,7 @@ import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
       useClass: GetAnalyticsRepositoryImpl,
     },
     {
-      provide: 'GET_ANALYTICS_USECASE',
+      provide: 'ANALYTICS_STRATEGIES',
       useFactory: (
         plantConsumption: PlantConsumption,
         plantAnomalies: PlantAnomalies,
@@ -43,8 +43,8 @@ import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
         wardAlarmsFrequency: WardAlarmsFrequency,
         wardFalls: WardFalls,
         wardResolvedAlarm: WardResolvedAlarm,
-      ): AnalyticsService => {
-        const strategies = new Map<string, AnalyticsStrategy>([
+      ) => {
+        return new Map<string, AnalyticsStrategy>([
           ['plant-consumption', plantConsumption],
           ['plant-anomalies', plantAnomalies],
           ['sensor-long-presence', sensorLongPresence],
@@ -54,7 +54,6 @@ import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
           ['ward-falls', wardFalls],
           ['ward-resolved-alarm', wardResolvedAlarm],
         ]);
-        return new AnalyticsService(strategies);
       },
       inject: [
         PlantConsumption,
@@ -66,6 +65,10 @@ import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
         WardFalls,
         WardResolvedAlarm,
       ],
+    },
+    {
+      provide: 'GET_ANALYTICS_USECASE',
+      useClass: AnalyticsService,
     },
   ],
 })

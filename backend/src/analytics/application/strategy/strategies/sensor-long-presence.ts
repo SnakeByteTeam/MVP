@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { AnalyticsStrategy } from '../analytics.strategy';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
-import { Plot } from 'src/analytics/domain/plot.model';
+import { Plot } from '../../../domain/plot.model';
 
 const LONG_PRESENCE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minuti
 

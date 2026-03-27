@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { AnalyticsStrategy } from '../analytics.strategy';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
-import { Plot } from 'src/analytics/domain/plot.model';
+import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 
 @Injectable()

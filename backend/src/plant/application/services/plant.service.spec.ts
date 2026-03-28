@@ -15,7 +15,7 @@ describe('PlantService', () => {
   });
 
   it('should return plant from port', async () => {
-    const plant = new Plant('plant-1', 'My Plant', []);
+    const plant = new Plant('plant-1', 'My Plant', [], 1);
 
     findByIdPort.findById.mockResolvedValue(plant);
 

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GetTokensCallbackUseCase } from '../ports/in/get-tokens.usecase';
 import {
   type GetTokensWithCodePort,
@@ -13,6 +14,7 @@ import { TokenPair } from 'src/tokens/domain/models/token-pair.model';
 @Injectable()
 export class ApiAuthTokensService implements GetTokensCallbackUseCase {
   constructor(
+    private readonly eventEmitter: EventEmitter2,
     @Inject(GETTOKENSWITHCODEPORT)
     private readonly getTokensWithCodePort: GetTokensWithCodePort,
     @Inject(WRITETOKENSREPOPORT)
@@ -24,5 +26,7 @@ export class ApiAuthTokensService implements GetTokensCallbackUseCase {
       await this.getTokensWithCodePort.getTokensWithCode(code);
 
     await this.writeTokensRepoPort.writeTokens(tokens);
+
+    this.eventEmitter.emit('fetched.tokens');
   }
 }

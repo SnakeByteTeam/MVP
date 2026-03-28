@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { IsArray, IsDate, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, IsNumber } from 'class-validator';
 import { RoomDto } from './room.dto';
 
 export class PlantDto {
@@ -20,13 +20,13 @@ export class PlantDto {
   rooms: RoomDto[];
 
   @ApiProperty({ example: '2026-03-25T10:00:00.000Z', format: 'date-time' })
-  @IsDate()
+  @IsNumber()
   @IsNotEmpty()
-  cached_at: Date;
+  wardId: number;
 
   static toDomain(dto: PlantDto): Plant {
     const rooms = dto.rooms.map((room) => RoomDto.toDomain(room));
-    return new Plant(dto.id, dto.name, rooms, dto.cached_at);
+    return new Plant(dto.id, dto.name, rooms, dto.wardId);
   }
 
   static fromDomain(plant: Plant): PlantDto {
@@ -34,7 +34,7 @@ export class PlantDto {
     dto.id = plant.getId();
     dto.name = plant.getName();
     dto.rooms = plant.getRooms().map((room) => RoomDto.fromDomain(room));
-    dto.cached_at = plant.getCachedAt();
+    dto.wardId = plant.getWardId();
     return dto;
   }
 }

@@ -104,21 +104,9 @@ export class WardOperationsService {
   }
 
   private toApartments(apartmentsDto: WardPlantDto[]): Ward['apartments'] {
-    const currentWards = this.store.getWardsSnapshot();
-    const enabledByPlantId = new Map<number, boolean>();
-
-    for (const ward of currentWards) {
-      for (const apartment of ward.apartments) {
-        if (!enabledByPlantId.has(apartment.id)) {
-          enabledByPlantId.set(apartment.id, apartment.isEnabled);
-        }
-      }
-    }
-
     return apartmentsDto.map((plant) => ({
       id: plant.id,
       name: plant.name,
-      isEnabled: plant.isEnabled ?? enabledByPlantId.get(plant.id) ?? true,
     }));
   }
 

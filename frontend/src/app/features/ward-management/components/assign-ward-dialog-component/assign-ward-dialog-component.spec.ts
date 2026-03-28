@@ -22,7 +22,7 @@ describe('AssignWardDialogComponent', () => {
 
   it('dovrebbe resettare plantId a null in ngOnInit', () => {
     // Arrange: imposto un valore prima dell init
-    component.form.controls.plantId.setValue(999);
+    component.form.controls.plantId.setValue('999');
 
     // Act: trigger lifecycle (ngOnInit)
     fixture.detectChanges();
@@ -50,13 +50,13 @@ describe('AssignWardDialogComponent', () => {
     // Arrange
     fixture.detectChanges();
     const submittedSpy = vi.spyOn(component.submitted, 'emit');
-    component.form.controls.plantId.setValue(101);
+    component.form.controls.plantId.setValue('101');
 
     // Act
     component.onSubmit();
 
     // Assert
-    expect(submittedSpy).toHaveBeenCalledWith({ plantId: 101 });
+    expect(submittedSpy).toHaveBeenCalledWith({ plantId: '101' });
     expect(submittedSpy).toHaveBeenCalledTimes(1);
   });
 

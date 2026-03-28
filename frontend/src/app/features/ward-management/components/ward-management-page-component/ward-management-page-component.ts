@@ -35,7 +35,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   public readonly snackbarMessage = signal<string | null>(null);
   public readonly wardDialogMode = signal<'closed' | 'create' | 'edit'>('closed');
   public readonly selectedWardId = signal<number | null>(null);
-  public readonly selectedApartmentId = signal<number | null>(null);
+  public readonly selectedApartmentId = signal<string | null>(null);
   public readonly mobileStep = signal<'wards' | 'apartments' | 'operators'>('wards');
   public readonly operatorWardId = signal<number | null>(null);
   public readonly plantWardId = signal<number | null>(null);
@@ -44,7 +44,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   public readonly confirmState = signal<
     | { kind: 'delete-ward'; wardId: number }
     | { kind: 'remove-operator'; wardId: number; userId: number }
-    | { kind: 'remove-plant'; wardId: number; plantId: number }
+    | { kind: 'remove-plant'; wardId: number; plantId: string }
     | null
   >(null);
 
@@ -97,7 +97,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
     const assignedToSelected = new Set(selectedWard.apartments.map((plant) => plant.id));
     const knownPlants = wards.flatMap((ward) => ward.apartments);
-    const uniquePlants = new Map<number, Plant>();
+    const uniquePlants = new Map<string, Plant>();
     for (const plant of knownPlants) {
       if (!uniquePlants.has(plant.id) && !assignedToSelected.has(plant.id)) {
         uniquePlants.set(plant.id, plant);
@@ -163,7 +163,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     this.mobileStep.set('apartments');
   }
 
-  public selectApartment(apartmentId: number): void {
+  public selectApartment(apartmentId: string): void {
     this.selectedApartmentId.set(apartmentId);
   }
 
@@ -266,14 +266,6 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
       wardId: event.wardId,
       plantId: event.plantId,
     });
-  }
-
-  public onEnablePlant(plantId: number): void {
-    this.store.enablePlant(plantId);
-  }
-
-  public onDisablePlant(plantId: number): void {
-    this.store.disablePlant(plantId);
   }
 
   public onConfirmDialogConfirmed(): void {

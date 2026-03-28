@@ -70,8 +70,7 @@
                 @for (apartment of currentWard.apartments; track apartment.id) {
                 <li
                     class="flex items-center justify-between gap-2 rounded-md border border-neutral-500 bg-white px-3 py-1.5">
-                    <app-ward-row-component [plant]="apartment" [wardId]="currentWard.id"
-                        (enable)="onEnablePlant($event)" (disable)="onDisablePlant($event)" />
+                    <app-ward-row-component [plant]="apartment" [wardId]="currentWard.id" />
                     <button type="button" (click)="onRemovePlantClick(apartment.id)"
                         aria-label="Rimuovi appartamento {{ apartment.name }} dal reparto {{ currentWard.name }}"
                         class="rounded-full border border-red-700 bg-red-500 px-1.5 py-0 text-xs font-bold text-white hover:bg-red-600">

@@ -20,7 +20,7 @@ describe('WardApiService', () => {
     const ward: Ward = {
         id: 1,
         name: 'Cardiologia',
-        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+        apartments: [{ id: '101', name: 'App. 101' }],
         operators: [
             {
                 id: 'user-1',
@@ -81,22 +81,22 @@ describe('WardApiService', () => {
 
     it('chiama GET /api/wards-plants-relationships/:wardId in getPlantsByWardId', () => {
         service.getPlantsByWardId(10).subscribe((result) => {
-            expect(result).toEqual([{ id: 101, name: 'App. 101' }]);
+            expect(result).toEqual([{ id: '101', name: 'App. 101' }]);
         });
 
         const request = httpController.expectOne(`${wardPlantsRelationshipsEndpoint}/10`);
         expect(request.request.method).toBe('GET');
-        request.flush([{ id: 101, name: 'App. 101' }]);
+        request.flush([{ id: '101', name: 'App. 101' }]);
     });
 
     it('chiama GET /api/plant/available in getAvailablePlants', () => {
         service.getAvailablePlants().subscribe((result) => {
-            expect(result).toEqual([{ id: 103, name: 'App. 103', isEnabled: false }]);
+            expect(result).toEqual([{ id: '103', name: 'App. 103' }]);
         });
 
         const request = httpController.expectOne(`${baseUrl}/plant/available`);
         expect(request.request.method).toBe('GET');
-        request.flush([{ id: 103, name: 'App. 103', isEnabled: false }]);
+        request.flush([{ id: '103', name: 'App. 103' }]);
     });
 
     it('chiama POST /api/wards in createWard', () => {
@@ -135,13 +135,13 @@ describe('WardApiService', () => {
     });
 
     it('chiama POST /api/wards-plants-relationships con wardId e plantId', () => {
-        service.assignPlantToWard(1, { plantId: 102 }).subscribe((result) => {
+        service.assignPlantToWard(1, { plantId: '102' }).subscribe((result) => {
             expect(result).toBeNull();
         });
 
         const request = httpController.expectOne(wardPlantsRelationshipsEndpoint);
         expect(request.request.method).toBe('POST');
-        expect(request.request.body).toEqual({ wardId: 1, plantId: 102 });
+        expect(request.request.body).toEqual({ wardId: 1, plantId: '102' });
         request.flush(null);
     });
 
@@ -167,7 +167,7 @@ describe('WardApiService', () => {
     });
 
     it('chiama DELETE /api/wards-plants-relationships/:wardId/:plantId', () => {
-        service.removePlantFromWard(1, 102).subscribe((result) => {
+        service.removePlantFromWard(1, '102').subscribe((result) => {
             expect(result).toBeNull();
         });
 
@@ -177,13 +177,13 @@ describe('WardApiService', () => {
     });
 
     it('mantiene compatibilita con assignPlantToWard mappando plantId -> plantId', () => {
-        service.assignPlantToWard(1, { plantId: 103 }).subscribe((result) => {
+        service.assignPlantToWard(1, { plantId: '103' }).subscribe((result) => {
             expect(result).toBeNull();
         });
 
         const request = httpController.expectOne(wardPlantsRelationshipsEndpoint);
         expect(request.request.method).toBe('POST');
-        expect(request.request.body).toEqual({ wardId: 1, plantId: 103 });
+        expect(request.request.body).toEqual({ wardId: 1, plantId: '103' });
         request.flush(null);
     });
 });

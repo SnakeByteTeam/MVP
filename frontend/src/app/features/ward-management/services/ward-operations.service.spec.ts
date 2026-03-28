@@ -15,7 +15,7 @@ describe('WardOperationsService', () => {
     const ward: Ward = {
         id: 1,
         name: 'Cardiologia',
-        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+        apartments: [{ id: '101', name: 'App. 101' }],
         operators: [
             {
                 id: 'user-1',
@@ -30,7 +30,7 @@ describe('WardOperationsService', () => {
     const hydratedWard: Ward = {
         id: 1,
         name: 'Cardiologia',
-        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+        apartments: [{ id: '101', name: 'App. 101' }],
         operators: [
             {
                 id: '1',
@@ -194,17 +194,17 @@ describe('WardOperationsService', () => {
         expect(storeStub.setWards).not.toHaveBeenCalled();
     });
 
-    it('loadWards preserva isEnabled dallo snapshot store quando il dto non lo espone', () => {
+    it('loadWards normalizza apartments dal dto', () => {
         storeStub.getWardsSnapshot.mockReturnValue([
             {
                 id: 99,
                 name: 'Snapshot',
-                apartments: [{ id: 101, name: 'App. 101', isEnabled: false }],
+                apartments: [{ id: '101', name: 'App. 101' }],
                 operators: [],
             },
         ]);
         apiStub.getWards.mockReturnValue(of(wardSummaries));
-        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
+        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: '101', name: 'App. 101' }]));
         apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
 
         service.loadWards().subscribe();
@@ -212,7 +212,7 @@ describe('WardOperationsService', () => {
         expect(storeStub.setWards).toHaveBeenCalledWith([
             {
                 ...hydratedWard,
-                apartments: [{ id: 101, name: 'App. 101', isEnabled: false }],
+                apartments: [{ id: '101', name: 'App. 101' }],
             },
         ]);
     });

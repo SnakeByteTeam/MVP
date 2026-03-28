@@ -16,7 +16,7 @@ describe('AssignmentOperationsService', () => {
         {
             id: 1,
             name: 'Cardiologia',
-            apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+            apartments: [{ id: '101', name: 'App. 101' }],
             operators: [
                 {
                     id: '1',
@@ -67,7 +67,7 @@ describe('AssignmentOperationsService', () => {
         storeStub.getWardsSnapshot.mockReturnValue([]);
         apiStub.assignOperatorToWard.mockReturnValue(of(void 0));
         apiStub.getWards.mockReturnValue(of(wardSummaries));
-        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
+        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: '101', name: 'App. 101' }]));
         apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
 
         service.assignOperator(1, { userId: 2 }).subscribe((result) => {
@@ -104,33 +104,33 @@ describe('AssignmentOperationsService', () => {
         expect(storeStub.setWards).not.toHaveBeenCalled();
     });
 
-    it('getAvailablePlantsForWard filtra i plant gia assegnati al ward selezionato e preserva isEnabled', () => {
+    it('getAvailablePlantsForWard filtra i plant gia assegnati al ward selezionato', () => {
         storeStub.getWardsSnapshot.mockReturnValue([
             {
                 id: 10,
                 name: 'W1',
-                apartments: [{ id: 201, name: 'App. 201', isEnabled: false }],
+                apartments: [{ id: '201', name: 'App. 201' }],
                 operators: [],
             },
             {
                 id: 11,
                 name: 'W2',
-                apartments: [{ id: 202, name: 'App. 202', isEnabled: false }],
+                apartments: [{ id: '202', name: 'App. 202' }],
                 operators: [],
             },
         ]);
         apiStub.getAvailablePlants.mockReturnValue(
             of([
-                { id: 201, name: 'App. 201' },
-                { id: 202, name: 'App. 202' },
-                { id: 203, name: 'App. 203', isEnabled: true },
+                { id: '201', name: 'App. 201' },
+                { id: '202', name: 'App. 202' },
+                { id: '203', name: 'App. 203' },
             ]),
         );
 
         service.getAvailablePlantsForWard(10).subscribe((result) => {
             expect(result).toEqual([
-                { id: 202, name: 'App. 202', isEnabled: false },
-                { id: 203, name: 'App. 203', isEnabled: true },
+                { id: '202', name: 'App. 202' },
+                { id: '203', name: 'App. 203' },
             ]);
         });
 
@@ -142,7 +142,7 @@ describe('AssignmentOperationsService', () => {
             throwError(() => new HttpErrorResponse({ status: 500, statusText: 'Server Error' }))
         );
 
-        service.assignPlant(1, { plantId: 102 }).subscribe();
+        service.assignPlant(1, { plantId: '102' }).subscribe();
 
         const messageArg = vi.mocked(storeStub.setError).mock.calls[0]?.[0] as string;
         expect(messageArg.length).toBeGreaterThan(0);
@@ -153,7 +153,7 @@ describe('AssignmentOperationsService', () => {
     it('removePlant in errore non-http usa fallback message', () => {
         apiStub.removePlantFromWard.mockReturnValue(throwError(() => ({ bad: true })));
 
-        service.removePlant(1, 102).subscribe();
+        service.removePlant(1, '102').subscribe();
 
         expect(storeStub.setError).toHaveBeenCalledWith('Operazione di assegnazione non riuscita.');
         expect(storeStub.setError).toHaveBeenCalledTimes(1);

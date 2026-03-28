@@ -80,7 +80,7 @@ export class WardApiService {
     }
 
 
-    public removePlantFromWard(wardId: number, plantId: number): Observable<void> {
+    public removePlantFromWard(wardId: number, plantId: string): Observable<void> {
         return this.http.delete<void>(
             `${this.wardPlantsRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}/${encodeURIComponent(String(plantId))}`,
         );

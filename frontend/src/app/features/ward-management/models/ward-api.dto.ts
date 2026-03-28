@@ -12,7 +12,7 @@ export interface AssignOperatorDto {
 }
 
 export interface AssignPlantDto {
-    plantId: number;
+    plantId: string;
 }
 
 export interface WardUserDto {
@@ -21,9 +21,8 @@ export interface WardUserDto {
 }
 
 export interface WardPlantDto {
-    id: number;
+    id: string;
     name: string;
-    isEnabled?: boolean;
 }
 
 export interface WardSummaryDto {

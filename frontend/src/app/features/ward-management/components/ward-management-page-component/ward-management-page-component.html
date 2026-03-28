@@ -129,13 +129,6 @@
                                 {{ apartment.name }}
                             </button>
                             <button type="button"
-                                (click)="apartment.isEnabled ? onDisablePlant(apartment.id) : onEnablePlant(apartment.id)"
-                                [class]="apartment.isEnabled
-                                    ? 'rounded-md px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                                    : 'rounded-md px-2 py-1 text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300'">
-                                {{ apartment.isEnabled ? 'Attivo' : 'Disattivo' }}
-                            </button>
-                            <button type="button"
                                 (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
                                 aria-label="Rimuovi appartamento"
                                 class="rounded-full bg-red-500 px-2 py-0.5 text-sm font-semibold text-white transition hover:bg-red-400">

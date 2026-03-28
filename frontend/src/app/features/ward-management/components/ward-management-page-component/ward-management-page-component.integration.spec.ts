@@ -26,7 +26,7 @@ describe('WardManagement feature integration', () => {
     const ward1: Ward = {
         id: 1,
         name: 'Cardiologia',
-        apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+        apartments: [{ id: '101', name: 'App. 101' }],
         operators: [
             {
                 id: '1',
@@ -41,7 +41,7 @@ describe('WardManagement feature integration', () => {
     const ward2: Ward = {
         id: 2,
         name: 'Neurologia',
-        apartments: [{ id: 102, name: 'App. 102', isEnabled: true }],
+        apartments: [{ id: '102', name: 'App. 102' }],
         operators: [],
     };
 
@@ -56,7 +56,7 @@ describe('WardManagement feature integration', () => {
         getWards: vi.fn(),
         getPlantsByWardId: vi.fn(),
         getOperatorsByWardId: vi.fn(),
-        getAvailablePlantsByWardId: vi.fn(),
+        getAvailablePlants: vi.fn(),
         createWard: vi.fn(),
         updateWard: vi.fn(),
         deleteWard: vi.fn(),
@@ -102,7 +102,7 @@ describe('WardManagement feature integration', () => {
         wardApiStub.removeOperatorFromWard.mockReturnValue(of(void 0));
         wardApiStub.assignPlantToWard.mockReturnValue(of(void 0));
         wardApiStub.removePlantFromWard.mockReturnValue(of(void 0));
-        wardApiStub.getAvailablePlantsByWardId.mockReturnValue(of([]));
+        wardApiStub.getAvailablePlants.mockReturnValue(of([]));
 
         apartmentApiStub.enableApartment.mockReturnValue(of(void 0));
         apartmentApiStub.disableApartment.mockReturnValue(of(void 0));
@@ -249,11 +249,11 @@ describe('WardManagement feature integration', () => {
     });
 
     it('assegna un appartamento usando il fallback locale se il fetch disponibile fallisce', () => {
-        wardApiStub.getAvailablePlantsByWardId.mockReturnValueOnce(throwError(() => new Error('network error')));
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(throwError(() => new Error('network error')));
 
         clickButtonByText('Assegna appartamento');
         expect(getDialog()?.textContent).toContain('Assegna appartamento');
-        expect(wardApiStub.getAvailablePlantsByWardId).toHaveBeenCalledWith(1);
+        expect(wardApiStub.getAvailablePlants).toHaveBeenCalledTimes(1);
 
         const apartmentOptions = Array.from(
             (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLOptionElement>('#apartment-id option'),
@@ -265,11 +265,11 @@ describe('WardManagement feature integration', () => {
         const assignPlantDialog = fixture.debugElement.query(By.directive(AssignWardDialogComponent));
         expect(assignPlantDialog).toBeTruthy();
         const assignPlantComponent = assignPlantDialog.componentInstance as AssignWardDialogComponent;
-        assignPlantComponent.form.controls.plantId.setValue(102);
+        assignPlantComponent.form.controls.plantId.setValue('102');
         assignPlantComponent.onSubmit();
         fixture.detectChanges();
 
-        expect(wardApiStub.assignPlantToWard).toHaveBeenCalledWith(1, { plantId: 102 });
+        expect(wardApiStub.assignPlantToWard).toHaveBeenCalledWith(1, { plantId: '102' });
         expect((fixture.nativeElement as HTMLElement).querySelector('#apartment-id')).toBeNull();
     });
 
@@ -282,7 +282,7 @@ describe('WardManagement feature integration', () => {
         clickButtonByAriaLabel('Rimuovi appartamento');
         expect(getDialog()?.textContent).toContain('rimozione dell\'appartamento');
         clickButtonByText('Conferma');
-        expect(wardApiStub.removePlantFromWard).toHaveBeenCalledWith(1, 101);
+        expect(wardApiStub.removePlantFromWard).toHaveBeenCalledWith(1, '101');
     });
 
     it('elimina un ward dopo conferma e aggiorna la selezione', () => {

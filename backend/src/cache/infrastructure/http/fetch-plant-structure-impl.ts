@@ -49,7 +49,7 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
       );
       
       plantdto.rooms = [];
-      // Process rooms sequentially and skip failed rooms instead of failing entire plant
+      // Viene fatto con il for piuttosto che con il map + Promise.all altrimenti il server viene bombardato di richieste parallele e risponde con 504
       for (const room of roomsToFetch) {
         try {
           const roomDto = await this.fetchRoom(validToken, plantId, room);

@@ -39,7 +39,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
   }
 
   private emptyPlot(metric: string): Plot {
-    return new Plot('Sensor Long Presence Analytics', metric, [], []);
+    return new Plot('Sensor Long Presence Analytics', metric, '', [], []);
   }
 
   private sortSnapshots(snapshotsMap: Map<string, any>) {
@@ -48,9 +48,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
     );
   }
 
-  private computeEvents(
-    snapshots: [string, any[]][],
-  ): Map<string, number> {
+  private computeEvents(snapshots: [string, any[]][]): Map<string, number> {
     const eventsByDay = new Map<string, number>();
 
     let presenceStart: Date | undefined;
@@ -95,8 +93,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
       return { presenceStart: currentTime, counted: false };
     }
 
-    const duration =
-      currentTime.getTime() - presenceStart.getTime();
+    const duration = currentTime.getTime() - presenceStart.getTime();
 
     if (duration >= LONG_PRESENCE_THRESHOLD_MS && !counted) {
       const day = presenceStart.toISOString().slice(0, 10);
@@ -107,10 +104,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
     return { presenceStart, counted };
   }
 
-  private buildPlot(
-    metric: string,
-    eventsByDay: Map<string, number>,
-  ): Plot {
+  private buildPlot(metric: string, eventsByDay: Map<string, number>): Plot {
     const sorted = Array.from(eventsByDay.entries()).sort(([a], [b]) =>
       a.localeCompare(b),
     );
@@ -118,6 +112,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
     return new Plot(
       'Sensor Long Presence Analytics',
       metric,
+      '',
       sorted.map(([day]) => day),
       sorted.map(([, count]) => count.toString()),
     );

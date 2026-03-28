@@ -29,6 +29,7 @@ describe('PlantAnomalies', () => {
     const emptyPlot = new Plot(
       'Plant Consumption Analytics',
       'plant-consumption',
+      'Wh',
       [],
       [],
     );
@@ -48,6 +49,7 @@ describe('PlantAnomalies', () => {
     const plotWithData = new Plot(
       'Plant Consumption Analytics',
       'plant-consumption',
+      'Wh',
       [yesterday],
       [anomalyValue],
     );
@@ -67,6 +69,7 @@ describe('PlantAnomalies', () => {
     const plotWithData = new Plot(
       'Plant Consumption Analytics',
       'plant-consumption',
+      'Wh',
       [yesterday],
       [normalValue],
     );
@@ -87,6 +90,7 @@ describe('PlantAnomalies', () => {
     const plotWithData = new Plot(
       'Plant Consumption Analytics',
       'plant-consumption',
+      'Wh',
       [twoDaysAgo, yesterday],
       [normalValue, anomalyValue],
     );

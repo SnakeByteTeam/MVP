@@ -26,6 +26,7 @@ export class PlantAnomalies implements AnalyticsStrategy {
     return new Plot(
       'Plant Anomalies Analytics',
       cmd.metric,
+      '',
       anomalyLabels,
       anomalyValues,
     );

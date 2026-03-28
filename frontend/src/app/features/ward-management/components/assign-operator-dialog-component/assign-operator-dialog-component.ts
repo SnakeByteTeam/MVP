@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { UserApiService } from '../../../../core/services/user-api.service';
 import type { User } from '../../../../core/models/user.model';
 import type { AssignOperatorDto } from '../../models/ward-api.dto';
@@ -30,7 +30,7 @@ export class AssignOperatorDialogComponent implements OnInit {
   });
 
   public ngOnInit(): void {
-    this.operators$ = this.userApiService.getUsers().pipe(map((users) => users));
+    this.operators$ = this.userApiService.getUsers();
   }
 
   public onSubmit(): void {

@@ -26,6 +26,7 @@
     <p aria-live="polite" class="text-sm text-slate-600">Caricamento in corso...</p>
     }
 
+    <!--Prima sezione reparti-->
     @if (wards$ | async; as wards) {
     @if (wards.length === 0) {
     <div class="rounded-lg border border-slate-300 bg-white p-8 text-center text-slate-600">Nessun reparto disponibile.
@@ -34,16 +35,16 @@
     @if (selectedWard(); as activeWard) {
     <div class="rounded-xl border border-slate-300 bg-slate-200 p-2 lg:hidden">
         <div class="grid grid-cols-3 gap-2 text-xs font-semibold uppercase tracking-wide text-slate-700">
-            <button type="button" (click)="showWardListStep()" class="rounded-md px-3 py-2 transition"
-                [ngClass]="mobileStep() === 'wards' ? 'bg-white text-slate-950 shadow-sm' : 'bg-transparent hover:bg-slate-300'">
+            <button type="button" (click)="showWardListStep()"
+                [class]="mobileStep() === 'wards' ? 'rounded-md px-3 py-2 transition bg-white text-slate-950 shadow-sm' : 'rounded-md px-3 py-2 transition bg-transparent hover:bg-slate-300'">
                 Reparti
             </button>
-            <button type="button" (click)="showApartmentsStep()" class="rounded-md px-3 py-2 transition"
-                [ngClass]="mobileStep() === 'apartments' ? 'bg-white text-slate-950 shadow-sm' : 'bg-transparent hover:bg-slate-300'">
+            <button type="button" (click)="showApartmentsStep()"
+                [class]="mobileStep() === 'apartments' ? 'rounded-md px-3 py-2 transition bg-white text-slate-950 shadow-sm' : 'rounded-md px-3 py-2 transition bg-transparent hover:bg-slate-300'">
                 Appartamenti
             </button>
-            <button type="button" (click)="showOperatorsStep()" class="rounded-md px-3 py-2 transition"
-                [ngClass]="mobileStep() === 'operators' ? 'bg-white text-slate-950 shadow-sm' : 'bg-transparent hover:bg-slate-300'">
+            <button type="button" (click)="showOperatorsStep()"
+                [class]="mobileStep() === 'operators' ? 'rounded-md px-3 py-2 transition bg-white text-slate-950 shadow-sm' : 'rounded-md px-3 py-2 transition bg-transparent hover:bg-slate-300'">
                 Operatori
             </button>
         </div>
@@ -67,8 +68,9 @@
                 @for (ward of wards; track ward.id) {
                 <li>
                     <button type="button" (click)="selectWard(ward.id)"
-                        class="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition"
-                        [ngClass]="selectedWardId() === ward.id ? 'border-amber-400 bg-amber-100 text-slate-950' : 'border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100'">
+                        [class]="selectedWardId() === ward.id
+                            ? 'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition border-amber-400 bg-amber-100 text-slate-950'
+                            : 'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100'">
                         <span class="truncate font-medium">{{ ward.name }}</span>
                         <span class="rounded bg-slate-200 px-2 py-0.5 text-xs text-slate-700">{{ ward.apartments.length
                             }}</span>
@@ -78,6 +80,7 @@
             </ul>
         </aside>
 
+        <!--Seconda sezione appartamenti del reparto-->
         <section aria-label="Dettagli reparto e appartamenti"
             class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
             [class.hidden]="mobileStep() !== 'apartments'">
@@ -118,16 +121,18 @@
                 <ul class="max-h-[24rem] space-y-2 overflow-y-auto">
                     @for (apartment of activeWard.apartments; track apartment.id) {
                     <li>
-                        <div class="flex items-center gap-2 rounded-md border px-3 py-2"
-                            [ngClass]="selectedApartmentId() === apartment.id ? 'border-blue-400 bg-blue-50' : 'border-slate-300 bg-slate-50'">
+                        <div class="flex items-center gap-2 rounded-md border px-3 py-2" [class]="selectedApartmentId() === apartment.id
+                                ? 'flex items-center gap-2 rounded-md border px-3 py-2 border-blue-400 bg-blue-50'
+                                : 'flex items-center gap-2 rounded-md border px-3 py-2 border-slate-300 bg-slate-50'">
                             <button type="button" (click)="selectApartment(apartment.id)"
                                 class="min-w-0 flex-1 truncate text-left text-sm font-medium text-slate-900">
                                 {{ apartment.name }}
                             </button>
                             <button type="button"
                                 (click)="apartment.isEnabled ? onDisablePlant(apartment.id) : onEnablePlant(apartment.id)"
-                                class="rounded-md px-2 py-1 text-xs font-semibold"
-                                [ngClass]="apartment.isEnabled ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'">
+                                [class]="apartment.isEnabled
+                                    ? 'rounded-md px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                                    : 'rounded-md px-2 py-1 text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300'">
                                 {{ apartment.isEnabled ? 'Attivo' : 'Disattivo' }}
                             </button>
                             <button type="button"
@@ -147,6 +152,7 @@
             }
         </section>
 
+        <!--Terza sezione operatori del reparto-->
         <section aria-label="Operatori assegnati"
             class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
             [class.hidden]="mobileStep() !== 'operators'">

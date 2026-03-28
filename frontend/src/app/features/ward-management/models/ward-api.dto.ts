@@ -23,6 +23,7 @@ export interface WardUserDto {
 export interface WardPlantDto {
     id: number;
     name: string;
+    isEnabled?: boolean;
 }
 
 export interface WardSummaryDto {

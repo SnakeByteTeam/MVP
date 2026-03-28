@@ -36,6 +36,7 @@ describe('AssignmentOperationsService', () => {
         removeOperatorFromWard: vi.fn(),
         assignPlantToWard: vi.fn(),
         removePlantFromWard: vi.fn(),
+        getAvailablePlantsByWardId: vi.fn(),
         getWards: vi.fn(),
         getPlantsByWardId: vi.fn(),
         getOperatorsByWardId: vi.fn(),
@@ -45,6 +46,7 @@ describe('AssignmentOperationsService', () => {
         setWards: vi.fn(),
         setLoading: vi.fn(),
         setError: vi.fn(),
+        getWardsSnapshot: vi.fn(),
     };
 
     beforeEach(() => {
@@ -62,6 +64,7 @@ describe('AssignmentOperationsService', () => {
     });
 
     it('assignOperator esegue operazione e poi ricarica i wards', () => {
+        storeStub.getWardsSnapshot.mockReturnValue([]);
         apiStub.assignOperatorToWard.mockReturnValue(of(void 0));
         apiStub.getWards.mockReturnValue(of(wardSummaries));
         apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
@@ -99,6 +102,32 @@ describe('AssignmentOperationsService', () => {
         expect(storeStub.setError).toHaveBeenCalledTimes(1);
         expect(apiStub.getWards).not.toHaveBeenCalled();
         expect(storeStub.setWards).not.toHaveBeenCalled();
+    });
+
+    it('getAvailablePlantsForWard usa endpoint dedicato e preserva stato se disponibile', () => {
+        storeStub.getWardsSnapshot.mockReturnValue([
+            {
+                id: 10,
+                name: 'W1',
+                apartments: [{ id: 201, name: 'App. 201', isEnabled: false }],
+                operators: [],
+            },
+        ]);
+        apiStub.getAvailablePlantsByWardId.mockReturnValue(
+            of([
+                { id: 201, name: 'App. 201' },
+                { id: 202, name: 'App. 202', isEnabled: true },
+            ]),
+        );
+
+        service.getAvailablePlantsForWard(10).subscribe((result) => {
+            expect(result).toEqual([
+                { id: 201, name: 'App. 201', isEnabled: false },
+                { id: 202, name: 'App. 202', isEnabled: true },
+            ]);
+        });
+
+        expect(apiStub.getAvailablePlantsByWardId).toHaveBeenCalledWith(10);
     });
 
     it('assignPlant in errore usa HttpErrorResponse.message quando non c e error string', () => {

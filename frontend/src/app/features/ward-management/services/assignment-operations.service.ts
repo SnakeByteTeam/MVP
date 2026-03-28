@@ -18,6 +18,12 @@ export class AssignmentOperationsService {
   private readonly api = inject(WardApiService);
   private readonly store = inject(WardStore);
 
+  public getAvailablePlantsForWard(wardId: number): Observable<Ward['apartments']> {
+    return this.api.getAvailablePlantsByWardId(wardId).pipe(
+      map((plants) => this.toApartments(plants)),
+    );
+  }
+
   public assignOperator(wardId: number, dto: AssignOperatorDto): Observable<void> {
     return this.reloadAfter(this.api.assignOperatorToWard(wardId, dto));
   }
@@ -69,10 +75,21 @@ export class AssignmentOperationsService {
   }
 
   private toApartments(apartmentsDto: WardPlantDto[]): Ward['apartments'] {
+    const currentWards = this.store.getWardsSnapshot();
+    const enabledByPlantId = new Map<number, boolean>();
+
+    for (const ward of currentWards) {
+      for (const apartment of ward.apartments) {
+        if (!enabledByPlantId.has(apartment.id)) {
+          enabledByPlantId.set(apartment.id, apartment.isEnabled);
+        }
+      }
+    }
+
     return apartmentsDto.map((plant) => ({
       id: plant.id,
       name: plant.name,
-      isEnabled: true,
+      isEnabled: plant.isEnabled ?? enabledByPlantId.get(plant.id) ?? true,
     }));
   }
 

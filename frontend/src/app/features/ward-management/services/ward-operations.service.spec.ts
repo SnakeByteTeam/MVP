@@ -60,6 +60,7 @@ describe('WardOperationsService', () => {
         addWard: vi.fn(),
         replaceWard: vi.fn(),
         removeWard: vi.fn(),
+        getWardsSnapshot: vi.fn(),
     };
 
     beforeEach(() => {
@@ -77,6 +78,7 @@ describe('WardOperationsService', () => {
     });
 
     it('loadWards aggiorna store e termina senza valore', () => {
+        storeStub.getWardsSnapshot.mockReturnValue([]);
         apiStub.getWards.mockReturnValue(of(wardSummaries));
         apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
         apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
@@ -96,6 +98,7 @@ describe('WardOperationsService', () => {
     });
 
     it('loadWards con lista vuota non richiama le relationship API', () => {
+        storeStub.getWardsSnapshot.mockReturnValue([]);
         apiStub.getWards.mockReturnValue(of([]));
 
         service.loadWards().subscribe();
@@ -125,8 +128,24 @@ describe('WardOperationsService', () => {
         expect(storeStub.setLoading).not.toHaveBeenCalled();
     });
 
+    it('createWard normalizza payload minimale mantenendo il modello Ward coerente', () => {
+        apiStub.createWard.mockReturnValue(of({ id: 11, name: 'Oncologia' } as unknown as Ward));
+        storeStub.getWardsSnapshot.mockReturnValue([]);
+
+        service.createWard({ name: 'Oncologia' }).subscribe();
+
+        expect(storeStub.addWard).toHaveBeenCalledWith({
+            id: 11,
+            name: 'Oncologia',
+            apartments: [],
+            operators: [],
+        });
+        expect(storeStub.setLoading).toHaveBeenCalledWith(false);
+    });
+
     it('updateWard sostituisce il ward nel store', () => {
         const updatedWard: Ward = { ...ward, name: 'Cardiologia A' };
+        storeStub.getWardsSnapshot.mockReturnValue([ward]);
         apiStub.updateWard.mockReturnValue(of(updatedWard));
 
         service.updateWard(1, { name: 'Cardiologia A' }).subscribe();
@@ -136,6 +155,21 @@ describe('WardOperationsService', () => {
         expect(storeStub.replaceWard).toHaveBeenCalledTimes(1);
         expect(storeStub.setLoading).toHaveBeenCalledWith(false);
         expect(storeStub.setError).not.toHaveBeenCalled();
+    });
+
+    it('updateWard preserva apartments/operators quando backend restituisce solo id e name', () => {
+        storeStub.getWardsSnapshot.mockReturnValue([ward]);
+        apiStub.updateWard.mockReturnValue(of({ id: 1, name: 'Cardiologia X' } as unknown as Ward));
+
+        service.updateWard(1, { name: 'Cardiologia X' }).subscribe();
+
+        expect(storeStub.replaceWard).toHaveBeenCalledWith({
+            id: 1,
+            name: 'Cardiologia X',
+            apartments: ward.apartments,
+            operators: ward.operators,
+        });
+        expect(storeStub.setLoading).toHaveBeenCalledWith(false);
     });
 
     it('deleteWard rimuove il ward dal store', () => {
@@ -158,5 +192,28 @@ describe('WardOperationsService', () => {
         expect(storeStub.setError).toHaveBeenCalledWith('Operazione sui reparti non riuscita.');
         expect(storeStub.setError).toHaveBeenCalledTimes(1);
         expect(storeStub.setWards).not.toHaveBeenCalled();
+    });
+
+    it('loadWards preserva isEnabled dallo snapshot store quando il dto non lo espone', () => {
+        storeStub.getWardsSnapshot.mockReturnValue([
+            {
+                id: 99,
+                name: 'Snapshot',
+                apartments: [{ id: 101, name: 'App. 101', isEnabled: false }],
+                operators: [],
+            },
+        ]);
+        apiStub.getWards.mockReturnValue(of(wardSummaries));
+        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
+        apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
+
+        service.loadWards().subscribe();
+
+        expect(storeStub.setWards).toHaveBeenCalledWith([
+            {
+                ...hydratedWard,
+                apartments: [{ id: 101, name: 'App. 101', isEnabled: false }],
+            },
+        ]);
     });
 });

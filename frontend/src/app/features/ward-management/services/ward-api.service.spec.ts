@@ -89,6 +89,16 @@ describe('WardApiService', () => {
         request.flush([{ id: 101, name: 'App. 101' }]);
     });
 
+    it('chiama GET /api/wards-plants-relationships/available/:wardId in getAvailablePlantsByWardId', () => {
+        service.getAvailablePlantsByWardId(10).subscribe((result) => {
+            expect(result).toEqual([{ id: 103, name: 'App. 103', isEnabled: false }]);
+        });
+
+        const request = httpController.expectOne(`${wardPlantsRelationshipsEndpoint}/available/10`);
+        expect(request.request.method).toBe('GET');
+        request.flush([{ id: 103, name: 'App. 103', isEnabled: false }]);
+    });
+
     it('chiama POST /api/wards in createWard', () => {
         const dto: CreateWardDto = { name: 'Neurologia' };
 

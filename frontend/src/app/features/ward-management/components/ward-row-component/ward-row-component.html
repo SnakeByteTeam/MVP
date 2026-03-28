@@ -8,6 +8,7 @@
         </span>
     </div>
     <button type="button" (click)="onToggle()"
+        [attr.aria-label]="(currentPlant.isEnabled ? 'Disabilita' : 'Abilita') + ' appartamento ' + currentPlant.name"
         class="shrink-0 rounded-md border border-neutral-600 bg-white px-2 py-0.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-100">
         {{ currentPlant.isEnabled ? 'Disabilita' : 'Abilita' }}
     </button>

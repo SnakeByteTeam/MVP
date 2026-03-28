@@ -1,7 +1,8 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { EMPTY, Subject, catchError, map, takeUntil, tap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, map, of, takeUntil, tap } from 'rxjs';
 import { ApartmentApiService } from '../../apartment-monitor/services/apartment-api.service';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../models/ward-api.dto';
+import type { Plant } from '../models/plant.model';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardOperationsService } from './ward-operations.service';
 import { WardStore } from './ward.store';
@@ -85,6 +86,15 @@ export class WardManagementStore implements OnDestroy {
             .removePlant(wardId, plantId)
             .pipe(takeUntil(this.destroy$))
             .subscribe();
+    }
+
+    public getAvailablePlantsForWard(wardId: number): Observable<Plant[] | null> {
+        return this.wardAssignmentOperations.getAvailablePlantsForWard(wardId).pipe(
+            catchError((error) => {
+                this.wardStore.setError(this.getErrorMessage(error));
+                return of(null);
+            }),
+        );
     }
 
     public enablePlant(plantId: number): void {

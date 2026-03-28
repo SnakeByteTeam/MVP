@@ -29,6 +29,10 @@ export class WardStore {
     this.setState({ wards });
   }
 
+  public getWardsSnapshot(): Ward[] {
+    return this.state$.value.wards;
+  }
+
   public addWard(ward: Ward): void {
     const current = this.state$.value;
     this.setState({

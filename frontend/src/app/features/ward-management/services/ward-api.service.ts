@@ -64,6 +64,14 @@ export class WardApiService {
         );
     }
 
+    public getAvailablePlantsByWardId(wardId: number): Observable<WardPlantDto[]> {
+        // Assumption: backend exposes an endpoint that returns plants not yet assigned to the ward.
+        // If backend contract differs, align this URL/payload mapping accordingly.
+        return this.http.get<WardPlantDto[]>(
+            `${this.wardPlantsRelationshipsEndpoint}/available/${encodeURIComponent(String(wardId))}`,
+        );
+    }
+
 
     public assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void> {
         return this.http.post<void>(this.wardPlantsRelationshipsEndpoint, {

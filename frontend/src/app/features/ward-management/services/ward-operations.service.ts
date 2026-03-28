@@ -39,7 +39,7 @@ export class WardOperationsService {
 
   public createWard(dto: CreateWardDto): Observable<void> {
     return this.api.createWard(dto).pipe(
-      tap((ward) => this.store.addWard(ward)),
+      tap((ward) => this.store.addWard(this.normalizeMutationWard(ward))),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
       catchError((error) => {
@@ -56,7 +56,7 @@ export class WardOperationsService {
 
   public updateWard(wardId: number, dto: UpdateWardDto): Observable<void> {
     return this.api.updateWard(wardId, dto).pipe(
-      tap((ward) => this.store.replaceWard(ward)),
+      tap((ward) => this.store.replaceWard(this.normalizeMutationWard(ward))),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
       catchError((error) => {
@@ -92,11 +92,33 @@ export class WardOperationsService {
     );
   }
 
+  private normalizeMutationWard(ward: Ward): Ward {
+    const currentWard = this.store.getWardsSnapshot().find((item) => item.id === ward.id);
+
+    return {
+      id: ward.id,
+      name: ward.name,
+      apartments: ward.apartments ?? currentWard?.apartments ?? [],
+      operators: ward.operators ?? currentWard?.operators ?? [],
+    };
+  }
+
   private toApartments(apartmentsDto: WardPlantDto[]): Ward['apartments'] {
+    const currentWards = this.store.getWardsSnapshot();
+    const enabledByPlantId = new Map<number, boolean>();
+
+    for (const ward of currentWards) {
+      for (const apartment of ward.apartments) {
+        if (!enabledByPlantId.has(apartment.id)) {
+          enabledByPlantId.set(apartment.id, apartment.isEnabled);
+        }
+      }
+    }
+
     return apartmentsDto.map((plant) => ({
       id: plant.id,
       name: plant.name,
-      isEnabled: true,
+      isEnabled: plant.isEnabled ?? enabledByPlantId.get(plant.id) ?? true,
     }));
   }
 

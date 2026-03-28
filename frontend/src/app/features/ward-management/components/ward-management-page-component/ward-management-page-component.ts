@@ -1,4 +1,4 @@
-import { AsyncPipe, NgClass } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import type { Plant } from '../../models/plant.model';
@@ -15,7 +15,6 @@ import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form
   selector: 'app-ward-management-page-component',
   imports: [
     AsyncPipe,
-    NgClass,
     WardFormDialogComponent,
     AssignOperatorDialogComponent,
     AssignWardDialogComponent,
@@ -40,6 +39,8 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   public readonly mobileStep = signal<'wards' | 'apartments' | 'operators'>('wards');
   public readonly operatorWardId = signal<number | null>(null);
   public readonly plantWardId = signal<number | null>(null);
+  public readonly availablePlantsFromFetch = signal<Plant[] | null>(null);
+  public readonly isLoadingAvailablePlants = signal(false);
   public readonly confirmState = signal<
     | { kind: 'delete-ward'; wardId: number }
     | { kind: 'remove-operator'; wardId: number; userId: number }
@@ -76,6 +77,13 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   });
 
   public readonly availablePlants = computed<Plant[]>(() => {
+    const fetchedPlants = this.availablePlantsFromFetch();
+    if (fetchedPlants !== null) {
+      return fetchedPlants;
+    }
+
+    // Fallback strategy: derive options from current wards snapshot.
+    // This keeps the dialog usable if the ad-hoc backend endpoint is temporarily unavailable.
     const selectedWardId = this.plantWardId();
     if (!selectedWardId) {
       return [];
@@ -227,6 +235,13 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public onAssignPlant(wardId: number): void {
     this.plantWardId.set(wardId);
+    this.availablePlantsFromFetch.set(null);
+    this.isLoadingAvailablePlants.set(true);
+
+    this.store.getAvailablePlantsForWard(wardId).pipe(takeUntil(this.destroy$)).subscribe((plants) => {
+      this.availablePlantsFromFetch.set(plants);
+      this.isLoadingAvailablePlants.set(false);
+    });
   }
 
   public onAssignPlantSubmit(dto: AssignPlantDto): void {
@@ -241,6 +256,8 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public onCloseAssignPlantDialog(): void {
     this.plantWardId.set(null);
+    this.availablePlantsFromFetch.set(null);
+    this.isLoadingAvailablePlants.set(false);
   }
 
   public onRemovePlant(event: RemovePlantEvent): void {

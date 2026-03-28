@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardManagementStore } from './ward-management.store';
@@ -31,6 +31,7 @@ describe('WardManagementStore', () => {
         removeOperator: vi.fn(),
         assignPlant: vi.fn(),
         removePlant: vi.fn(),
+        getAvailablePlantsForWard: vi.fn(),
     };
 
     const apartmentApiStub = {
@@ -50,6 +51,7 @@ describe('WardManagementStore', () => {
         assignmentOperationsStub.removeOperator.mockReturnValue(of(void 0));
         assignmentOperationsStub.assignPlant.mockReturnValue(of(void 0));
         assignmentOperationsStub.removePlant.mockReturnValue(of(void 0));
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(of([]));
 
         apartmentApiStub.enableApartment.mockReturnValue(of(void 0));
         apartmentApiStub.disableApartment.mockReturnValue(of(void 0));
@@ -120,5 +122,28 @@ describe('WardManagementStore', () => {
         expect(wardStoreStub.setError).toHaveBeenCalledWith('No network');
         expect(wardStoreStub.patchPlant).not.toHaveBeenCalled();
         expect(wardStoreStub.setLoading).toHaveBeenCalledWith(true);
+    });
+
+    it('getAvailablePlantsForWard delega ad AssignmentOperationsService', async () => {
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(
+            of([{ id: 200, name: 'App. 200', isEnabled: true }]),
+        );
+
+        const result = await firstValueFrom(store.getAvailablePlantsForWard(10));
+
+        expect(assignmentOperationsStub.getAvailablePlantsForWard).toHaveBeenCalledWith(10);
+        expect(result).toEqual([{ id: 200, name: 'App. 200', isEnabled: true }]);
+        expect(wardStoreStub.setError).not.toHaveBeenCalled();
+    });
+
+    it('getAvailablePlantsForWard in errore ritorna null e setta errore', async () => {
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(
+            throwError(() => new Error('fetch failed')),
+        );
+
+        const result = await firstValueFrom(store.getAvailablePlantsForWard(10));
+
+        expect(result).toBeNull();
+        expect(wardStoreStub.setError).toHaveBeenCalledWith('fetch failed');
     });
 });

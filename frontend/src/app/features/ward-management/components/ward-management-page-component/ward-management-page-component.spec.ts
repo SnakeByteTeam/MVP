@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserRole } from '../../../../core/models/user-role.enum';
 import type { Ward } from '../../models/ward.model';
@@ -55,6 +55,7 @@ describe('WardManagementPageComponent', () => {
     removeOperator: vi.fn(),
     assignPlant: vi.fn(),
     removePlant: vi.fn(),
+    getAvailablePlantsForWard: vi.fn(),
     enablePlant: vi.fn(),
     disablePlant: vi.fn(),
   };
@@ -69,6 +70,7 @@ describe('WardManagementPageComponent', () => {
     storeStub.wards$ = wardsSubject.asObservable();
     storeStub.isLoading$ = loadingSubject.asObservable();
     storeStub.error$ = errorSubject.asObservable();
+    storeStub.getAvailablePlantsForWard.mockReturnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [WardManagementPageComponent],
@@ -214,8 +216,14 @@ describe('WardManagementPageComponent', () => {
   });
 
   it('flow plant dovrebbe impostare wardId, submit e chiudere', () => {
+    storeStub.getAvailablePlantsForWard.mockReturnValue(
+      of([{ id: 103, name: 'App. 103', isEnabled: true }]),
+    );
+
     component.onAssignPlant(2);
     expect(component.plantWardId()).toBe(2);
+    expect(storeStub.getAvailablePlantsForWard).toHaveBeenCalledWith(2);
+    expect(component.availablePlants()).toEqual([{ id: 103, name: 'App. 103', isEnabled: true }]);
 
     component.onAssignPlantSubmit({ plantId: 103 });
 
@@ -317,5 +325,17 @@ describe('WardManagementPageComponent', () => {
 
     component.plantWardId.set(9999);
     expect(component.availablePlants()).toEqual([]);
+  });
+
+  it('onAssignPlant usa fallback locale se fetch ad-hoc fallisce', () => {
+    storeStub.getAvailablePlantsForWard.mockReturnValue(of(null));
+    component.wardsSnapshot.set([wardA, wardB]);
+
+    component.onAssignPlant(1);
+
+    expect(component.availablePlants()).toEqual([
+      { id: 103, name: 'App. 103', isEnabled: true },
+    ]);
+    expect(component.isLoadingAvailablePlants()).toBe(false);
   });
 });

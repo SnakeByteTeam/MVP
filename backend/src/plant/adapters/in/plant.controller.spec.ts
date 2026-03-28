@@ -1,17 +1,22 @@
 import { PlantController } from './plant.controller';
 import { FindPlantByIdUseCase } from 'src/plant/application/ports/in/find-plant-by-id.usecase';
+import { FindAllAvailablePlantsUseCase } from 'src/plant/application/ports/in/find-all-available-plants.usecase';
 import { Plant } from 'src/plant/domain/models/plant.model';
 
 describe('PlantController', () => {
   let controller: PlantController;
   let findPlantByIdUseCase: jest.Mocked<FindPlantByIdUseCase>;
+  let findAllAvailablePlantsUseCase: jest.Mocked<FindAllAvailablePlantsUseCase>;
 
   beforeEach(() => {
     findPlantByIdUseCase = {
       findById: jest.fn(),
     };
+    findAllAvailablePlantsUseCase = {
+      findAllAvailablePlants: jest.fn(),
+    };
 
-    controller = new PlantController(findPlantByIdUseCase);
+    controller = new PlantController(findPlantByIdUseCase, findAllAvailablePlantsUseCase);
   });
 
   it('should return PlantDto mapped from domain model', async () => {

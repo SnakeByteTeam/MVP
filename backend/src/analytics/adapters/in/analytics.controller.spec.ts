@@ -43,6 +43,7 @@ describe('AnalyticsController', () => {
     const plot = new Plot(
       'Plant Consumption Analytics',
       'plant-consumption',
+      'Wh',
       [twoDaysAgo, yesterday],
       ['20.00', '40.00'],
     );
@@ -62,7 +63,7 @@ describe('AnalyticsController', () => {
   });
 
   it('should pass metric and id to use case as GetAnalyticsCmd', async () => {
-    const plot = new Plot('Ward Falls Analytics', 'ward-falls', [], []);
+    const plot = new Plot('Ward Falls Analytics', 'ward-falls', '', [], []);
     mockUseCase.getAnalytics.mockResolvedValue(plot);
 
     await controller.getAnalytics({ metric: 'ward-falls', id: '1' });
@@ -76,6 +77,7 @@ describe('AnalyticsController', () => {
     const plot = new Plot(
       'Ward Resolved Alarm Analytics',
       'ward-resolved-alarm',
+      '',
       [yesterday],
       ['3'],
       { resolved: ['2'] },
@@ -92,7 +94,7 @@ describe('AnalyticsController', () => {
   });
 
   it('should return PlotDto with empty labels and data when plot is empty', async () => {
-    const plot = new Plot('Ward Falls Analytics', 'ward-falls', [], []);
+    const plot = new Plot('Ward Falls Analytics', 'ward-falls', '', [], []);
     mockUseCase.getAnalytics.mockResolvedValue(plot);
 
     const result = await controller.getAnalytics({

@@ -24,6 +24,7 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
       return new Plot(
         'Plant Thermostat Temperature Analytics',
         cmd.metric,
+        '',
         [],
         [],
       );
@@ -59,6 +60,7 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     return new Plot(
       'Plant Thermostat Temperature Analytics',
       cmd.metric,
+      '°C',
       sorted.map(([day]) => day),
       sorted.map(([, { sum, count }]) => (sum / count).toFixed(1)),
     );

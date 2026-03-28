@@ -5,12 +5,13 @@ describe('Plot', () => {
 
   const title = 'Test Analytics';
   const metric = 'test-metric';
+  const unit = '°C';
   const labels = ['2026-03-25', '2026-03-26'];
   const data = ['10', '20'];
   const series = { resolved: ['5', '10'] };
 
   beforeEach(() => {
-    plot = new Plot(title, metric, labels, data, series);
+    plot = new Plot(title, metric, unit, labels, data, series);
   });
 
   it('should be defined', () => {
@@ -23,6 +24,10 @@ describe('Plot', () => {
 
   it('should return the correct metric', () => {
     expect(plot.getMetric()).toBe(metric);
+  });
+
+  it('should return the correct unit', () => {
+    expect(plot.getUnit()).toBe(unit);
   });
 
   it('should return the correct labels', () => {
@@ -38,7 +43,7 @@ describe('Plot', () => {
   });
 
   it('should handle undefined series', () => {
-    const plotWithoutSeries = new Plot(title, metric, labels, data);
+    const plotWithoutSeries = new Plot(title, metric, unit, labels, data);
     expect(plotWithoutSeries.getSeries()).toBeUndefined();
   });
 });

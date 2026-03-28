@@ -22,7 +22,13 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     );
 
     if (alarmsByDay.size === 0) {
-      return new Plot('Ward Alarms Frequency Analytics', cmd.metric, [], []);
+      return new Plot(
+        'Ward Alarms Frequency Analytics',
+        cmd.metric,
+        '',
+        [],
+        [],
+      );
     }
 
     const sorted = Array.from(alarmsByDay.entries()).sort(([a], [b]) =>
@@ -32,6 +38,7 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     return new Plot(
       'Ward Alarms Frequency Analytics',
       cmd.metric,
+      '',
       sorted.map(([day]) => day),
       sorted.map(([, count]) => count.toString()),
     );

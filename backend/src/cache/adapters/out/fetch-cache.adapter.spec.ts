@@ -68,9 +68,7 @@ describe('FetchNewCacheAdapter', () => {
         .mockResolvedValueOnce(mockPlantDto);
 
       const plant = PlantDto.toDomain(mockPlantDto);
-      jest
-        .spyOn(PlantDto, 'toDomain')
-        .mockReturnValueOnce(plant);
+      jest.spyOn(PlantDto, 'toDomain').mockReturnValueOnce(plant);
 
       const result = await adapter.fetch({ plantId: 'plant-1' });
 
@@ -84,18 +82,14 @@ describe('FetchNewCacheAdapter', () => {
 
     it('should throw error when plantId is null or undefined', async () => {
       const cmd: any = { plantId: null };
-      
-      await expect(adapter.fetch(cmd)).rejects.toThrow(
-        'PlantId is null',
-      );
+
+      await expect(adapter.fetch(cmd)).rejects.toThrow('PlantId is null');
     });
 
     it('should throw error when cmd is empty', async () => {
       const cmd: any = {};
-      
-      await expect(adapter.fetch(cmd)).rejects.toThrow(
-        'PlantId is null',
-      );
+
+      await expect(adapter.fetch(cmd)).rejects.toThrow('PlantId is null');
     });
 
     it('should throw error when valid token not found', async () => {
@@ -112,9 +106,7 @@ describe('FetchNewCacheAdapter', () => {
       jest
         .spyOn(mockGetValidTokenPort, 'getValidToken')
         .mockResolvedValueOnce('valid-token');
-      jest
-        .spyOn(mockFetchNewCacheRepo, 'fetch')
-        .mockResolvedValueOnce(null);
+      jest.spyOn(mockFetchNewCacheRepo, 'fetch').mockResolvedValueOnce(null);
 
       await expect(adapter.fetch({ plantId: 'plant-1' })).rejects.toThrow(
         'Plant not found',

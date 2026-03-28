@@ -20,10 +20,7 @@ describe('StructureCacheImpl', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        StructureCacheImpl,
-        { provide: PG_POOL, useValue: mockPool },
-      ],
+      providers: [StructureCacheImpl, { provide: PG_POOL, useValue: mockPool }],
     }).compile();
 
     repository = module.get<StructureCacheImpl>(StructureCacheImpl);
@@ -80,9 +77,7 @@ describe('StructureCacheImpl', () => {
         ward_id: 1,
       };
 
-      mockClient.query.mockRejectedValueOnce(
-        new Error('Database error'),
-      );
+      mockClient.query.mockRejectedValueOnce(new Error('Database error'));
 
       const result = await repository.write(mockPlant);
 
@@ -115,9 +110,7 @@ describe('StructureCacheImpl', () => {
         ward_id: 1,
       };
 
-      mockClient.query.mockRejectedValueOnce(
-        new Error('Database error'),
-      );
+      mockClient.query.mockRejectedValueOnce(new Error('Database error'));
 
       await repository.write(mockPlant);
 
@@ -136,10 +129,11 @@ describe('StructureCacheImpl', () => {
 
       await repository.write(mockPlant);
 
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.any(String),
-        ['plant-1', JSON.stringify({ name: 'Test Plant', rooms: [] }), 0],
-      );
+      expect(mockClient.query).toHaveBeenCalledWith(expect.any(String), [
+        'plant-1',
+        JSON.stringify({ name: 'Test Plant', rooms: [] }),
+        0,
+      ]);
     });
 
     it('should convert plant data to JSON', async () => {

@@ -108,9 +108,7 @@ describe('PlantRepositoryImpl', () => {
     });
 
     it('should handle database query errors', async () => {
-      mockClient.query.mockRejectedValueOnce(
-        new Error('Database error'),
-      );
+      mockClient.query.mockRejectedValueOnce(new Error('Database error'));
 
       await expect(repository.findById('plant-1')).rejects.toThrow(
         'Database error',
@@ -129,9 +127,7 @@ describe('PlantRepositoryImpl', () => {
     });
 
     it('should release connection even on error', async () => {
-      mockClient.query.mockRejectedValueOnce(
-        new Error('Query failed'),
-      );
+      mockClient.query.mockRejectedValueOnce(new Error('Query failed'));
 
       try {
         await repository.findById('plant-1');

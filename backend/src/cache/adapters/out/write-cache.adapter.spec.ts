@@ -37,12 +37,7 @@ describe('WriteCacheAdapter', () => {
   describe('writeStructure', () => {
     it('should convert plant to entity and write to repository', async () => {
       const mockRoom = new Room('room-1', 'Living Room', []);
-      const mockPlant = new Plant(
-        'plant-1',
-        'Test Plant',
-        [mockRoom],
-        1,
-      );
+      const mockPlant = new Plant('plant-1', 'Test Plant', [mockRoom], 1);
 
       const mockPlantEntity: PlantEntity = {
         id: 'plant-1',
@@ -73,12 +68,7 @@ describe('WriteCacheAdapter', () => {
     });
 
     it('should return false on write failure', async () => {
-      const mockPlant = new Plant(
-        'plant-1',
-        'Test Plant',
-        [],
-        1,
-      );
+      const mockPlant = new Plant('plant-1', 'Test Plant', [], 1);
 
       const mockPlantEntity: PlantEntity = {
         id: 'plant-1',
@@ -101,12 +91,7 @@ describe('WriteCacheAdapter', () => {
     });
 
     it('should handle repository write errors', async () => {
-      const mockPlant = new Plant(
-        'plant-1',
-        'Test Plant',
-        [],
-        1,
-      );
+      const mockPlant = new Plant('plant-1', 'Test Plant', [], 1);
 
       const mockPlantEntity: PlantEntity = {
         id: 'plant-1',
@@ -131,18 +116,11 @@ describe('WriteCacheAdapter', () => {
     });
 
     it('should handle entity conversion errors', async () => {
-      const mockPlant = new Plant(
-        'plant-1',
-        'Test Plant',
-        [],
-        1,
-      );
+      const mockPlant = new Plant('plant-1', 'Test Plant', [], 1);
 
-      jest
-        .spyOn(PlantEntity, 'fromDomain')
-        .mockImplementationOnce(() => {
-          throw new Error('Conversion failed');
-        });
+      jest.spyOn(PlantEntity, 'fromDomain').mockImplementationOnce(() => {
+        throw new Error('Conversion failed');
+      });
 
       await expect(adapter.writeStructure(mockPlant)).rejects.toThrow(
         'Conversion failed',

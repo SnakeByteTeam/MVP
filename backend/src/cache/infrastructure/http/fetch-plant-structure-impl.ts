@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, retry } from 'rxjs';
 
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
 import { DatapointDto } from 'src/device/infrastructure/http/dtos/datapoint.dto';
@@ -14,41 +14,78 @@ import {
 import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
 import { RoomDto } from 'src/plant/infrastructure/http/dtos/room.dto';
 import { FetchNewCacheRepoPort } from 'src/cache/application/repository/fetch-new-cache.repository';
+import { GetAllPlantIdsRepoPort } from 'src/cache/application/repository/get-all-plantids.repository';
+import { PlantSeekResponseDto } from './dtos/in/plant-seek.dto';
 
 @Injectable()
-export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
+export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPlantIdsRepoPort {
   private readonly API_DOMAIN = process.env.HOST3 || '';
 
   constructor(private readonly httpService: HttpService) {}
 
   async fetch(validToken: string, plantId: string): Promise<PlantDto | null> {
-    const response = await firstValueFrom(
-      this.httpService.get(`${this.API_DOMAIN}/${plantId}/locations`, {
-        headers: { Authorization: `Bearer ${validToken}` },
-      }),
-    );
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`${this.API_DOMAIN}/${plantId}/locations`, {
+          headers: { Authorization: `Bearer ${validToken}` },
+          timeout: 30000
+        }).pipe(retry({count: 3, delay: 2000})),
+      );
 
-    if (!response.data) return null;
+      if (!response.data) return null;
 
-    const apiResponse: ApiPlantResponseDto = plainToInstance(
-      ApiPlantResponseDto,
-      response.data,
-      { excludeExtraneousValues: true },
-    );
+      const apiResponse: ApiPlantResponseDto = plainToInstance(
+        ApiPlantResponseDto,
+        response.data,
+        { excludeExtraneousValues: true },
+      );
 
-    const plantdto = new PlantDto();
-    plantdto.id = plantId;
-    plantdto.name = apiResponse.data[0].attributes.title;
-    plantdto.rooms = await Promise.all(
-      apiResponse.data
-        .filter((room: ApiRoomDto) => room.meta.type.includes('loc:Location'))
-        .map(
-          async (room: ApiRoomDto) =>
-            await this.fetchRoom(validToken, plantId, room),
-        ),
-    );
+      const plantdto = new PlantDto();
+      plantdto.id = plantId;
+      plantdto.name = apiResponse.data[0].attributes.title;
+      
+      const roomsToFetch = apiResponse.data.filter((room: ApiRoomDto) =>
+        room.meta.type.includes('loc:Location'),
+      );
+      
+      plantdto.rooms = [];
+      // Process rooms sequentially and skip failed rooms instead of failing entire plant
+      for (const room of roomsToFetch) {
+        try {
+          const roomDto = await this.fetchRoom(validToken, plantId, room);
+          if (roomDto) {
+            plantdto.rooms.push(roomDto);
+          }
+        } catch (roomError) {
+          console.warn(
+            `[FetchStructureCacheImpl] Failed to fetch room ${room.id} for plant ${plantId}:`,
+            roomError.message,
+          );
+          // Skip this room and continue with next
+          continue;
+        }
+      }
 
-    return plantdto;
+      return plantdto;
+    } catch (error) {
+      console.error(
+        `[FetchStructureCacheImpl] Error fetching plant structure for ${plantId}:`,
+        error.message,
+      );
+      return null; 
+    }
+  }
+
+  async getAllPlantIds(validToken: string): Promise<string[]> {
+      const PLANT_DOMAIN: string = process.env.PLANT_DOMAIN || '';
+  
+      const response = await firstValueFrom(
+        this.httpService.get<PlantSeekResponseDto>(PLANT_DOMAIN, {
+          headers: { Authorization: `Bearer ${validToken}` },
+        }),
+      );
+  
+      return response.data.api.templates.plantId.values;
   }
 
   private async fetchRoom(
@@ -59,8 +96,11 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     const response = await firstValueFrom(
       this.httpService.get(
         `${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`,
-        { headers: { Authorization: `Bearer ${validToken}` } },
-      ),
+        { 
+          headers: { Authorization: `Bearer ${validToken}` }, 
+          timeout: 30000
+        },
+      ).pipe(retry({count: 3, delay: 2000})),
     );
 
     if (!response.data)
@@ -75,12 +115,23 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     roomdto.id = room.id;
     roomdto.name = room.attributes.title;
 
-    roomdto.devices = await Promise.all(
-      deviceResponse.data.map(
-        async (device: ApiDeviceDto) =>
-          await this.fetchDevice(validToken, plantId, device),
-      ),
-    );
+    roomdto.devices = [];
+    // Fetch devices sequentially and skip failed devices instead of failing entire room
+    for (const device of deviceResponse.data) {
+      try {
+        const deviceDto = await this.fetchDevice(validToken, plantId, device);
+        if (deviceDto) {
+          roomdto.devices.push(deviceDto);
+        }
+      } catch (deviceError) {
+        console.warn(
+          `[FetchStructureCacheImpl] Failed to fetch device ${device.id} in room ${room.id}:`,
+          deviceError.message,
+        );
+        // Skip this device and continue with next
+        continue;
+      }
+    }
 
     return roomdto;
   }
@@ -93,8 +144,11 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     const response = await firstValueFrom(
       this.httpService.get(
         `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
-        { headers: { Authorization: `Bearer ${validToken}` } },
-      ),
+        { 
+          headers: { Authorization: `Bearer ${validToken}` }, 
+          timeout: 30000
+        },
+      ).pipe(retry({count: 3, delay: 2000})),
     );
 
     if (!response.data)
@@ -115,11 +169,23 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     devicedto.type = device.meta.ssType;
     devicedto.subType = device.meta.sfType;
 
-    devicedto.datapoints = await Promise.all(
-      datapointReponse.data.map(
-        async (dp: ApiDatapointDto) => await this.fetchDatapoint(dp),
-      ),
-    );
+    devicedto.datapoints = [];
+    // Process datapoints sequentially and skip failed datapoints instead of failing entire device
+    for (const dp of datapointReponse.data) {
+      try {
+        const datapointDto = await this.fetchDatapoint(dp);
+        if (datapointDto) {
+          devicedto.datapoints.push(datapointDto);
+        }
+      } catch (datapointError) {
+        console.warn(
+          `[FetchStructureCacheImpl] Failed to process datapoint ${dp.id}:`,
+          datapointError.message,
+        );
+        // Skip this datapoint and continue with next
+        continue;
+      }
+    }
 
     return devicedto;
   }

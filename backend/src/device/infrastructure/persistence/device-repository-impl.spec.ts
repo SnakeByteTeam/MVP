@@ -44,7 +44,9 @@ describe('DeviceRepositoryImpl', () => {
         datapoints: [],
       };
 
-      mockClient.query.mockResolvedValueOnce({ rows: [{ device: mockDevice }] });
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ device: mockDevice }],
+      });
 
       const result = await repository.findById('device-1');
 
@@ -105,7 +107,9 @@ describe('DeviceRepositoryImpl', () => {
         datapoints: [],
       };
 
-      mockClient.query.mockResolvedValueOnce({ rows: [{ device: mockDevice }] });
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ device: mockDevice }],
+      });
 
       const result = await repository.findById('device-1');
 
@@ -137,10 +141,7 @@ describe('DeviceRepositoryImpl', () => {
       ];
 
       mockClient.query.mockResolvedValueOnce({
-        rows: [
-          { device: mockDevices[0] },
-          { device: mockDevices[1] },
-        ],
+        rows: [{ device: mockDevices[0] }, { device: mockDevices[1] }],
       });
 
       const result = await repository.findByPlantId('plant-1');
@@ -208,7 +209,11 @@ describe('DeviceRepositoryImpl', () => {
       const result = await repository.findByPlantId('plant-1');
 
       expect(result).toHaveLength(3);
-      expect(result?.map((d) => d.id)).toEqual(['device-1', 'device-2', 'device-3']);
+      expect(result?.map((d) => d.id)).toEqual([
+        'device-1',
+        'device-2',
+        'device-3',
+      ]);
     });
 
     it('should handle database errors', async () => {

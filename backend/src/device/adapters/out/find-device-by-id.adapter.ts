@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import {
   UPDATE_CACHE_USE_CASE,
   type UpdateCacheUseCase,
-} from 'src/cache/application/ports/in/get-valid-cache.usecase';
+} from 'src/cache/application/ports/in/update-cache.usecase';
 
 import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-by-id.command';
 import { FindDeviceByIdPort } from 'src/device/application/ports/out/find-device-by-id.port';

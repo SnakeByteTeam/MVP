@@ -1,12 +1,14 @@
 import { Plant } from 'src/plant/domain/models/plant.model';
 import { FetchNewCachePort } from '../ports/out/fetch-new-cache.port';
 import { WriteCachePort } from '../ports/out/write-cache.port';
+import { GetAllPlantIdsPort } from '../ports/out/get-all-plantids.port';
 import { SyncCacheService } from './sync-cache.service';
 
 describe('SyncCacheService', () => {
   let service: SyncCacheService;
   let fetchPort: jest.Mocked<FetchNewCachePort>;
   let writePort: jest.Mocked<WriteCachePort>;
+  let getAllPlantIdsPort: jest.Mocked<GetAllPlantIdsPort>;
 
   beforeEach(() => {
     fetchPort = {
@@ -17,7 +19,11 @@ describe('SyncCacheService', () => {
       writeStructure: jest.fn(),
     };
 
-    service = new SyncCacheService(fetchPort, writePort);
+    getAllPlantIdsPort = {
+      getAllPlantIds: jest.fn(),
+    };
+
+    service = new SyncCacheService(fetchPort, writePort, getAllPlantIdsPort);
   });
 
   it('should throw PlantId is null when cmd.plantId is absent', async () => {

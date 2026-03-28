@@ -17,11 +17,8 @@ import {
 import { LoginUseCase } from '../../application/ports/in/login-use-case.interface';
 import { LoginCmd } from '../../application/commands/login-cmd';
 import { RefreshUseCase } from '../../application/ports/in/refresh-use-case.interface';
-// import { LogoutUseCase } from '../../application/ports/in/logout-use-case.interface';
 import { RefreshCmd } from '../../application/commands/refresh-cmd';
-// import { LogoutCmd } from '../../application/commands/logout-cmd';
 import { LoginResDto } from '../../infrastructure/dtos/out/login-res-dto';
-import { RefreshReqDto } from '../../infrastructure/dtos/in/refresh-req-dto';
 import { Tokens } from '../../domain/tokens';
 import { plainToInstance } from 'class-transformer';
 import { RefreshResDto } from '../../infrastructure/dtos/out/refresh-res-dto';
@@ -34,6 +31,19 @@ import { FirstLoginGuard } from '../../infrastructure/guards/first-login.guard';
 
 import { Request, Response } from 'express';
 import { LogoutResDto } from '../../infrastructure/dtos/out/logout-res-dto';
+
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+const clearRefreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict' as const,
+};
 
 @Controller('auth')
 export class AuthController {
@@ -56,12 +66,7 @@ export class AuthController {
       new FirstLoginCmd(req.username, req.password, req.tempPassword),
     );
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('refreshToken', tokens.refreshToken, refreshCookieOptions);
 
     return plainToInstance(FirstLoginResDto, {
       accessToken: tokens.accessToken,
@@ -78,26 +83,21 @@ export class AuthController {
       new LoginCmd(req.username, req.password),
     );
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie('refreshToken', tokens.refreshToken, refreshCookieOptions);
 
     return plainToInstance(LoginResDto, { accessToken: tokens.accessToken });
   }
 
   @ApiOkResponse({ type: RefreshResDto })
   @Post('/refresh')
-  async refresh(@Req() req: Request): Promise<RefreshResDto> {
+  refresh(@Req() req: Request): RefreshResDto {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found in cookies');
     }
 
-    const accessToken = await this.refreshUseCase.refresh(
+    const accessToken = this.refreshUseCase.refresh(
       new RefreshCmd(refreshToken),
     );
 
@@ -109,11 +109,7 @@ export class AuthController {
   @ApiOkResponse({ type: LogoutResDto })
   @Post('/logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-    });
+    res.clearCookie('refreshToken', clearRefreshCookieOptions);
 
     return plainToInstance(LogoutResDto, {
       success: true,

@@ -21,12 +21,22 @@ describe('GenerateChangePasswordAccessTokenAdapter', () => {
     );
 
     const result = adapter.generateChangePasswordAccessToken({
-      payload: { id: 1, role: 'admin', firstAccess: false },
+      payload: {
+        id: 1,
+        username: 'user',
+        role: 'OPERATORE_SANITARIO',
+        firstAccess: false,
+      },
     });
 
     expect(
       mockJwtChangePasswordAccessTokenGenerator.generateChangePasswordAccessToken,
-    ).toHaveBeenCalledWith({ id: 1, role: 'admin', firstAccess: false });
+    ).toHaveBeenCalledWith({
+      id: 1,
+      username: 'user',
+      role: 'OPERATORE_SANITARIO',
+      firstAccess: false,
+    });
 
     expect(result).toEqual(mockToken);
   });

@@ -1,11 +1,15 @@
 // ...existing code...
-import { first } from 'rxjs';
 import { JwtTokenGenerator } from './jwt-token-generator';
 import { UnauthorizedException } from '@nestjs/common';
 
 describe('JwtTokenGenerator', () => {
   let generator: JwtTokenGenerator;
-  const payload = { id: 1, role: 'admin', firstAccess: false };
+  const payload = {
+    id: 1,
+    username: 'user',
+    role: 'OPERATORE_SANITARIO',
+    firstAccess: false,
+  };
 
   beforeEach(() => {
     process.env.ACCESS_SECRET = 'access-secret';
@@ -32,7 +36,12 @@ describe('JwtTokenGenerator', () => {
   });
 
   describe('change-password tokens', () => {
-    const cpPayload = { id: 2, role: 'user', firstAccess: true };
+    const cpPayload = {
+      id: 2,
+      username: 'user2',
+      role: 'OPERATORE_SANITARIO',
+      firstAccess: true,
+    };
 
     it('should generate a valid change-password access token', () => {
       const token = generator.generateChangePasswordAccessToken(cpPayload);

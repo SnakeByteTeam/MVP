@@ -24,7 +24,8 @@ CREATE TABLE "user" (
     FOREIGN KEY (roleId) REFERENCES role(id)
 );
 
-INSERT INTO "user" (username, surname, name, password, temp_password, roleId) VALUES ('test', 'test', 'test', 'test', 'test', 1);
+INSERT INTO "user" (username, surname, name, password, first_access, roleId)
+VALUES ('test', 'test', 'test', 'test', FALSE, 1);
 
 
 

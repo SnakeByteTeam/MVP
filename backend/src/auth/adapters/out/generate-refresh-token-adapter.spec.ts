@@ -19,12 +19,22 @@ describe('GenerateRefreshTokenAdapter', () => {
     );
 
     const result = adapter.generateRefreshToken({
-      payload: { id: 1, role: 'admin', firstAccess: false },
+      payload: {
+        id: 1,
+        username: 'user',
+        role: 'OPERATORE_SANITARIO',
+        firstAccess: false,
+      },
     });
 
     expect(
       mockJwtRefreshTokenGenerator.generateRefreshToken,
-    ).toHaveBeenCalledWith({ id: 1, role: 'admin', firstAccess: false });
+    ).toHaveBeenCalledWith({
+      id: 1,
+      username: 'user',
+      role: 'OPERATORE_SANITARIO',
+      firstAccess: false,
+    });
 
     expect(result).toEqual(mockToken);
   });

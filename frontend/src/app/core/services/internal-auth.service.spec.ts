@@ -63,17 +63,17 @@ describe('InternalAuthService', () => {
     expect(service.hasRole(UserRole.AMMINISTRATORE)).toBe(false);
   });
 
-  it('chiama endpoint first-access con payload corretto', async () => {
+  it('chiama endpoint first-login con payload corretto', async () => {
     const callPromise = firstValueFrom(
       service.setFirstAccessPassword('mrossi', temporaryCredential, nextCredential)
     );
 
-    const request = httpMock.expectOne('http://localhost:3000/auth/first-access');
+    const request = httpMock.expectOne('http://localhost:3000/auth/first-login');
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       username: 'mrossi',
-      temporaryPassword: temporaryCredential,
-      newPassword: nextCredential,
+      tempPassword: temporaryCredential,
+      password: nextCredential,
     });
 
     request.flush(null);

@@ -43,10 +43,10 @@ export class InternalAuthService {
 		temporaryPassword: string,
 		newPassword: string
 	): Observable<void> {
-		return this.http.post<void>(`${this.baseUrl}/auth/first-access`, {
+		return this.http.post<void>(`${this.baseUrl}/auth/first-login`, {
 			username,
-			temporaryPassword,
-			newPassword,
+			tempPassword: temporaryPassword,
+			password: newPassword,
 		});
 	}
 

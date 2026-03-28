@@ -87,7 +87,7 @@ describe('AuthController', () => {
   });
 
   it('refresh: should call refresh use case and return RefreshResDto', async () => {
-    mockRefreshUseCase.refresh.mockResolvedValue('nat');
+    mockRefreshUseCase.refresh.mockReturnValue('nat');
 
     const mockReq: any = {
       cookies: { refreshToken: 'at' },
@@ -101,7 +101,7 @@ describe('AuthController', () => {
 
   it('refresh: should throw UnauthorizedException when refresh cookie is missing', async () => {
     const mockReq: any = {};
-    await expect(controller.refresh(mockReq as any)).rejects.toThrow(
+    expect(() => controller.refresh(mockReq as any)).toThrow(
       UnauthorizedException,
     );
   });

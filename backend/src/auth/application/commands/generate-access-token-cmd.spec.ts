@@ -3,6 +3,10 @@ import { GenerateAccessTokenCmd } from './generate-access-token-cmd';
 
 describe('GenerateTokenCmd', () => {
   it('should be defined', () => {
-    expect(new GenerateAccessTokenCmd(new Payload(1, '', false))).toBeDefined();
+    expect(
+      new GenerateAccessTokenCmd(
+        new Payload(1, 'user', 'OPERATORE_SANITARIO', false),
+      ),
+    ).toBeDefined();
   });
 });

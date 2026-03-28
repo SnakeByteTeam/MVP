@@ -22,7 +22,8 @@ describe('CheckCredentialsAdapter', () => {
   it('should call repository and return Payload', async () => {
     const repoResponse = {
       id: 1,
-      role: 'admin',
+      username: 'user',
+      role: 'OPERATORE_SANITARIO',
       firstAccess: true,
     };
 
@@ -39,7 +40,9 @@ describe('CheckCredentialsAdapter', () => {
     ).toHaveBeenCalledWith('user', 'pass');
 
     expect(result).toBeInstanceOf(Payload);
-    expect(result).toEqual(new Payload(1, 'admin', true));
+    expect(result).toEqual(
+      new Payload(1, 'user', 'OPERATORE_SANITARIO', true),
+    );
   });
 
   it('should propagate error from repository', async () => {

@@ -25,6 +25,7 @@ describe('CheckCredentialsRepositoryImpl', () => {
           id: 1,
           username: 'testuser',
           role: 'admin',
+          first_access: false
         },
       ],
     });
@@ -32,10 +33,10 @@ describe('CheckCredentialsRepositoryImpl', () => {
     const result = await repo.checkCredentials('testuser', 'password');
 
     expect(result).toBeInstanceOf(PayloadEntity);
-    expect(result).toEqual(new PayloadEntity(1, 'admin'));
+    expect(result).toEqual(new PayloadEntity(1, 'admin', false));
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      'SELECT u.id, r.name FROM "user" u JOIN role r ON r.id = u.roleId WHERE u.username = $1 AND u.password = $2',
+      'SELECT u.id as id, r.name as role, u.first_access FROM "user" u JOIN role r ON r.id = u.roleId WHERE u.username = $1 AND u.password = $2',
       ['testuser', 'password'],
     );
   });

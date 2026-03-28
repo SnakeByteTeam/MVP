@@ -11,7 +11,7 @@ export class CheckCredentialsRepositoryImpl implements CheckCredentialsRepositor
     password: string,
   ): Promise<PayloadEntity> {
     const result = await this.conn.query(
-      'SELECT u.id, r.name FROM "user" u JOIN role r ON r.id = u.roleId WHERE u.username = $1 AND u.password = $2',
+      'SELECT u.id as id, r.name as role, u.first_access FROM "user" u JOIN role r ON r.id = u.roleId WHERE u.username = $1 AND u.password = $2',
       [username, password],
     );
 
@@ -21,6 +21,6 @@ export class CheckCredentialsRepositoryImpl implements CheckCredentialsRepositor
 
     const user = result.rows[0];
 
-    return new PayloadEntity(user.id, user.role);
+    return new PayloadEntity(user.id, user.role, user.first_access);
   }
 }

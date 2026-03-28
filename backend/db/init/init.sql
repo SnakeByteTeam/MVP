@@ -19,7 +19,7 @@ CREATE TABLE "user" (
     surname VARCHAR(255),
     name VARCHAR(255),
     password VARCHAR(255),
-    temp_password VARCHAR(255),
+    first_access BOOLEAN DEFAULT TRUE,
     roleId INTEGER,
     FOREIGN KEY (roleId) REFERENCES role(id)
 );

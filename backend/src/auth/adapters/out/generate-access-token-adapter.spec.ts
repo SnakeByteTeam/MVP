@@ -19,12 +19,12 @@ describe('GenerateTokenAdapter', () => {
     );
 
     const result = adapter.generateAccessToken({
-      payload: { id: 1, role: 'admin' },
+      payload: { id: 1, role: 'admin', firstAccess: false },
     });
 
     expect(
       mockJwtAccessTokenGenerator.generateAccessToken,
-    ).toHaveBeenCalledWith({ id: 1, role: 'admin' });
+    ).toHaveBeenCalledWith({ id: 1, role: 'admin', firstAccess: false });
 
     expect(result).toEqual(mockToken);
   });

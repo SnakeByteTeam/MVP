@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import {
+  FIRST_LOGIN_USE_CASE,
   LOGIN_USE_CASE,
   REFRESH_USE_CASE,
-  LOGOUT_USE_CASE,
 } from '../../application/services/auth.service';
+import { UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -13,12 +14,12 @@ describe('AuthController', () => {
     login: jest.fn(),
   };
 
-  const mockRefreshUseCase = {
-    refresh: jest.fn(),
+  const mockFirstLoginUseCase = {
+    firstLogin: jest.fn(),
   };
 
-  const mockLogoutUseCase = {
-    logout: jest.fn(),
+  const mockRefreshUseCase = {
+    refresh: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -27,7 +28,7 @@ describe('AuthController', () => {
       providers: [
         { provide: LOGIN_USE_CASE, useValue: mockLoginUseCase },
         { provide: REFRESH_USE_CASE, useValue: mockRefreshUseCase },
-        { provide: LOGOUT_USE_CASE, useValue: mockLogoutUseCase },
+        { provide: FIRST_LOGIN_USE_CASE, useValue: mockFirstLoginUseCase },
       ],
     }).compile();
 
@@ -38,45 +39,84 @@ describe('AuthController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should call login use case and return LoginResDto', async () => {
-    const tokens = { accessToken: 'a', refreshToken: 'r' };
+  it('first-login: should call firstLogin use case, set cookie and return FirstLoginResDto', async () => {
+    const tokens = { accessToken: 'fa', refreshToken: 'fr' };
+    mockFirstLoginUseCase.firstLogin.mockResolvedValue(tokens);
 
-    mockLoginUseCase.login.mockReturnValue(tokens);
+    const mockRes: any = {
+      cookie: jest.fn(),
+    };
 
-    const result = await controller.login({
+    const reqBody: any = {
       username: 'user',
       password: 'pass',
-    });
+      tempPassword: 'tmp',
+    };
+
+    const result = await controller.firstLogin(reqBody, mockRes as any);
+
+    expect(mockFirstLoginUseCase.firstLogin).toHaveBeenCalled();
+    expect(mockRes.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'fr',
+      expect.any(Object),
+    );
+    expect(result).toEqual({ accessToken: 'fa' });
+  });
+
+  it('login: should call login use case, set cookie and return LoginResDto', async () => {
+    const tokens = { accessToken: 'a', refreshToken: 'r' };
+    mockLoginUseCase.login.mockResolvedValue(tokens);
+
+    const mockRes: any = {
+      cookie: jest.fn(),
+    };
+
+    const result = await controller.login(
+      { username: 'user', password: 'pass' } as any,
+      mockRes as any,
+    );
 
     expect(mockLoginUseCase.login).toHaveBeenCalled();
-
-    expect(result).toEqual({
-      accessToken: 'a',
-      refreshToken: 'r',
-    });
+    expect(mockRes.cookie).toHaveBeenCalledWith(
+      'refreshToken',
+      'r',
+      expect.any(Object),
+    );
+    expect(result).toEqual({ accessToken: 'a' });
   });
 
-  it('should call refresh use case and return RefreshResDto', () => {
-    mockRefreshUseCase.refresh.mockReturnValue('nat');
+  it('refresh: should call refresh use case and return RefreshResDto', async () => {
+    mockRefreshUseCase.refresh.mockResolvedValue('nat');
 
-    const result = controller.refresh({
-      refreshToken: 'at',
-    });
+    const mockReq: any = {
+      cookies: { refreshToken: 'at' },
+    };
+
+    const result = await controller.refresh(mockReq as any);
 
     expect(mockRefreshUseCase.refresh).toHaveBeenCalled();
-
-    expect(result).toEqual({
-      refreshToken: 'nat',
-    });
+    expect(result).toEqual({ accessToken: 'nat' });
   });
 
-  /*   it('should call logout use case', () => {
-    mockLogoutUseCase.logout.mockReturnValue(undefined);
+  it('refresh: should throw UnauthorizedException when refresh cookie is missing', async () => {
+    const mockReq: any = {};
+    await expect(controller.refresh(mockReq as any)).rejects.toThrow(
+      UnauthorizedException,
+    );
+  });
 
-    const result = controller.logout();
+  it('logout: should clear cookie', () => {
+    const mockRes: any = {
+      clearCookie: jest.fn(),
+    };
 
-    expect(mockLogoutUseCase.logout).toHaveBeenCalled();
+    const result = controller.logout(mockRes as any);
 
-    expect(result).toBeUndefined();
-  }); */
+    expect(mockRes.clearCookie).toHaveBeenCalledWith(
+      'refreshToken',
+      expect.any(Object),
+    );
+    expect(result).toEqual({ success: true });
+  });
 });

@@ -1,9 +1,11 @@
+// ...existing code...
+import { first } from 'rxjs';
 import { JwtTokenGenerator } from './jwt-token-generator';
 import { UnauthorizedException } from '@nestjs/common';
 
 describe('JwtTokenGenerator', () => {
   let generator: JwtTokenGenerator;
-  const payload = { id: 1, role: 'admin' };
+  const payload = { id: 1, role: 'admin', firstAccess: false };
 
   beforeEach(() => {
     process.env.ACCESS_SECRET = 'access-secret';
@@ -26,6 +28,48 @@ describe('JwtTokenGenerator', () => {
 
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
+    });
+  });
+
+  describe('change-password tokens', () => {
+    const cpPayload = { id: 2, role: 'user', firstAccess: true };
+
+    it('should generate a valid change-password access token', () => {
+      const token = generator.generateChangePasswordAccessToken(cpPayload);
+      expect(token).toBeDefined();
+      expect(typeof token).toBe('string');
+    });
+
+    it('should generate a valid change-password refresh token', () => {
+      const token = generator.generateChangePasswordRefreshToken(cpPayload);
+      expect(token).toBeDefined();
+      expect(typeof token).toBe('string');
+    });
+
+    it('should round-trip change-password access token payload', () => {
+      const token = generator.generateChangePasswordAccessToken(cpPayload);
+      const decoded = generator.extractAccessTokenPayload(token);
+      expect(decoded.id).toBe(cpPayload.id);
+      expect(decoded.firstAccess).toBe(cpPayload.firstAccess);
+    });
+
+    it('should round-trip change-password refresh token payload', () => {
+      const token = generator.generateChangePasswordRefreshToken(cpPayload);
+      const decoded = generator.extractRefreshTokenPayload(token);
+      expect(decoded.id).toBe(cpPayload.id);
+      expect(decoded.firstAccess).toBe(cpPayload.firstAccess);
+    });
+
+    it('should throw if change-password access token signed with different secret', () => {
+      const token = generator.generateChangePasswordAccessToken(cpPayload);
+      process.env.ACCESS_SECRET = 'other-secret';
+      expect(() => generator.extractAccessTokenPayload(token)).toThrow(UnauthorizedException);
+    });
+
+    it('should throw if change-password refresh token signed with different secret', () => {
+      const token = generator.generateChangePasswordRefreshToken(cpPayload);
+      process.env.REFRESH_SECRET = 'other-secret';
+      expect(() => generator.extractRefreshTokenPayload(token)).toThrow(UnauthorizedException);
     });
   });
 
@@ -81,3 +125,4 @@ describe('JwtTokenGenerator', () => {
     });
   });
 });
+// ...existing code...

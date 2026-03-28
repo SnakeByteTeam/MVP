@@ -20,6 +20,7 @@ export class WardApiService {
     private readonly wardsEndpoint = `${this.baseUrl}/wards`;
     private readonly wardUsersRelationshipsEndpoint = `${this.baseUrl}/wards-users-relationships`;
     private readonly wardPlantsRelationshipsEndpoint = `${this.baseUrl}/wards-plants-relationships`;
+    private readonly plantEndpoint = `${this.baseUrl}/plant`;
 
     public getWards(): Observable<WardSummaryDto[]> {
         return this.http.get<WardSummaryDto[]>(this.wardsEndpoint);
@@ -64,11 +65,9 @@ export class WardApiService {
         );
     }
 
-    public getAvailablePlantsByWardId(wardId: number): Observable<WardPlantDto[]> {
-        // Assumption: backend exposes an endpoint that returns plants not yet assigned to the ward.
-        // If backend contract differs, align this URL/payload mapping accordingly.
+    public getAvailablePlants(): Observable<WardPlantDto[]> {
         return this.http.get<WardPlantDto[]>(
-            `${this.wardPlantsRelationshipsEndpoint}/available/${encodeURIComponent(String(wardId))}`,
+            `${this.plantEndpoint}/available`,
         );
     }
 

@@ -89,12 +89,12 @@ describe('WardApiService', () => {
         request.flush([{ id: 101, name: 'App. 101' }]);
     });
 
-    it('chiama GET /api/wards-plants-relationships/available/:wardId in getAvailablePlantsByWardId', () => {
-        service.getAvailablePlantsByWardId(10).subscribe((result) => {
+    it('chiama GET /api/plant/available in getAvailablePlants', () => {
+        service.getAvailablePlants().subscribe((result) => {
             expect(result).toEqual([{ id: 103, name: 'App. 103', isEnabled: false }]);
         });
 
-        const request = httpController.expectOne(`${wardPlantsRelationshipsEndpoint}/available/10`);
+        const request = httpController.expectOne(`${baseUrl}/plant/available`);
         expect(request.request.method).toBe('GET');
         request.flush([{ id: 103, name: 'App. 103', isEnabled: false }]);
     });

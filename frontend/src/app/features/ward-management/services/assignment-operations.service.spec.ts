@@ -36,7 +36,7 @@ describe('AssignmentOperationsService', () => {
         removeOperatorFromWard: vi.fn(),
         assignPlantToWard: vi.fn(),
         removePlantFromWard: vi.fn(),
-        getAvailablePlantsByWardId: vi.fn(),
+        getAvailablePlants: vi.fn(),
         getWards: vi.fn(),
         getPlantsByWardId: vi.fn(),
         getOperatorsByWardId: vi.fn(),
@@ -104,7 +104,7 @@ describe('AssignmentOperationsService', () => {
         expect(storeStub.setWards).not.toHaveBeenCalled();
     });
 
-    it('getAvailablePlantsForWard usa endpoint dedicato e preserva stato se disponibile', () => {
+    it('getAvailablePlantsForWard filtra i plant gia assegnati al ward selezionato e preserva isEnabled', () => {
         storeStub.getWardsSnapshot.mockReturnValue([
             {
                 id: 10,
@@ -112,22 +112,29 @@ describe('AssignmentOperationsService', () => {
                 apartments: [{ id: 201, name: 'App. 201', isEnabled: false }],
                 operators: [],
             },
+            {
+                id: 11,
+                name: 'W2',
+                apartments: [{ id: 202, name: 'App. 202', isEnabled: false }],
+                operators: [],
+            },
         ]);
-        apiStub.getAvailablePlantsByWardId.mockReturnValue(
+        apiStub.getAvailablePlants.mockReturnValue(
             of([
                 { id: 201, name: 'App. 201' },
-                { id: 202, name: 'App. 202', isEnabled: true },
+                { id: 202, name: 'App. 202' },
+                { id: 203, name: 'App. 203', isEnabled: true },
             ]),
         );
 
         service.getAvailablePlantsForWard(10).subscribe((result) => {
             expect(result).toEqual([
-                { id: 201, name: 'App. 201', isEnabled: false },
-                { id: 202, name: 'App. 202', isEnabled: true },
+                { id: 202, name: 'App. 202', isEnabled: false },
+                { id: 203, name: 'App. 203', isEnabled: true },
             ]);
         });
 
-        expect(apiStub.getAvailablePlantsByWardId).toHaveBeenCalledWith(10);
+        expect(apiStub.getAvailablePlants).toHaveBeenCalledOnce();
     });
 
     it('assignPlant in errore usa HttpErrorResponse.message quando non c e error string', () => {

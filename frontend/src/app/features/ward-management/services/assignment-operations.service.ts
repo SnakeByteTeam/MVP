@@ -19,7 +19,11 @@ export class AssignmentOperationsService {
   private readonly store = inject(WardStore);
 
   public getAvailablePlantsForWard(wardId: number): Observable<Ward['apartments']> {
-    return this.api.getAvailablePlantsByWardId(wardId).pipe(
+    const selectedWard = this.store.getWardsSnapshot().find((ward) => ward.id === wardId);
+    const assignedToSelectedWard = new Set((selectedWard?.apartments ?? []).map((apartment) => apartment.id));
+
+    return this.api.getAvailablePlants().pipe(
+      map((plants) => plants.filter((plant) => !assignedToSelectedWard.has(plant.id))),
       map((plants) => this.toApartments(plants)),
     );
   }

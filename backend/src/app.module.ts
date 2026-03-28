@@ -28,14 +28,11 @@ import { SubscriptionModule } from './subscription/subscription.module';
     DatabaseModule,
     DeviceModule,
     PlantModule,
-<<<<<<< HEAD
     AuthModule,
-    WardsModule
-=======
+    WardsModule,
     CacheModule,
     SubscriptionModule,
     EventEmitterModule.forRoot(),
->>>>>>> fix/plantModule
   ],
 })
 export class AppModule { }

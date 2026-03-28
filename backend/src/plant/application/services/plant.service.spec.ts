@@ -1,21 +1,26 @@
 import { Plant } from 'src/plant/domain/models/plant.model';
 import { FindPlantByIdPort } from '../ports/out/find-plant-by-id.port';
+import { FindAllAvailablePlantsPort } from '../ports/out/find-all-available-plants.port';
 import { PlantService } from './plant.service';
 
 describe('PlantService', () => {
   let service: PlantService;
   let findByIdPort: jest.Mocked<FindPlantByIdPort>;
+  let findAllAvailablePlantsPort: jest.Mocked<FindAllAvailablePlantsPort>;
 
   beforeEach(() => {
     findByIdPort = {
       findById: jest.fn(),
     };
+    findAllAvailablePlantsPort = {
+      findAllAvailablePlants: jest.fn(),
+    };
 
-    service = new PlantService(findByIdPort);
+    service = new PlantService(findByIdPort, findAllAvailablePlantsPort);
   });
 
   it('should return plant from port', async () => {
-    const plant = new Plant('plant-1', 'My Plant', []);
+    const plant = new Plant('plant-1', 'My Plant', [], 1);
 
     findByIdPort.findById.mockResolvedValue(plant);
 

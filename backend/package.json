@@ -24,7 +24,11 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
+<<<<<<< HEAD
     "@nestjs/jwt": "^11.0.2",
+=======
+    "@nestjs/event-emitter": "^3.0.1",
+>>>>>>> fix/plantModule
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.1.1",
     "@nestjs/swagger": "^11.2.6",

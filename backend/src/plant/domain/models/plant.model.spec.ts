@@ -22,18 +22,17 @@ describe('Plant', () => {
     ];
     const rooms: Room[] = [new Room('room-1', 'Living Room', devices)];
 
-    const plant = new Plant('plant-1', 'My Plant', rooms, cachedAt);
+    const plant = new Plant('plant-1', 'My Plant', rooms, 1);
 
     expect(plant.getId()).toBe('plant-1');
     expect(plant.getName()).toBe('My Plant');
     expect(plant.getRooms()).toHaveLength(1);
-    expect(plant.getCachedAt().toISOString()).toBe(cachedAt.toISOString());
+    expect(plant.getWardId()).toBe(1);
   });
 
   it('should use defensive copy for rooms and cached date', () => {
     const originalRooms: Room[] = [new Room('room-1', 'Living Room', [])];
-    const cachedAt = new Date('2026-03-24T10:00:00.000Z');
-    const plant = new Plant('plant-1', 'My Plant', originalRooms, cachedAt);
+    const plant = new Plant('plant-1', 'My Plant', originalRooms, 1);
 
     originalRooms.push(new Room('room-2', 'Kitchen', []));
     expect(plant.getRooms()).toHaveLength(1);
@@ -41,9 +40,5 @@ describe('Plant', () => {
     const returnedRooms = plant.getRooms();
     returnedRooms.push(new Room('room-3', 'Bedroom', []));
     expect(plant.getRooms()).toHaveLength(1);
-
-    const returnedCachedAt = plant.getCachedAt();
-    returnedCachedAt.setFullYear(2000);
-    expect(plant.getCachedAt().toISOString()).toBe(cachedAt.toISOString());
   });
 });

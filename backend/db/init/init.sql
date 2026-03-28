@@ -9,7 +9,8 @@ CREATE TABLE "user" (
 );
 
 CREATE TABLE plant (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
+    ward_id INTEGER REFERENCES ward(id),
     name VARCHAR(255) UNIQUE
 );
 
@@ -19,12 +20,7 @@ CREATE TABLE ward_user (
     user_id INTEGER REFERENCES "user"(id)
 );
 
-CREATE TABLE ward_plant (
-    id SERIAL PRIMARY KEY,
-    ward_id INTEGER REFERENCES ward(id),
-    plant_id INTEGER REFERENCES plant(id)
-);
-
-
+INSERT INTO ward (name) VALUES ('test-ward');
 INSERT INTO "user" (username) VALUES ('test');
-INSERT INTO plant (name) VALUES ('test-plant');
+INSERT INTO plant (id, ward_id, name) VALUES ('id1', 1, 'test-plant');
+INSERT INTO plant (id, ward_id, name) VALUES ('id2', 1, 'test-plant');

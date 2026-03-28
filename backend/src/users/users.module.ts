@@ -3,6 +3,7 @@ import { UsersController } from './adapters/in/users.controller';
 import {
   CREATE_USER_USE_CASE,
   DELETE_USER_USE_CASE,
+  FIND_ALL_AVAILABLE_USERS_USE_CASE,
   FIND_ALL_USERS_USE_CASE,
   UPDATE_USER_USE_CASE,
   UsersService,
@@ -40,12 +41,21 @@ import {
   CONVERT_BASE_64_PORT,
   ConvertBase64Impl,
 } from './infrastructure/convert-base-64-impl/convert-base-64-impl';
+import {
+  FIND_ALL_AVAILABLE_USERS_PORT,
+  FindAllAvailableUsersAdapter,
+} from './adapters/out/find-all-available-users-adapter';
+import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/find-all-available-users-repository.interface';
 
 @Module({
   controllers: [UsersController],
   providers: [
     {
       provide: CREATE_USER_USE_CASE,
+      useClass: UsersService,
+    },
+    {
+      provide: FIND_ALL_AVAILABLE_USERS_USE_CASE,
       useClass: UsersService,
     },
     {
@@ -69,6 +79,10 @@ import {
       useClass: UsersRepositoryImpl,
     },
     {
+      provide: FIND_ALL_AVAILABLE_USERS_REPOSITORY,
+      useClass: UsersRepositoryImpl,
+    },
+    {
       provide: UPDATE_USER_REPOSITORY,
       useClass: UsersRepositoryImpl,
     },
@@ -83,6 +97,10 @@ import {
     {
       provide: FIND_ALL_USERS_PORT,
       useClass: FindAllUsersAdapter,
+    },
+    {
+      provide: FIND_ALL_AVAILABLE_USERS_PORT,
+      useClass: FindAllAvailableUsersAdapter,
     },
     {
       provide: UPDATE_USER_PORT,

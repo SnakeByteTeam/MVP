@@ -5,10 +5,13 @@ import { DeleteUserRepository } from '../../application/repository/delete-user-r
 import { FindAllUsersRepository } from '../../application/repository/find-all-users-repository.interface';
 import { UpdateUserRepository } from '../../application/repository/update-user-repository.interface';
 import { UserEntity } from '../entities/user-entity';
+import { FindAllAvailableUsersRepository } from '../../application/repository/find-all-available-users-repository.interface';
+import { User } from '../../domain/user';
 
 export class UsersRepositoryImpl
   implements
     FindAllUsersRepository,
+    FindAllAvailableUsersRepository,
     UpdateUserRepository,
     CreateUserRepository,
     DeleteUserRepository
@@ -17,11 +20,21 @@ export class UsersRepositoryImpl
 
   async findAllUsers(): Promise<UserEntity[]> {
     const result = await this.conn.query(
-      ' SELECT u.id, u.username, u.surname, u.name, r.title AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id;',
+      ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id;',
     );
 
     return result.rows;
   }
+
+  async findAllAvailableUsers(): Promise<UserEntity[]> {
+    const result = await this.conn.query(
+      ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id ' +
+        'WHERE u.id NOT IN (SELECT user_id FROM ward_user) ',
+    );
+
+    return result.rows;
+  }
+
   async updateUser(
     id: number,
     username: string,

@@ -24,11 +24,15 @@ import { CONVERT_BASE_64_PORT } from '../../infrastructure/convert-base-64-impl/
 import { ConvertBase64Port } from '../ports/out/converte-base-64-port.interface';
 import { CreatedUser } from '../../domain/created-user';
 import { CreateUserWithTempPasswordCmd } from '../commands/create-user-with-temp-password-cmd';
+import { FindAllAvailableUsersUseCase } from '../ports/in/find-all-available-users-use-case.interface';
+import { FIND_ALL_AVAILABLE_USERS_PORT } from '../../adapters/out/find-all-available-users-adapter';
+import { FindAllAvailableUsersPort } from '../ports/out/find-all-available-users-port.interface';
 
 @Injectable()
 export class UsersService
   implements
     FindAllUsersUseCase,
+    FindAllAvailableUsersUseCase,
     UpdateUserUseCase,
     CreateUserUseCase,
     DeleteUserUseCase
@@ -36,6 +40,8 @@ export class UsersService
   constructor(
     @Inject(FIND_ALL_USERS_PORT)
     private readonly findAllUsersPort: FindAllUsersPort,
+    @Inject(FIND_ALL_AVAILABLE_USERS_PORT)
+    private readonly findAllAvailableUsersPort: FindAllAvailableUsersPort,
     @Inject(UPDATE_USER_PORT) private readonly updateUserPort: UpdateUserPort,
     @Inject(CREATE_USER_PORT) private readonly createUserPort: CreateUserPort,
     @Inject(DELETE_USER_PORT) private readonly deleteUserPort: DeleteUserPort,
@@ -50,9 +56,15 @@ export class UsersService
   async findAllUsers(): Promise<User[]> {
     return await this.findAllUsersPort.findAllUsers();
   }
+
+  async findAllAvailableUsers(): Promise<User[]> {
+    return await this.findAllAvailableUsersPort.findAllAvailableUsers();
+  }
+
   async updateUser(req: UpdateUserCmd): Promise<User> {
     return await this.updateUserPort.updateUser(req);
   }
+
   async createUser(req: CreateUserCmd): Promise<CreatedUser> {
     const password: string = this.generatePasswordPort.generatePassword(128);
     const userEntity: UserEntity = await this.createUserPort.createUser(
@@ -81,6 +93,8 @@ export class UsersService
 }
 
 export const FIND_ALL_USERS_USE_CASE = 'FIND_ALL_USERS_USE_CASE';
+export const FIND_ALL_AVAILABLE_USERS_USE_CASE =
+  'FIND_ALL_AVAILABLE_USERS_USE_CASE';
 export const UPDATE_USER_USE_CASE = 'UPDATE_USER_USE_CASE';
 export const CREATE_USER_USE_CASE = 'CREATE_USER_USE_CASE';
 export const DELETE_USER_USE_CASE = 'DELETE_USER_USE_CASE';

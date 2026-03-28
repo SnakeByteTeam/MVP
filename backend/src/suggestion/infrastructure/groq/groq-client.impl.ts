@@ -2,6 +2,7 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
 import { GroqClient } from './groq.client';
+import { GroqSuggestionResult } from '../dtos/groq-suggestion-result.dto';
 
 interface GroqApiResponse {
   choices: {
@@ -53,10 +54,8 @@ export class GroqClientImpl implements GroqClient {
   async generateSuggestion(
     current: GetSuggestionCmd,
     baseline: GetSuggestionCmd,
-  ): Promise<string> {
+  ): Promise<GroqSuggestionResult> {
     const prompt = this.buildPrompt(current, baseline);
-
-    this.logger.debug(`Calling Groq API for metric: ${current.metric}`);
 
     const response = await fetch(this.apiUrl, {
       method: 'POST',
@@ -70,7 +69,7 @@ export class GroqClientImpl implements GroqClient {
           {
             role: 'system',
             content:
-              'You are an expert energy data analyst for smart building management systems. Always respond in English, in a professional and concise manner.',
+              'You are an expert energy data analyst for smart building management systems. Always respond in Italian, in a professional and concise manner. Always respond with a valid JSON object only, no markdown, no extra text.',
           },
           {
             role: 'user',
@@ -78,7 +77,7 @@ export class GroqClientImpl implements GroqClient {
           },
         ],
         temperature: 0.3,
-        max_tokens: 100,
+        max_tokens: 150,
       }),
     });
 
@@ -106,7 +105,19 @@ export class GroqClientImpl implements GroqClient {
       throw new Error('Groq returned an empty response');
     }
 
-    return text.trim();
+    try {
+      const parsed = JSON.parse(text) as GroqSuggestionResult;
+      if (
+        typeof parsed.message !== 'string' ||
+        typeof parsed.isSuggestion !== 'boolean'
+      ) {
+        throw new Error('Invalid JSON structure');
+      }
+      return parsed;
+    } catch {
+      this.logger.error(`Groq returned invalid JSON: ${text}`);
+      throw new Error('Groq returned an invalid JSON response');
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -140,13 +151,18 @@ You are analyzing plant monitoring data for non-technical staff (nurses, healthc
 - Deviation from baseline: ${deviation}%
 
 ## Instructions
-- If deviation is below +15%: respond ONLY with "No action required."
-- If deviation is above +15%: write ONE direct action to reduce usage.
-- Actions must be simple and concrete (e.g. "Turn off the lights from 9:00 PM to 6:00 AM." or "Set the thermostat to 20°C during the night.").
-- Maximum 2 sentences.
-- Do NOT mention numbers, device names, or technical terms.
+- If deviation is below +15%: set "isSuggestion" to false and "message" to "No action required."
+- If deviation is above +15%: set "isSuggestion" to true and write a direct action in "message" to reduce usage.
+- Actions must be concrete (e.g. "Turn off the lights from 9:00 PM to 6:00 AM." or "Set the thermostat to 20°C during the night.").
+- Do NOT mention device names.
 - Do NOT explain the problem. Only state the action.
+- Message must be maximum 2 sentences long.
 - Tone: formal, direct, imperative.
+
+## Response format
+Respond ONLY with a valid JSON object, no markdown, no extra text:
+{"message": "<action or No action required.>", "isSuggestion": <true|false>}
+Message content must be in Italian.
     `.trim();
   }
 

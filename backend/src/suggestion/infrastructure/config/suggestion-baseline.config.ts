@@ -1,7 +1,3 @@
-// ---------------------------------------------------------------------------
-// HELPERS
-// ---------------------------------------------------------------------------
-
 import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
 
 function generateLast30Days(): string[] {
@@ -91,9 +87,9 @@ function buildConsumptionBaseline(): GetSuggestionCmd {
 // ---------------------------------------------------------------------------
 
 const TEMPERATURE_RANGES: Record<Season, [number, number]> = {
-  winter: [19, 21],
+  winter: [18, 21],
   spring: [21, 23],
-  summer: [24, 26],
+  summer: [20, 24],
   autumn: [20, 22],
 };
 

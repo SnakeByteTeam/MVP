@@ -29,7 +29,7 @@ export class LLMSuggestionAdapter implements LLMSuggestionPort {
 
     const baseline = baselineFactory();
 
-    const message = await this.groqClient.generateSuggestion(cmd, baseline);
-    return new Suggestion(message);
+    const result = await this.groqClient.generateSuggestion(cmd, baseline);
+    return new Suggestion(result.message, result.isSuggestion);
   }
 }

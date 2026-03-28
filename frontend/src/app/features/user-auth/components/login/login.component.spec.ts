@@ -61,7 +61,7 @@ describe('LoginComponent', () => {
         userId: 'u1',
         username: 'mrossi',
         role: UserRole.OPERATORE_SANITARIO,
-        token: 'jwt-token',
+        accessToken: 'jwt-token',
         isFirstAccess: false,
       })
     );

@@ -12,7 +12,7 @@ export class SuggestionController {
   ) {}
 
   @Post()
-  async getAnalytics(@Body() dto: GetSuggestionDto): Promise<SuggestionDto> {
+  async getSuggestion(@Body() dto: GetSuggestionDto): Promise<SuggestionDto> {
     const cmd = new GetSuggestionCmd(dto.metric, dto.labels, dto.data);
     const suggestion = await this.getSuggestionUseCase.getSuggestion(cmd);
     return SuggestionDto.fromDomain(suggestion);

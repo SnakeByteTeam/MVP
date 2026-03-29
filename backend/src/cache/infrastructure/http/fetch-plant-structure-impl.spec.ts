@@ -137,7 +137,7 @@ describe('FetchStructureCacheImpl', () => {
 
     expect(httpService.get).toHaveBeenCalledWith('/plant-1/locations', {
       headers: { Authorization: 'Bearer valid-token' },
-      timeout: 30000
+      timeout: 30000,
     });
   });
 
@@ -161,7 +161,7 @@ describe('FetchStructureCacheImpl', () => {
           },
         } as any),
       )
-      .mockReturnValueOnce(of({ data: null } as any))  // room-1 fails
+      .mockReturnValueOnce(of({ data: null } as any)) // room-1 fails
       .mockReturnValueOnce(
         of({
           data: {
@@ -246,7 +246,7 @@ describe('FetchStructureCacheImpl', () => {
           },
         } as any),
       )
-      .mockReturnValueOnce(of({ data: null } as any))  // device-1 fails
+      .mockReturnValueOnce(of({ data: null } as any)) // device-1 fails
       .mockReturnValueOnce(
         of({
           data: {

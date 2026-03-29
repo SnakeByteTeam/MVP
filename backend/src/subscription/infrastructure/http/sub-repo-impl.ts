@@ -2,9 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { RefreshNodeSubscriptionRepoPort } from 'src/subscription/application/repository/refresh-node-subscription.repository';
-import {
-  SubscriptionCreateDto,
-} from './dtos/subscription.dto';
+import { SubscriptionCreateDto } from './dtos/subscription.dto';
 
 @Injectable()
 export class SubscriptionRepoImpl implements RefreshNodeSubscriptionRepoPort {
@@ -13,10 +11,7 @@ export class SubscriptionRepoImpl implements RefreshNodeSubscriptionRepoPort {
 
   constructor(private readonly httpService: HttpService) {}
 
-    async refreshSub(
-    validToken: string,
-    plantId: string
-  ): Promise<boolean> {
+  async refreshSub(validToken: string, plantId: string): Promise<boolean> {
     try {
       const lifetimeSeconds = 3600;
 

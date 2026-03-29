@@ -23,7 +23,7 @@ export class Plot {
     return this.data;
   }
 
-  getSeries(): Record<string, string[]>|undefined {
+  getSeries(): Record<string, string[]> | undefined {
     return this.series;
   }
 }

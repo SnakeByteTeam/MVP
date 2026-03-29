@@ -36,9 +36,13 @@ export class HttpCacheController {
     setImmediate(async () => {
       for (const plantId of plantIds) {
         try {
-          console.log(`[CacheController] Starting cache update for plant ${plantId}`);
+          console.log(
+            `[CacheController] Starting cache update for plant ${plantId}`,
+          );
           await this.updateCacheUseCase.updateCache({ plantId: plantId });
-          console.log(`[CacheController] Cache updated successfully for plant ${plantId}`);
+          console.log(
+            `[CacheController] Cache updated successfully for plant ${plantId}`,
+          );
         } catch (err) {
           console.error(
             `[CacheController] Error updating cache for plant ${plantId}:`,

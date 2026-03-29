@@ -6,9 +6,8 @@ import { FindPlantByIdRepoPort } from 'src/plant/application/repository/find-pla
 import { FindAllAvailablePlantsRepoPort } from 'src/plant/application/repository/find-all-plants.repository';
 
 @Injectable()
-export class PlantRepositoryImpl implements FindPlantByIdRepoPort, 
-                                            FindAllAvailablePlantsRepoPort
-
+export class PlantRepositoryImpl
+  implements FindPlantByIdRepoPort, FindAllAvailablePlantsRepoPort
 {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
@@ -28,7 +27,7 @@ export class PlantRepositoryImpl implements FindPlantByIdRepoPort,
 
       if (rows.length === 0) return null;
 
-      return rows[0]; 
+      return rows[0];
     } finally {
       client.release();
     }
@@ -38,21 +37,21 @@ export class PlantRepositoryImpl implements FindPlantByIdRepoPort,
     const client = await this.pool.connect();
 
     try {
-        const { rows } = await client.query<PlantEntity>(
-           `SELECT 
+      const { rows } = await client.query<PlantEntity>(
+        `SELECT 
             plant_id AS id,
             cached_at,
             data,
             ward_id
             FROM structure_cache
-            WHERE ward_id IS NULL`
-        );
+            WHERE ward_id IS NULL`,
+      );
 
-        if(rows.length === 0) return null;
+      if (rows.length === 0) return null;
 
-        return rows;
+      return rows;
     } finally {
-        client.release()
+      client.release();
     }
   }
 }

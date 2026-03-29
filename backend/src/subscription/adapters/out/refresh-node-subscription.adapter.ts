@@ -20,7 +20,7 @@ export class RefreshNodeSubscriptionAdapter implements RefreshNodeSubscriptionPo
   ) {}
 
   async refreshSub(cmd: RefreshNodeSubCmd): Promise<boolean> {
-    if(!cmd?.plantId) throw new Error('PlantId is null');
+    if (!cmd?.plantId) throw new Error('PlantId is null');
 
     const validToken: string | null =
       await this.getValidTokenPort.getValidToken();

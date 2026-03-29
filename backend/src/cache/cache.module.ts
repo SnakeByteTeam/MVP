@@ -30,8 +30,8 @@ import { GET_ALL_PLANTIDS_REPO_PORT } from './application/repository/get-all-pla
     { provide: WRITE_CACHE_REPO_PORT, useClass: StructureCacheImpl },
     { provide: UPDATE_CACHE_USE_CASE, useClass: SyncCacheService },
     { provide: UPDATE_CACHE_ALL_PLANTS_USECASE, useClass: SyncCacheService },
-    { provide: GET_ALL_PLANTIDS_PORT, useClass: GetAllPlantIdsAdapter }, 
-    { provide: GET_ALL_PLANTIDS_REPO_PORT, useClass: FetchStructureCacheImpl }
+    { provide: GET_ALL_PLANTIDS_PORT, useClass: GetAllPlantIdsAdapter },
+    { provide: GET_ALL_PLANTIDS_REPO_PORT, useClass: FetchStructureCacheImpl },
   ],
   exports: [UPDATE_CACHE_USE_CASE, GET_ALL_PLANTIDS_PORT],
 })

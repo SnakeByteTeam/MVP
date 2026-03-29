@@ -16,7 +16,10 @@ describe('PlantController', () => {
       findAllAvailablePlants: jest.fn(),
     };
 
-    controller = new PlantController(findPlantByIdUseCase, findAllAvailablePlantsUseCase);
+    controller = new PlantController(
+      findPlantByIdUseCase,
+      findAllAvailablePlantsUseCase,
+    );
   });
 
   it('should return PlantDto mapped from domain model', async () => {

@@ -20,9 +20,15 @@ import { FIND_ALL_AVAILABLE_PLANTS_REPO_PORT } from './application/repository/fi
     { provide: FIND_PLANT_BY_ID_USECASE, useClass: PlantService },
     { provide: FIND_PLANT_BY_ID_PORT, useClass: FindPlantByIdAdapter },
     { provide: FIND_PLANT_BY_ID_REPO_PORT, useClass: PlantRepositoryImpl },
-    { provide: FIND_ALL_AVAILABLE_PLANTS_USECASE, useClass: PlantService }, 
-    { provide: FIND_ALL_AVAILABLE_PLANTS_PORT, useClass: FindAllAvailablePlantsAdapter }, 
-    { provide: FIND_ALL_AVAILABLE_PLANTS_REPO_PORT, useClass: PlantRepositoryImpl }
+    { provide: FIND_ALL_AVAILABLE_PLANTS_USECASE, useClass: PlantService },
+    {
+      provide: FIND_ALL_AVAILABLE_PLANTS_PORT,
+      useClass: FindAllAvailablePlantsAdapter,
+    },
+    {
+      provide: FIND_ALL_AVAILABLE_PLANTS_REPO_PORT,
+      useClass: PlantRepositoryImpl,
+    },
   ],
 })
 export class PlantModule {}

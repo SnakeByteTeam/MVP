@@ -44,4 +44,50 @@ describe('PlantService', () => {
       Error('Plant plant-1 not found'),
     );
   });
+
+  describe('findAllAvailablePlants', () => {
+    it('should return array of plants', async () => {
+      const plant1 = new Plant('plant-1', 'Plant A', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant B', [], 2);
+
+      findAllAvailablePlantsPort.findAllAvailablePlants.mockResolvedValue([
+        plant1,
+        plant2,
+      ]);
+
+      const result = await service.findAllAvailablePlants();
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBe(plant1);
+      expect(result[1]).toBe(plant2);
+      expect(findAllAvailablePlantsPort.findAllAvailablePlants).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error when no available plants', async () => {
+      findAllAvailablePlantsPort.findAllAvailablePlants.mockResolvedValue(null);
+
+      await expect(service.findAllAvailablePlants()).rejects.toThrow(
+        Error('No available plants found'),
+      );
+    });
+
+    it('should return empty array when available plants returned', async () => {
+      findAllAvailablePlantsPort.findAllAvailablePlants.mockResolvedValue([]);
+
+      const result = await service.findAllAvailablePlants();
+
+      expect(result).toEqual([]);
+      expect(findAllAvailablePlantsPort.findAllAvailablePlants).toHaveBeenCalledTimes(1);
+    });
+
+    it('should propagate port errors', async () => {
+      findAllAvailablePlantsPort.findAllAvailablePlants.mockRejectedValue(
+        new Error('Port error'),
+      );
+
+      await expect(service.findAllAvailablePlants()).rejects.toThrow(
+        'Port error',
+      );
+    });
+  });
 });

@@ -1,8 +1,4 @@
 import { Injectable, Inject } from '@nestjs/common';
-import {
-  UPDATE_CACHE_USE_CASE,
-  type UpdateCacheUseCase,
-} from 'src/cache/application/ports/in/update-cache.usecase';
 
 import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-by-id.command';
 import { FindDeviceByIdPort } from 'src/device/application/ports/out/find-device-by-id.port';
@@ -12,7 +8,6 @@ import {
 } from 'src/device/application/repository/find-device-by-id.repository';
 import { Device } from 'src/device/domain/models/device.model';
 import { DeviceEntity } from 'src/device/infrastructure/persistence/entities/device.entity';
-import { Plant } from 'src/plant/domain/models/plant.model';
 
 @Injectable()
 export class FindDeviceByIdAdapter implements FindDeviceByIdPort {

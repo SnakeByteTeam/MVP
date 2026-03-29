@@ -1,10 +1,8 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   Inject,
-  Param,
   Post,
 } from '@nestjs/common';
 import {

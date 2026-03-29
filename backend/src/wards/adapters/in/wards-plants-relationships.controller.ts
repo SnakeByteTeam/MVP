@@ -37,7 +37,9 @@ export class WardsPlantsRelationshipsController {
   ) {}
 
   @Post()
-  async addPlantToWard(@Body() req: AddPlantToWardReqDto): Promise<AddPlantToWardResDto> {
+  async addPlantToWard(
+    @Body() req: AddPlantToWardReqDto,
+  ): Promise<AddPlantToWardResDto> {
     const plant: Plant = this.addPlantToWardUseCase.addPlantToWard(
       new AddPlantToWardCmd(req.wardId, req.plantId),
     );
@@ -46,18 +48,19 @@ export class WardsPlantsRelationshipsController {
   }
 
   @Get('/:wardId')
-  async findAllPlantsByWardId(@Param('wardId', ParseIntPipe) id: number): Promise<FindAllPlantsByWardIdResDto[]> {
-    const plants: Plant[] = await this.findAllPlantsByWardIdUseCase.findAllPlantsByWardId(
-      new FindAllPlantsByWardIdCmd(id),
-    );
+  async findAllPlantsByWardId(
+    @Param('wardId', ParseIntPipe) id: number,
+  ): Promise<FindAllPlantsByWardIdResDto[]> {
+    const plants: Plant[] =
+      await this.findAllPlantsByWardIdUseCase.findAllPlantsByWardId(
+        new FindAllPlantsByWardIdCmd(id),
+      );
 
     return plainToInstance(FindAllPlantsByWardIdResDto, plants);
   }
 
   @Delete('/:plantId')
-  removeUserFromWard(
-    @Param('plantId') plantId: string,
-  ): Promise<void> {
+  removeUserFromWard(@Param('plantId') plantId: string): Promise<void> {
     return this.removePlantFromWardUseCase.removePlantFromWard(
       new RemovePlantFromWardCmd(plantId),
     );

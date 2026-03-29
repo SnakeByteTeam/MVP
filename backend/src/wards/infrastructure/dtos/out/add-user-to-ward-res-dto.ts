@@ -1,9 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AddUserToWardResDto {
-    @ApiProperty()
-    id!: number;
+  @ApiProperty()
+  id!: number;
 
-    @ApiProperty()
-    name!: string;
+  @ApiProperty()
+  name!: string;
 }

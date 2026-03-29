@@ -34,9 +34,8 @@ export class WardsPlantsRelationshipsRepositoryImpl
     return result.rows;
   }
   async removePlantFromWard(plantId: string): Promise<void> {
-    await this.conn.query(
-      'UPDATE plant p SET ward_id = NULL WHERE p.id = $1',
-      [plantId],
-    );
+    await this.conn.query('UPDATE plant p SET ward_id = NULL WHERE p.id = $1', [
+      plantId,
+    ]);
   }
 }

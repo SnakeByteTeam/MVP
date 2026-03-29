@@ -38,7 +38,9 @@ export class WardsUsersRelationshipsController {
   ) {}
 
   @Post()
-  async addUserToWard(@Body() req: AddUserToWardReqDto): Promise<AddUserToWardResDto> {
+  async addUserToWard(
+    @Body() req: AddUserToWardReqDto,
+  ): Promise<AddUserToWardResDto> {
     const user: User = this.addUserToWardUseCase.addUserToWard(
       new AddUserToWardCmd(req.wardId, req.userId),
     );
@@ -47,10 +49,13 @@ export class WardsUsersRelationshipsController {
   }
 
   @Get('/:wardId')
-  async findAllUsersByWardId(@Param('wardId', ParseIntPipe) id: number): Promise<FindAllUsersByWardIdResDto[]> {
-    const users: User[] = await this.findAllUsersByWardIdUseCase.findAllUsersByWardId(
-      new FindAllUsersByWardIdCmd(id),
-    );
+  async findAllUsersByWardId(
+    @Param('wardId', ParseIntPipe) id: number,
+  ): Promise<FindAllUsersByWardIdResDto[]> {
+    const users: User[] =
+      await this.findAllUsersByWardIdUseCase.findAllUsersByWardId(
+        new FindAllUsersByWardIdCmd(id),
+      );
 
     return plainToInstance(FindAllUsersByWardIdResDto, users);
   }

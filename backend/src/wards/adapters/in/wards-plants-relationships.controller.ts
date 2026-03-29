@@ -60,7 +60,7 @@ export class WardsPlantsRelationshipsController {
   }
 
   @Delete('/:plantId')
-  removeUserFromWard(@Param('plantId') plantId: string): Promise<void> {
+  removePlantFromWard(@Param('plantId') plantId: string): Promise<void> {
     return this.removePlantFromWardUseCase.removePlantFromWard(
       new RemovePlantFromWardCmd(plantId),
     );

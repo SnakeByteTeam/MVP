@@ -34,8 +34,8 @@ export class WardService
   async createWard(req: CreateWardCmd): Promise<Ward> {
     return await this.createWardPort.createWard(req);
   }
-  async findAllWard(): Promise<Ward[]> {
-    return await this.findAllWardsPort.findAllWard();
+  async findAllWards(): Promise<Ward[]> {
+    return await this.findAllWardsPort.findAllWards();
   }
   async updateWard(req: UpdateWardCmd): Promise<Ward> {
     return await this.updateWardPort.updateWard(req);

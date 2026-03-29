@@ -22,6 +22,7 @@ import {
   FIND_ALL_WARD_USE_CASE,
   UPDATE_WARD_USE_CASE,
 } from '../../application/services/ward.service';
+import { DeleteWardUseCase } from '../../application/ports/in/delete-ward-use-case.interface';
 
 @Controller('wards')
 export class WardsController {
@@ -33,7 +34,7 @@ export class WardsController {
     @Inject(UPDATE_WARD_USE_CASE)
     private readonly updateWardUseCase: UpdateWardUseCase,
     @Inject(DELETE_WARD_USE_CASE)
-    private readonly deleteWardUseCase: DeleteWardCmd,
+    private readonly deleteWardUseCase: DeleteWardUseCase,
   ) {}
 
   @Post()
@@ -43,7 +44,7 @@ export class WardsController {
 
   @Get()
   async findAllWards() {
-    return this.findAllWardUseCase.findAllWard();
+    return this.findAllWardUseCase.findAllWards();
   }
 
   @Put('/:id')

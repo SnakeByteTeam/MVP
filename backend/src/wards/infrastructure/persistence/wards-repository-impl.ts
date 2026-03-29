@@ -27,9 +27,6 @@ export class WardsRepositoryImpl
 
     return result.rows[0];
   }
-  deleteWard(id: number) {
-    this.conn.query('DELETE FROM ward WHERE id = $1', [id]);
-  }
   async findAllWards(): Promise<WardEntity[]> {
     const result = await this.conn.query('SELECT * FROM ward');
 
@@ -46,5 +43,8 @@ export class WardsRepositoryImpl
     }
 
     return result.rows[0];
+  }
+  async deleteWard(id: number): Promise<void> {
+    await this.conn.query('DELETE FROM ward WHERE id = $1', [id]);
   }
 }

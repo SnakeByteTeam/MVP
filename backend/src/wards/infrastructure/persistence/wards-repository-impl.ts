@@ -9,12 +9,11 @@ import { Pool } from 'pg';
 
 export class WardsRepositoryImpl
   implements
-    CreateWardRepository,
-    DeleteWardRepository,
-    FindAllWardsRepository,
-    UpdateWardRepository
-{
-  constructor(@Inject(PG_POOL) private readonly conn: Pool) {}
+  CreateWardRepository,
+  DeleteWardRepository,
+  FindAllWardsRepository,
+  UpdateWardRepository {
+  constructor(@Inject(PG_POOL) private readonly conn: Pool) { }
 
   async createWard(name: string): Promise<WardEntity> {
     const result = await this.conn.query(

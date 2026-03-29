@@ -66,7 +66,7 @@ export class UserManagementPageComponent implements OnInit {
   }
 
 
-  onUserDeleted(id: string): void {
+  onUserDeleted(id: number): void {
     this.userApi.deleteUser(id).subscribe({
       next: () => {
         //successo: trigger emette, lista si aggiorna

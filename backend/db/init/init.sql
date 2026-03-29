@@ -32,7 +32,7 @@ INSERT INTO "user" (username, surname, name, password, temp_password, roleId) VA
 
 CREATE TABLE plant (
     id VARCHAR(255) PRIMARY KEY,
-    ward_id INTEGER REFERENCES ward(id) ON DELETE CASCADE,
+    ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL,
     name VARCHAR(255) UNIQUE
 );
 
@@ -152,7 +152,7 @@ CREATE TABLE STRUCTURE_CACHE (
     cached_at TIMESTAMPTZ NOT NULL, 
     plant_id VARCHAR(36) NOT NULL, 
     data JSONB NOT NULL, 
-    ward_id VARCHAR(36) DEFAULT NULL,
+    ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL,
 
     PRIMARY KEY (plant_id)
 );
@@ -198,10 +198,10 @@ SELECT
         )
     ) AS data,
     CASE
-        WHEN gs BETWEEN 1 AND 10 THEN (SELECT id::text FROM ward WHERE name = 'Reparto autosufficienti')
-        WHEN gs BETWEEN 11 AND 18 THEN (SELECT id::text FROM ward WHERE name = 'Reparto cure livello 1')
-        WHEN gs BETWEEN 19 AND 24 THEN (SELECT id::text FROM ward WHERE name = 'Reparto cure livello 2')
-        WHEN gs BETWEEN 25 AND 30 THEN (SELECT id::text FROM ward WHERE name = 'Reparto riabilitazione')
+        WHEN gs BETWEEN 1 AND 10 THEN (SELECT id FROM ward WHERE name = 'Reparto autosufficienti')
+        WHEN gs BETWEEN 11 AND 18 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 1')
+        WHEN gs BETWEEN 19 AND 24 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 2')
+        WHEN gs BETWEEN 25 AND 30 THEN (SELECT id FROM ward WHERE name = 'Reparto riabilitazione')
         ELSE NULL
     END AS ward_id
 FROM generate_series(1, 80) AS gs

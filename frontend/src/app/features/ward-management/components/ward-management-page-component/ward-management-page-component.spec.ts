@@ -24,7 +24,7 @@ describe('WardManagementPageComponent', () => {
     ],
     operators: [
       {
-        id: 'user-1',
+        id: 1,
         firstName: 'Mario',
         lastName: 'Rossi',
         username: 'mrossi',
@@ -55,6 +55,7 @@ describe('WardManagementPageComponent', () => {
     removeOperator: vi.fn(),
     assignPlant: vi.fn(),
     removePlant: vi.fn(),
+    getAvailableUsersForWard: vi.fn(),
     getAvailablePlantsForWard: vi.fn(),
   };
 
@@ -68,6 +69,7 @@ describe('WardManagementPageComponent', () => {
     storeStub.wards$ = wardsSubject.asObservable();
     storeStub.isLoading$ = loadingSubject.asObservable();
     storeStub.error$ = errorSubject.asObservable();
+    storeStub.getAvailableUsersForWard.mockReturnValue(of([]));
     storeStub.getAvailablePlantsForWard.mockReturnValue(of([]));
 
     await TestBed.configureTestingModule({
@@ -192,8 +194,30 @@ describe('WardManagementPageComponent', () => {
   });
 
   it('flow operator dovrebbe impostare wardId, submit e chiudere', () => {
+    storeStub.getAvailableUsersForWard.mockReturnValue(
+      of([
+        {
+          id: 2,
+          firstName: 'Luca',
+          lastName: 'Verdi',
+          username: 'lverdi',
+          role: UserRole.OPERATORE_SANITARIO,
+        },
+      ]),
+    );
+
     component.onAssignOperator(1);
     expect(component.operatorWardId()).toBe(1);
+    expect(storeStub.getAvailableUsersForWard).toHaveBeenCalledWith(1);
+    expect(component.availableOperators()).toEqual([
+      {
+        id: 2,
+        firstName: 'Luca',
+        lastName: 'Verdi',
+        username: 'lverdi',
+        role: UserRole.OPERATORE_SANITARIO,
+      },
+    ]);
 
     component.onAssignOperatorSubmit({ userId: 2 });
 
@@ -309,23 +333,19 @@ describe('WardManagementPageComponent', () => {
     expect(component.availablePlants()).toEqual([]);
 
     component.plantWardId.set(1);
-    expect(component.availablePlants()).toEqual([
-      { id: '103', name: 'App. 103' },
-    ]);
+    expect(component.availablePlants()).toEqual([]);
 
     component.plantWardId.set(9999);
     expect(component.availablePlants()).toEqual([]);
   });
 
-  it('onAssignPlant usa fallback locale se fetch ad-hoc fallisce', () => {
+  it('onAssignPlant non usa fallback locale se fetch ad-hoc fallisce', () => {
     storeStub.getAvailablePlantsForWard.mockReturnValue(of(null));
     component.wardsSnapshot.set([wardA, wardB]);
 
     component.onAssignPlant(1);
 
-    expect(component.availablePlants()).toEqual([
-      { id: '103', name: 'App. 103' },
-    ]);
+    expect(component.availablePlants()).toEqual([]);
     expect(component.isLoadingAvailablePlants()).toBe(false);
   });
 });

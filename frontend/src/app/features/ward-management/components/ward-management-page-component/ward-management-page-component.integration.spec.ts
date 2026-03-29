@@ -3,7 +3,6 @@ import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
-import { UserApiService } from '../../../../core/services/user-api.service';
 import { UserRole } from '../../../../core/models/user-role.enum';
 import type { Ward } from '../../models/ward.model';
 import { AssignmentOperationsService } from '../../services/assignment-operations.service';
@@ -29,7 +28,7 @@ describe('WardManagement feature integration', () => {
         apartments: [{ id: '101', name: 'App. 101' }],
         operators: [
             {
-                id: '1',
+                id: 1,
                 firstName: 'mrossi',
                 lastName: '',
                 username: 'mrossi',
@@ -56,6 +55,7 @@ describe('WardManagement feature integration', () => {
         getWards: vi.fn(),
         getPlantsByWardId: vi.fn(),
         getOperatorsByWardId: vi.fn(),
+        getAvailableOperators: vi.fn(),
         getAvailablePlants: vi.fn(),
         createWard: vi.fn(),
         updateWard: vi.fn(),
@@ -69,12 +69,6 @@ describe('WardManagement feature integration', () => {
     const apartmentApiStub = {
         enableApartment: vi.fn(),
         disableApartment: vi.fn(),
-    };
-
-    const userApiStub = {
-        getUsers: vi.fn(),
-        createUser: vi.fn(),
-        deleteUser: vi.fn(),
     };
 
     beforeEach(async () => {
@@ -95,6 +89,11 @@ describe('WardManagement feature integration', () => {
 
             return of([]);
         });
+        wardApiStub.getAvailableOperators.mockReturnValue(
+            of([
+                { id: 2, username: 'lverdi' },
+            ]),
+        );
         wardApiStub.createWard.mockReturnValue(of({ id: 3, name: 'Oncologia' } as unknown as Ward));
         wardApiStub.updateWard.mockReturnValue(of({ id: 1, name: 'Cardiologia A' } as unknown as Ward));
         wardApiStub.deleteWard.mockReturnValue(of(void 0));
@@ -107,18 +106,6 @@ describe('WardManagement feature integration', () => {
         apartmentApiStub.enableApartment.mockReturnValue(of(void 0));
         apartmentApiStub.disableApartment.mockReturnValue(of(void 0));
 
-        userApiStub.getUsers.mockReturnValue(
-            of([
-                {
-                    id: '1',
-                    firstName: 'Mario',
-                    lastName: 'Rossi',
-                    username: 'mrossi',
-                    role: UserRole.OPERATORE_SANITARIO,
-                },
-            ]),
-        );
-
         await TestBed.configureTestingModule({
             imports: [WardManagementPageComponent],
             providers: [
@@ -128,7 +115,6 @@ describe('WardManagement feature integration', () => {
                 WardManagementStore,
                 { provide: WardApiService, useValue: wardApiStub },
                 { provide: ApartmentApiService, useValue: apartmentApiStub },
-                { provide: UserApiService, useValue: userApiStub },
             ],
         }).compileComponents();
 
@@ -235,7 +221,7 @@ describe('WardManagement feature integration', () => {
         clickButtonByText('Aggiungi operatore');
 
         expect(getDialog()?.textContent).toContain('Assegna operatore sanitario');
-        expect(userApiStub.getUsers).toHaveBeenCalledTimes(1);
+        expect(wardApiStub.getAvailableOperators).toHaveBeenCalledTimes(1);
 
         const assignOperatorDialog = fixture.debugElement.query(By.directive(AssignOperatorDialogComponent));
         expect(assignOperatorDialog).toBeTruthy();
@@ -248,7 +234,7 @@ describe('WardManagement feature integration', () => {
         expect((fixture.nativeElement as HTMLElement).querySelector('#operator-id')).toBeNull();
     });
 
-    it('assegna un appartamento usando il fallback locale se il fetch disponibile fallisce', () => {
+    it('non mostra appartamenti assegnabili se fetch disponibile fallisce', () => {
         wardApiStub.getAvailablePlants.mockReturnValueOnce(throwError(() => new Error('network error')));
 
         clickButtonByText('Assegna appartamento');
@@ -259,7 +245,7 @@ describe('WardManagement feature integration', () => {
             (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLOptionElement>('#apartment-id option'),
         ).map((option) => option.textContent?.trim() ?? '');
 
-        expect(apartmentOptions).toContain('App. 102');
+        expect(apartmentOptions).not.toContain('App. 102');
         expect(apartmentOptions).not.toContain('App. 101');
 
         const assignPlantDialog = fixture.debugElement.query(By.directive(AssignWardDialogComponent));

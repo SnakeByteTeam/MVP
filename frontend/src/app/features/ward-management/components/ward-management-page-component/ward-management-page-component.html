@@ -176,7 +176,7 @@
                             <span class="truncate text-sm font-medium text-slate-900">{{
                                 getOperatorDisplayName(operator.firstName, operator.lastName) }}</span>
                             <button type="button"
-                                (click)="onRemoveOperator({ wardId: activeWard.id, userId: +operator.id })"
+                                (click)="onRemoveOperator({ wardId: activeWard.id, userId: operator.id })"
                                 aria-label="Rimuovi operatore"
                                 class="rounded-full bg-red-500 px-2 py-0.5 text-sm font-semibold text-white transition hover:bg-red-400">
                                 x
@@ -215,7 +215,8 @@
 
     @if (operatorWardId(); as activeWardId) {
     <app-assign-operator-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
-        (submitted)="onAssignOperatorSubmit($event)" (cancelled)="onCloseAssignOperatorDialog()" />
+        [availableOperators]="availableOperators()" (submitted)="onAssignOperatorSubmit($event)"
+        (cancelled)="onCloseAssignOperatorDialog()" />
     }
 
     @if (plantWardId(); as activeWardId) {

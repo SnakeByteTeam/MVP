@@ -14,6 +14,7 @@ describe('WardApiService', () => {
 
     const baseUrl = 'http://api.example.test';
     const wardsEndpoint = `${baseUrl}/wards`;
+    const usersEndpoint = `${baseUrl}/users`;
     const wardUsersRelationshipsEndpoint = `${baseUrl}/wards-users-relationships`;
     const wardPlantsRelationshipsEndpoint = `${baseUrl}/wards-plants-relationships`;
 
@@ -23,7 +24,7 @@ describe('WardApiService', () => {
         apartments: [{ id: '101', name: 'App. 101' }],
         operators: [
             {
-                id: 'user-1',
+                id: 1,
                 firstName: 'Mario',
                 lastName: 'Rossi',
                 username: 'mrossi',
@@ -77,6 +78,16 @@ describe('WardApiService', () => {
         const request = httpController.expectOne(`${wardUsersRelationshipsEndpoint}/10`);
         expect(request.request.method).toBe('GET');
         request.flush([{ id: 1, username: 'mrossi' }]);
+    });
+
+    it('chiama GET /api/users/available in getAvailableOperators', () => {
+        service.getAvailableOperators().subscribe((result) => {
+            expect(result).toEqual([{ id: 2, username: 'lverdi' }]);
+        });
+
+        const request = httpController.expectOne(`${usersEndpoint}/available`);
+        expect(request.request.method).toBe('GET');
+        request.flush([{ id: 2, username: 'lverdi' }]);
     });
 
     it('chiama GET /api/wards-plants-relationships/:wardId in getPlantsByWardId', () => {
@@ -166,12 +177,12 @@ describe('WardApiService', () => {
         request.flush(null);
     });
 
-    it('chiama DELETE /api/wards-plants-relationships/:wardId/:plantId', () => {
+    it('chiama DELETE /api/wards-plants-relationships/:plantId', () => {
         service.removePlantFromWard(1, '102').subscribe((result) => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne(`${wardPlantsRelationshipsEndpoint}/1/102`);
+        const request = httpController.expectOne(`${wardPlantsRelationshipsEndpoint}/102`);
         expect(request.request.method).toBe('DELETE');
         request.flush(null);
     });

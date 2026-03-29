@@ -8,8 +8,8 @@ export class DeleteWardAdapter implements DeleteWardPort {
     @Inject(DELETE_WARD_REPOSITORY) private readonly deleteWardRepository,
   ) {}
 
-  deleteWard(req: DeleteWardCmd): void {
-    return this.deleteWardRepository.deleteWard(req.id);
+  async deleteWard(req: DeleteWardCmd): Promise<void> {
+    await this.deleteWardRepository.deleteWard(req.id);
   }
 }
 

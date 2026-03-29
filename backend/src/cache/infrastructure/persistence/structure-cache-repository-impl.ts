@@ -18,7 +18,8 @@ export class StructureCacheImpl implements WriteCacheRepoPort {
                 VALUES ($1, $2, NOW(), $3)
                 ON CONFLICT (plant_id) DO UPDATE
                 SET data      = EXCLUDED.data,
-                    cached_at = NOW()`,
+                    cached_at = NOW(),
+                    ward_id   = EXCLUDED.ward_id`,
         [plant.id, JSON.stringify(plant.data), plant.ward_id],
       );
       return true;

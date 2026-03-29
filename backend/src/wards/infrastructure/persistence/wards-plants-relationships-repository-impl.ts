@@ -7,11 +7,10 @@ import { PlantEntity } from '../entities/plant-entity';
 
 export class WardsPlantsRelationshipsRepositoryImpl
   implements
-    AddPlantToWardRepository,
-    FindAllPlantsByWardIdRepository,
-    RemovePlantFromWardRepository
-{
-  constructor(@Inject(PG_POOL) private readonly conn) {}
+  AddPlantToWardRepository,
+  FindAllPlantsByWardIdRepository,
+  RemovePlantFromWardRepository {
+  constructor(@Inject(PG_POOL) private readonly conn) { }
 
   async addPlantToWard(wardId: number, plantId: string): Promise<PlantEntity> {
     const result = await this.conn.query(

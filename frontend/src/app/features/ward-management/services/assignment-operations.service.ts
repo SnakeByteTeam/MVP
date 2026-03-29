@@ -19,12 +19,30 @@ export class AssignmentOperationsService {
   private readonly store = inject(WardStore);
 
   public getAvailablePlantsForWard(wardId: number): Observable<Ward['apartments']> {
-    const selectedWard = this.store.getWardsSnapshot().find((ward) => ward.id === wardId);
-    const assignedToSelectedWard = new Set((selectedWard?.apartments ?? []).map((apartment) => apartment.id));
+    const assignedPlantIds = new Set(
+      this.store
+        .getWardsSnapshot()
+        .flatMap((ward) => ward.apartments)
+        .map((apartment) => apartment.id),
+    );
 
     return this.api.getAvailablePlants().pipe(
-      map((plants) => plants.filter((plant) => !assignedToSelectedWard.has(plant.id))),
+      map((plants) => plants.filter((plant) => !assignedPlantIds.has(plant.id))),
       map((plants) => this.toApartments(plants)),
+    );
+  }
+
+  public getAvailableUsersForWard(wardId: number): Observable<Ward['operators']> {
+    const assignedUserIds = new Set(
+      this.store
+        .getWardsSnapshot()
+        .flatMap((ward) => ward.operators)
+        .map((operator) => operator.id),
+    );
+
+    return this.api.getAvailableOperators().pipe(
+      map((users) => users.filter((user) => !assignedUserIds.has(user.id))),
+      map((users) => this.toOperators(users)),
     );
   }
 
@@ -87,7 +105,7 @@ export class AssignmentOperationsService {
 
   private toOperators(operatorsDto: WardUserDto[]): Ward['operators'] {
     return operatorsDto.map((user) => ({
-      id: String(user.id),
+      id: user.id,
       firstName: user.username,
       lastName: '',
       username: user.username,

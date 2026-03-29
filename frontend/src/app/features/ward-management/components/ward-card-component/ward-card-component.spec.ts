@@ -14,7 +14,7 @@ describe('WardCardComponent', () => {
     apartments: [{ id: '101', name: 'App. 101' }],
     operators: [
       {
-        id: 'user-1',
+        id: 1,
         firstName: 'Mario',
         lastName: 'Rossi',
         username: 'mrossi',

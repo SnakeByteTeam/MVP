@@ -21,6 +21,7 @@ export class WardApiService {
     private readonly wardUsersRelationshipsEndpoint = `${this.baseUrl}/wards-users-relationships`;
     private readonly wardPlantsRelationshipsEndpoint = `${this.baseUrl}/wards-plants-relationships`;
     private readonly plantEndpoint = `${this.baseUrl}/plant`;
+    private readonly usersEndpoint = `${this.baseUrl}/users`;
 
     public getWards(): Observable<WardSummaryDto[]> {
         return this.http.get<WardSummaryDto[]>(this.wardsEndpoint);
@@ -38,9 +39,17 @@ export class WardApiService {
         return this.http.delete<void>(`${this.wardsEndpoint}/${encodeURIComponent(String(wardId))}`);
     }
 
+
+
     public getOperatorsByWardId(wardId: number): Observable<WardUserDto[]> {
         return this.http.get<WardUserDto[]>(
             `${this.wardUsersRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}`,
+        );
+    }
+
+    public getAvailableOperators(): Observable<WardUserDto[]> {
+        return this.http.get<WardUserDto[]>(
+            `${this.usersEndpoint}/available`,
         );
     }
 
@@ -50,7 +59,6 @@ export class WardApiService {
             userId: dto.userId,
         });
     }
-
 
     public removeOperatorFromWard(wardId: number, userId: number): Observable<void> {
         return this.http.delete<void>(

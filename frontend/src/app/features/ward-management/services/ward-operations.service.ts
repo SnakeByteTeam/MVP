@@ -112,7 +112,7 @@ export class WardOperationsService {
 
   private toOperators(operatorsDto: WardUserDto[]): Ward['operators'] {
     return operatorsDto.map((user) => ({
-      id: String(user.id),
+      id: user.id,
       firstName: user.username,
       lastName: '',
       username: user.username,

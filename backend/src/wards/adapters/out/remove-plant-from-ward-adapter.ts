@@ -10,7 +10,7 @@ export class RemovePlantFromWardAdapter implements RemovePlantFromWardPort {
   constructor(
     @Inject(REMOVE_PLANT_FROM_WARD_REPOSITORY)
     private readonly removePlantFromWardRepository: RemovePlantFromWardRepository,
-  ) {}
+  ) { }
 
   async removePlantFromWard(req: RemovePlantFromWardCmd): Promise<void> {
     return await this.removePlantFromWardRepository.removePlantFromWard(

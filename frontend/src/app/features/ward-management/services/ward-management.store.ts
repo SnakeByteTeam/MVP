@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Observable, Subject, catchError, of, takeUntil } from 'rxjs';
+import type { User } from '../../../core/models/user.model';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../models/ward-api.dto';
 import type { Plant } from '../models/plant.model';
 import { AssignmentOperationsService } from './assignment-operations.service';
@@ -88,6 +89,15 @@ export class WardManagementStore implements OnDestroy {
 
     public getAvailablePlantsForWard(wardId: number): Observable<Plant[] | null> {
         return this.wardAssignmentOperations.getAvailablePlantsForWard(wardId).pipe(
+            catchError((error) => {
+                this.wardStore.setError(this.getErrorMessage(error));
+                return of(null);
+            }),
+        );
+    }
+
+    public getAvailableUsersForWard(wardId: number): Observable<User[] | null> {
+        return this.wardAssignmentOperations.getAvailableUsersForWard(wardId).pipe(
             catchError((error) => {
                 this.wardStore.setError(this.getErrorMessage(error));
                 return of(null);

@@ -5,12 +5,14 @@ import {
   Get,
   Inject,
   Param,
+  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { CreateWardReqDto } from '../../infrastructure/dtos/in/create-ward-req.dto';
 import { UpdateWardReqDto } from '../../infrastructure/dtos/in/update-ward-req.dto';
 import { CreateWardUseCase } from '../../application/ports/in/create-ward-use-case.interface';
+import { DeleteWardUseCase } from '../../application/ports/in/delete-ward-use-case.interface';
 import { FindAllWardsUseCase } from '../../application/ports/in/find-all-wards-use-case.interface';
 import { UpdateWardUseCase } from '../../application/ports/in/update-ward-use-case.interface';
 import { DeleteWardCmd } from '../../application/commands/delete-ward-cmd';
@@ -33,7 +35,7 @@ export class WardsController {
     @Inject(UPDATE_WARD_USE_CASE)
     private readonly updateWardUseCase: UpdateWardUseCase,
     @Inject(DELETE_WARD_USE_CASE)
-    private readonly deleteWardUseCase: DeleteWardCmd,
+    private readonly deleteWardUseCase: DeleteWardUseCase,
   ) {}
 
   @Post()
@@ -47,12 +49,15 @@ export class WardsController {
   }
 
   @Put('/:id')
-  async updateWard(@Param('id') id: number, @Body() req: UpdateWardReqDto) {
+  async updateWard(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() req: UpdateWardReqDto,
+  ) {
     return this.updateWardUseCase.updateWard(new UpdateWardCmd(id, req.name));
   }
 
   @Delete('/:id')
-  async deleteWard(@Param('id') id: number) {
+  async deleteWard(@Param('id', ParseIntPipe) id: number) {
     return this.deleteWardUseCase.deleteWard(new DeleteWardCmd(id));
   }
 }

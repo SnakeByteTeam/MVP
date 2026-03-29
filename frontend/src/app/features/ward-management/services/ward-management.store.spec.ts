@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { UserRole } from '../../../core/models/user-role.enum';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardManagementStore } from './ward-management.store';
 import { WardOperationsService } from './ward-operations.service';
@@ -29,6 +30,7 @@ describe('WardManagementStore', () => {
         removeOperator: vi.fn(),
         assignPlant: vi.fn(),
         removePlant: vi.fn(),
+        getAvailableUsersForWard: vi.fn(),
         getAvailablePlantsForWard: vi.fn(),
     };
 
@@ -44,6 +46,7 @@ describe('WardManagementStore', () => {
         assignmentOperationsStub.removeOperator.mockReturnValue(of(void 0));
         assignmentOperationsStub.assignPlant.mockReturnValue(of(void 0));
         assignmentOperationsStub.removePlant.mockReturnValue(of(void 0));
+        assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(of([]));
         assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(of([]));
 
         TestBed.configureTestingModule({
@@ -115,5 +118,28 @@ describe('WardManagementStore', () => {
 
         expect(result).toBeNull();
         expect(wardStoreStub.setError).toHaveBeenCalledWith('fetch failed');
+    });
+
+    it('getAvailableUsersForWard delega ad AssignmentOperationsService', async () => {
+        assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(
+            of([{ id: 7, firstName: 'Mario', lastName: 'Rossi', username: 'mrossi', role: UserRole.OPERATORE_SANITARIO }]),
+        );
+
+        const result = await firstValueFrom(store.getAvailableUsersForWard(10));
+
+        expect(assignmentOperationsStub.getAvailableUsersForWard).toHaveBeenCalledWith(10);
+        expect(result).toEqual([{ id: 7, firstName: 'Mario', lastName: 'Rossi', username: 'mrossi', role: UserRole.OPERATORE_SANITARIO }]);
+        expect(wardStoreStub.setError).not.toHaveBeenCalled();
+    });
+
+    it('getAvailableUsersForWard in errore ritorna null e setta errore', async () => {
+        assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(
+            throwError(() => new Error('users fetch failed')),
+        );
+
+        const result = await firstValueFrom(store.getAvailableUsersForWard(10));
+
+        expect(result).toBeNull();
+        expect(wardStoreStub.setError).toHaveBeenCalledWith('users fetch failed');
     });
 });

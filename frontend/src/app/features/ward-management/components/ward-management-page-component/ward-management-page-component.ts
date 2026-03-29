@@ -5,6 +5,7 @@ import type { Plant } from '../../models/plant.model';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../../models/ward-api.dto';
 import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/ward-management.events';
 import type { Ward } from '../../models/ward.model';
+import type { User } from '../../../../core/models/user.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { WardManagementStore } from '../../services/ward-management.store';
 import { AssignWardDialogComponent } from '../assign-ward-dialog-component/assign-ward-dialog-component';
@@ -38,6 +39,8 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   public readonly selectedApartmentId = signal<string | null>(null);
   public readonly mobileStep = signal<'wards' | 'apartments' | 'operators'>('wards');
   public readonly operatorWardId = signal<number | null>(null);
+  public readonly availableOperatorsFromFetch = signal<User[] | null>(null);
+  public readonly isLoadingAvailableOperators = signal(false);
   public readonly plantWardId = signal<number | null>(null);
   public readonly availablePlantsFromFetch = signal<Plant[] | null>(null);
   public readonly isLoadingAvailablePlants = signal(false);
@@ -82,29 +85,18 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
       return fetchedPlants;
     }
 
-    // Fallback strategy: derive options from current wards snapshot.
-    // This keeps the dialog usable if the ad-hoc backend endpoint is temporarily unavailable.
-    const selectedWardId = this.plantWardId();
-    if (!selectedWardId) {
-      return [];
+    // Without backend response, we cannot reliably infer global unassigned plants.
+    return [];
+  });
+
+  public readonly availableOperators = computed<User[]>(() => {
+    const fetchedOperators = this.availableOperatorsFromFetch();
+    if (fetchedOperators !== null) {
+      return fetchedOperators;
     }
 
-    const wards = this.wardsSnapshot();
-    const selectedWard = wards.find((ward) => ward.id === selectedWardId);
-    if (!selectedWard) {
-      return [];
-    }
-
-    const assignedToSelected = new Set(selectedWard.apartments.map((plant) => plant.id));
-    const knownPlants = wards.flatMap((ward) => ward.apartments);
-    const uniquePlants = new Map<string, Plant>();
-    for (const plant of knownPlants) {
-      if (!uniquePlants.has(plant.id) && !assignedToSelected.has(plant.id)) {
-        uniquePlants.set(plant.id, plant);
-      }
-    }
-
-    return Array.from(uniquePlants.values());
+    // Without backend response, we cannot reliably infer global unassigned operators.
+    return [];
   });
 
   public ngOnInit(): void {
@@ -213,6 +205,13 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public onAssignOperator(wardId: number): void {
     this.operatorWardId.set(wardId);
+    this.availableOperatorsFromFetch.set(null);
+    this.isLoadingAvailableOperators.set(true);
+
+    this.store.getAvailableUsersForWard(wardId).pipe(takeUntil(this.destroy$)).subscribe((users) => {
+      this.availableOperatorsFromFetch.set(users);
+      this.isLoadingAvailableOperators.set(false);
+    });
   }
 
   public onAssignOperatorSubmit(dto: AssignOperatorDto): void {
@@ -223,10 +222,14 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
     this.store.assignOperator(wardId, dto);
     this.operatorWardId.set(null);
+    this.availableOperatorsFromFetch.set(null);
+    this.isLoadingAvailableOperators.set(false);
   }
 
   public onCloseAssignOperatorDialog(): void {
     this.operatorWardId.set(null);
+    this.availableOperatorsFromFetch.set(null);
+    this.isLoadingAvailableOperators.set(false);
   }
 
   public onRemoveOperator(event: RemoveOperatorEvent): void {

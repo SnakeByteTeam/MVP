@@ -67,6 +67,7 @@ describe('StructureCacheImpl', () => {
       const query = (mockClient.query as jest.Mock).mock.calls[0][0];
       expect(query).toContain('ON CONFLICT (plant_id)');
       expect(query).toContain('DO UPDATE');
+      expect(query).toContain('ward_id   = EXCLUDED.ward_id');
     });
 
     it('should handle write errors', async () => {

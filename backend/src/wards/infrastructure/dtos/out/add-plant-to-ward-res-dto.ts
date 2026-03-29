@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FindAllPlantsByWardIdResDto {
+export class AddPlantToWardResDto {
   @ApiProperty()
   id!: string;
 

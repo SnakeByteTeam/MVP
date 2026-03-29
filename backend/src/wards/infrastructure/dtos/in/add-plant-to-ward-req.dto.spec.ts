@@ -1,4 +1,4 @@
-import { AddPlantToWardReqDto } from './add-plant-to-ward-req-dto';
+import { AddPlantToWardReqDto } from './add-plant-to-ward-req.dto';
 
 describe('AddPlantToWardReqDto', () => {
   it('should be defined', () => {

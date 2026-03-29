@@ -28,7 +28,8 @@ INSERT INTO "user" (username, surname, name, password, temp_password, roleId) VA
 
 
 CREATE TABLE plant (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
+    ward_id INTEGER REFERENCES ward(id),
     name VARCHAR(255) UNIQUE
 );
 
@@ -258,3 +259,7 @@ CREATE TABLE STRUCTURE_CACHE (
 );
 
 
+INSERT INTO ward (name) VALUES ('test-ward');
+INSERT INTO "user" (username) VALUES ('test');
+INSERT INTO plant (id, ward_id, name) VALUES ('id1', 1, 'test-plant');
+INSERT INTO plant (id, ward_id, name) VALUES ('id2', 1, 'test-plant');

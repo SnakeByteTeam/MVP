@@ -13,7 +13,9 @@ export class RemovePlantFromWardAdapter implements RemovePlantFromWardPort {
   ) {}
 
   async removePlantFromWard(req: RemovePlantFromWardCmd): Promise<void> {
-    return await this.removePlantFromWardRepository.removePlantFromWard(req.wardId, req.plantId)
+    return await this.removePlantFromWardRepository.removePlantFromWard(
+      req.plantId,
+    );
   }
 }
 

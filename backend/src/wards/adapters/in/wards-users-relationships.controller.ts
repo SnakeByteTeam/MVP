@@ -9,7 +9,7 @@ import {
   ParseIntPipe,
   Post,
 } from '@nestjs/common';
-import { AddUserToWardReqDto } from '../../infrastructure/dtos/in/add-user-to-ward-req-dto';
+import { AddUserToWardReqDto } from '../../infrastructure/dtos/in/add-user-to-ward-req.dto';
 import { AddUserToWardUseCase } from '../../application/ports/in/add-user-to-ward-use-case.interface';
 import { FindAllUsersByWardIdUseCase } from '../../application/ports/in/find-all-users-by-ward-id-use-case.interface';
 import { RemoveUserFromWardUseCase } from '../../application/ports/in/remove-user-from-ward-use-case.interface';
@@ -21,6 +21,10 @@ import {
 import { AddUserToWardCmd } from '../../application/commands/add-user-to-ward-cmd';
 import { FindAllUsersByWardIdCmd } from '../../application/commands/find-all-users-by-ward-id-cmd';
 import { RemoveUserFromWardCmd } from '../../application/commands/remove-user-from-ward-cmd';
+import { plainToInstance } from 'class-transformer';
+import { AddUserToWardResDto } from '../../infrastructure/dtos/out/add-user-to-ward-res-dto';
+import { FindAllUsersByWardIdResDto } from '../../infrastructure/dtos/out/find-all-users-by-ward-id-res.dto';
+import { User } from '../../domain/user';
 
 @Controller('wards-users-relationships')
 export class WardsUsersRelationshipsController {
@@ -34,17 +38,26 @@ export class WardsUsersRelationshipsController {
   ) {}
 
   @Post()
-  async addUserToWard(@Body() req: AddUserToWardReqDto) {
-    return await this.addUserToWardUseCase.addUserToWard(
+  async addUserToWard(
+    @Body() req: AddUserToWardReqDto,
+  ): Promise<AddUserToWardResDto> {
+    const user: User = this.addUserToWardUseCase.addUserToWard(
       new AddUserToWardCmd(req.wardId, req.userId),
     );
+
+    return plainToInstance(AddUserToWardResDto, user);
   }
 
   @Get('/:wardId')
-  async findAllUsersByWardId(@Param('wardId', ParseIntPipe) id: number) {
-    return await this.findAllUsersByWardIdUseCase.findAllUsersByWardId(
-      new FindAllUsersByWardIdCmd(id),
-    );
+  async findAllUsersByWardId(
+    @Param('wardId', ParseIntPipe) id: number,
+  ): Promise<FindAllUsersByWardIdResDto[]> {
+    const users: User[] =
+      await this.findAllUsersByWardIdUseCase.findAllUsersByWardId(
+        new FindAllUsersByWardIdCmd(id),
+      );
+
+    return plainToInstance(FindAllUsersByWardIdResDto, users);
   }
 
   @Delete('/:wardId/:userId')

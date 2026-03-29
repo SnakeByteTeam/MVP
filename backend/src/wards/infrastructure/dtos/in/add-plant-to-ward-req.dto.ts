@@ -4,7 +4,7 @@ import { IsNumber } from 'class-validator';
 export class AddPlantToWardReqDto {
   @ApiProperty()
   @IsNumber()
-  plantId!: number;
+  plantId!: string;
 
   @ApiProperty()
   @IsNumber()

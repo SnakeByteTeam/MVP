@@ -1,5 +1,5 @@
 export interface RemovePlantFromWardRepository {
-  removePlantFromWard(wardId: number, plantId: number): Promise<void>;
+  removePlantFromWard(plantId: string): Promise<void>;
 }
 
 export const REMOVE_PLANT_FROM_WARD_REPOSITORY =

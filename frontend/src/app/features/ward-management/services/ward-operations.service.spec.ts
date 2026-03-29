@@ -80,7 +80,8 @@ describe('WardOperationsService', () => {
     it('loadWards aggiorna store e termina senza valore', () => {
         storeStub.getWardsSnapshot.mockReturnValue([]);
         apiStub.getWards.mockReturnValue(of(wardSummaries));
-        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: 101, name: 'App. 101' }]));
+        //id e name riferiscono al plant (vedi WardPlantDto)
+        apiStub.getPlantsByWardId.mockReturnValue(of([{ id: '101', name: 'App. 101' }]));
         apiStub.getOperatorsByWardId.mockReturnValue(of([{ id: 1, username: 'mrossi' }]));
 
         service.loadWards().subscribe((result) => {

@@ -20,6 +20,7 @@ export interface WardUserDto {
     username: string;
 }
 
+//riferito a reparto
 export interface WardPlantDto {
     id: string;
     name: string;

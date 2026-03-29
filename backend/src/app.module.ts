@@ -15,6 +15,7 @@ import { DeviceModule } from './device/device.module';
 import { PlantModule } from './plant/plant.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     WardsModule,
     CacheModule,
     SubscriptionModule,
-    EventEmitterModule.forRoot(),
+    EventEmitterModule.forRoot(), UsersModule
   ],
 })
 export class AppModule { }

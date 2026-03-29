@@ -44,7 +44,6 @@ CREATE TABLE ward_user (
 );
 
 
-
 -- Fake data for ward-management UI preview.
 INSERT INTO ward (name)
 VALUES

@@ -9,8 +9,11 @@ INSERT INTO role (name) VALUES
 
 CREATE TABLE ward (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE
+    name VARCHAR(255) UNIQUE 
 );
+
+INSERT INTO ward (name) VALUES ('test-ward');
+
 
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
@@ -29,11 +32,9 @@ INSERT INTO "user" (username, surname, name, password, temp_password, roleId) VA
 
 CREATE TABLE plant (
     id VARCHAR(255) PRIMARY KEY,
-    ward_id INTEGER REFERENCES ward(id),
+    ward_id INTEGER REFERENCES ward(id) ON DELETE CASCADE,
     name VARCHAR(255) UNIQUE
 );
-
-INSERT INTO plant (name) VALUES ('test-plant');
 
 
 CREATE TABLE ward_user (
@@ -42,11 +43,7 @@ CREATE TABLE ward_user (
     user_id INTEGER REFERENCES "user"(id) ON DELETE CASCADE
 );
 
-CREATE TABLE ward_plant (
-    id SERIAL PRIMARY KEY,
-    ward_id INTEGER REFERENCES ward(id) ON DELETE CASCADE,
-    plant_id INTEGER REFERENCES plant(id) ON DELETE CASCADE
-);
+
 
 -- Fake data for ward-management UI preview.
 INSERT INTO ward (name)
@@ -63,20 +60,19 @@ VALUES
         ('gbianchi', 'Bianchi', 'Gioia', 'test', 'test', 1),
         ('lverdi', 'Verdi', 'Luca', 'test', 'test', 1),
         ('asala', 'Sala', 'Anna', 'test', 'test', 1),
-        ('fneri', 'Neri', 'Franco', 'test', 'test', 1)
+        ('fneri', 'Neri', 'Franco', 'test', 'test', 1),
+        -- Nuovi operatori sanitari
+        ('gcolombo', 'Colombo', 'Giuseppe', 'test', 'test', 1),
+        ('fferrari', 'Ferrari', 'Francesca', 'test', 'test', 1),
+        ('arusso', 'Russo', 'Antonio', 'test', 'test', 1),
+        ('cgallo', 'Gallo', 'Chiara', 'test', 'test', 1),
+        ('mromano', 'Romano', 'Matteo', 'test', 'test', 1),
+        -- Amministratori di sistema
+        ('admin_mario', 'Draghi', 'Mario', 'test', 'test', 2),
+        ('admin_luigi', 'Einaudi', 'Luigi', 'test', 'test', 2)
 ON CONFLICT (username) DO NOTHING;
 
-INSERT INTO plant (name)
-VALUES
-        ('Appartamento Rossi (H3)'),
-        ('Appartamento Verdi (C1)'),
-        ('Appartamento Pisu (J2)'),
-        ('Appartamento Bianchi (A4)'),
-        ('Appartamento Serra (D7)'),
-        ('Appartamento Mura (E9)'),
-        ('Appartamento Cossu (B2)'),
-        ('Appartamento Ladu (F5)')
-ON CONFLICT (name) DO NOTHING;
+
 
 INSERT INTO ward_user (ward_id, user_id)
 SELECT w.id, u.id
@@ -138,102 +134,6 @@ WHERE w.name = 'Reparto riabilitazione'
                 AND wu.user_id = u.id
     );
 
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Rossi (H3)'
-WHERE w.name = 'Reparto autosufficienti'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Verdi (C1)'
-WHERE w.name = 'Reparto autosufficienti'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Pisu (J2)'
-WHERE w.name = 'Reparto autosufficienti'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Bianchi (A4)'
-WHERE w.name = 'Reparto cure livello 1'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Serra (D7)'
-WHERE w.name = 'Reparto cure livello 1'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Mura (E9)'
-WHERE w.name = 'Reparto cure livello 2'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Cossu (B2)'
-WHERE w.name = 'Reparto riabilitazione'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
-INSERT INTO ward_plant (ward_id, plant_id)
-SELECT w.id, p.id
-FROM ward w
-JOIN plant p ON p.name = 'Appartamento Ladu (F5)'
-WHERE w.name = 'Reparto riabilitazione'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_plant wp
-            WHERE wp.ward_id = w.id
-                AND wp.plant_id = p.id
-    );
-
 
 
 DROP TABLE IF EXISTS TOKEN_CACHE;
@@ -259,7 +159,57 @@ CREATE TABLE STRUCTURE_CACHE (
 );
 
 
-INSERT INTO ward (name) VALUES ('test-ward');
-INSERT INTO "user" (username) VALUES ('test');
-INSERT INTO plant (id, ward_id, name) VALUES ('id1', 1, 'test-plant');
-INSERT INTO plant (id, ward_id, name) VALUES ('id2', 1, 'test-plant');
+-- Bulk apartments for manual testing.
+-- Generates 80 apartments: first 30 already assigned to wards, remaining available.
+INSERT INTO plant (id, ward_id, name)
+SELECT
+    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS id,
+    CASE
+        WHEN gs BETWEEN 1 AND 10 THEN (SELECT id FROM ward WHERE name = 'Reparto autosufficienti')
+        WHEN gs BETWEEN 11 AND 18 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 1')
+        WHEN gs BETWEEN 19 AND 24 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 2')
+        WHEN gs BETWEEN 25 AND 30 THEN (SELECT id FROM ward WHERE name = 'Reparto riabilitazione')
+        ELSE NULL
+    END AS ward_id,
+    CONCAT('App. ', LPAD(gs::text, 3, '0')) AS name
+FROM generate_series(1, 80) AS gs
+ON CONFLICT (id) DO UPDATE
+SET
+    ward_id = EXCLUDED.ward_id,
+    name = EXCLUDED.name;
+
+
+INSERT INTO structure_cache (cached_at, plant_id, data, ward_id)
+SELECT
+    NOW() - (gs * INTERVAL '1 minute') AS cached_at,
+    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS plant_id,
+    jsonb_build_object(
+        'name', CONCAT('App. ', LPAD(gs::text, 3, '0')),
+        'rooms', jsonb_build_array(
+            jsonb_build_object(
+                'id', CONCAT('apt-', LPAD(gs::text, 3, '0'), '-r1'),
+                'name', 'Ingresso',
+                'devices', jsonb_build_array()
+            ),
+            jsonb_build_object(
+                'id', CONCAT('apt-', LPAD(gs::text, 3, '0'), '-r2'),
+                'name', 'Camera principale',
+                'devices', jsonb_build_array()
+            )
+        )
+    ) AS data,
+    CASE
+        WHEN gs BETWEEN 1 AND 10 THEN (SELECT id::text FROM ward WHERE name = 'Reparto autosufficienti')
+        WHEN gs BETWEEN 11 AND 18 THEN (SELECT id::text FROM ward WHERE name = 'Reparto cure livello 1')
+        WHEN gs BETWEEN 19 AND 24 THEN (SELECT id::text FROM ward WHERE name = 'Reparto cure livello 2')
+        WHEN gs BETWEEN 25 AND 30 THEN (SELECT id::text FROM ward WHERE name = 'Reparto riabilitazione')
+        ELSE NULL
+    END AS ward_id
+FROM generate_series(1, 80) AS gs
+ON CONFLICT (plant_id) DO UPDATE
+SET
+    cached_at = EXCLUDED.cached_at,
+    data = EXCLUDED.data,
+    ward_id = EXCLUDED.ward_id;
+
+

@@ -14,9 +14,9 @@ import type { Ward } from '../models/ward.model';
 export class WardApiService {
     private readonly http = inject(HttpClient);
     private readonly baseUrl: string = inject(API_BASE_URL);
-    private readonly wardsEndpoint = `${this.baseUrl}/wards`;
-    private readonly wardUsersRelationshipsEndpoint = `${this.baseUrl}/wards-users-relationships`;
-    private readonly wardPlantsRelationshipsEndpoint = `${this.baseUrl}/wards-plants-relationships`;
+    private readonly wardsEndpoint = `${this.baseUrl}/api/wards`;
+    private readonly wardUsersRelationshipsEndpoint = `${this.baseUrl}/api/wards-users-relationships`;
+    private readonly wardPlantsRelationshipsEndpoint = `${this.baseUrl}/api/wards-plants-relationships`;
 
     public getWards(): Observable<Ward[]> {
         return this.http.get<Ward[]>(this.wardsEndpoint);

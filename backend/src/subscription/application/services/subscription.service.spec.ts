@@ -6,8 +6,15 @@ describe('SubscriptionService', () => {
   let service: SubscriptionService;
   let refreshPort: jest.Mocked<RefreshNodeSubscriptionPort>;
   let getAllPlantIdsPort: jest.Mocked<GetAllPlantIdsPort>;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleWarnSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     refreshPort = {
       refreshSub: jest.fn(),
     };
@@ -16,6 +23,10 @@ describe('SubscriptionService', () => {
     };
 
     service = new SubscriptionService(refreshPort, getAllPlantIdsPort);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('renewNodeSubcription', () => {
@@ -28,8 +39,6 @@ describe('SubscriptionService', () => {
         .mockResolvedValueOnce(true)
         .mockResolvedValueOnce(true);
 
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       await service.renewNodeSubcription();
 
       expect(getAllPlantIdsPort.getAllPlantIds).toHaveBeenCalledTimes(1);
@@ -40,28 +49,22 @@ describe('SubscriptionService', () => {
       expect(refreshPort.refreshSub).toHaveBeenCalledWith({
         plantId: 'plant-2',
       });
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Refreshing node subscription'),
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('successfully'),
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should log warning when no plant IDs found', async () => {
       getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([]);
 
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
-
       await service.renewNodeSubcription();
 
-      expect(warnSpy).toHaveBeenCalledWith(
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
         'No plant IDs found. Skipping subscription refresh.',
       );
-
-      warnSpy.mockRestore();
     });
 
     it('should continue with next plant when refresh fails for one plant', async () => {
@@ -73,32 +76,24 @@ describe('SubscriptionService', () => {
         .mockResolvedValueOnce(false)
         .mockResolvedValueOnce(true);
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
-
       await service.renewNodeSubcription();
 
       expect(refreshPort.refreshSub).toHaveBeenCalledTimes(2);
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to refresh node subscription',
       );
-
-      errorSpy.mockRestore();
     });
 
     it('should handle errors during refresh', async () => {
       getAllPlantIdsPort.getAllPlantIds.mockResolvedValue(['plant-1']);
       refreshPort.refreshSub.mockRejectedValue(new Error('Refresh error'));
 
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
-
       await service.renewNodeSubcription();
 
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Error refreshing node subscription:',
         expect.any(Error),
       );
-
-      errorSpy.mockRestore();
     });
 
     it('should handle error when getAllPlantIds fails', async () => {
@@ -117,14 +112,10 @@ describe('SubscriptionService', () => {
       getAllPlantIdsPort.getAllPlantIds.mockResolvedValue(plantIds);
       refreshPort.refreshSub.mockResolvedValue(true);
 
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       await service.renewNodeSubcription();
 
       expect(refreshPort.refreshSub).toHaveBeenCalledTimes(3);
-      expect(consoleSpy).toHaveBeenCalledTimes(6); // 3 log + 3 success messages
-
-      consoleSpy.mockRestore();
+      expect(consoleLogSpy).toHaveBeenCalledTimes(6); // 3 log + 3 success messages
     });
   });
 });

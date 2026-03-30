@@ -6,11 +6,18 @@ describe('CacheController', () => {
   let updateCacheUseCase: jest.Mocked<UpdateCacheUseCase>;
 
   beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
     updateCacheUseCase = {
       updateCache: jest.fn().mockResolvedValue(true),
     } as any;
 
     controller = new HttpCacheController(updateCacheUseCase);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {

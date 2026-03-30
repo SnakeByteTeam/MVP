@@ -1,14 +1,21 @@
 import { WardsPlantsRelationshipsRepositoryImpl } from './wards-plants-relationships-repository-impl';
-import { PoolClient } from 'pg';
 
 describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   let repo: WardsPlantsRelationshipsRepositoryImpl;
   let mockConn: any;
+  let mockClient: any;
 
   beforeEach(() => {
+    mockClient = {
+      query: jest.fn(),
+      release: jest.fn(),
+    };
+
     mockConn = {
       query: jest.fn(),
+      connect: jest.fn().mockResolvedValue(mockClient),
     };
+
     repo = new WardsPlantsRelationshipsRepositoryImpl(mockConn);
   });
 
@@ -17,14 +24,15 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   });
 
   it('should call query with correct parameters when adding a plant to a ward', async () => {
-    mockConn.query.mockResolvedValue({
+    mockClient.query.mockResolvedValue({
       rowCount: 1,
       rows: [{ id: 'id', name: 'plant' }],
     });
 
     await repo.addPlantToWard(1, 'id');
 
-    expect(mockConn.query).toHaveBeenCalledWith(
+    expect(mockClient.query).toHaveBeenNthCalledWith(
+      2,
       'UPDATE plant p SET ward_id = $1 WHERE p.id = $2 RETURNING *',
       [1, 'id'],
     );
@@ -33,14 +41,15 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   it('should return PlantEntity when update succeeds', async () => {
     const mockPlant = { id: 'id', name: 'name' };
 
-    mockConn.query.mockResolvedValue({
+    mockClient.query.mockResolvedValue({
       rowCount: 1,
       rows: [mockPlant],
     });
 
     const result = await repo.addPlantToWard(1, 'id');
 
-    expect(mockConn.query).toHaveBeenCalledWith(
+    expect(mockClient.query).toHaveBeenNthCalledWith(
+      2,
       'UPDATE plant p SET ward_id = $1 WHERE p.id = $2 RETURNING *',
       [1, 'id'],
     );
@@ -49,10 +58,13 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   });
 
   it('should throw error when no rows are updated', async () => {
-    mockConn.query.mockResolvedValue({
-      rowCount: 0,
-      rows: [],
-    });
+    mockClient.query
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({
+        rowCount: 0,
+        rows: [],
+      })
+      .mockResolvedValueOnce({});
 
     await expect(repo.addPlantToWard(1, 'id')).rejects.toThrow(
       'Add plant to ward failed',
@@ -60,7 +72,10 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   });
 
   it('should propagate DB error on add plant to ward', async () => {
-    mockConn.query.mockRejectedValue(new Error('DB error'));
+    mockClient.query
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error('DB error'))
+      .mockResolvedValueOnce({});
 
     await expect(repo.addPlantToWard(1, 'id')).rejects.toThrow('DB error');
   });
@@ -78,7 +93,7 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
     const result = await repo.findAllPlantsByWardId(1);
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      'SELECT p.id, p.data->>\'name\' name FROM plant p WHERE p.ward_id = $1',
+      'SELECT p.id, p.data->>\'name\' as name FROM plant p WHERE p.ward_id = $1',
       [1],
     );
 
@@ -92,18 +107,22 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   });
 
   it('should call query with correct parameters when removing a plant from a ward', async () => {
-    mockConn.query.mockResolvedValue({});
+    mockClient.query.mockResolvedValue({});
 
     await repo.removePlantFromWard('id');
 
-    expect(mockConn.query).toHaveBeenCalledWith(
+    expect(mockClient.query).toHaveBeenNthCalledWith(
+      2,
       'UPDATE plant p SET ward_id = NULL WHERE p.id = $1',
       ['id'],
     );
   });
 
   it('should propagate error when removing plant fails', async () => {
-    mockConn.query.mockRejectedValue(new Error('DB error'));
+    mockClient.query
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error('DB error'))
+      .mockResolvedValueOnce({});
 
     await expect(repo.removePlantFromWard('id')).rejects.toThrow('DB error');
   });

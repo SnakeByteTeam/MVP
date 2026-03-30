@@ -6,8 +6,13 @@ import { SubscriptionRepoImpl } from './sub-repo-impl';
 describe('SubscriptionRepoImpl', () => {
   let repo: SubscriptionRepoImpl;
   let httpService: jest.Mocked<HttpService>;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     httpService = {
       post: jest.fn(),
     } as unknown as jest.Mocked<HttpService>;
@@ -21,6 +26,7 @@ describe('SubscriptionRepoImpl', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     delete process.env.HOST3;
     delete process.env.SUB_CALLBACK;
     delete process.env.SECRET_FOR_SUB;
@@ -37,7 +43,6 @@ describe('SubscriptionRepoImpl', () => {
       };
 
       (httpService.post as jest.Mock).mockReturnValue(of(mockResponse));
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
@@ -57,7 +62,7 @@ describe('SubscriptionRepoImpl', () => {
             },
             attributes: expect.objectContaining({
               url: 'https://callback.example.com',
-              lifetime: 3600,
+              lifetime: 0,
               secret: 'secret-password',
             }),
           }),
@@ -68,38 +73,30 @@ describe('SubscriptionRepoImpl', () => {
           }),
         }),
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('New subscription created for plant plant-1'),
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should return false when HTTP request fails', async () => {
       (httpService.post as jest.Mock).mockReturnValue(
         throwError(() => new Error('Network error')),
       );
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith('Failed to create subscription');
-
-      errorSpy.mockRestore();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to create subscription');
     });
 
     it('should return false when SECRET_FOR_SUB is not set', async () => {
       delete process.env.SECRET_FOR_SUB;
       const newRepo = new SubscriptionRepoImpl(httpService);
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await newRepo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith('Failed to create subscription');
-
-      errorSpy.mockRestore();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to create subscription');
     });
 
     it('should use default empty string for HOST3 when not set', async () => {

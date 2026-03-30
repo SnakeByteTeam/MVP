@@ -2,6 +2,7 @@ import { FindAllUsersAdapter } from './find-all-users-adapter';
 
 describe('FindAllUsersAdapter', () => {
   it('should be defined', () => {
-    expect(new FindAllUsersAdapter()).toBeDefined();
+    const findAllUsersRepository = { findAllUsers: jest.fn() };
+    expect(new FindAllUsersAdapter(findAllUsersRepository)).toBeDefined();
   });
 });

@@ -3,6 +3,7 @@ import { UsersController } from './users.controller';
 import {
   CREATE_USER_USE_CASE,
   DELETE_USER_USE_CASE,
+  FIND_ALL_AVAILABLE_USERS_USE_CASE,
   FIND_ALL_USERS_USE_CASE,
   UPDATE_USER_USE_CASE,
 } from '../../application/services/users.service';
@@ -17,6 +18,10 @@ describe('UsersController', () => {
         {
           provide: FIND_ALL_USERS_USE_CASE,
           useValue: { findAllUsers: jest.fn() },
+        },
+        {
+          provide: FIND_ALL_AVAILABLE_USERS_USE_CASE,
+          useValue: { findAllAvailableUsers: jest.fn() },
         },
         { provide: UPDATE_USER_USE_CASE, useValue: { updateUser: jest.fn() } },
         { provide: CREATE_USER_USE_CASE, useValue: { createUser: jest.fn() } },

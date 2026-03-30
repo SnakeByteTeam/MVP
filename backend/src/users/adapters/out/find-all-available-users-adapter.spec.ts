@@ -2,6 +2,9 @@ import { FindAllAvailableUsersAdapter } from './find-all-available-users-adapter
 
 describe('FindAllAvailableUsersAdapter', () => {
   it('should be defined', () => {
-    expect(new FindAllAvailableUsersAdapter()).toBeDefined();
+    const findAllAvailableUsersRepository = { findAllAvailableUsers: jest.fn() };
+    expect(
+      new FindAllAvailableUsersAdapter(findAllAvailableUsersRepository),
+    ).toBeDefined();
   });
 });

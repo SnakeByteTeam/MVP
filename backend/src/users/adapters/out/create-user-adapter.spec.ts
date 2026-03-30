@@ -2,6 +2,7 @@ import { CreateUserAdapter } from './create-user-adapter';
 
 describe('CreateUserAdapter', () => {
   it('should be defined', () => {
-    expect(new CreateUserAdapter()).toBeDefined();
+    const createUserRepository = { createUser: jest.fn() };
+    expect(new CreateUserAdapter(createUserRepository)).toBeDefined();
   });
 });

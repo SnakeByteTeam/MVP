@@ -34,15 +34,12 @@ describe('ApiAuthVimarService', () => {
     );
   });
 
-  it('should use default redirect URI when REDIRECT_URI is not set', () => {
+  it('should throw when REDIRECT_URI is not set', () => {
     delete process.env.REDIRECT_URI;
     const service = new ApiAuthVimarService();
 
-    const loginUrl = service.getLoginUrl();
-    const parsedUrl = new URL(loginUrl);
-
-    expect(parsedUrl.searchParams.get('redirect_uri')).toBe(
-      'http://localhost:3000/tokens/callback',
+    expect(() => service.getLoginUrl()).toThrow(
+      'There is no redirect_url setted',
     );
   });
 

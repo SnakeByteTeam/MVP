@@ -26,7 +26,8 @@ describe('UserApiService', () => {
     });
 
     afterEach(() => {
-        httpController.verify();
+        httpController?.verify();
+        TestBed.resetTestingModule();
     });
 
     it('deleteUser chiama DELETE /users/:id con id numerico', () => {

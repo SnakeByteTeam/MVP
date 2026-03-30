@@ -9,8 +9,13 @@ describe('SyncCacheService', () => {
   let fetchPort: jest.Mocked<FetchNewCachePort>;
   let writePort: jest.Mocked<WriteCachePort>;
   let getAllPlantIdsPort: jest.Mocked<GetAllPlantIdsPort>;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     fetchPort = {
       fetch: jest.fn(),
     };
@@ -26,9 +31,13 @@ describe('SyncCacheService', () => {
     service = new SyncCacheService(fetchPort, writePort, getAllPlantIdsPort);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should throw PlantId is null when cmd.plantId is absent', async () => {
     await expect(service.updateCache({ plantId: '' })).rejects.toThrow(
-      Error('PlantId is null'),
+      new Error('PlantId is null'),
     );
   });
 
@@ -53,7 +62,7 @@ describe('SyncCacheService', () => {
     writePort.writeStructure.mockResolvedValue(false);
 
     await expect(service.updateCache({ plantId: 'plant-1' })).rejects.toThrow(
-      Error('Failed to write cache'),
+      new Error('Failed to write cache'),
     );
   });
 
@@ -102,18 +111,14 @@ describe('SyncCacheService', () => {
         .mockResolvedValueOnce(plant2);
       writePort.writeStructure.mockResolvedValue(true);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
       const result = await service.updateAllCache();
 
       expect(result).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error updating cache for plantId: plant-1'),
       );
       expect(writePort.writeStructure).toHaveBeenCalledTimes(1);
       expect(writePort.writeStructure).toHaveBeenCalledWith(plant2);
-
-      consoleSpy.mockRestore();
     });
 
     it('should continue with next plant when write fails for one plant', async () => {
@@ -131,16 +136,12 @@ describe('SyncCacheService', () => {
         .mockResolvedValueOnce(false)
         .mockResolvedValueOnce(true);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
       const result = await service.updateAllCache();
 
       expect(result).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error updating cache for plantId: plant-1'),
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should log success message when cache is updated for a plant', async () => {
@@ -150,16 +151,12 @@ describe('SyncCacheService', () => {
       fetchPort.fetch.mockResolvedValue(plant1);
       writePort.writeStructure.mockResolvedValue(true);
 
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-
       const result = await service.updateAllCache();
 
       expect(result).toBe(true);
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         'Cache updated successfully for plantId: plant-1',
       );
-
-      consoleSpy.mockRestore();
     });
 
     it('should handle empty plant ids list', async () => {

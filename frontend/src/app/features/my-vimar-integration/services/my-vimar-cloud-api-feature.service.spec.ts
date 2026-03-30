@@ -35,6 +35,7 @@ describe('MyVimarCloudApiFeatureService', () => {
 
   afterEach(() => {
     httpController.verify();
+    TestBed.resetTestingModule();
   });
 
   it('chiama GET /api/vimar-account in getLinkedAccount', () => {
@@ -70,14 +71,19 @@ describe('MyVimarCloudApiFeatureService', () => {
     request.flush(null);
   });
 
-  it('chiama POST /api/vimar-account/oauth/authorize con redirect_url in initiateOAuth', () => {
+  it('chiama GET /my-vimar/auth con redirect_url in initiateOAuth', () => {
     service.initiateOAuth();
 
-    const request = httpController.expectOne(`${baseUrl}/api/vimar-account/oauth/authorize`);
-    expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual({ redirect_url: 'http://localhost:4200/vimar-link/oauth-callback' });
-    request.flush({ url: `${baseUrl}/api/vimar-account/oauth/authorize` });
+    const request = httpController.expectOne(
+      (req) =>
+        req.method === 'GET' &&
+        req.url === `${baseUrl}/my-vimar/auth` &&
+        req.params.get('redirect_url') === 'http://localhost:4200/vimar-link/oauth-callback',
+    );
 
-    expect(mockLocation.href).toBe(`${baseUrl}/api/vimar-account/oauth/authorize`);
+    expect(request.request.method).toBe('GET');
+    request.flush({ url: `${baseUrl}/my-vimar/auth` });
+
+    expect(mockLocation.href).toBe(`${baseUrl}/my-vimar/auth`);
   });
 });

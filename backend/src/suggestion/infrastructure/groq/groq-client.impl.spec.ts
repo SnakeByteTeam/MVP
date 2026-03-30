@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GroqClientImpl } from './groq-client.impl';
 import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
@@ -32,12 +32,14 @@ describe('GroqClientImpl', () => {
       ],
     }).compile();
 
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+
     groqClientImpl = module.get<GroqClientImpl>(GroqClientImpl);
-    fetchSpy = jest.spyOn(global, 'fetch');
+    fetchSpy = jest.spyOn(globalThis, 'fetch');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('generateSuggestion', () => {

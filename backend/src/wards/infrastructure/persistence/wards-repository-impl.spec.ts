@@ -1,14 +1,21 @@
 import { WardsRepositoryImpl } from './wards-repository-impl';
-import { PoolClient } from 'pg';
 
 describe('WardsRepositoryImpl', () => {
   let repo: WardsRepositoryImpl;
   let mockConn: any;
+  let mockClient: any;
 
   beforeEach(() => {
+    mockClient = {
+      query: jest.fn(),
+      release: jest.fn(),
+    };
+
     mockConn = {
       query: jest.fn(),
+      connect: jest.fn().mockResolvedValue(mockClient),
     };
+
     repo = new WardsRepositoryImpl(mockConn);
   });
 
@@ -109,18 +116,22 @@ describe('WardsRepositoryImpl', () => {
   });
 
   it('should call query to delete ward', async () => {
-    mockConn.query.mockResolvedValue({});
+    mockClient.query.mockResolvedValue({});
 
-    repo.deleteWard(1);
+    await repo.deleteWard(1);
 
-    expect(mockConn.query).toHaveBeenCalledWith(
+    expect(mockClient.query).toHaveBeenNthCalledWith(
+      4,
       'DELETE FROM ward WHERE id = $1',
       [1],
     );
   });
 
   it('should propagate DB error on delete', async () => {
-    mockConn.query.mockRejectedValue(new Error('DB error'));
+    mockClient.query
+      .mockResolvedValueOnce({})
+      .mockRejectedValueOnce(new Error('DB error'))
+      .mockResolvedValueOnce({});
 
     await expect(repo.deleteWard(1)).rejects.toThrow('DB error');
   });

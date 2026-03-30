@@ -7,6 +7,8 @@ describe('FetchStructureCacheImpl', () => {
   let httpService: jest.Mocked<Pick<HttpService, 'get'>>;
 
   beforeEach(() => {
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
     httpService = {
       get: jest.fn(),
     };
@@ -14,6 +16,10 @@ describe('FetchStructureCacheImpl', () => {
     process.env.HOST3 = 'https://api.example.com';
 
     impl = new FetchStructureCacheImpl(httpService as unknown as HttpService);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('fetch', () => {

@@ -27,7 +27,8 @@ describe('NotificationApiService', () => {
     });
 
     afterEach(() => {
-        httpController.verify();
+        httpController?.verify();
+        TestBed.resetTestingModule();
     });
 
     it('getNotificationsHistory chiama GET /api/notifications e restituisce la lista', () => {

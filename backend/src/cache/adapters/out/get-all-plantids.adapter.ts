@@ -1,13 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { GetValidTokenPort, GETVALIDTOKENPORT } from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
 import { GetAllPlantIdsPort } from 'src/cache/application/ports/out/get-all-plantids.port';
 import {
   GET_ALL_PLANTIDS_REPO_PORT,
   type GetAllPlantIdsRepoPort,
 } from 'src/cache/application/repository/get-all-plantids.repository';
-import {
-  GETVALIDTOKENPORT,
-  type GetValidTokenPort,
-} from 'src/tokens/application/ports/out/get-valid-token.port';
+
 
 @Injectable()
 export class GetAllPlantIdsAdapter implements GetAllPlantIdsPort {

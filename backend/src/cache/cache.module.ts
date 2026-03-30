@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TokensModule } from 'src/tokens/tokens.module';
 import { HttpModule } from '@nestjs/axios';
+import { ApiAuthVimarModule } from 'src/api-auth-vimar/api-auth-vimar.module';
 
 import { FetchNewCacheAdapter } from './adapters/out/fetch-cache.adapter';
 import { WriteCacheAdapter } from './adapters/out/write-cache.adapter';
@@ -20,8 +20,9 @@ import { UPDATE_CACHE_ALL_PLANTS_USECASE } from './application/ports/in/update-c
 import { GET_ALL_PLANTIDS_PORT } from './application/ports/out/get-all-plantids.port';
 import { GET_ALL_PLANTIDS_REPO_PORT } from './application/repository/get-all-plantids.repository';
 
+
 @Module({
-  imports: [TokensModule, HttpModule],
+  imports: [ApiAuthVimarModule, HttpModule],
   controllers: [HttpCacheController, EventCacheController],
   providers: [
     { provide: FETCH_NEW_CACHE_PORT, useClass: FetchNewCacheAdapter },

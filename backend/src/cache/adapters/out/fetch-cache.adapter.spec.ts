@@ -7,7 +7,7 @@ import {
 import {
   GetValidTokenPort,
   GETVALIDTOKENPORT,
-} from 'src/tokens/application/ports/out/get-valid-token.port';
+} from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
 import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
 
 describe('FetchNewCacheAdapter', () => {

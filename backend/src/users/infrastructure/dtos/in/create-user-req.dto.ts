@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length, MaxLength, MinLength } from 'class-validator';
+import { IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateUserReqDto {
   @ApiProperty()
@@ -33,12 +33,4 @@ export class CreateUserReqDto {
       'Name is too long. Maximal length is $constraint1 characters, but actual is $value',
   })
   name!: string;
-
-  @ApiProperty()
-  @IsString()
-  @Length(128, 128, {
-    message:
-      'Temporary password is too short. Minimal length is $constraint1 characters, but actual is $value',
-  })
-  tempPassword!: string;
 }

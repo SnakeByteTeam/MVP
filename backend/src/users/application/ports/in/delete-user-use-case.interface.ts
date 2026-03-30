@@ -1,5 +1,5 @@
 import { DeleteUserCmd } from '../../commands/delete-user-cmd';
 
 export interface DeleteUserUseCase {
-  deleteUser(req: DeleteUserCmd);
+  deleteUser(req: DeleteUserCmd): Promise<void>;
 }

@@ -9,8 +9,8 @@ import { ActiveAlarm } from '../models/active-alarm.model';
 @Injectable({ providedIn: 'root' })
 export class AlarmApiService {
     private readonly http = inject(HttpClient);
-    private readonly alarmsBaseUrl = '/api/alarms';
-    private readonly activeAlarmsBaseUrl = '/api/active-alarms';
+    private readonly alarmsBaseUrl = '/alarm-rules';
+    private readonly activeAlarmsBaseUrl = '/active-alarms';
 
     public getAlarms(): Observable<AlarmRule[]> {
         return this.http.get<AlarmRule[]>(this.alarmsBaseUrl);

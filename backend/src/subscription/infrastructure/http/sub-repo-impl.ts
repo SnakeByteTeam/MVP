@@ -13,7 +13,7 @@ export class SubscriptionRepoImpl implements RefreshNodeSubscriptionRepoPort {
 
   async refreshSub(validToken: string, plantId: string): Promise<boolean> {
     try {
-      const lifetimeSeconds = 3600;
+      const lifetimeSeconds = 0; // == valore massimo del server di Vimar
 
       const secretPassword: string = process.env.SECRET_FOR_SUB || '';
       if (!secretPassword)

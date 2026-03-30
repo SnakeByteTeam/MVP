@@ -12,7 +12,6 @@ import {
 import { CreateWardReqDto } from '../../infrastructure/dtos/in/create-ward-req.dto';
 import { UpdateWardReqDto } from '../../infrastructure/dtos/in/update-ward-req.dto';
 import { CreateWardUseCase } from '../../application/ports/in/create-ward-use-case.interface';
-import { DeleteWardUseCase } from '../../application/ports/in/delete-ward-use-case.interface';
 import { FindAllWardsUseCase } from '../../application/ports/in/find-all-wards-use-case.interface';
 import { UpdateWardUseCase } from '../../application/ports/in/update-ward-use-case.interface';
 import { DeleteWardCmd } from '../../application/commands/delete-ward-cmd';

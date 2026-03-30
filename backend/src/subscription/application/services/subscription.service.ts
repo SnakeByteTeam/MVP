@@ -5,14 +5,18 @@ import {
   REFRESH_NODE_SUBSCRIPTION_PORT,
   type RefreshNodeSubscriptionPort,
 } from '../ports/out/refresh-node-subscription.port';
-import { GET_ALL_PLANTIDS_PORT, type GetAllPlantIdsPort } from 'src/cache/application/ports/out/get-all-plantids.port';
+import {
+  GET_ALL_PLANTIDS_PORT,
+  type GetAllPlantIdsPort,
+} from 'src/cache/application/ports/out/get-all-plantids.port';
 
 @Injectable()
 export class SubscriptionService {
   constructor(
     @Inject(REFRESH_NODE_SUBSCRIPTION_PORT)
     private readonly refreshPort: RefreshNodeSubscriptionPort,
-    @Inject(GET_ALL_PLANTIDS_PORT) private readonly getAllPlantIdsPort: GetAllPlantIdsPort
+    @Inject(GET_ALL_PLANTIDS_PORT)
+    private readonly getAllPlantIdsPort: GetAllPlantIdsPort,
   ) {}
 
   @OnEvent('fetched.tokens')
@@ -27,7 +31,9 @@ export class SubscriptionService {
     try {
       for (const plantId of plantIds) {
         console.log(`Refreshing node subscription for plantId: ${plantId}`);
-        const refreshResult = await this.refreshPort.refreshSub({ plantId: plantId });
+        const refreshResult = await this.refreshPort.refreshSub({
+          plantId: plantId,
+        });
 
         if (!refreshResult) {
           console.error('Failed to refresh node subscription');

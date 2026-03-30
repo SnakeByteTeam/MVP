@@ -45,7 +45,7 @@ describe('StructureCacheImpl', () => {
 
       expect(mockPool.connect).toHaveBeenCalled();
       expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining('INSERT INTO structure_cache'),
+        expect.stringContaining('INSERT INTO plant'),
         ['plant-1', JSON.stringify({ name: 'Test Plant', rooms: [] }), 1],
       );
       expect(mockClient.release).toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('StructureCacheImpl', () => {
       await repository.write(mockPlant);
 
       const query = (mockClient.query as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('ON CONFLICT (plant_id)');
+      expect(query).toContain('ON CONFLICT (id)');
       expect(query).toContain('DO UPDATE');
       expect(query).toContain('ward_id   = EXCLUDED.ward_id');
     });

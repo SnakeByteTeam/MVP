@@ -1,4 +1,4 @@
-import { RefreshNodeSubCmd } from "../../commands/refresh-node-sub.command";
+import { RefreshNodeSubCmd } from '../../commands/refresh-node-sub.command';
 
 export interface RefreshNodeSubscriptionPort {
   refreshSub(cmd: RefreshNodeSubCmd): Promise<boolean>;

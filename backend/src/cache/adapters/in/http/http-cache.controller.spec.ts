@@ -69,7 +69,7 @@ describe('CacheController', () => {
       await controller.updateCache(body);
 
       // Wait for setImmediate to execute
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(3);
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
@@ -110,7 +110,7 @@ describe('CacheController', () => {
       await controller.updateCache(body);
 
       // Wait for setImmediate to execute
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(1);
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
@@ -124,7 +124,7 @@ describe('CacheController', () => {
       await controller.updateCache(body);
 
       // Wait for setImmediate to execute
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(updateCacheUseCase.updateCache).not.toHaveBeenCalled();
     });
@@ -150,7 +150,7 @@ describe('CacheController', () => {
       await controller.updateCache(body);
 
       // Wait for setImmediate to execute
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(updateCacheUseCase.updateCache).not.toHaveBeenCalled();
     });
@@ -191,7 +191,7 @@ describe('CacheController', () => {
       await controller.updateCache(body);
 
       // Wait for setImmediate and all updates to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(3);
       expect(callOrder).toEqual(['plant-1', 'plant-2', 'plant-3']);

@@ -12,18 +12,22 @@ import {
 import { UpdateCacheUseCase } from '../ports/in/update-cache.usecase';
 import { GetValidCacheCmd } from '../commands/get-valid-cache.command';
 import { UpdateCacheAllPlantsUseCase } from '../ports/in/update-cache-all-plants.usecase';
-import { GET_ALL_PLANTIDS_PORT, type GetAllPlantIdsPort } from '../ports/out/get-all-plantids.port';
+import {
+  GET_ALL_PLANTIDS_PORT,
+  type GetAllPlantIdsPort,
+} from '../ports/out/get-all-plantids.port';
 
 @Injectable()
-export class SyncCacheService implements UpdateCacheUseCase, 
-                                         UpdateCacheAllPlantsUseCase
+export class SyncCacheService
+  implements UpdateCacheUseCase, UpdateCacheAllPlantsUseCase
 {
   constructor(
     @Inject(FETCH_NEW_CACHE_PORT)
     private readonly fetchCachePort: FetchNewCachePort,
     @Inject(WRITE_CACHE_PORT)
     private readonly writeStructurePort: WriteCachePort,
-    @Inject(GET_ALL_PLANTIDS_PORT) private readonly getAllPlantIdsPort: GetAllPlantIdsPort
+    @Inject(GET_ALL_PLANTIDS_PORT)
+    private readonly getAllPlantIdsPort: GetAllPlantIdsPort,
   ) {}
 
   async updateCache(cmd: GetValidCacheCmd): Promise<boolean> {
@@ -54,16 +58,18 @@ export class SyncCacheService implements UpdateCacheUseCase,
           plantId,
         });
 
-        const writeResult = await this.writeStructurePort.writeStructure(fetchedPlant);
+        const writeResult =
+          await this.writeStructurePort.writeStructure(fetchedPlant);
 
-        if (!writeResult) throw new Error(`Failed to write cache for plantId: ${plantId}`);
+        if (!writeResult)
+          throw new Error(`Failed to write cache for plantId: ${plantId}`);
         else console.log(`Cache updated successfully for plantId: ${plantId}`);
       } catch (error) {
         console.error(
           `Error updating cache for plantId: ${plantId}. Error: ${error}`,
         );
       }
-    } 
+    }
     return true;
   }
 }

@@ -4,6 +4,7 @@ export class PlotDto {
   private constructor(
     public readonly title: string,
     public readonly metric: string,
+    public readonly unit: string,
     public readonly labels: string[],
     public readonly data: string[],
     public readonly series?: Record<string, string[]>, // serie aggiuntive
@@ -13,6 +14,7 @@ export class PlotDto {
     return new PlotDto(
       p.getTitle(),
       p.getMetric(),
+      p.getUnit(),
       p.getLabels(),
       p.getData(),
       p.getSeries(),

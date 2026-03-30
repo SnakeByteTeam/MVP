@@ -65,4 +65,121 @@ describe('SyncCacheService', () => {
       fetchError,
     );
   });
+
+  describe('updateAllCache', () => {
+    it('should update cache for all plants', async () => {
+      const plant1 = new Plant('plant-1', 'Plant 1', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant 2', [], 2);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([
+        'plant-1',
+        'plant-2',
+      ]);
+      fetchPort.fetch
+        .mockResolvedValueOnce(plant1)
+        .mockResolvedValueOnce(plant2);
+      writePort.writeStructure
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(getAllPlantIdsPort.getAllPlantIds).toHaveBeenCalledTimes(1);
+      expect(fetchPort.fetch).toHaveBeenCalledTimes(2);
+      expect(writePort.writeStructure).toHaveBeenCalledTimes(2);
+    });
+
+    it('should continue with next plant when fetch fails for one plant', async () => {
+      const plant2 = new Plant('plant-2', 'Plant 2', [], 2);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([
+        'plant-1',
+        'plant-2',
+      ]);
+      fetchPort.fetch
+        .mockRejectedValueOnce(new Error('Fetch failed for plant-1'))
+        .mockResolvedValueOnce(plant2);
+      writePort.writeStructure.mockResolvedValue(true);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error updating cache for plantId: plant-1'),
+      );
+      expect(writePort.writeStructure).toHaveBeenCalledTimes(1);
+      expect(writePort.writeStructure).toHaveBeenCalledWith(plant2);
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should continue with next plant when write fails for one plant', async () => {
+      const plant1 = new Plant('plant-1', 'Plant 1', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant 2', [], 2);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([
+        'plant-1',
+        'plant-2',
+      ]);
+      fetchPort.fetch
+        .mockResolvedValueOnce(plant1)
+        .mockResolvedValueOnce(plant2);
+      writePort.writeStructure
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error updating cache for plantId: plant-1'),
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should log success message when cache is updated for a plant', async () => {
+      const plant1 = new Plant('plant-1', 'Plant 1', [], 1);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue(['plant-1']);
+      fetchPort.fetch.mockResolvedValue(plant1);
+      writePort.writeStructure.mockResolvedValue(true);
+
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Cache updated successfully for plantId: plant-1',
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should handle empty plant ids list', async () => {
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([]);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(fetchPort.fetch).not.toHaveBeenCalled();
+      expect(writePort.writeStructure).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error when getAllPlantIds fails', async () => {
+      getAllPlantIdsPort.getAllPlantIds.mockRejectedValue(
+        new Error('Failed to get plant ids'),
+      );
+
+      await expect(service.updateAllCache()).rejects.toThrow(
+        'Failed to get plant ids',
+      );
+    });
+  });
 });

@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { EventEmitterModule, EventEmitter2 } from '@nestjs/event-emitter';
-import { UpdateCacheAllPlantsUseCase } from "src/cache/application/ports/in/update-cache-all-plants.usecase";
-import { EventCacheController } from "./event-cache.controller";
+import { UpdateCacheAllPlantsUseCase } from 'src/cache/application/ports/in/update-cache-all-plants.usecase';
+import { EventCacheController } from './event-cache.controller';
 import { UPDATE_CACHE_ALL_PLANTS_USECASE } from 'src/cache/application/ports/in/update-cache-all-plants.usecase';
 
 describe('EventCacheController', () => {
@@ -35,7 +35,7 @@ describe('EventCacheController', () => {
     await emitter.emitAsync('fetched.tokens');
 
     // Wait for event to be processed
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(useCase.updateAllCache).toHaveBeenCalledTimes(1);
   });

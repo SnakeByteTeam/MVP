@@ -211,7 +211,11 @@ describe('GetAnalyticsData', () => {
     it('should return a map keyed by day string with parsed alarm counts', async () => {
       mockRepository.query.mockResolvedValue(mockAlarmRows);
 
-      const result = await adapter.getAlarmsByWardId('ward-001', startDate, false);
+      const result = await adapter.getAlarmsByWardId(
+        'ward-001',
+        startDate,
+        false,
+      );
 
       expect(result.size).toBe(2);
       expect(result.get('2024-01-01')).toBe(3);
@@ -221,7 +225,11 @@ describe('GetAnalyticsData', () => {
     it('should handle day field as a Date object and convert it to ISO date string', async () => {
       mockRepository.query.mockResolvedValue(mockAlarmRowsWithDateObject);
 
-      const result = await adapter.getAlarmsByWardId('ward-001', startDate, false);
+      const result = await adapter.getAlarmsByWardId(
+        'ward-001',
+        startDate,
+        false,
+      );
 
       expect(result.size).toBe(1);
       expect(result.get('2024-01-03')).toBe(5);
@@ -230,7 +238,11 @@ describe('GetAnalyticsData', () => {
     it('should return an empty map when repository returns no rows', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      const result = await adapter.getAlarmsByWardId('ward-001', startDate, false);
+      const result = await adapter.getAlarmsByWardId(
+        'ward-001',
+        startDate,
+        false,
+      );
 
       expect(result.size).toBe(0);
     });

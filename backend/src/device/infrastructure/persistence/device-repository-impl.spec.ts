@@ -253,8 +253,8 @@ describe('DeviceRepositoryImpl', () => {
       await repository.findByPlantId('plant-1');
 
       const query = (mockClient.query as jest.Mock).mock.calls[0][0];
-      expect(query).toContain('structure_cache');
-      expect(query).toContain('plant_id');
+      expect(query).toContain('plant');
+      expect(query).toContain('id');
     });
   });
 });

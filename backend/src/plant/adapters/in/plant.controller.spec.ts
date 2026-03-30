@@ -16,7 +16,10 @@ describe('PlantController', () => {
       findAllAvailablePlants: jest.fn(),
     };
 
-    controller = new PlantController(findPlantByIdUseCase, findAllAvailablePlantsUseCase);
+    controller = new PlantController(
+      findPlantByIdUseCase,
+      findAllAvailablePlantsUseCase,
+    );
   });
 
   it('should return PlantDto mapped from domain model', async () => {
@@ -35,5 +38,78 @@ describe('PlantController', () => {
     expect(dto.name).toBe('My Plant');
     expect(dto.wardId).toBe(1);
     expect(dto.rooms).toEqual([]);
+  });
+
+  describe('getAllAvailablePlants', () => {
+    it('should return array of available plants as DTOs', async () => {
+      const plant1 = new Plant('plant-1', 'Plant A', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant B', [], 2);
+
+      findAllAvailablePlantsUseCase.findAllAvailablePlants.mockResolvedValue([
+        plant1,
+        plant2,
+      ]);
+
+      const result = await controller.getAllAvailablePlants();
+
+      expect(
+        findAllAvailablePlantsUseCase.findAllAvailablePlants,
+      ).toHaveBeenCalledTimes(1);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: 'plant-1',
+        name: 'Plant A',
+        rooms: [],
+        wardId: 1,
+      });
+      expect(result[1]).toEqual({
+        id: 'plant-2',
+        name: 'Plant B',
+        rooms: [],
+        wardId: 2,
+      });
+    });
+
+    it('should return error message when no plants found', async () => {
+      findAllAvailablePlantsUseCase.findAllAvailablePlants.mockRejectedValue(
+        new Error('No available plants'),
+      );
+
+      const result = await controller.getAllAvailablePlants();
+
+      expect(result).toEqual({
+        message: 'No available plants found',
+        statusCode: 202,
+      });
+    });
+
+    it('should handle empty plants array', async () => {
+      findAllAvailablePlantsUseCase.findAllAvailablePlants.mockResolvedValue(
+        [],
+      );
+
+      const result = await controller.getAllAvailablePlants();
+
+      expect(result).toEqual([]);
+    });
+
+    it('should map multiple plants correctly', async () => {
+      const plant1 = new Plant('plant-1', 'Growing Plant', [], 5);
+      const plant2 = new Plant('plant-2', 'Thriving Plant', [], 10);
+      const plant3 = new Plant('plant-3', 'New Plant', [], 0);
+
+      findAllAvailablePlantsUseCase.findAllAvailablePlants.mockResolvedValue([
+        plant1,
+        plant2,
+        plant3,
+      ]);
+
+      const result = await controller.getAllAvailablePlants();
+
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toBe('plant-1');
+      expect(result[0].wardId).toBe(5);
+      expect(result[2].wardId).toBe(0);
+    });
   });
 });

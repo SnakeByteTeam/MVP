@@ -1,3 +1,3 @@
 export interface RefreshNodeSubCmd {
-    plantId: string;
+  plantId: string;
 }

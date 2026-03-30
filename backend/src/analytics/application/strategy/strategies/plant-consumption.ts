@@ -22,7 +22,7 @@ export class PlantConsumption implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Plant Consumption Analytics', cmd.metric, [], []);
+      return new Plot('Plant Consumption Analytics', cmd.metric, '', [], []);
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -59,6 +59,7 @@ export class PlantConsumption implements AnalyticsStrategy {
     return new Plot(
       'Plant Consumption Analytics',
       cmd.metric,
+      'Wh',
       sorted.map(([day]) => day),
       sorted.map(([, wh]) => wh.toFixed(2)),
     );

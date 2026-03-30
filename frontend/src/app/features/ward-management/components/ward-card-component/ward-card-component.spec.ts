@@ -11,10 +11,10 @@ describe('WardCardComponent', () => {
   const ward = {
     id: 1,
     name: 'Cardiologia',
-    apartments: [{ id: 101, name: 'App. 101', isEnabled: true }],
+    apartments: [{ id: '101', name: 'App. 101' }],
     operators: [
       {
-        id: 'user-1',
+        id: 1,
         firstName: 'Mario',
         lastName: 'Rossi',
         username: 'mrossi',
@@ -103,31 +103,13 @@ describe('WardCardComponent', () => {
     const removePlantSpy = vi.spyOn(component.removePlant, 'emit');
     fixture.componentRef.setInput('ward', ward);
 
-    component.onRemovePlantClick(102);
+    component.onRemovePlantClick('102');
 
     expect(removePlantSpy).toHaveBeenCalledWith({
       wardId: 1,
-      plantId: 102,
+      plantId: '102',
     });
     expect(removePlantSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('onEnableApartment dovrebbe inoltrare l id plant', () => {
-    const enablePlantSpy = vi.spyOn(component.enablePlant, 'emit');
-
-    component.onEnablePlant(110);
-
-    expect(enablePlantSpy).toHaveBeenCalledWith(110);
-    expect(enablePlantSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('onDisableApartment dovrebbe inoltrare l id plant', () => {
-    const disablePlantSpy = vi.spyOn(component.disablePlant, 'emit');
-
-    component.onDisablePlant(111);
-
-    expect(disablePlantSpy).toHaveBeenCalledWith(111);
-    expect(disablePlantSpy).toHaveBeenCalledTimes(1);
   });
 
   it('non dovrebbe emettere eventi legati al ward quando ward e null', () => {
@@ -145,7 +127,7 @@ describe('WardCardComponent', () => {
     component.onAssignOperatorClick();
     component.onRemoveOperatorClick(1);
     component.onAssignPlantClick();
-    component.onRemovePlantClick(101);
+    component.onRemovePlantClick('101');
 
     expect(editWardSpy).not.toHaveBeenCalled();
     expect(deleteWardSpy).not.toHaveBeenCalled();

@@ -1,5 +1,4 @@
 export interface Plant {
-    id: number;
+    id: string;
     name: string;
-    isEnabled: boolean;
 }

@@ -23,7 +23,7 @@ describe('WardFormDialogComponent', () => {
   it('dovrebbe precompilare il nome in edit mode', async () => {
     // Arrange
     fixture.componentRef.setInput('ward', {
-      id: 'w-1',
+      id: 1,
       name: 'Cardiologia',
       apartments: [],
       operators: [],

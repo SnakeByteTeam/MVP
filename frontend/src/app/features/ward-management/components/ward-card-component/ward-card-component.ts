@@ -19,8 +19,6 @@ export class WardCardComponent {
   public readonly removeOperator = output<RemoveOperatorEvent>();
   public readonly assignPlant = output<number>();
   public readonly removePlant = output<RemovePlantEvent>();
-  public readonly enablePlant = output<number>();
-  public readonly disablePlant = output<number>();
 
   private readonly isExpandedSignal = signal(false);
   public readonly isExpanded = computed(() => this.isExpandedSignal());
@@ -64,18 +62,10 @@ export class WardCardComponent {
     }
   }
 
-  public onRemovePlantClick(plantId: number): void {
+  public onRemovePlantClick(plantId: string): void {
     const ward = this.ward();
     if (ward) {
       this.removePlant.emit({ wardId: ward.id, plantId });
     }
-  }
-
-  public onEnablePlant(plantId: number): void {
-    this.enablePlant.emit(plantId);
-  }
-
-  public onDisablePlant(plantId: number): void {
-    this.disablePlant.emit(plantId);
   }
 }

@@ -6,7 +6,7 @@ import {
   type FetchNewCacheRepoPort,
 } from 'src/cache/application/repository/fetch-new-cache.repository';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantDto } from 'src/plant/infrastructure/dtos/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
 import {
   type GetValidTokenPort,
   GETVALIDTOKENPORT,

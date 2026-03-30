@@ -1,36 +1,31 @@
-import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, map } from 'rxjs';
-import { UserApiService } from '../../../../core/services/user-api.service';
 import type { User } from '../../../../core/models/user.model';
 import type { AssignOperatorDto } from '../../models/ward-api.dto';
 import type { Ward } from '../../models/ward.model';
 
 @Component({
   selector: 'app-assign-operator-dialog-component',
-  imports: [ReactiveFormsModule, AsyncPipe],
+  imports: [ReactiveFormsModule],
   templateUrl: './assign-operator-dialog-component.html',
   styleUrl: './assign-operator-dialog-component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssignOperatorDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly userApiService = inject(UserApiService);
 
   public readonly wardId = input<number>(0);
   public readonly availableWards = input<Ward[]>([]);
+  public readonly availableOperators = input<User[]>([]);
   public readonly submitted = output<AssignOperatorDto>();
   public readonly cancelled = output<void>();
-
-  public operators$!: Observable<User[]>;
 
   public readonly form = this.formBuilder.group({
     userId: this.formBuilder.control<number | null>(null, { validators: [Validators.required] }),
   });
 
   public ngOnInit(): void {
-    this.operators$ = this.userApiService.getUsers().pipe(map((users) => users));
+    this.form.reset({ userId: null });
   }
 
   public onSubmit(): void {
@@ -44,5 +39,10 @@ export class AssignOperatorDialogComponent implements OnInit {
 
   public onCancel(): void {
     this.cancelled.emit();
+  }
+
+  public getOperatorLabel(operator: User): string {
+    const fullName = `${operator.firstName} ${operator.lastName}`.trim();
+    return fullName || operator.username;
   }
 }

@@ -1,4 +1,5 @@
 import { WardsPlantsRelationshipsRepositoryImpl } from './wards-plants-relationships-repository-impl';
+import { PoolClient } from 'pg';
 
 describe('WardsPlantsRelationshipsRepositoryImpl', () => {
   let repo: WardsPlantsRelationshipsRepositoryImpl;

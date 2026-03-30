@@ -21,7 +21,7 @@ export class AssignWardDialogComponent implements OnInit {
   public readonly cancelled = output<void>();
 
   public readonly form = this.formBuilder.group({
-    plantId: this.formBuilder.control<number | null>(null, { validators: [Validators.required] }),
+    plantId: this.formBuilder.control<string | null>(null, { validators: [Validators.required] }),
   });
 
   public ngOnInit(): void {

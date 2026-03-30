@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiAuthTokensService } from './api-auth-tokens.service';
 import { TokenPair } from 'src/tokens/domain/models/token-pair.model';
 import { GetTokensWithCodePort } from '../ports/out/get-tokens-with-code.port';
@@ -5,10 +6,15 @@ import { WriteTokensRepoPort } from '../ports/out/write-tokens-repo.port';
 
 describe('ApiAuthTokensService', () => {
   let service: ApiAuthTokensService;
+  let eventEmitter: jest.Mocked<EventEmitter2>;
   let getTokensWithCodePort: jest.Mocked<GetTokensWithCodePort>;
   let writeTokensRepoPort: jest.Mocked<WriteTokensRepoPort>;
 
   beforeEach(() => {
+    eventEmitter = {
+      emit: jest.fn(),
+    } as any;
+
     getTokensWithCodePort = {
       getTokensWithCode: jest.fn(),
     };
@@ -18,6 +24,7 @@ describe('ApiAuthTokensService', () => {
     };
 
     service = new ApiAuthTokensService(
+      eventEmitter,
       getTokensWithCodePort,
       writeTokensRepoPort,
     );

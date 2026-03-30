@@ -27,6 +27,7 @@
             <div class="mb-2 flex items-center justify-between gap-2">
                 <h3 class="text-sm font-bold text-neutral-900">Operatori Socio Sanitari del reparto:</h3>
                 <button type="button" (click)="onAssignOperatorClick()"
+                    aria-label="Aggiungi operatore al reparto {{ currentWard.name }}"
                     class="rounded-full border border-green-700 bg-green-600 px-2 py-0.5 text-sm font-bold leading-5 text-white hover:bg-green-700">
                     +
                 </button>
@@ -42,6 +43,7 @@
                     <span class="truncate text-sm font-semibold text-neutral-900">{{ operator.firstName }} {{
                         operator.lastName }}</span>
                     <button type="button" (click)="onRemoveOperatorClick(+operator.id)"
+                        aria-label="Rimuovi operatore {{ operator.firstName }} {{ operator.lastName }} dal reparto {{ currentWard.name }}"
                         class="rounded-full border border-red-700 bg-red-500 px-1.5 py-0 text-xs font-bold text-white hover:bg-red-600">
                         x
                     </button>
@@ -55,6 +57,7 @@
             <div class="mb-2 flex items-center justify-between gap-2">
                 <h3 class="text-sm font-bold text-neutral-900">Appartamenti del reparto:</h3>
                 <button type="button" (click)="onAssignPlantClick()"
+                    aria-label="Aggiungi appartamento al reparto {{ currentWard.name }}"
                     class="rounded-full border border-green-700 bg-green-600 px-2 py-0.5 text-sm font-bold leading-5 text-white hover:bg-green-700">
                     +
                 </button>
@@ -67,9 +70,9 @@
                 @for (apartment of currentWard.apartments; track apartment.id) {
                 <li
                     class="flex items-center justify-between gap-2 rounded-md border border-neutral-500 bg-white px-3 py-1.5">
-                    <app-ward-row-component [plant]="apartment" [wardId]="currentWard.id"
-                        (enable)="onEnablePlant($event)" (disable)="onDisablePlant($event)" />
+                    <app-ward-row-component [plant]="apartment" [wardId]="currentWard.id" />
                     <button type="button" (click)="onRemovePlantClick(apartment.id)"
+                        aria-label="Rimuovi appartamento {{ apartment.name }} dal reparto {{ currentWard.name }}"
                         class="rounded-full border border-red-700 bg-red-500 px-1.5 py-0 text-xs font-bold text-white hover:bg-red-600">
                         x
                     </button>

@@ -5,5 +5,5 @@ export interface RemoveOperatorEvent {
 
 export interface RemovePlantEvent {
     wardId: number;
-    plantId: number;
+    plantId: string;
 }

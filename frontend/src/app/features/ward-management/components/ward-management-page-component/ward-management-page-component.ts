@@ -5,18 +5,17 @@ import type { Plant } from '../../models/plant.model';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../../models/ward-api.dto';
 import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/ward-management.events';
 import type { Ward } from '../../models/ward.model';
+import type { User } from '../../../../core/models/user.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { WardManagementStore } from '../../services/ward-management.store';
 import { AssignWardDialogComponent } from '../assign-ward-dialog-component/assign-ward-dialog-component';
 import { AssignOperatorDialogComponent } from '../assign-operator-dialog-component/assign-operator-dialog-component';
-import { WardCardComponent } from '../ward-card-component/ward-card-component';
 import { WardFormDialogComponent } from '../ward-form-dialog-component/ward-form-dialog-component';
 
 @Component({
   selector: 'app-ward-management-page-component',
   imports: [
     AsyncPipe,
-    WardCardComponent,
     WardFormDialogComponent,
     AssignOperatorDialogComponent,
     AssignWardDialogComponent,
@@ -36,17 +35,42 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public readonly snackbarMessage = signal<string | null>(null);
   public readonly wardDialogMode = signal<'closed' | 'create' | 'edit'>('closed');
-  public readonly selectedWard = signal<Ward | null>(null);
+  public readonly selectedWardId = signal<number | null>(null);
+  public readonly selectedApartmentId = signal<string | null>(null);
+  public readonly mobileStep = signal<'wards' | 'apartments' | 'operators'>('wards');
   public readonly operatorWardId = signal<number | null>(null);
+  public readonly availableOperatorsFromFetch = signal<User[] | null>(null);
+  public readonly isLoadingAvailableOperators = signal(false);
   public readonly plantWardId = signal<number | null>(null);
+  public readonly availablePlantsFromFetch = signal<Plant[] | null>(null);
+  public readonly isLoadingAvailablePlants = signal(false);
   public readonly confirmState = signal<
     | { kind: 'delete-ward'; wardId: number }
     | { kind: 'remove-operator'; wardId: number; userId: number }
-    | { kind: 'remove-plant'; wardId: number; plantId: number }
+    | { kind: 'remove-plant'; wardId: number; plantId: string }
     | null
   >(null);
 
   public readonly wardsSnapshot = signal<Ward[]>([]);
+  public readonly selectedWard = computed<Ward | null>(() => {
+    const wardId = this.selectedWardId();
+    if (!wardId) {
+      return null;
+    }
+
+    return this.wardsSnapshot().find((ward) => ward.id === wardId) ?? null;
+  });
+
+  public readonly selectedApartment = computed<Plant | null>(() => {
+    const apartmentId = this.selectedApartmentId();
+    const ward = this.selectedWard();
+    if (!apartmentId || !ward) {
+      return null;
+    }
+
+    return ward.apartments.find((apartment) => apartment.id === apartmentId) ?? null;
+  });
+
   public readonly wardDialogValue = computed<Ward | null>(() => {
     if (this.wardDialogMode() !== 'edit') {
       return null;
@@ -56,27 +80,23 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   });
 
   public readonly availablePlants = computed<Plant[]>(() => {
-    const selectedWardId = this.plantWardId();
-    if (!selectedWardId) {
-      return [];
+    const fetchedPlants = this.availablePlantsFromFetch();
+    if (fetchedPlants !== null) {
+      return fetchedPlants;
     }
 
-    const wards = this.wardsSnapshot();
-    const selectedWard = wards.find((ward) => ward.id === selectedWardId);
-    if (!selectedWard) {
-      return [];
+    // Without backend response, we cannot reliably infer global unassigned plants.
+    return [];
+  });
+
+  public readonly availableOperators = computed<User[]>(() => {
+    const fetchedOperators = this.availableOperatorsFromFetch();
+    if (fetchedOperators !== null) {
+      return fetchedOperators;
     }
 
-    const assignedToSelected = new Set(selectedWard.apartments.map((plant) => plant.id));
-    const knownPlants = wards.flatMap((ward) => ward.apartments);
-    const uniquePlants = new Map<number, Plant>();
-    for (const plant of knownPlants) {
-      if (!uniquePlants.has(plant.id) && !assignedToSelected.has(plant.id)) {
-        uniquePlants.set(plant.id, plant);
-      }
-    }
-
-    return Array.from(uniquePlants.values());
+    // Without backend response, we cannot reliably infer global unassigned operators.
+    return [];
   });
 
   public ngOnInit(): void {
@@ -84,6 +104,30 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
     this.wards$.pipe(takeUntil(this.destroy$)).subscribe((wards) => {
       this.wardsSnapshot.set(wards);
+
+      if (wards.length === 0) {
+        this.selectedWardId.set(null);
+        this.selectedApartmentId.set(null);
+        this.mobileStep.set('wards');
+        return;
+      }
+
+      const selectedWardId = this.selectedWardId();
+      const selectedWardExists = selectedWardId !== null && wards.some((ward) => ward.id === selectedWardId);
+
+      if (!selectedWardExists) {
+        this.selectedWardId.set(wards[0].id);
+        this.selectedApartmentId.set(null);
+      }
+
+      const selectedApartmentId = this.selectedApartmentId();
+      if (selectedApartmentId !== null) {
+        const activeWard = wards.find((ward) => ward.id === this.selectedWardId());
+        const apartmentStillExists = activeWard?.apartments.some((apartment) => apartment.id === selectedApartmentId) ?? false;
+        if (!apartmentStillExists) {
+          this.selectedApartmentId.set(null);
+        }
+      }
     });
 
     this.error$.pipe(takeUntil(this.destroy$)).subscribe((message) => {
@@ -100,8 +144,34 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     this.snackbarMessage.set(null);
   }
 
+  public selectWard(wardId: number): void {
+    if (this.selectedWardId() === wardId) {
+      this.mobileStep.set('apartments');
+      return;
+    }
+
+    this.selectedWardId.set(wardId);
+    this.selectedApartmentId.set(null);
+    this.mobileStep.set('apartments');
+  }
+
+  public selectApartment(apartmentId: string): void {
+    this.selectedApartmentId.set(apartmentId);
+  }
+
+  public showWardListStep(): void {
+    this.mobileStep.set('wards');
+  }
+
+  public showApartmentsStep(): void {
+    this.mobileStep.set('apartments');
+  }
+
+  public showOperatorsStep(): void {
+    this.mobileStep.set('operators');
+  }
+
   public onCreateWard(): void {
-    this.selectedWard.set(null);
     this.wardDialogMode.set('create');
   }
 
@@ -111,7 +181,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   }
 
   public onEditWard(ward: Ward): void {
-    this.selectedWard.set(ward);
+    this.selectedWardId.set(ward.id);
     this.wardDialogMode.set('edit');
   }
 
@@ -122,12 +192,10 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     }
 
     this.store.updateWard(ward.id, dto);
-    this.selectedWard.set(null);
     this.wardDialogMode.set('closed');
   }
 
   public onCloseWardDialog(): void {
-    this.selectedWard.set(null);
     this.wardDialogMode.set('closed');
   }
 
@@ -137,6 +205,13 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public onAssignOperator(wardId: number): void {
     this.operatorWardId.set(wardId);
+    this.availableOperatorsFromFetch.set(null);
+    this.isLoadingAvailableOperators.set(true);
+
+    this.store.getAvailableUsersForWard(wardId).pipe(takeUntil(this.destroy$)).subscribe((users) => {
+      this.availableOperatorsFromFetch.set(users);
+      this.isLoadingAvailableOperators.set(false);
+    });
   }
 
   public onAssignOperatorSubmit(dto: AssignOperatorDto): void {
@@ -147,10 +222,14 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
     this.store.assignOperator(wardId, dto);
     this.operatorWardId.set(null);
+    this.availableOperatorsFromFetch.set(null);
+    this.isLoadingAvailableOperators.set(false);
   }
 
   public onCloseAssignOperatorDialog(): void {
     this.operatorWardId.set(null);
+    this.availableOperatorsFromFetch.set(null);
+    this.isLoadingAvailableOperators.set(false);
   }
 
   public onRemoveOperator(event: RemoveOperatorEvent): void {
@@ -159,6 +238,13 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public onAssignPlant(wardId: number): void {
     this.plantWardId.set(wardId);
+    this.availablePlantsFromFetch.set(null);
+    this.isLoadingAvailablePlants.set(true);
+
+    this.store.getAvailablePlantsForWard(wardId).pipe(takeUntil(this.destroy$)).subscribe((plants) => {
+      this.availablePlantsFromFetch.set(plants);
+      this.isLoadingAvailablePlants.set(false);
+    });
   }
 
   public onAssignPlantSubmit(dto: AssignPlantDto): void {
@@ -173,6 +259,8 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public onCloseAssignPlantDialog(): void {
     this.plantWardId.set(null);
+    this.availablePlantsFromFetch.set(null);
+    this.isLoadingAvailablePlants.set(false);
   }
 
   public onRemovePlant(event: RemovePlantEvent): void {
@@ -181,14 +269,6 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
       wardId: event.wardId,
       plantId: event.plantId,
     });
-  }
-
-  public onEnablePlant(plantId: number): void {
-    this.store.enablePlant(plantId);
-  }
-
-  public onDisablePlant(plantId: number): void {
-    this.store.disablePlant(plantId);
   }
 
   public onConfirmDialogConfirmed(): void {
@@ -235,5 +315,9 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
 
   public getConfirmLabel(): string {
     return 'Conferma';
+  }
+
+  public getOperatorDisplayName(firstName: string, lastName: string): string {
+    return `${firstName} ${lastName}`.trim();
   }
 }

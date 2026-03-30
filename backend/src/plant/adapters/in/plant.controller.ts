@@ -1,4 +1,10 @@
-import { Controller, Query, Get, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Query,
+  Get,
+  Inject,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -7,12 +13,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FindPlantByIdCmd } from 'src/plant/application/commands/find-plant-by-id.command';
+import { FIND_ALL_AVAILABLE_PLANTS_USECASE, type FindAllAvailablePlantsUseCase } from 'src/plant/application/ports/in/find-all-available-plants.usecase';
 import {
   FIND_PLANT_BY_ID_USECASE,
   type FindPlantByIdUseCase,
 } from 'src/plant/application/ports/in/find-plant-by-id.usecase';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantDto } from 'src/plant/infrastructure/dtos/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
 
 @ApiTags('plant')
 @Controller('plant')
@@ -20,6 +27,8 @@ export class PlantController {
   constructor(
     @Inject(FIND_PLANT_BY_ID_USECASE)
     private readonly findPlantById: FindPlantByIdUseCase,
+    @Inject(FIND_ALL_AVAILABLE_PLANTS_USECASE) 
+    private readonly findAllAvailablePlants: FindAllAvailablePlantsUseCase
   ) {}
 
   @Get()
@@ -51,11 +60,27 @@ export class PlantController {
     },
   })
   async findById(@Query('plantid') plantId: string) {
-    const findByPlantIdCmd: FindPlantByIdCmd = {
-      id: plantId,
-    };
+    try {
+      const findByPlantIdCmd: FindPlantByIdCmd = {
+        id: plantId,
+      };
 
-    const plant: Plant = await this.findPlantById.findById(findByPlantIdCmd);
-    return PlantDto.fromDomain(plant);
+      const plant: Plant = await this.findPlantById.findById(findByPlantIdCmd);
+      return PlantDto.fromDomain(plant);
+    } catch {
+      throw new NotFoundException();
+    }
+  }
+
+  @Get('available')
+  async getAllAvailablePlants() {
+    try{
+        const plants: Plant[] = await this.findAllAvailablePlants.findAllAvailablePlants();
+
+        const plantsDto: PlantDto[] = plants.map((plant: Plant) => PlantDto.fromDomain(plant));
+        return plantsDto;
+    } catch {
+        return { message: 'No available plants found', statusCode: 202}
+    }
   }
 }

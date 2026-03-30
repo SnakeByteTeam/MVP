@@ -1,10 +1,15 @@
 import { DeleteWardCmd } from '../../application/commands/delete-ward-cmd';
 import { DeleteWardAdapter } from './delete-ward-adapter';
+import { DeleteWardCmd } from '../../application/commands/delete-ward-cmd';
 
 describe('DeleteWardAdapter', () => {
+<<<<<<< HEAD
   let adapter: DeleteWardAdapter;
 
   const mockRepo = {
+=======
+  const deleteWardRepository = {
+>>>>>>> grafica-reparti
     deleteWard: jest.fn(),
   };
 

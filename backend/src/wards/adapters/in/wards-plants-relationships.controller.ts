@@ -34,7 +34,7 @@ export class WardsPlantsRelationshipsController {
     private readonly findAllPlantsByWardIdUseCase: FindAllPlantsByWardIdUseCase,
     @Inject(REMOVE_PLANT_FROM_WARD_USE_CASE)
     private readonly removePlantFromWardUseCase: RemovePlantFromWardUseCase,
-  ) {}
+  ) { }
 
   @Post()
   async addPlantToWard(

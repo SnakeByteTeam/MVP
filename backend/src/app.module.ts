@@ -10,6 +10,8 @@ import { ApiAuthVimarModule } from './api-auth-vimar/api-auth-vimar.module';
 import { TokensModule } from './tokens/tokens.module';
 import { DeviceModule } from './device/device.module';
 import { PlantModule } from './plant/plant.module';
+import { AlarmsModule } from './alarms/alarms.module';
+
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { PlantModule } from './plant/plant.module';
     DeviceModule,
     PlantModule,
     AuthModule,
-    WardsModule
+    WardsModule, AlarmsModule
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule { }

@@ -13,9 +13,6 @@ import { PlantModule } from './plant/plant.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 
-import { RawBodyMiddleware } from './middlewares/raw-body.middleware';
-import { JsonBodyMiddleware } from './middlewares/json-body.middleware';
-
 @Module({
   imports: [
     AnalyticsModule,
@@ -33,20 +30,4 @@ import { JsonBodyMiddleware } from './middlewares/json-body.middleware';
     EventEmitterModule.forRoot(),
   ],
 })
-export class AppModule {
-  private rawBodyParsingRoutes: Array<RouteInfo> = [
-    {
-      path: 'cache/update',
-      method: RequestMethod.POST,
-    },
-  ];
-
-  public configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-    consumer
-      .apply(RawBodyMiddleware)
-      .forRoutes(...this.rawBodyParsingRoutes)
-      .apply(JsonBodyMiddleware)
-      .exclude(...this.rawBodyParsingRoutes)
-      .forRoutes('*');
-  }
-}
+export class AppModule {}

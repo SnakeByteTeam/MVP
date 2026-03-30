@@ -11,7 +11,6 @@ import {
   type UpdateCacheUseCase,
 } from 'src/cache/application/ports/in/update-cache.usecase';
 import { SubNotificationPayloadDto } from 'src/cache/infrastructure/http/dtos/in/subNotification.dto';
-import { WebhookGuard } from 'src/cache/infrastructure/http/guards/webhook.guard';
 
 @Controller('cache')
 export class HttpCacheController {
@@ -22,7 +21,6 @@ export class HttpCacheController {
 
   @Post('update')
   @HttpCode(202)
-  @UseGuards(WebhookGuard)
   async updateCache(@Body() payload: SubNotificationPayloadDto) {
     const plantIds = payload.data
       .filter((item: any) => item.type === 'service')

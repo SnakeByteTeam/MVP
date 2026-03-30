@@ -52,25 +52,15 @@ const ANALYTICS_STRATEGIES_TOKEN = 'ANALYTICS_STRATEGIES';
         plantAnomalies,
         thermostatTemperature,
       ],
-      inject: [
-        PlantConsumption,
-        PlantAnomalies,
-        PlantThermostatTemperature,
-      ],
+      inject: [PlantConsumption, PlantAnomalies, PlantThermostatTemperature],
     },
     {
       provide: SENSOR_STRATEGIES_TOKEN,
       useFactory: (
         sensorLongPresence: SensorLongPresence,
         sensorPresence: SensorPresence,
-      ): AnalyticsStrategy[] => [
-        sensorLongPresence,
-        sensorPresence,
-      ],
-      inject: [
-        SensorLongPresence,
-        SensorPresence,
-      ],
+      ): AnalyticsStrategy[] => [sensorLongPresence, sensorPresence],
+      inject: [SensorLongPresence, SensorPresence],
     },
     {
       provide: WARD_STRATEGIES_TOKEN,
@@ -83,11 +73,7 @@ const ANALYTICS_STRATEGIES_TOKEN = 'ANALYTICS_STRATEGIES';
         wardFalls,
         wardResolvedAlarm,
       ],
-      inject: [
-        WardAlarmsFrequency,
-        WardFalls,
-        WardResolvedAlarm,
-      ],
+      inject: [WardAlarmsFrequency, WardFalls, WardResolvedAlarm],
     },
     {
       provide: ANALYTICS_STRATEGIES_TOKEN,
@@ -96,22 +82,13 @@ const ANALYTICS_STRATEGIES_TOKEN = 'ANALYTICS_STRATEGIES';
         sensorStrategies: AnalyticsStrategy[],
         wardStrategies: AnalyticsStrategy[],
       ): Map<string, AnalyticsStrategy> => {
-        const [
-          plantConsumption,
-          plantAnomalies,
-          thermostatTemperature,
-        ] = plantStrategies;
+        const [plantConsumption, plantAnomalies, thermostatTemperature] =
+          plantStrategies;
 
-        const [
-          sensorLongPresence,
-          sensorPresence,
-        ] = sensorStrategies;
+        const [sensorLongPresence, sensorPresence] = sensorStrategies;
 
-        const [
-          wardAlarmsFrequency,
-          wardFalls,
-          wardResolvedAlarm,
-        ] = wardStrategies;
+        const [wardAlarmsFrequency, wardFalls, wardResolvedAlarm] =
+          wardStrategies;
         return new Map<string, AnalyticsStrategy>([
           ['plant-consumption', plantConsumption],
           ['plant-anomalies', plantAnomalies],

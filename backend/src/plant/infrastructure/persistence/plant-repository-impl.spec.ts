@@ -1,15 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { PlantRepositoryImpl } from './plant-repository-impl';
-import { PG_POOL } from 'src/database/database.module';
-import { Pool } from 'pg';
 import { PlantEntity } from './entities/plant.entity';
 
 describe('PlantRepositoryImpl', () => {
   let repository: PlantRepositoryImpl;
-  let mockPool: Partial<Pool>;
   let mockClient: any;
+  let mockPool: any;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     mockClient = {
       query: jest.fn(),
       release: jest.fn(),
@@ -19,18 +16,7 @@ describe('PlantRepositoryImpl', () => {
       connect: jest.fn().mockResolvedValue(mockClient),
     };
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PlantRepositoryImpl,
-        { provide: PG_POOL, useValue: mockPool },
-      ],
-    }).compile();
-
-    repository = module.get<PlantRepositoryImpl>(PlantRepositoryImpl);
-  });
-
-  it('should be defined', () => {
-    expect(repository).toBeDefined();
+    repository = new PlantRepositoryImpl(mockPool);
   });
 
   describe('findById', () => {
@@ -117,9 +103,7 @@ describe('PlantRepositoryImpl', () => {
     });
 
     it('should handle connection errors', async () => {
-      (mockPool.connect as jest.Mock).mockRejectedValueOnce(
-        new Error('Connection failed'),
-      );
+      mockPool.connect.mockRejectedValueOnce(new Error('Connection failed'));
 
       await expect(repository.findById('plant-1')).rejects.toThrow(
         'Connection failed',
@@ -131,6 +115,85 @@ describe('PlantRepositoryImpl', () => {
 
       try {
         await repository.findById('plant-1');
+      } catch (e) {
+        // Expected error
+      }
+
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllAvailablePlants', () => {
+    it('should find all available plants', async () => {
+      const mockRows: PlantEntity[] = [
+        {
+          id: 'plant-1',
+          cached_at: new Date(),
+          ward_id: 0,
+          data: { name: 'Plant A', rooms: [] },
+        },
+        {
+          id: 'plant-2',
+          cached_at: new Date(),
+          ward_id: 0,
+          data: { name: 'Plant B', rooms: [] },
+        },
+      ];
+
+      mockClient.query.mockResolvedValueOnce({ rows: mockRows });
+
+      const result = await repository.findAllAvailablePlants();
+
+      expect(mockPool.connect).toHaveBeenCalled();
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('WHERE ward_id IS NULL'),
+      );
+      expect(mockClient.release).toHaveBeenCalled();
+      expect(result).toEqual(mockRows);
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return null when no available plants found', async () => {
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
+
+      const result = await repository.findAllAvailablePlants();
+
+      expect(result).toBeNull();
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('should return only plants with ward_id IS NULL', async () => {
+      const mockRow: PlantEntity = {
+        id: 'plant-1',
+        cached_at: new Date(),
+        ward_id: 0,
+        data: { name: 'Available Plant', rooms: [] },
+      };
+
+      mockClient.query.mockResolvedValueOnce({ rows: [mockRow] });
+
+      const result = await repository.findAllAvailablePlants();
+
+      expect(result?.[0].ward_id).toBe(0);
+      expect(result?.length).toBe(1);
+    });
+
+    it('should handle database query errors on findAllAvailablePlants', async () => {
+      mockClient.query.mockRejectedValueOnce(
+        new Error('Database error on select all'),
+      );
+
+      await expect(repository.findAllAvailablePlants()).rejects.toThrow(
+        'Database error on select all',
+      );
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('should release connection even on findAllAvailablePlants error', async () => {
+      mockClient.query.mockRejectedValueOnce(new Error('Query failed'));
+
+      try {
+        await repository.findAllAvailablePlants();
       } catch (e) {
         // Expected error
       }

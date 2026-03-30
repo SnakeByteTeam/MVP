@@ -18,7 +18,9 @@ import { GetAllPlantIdsRepoPort } from 'src/cache/application/repository/get-all
 import { PlantSeekResponseDto } from './dtos/in/plant-seek.dto';
 
 @Injectable()
-export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPlantIdsRepoPort {
+export class FetchStructureCacheImpl
+  implements FetchNewCacheRepoPort, GetAllPlantIdsRepoPort
+{
   private readonly API_DOMAIN = process.env.HOST3 || '';
 
   constructor(private readonly httpService: HttpService) {}
@@ -26,10 +28,12 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
   async fetch(validToken: string, plantId: string): Promise<PlantDto | null> {
     try {
       const response = await firstValueFrom(
-        this.httpService.get(`${this.API_DOMAIN}/${plantId}/locations`, {
-          headers: { Authorization: `Bearer ${validToken}` },
-          timeout: 30000
-        }).pipe(retry({count: 3, delay: 2000})),
+        this.httpService
+          .get(`${this.API_DOMAIN}/${plantId}/locations`, {
+            headers: { Authorization: `Bearer ${validToken}` },
+            timeout: 30000,
+          })
+          .pipe(retry({ count: 3, delay: 2000 })),
       );
 
       if (!response.data) return null;
@@ -43,28 +47,17 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
       const plantdto = new PlantDto();
       plantdto.id = plantId;
       plantdto.name = apiResponse.data[0].attributes.title;
-      
+
       const roomsToFetch = apiResponse.data.filter((room: ApiRoomDto) =>
         room.meta.type.includes('loc:Location'),
       );
-      
-      plantdto.rooms = [];
-      // Viene fatto con il for piuttosto che con il map + Promise.all altrimenti il server viene bombardato di richieste parallele e risponde con 504
-      for (const room of roomsToFetch) {
-        try {
-          const roomDto = await this.fetchRoom(validToken, plantId, room);
-          if (roomDto) {
-            plantdto.rooms.push(roomDto);
-          }
-        } catch (roomError) {
-          console.warn(
-            `[FetchStructureCacheImpl] Failed to fetch room ${room.id} for plant ${plantId}:`,
-            roomError.message,
-          );
-          // Skip this room and continue with next
-          continue;
-        }
-      }
+
+      plantdto.rooms = await Promise.all(
+        roomsToFetch.map(
+          async (room: ApiRoomDto) =>
+            await this.fetchRoom(validToken, plantId, room),
+        ),
+      );
 
       return plantdto;
     } catch (error) {
@@ -72,20 +65,20 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
         `[FetchStructureCacheImpl] Error fetching plant structure for ${plantId}:`,
         error.message,
       );
-      return null; 
+      return null;
     }
   }
 
   async getAllPlantIds(validToken: string): Promise<string[]> {
-      const PLANT_DOMAIN: string = process.env.PLANT_DOMAIN || '';
-  
-      const response = await firstValueFrom(
-        this.httpService.get<PlantSeekResponseDto>(PLANT_DOMAIN, {
-          headers: { Authorization: `Bearer ${validToken}` },
-        }),
-      );
-  
-      return response.data.api.templates.plantId.values;
+    const PLANT_DOMAIN: string = process.env.PLANT_DOMAIN || '';
+
+    const response = await firstValueFrom(
+      this.httpService.get<PlantSeekResponseDto>(PLANT_DOMAIN, {
+        headers: { Authorization: `Bearer ${validToken}` },
+      }),
+    );
+
+    return response.data.api.templates.plantId.values;
   }
 
   private async fetchRoom(
@@ -94,13 +87,12 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
     room: ApiRoomDto,
   ): Promise<RoomDto> {
     const response = await firstValueFrom(
-      this.httpService.get(
-        `${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`,
-        { 
-          headers: { Authorization: `Bearer ${validToken}` }, 
-          timeout: 30000
-        },
-      ).pipe(retry({count: 3, delay: 2000})),
+      this.httpService
+        .get(`${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`, {
+          headers: { Authorization: `Bearer ${validToken}` },
+          timeout: 30000,
+        })
+        .pipe(retry({ count: 3, delay: 2000 })),
     );
 
     if (!response.data)
@@ -115,23 +107,14 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
     roomdto.id = room.id;
     roomdto.name = room.attributes.title;
 
-    roomdto.devices = [];
-    // Fetch devices sequentially and skip failed devices instead of failing entire room
-    for (const device of deviceResponse.data) {
-      try {
-        const deviceDto = await this.fetchDevice(validToken, plantId, device);
-        if (deviceDto) {
-          roomdto.devices.push(deviceDto);
-        }
-      } catch (deviceError) {
-        console.warn(
-          `[FetchStructureCacheImpl] Failed to fetch device ${device.id} in room ${room.id}:`,
-          deviceError.message,
-        );
-        // Skip this device and continue with next
-        continue;
-      }
-    }
+    const deviceToFetch: ApiDeviceDto[] = deviceResponse.data;
+
+    roomdto.devices = await Promise.all(
+      deviceToFetch.map(
+        async (device: ApiDeviceDto) =>
+          await this.fetchDevice(validToken, plantId, device),
+      ),
+    );
 
     return roomdto;
   }
@@ -142,13 +125,15 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
     device: any,
   ): Promise<DeviceDto> {
     const response = await firstValueFrom(
-      this.httpService.get(
-        `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
-        { 
-          headers: { Authorization: `Bearer ${validToken}` }, 
-          timeout: 30000
-        },
-      ).pipe(retry({count: 3, delay: 2000})),
+      this.httpService
+        .get(
+          `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
+          {
+            headers: { Authorization: `Bearer ${validToken}` },
+            timeout: 30000,
+          },
+        )
+        .pipe(retry({ count: 3, delay: 2000 })),
     );
 
     if (!response.data)
@@ -169,30 +154,16 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort, GetAllPla
     devicedto.type = device.meta.ssType;
     devicedto.subType = device.meta.sfType;
 
-    devicedto.datapoints = [];
-    // Process datapoints sequentially and skip failed datapoints instead of failing entire device
-    for (const dp of datapointReponse.data) {
-      try {
-        const datapointDto = await this.fetchDatapoint(dp);
-        if (datapointDto) {
-          devicedto.datapoints.push(datapointDto);
-        }
-      } catch (datapointError) {
-        console.warn(
-          `[FetchStructureCacheImpl] Failed to process datapoint ${dp.id}:`,
-          datapointError.message,
-        );
-        // Skip this datapoint and continue with next
-        continue;
-      }
-    }
+    const datapointTofetch: ApiDatapointDto[] = datapointReponse.data;
+
+    devicedto.datapoints = datapointTofetch.map((dp: ApiDatapointDto) =>
+      this.fetchDatapoint(dp),
+    );
 
     return devicedto;
   }
 
-  private async fetchDatapoint(
-    datapoint: ApiDatapointDto,
-  ): Promise<DatapointDto> {
+  private fetchDatapoint(datapoint: ApiDatapointDto): DatapointDto {
     const datapointdto: DatapointDto = {
       id: datapoint.id,
       name: datapoint.attributes.title,

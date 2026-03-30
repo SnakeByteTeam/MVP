@@ -1,23 +1,25 @@
-DROP TABLE IF EXISTS TOKEN_CACHE;
-DROP TABLE IF EXISTS STRUCTURE_CACHE;
+DROP TABLE IF EXISTS token_cache;
+DROP TABLE IF EXISTS plant;
 
-CREATE UNLOGGED TABLE TOKEN_CACHE (
+CREATE UNLOGGED TABLE token_cache (
     access_token TEXT NOT NULL, 
     refresh_token TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
 
     lock BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT single_row UNIQUE (LOCK),
-    CONSTRAINT lock_always_true CHECK (LOCK = TRUE) -- questi ultimi due garantiscono una singola riga, non serve id
+    CONSTRAINT lock_always_true CHECK (LOCK = TRUE)
 );
 
-CREATE TABLE STRUCTURE_CACHE (
-    cached_at TIMESTAMPTZ NOT NULL, 
-    plant_id VARCHAR(36) NOT NULL, 
-    data JSONB NOT NULL, 
-    ward_id VARCHAR(36) DEFAULT NULL,
-
-    PRIMARY KEY (plant_id)
+CREATE TABLE ward (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE 
 );
 
+CREATE TABLE plant (
+    cached_at TIMESTAMPTZ NOT NULL,
+    id VARCHAR(36) PRIMARY KEY,
+    data JSONB NOT NULL,
+    ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL
+);
 

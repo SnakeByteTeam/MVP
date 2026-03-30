@@ -9,7 +9,7 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
   constructor(
     @Inject('GET_ANALYTICS_PORT')
     private readonly analyticsPort: GetAnalyticsPort,
-  ) { }
+  ) {}
 
   async execute(cmd: GetAnalyticsCmd): Promise<Plot> {
     const startDate = new Date();

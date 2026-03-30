@@ -1,5 +1,5 @@
 export interface GetAllPlantIdsPort {
-    getAllPlantIds(): Promise<string[]>;
+  getAllPlantIds(): Promise<string[]>;
 }
 
 export const GET_ALL_PLANTIDS_PORT = Symbol('GetAllPlantIdsPort');

@@ -1,5 +1,4 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
 import { GroqClient } from './groq.client';
 import { GroqSuggestionResult } from '../dtos/groq-suggestion-result.dto';
@@ -47,8 +46,8 @@ export class GroqClientImpl implements GroqClient {
   private readonly apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
   private readonly model = 'llama-3.3-70b-versatile';
 
-  constructor(private readonly configService: ConfigService) {
-    this.apiKey = this.configService.getOrThrow<string>('GROQ_API_KEY');
+  constructor() {
+    this.apiKey = process.env.GROQ_API_KEY || '';
   }
 
   async generateSuggestion(

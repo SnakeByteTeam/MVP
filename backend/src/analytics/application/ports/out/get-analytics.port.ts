@@ -1,4 +1,4 @@
-import { DatapointValue } from "src/analytics/domain/datapoint-value.model";
+import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
 
 export interface GetAnalyticsPort {
   getDataByPlantId(

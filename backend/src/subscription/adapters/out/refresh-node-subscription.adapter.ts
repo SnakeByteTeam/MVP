@@ -8,7 +8,7 @@ import {
 import {
   type GetValidTokenPort,
   GETVALIDTOKENPORT,
-} from 'src/tokens/application/ports/out/get-valid-token.port';
+} from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
 
 @Injectable()
 export class RefreshNodeSubscriptionAdapter implements RefreshNodeSubscriptionPort {

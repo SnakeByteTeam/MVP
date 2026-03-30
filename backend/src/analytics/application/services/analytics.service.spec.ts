@@ -7,6 +7,7 @@ import { Plot } from 'src/analytics/domain/plot.model';
 const mockPlot = new Plot(
   'Plant Consumption Analytics',
   'plant-consumption',
+  'Wh',
   [],
   [],
 );
@@ -83,6 +84,7 @@ describe('AnalyticsService', () => {
       const wardFallsPlot = new Plot(
         'Ward Falls Analytics',
         'ward-falls',
+        '',
         [],
         [],
       );

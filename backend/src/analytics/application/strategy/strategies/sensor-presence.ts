@@ -21,7 +21,7 @@ export class SensorPresence implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Sensor Presence Analytics', cmd.metric, [], []);
+      return new Plot('Sensor Presence Analytics', cmd.metric, '', [], []);
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -54,6 +54,7 @@ export class SensorPresence implements AnalyticsStrategy {
     return new Plot(
       'Sensor Presence Analytics',
       cmd.metric,
+      '',
       sorted.map(([day]) => day),
       sorted.map(([, count]) => count.toString()),
     );

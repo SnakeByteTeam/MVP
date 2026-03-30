@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { TokensModule } from 'src/tokens/tokens.module';
+import { ApiAuthVimarModule } from 'src/api-auth-vimar/api-auth-vimar.module';
+
 import { REFRESH_NODE_SUBSCRIPTION_PORT } from './application/ports/out/refresh-node-subscription.port';
 import { RefreshNodeSubscriptionAdapter } from './adapters/out/refresh-node-subscription.adapter';
 import { REFRESH_NODE_SUBSCRIPTION_REPO_PORT } from './application/repository/refresh-node-subscription.repository';
@@ -9,7 +10,7 @@ import { SubscriptionService } from './application/services/subscription.service
 import { CacheModule } from 'src/cache/cache.module';
 
 @Module({
-  imports: [TokensModule, HttpModule, CacheModule],
+  imports: [ApiAuthVimarModule, HttpModule, CacheModule],
   providers: [
     SubscriptionService,
     {

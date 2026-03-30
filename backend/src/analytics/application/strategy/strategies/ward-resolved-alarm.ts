@@ -36,7 +36,7 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
     });
 
     if (allDays.length === 0) {
-      return new Plot('Ward Resolved Alarm Analytics', cmd.metric, [], []);
+      return new Plot('Ward Resolved Alarm Analytics', cmd.metric, '', [], []);
     }
 
     const series: Record<string, string[]> = {
@@ -46,6 +46,7 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
     return new Plot(
       'Ward Resolved Alarm Analytics',
       cmd.metric,
+      '',
       allDays,
       allDays.map((day) => (sentByDay.get(day) ?? 0).toString()),
       series,

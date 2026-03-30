@@ -21,7 +21,7 @@ export class WardFalls implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Ward Falls Analytics', cmd.metric, [], []);
+      return new Plot('Ward Falls Analytics', cmd.metric, '', [], []);
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -55,6 +55,7 @@ export class WardFalls implements AnalyticsStrategy {
     return new Plot(
       'Ward Falls Analytics',
       cmd.metric,
+      '',
       sorted.map(([day]) => day),
       sorted.map(([, count]) => count.toString()),
     );

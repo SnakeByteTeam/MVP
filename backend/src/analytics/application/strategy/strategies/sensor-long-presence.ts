@@ -39,7 +39,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
   }
 
   private emptyPlot(metric: string): Plot {
-    return new Plot('Sensor Long Presence Analytics', metric, [], []);
+    return new Plot('Sensor Long Presence Analytics', metric, '', [], []);
   }
 
   private sortSnapshots(snapshotsMap: Map<string, any>) {
@@ -112,6 +112,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
     return new Plot(
       'Sensor Long Presence Analytics',
       metric,
+      '',
       sorted.map(([day]) => day),
       sorted.map(([, count]) => count.toString()),
     );

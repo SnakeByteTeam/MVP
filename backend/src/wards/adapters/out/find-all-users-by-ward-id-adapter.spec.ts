@@ -39,10 +39,7 @@ describe('FindAllUsersByWardIdAdapter', () => {
       new FindAllUsersByWardIdCmd(1),
     );
 
-    expect(result).toEqual([
-      new User(1, 'user1'),
-      new User(2, 'user2'),
-    ]);
+    expect(result).toEqual([new User(1, 'user1'), new User(2, 'user2')]);
   });
 
   it('should propagate repository errors', async () => {

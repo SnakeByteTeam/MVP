@@ -35,10 +35,7 @@ describe('FindAllWardsAdapter', () => {
 
     const result = await adapter.findAllWards();
 
-    expect(result).toEqual([
-      new Ward(1, 'ward1'),
-      new Ward(2, 'ward2'),
-    ]);
+    expect(result).toEqual([new Ward(1, 'ward1'), new Ward(2, 'ward2')]);
   });
 
   it('should propagate repository errors', async () => {

@@ -64,7 +64,7 @@ export class WardsUsersRelationshipsController {
   async removeUserFromWard(
     @Param('wardId', ParseIntPipe) wardId: number,
     @Param('userId', ParseIntPipe) userId: number,
-  ) {
+  ): Promise<void> {
     return await this.removeUserFromWardUseCase.removeUserFromWard(
       new RemoveUserFromWardCmd(wardId, userId),
     );

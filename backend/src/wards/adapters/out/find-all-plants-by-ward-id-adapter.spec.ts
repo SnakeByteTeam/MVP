@@ -29,8 +29,8 @@ describe('FindAllPlantsByWardIdAdapter', () => {
 
   it('should map PlantEntity to Plant', async () => {
     const mockEntities = [
-      { id: "id1", name: 'plant1' },
-      { id: "id2", name: 'plant2' },
+      { id: 'id1', name: 'plant1' },
+      { id: 'id2', name: 'plant2' },
     ];
 
     mockRepo.findAllPlantsByWardId.mockResolvedValue(mockEntities);
@@ -40,8 +40,8 @@ describe('FindAllPlantsByWardIdAdapter', () => {
     );
 
     expect(result).toEqual([
-      new Plant("id1", 'plant1'),
-      new Plant("id2", 'plant2'),
+      new Plant('id1', 'plant1'),
+      new Plant('id2', 'plant2'),
     ]);
   });
 

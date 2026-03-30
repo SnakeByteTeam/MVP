@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetAllWardsResDto {
+export class FindAllWardsResDto {
   @ApiProperty()
   id!: number;
 

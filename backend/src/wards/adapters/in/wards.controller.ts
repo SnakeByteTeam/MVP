@@ -23,6 +23,10 @@ import {
   UPDATE_WARD_USE_CASE,
 } from '../../application/services/ward.service';
 import { DeleteWardUseCase } from '../../application/ports/in/delete-ward-use-case.interface';
+import { CreateWardResDto } from '../../infrastructure/dtos/out/create-ward-res.dto';
+import { plainToInstance } from 'class-transformer';
+import { FindAllWardsResDto } from '../../infrastructure/dtos/out/find-all-wards-res.dto';
+import { UpdateWardResDto } from '../../infrastructure/dtos/out/update-ward-res.dto';
 
 @Controller('wards')
 export class WardsController {
@@ -38,22 +42,32 @@ export class WardsController {
   ) {}
 
   @Post()
-  async createWard(@Body() req: CreateWardReqDto) {
-    return this.createWardUseCase.createWard(new CreateWardCmd(req.name));
+  async createWard(@Body() req: CreateWardReqDto): Promise<CreateWardResDto> {
+    const ward = await this.createWardUseCase.createWard(
+      new CreateWardCmd(req.name),
+    );
+    return plainToInstance(CreateWardResDto, ward);
   }
 
   @Get()
-  async findAllWards() {
-    return this.findAllWardUseCase.findAllWards();
+  async findAllWards(): Promise<FindAllWardsResDto[]> {
+    const wards = await this.findAllWardUseCase.findAllWards();
+    return plainToInstance(FindAllWardsResDto, wards);
   }
 
   @Put('/:id')
-  async updateWard(@Param('id') id: number, @Body() req: UpdateWardReqDto) {
-    return this.updateWardUseCase.updateWard(new UpdateWardCmd(id, req.name));
+  async updateWard(
+    @Param('id') id: number,
+    @Body() req: UpdateWardReqDto,
+  ): Promise<UpdateWardResDto> {
+    const ward = await this.updateWardUseCase.updateWard(
+      new UpdateWardCmd(id, req.name),
+    );
+    return plainToInstance(UpdateWardResDto, ward);
   }
 
   @Delete('/:id')
-  async deleteWard(@Param('id') id: number) {
-    return this.deleteWardUseCase.deleteWard(new DeleteWardCmd(id));
+  async deleteWard(@Param('id') id: number): Promise<void> {
+    return await this.deleteWardUseCase.deleteWard(new DeleteWardCmd(id));
   }
 }

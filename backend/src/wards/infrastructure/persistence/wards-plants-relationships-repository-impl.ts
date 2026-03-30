@@ -27,7 +27,7 @@ export class WardsPlantsRelationshipsRepositoryImpl
   }
   async findAllPlantsByWardId(wardId: number): Promise<PlantEntity[]> {
     const result = await this.conn.query(
-      'SELECT p.id, p.name FROM plant p WHERE p.ward_id = $1',
+      'SELECT p.id, data->>\'name\' name FROM plant p WHERE p.ward_id = $1',
       [wardId],
     );
 

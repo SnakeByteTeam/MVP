@@ -18,9 +18,9 @@ export class FindAllUsersByWardIdAdapter implements FindAllUsersByWardIdPort {
     const userEntities: UserEntity[] =
       await this.findAllUsersByWardIdRepository.findAllUsersByWardId(req.id);
 
-    return userEntities.map((userEntity) => (
-      new User(userEntity.id, userEntity.username)
-    ));
+    return userEntities.map(
+      (userEntity) => new User(userEntity.id, userEntity.username),
+    );
   }
 }
 

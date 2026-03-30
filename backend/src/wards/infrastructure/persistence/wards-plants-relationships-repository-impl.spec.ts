@@ -1,4 +1,3 @@
-import { mock } from 'node:test';
 import { WardsPlantsRelationshipsRepositoryImpl } from './wards-plants-relationships-repository-impl';
 
 describe('WardsPlantsRelationshipsRepositoryImpl', () => {

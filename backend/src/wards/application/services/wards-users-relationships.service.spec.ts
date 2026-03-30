@@ -3,7 +3,6 @@ import { WardsUsersRelationshipsService } from './wards-users-relationships.serv
 import { ADD_USER_TO_WARD_PORT } from '../../adapters/out/add-user-to-ward-adapter';
 import { FIND_ALL_USERS_BY_WARD_ID_PORT } from '../../adapters/out/find-all-users-by-ward-id-adapter';
 import { REMOVE_USER_FROM_WARD_PORT } from '../../adapters/out/remove-user-from-ward-adapter';
-import { WardsPlantsRelationshipsService } from './wards-plants-relationships.service';
 
 describe('WardsUsersRelationshipsServiceService', () => {
   let service: WardsUsersRelationshipsService;

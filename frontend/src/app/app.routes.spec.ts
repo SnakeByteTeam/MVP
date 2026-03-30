@@ -18,15 +18,9 @@ describe('App Routes', () => {
 		expect(route?.canActivate).toContain(roleGuard);
 	});
 
-	//DA DECOMMENTARE
-	/*it('main layout route "" protetta da authGuard ', () => {
-		const route = routes.find(r => r.path === '');
-		expect(route?.canActivate).toContain(authGuard);
-	});*/
-
 	it('vimar-link route richiede ruolo AMMINISTRATORE', () => {
 		const route = routes.find(r => r.path === 'vimar-link');
-
+		expect(route?.data?.['requiredRole']).toBe(UserRole.AMMINISTRATORE);
 	});
 
 	it('route "" carica il main layout', () => {

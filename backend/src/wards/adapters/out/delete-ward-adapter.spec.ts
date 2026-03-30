@@ -21,7 +21,7 @@ describe('DeleteWardAdapter', () => {
     const cmd = new DeleteWardCmd(1);
     mockRepo.deleteWard.mockResolvedValue(undefined);
 
-    await adapter.deleteWard(cmd);
+    adapter.deleteWard(cmd);
 
     expect(mockRepo.deleteWard).toHaveBeenCalledWith(1);
   });

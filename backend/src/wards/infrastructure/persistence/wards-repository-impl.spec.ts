@@ -110,7 +110,7 @@ describe('WardsRepositoryImpl', () => {
   it('should call query to delete ward', async () => {
     mockConn.query.mockResolvedValue({});
 
-    await repo.deleteWard(1);
+    repo.deleteWard(1);
 
     expect(mockConn.query).toHaveBeenCalledWith(
       'DELETE FROM ward WHERE id = $1',

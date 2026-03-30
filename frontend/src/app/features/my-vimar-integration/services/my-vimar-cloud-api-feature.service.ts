@@ -6,14 +6,15 @@ import { IVimarCloudApiService } from '../../../core/services/vimar-cloud-api.se
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { MyVimarAccount } from '../models/my-vimar-account.model';
 import { OAuthCallbackParams } from '../models/oauth-callback-params.model';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable()
 export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
-  private readonly authorizeEndpoint = `${this.baseUrl}/api/vimar-account/oauth/authorize`;
+  private readonly authorizeEndpoint = `${this.baseUrl}/my-vimar/auth`;
 
-  constructor(@Inject(DOCUMENT) private readonly document: Document) {}
+  constructor(@Inject(DOCUMENT) private readonly document: Document) { }
 
   public getLinkedAccount(): Observable<MyVimarAccount> {
     return this.http.get<MyVimarAccount>(`${this.baseUrl}/api/vimar-account`);
@@ -27,10 +28,12 @@ export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
 
     const redirectUrl = `${location.origin}/vimar-link/oauth-callback`;
 
+    const params = new HttpParams().set('redirect_url', redirectUrl);
+
     this.http
-      .post<{ url?: string; redirect_url?: string; authorization_url?: string }>(
+      .get<{ url?: string; redirect_url?: string; authorization_url?: string }>(
         this.authorizeEndpoint,
-        { redirect_url: redirectUrl },
+        { params }
       )
       .subscribe((response) => {
         const targetUrl =

@@ -16,19 +16,21 @@ INSERT INTO ward (name) VALUES ('test-ward');
 
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE,
-    surname VARCHAR(255),
-    name VARCHAR(255),
-    password VARCHAR(255),
+    username VARCHAR(255) UNIQUE NOT NULL,
+    surname VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    temp_password VARCHAR (255) UNIQUE NOT NULL,
     first_access BOOLEAN DEFAULT TRUE,
-    roleId INTEGER,
+    roleId INTEGER NOT NULL,
     FOREIGN KEY (roleId) REFERENCES role(id)
 );
 
-INSERT INTO "user" (username, surname, name, password, first_access, roleId)
-VALUES ('test', 'test', 'test', 'test', FALSE, 1);
-INSERT INTO "user" (username, surname, name, password, first_access, roleId)
-VALUES ('admin', 'admin', 'admin', 'admin', FALSE, 2);
+INSERT INTO "user" (username, surname, name, password, temp_password, first_access, roleId)
+VALUES
+    ('test', 'test', 'test', 'test', 'tmp_test', FALSE, 1),
+    ('admin', 'admin', 'admin', 'admin', 'tmp_admin', FALSE, 2)
+ON CONFLICT (username) DO NOTHING;
 
 
 
@@ -55,22 +57,22 @@ VALUES
         ('Reparto riabilitazione')
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO "user" (username, surname, name, password, temp_password, roleId)
+INSERT INTO "user" (username, surname, name, password, temp_password, first_access, roleId)
 VALUES
-        ('mrossi', 'Rossi', 'Mario', 'test', 'test', 1),
-        ('gbianchi', 'Bianchi', 'Gioia', 'test', 'test', 1),
-        ('lverdi', 'Verdi', 'Luca', 'test', 'test', 1),
-        ('asala', 'Sala', 'Anna', 'test', 'test', 1),
-        ('fneri', 'Neri', 'Franco', 'test', 'test', 1),
+    ('mrossi', 'Rossi', 'Mario', 'test', 'tmp_mrossi', TRUE, 1),
+    ('gbianchi', 'Bianchi', 'Gioia', 'test', 'tmp_gbianchi', TRUE, 1),
+    ('lverdi', 'Verdi', 'Luca', 'test', 'tmp_lverdi', TRUE, 1),
+    ('asala', 'Sala', 'Anna', 'test', 'tmp_asala', TRUE, 1),
+    ('fneri', 'Neri', 'Franco', 'test', 'tmp_fneri', TRUE, 1),
         -- Nuovi operatori sanitari
-        ('gcolombo', 'Colombo', 'Giuseppe', 'test', 'test', 1),
-        ('fferrari', 'Ferrari', 'Francesca', 'test', 'test', 1),
-        ('arusso', 'Russo', 'Antonio', 'test', 'test', 1),
-        ('cgallo', 'Gallo', 'Chiara', 'test', 'test', 1),
-        ('mromano', 'Romano', 'Matteo', 'test', 'test', 1),
+    ('gcolombo', 'Colombo', 'Giuseppe', 'test', 'tmp_gcolombo', TRUE, 1),
+    ('fferrari', 'Ferrari', 'Francesca', 'test', 'tmp_fferrari', TRUE, 1),
+    ('arusso', 'Russo', 'Antonio', 'test', 'tmp_arusso', TRUE, 1),
+    ('cgallo', 'Gallo', 'Chiara', 'test', 'tmp_cgallo', TRUE, 1),
+    ('mromano', 'Romano', 'Matteo', 'test', 'tmp_mromano', TRUE, 1),
         -- Amministratori di sistema
-        ('admin_mario', 'Draghi', 'Mario', 'test', 'test', 2),
-        ('admin_luigi', 'Einaudi', 'Luigi', 'test', 'test', 2)
+    ('admin_mario', 'Draghi', 'Mario', 'test', 'tmp_admin_mario', TRUE, 2),
+    ('admin_luigi', 'Einaudi', 'Luigi', 'test', 'tmp_admin_luigi', TRUE, 2)
 ON CONFLICT (username) DO NOTHING;
 
 

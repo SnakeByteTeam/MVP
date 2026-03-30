@@ -11,12 +11,22 @@ export class AnalyticsService implements GetAnalyticsUseCase {
     private readonly strategies: Map<string, AnalyticsStrategy>,
   ) {}
 
-  async getAnalytics(cmd: GetAnalyticsCmd): Promise<Plot> {
-    const strategy = this.strategies.get(cmd.metric);
+  async getAnalyticsByPlantId(cmd: GetAnalyticsCmd): Promise<Plot[]> {
+    const plots: Plot[] = [];
 
-    if (!strategy) {
-      throw new Error(`No strategy found for metric: ${cmd.metric}`);
+    for (const [key, strategy] of this.strategies.entries()) {
+      try {
+        const plot = await strategy.execute(cmd);
+        plots.push(plot);
+      } catch (err) {
+        console.error(`Error executing strategy ${key}:`, err);
+      }
     }
-    return strategy.execute(cmd);
+
+    if (plots.length === 0) {
+      throw new Error(`No analytics available for plant ${cmd.plantId}`);
+    }
+
+    return plots;
   }
 }

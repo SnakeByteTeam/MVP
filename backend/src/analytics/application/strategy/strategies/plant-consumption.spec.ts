@@ -27,16 +27,16 @@ describe('PlantConsumption', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new PlantConsumption(mockPort);
   });
 
   it('should return an empty Plot if there are no snapshots', async () => {
-    mockPort.getDataByPlantId.mockResolvedValue(new Map());
+    mockPort.getDataForPlant.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
@@ -52,7 +52,7 @@ describe('PlantConsumption', () => {
       [`${yesterday}T10:00:00.000Z`, buildLightDatapoint('Off')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
@@ -69,7 +69,7 @@ describe('PlantConsumption', () => {
       [`${yesterday}T10:00:00.000Z`, buildLightDatapoint('Off')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
@@ -87,7 +87,7 @@ describe('PlantConsumption', () => {
       [`${yesterday}T12:00:00.000Z`, buildLightDatapoint('Off')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),
@@ -126,7 +126,7 @@ describe('PlantConsumption', () => {
       ],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('plant-consumption', 'plant-001'),

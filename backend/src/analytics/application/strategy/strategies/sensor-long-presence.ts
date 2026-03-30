@@ -1,86 +1,147 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { AnalyticsStrategy } from '../analytics.strategy';
-import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
+import {
+  GetAnalyticsPort,
+  GET_ANALYTICS_PORT,
+} from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Plot } from '../../../domain/plot.model';
+import { DatapointValue } from '../../../domain/datapoint-value.model';
+import { Series } from 'src/analytics/domain/series.model';
 
 const LONG_PRESENCE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minuti
+const PRESENCE_SFE_TYPE = 'SFE_State_Presence';
+const DETECTED = 'Detected';
+const DAYS_RANGE = 30;
+const METRIC = 'sensor-long-presence';
+
+interface SensorState {
+  name: string;
+  presenceStart: Date | undefined;
+  counted: boolean;
+  eventsByDay: Map<string, number>;
+}
+
+interface DetectedResult {
+  presenceStart: Date | undefined;
+  counted: boolean;
+}
 
 @Injectable()
 export class SensorLongPresence implements AnalyticsStrategy {
   constructor(
-    @Inject('GET_ANALYTICS_PORT')
+    @Inject(GET_ANALYTICS_PORT)
     private readonly analyticsPort: GetAnalyticsPort,
   ) {}
 
   async execute(cmd: GetAnalyticsCmd): Promise<Plot> {
     const startDate = this.getStartDate();
 
-    const snapshotsMap = await this.analyticsPort.getDataBySensorId(
-      cmd.id,
+    const snapshotsMap = await this.analyticsPort.getDataForSensor(
+      cmd.plantId,
       startDate,
     );
 
     if (snapshotsMap.size === 0) {
-      return this.emptyPlot(cmd.metric);
+      return this.emptyPlot();
     }
 
     const snapshots = this.sortSnapshots(snapshotsMap);
-    const eventsByDay = this.computeEvents(snapshots);
+    const { labels, seriesMap } = this.computeSeriesPerSensor(snapshots);
 
-    return this.buildPlot(cmd.metric, eventsByDay);
+    return this.buildPlot(labels, seriesMap);
   }
 
-  // ---------------- HELPERS ----------------
   private getStartDate(): Date {
     const d = new Date();
-    d.setDate(d.getDate() - 30);
+    d.setDate(d.getDate() - DAYS_RANGE);
     return d;
   }
 
-  private emptyPlot(metric: string): Plot {
-    return new Plot('Sensor Long Presence Analytics', metric, '', [], []);
+  private emptyPlot(): Plot {
+    return new Plot('Sensor Long Presence Analytics', METRIC, 'events', [], []);
   }
 
-  private sortSnapshots(snapshotsMap: Map<string, any>) {
+  private sortSnapshots(
+    snapshotsMap: Map<string, DatapointValue[]>,
+  ): [string, DatapointValue[]][] {
     return Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
       a.localeCompare(b),
     );
   }
 
-  private computeEvents(snapshots: [string, any[]][]): Map<string, number> {
-    const eventsByDay = new Map<string, number>();
-
-    let presenceStart: Date | undefined;
-    let counted = false;
+  private computeSeriesPerSensor(snapshots: [string, DatapointValue[]][]): {
+    labels: string[];
+    seriesMap: Map<string, { name: string; eventsByDay: Map<string, number> }>;
+  } {
+    const sensorState = new Map<string, SensorState>();
 
     for (const [timestamp, datapoints] of snapshots) {
       const snapshotTime = new Date(timestamp);
 
       for (const dp of datapoints) {
-        if (!this.isPresence(dp)) continue;
+        if (dp.sfeType !== PRESENCE_SFE_TYPE) continue;
 
-        const state = dp.value ?? 'NotDetected';
+        const sensorId = dp.datapointId;
+        const state = this.getOrCreateSensorState(
+          sensorState,
+          sensorId,
+          dp.name,
+        );
+        const value = dp.value ?? 'NotDetected';
 
-        if (state === 'Detected') {
-          ({ presenceStart, counted } = this.handleDetected(
+        if (value === DETECTED) {
+          const updated = this.handleDetected(
             snapshotTime,
-            presenceStart,
-            counted,
-            eventsByDay,
-          ));
+            state.presenceStart,
+            state.counted,
+            state.eventsByDay,
+          );
+          state.presenceStart = updated.presenceStart;
+          state.counted = updated.counted;
         } else {
-          presenceStart = undefined;
-          counted = false;
+          state.presenceStart = undefined;
+          state.counted = false;
         }
       }
     }
 
-    return eventsByDay;
+    const allDays = new Set<string>();
+    for (const { eventsByDay } of sensorState.values()) {
+      for (const day of eventsByDay.keys()) {
+        allDays.add(day);
+      }
+    }
+    const labels = Array.from(allDays).sort();
+
+    const seriesMap = new Map<
+      string,
+      { name: string; eventsByDay: Map<string, number> }
+    >();
+    for (const [sensorId, { name, eventsByDay }] of sensorState.entries()) {
+      seriesMap.set(sensorId, { name, eventsByDay });
+    }
+
+    return { labels, seriesMap };
   }
 
-  private isPresence(dp: any): boolean {
-    return dp.sfeType === 'SFE_State_Presence';
+  private getOrCreateSensorState(
+    sensorState: Map<string, SensorState>,
+    sensorId: string,
+    name: string,
+  ): SensorState {
+    const existing = sensorState.get(sensorId);
+    if (existing !== undefined) {
+      return existing;
+    }
+    const created: SensorState = {
+      name,
+      presenceStart: undefined,
+      counted: false,
+      eventsByDay: new Map(),
+    };
+    sensorState.set(sensorId, created);
+    return created;
   }
 
   private handleDetected(
@@ -88,8 +149,8 @@ export class SensorLongPresence implements AnalyticsStrategy {
     presenceStart: Date | undefined,
     counted: boolean,
     eventsByDay: Map<string, number>,
-  ): { presenceStart: Date | undefined; counted: boolean } {
-    if (!presenceStart) {
+  ): DetectedResult {
+    if (presenceStart === undefined) {
       return { presenceStart: currentTime, counted: false };
     }
 
@@ -104,17 +165,32 @@ export class SensorLongPresence implements AnalyticsStrategy {
     return { presenceStart, counted };
   }
 
-  private buildPlot(metric: string, eventsByDay: Map<string, number>): Plot {
-    const sorted = Array.from(eventsByDay.entries()).sort(([a], [b]) =>
-      a.localeCompare(b),
+  private buildPlot(
+    labels: string[],
+    seriesMap: Map<string, { name: string; eventsByDay: Map<string, number> }>,
+  ): Plot {
+    const entries: [
+      string,
+      { name: string; eventsByDay: Map<string, number> },
+    ][] = Array.from(seriesMap.entries());
+    const series: Series[] = entries.map(
+      ([sensorId, { name, eventsByDay }]: [
+        string,
+        { name: string; eventsByDay: Map<string, number> },
+      ]) => {
+        const data: number[] = labels.map(
+          (day: string): number => eventsByDay.get(day) ?? 0,
+        );
+        return new Series(sensorId, name, data);
+      },
     );
 
     return new Plot(
       'Sensor Long Presence Analytics',
-      metric,
-      '',
-      sorted.map(([day]) => day),
-      sorted.map(([, count]) => count.toString()),
+      METRIC,
+      'events',
+      labels,
+      series,
     );
   }
 }

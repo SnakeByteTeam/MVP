@@ -4,6 +4,7 @@ import { PlantConsumption } from './plant-consumption';
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { ANOMALY_THRESHOLD_WH } from './consumption-config';
+import { Series } from 'src/analytics/domain/series.model';
 
 @Injectable()
 export class PlantAnomalies implements AnalyticsStrategy {
@@ -14,9 +15,10 @@ export class PlantAnomalies implements AnalyticsStrategy {
 
     const anomalyLabels: string[] = [];
     const anomalyValues: string[] = [];
+    const series = consumptionPlot.getSeries()[0];
 
     for (let i = 0; i < consumptionPlot.getLabels().length; i++) {
-      const wh = Number.parseFloat(consumptionPlot.getData()[i]);
+      const wh = series.getData()[i];
       if (wh > ANOMALY_THRESHOLD_WH) {
         anomalyLabels.push(consumptionPlot.getLabels()[i]);
         anomalyValues.push(wh.toFixed(2));
@@ -25,10 +27,10 @@ export class PlantAnomalies implements AnalyticsStrategy {
 
     return new Plot(
       'Plant Anomalies Analytics',
-      cmd.metric,
+      'plant-anomalies',
       '',
       anomalyLabels,
-      anomalyValues,
+      [new Series('', '', anomalyValues.map(Number))],
     );
   }
 }

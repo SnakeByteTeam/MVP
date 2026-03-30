@@ -15,7 +15,7 @@ export class WardFalls implements AnalyticsStrategy {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const snapshotsMap = await this.analyticsPort.getDataByWardId(
+    const snapshotsMap = await this.analyticsPort.getDataForWard(
       cmd.id,
       startDate,
     );

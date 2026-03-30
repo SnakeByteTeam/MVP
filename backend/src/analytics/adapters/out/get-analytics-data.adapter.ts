@@ -10,7 +10,7 @@ export class GetAnalyticsData implements GetAnalyticsPort {
     private readonly repository: GetAnalyticsRepositoryPort,
   ) {}
 
-  async getDataByPlantId(
+  async getDataForPlant(
     plantId: string,
     startDate: Date,
   ): Promise<Map<string, any>> {
@@ -19,7 +19,7 @@ export class GetAnalyticsData implements GetAnalyticsPort {
     return this.toMap(result);
   }
 
-  async getDataByWardId(
+  async getDataForWard(
     wardId: string,
     startDate: Date,
   ): Promise<Map<string, any>> {
@@ -28,7 +28,7 @@ export class GetAnalyticsData implements GetAnalyticsPort {
     return this.toMap(result);
   }
 
-  async getAlarmsByWardId(
+  async getAlarmsForWard(
     wardId: string,
     startDate: Date,
     onlyResolved: boolean,
@@ -51,7 +51,7 @@ export class GetAnalyticsData implements GetAnalyticsPort {
     return map;
   }
 
-  async getDataBySensorId(
+  async getDataForSensor(
     sensorId: string,
     startDate: Date,
   ): Promise<Map<string, any>> {

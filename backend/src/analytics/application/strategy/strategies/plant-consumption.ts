@@ -4,6 +4,7 @@ import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { getDeviceWatt, isDeviceActive } from './consumption-config';
+import { Series } from 'src/analytics/domain/series.model';
 
 @Injectable()
 export class PlantConsumption implements AnalyticsStrategy {
@@ -16,13 +17,19 @@ export class PlantConsumption implements AnalyticsStrategy {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const snapshotsMap = await this.analyticsPort.getDataByPlantId(
-      cmd.id,
+    const snapshotsMap = await this.analyticsPort.getDataForPlant(
+      cmd.plantId,
       startDate,
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Plant Consumption Analytics', cmd.metric, '', [], []);
+      return new Plot(
+        'Plant Consumption Analytics',
+        'plant-consumption',
+        '',
+        [],
+        [],
+      );
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -56,12 +63,15 @@ export class PlantConsumption implements AnalyticsStrategy {
       a.localeCompare(b),
     );
 
+    const labels = sorted.map(([day]) => day);
+    const values = sorted.map(([, wh]) => wh);
+
     return new Plot(
       'Plant Consumption Analytics',
-      cmd.metric,
+      'plant-consumption',
       'Wh',
-      sorted.map(([day]) => day),
-      sorted.map(([, wh]) => wh.toFixed(2)),
+      labels,
+      [new Series('', '', values)],
     );
   }
 }

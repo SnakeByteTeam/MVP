@@ -15,7 +15,7 @@ export class SensorPresence implements AnalyticsStrategy {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const snapshotsMap = await this.analyticsPort.getDataBySensorId(
+    const snapshotsMap = await this.analyticsPort.getDataForSensor(
       cmd.id,
       startDate,
     );

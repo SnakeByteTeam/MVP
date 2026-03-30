@@ -3,6 +3,7 @@ import { AnalyticsStrategy } from '../analytics.strategy';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
+import { Series } from 'src/analytics/domain/series.model';
 
 @Injectable()
 export class PlantThermostatTemperature implements AnalyticsStrategy {
@@ -15,15 +16,15 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const snapshotsMap = await this.analyticsPort.getDataByPlantId(
-      cmd.id,
+    const snapshotsMap = await this.analyticsPort.getDataForPlant(
+      cmd.plantId,
       startDate,
     );
 
     if (snapshotsMap.size === 0) {
       return new Plot(
         'Plant Thermostat Temperature Analytics',
-        cmd.metric,
+        'thermostat-temperature',
         '',
         [],
         [],
@@ -57,12 +58,15 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
       a.localeCompare(b),
     );
 
+    const labels = sorted.map(([day]) => day);
+    const values = sorted.map(([, { sum, count }]) => sum / count);
+
     return new Plot(
       'Plant Thermostat Temperature Analytics',
-      cmd.metric,
+      'thermostat-temperature',
       '°C',
-      sorted.map(([day]) => day),
-      sorted.map(([, { sum, count }]) => (sum / count).toFixed(1)),
+      labels,
+      [new Series('', '', values)],
     );
   }
 }

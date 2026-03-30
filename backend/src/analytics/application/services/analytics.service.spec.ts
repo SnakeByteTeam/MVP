@@ -60,7 +60,7 @@ describe('AnalyticsService', () => {
     it('should return a Plot when a valid strategy is found', async () => {
       mockStrategy.execute.mockResolvedValue(mockPlot);
 
-      const result = await service.getAnalytics(mockCmd);
+      const result = await service.getAnalyticsByPlantId(mockCmd);
 
       expect(mockStrategy.execute).toHaveBeenCalledTimes(1);
       expect(mockStrategy.execute).toHaveBeenCalledWith(mockCmd);
@@ -73,7 +73,7 @@ describe('AnalyticsService', () => {
         metric: 'unknown-metric',
       };
 
-      await expect(service.getAnalytics(unknownCmd)).rejects.toThrow(
+      await expect(service.getAnalyticsByPlantId(unknownCmd)).rejects.toThrow(
         'No strategy found for metric: unknown-metric',
       );
 
@@ -99,7 +99,7 @@ describe('AnalyticsService', () => {
         ...mockCmd,
         metric: 'ward-falls',
       };
-      const result = await service.getAnalytics(wardFallsCmd);
+      const result = await service.getAnalyticsByPlantId(wardFallsCmd);
 
       expect(wardFallsStrategy.execute).toHaveBeenCalledWith(wardFallsCmd);
       expect(mockStrategy.execute).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('AnalyticsService', () => {
       const strategyError = new Error('Strategy execution failed');
       mockStrategy.execute.mockRejectedValue(strategyError);
 
-      await expect(service.getAnalytics(mockCmd)).rejects.toThrow(
+      await expect(service.getAnalyticsByPlantId(mockCmd)).rejects.toThrow(
         'Strategy execution failed',
       );
 

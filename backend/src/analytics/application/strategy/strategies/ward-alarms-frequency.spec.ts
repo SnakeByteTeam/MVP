@@ -18,16 +18,16 @@ describe('WardAlarmsFrequency', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new WardAlarmsFrequency(mockPort);
   });
 
   it('should return an empty Plot if there are no alarms', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValue(new Map());
+    mockPort.getAlarmsForWard.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-alarms-frequency', '1'),
@@ -38,7 +38,7 @@ describe('WardAlarmsFrequency', () => {
   });
 
   it('should return the number of alarms for a single day', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValue(new Map([[yesterday, 3]]));
+    mockPort.getAlarmsForWard.mockResolvedValue(new Map([[yesterday, 3]]));
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-alarms-frequency', '1'),
@@ -49,7 +49,7 @@ describe('WardAlarmsFrequency', () => {
   });
 
   it('should correctly aggregate alarms over multiple days', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValue(
+    mockPort.getAlarmsForWard.mockResolvedValue(
       new Map([
         [threeDaysAgo, 1],
         [twoDaysAgo, 4],
@@ -71,12 +71,12 @@ describe('WardAlarmsFrequency', () => {
   });
 
   it('should call getAlarmsByWardId with onlyResolved=false', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValue(new Map());
+    mockPort.getAlarmsForWard.mockResolvedValue(new Map());
 
     await strategy.execute(new GetAnalyticsCmd('ward-alarms-frequency', '1'));
 
-    expect(mockPort.getAlarmsByWardId).toHaveBeenCalledTimes(1);
-    expect(mockPort.getAlarmsByWardId).toHaveBeenCalledWith(
+    expect(mockPort.getAlarmsForWard).toHaveBeenCalledTimes(1);
+    expect(mockPort.getAlarmsForWard).toHaveBeenCalledWith(
       '1',
       expect.any(Date),
       false,
@@ -84,7 +84,7 @@ describe('WardAlarmsFrequency', () => {
   });
 
   it('should return labels sorted by date ascending', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValue(
+    mockPort.getAlarmsForWard.mockResolvedValue(
       new Map([
         [yesterday, 2],
         [threeDaysAgo, 5],

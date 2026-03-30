@@ -15,7 +15,7 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
 
-    const alarmsByDay = await this.analyticsPort.getAlarmsByWardId(
+    const alarmsByDay = await this.analyticsPort.getAlarmsForWard(
       cmd.id,
       startDate,
       false,

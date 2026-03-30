@@ -27,16 +27,16 @@ describe('PlantThermostatTemperature', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new PlantThermostatTemperature(mockPort);
   });
 
   it('should return an empty Plot if there are no snapshots', async () => {
-    mockPort.getDataByPlantId.mockResolvedValue(new Map());
+    mockPort.getDataForPlant.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
@@ -53,7 +53,7 @@ describe('PlantThermostatTemperature', () => {
       [`${yesterday}T20:00:00.000Z`, buildTempDatapoint('21.0')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
@@ -72,7 +72,7 @@ describe('PlantThermostatTemperature', () => {
       [`${yesterday}T20:00:00.000Z`, buildTempDatapoint('24.0')], // media 23.0
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
@@ -100,7 +100,7 @@ describe('PlantThermostatTemperature', () => {
       ],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),

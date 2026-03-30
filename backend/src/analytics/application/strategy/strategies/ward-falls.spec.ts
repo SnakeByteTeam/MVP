@@ -36,16 +36,16 @@ describe('WardFalls', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new WardFalls(mockPort);
   });
 
   it('should return an empty Plot if there are no snapshots', async () => {
-    mockPort.getDataByWardId.mockResolvedValue(new Map());
+    mockPort.getDataForWard.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-falls', '1'),
@@ -61,7 +61,7 @@ describe('WardFalls', () => {
       [`${yesterday}T09:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-falls', '1'),
@@ -78,7 +78,7 @@ describe('WardFalls', () => {
       [`${yesterday}T10:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-falls', '1'),
@@ -95,7 +95,7 @@ describe('WardFalls', () => {
       [`${yesterday}T11:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-falls', '1'),
@@ -116,7 +116,7 @@ describe('WardFalls', () => {
       [`${yesterday}T11:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-falls', '1'),
@@ -134,7 +134,7 @@ describe('WardFalls', () => {
       [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Detected')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('ward-falls', '1'),

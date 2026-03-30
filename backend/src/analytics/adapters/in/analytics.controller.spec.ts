@@ -19,7 +19,7 @@ describe('AnalyticsController', () => {
 
   beforeEach(async () => {
     mockUseCase = {
-      getAnalytics: jest.fn(),
+      getAnalyticsByPlantId: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -48,9 +48,9 @@ describe('AnalyticsController', () => {
       ['20.00', '40.00'],
     );
 
-    mockUseCase.getAnalytics.mockResolvedValue(plot);
+    mockUseCase.getAnalyticsByPlantId.mockResolvedValue(plot);
 
-    const result = await controller.getAnalytics({
+    const result = await controller.getAnalyticsByPlantId({
       metric: 'plant-consumption',
       id: 'plant-001',
     });
@@ -64,11 +64,11 @@ describe('AnalyticsController', () => {
 
   it('should pass metric and id to use case as GetAnalyticsCmd', async () => {
     const plot = new Plot('Ward Falls Analytics', 'ward-falls', '', [], []);
-    mockUseCase.getAnalytics.mockResolvedValue(plot);
+    mockUseCase.getAnalyticsByPlantId.mockResolvedValue(plot);
 
-    await controller.getAnalytics({ metric: 'ward-falls', id: '1' });
+    await controller.getAnalyticsByPlantId({ metric: 'ward-falls', id: '1' });
 
-    expect(mockUseCase.getAnalytics).toHaveBeenCalledWith(
+    expect(mockUseCase.getAnalyticsByPlantId).toHaveBeenCalledWith(
       expect.objectContaining({ metric: 'ward-falls', id: '1' }),
     );
   });
@@ -83,9 +83,9 @@ describe('AnalyticsController', () => {
       { resolved: ['2'] },
     );
 
-    mockUseCase.getAnalytics.mockResolvedValue(plot);
+    mockUseCase.getAnalyticsByPlantId.mockResolvedValue(plot);
 
-    const result = await controller.getAnalytics({
+    const result = await controller.getAnalyticsByPlantId({
       metric: 'ward-resolved-alarm',
       id: '1',
     });
@@ -95,9 +95,9 @@ describe('AnalyticsController', () => {
 
   it('should return PlotDto with empty labels and data when plot is empty', async () => {
     const plot = new Plot('Ward Falls Analytics', 'ward-falls', '', [], []);
-    mockUseCase.getAnalytics.mockResolvedValue(plot);
+    mockUseCase.getAnalyticsByPlantId.mockResolvedValue(plot);
 
-    const result = await controller.getAnalytics({
+    const result = await controller.getAnalyticsByPlantId({
       metric: 'ward-falls',
       id: '1',
     });

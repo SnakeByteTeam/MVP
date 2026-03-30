@@ -32,16 +32,16 @@ describe('SensorLongPresence', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new SensorLongPresence(mockPort);
   });
 
   it('should return an empty Plot if there are no snapshots', async () => {
-    mockPort.getDataBySensorId.mockResolvedValue(new Map());
+    mockPort.getDataForSensor.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
@@ -58,7 +58,7 @@ describe('SensorLongPresence', () => {
       [ts(8, 25), buildPresenceDatapoint('NotDetected')],
     ]);
 
-    mockPort.getDataBySensorId.mockResolvedValue(snapshots);
+    mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
@@ -74,7 +74,7 @@ describe('SensorLongPresence', () => {
       [ts(9, 0), buildPresenceDatapoint('NotDetected')],
     ]);
 
-    mockPort.getDataBySensorId.mockResolvedValue(snapshots);
+    mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
@@ -92,7 +92,7 @@ describe('SensorLongPresence', () => {
       [ts(9, 30), buildPresenceDatapoint('NotDetected')],
     ]);
 
-    mockPort.getDataBySensorId.mockResolvedValue(snapshots);
+    mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
@@ -112,7 +112,7 @@ describe('SensorLongPresence', () => {
       [ts(11, 0), buildPresenceDatapoint('NotDetected')],
     ]);
 
-    mockPort.getDataBySensorId.mockResolvedValue(snapshots);
+    mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
       new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),

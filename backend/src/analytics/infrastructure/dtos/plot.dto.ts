@@ -1,4 +1,5 @@
 import { Plot } from '../../domain/plot.model';
+import { SeriesDto } from './series.dto';
 
 export class PlotDto {
   private constructor(
@@ -6,8 +7,7 @@ export class PlotDto {
     public readonly metric: string,
     public readonly unit: string,
     public readonly labels: string[],
-    public readonly data: string[],
-    public readonly series?: Record<string, string[]>, // serie aggiuntive
+    public readonly series: SeriesDto[],
   ) {}
 
   static fromDomain(p: Plot): PlotDto {
@@ -16,8 +16,7 @@ export class PlotDto {
       p.getMetric(),
       p.getUnit(),
       p.getLabels(),
-      p.getData(),
-      p.getSeries(),
+      p.getSeries().map((s) => SeriesDto.fromDomain(s)),
     );
   }
 }

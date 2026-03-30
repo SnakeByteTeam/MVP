@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
-import { InjectPool } from '../../../database/database.module';
+import { PG_POOL } from '../../../database/database.module';
 import { UpdateAlarmPort } from '../ports/out/update-alarm.port';
 import { UpdateAlarmCmd } from '../commands/update-alarm.cmd';
 import { Alarm } from '../../domain/models/alarm.model';
 import { AlarmEntity } from '../../infrastructure/entities/alarm.entity';
 import { toModel } from './alarm-mapper';
+import { Inject } from '@nestjs/common';
+
 
 @Injectable()
 export class UpdateAlarmRepository implements UpdateAlarmPort {
-  constructor(@InjectPool() private readonly pool: Pool) {}
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async updateAlarm(id: string, cmd: UpdateAlarmCmd): Promise<Alarm> {
     const { rows } = await this.pool.query<AlarmEntity>(

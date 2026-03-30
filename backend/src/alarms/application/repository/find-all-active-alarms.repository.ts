@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
-import { InjectPool } from '../../../database/database.module';
+import { PG_POOL } from '../../../database/database.module';
 import { FindAllActiveAlarmsPort } from '../ports/out/find-active-alarms.port';
 import { ActiveAlarm } from '../../domain/models/active-alarm.model';
 import { ActiveAlarmEntity } from '../../infrastructure/entities/alarm.entity';
 import { toActiveModel } from './active-alarm-mapper';
+import { Inject } from '@nestjs/common';
+
 
 @Injectable()
 export class FindAllActiveAlarmsRepository implements FindAllActiveAlarmsPort {
-  constructor(@InjectPool() private readonly pool: Pool) {}
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async findAllActive(): Promise<ActiveAlarm[]> {
     const { rows } = await this.pool.query<ActiveAlarmEntity>(

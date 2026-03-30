@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { Alarm } from '../../domain/models/alarm.model';
 import { ActiveAlarm } from '../../domain/models/active-alarm.model';
@@ -34,15 +34,14 @@ import { TriggerActiveAlarmCmd } from '../commands/trigger-active-alarm.cmd';
 @Injectable()
 export class AlarmService
   implements
-    CreateAlarmUseCase,
-    GetAllAlarmsUseCase,
-    GetAlarmUseCase,
-    UpdateAlarmUseCase,
-    DeleteAlarmUseCase,
-    GetActiveAlarmsUseCase,
-    ResolveActiveAlarmUseCase,
-    TriggerActiveAlarmUseCase
-{
+  CreateAlarmUseCase,
+  GetAllAlarmsUseCase,
+  GetAlarmUseCase,
+  UpdateAlarmUseCase,
+  DeleteAlarmUseCase,
+  GetActiveAlarmsUseCase,
+  ResolveActiveAlarmUseCase,
+  TriggerActiveAlarmUseCase {
   constructor(
     @Inject(GET_ALL_ALARMS_PORT)
     private readonly getAllAlarmsPort: GetAllAlarmsPort,
@@ -76,7 +75,7 @@ export class AlarmService
 
     @Inject(RESOLVE_ACTIVE_ALARM_PORT)
     private readonly resolveActiveAlarmPort: ResolveActiveAlarmPort,
-  ) {}
+  ) { }
 
   // ─── Alarm use cases ────────────────────────────────────────────────────────
 
@@ -122,7 +121,7 @@ export class AlarmService
     if (existing) return; // se c'è un allarme che per questa regola è già attivo, allora non ne viene creato un altro
 
     const activeAlarm = new ActiveAlarm(
-      uuidv4(),
+      randomUUID(),
       cmd.alarmId,
       cmd.alarmName,
       cmd.dangerSignal,

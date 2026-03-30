@@ -1,12 +1,11 @@
 import { DOCUMENT } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IVimarCloudApiService } from '../../../core/services/vimar-cloud-api.service.interface';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { MyVimarAccount } from '../models/my-vimar-account.model';
 import { OAuthCallbackParams } from '../models/oauth-callback-params.model';
-import { HttpParams } from '@angular/common/http';
 
 @Injectable()
 export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {

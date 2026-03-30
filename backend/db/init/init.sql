@@ -1,6 +1,6 @@
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE
+    name VARCHAR2(255) UNIQUE
 );
 
 INSERT INTO role (name) VALUES 
@@ -9,18 +9,18 @@ INSERT INTO role (name) VALUES
 
 CREATE TABLE ward (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE 
+    name VARCHAR2(255) UNIQUE 
 );
 
 INSERT INTO ward (name) VALUES ('test-ward');
 
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    surname VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    temp_password VARCHAR (255) UNIQUE NOT NULL,
+    username VARCHAR2(255) UNIQUE NOT NULL,
+    surname VARCHAR2(255) NOT NULL,
+    name VARCHAR2(255) NOT NULL,
+    password VARCHAR2(255) NOT NULL,
+    temp_password VARCHAR2 (255) UNIQUE NOT NULL,
     first_access BOOLEAN DEFAULT TRUE,
     roleId INTEGER NOT NULL,
     FOREIGN KEY (roleId) REFERENCES role(id)
@@ -35,9 +35,9 @@ ON CONFLICT (username) DO NOTHING;
 
 
 CREATE TABLE plant (
-    id VARCHAR(255) PRIMARY KEY,
+    id VARCHAR2(255) PRIMARY KEY,
     ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL,
-    name VARCHAR(255) UNIQUE
+    name VARCHAR2(255) UNIQUE
 );
 
 
@@ -48,13 +48,25 @@ CREATE TABLE ward_user (
 );
 
 
--- Fake data for ward-management UI preview.
-INSERT INTO ward (name)
+-- TO BE DELETED: fake data
+CREATE TEMP TABLE ward_seed (
+    code TEXT PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    start_idx INTEGER NOT NULL,
+    end_idx INTEGER NOT NULL
+);
+
+INSERT INTO ward_seed (code, name, start_idx, end_idx)
 VALUES
-        ('Reparto autosufficienti'),
-        ('Reparto cure livello 1'),
-        ('Reparto cure livello 2'),
-        ('Reparto riabilitazione')
+    ('AUTO', 'Reparto autosufficienti', 1, 10),
+    ('L1', 'Reparto cure livello 1', 11, 18),
+    ('L2', 'Reparto cure livello 2', 19, 24),
+    ('RIAB', 'Reparto riabilitazione', 25, 30)
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO ward (name)
+SELECT ws.name
+FROM ward_seed ws
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO "user" (username, surname, name, password, temp_password, first_access, roleId)
@@ -75,67 +87,21 @@ VALUES
     ('admin_luigi', 'Einaudi', 'Luigi', 'test', 'tmp_admin_luigi', TRUE, 2)
 ON CONFLICT (username) DO NOTHING;
 
-
-
 INSERT INTO ward_user (ward_id, user_id)
 SELECT w.id, u.id
-FROM ward w
-JOIN "user" u ON u.username = 'mrossi'
-WHERE w.name = 'Reparto autosufficienti'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_user wu
-            WHERE wu.ward_id = w.id
-                AND wu.user_id = u.id
-    );
-
-INSERT INTO ward_user (ward_id, user_id)
-SELECT w.id, u.id
-FROM ward w
-JOIN "user" u ON u.username = 'gbianchi'
-WHERE w.name = 'Reparto autosufficienti'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_user wu
-            WHERE wu.ward_id = w.id
-                AND wu.user_id = u.id
-    );
-
-INSERT INTO ward_user (ward_id, user_id)
-SELECT w.id, u.id
-FROM ward w
-JOIN "user" u ON u.username = 'lverdi'
-WHERE w.name = 'Reparto cure livello 1'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_user wu
-            WHERE wu.ward_id = w.id
-                AND wu.user_id = u.id
-    );
-
-INSERT INTO ward_user (ward_id, user_id)
-SELECT w.id, u.id
-FROM ward w
-JOIN "user" u ON u.username = 'asala'
-WHERE w.name = 'Reparto cure livello 2'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_user wu
-            WHERE wu.ward_id = w.id
-                AND wu.user_id = u.id
-    );
-
-INSERT INTO ward_user (ward_id, user_id)
-SELECT w.id, u.id
-FROM ward w
-JOIN "user" u ON u.username = 'fneri'
-WHERE w.name = 'Reparto riabilitazione'
-    AND NOT EXISTS (
-            SELECT 1
-            FROM ward_user wu
-            WHERE wu.ward_id = w.id
-                AND wu.user_id = u.id
-    );
+FROM (
+    VALUES
+    ('mrossi', 'AUTO'),
+    ('gbianchi', 'AUTO'),
+    ('lverdi', 'L1'),
+    ('asala', 'L2'),
+    ('fneri', 'RIAB')
+) AS assignment(username, ward_code)
+JOIN ward_seed ws ON ws.code = assignment.ward_code
+JOIN ward w ON w.name = ws.name
+JOIN "user" u ON u.username = assignment.username
+LEFT JOIN ward_user wu ON wu.ward_id = w.id AND wu.user_id = u.id
+WHERE wu.id IS NULL;
 
 
 
@@ -154,7 +120,7 @@ CREATE UNLOGGED TABLE token_cache (
 
 CREATE TABLE plant (
     cached_at TIMESTAMPTZ NOT NULL,
-    id VARCHAR(36) PRIMARY KEY,
+    id VARCHAR2(36) PRIMARY KEY,
     data JSONB NOT NULL,
     ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL
 );
@@ -178,14 +144,13 @@ SELECT
             )
         )
     ) AS data,
-    CASE
-        WHEN gs BETWEEN 1 AND 10 THEN (SELECT id FROM ward WHERE name = 'Reparto autosufficienti')
-        WHEN gs BETWEEN 11 AND 18 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 1')
-        WHEN gs BETWEEN 19 AND 24 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 2')
-        WHEN gs BETWEEN 25 AND 30 THEN (SELECT id FROM ward WHERE name = 'Reparto riabilitazione')
-        ELSE NULL
-    END AS ward_id
+    wr.ward_id
 FROM generate_series(1, 80) AS gs
+LEFT JOIN (
+    SELECT w.id AS ward_id, ws.start_idx, ws.end_idx
+    FROM ward_seed ws
+    JOIN ward w ON w.name = ws.name
+) AS wr ON gs BETWEEN wr.start_idx AND wr.end_idx
 ON CONFLICT (id) DO UPDATE
 SET
     cached_at = EXCLUDED.cached_at,

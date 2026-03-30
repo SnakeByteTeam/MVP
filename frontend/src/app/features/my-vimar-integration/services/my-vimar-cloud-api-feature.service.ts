@@ -11,6 +11,7 @@ import { OAuthCallbackParams } from '../models/oauth-callback-params.model';
 export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
+  private readonly authorizeEndpoint = `${this.baseUrl}/api/vimar-account/oauth/authorize`;
 
   constructor(@Inject(DOCUMENT) private readonly document: Document) {}
 
@@ -23,8 +24,23 @@ export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
     if (!location) {
       throw new Error('Browser location is not available for OAuth redirection.');
     }
-    // inserire i veri endpoint
-    location.href = `${this.baseUrl}/api/vimar-account/oauth/authorize`;
+
+    const redirectUrl = `${location.origin}/vimar-link/oauth-callback`;
+
+    this.http
+      .post<{ url?: string; redirect_url?: string; authorization_url?: string }>(
+        this.authorizeEndpoint,
+        { redirect_url: redirectUrl },
+      )
+      .subscribe((response) => {
+        const targetUrl =
+          response?.url ??
+          response?.authorization_url ??
+          response?.redirect_url ??
+          this.authorizeEndpoint;
+
+        location.href = targetUrl;
+      });
   }
 
   public handleOAuthCallback(params: OAuthCallbackParams): Observable<void> {

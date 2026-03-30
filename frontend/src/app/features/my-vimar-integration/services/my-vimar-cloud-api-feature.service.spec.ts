@@ -11,7 +11,7 @@ describe('MyVimarCloudApiFeatureService', () => {
   let httpController: HttpTestingController;
 
   const baseUrl = 'http://api.example.test';
-  const mockLocation = { href: 'http://localhost:4200/vimar-link' };
+  const mockLocation = { href: 'http://localhost:4200/vimar-link', origin: 'http://localhost:4200' };
   const mockDocument = {
     defaultView: {
       location: mockLocation,
@@ -70,8 +70,13 @@ describe('MyVimarCloudApiFeatureService', () => {
     request.flush(null);
   });
 
-  it('reindirizza il browser a /api/vimar-account/oauth/authorize in initiateOAuth', () => {
+  it('chiama POST /api/vimar-account/oauth/authorize con redirect_url in initiateOAuth', () => {
     service.initiateOAuth();
+
+    const request = httpController.expectOne(`${baseUrl}/api/vimar-account/oauth/authorize`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ redirect_url: 'http://localhost:4200/vimar-link/oauth-callback' });
+    request.flush({ url: `${baseUrl}/api/vimar-account/oauth/authorize` });
 
     expect(mockLocation.href).toBe(`${baseUrl}/api/vimar-account/oauth/authorize`);
   });

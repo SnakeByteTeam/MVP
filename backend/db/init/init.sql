@@ -135,53 +135,30 @@ WHERE w.name = 'Reparto riabilitazione'
 
 
 
-DROP TABLE IF EXISTS TOKEN_CACHE;
-DROP TABLE IF EXISTS STRUCTURE_CACHE;
+DROP TABLE IF EXISTS token_cache;
+DROP TABLE IF EXISTS plant;
 
-CREATE UNLOGGED TABLE TOKEN_CACHE (
+CREATE UNLOGGED TABLE token_cache (
     access_token TEXT NOT NULL, 
     refresh_token TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
 
     lock BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT single_row UNIQUE (LOCK),
-    CONSTRAINT lock_always_true CHECK (LOCK = TRUE) -- questi ultimi due garantiscono una singola riga, non serve id
+    CONSTRAINT lock_always_true CHECK (LOCK = TRUE)
 );
 
-CREATE TABLE STRUCTURE_CACHE (
-    cached_at TIMESTAMPTZ NOT NULL, 
-    plant_id VARCHAR(36) NOT NULL, 
-    data JSONB NOT NULL, 
-    ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL,
-
-    PRIMARY KEY (plant_id)
+CREATE TABLE plant (
+    cached_at TIMESTAMPTZ NOT NULL,
+    id VARCHAR(36) PRIMARY KEY,
+    data JSONB NOT NULL,
+    ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL
 );
 
-
--- Bulk apartments for manual testing.
--- Generates 80 apartments: first 30 already assigned to wards, remaining available.
-INSERT INTO plant (id, ward_id, name)
-SELECT
-    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS id,
-    CASE
-        WHEN gs BETWEEN 1 AND 10 THEN (SELECT id FROM ward WHERE name = 'Reparto autosufficienti')
-        WHEN gs BETWEEN 11 AND 18 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 1')
-        WHEN gs BETWEEN 19 AND 24 THEN (SELECT id FROM ward WHERE name = 'Reparto cure livello 2')
-        WHEN gs BETWEEN 25 AND 30 THEN (SELECT id FROM ward WHERE name = 'Reparto riabilitazione')
-        ELSE NULL
-    END AS ward_id,
-    CONCAT('App. ', LPAD(gs::text, 3, '0')) AS name
-FROM generate_series(1, 80) AS gs
-ON CONFLICT (id) DO UPDATE
-SET
-    ward_id = EXCLUDED.ward_id,
-    name = EXCLUDED.name;
-
-
-INSERT INTO structure_cache (cached_at, plant_id, data, ward_id)
+INSERT INTO plant (cached_at, id, data, ward_id)
 SELECT
     NOW() - (gs * INTERVAL '1 minute') AS cached_at,
-    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS plant_id,
+    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS id,
     jsonb_build_object(
         'name', CONCAT('App. ', LPAD(gs::text, 3, '0')),
         'rooms', jsonb_build_array(
@@ -205,10 +182,8 @@ SELECT
         ELSE NULL
     END AS ward_id
 FROM generate_series(1, 80) AS gs
-ON CONFLICT (plant_id) DO UPDATE
+ON CONFLICT (id) DO UPDATE
 SET
     cached_at = EXCLUDED.cached_at,
     data = EXCLUDED.data,
     ward_id = EXCLUDED.ward_id;
-
-

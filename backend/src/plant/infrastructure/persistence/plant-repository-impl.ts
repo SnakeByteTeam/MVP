@@ -16,12 +16,12 @@ export class PlantRepositoryImpl
     try {
       const { rows } = await client.query<PlantEntity>(
         `SELECT 
-        plant_id AS id,
+        id,
         cached_at,
         data,
         ward_id
-       FROM structure_cache
-       WHERE plant_id = $1`,
+       FROM plant
+       WHERE id = $1`,
         [plantId],
       );
 
@@ -39,11 +39,11 @@ export class PlantRepositoryImpl
     try {
       const { rows } = await client.query<PlantEntity>(
         `SELECT 
-            plant_id AS id,
+            id,
             cached_at,
             data,
             ward_id
-            FROM structure_cache
+            FROM plant
             WHERE ward_id IS NULL`,
       );
 

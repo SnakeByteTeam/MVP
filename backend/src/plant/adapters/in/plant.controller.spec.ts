@@ -52,9 +52,9 @@ describe('PlantController', () => {
 
       const result = await controller.getAllAvailablePlants();
 
-      expect(findAllAvailablePlantsUseCase.findAllAvailablePlants).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(
+        findAllAvailablePlantsUseCase.findAllAvailablePlants,
+      ).toHaveBeenCalledTimes(1);
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
         id: 'plant-1',
@@ -84,7 +84,9 @@ describe('PlantController', () => {
     });
 
     it('should handle empty plants array', async () => {
-      findAllAvailablePlantsUseCase.findAllAvailablePlants.mockResolvedValue([]);
+      findAllAvailablePlantsUseCase.findAllAvailablePlants.mockResolvedValue(
+        [],
+      );
 
       const result = await controller.getAllAvailablePlants();
 

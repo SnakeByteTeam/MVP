@@ -60,7 +60,9 @@ describe('PlantService', () => {
       expect(result).toHaveLength(2);
       expect(result[0]).toBe(plant1);
       expect(result[1]).toBe(plant2);
-      expect(findAllAvailablePlantsPort.findAllAvailablePlants).toHaveBeenCalledTimes(1);
+      expect(
+        findAllAvailablePlantsPort.findAllAvailablePlants,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('should throw error when no available plants', async () => {
@@ -77,7 +79,9 @@ describe('PlantService', () => {
       const result = await service.findAllAvailablePlants();
 
       expect(result).toEqual([]);
-      expect(findAllAvailablePlantsPort.findAllAvailablePlants).toHaveBeenCalledTimes(1);
+      expect(
+        findAllAvailablePlantsPort.findAllAvailablePlants,
+      ).toHaveBeenCalledTimes(1);
     });
 
     it('should propagate port errors', async () => {

@@ -35,7 +35,7 @@ describe('TokenCacheImpl', () => {
     expect(pool.connect).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO TOKEN_CACHE'),
+      expect.stringContaining('INSERT INTO token_cache'),
       ['access-1', 'refresh-1', expiresAt],
     );
     expect(releaseMock).toHaveBeenCalledTimes(1);
@@ -75,7 +75,7 @@ describe('TokenCacheImpl', () => {
       refreshToken: 'refresh-1',
       expiresAt,
     });
-    expect(queryMock).toHaveBeenCalledWith('SELECT * FROM TOKEN_CACHE');
+    expect(queryMock).toHaveBeenCalledWith('SELECT * FROM token_cache');
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 

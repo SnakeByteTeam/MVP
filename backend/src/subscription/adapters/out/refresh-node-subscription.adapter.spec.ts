@@ -29,23 +29,22 @@ describe('RefreshNodeSubscriptionAdapter', () => {
 
       expect(result).toBe(true);
       expect(getValidTokenPort.getValidToken).toHaveBeenCalledTimes(1);
-      expect(nodeRepo.refreshSub).toHaveBeenCalledWith('valid-token', 'plant-1');
+      expect(nodeRepo.refreshSub).toHaveBeenCalledWith(
+        'valid-token',
+        'plant-1',
+      );
     });
 
     it('should throw error when plantId is null', async () => {
       const cmd: RefreshNodeSubCmd = { plantId: '' };
 
-      await expect(adapter.refreshSub(cmd)).rejects.toThrow(
-        'PlantId is null',
-      );
+      await expect(adapter.refreshSub(cmd)).rejects.toThrow('PlantId is null');
     });
 
     it('should throw error when plantId is missing', async () => {
       const cmd: RefreshNodeSubCmd = {} as RefreshNodeSubCmd;
 
-      await expect(adapter.refreshSub(cmd)).rejects.toThrow(
-        'PlantId is null',
-      );
+      await expect(adapter.refreshSub(cmd)).rejects.toThrow('PlantId is null');
     });
 
     it('should throw error when no valid token found', async () => {
@@ -70,13 +69,9 @@ describe('RefreshNodeSubscriptionAdapter', () => {
     it('should propagate repo errors', async () => {
       const cmd: RefreshNodeSubCmd = { plantId: 'plant-1' };
       getValidTokenPort.getValidToken.mockResolvedValue('valid-token');
-      nodeRepo.refreshSub.mockRejectedValue(
-        new Error('Repository error'),
-      );
+      nodeRepo.refreshSub.mockRejectedValue(new Error('Repository error'));
 
-      await expect(adapter.refreshSub(cmd)).rejects.toThrow(
-        'Repository error',
-      );
+      await expect(adapter.refreshSub(cmd)).rejects.toThrow('Repository error');
     });
 
     it('should propagate token port errors', async () => {

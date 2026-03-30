@@ -14,9 +14,9 @@ export class StructureCacheImpl implements WriteCacheRepoPort {
 
     try {
       await client.query(
-        `INSERT INTO structure_cache (plant_id, data, cached_at, ward_id)
+        `INSERT INTO plant (id, data, cached_at, ward_id)
                 VALUES ($1, $2, NOW(), $3)
-                ON CONFLICT (plant_id) DO UPDATE
+                ON CONFLICT (id) DO UPDATE
                 SET data      = EXCLUDED.data,
                     cached_at = NOW()`,
         [plant.id, JSON.stringify(plant.data), plant.ward_id],

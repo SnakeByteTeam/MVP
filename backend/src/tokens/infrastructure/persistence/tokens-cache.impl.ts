@@ -21,7 +21,7 @@ export class TokenCacheImpl
 
     try {
       await client.query(
-        `INSERT INTO TOKEN_CACHE (access_token, refresh_token, expires_at) 
+        `INSERT INTO token_cache (access_token, refresh_token, expires_at) 
                 VALUES ($1, $2, $3)
                 ON CONFLICT (lock) DO UPDATE
                     SET access_token = EXCLUDED.access_token,
@@ -42,7 +42,7 @@ export class TokenCacheImpl
     const client = await this.pool.connect();
 
     try {
-      const result = await client.query(`SELECT * FROM TOKEN_CACHE`);
+      const result = await client.query(`SELECT * FROM token_cache`);
 
       if (result.rows.length === 0) {
         return null;

@@ -20,7 +20,7 @@ export class DeviceRepositoryImpl
                       '$.rooms[*].devices[*] ? (@.id == $deviceId)',
                       jsonb_build_object('deviceId', $1::text)
                   ) AS device
-                  FROM structure_cache;`,
+                  FROM plant;`,
         [id],
       );
 
@@ -41,8 +41,8 @@ export class DeviceRepositoryImpl
     try {
       const { rows } = await client.query<{ device: DeviceEntity }>(
         `SELECT jsonb_path_query(data, '$.rooms[*].devices[*]') AS device
-              FROM structure_cache
-              WHERE plant_id = $1`,
+              FROM plant
+              WHERE id = $1`,
         [plantId],
       );
 

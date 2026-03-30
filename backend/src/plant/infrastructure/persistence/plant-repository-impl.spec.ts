@@ -103,9 +103,7 @@ describe('PlantRepositoryImpl', () => {
     });
 
     it('should handle connection errors', async () => {
-      mockPool.connect.mockRejectedValueOnce(
-        new Error('Connection failed'),
-      );
+      mockPool.connect.mockRejectedValueOnce(new Error('Connection failed'));
 
       await expect(repository.findById('plant-1')).rejects.toThrow(
         'Connection failed',

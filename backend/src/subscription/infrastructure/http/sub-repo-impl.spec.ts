@@ -84,9 +84,7 @@ describe('SubscriptionRepoImpl', () => {
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Failed to create subscription',
-      );
+      expect(errorSpy).toHaveBeenCalledWith('Failed to create subscription');
 
       errorSpy.mockRestore();
     });
@@ -99,9 +97,7 @@ describe('SubscriptionRepoImpl', () => {
       const result = await newRepo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Failed to create subscription',
-      );
+      expect(errorSpy).toHaveBeenCalledWith('Failed to create subscription');
 
       errorSpy.mockRestore();
     });

@@ -4,7 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet'; //Middleware per la sicurezza HTTP, setta correttamente gli header HTTP per proteggere da vulnerabilità note.
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
 
   app.use(helmet());
   app.enableCors({

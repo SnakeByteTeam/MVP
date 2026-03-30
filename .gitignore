@@ -73,5 +73,9 @@ typings/
 !.vscode/extensions.json
 .history/
 
+!backend/src/alarms/application/ports/out
+!backend/src/alarms/application/ports/out/*.ts
+
+
 # local documentation / notes
 .ignore/

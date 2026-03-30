@@ -1,4 +1,4 @@
-import { UpdateWardReqDto } from './update-ward-req-dto';
+import { UpdateWardReqDto } from './update-ward-req.dto';
 
 describe('UpdateWardReqDto', () => {
   it('should be defined', () => {

@@ -13,7 +13,7 @@ export class FindAllWardsAdapter implements FindAllWardsPort {
     private readonly findAllWardsRepository: FindAllWardsRepository,
   ) {}
 
-  async findAllWard(): Promise<Ward[]> {
+  async findAllWards(): Promise<Ward[]> {
     const res: WardEntity[] = await this.findAllWardsRepository.findAllWards();
 
     return res.map((element) => new Ward(element.id, element.name));

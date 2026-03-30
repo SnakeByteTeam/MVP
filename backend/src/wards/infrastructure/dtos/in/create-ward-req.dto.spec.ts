@@ -1,4 +1,4 @@
-import { CreateWardReqDto } from './create-ward-req-dto';
+import { CreateWardReqDto } from './create-ward-req.dto';
 
 describe('CreateWardReqDto', () => {
   it('should be defined', () => {

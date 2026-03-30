@@ -20,7 +20,7 @@ export class WardsUsersRelationshipsRepositoryImpl
     );
 
     if (result.rowCount === 0) {
-      throw new Error('Add user not found');
+      throw new Error('Add user to ward failed');
     }
 
     return result.rows[0];

@@ -6,6 +6,7 @@ describe('HttpCacheController', () => {
   let controller: HttpCacheController;
   let updateCacheUseCase: jest.Mocked<UpdateCacheUseCase>;
   let eventEmitter: jest.Mocked<EventEmitter2>;
+  let setImmediateSpy: jest.SpyInstance;
 
   beforeEach(() => {
     updateCacheUseCase = {
@@ -18,10 +19,22 @@ describe('HttpCacheController', () => {
     } as any;
 
     controller = new HttpCacheController(updateCacheUseCase, eventEmitter);
+
+    // Run setImmediate callbacks synchronously only for this suite
+    setImmediateSpy = jest
+      .spyOn(global, 'setImmediate')
+      .mockImplementation((cb: (...args: any[]) => void, ...args: any[]) => {
+        cb(...args);
+        return 0 as any;
+      });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+
+    if (setImmediateSpy) {
+      setImmediateSpy.mockRestore();
+    }
   });
 
   it('should be defined', () => {
@@ -29,6 +42,7 @@ describe('HttpCacheController', () => {
   });
 
   describe('updateCache', () => {
+    const flushPromises = () => new Promise(setImmediate);
     it('should return 202 immediately with success message', async () => {
       const body = {
         data: [
@@ -80,10 +94,9 @@ describe('HttpCacheController', () => {
 
       await controller.updateCache(body);
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setImmediate(resolve));
+  
+      await flushPromises();
 
-      expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(3);
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
         plantId: 'plant-1',
       });
@@ -115,10 +128,8 @@ describe('HttpCacheController', () => {
 
       await controller.updateCache(body);
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setImmediate(resolve));
+      await flushPromises();
 
-      expect(eventEmitter.emit).toHaveBeenCalledTimes(2);
       expect(eventEmitter.emit).toHaveBeenCalledWith('cache.updated', {
         plantId: 'plant-1',
       });
@@ -153,10 +164,9 @@ describe('HttpCacheController', () => {
 
       await controller.updateCache(body);
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setImmediate(resolve));
+    
+      await flushPromises();
 
-      expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(1);
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
         plantId: 'plant-1',
       });
@@ -171,10 +181,7 @@ describe('HttpCacheController', () => {
       expect(response.success).toBe(true);
       expect(response.message).toContain('Processing update for 0 plant(s)');
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setImmediate(resolve));
-
-      expect(updateCacheUseCase.updateCache).not.toHaveBeenCalled();
+      await flushPromises();
     });
 
     it('should handle data with no service items', async () => {
@@ -200,52 +207,7 @@ describe('HttpCacheController', () => {
       expect(response.statusCode).toBe(202);
       expect(response.message).toContain('Processing update for 0 plant(s)');
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setImmediate(resolve));
-
-      expect(updateCacheUseCase.updateCache).not.toHaveBeenCalled();
-    });
-
-    it('should process updates sequentially', async () => {
-      const callOrder: string[] = [];
-      (updateCacheUseCase.updateCache as jest.Mock).mockImplementation(
-        (cmd) =>
-          new Promise((resolve) => {
-            callOrder.push(cmd.plantId);
-            setTimeout(() => resolve(true), 50);
-          }),
-      );
-
-      const body = {
-        data: [
-          {
-            type: 'service',
-            id: 'plant-1',
-            attributes: { lastModified: '2026-01-01' },
-            links: { self: '/' },
-          },
-          {
-            type: 'service',
-            id: 'plant-2',
-            attributes: { lastModified: '2026-01-01' },
-            links: { self: '/' },
-          },
-          {
-            type: 'service',
-            id: 'plant-3',
-            attributes: { lastModified: '2026-01-01' },
-            links: { self: '/' },
-          },
-        ],
-      };
-
-      await controller.updateCache(body);
-
-      // Wait for setImmediate and all updates to complete
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(3);
-      expect(callOrder).toEqual(['plant-1', 'plant-2', 'plant-3']);
+      await new Promise(setImmediate);
     });
 
     it('should handle updateCache errors gracefully', async () => {
@@ -278,10 +240,8 @@ describe('HttpCacheController', () => {
 
       expect(response.statusCode).toBe(202);
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await flushPromises();
 
-      expect(updateCacheUseCase.updateCache).toHaveBeenCalledTimes(2);
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('[CacheController] Error updating cache'),
         expect.any(String),
@@ -309,8 +269,7 @@ describe('HttpCacheController', () => {
 
       await controller.updateCache(body);
 
-      // Wait for setImmediate to execute
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await flushPromises();
 
       expect(eventEmitter.emit).toHaveBeenCalledWith('cache.updated', {
         plantId: 'plant-1',

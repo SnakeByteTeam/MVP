@@ -1,13 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { GetTokensFromApiImpl } from './get-tokens-from-api.impl';
-import { ConfigService } from '@nestjs/config';
 import { Observable, of } from 'rxjs';
 import { TokensDto } from '../dto/tokens.dto';
 
 describe('GetTokensFromApiImpl', () => {
   let apiImpl: GetTokensFromApiImpl;
   let httpService: jest.Mocked<Pick<HttpService, 'post'>>;
-  let configService: jest.Mocked<Partial<ConfigService>>;
 
   beforeEach(() => {
     httpService = {
@@ -22,19 +20,12 @@ describe('GetTokensFromApiImpl', () => {
       ),
     };
 
-    const cfg: Record<string, string> = {
-      clientId: 'my-client-id',
-      clientSecret: 'my-client-secret',
-      host2: 'https://auth.example.com/token',
-      redirectUrl: 'http://localhost:3000/callback',
-    };
-
-    configService = {
-      get: jest.fn((key: string) => cfg[key]),
-    };
+    process.env.CLIENTID = 'my-client-id';
+    process.env.CLIENTSECRET = 'my-client-secret';
+    process.env.HOST2 = 'https://auth.example.com/token';
+    process.env.REDIRECT_URI = 'http://localhost:3000/callback';
 
     apiImpl = new GetTokensFromApiImpl(
-      configService as unknown as ConfigService,
       httpService as unknown as HttpService,
     );
   });
@@ -78,11 +69,12 @@ describe('GetTokensFromApiImpl', () => {
     });
 
     it('should fallback to empty token and redirect urls when config values are missing', async () => {
-      const emptyConfigService: jest.Mocked<Partial<ConfigService>> = {
-        get: jest.fn(() => undefined),
-      };
+      delete process.env.CLIENTID;
+      delete process.env.CLIENTSECRET;
+      delete process.env.HOST2;
+      delete process.env.REDIRECT_URI;
+
       const apiWithEmptyConfig = new GetTokensFromApiImpl(
-        emptyConfigService as unknown as ConfigService,
         httpService as unknown as HttpService,
       );
 
@@ -146,17 +138,9 @@ describe('GetTokensFromApiImpl', () => {
     });
 
     it('should fallback to empty token url when config value is missing', async () => {
-      const cfg: Record<string, string | undefined> = {
-        clientId: 'my-client-id',
-        clientSecret: 'my-client-secret',
-        host2: undefined,
-        redirectUrl: 'http://localhost:3000/callback',
-      };
-      const missingTokenUrlConfig: jest.Mocked<Partial<ConfigService>> = {
-        get: jest.fn((key: string) => cfg[key]),
-      };
+      delete process.env.HOST2;
+
       const apiWithMissingTokenUrl = new GetTokensFromApiImpl(
-        missingTokenUrlConfig as unknown as ConfigService,
         httpService as unknown as HttpService,
       );
 

@@ -24,8 +24,6 @@ import { TokenService } from './application/services/tokens.service';
 import { ReadTokensFromRepoAdapter } from './adapters/out/read-tokens-from-repo.adapter';
 import { RefreshTokensAdapter } from './adapters/out/refresh-tokens.adapter';
 
-
-
 @Module({
   imports: [HttpModule],
   controllers: [ApiAuthVimarController],
@@ -39,7 +37,7 @@ import { RefreshTokensAdapter } from './adapters/out/refresh-tokens.adapter';
     { provide: WRITETOKENSCACHEPORT, useClass: TokenCacheImpl },
     { provide: READTOKENSCACHEPORT, useClass: TokenCacheImpl },
     { provide: GETTOKENSWITHCODEPORT, useClass: GetTokenWithCodeAdapter },
-    { provide: GETTOKENSFROMAPIPORT, useClass: GetTokensFromApiImpl},
+    { provide: GETTOKENSFROMAPIPORT, useClass: GetTokensFromApiImpl },
     { provide: REFRESHTOKENSFROMAPIPORT, useClass: GetTokensFromApiImpl },
     { provide: GETVALIDTOKENPORT, useClass: TokenService },
     { provide: READTOKENSFROMREPOPORT, useClass: ReadTokensFromRepoAdapter },

@@ -1,6 +1,6 @@
 import { RefreshNodeSubCmd } from 'src/subscription/application/commands/refresh-node-sub.command';
 import { RefreshNodeSubscriptionRepoPort } from 'src/subscription/application/repository/refresh-node-subscription.repository';
-import { GetValidTokenPort } from 'src/tokens/application/ports/out/get-valid-token.port';
+import { GetValidTokenPort } from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
 import { RefreshNodeSubscriptionAdapter } from './refresh-node-subscription.adapter';
 
 describe('RefreshNodeSubscriptionAdapter', () => {

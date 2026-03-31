@@ -4,14 +4,24 @@ import {
   APIAUTHUSECASE,
   type ApiAuthUseCase,
 } from 'src/api-auth-vimar/application/ports/in/api-auth.usecase';
+import {
+  GETTOKENSCALLBACKUSECASE,
+  type GetTokensCallbackUseCase,
+} from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
+import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
 
 describe('ApiAuthVimarController', () => {
   let controller: ApiAuthVimarController;
   let apiAuthUseCase: jest.Mocked<ApiAuthUseCase>;
+  let getTokensCallbackUseCase: jest.Mocked<GetTokensCallbackUseCase>;
 
   beforeEach(async () => {
     apiAuthUseCase = {
       getLoginUrl: jest.fn(),
+    };
+
+    getTokensCallbackUseCase = {
+      getTokens: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -20,6 +30,10 @@ describe('ApiAuthVimarController', () => {
         {
           provide: APIAUTHUSECASE,
           useValue: apiAuthUseCase,
+        },
+        {
+          provide: GETTOKENSCALLBACKUSECASE,
+          useValue: getTokensCallbackUseCase,
         },
       ],
     }).compile();
@@ -34,7 +48,11 @@ describe('ApiAuthVimarController', () => {
   it('should return redirect url and 302 status code', () => {
     apiAuthUseCase.getLoginUrl.mockReturnValue('url-login');
 
-    const result = controller.login();
+    const payload: PlantAuthDto = {
+      redirect_url: 'http://localhost:4200/callback',
+    };
+
+    const result = controller.login(payload);
 
     expect(apiAuthUseCase.getLoginUrl).toHaveBeenCalledTimes(1);
     expect(result).toEqual({

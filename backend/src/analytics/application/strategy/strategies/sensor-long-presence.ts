@@ -13,6 +13,7 @@ const LONG_PRESENCE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minuti
 const PRESENCE_SFE_TYPE = 'SFE_State_Presence';
 const DETECTED = 'Detected';
 const DAYS_RANGE = 30;
+const TITLE = 'Rilevamento di presenza prolungata';
 const METRIC = 'sensor-long-presence';
 
 interface SensorState {
@@ -59,7 +60,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
   }
 
   private emptyPlot(): Plot {
-    return new Plot('Sensor Long Presence Analytics', METRIC, 'events', [], []);
+    return new Plot(TITLE, METRIC, 'events', [], []);
   }
 
   private sortSnapshots(
@@ -185,12 +186,6 @@ export class SensorLongPresence implements AnalyticsStrategy {
       },
     );
 
-    return new Plot(
-      'Sensor Long Presence Analytics',
-      METRIC,
-      'events',
-      labels,
-      series,
-    );
+    return new Plot(TITLE, METRIC, 'events', labels, series);
   }
 }

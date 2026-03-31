@@ -6,6 +6,9 @@ import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { getDeviceWatt, isDeviceActive } from './consumption-config';
 import { Series } from 'src/analytics/domain/series.model';
 
+const TITLE = 'Consumo energetico di impianto';
+const METRIC = 'plant-consumption';
+
 @Injectable()
 export class PlantConsumption implements AnalyticsStrategy {
   constructor(
@@ -23,13 +26,7 @@ export class PlantConsumption implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot(
-        'Plant Consumption Analytics',
-        'plant-consumption',
-        '',
-        [],
-        [],
-      );
+      return new Plot(TITLE, METRIC, '', [], []);
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -66,12 +63,6 @@ export class PlantConsumption implements AnalyticsStrategy {
     const labels = sorted.map(([day]) => day);
     const values = sorted.map(([, wh]) => wh);
 
-    return new Plot(
-      'Plant Consumption Analytics',
-      'plant-consumption',
-      'Wh',
-      labels,
-      [new Series('', '', values)],
-    );
+    return new Plot(TITLE, METRIC, 'Wh', labels, [new Series('', '', values)]);
   }
 }

@@ -4,6 +4,12 @@ import { AnalyticsStrategy } from '../strategy/analytics.strategy';
 import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
 import { Series } from 'src/analytics/domain/series.model';
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
+import { GetSuggestionUseCase } from '../ports/in/get-suggestion.usecase';
+import { ANALYTICS_STRATEGIES_TOKEN } from 'src/analytics/analytics.module';
+import { GET_SUGGESTION_USECASE } from '../ports/in/get-suggestion.usecase';
+
+const mockSuggestion = new Suggestion('Turn off the lights.', true);
 
 const mockPlot: Plot = new Plot(
   'Plant Consumption Analytics',
@@ -19,6 +25,10 @@ const mockCmd: GetAnalyticsCmd = {
 
 const mockStrategy: jest.Mocked<AnalyticsStrategy> = {
   execute: jest.fn(),
+};
+
+const mockSuggestionUseCase: jest.Mocked<GetSuggestionUseCase> = {
+  getSuggestion: jest.fn(),
 };
 
 describe('AnalyticsService', () => {
@@ -41,8 +51,12 @@ describe('AnalyticsService', () => {
       providers: [
         AnalyticsService,
         {
-          provide: 'ANALYTICS_STRATEGIES',
+          provide: ANALYTICS_STRATEGIES_TOKEN,
           useValue: strategiesMap,
+        },
+        {
+          provide: GET_SUGGESTION_USECASE,
+          useValue: mockSuggestionUseCase,
         },
       ],
     }).compile();
@@ -58,6 +72,7 @@ describe('AnalyticsService', () => {
   describe('getAnalyticsByPlantId', () => {
     it('should return all Plots when all strategies succeed', async () => {
       mockStrategy.execute.mockResolvedValue(mockPlot);
+      mockSuggestionUseCase.getSuggestion.mockResolvedValue(mockSuggestion);
 
       const result = await service.getAnalyticsByPlantId(mockCmd);
 
@@ -82,6 +97,7 @@ describe('AnalyticsService', () => {
       };
       strategiesMap.set('plant-anomalies', failingStrategy);
       mockStrategy.execute.mockResolvedValue(mockPlot);
+      mockSuggestionUseCase.getSuggestion.mockResolvedValue(mockSuggestion);
 
       const result = await service.getAnalyticsByPlantId(mockCmd);
 
@@ -97,11 +113,30 @@ describe('AnalyticsService', () => {
         [new Series('consumption', 'Consumption', [20, 40])],
       );
       mockStrategy.execute.mockResolvedValue(consumptionPlot);
+      mockSuggestionUseCase.getSuggestion.mockResolvedValue(mockSuggestion);
 
       const result = await service.getAnalyticsByPlantId(mockCmd);
 
       expect(result[0].getTitle()).toBe('Plant Consumption Analytics');
       expect(result[0].getMetric()).toBe('plant-consumption');
+    });
+
+    it('should attach suggestion to each plot', async () => {
+      mockStrategy.execute.mockResolvedValue(mockPlot);
+      mockSuggestionUseCase.getSuggestion.mockResolvedValue(mockSuggestion);
+
+      const result = await service.getAnalyticsByPlantId(mockCmd);
+
+      expect(result[0].getSuggestion()).toBe(mockSuggestion);
+    });
+
+    it('should call getSuggestion once per successful plot', async () => {
+      mockStrategy.execute.mockResolvedValue(mockPlot);
+      mockSuggestionUseCase.getSuggestion.mockResolvedValue(mockSuggestion);
+
+      await service.getAnalyticsByPlantId(mockCmd);
+
+      expect(mockSuggestionUseCase.getSuggestion).toHaveBeenCalledTimes(8);
     });
   });
 });

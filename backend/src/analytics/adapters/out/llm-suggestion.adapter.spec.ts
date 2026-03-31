@@ -43,7 +43,7 @@ describe('LLMSuggestionAdapter', () => {
   });
 
   describe('generateSuggestion', () => {
-    it('should throw an error if the metric has no baseline configuration', async () => {
+    it('should return a Suggestion with empty message and isSuggestion=false if the metric has no baseline configuration', async () => {
       const cmd = new GetSuggestionCmd(
         'Unknown',
         'unknown-metric',
@@ -52,9 +52,11 @@ describe('LLMSuggestionAdapter', () => {
         [new Series('unknown', 'Unknown', [100])],
       );
 
-      await expect(adapter.generateSuggestion(cmd)).rejects.toThrow(
-        'No baseline configuration found for metric: unknown-metric',
-      );
+      const result = await adapter.generateSuggestion(cmd);
+
+      expect(result).toBeInstanceOf(Suggestion);
+      expect(result.getMessage()).toBe('');
+      expect(result.getIsSuggestion()).toBe(false);
       expect(mockGroqClient.generateSuggestion).not.toHaveBeenCalled();
     });
 

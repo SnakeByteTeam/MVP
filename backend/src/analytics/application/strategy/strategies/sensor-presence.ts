@@ -13,6 +13,7 @@ const PRESENCE_SFE_TYPE = 'SFE_State_Presence';
 const DETECTED = 'Detected';
 const NOT_DETECTED = 'NotDetected';
 const DAYS_RANGE = 30;
+const TITLE = 'Rilevamento di presenza';
 const METRIC = 'sensor-presence';
 
 interface SensorState {
@@ -38,7 +39,7 @@ export class SensorPresence implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Sensor Presence Analytics', METRIC, 'events', [], []);
+      return new Plot(TITLE, METRIC, 'events', [], []);
     }
 
     const snapshots: [string, DatapointValue[]][] = Array.from(
@@ -86,13 +87,7 @@ export class SensorPresence implements AnalyticsStrategy {
       },
     );
 
-    return new Plot(
-      'Sensor Presence Analytics',
-      METRIC,
-      'events',
-      labels,
-      series,
-    );
+    return new Plot(TITLE, METRIC, 'events', labels, series);
   }
 
   private getOrCreateSensorState(

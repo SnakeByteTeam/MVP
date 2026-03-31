@@ -5,6 +5,9 @@ import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Series } from 'src/analytics/domain/series.model';
 
+const TITLE = 'Variazione e cambio di temperatura di impianto';
+const METRIC = 'thermostat-temperature';
+
 @Injectable()
 export class PlantThermostatTemperature implements AnalyticsStrategy {
   constructor(
@@ -22,13 +25,7 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot(
-        'Plant Thermostat Temperature Analytics',
-        'thermostat-temperature',
-        '',
-        [],
-        [],
-      );
+      return new Plot(TITLE, METRIC, '', [], []);
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -61,12 +58,6 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     const labels = sorted.map(([day]) => day);
     const values = sorted.map(([, { sum, count }]) => sum / count);
 
-    return new Plot(
-      'Plant Thermostat Temperature Analytics',
-      'thermostat-temperature',
-      '°C',
-      labels,
-      [new Series('', '', values)],
-    );
+    return new Plot(TITLE, METRIC, '°C', labels, [new Series('', '', values)]);
   }
 }

@@ -35,6 +35,11 @@ const METRIC_LABELS: Record<string, string> = {
   'sensor-long-presence': 'prolonged presence events (>30 min) per sensor',
 };
 
+const EMPTY_SUGGESTION: GroqSuggestionResultDto = {
+  message: '',
+  isSuggestion: false,
+};
+
 @Injectable()
 export class GroqClientImpl implements GroqClient {
   private readonly logger = new Logger(GroqClientImpl.name);
@@ -50,6 +55,14 @@ export class GroqClientImpl implements GroqClient {
     current: GetSuggestionCmd,
     baseline: GetSuggestionCmd,
   ): Promise<GroqSuggestionResultDto> {
+    const hasSeries =
+      current.series.length > 0 &&
+      current.series.some((s) => s.getData().length > 0);
+
+    if (!hasSeries) {
+      return EMPTY_SUGGESTION;
+    }
+
     const prompt = this.buildPrompt(current, baseline);
 
     const response = await fetch(this.apiUrl, {
@@ -81,10 +94,10 @@ export class GroqClientImpl implements GroqClient {
       this.logger.error(`Groq API error: ${error}`);
 
       if (response.status === 429) {
-        throw new HttpException(
-          'The analysis service is temporarily unavailable. Please try again in a few minutes.',
-          HttpStatus.TOO_MANY_REQUESTS,
+        this.logger.warn(
+          'Groq rate limit exceeded — returning empty suggestion',
         );
+        return EMPTY_SUGGESTION;
       }
 
       throw new HttpException(

@@ -10,6 +10,8 @@ import { Series } from 'src/analytics/domain/series.model';
 
 const DAYS_RANGE = 30;
 const METRIC = 'ward-resolved-alarm';
+const TITLE = 'Allarmi inviati e risolti nel reparto';
+const UNIT = 'allarmi';
 
 @Injectable()
 export class WardResolvedAlarm implements AnalyticsStrategy {
@@ -33,13 +35,7 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
     ]);
 
     if (allDaysSet.size === 0) {
-      return new Plot(
-        'Ward Resolved Alarm Analytics',
-        METRIC,
-        'alarms',
-        [],
-        [],
-      );
+      return new Plot(TITLE, METRIC, UNIT, [], []);
     }
 
     const labels: string[] = Array.from(allDaysSet).sort((a, b) =>
@@ -58,12 +54,6 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
       new Series('resolved', 'Resolved Alarms', resolvedData),
     ];
 
-    return new Plot(
-      'Ward Resolved Alarm Analytics',
-      METRIC,
-      'alarms',
-      labels,
-      series,
-    );
+    return new Plot(TITLE, METRIC, UNIT, labels, series);
   }
 }

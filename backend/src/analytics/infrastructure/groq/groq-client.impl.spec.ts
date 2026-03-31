@@ -1,13 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { GroqClientImpl } from './groq-client.impl';
-import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
 import { Series } from 'src/analytics/domain/series.model';
-
-const mockConfigService = {
-  getOrThrow: jest.fn().mockReturnValue('mock-groq-api-key'),
-};
+import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';
 
 const mockCurrent = new GetSuggestionCmd(
   'Plant Consumption Analytics',
@@ -31,10 +26,7 @@ describe('GroqClientImpl', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        GroqClientImpl,
-        { provide: ConfigService, useValue: mockConfigService },
-      ],
+      providers: [GroqClientImpl],
     }).compile();
 
     groqClientImpl = module.get<GroqClientImpl>(GroqClientImpl);
@@ -104,21 +96,58 @@ describe('GroqClientImpl', () => {
       expect(result.isSuggestion).toBe(false);
     });
 
-    it('should throw HttpException with TOO_MANY_REQUESTS on 429', async () => {
+    it('should return empty suggestion when current has no series', async () => {
+      const cmdNoSeries = new GetSuggestionCmd(
+        'Plant Consumption Analytics',
+        'plant-consumption',
+        'Wh',
+        [],
+        [],
+      );
+
+      const result = await groqClientImpl.generateSuggestion(
+        cmdNoSeries,
+        mockBaseline,
+      );
+
+      expect(result.message).toBe('');
+      expect(result.isSuggestion).toBe(false);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return empty suggestion when series have no data', async () => {
+      const cmdEmptyData = new GetSuggestionCmd(
+        'Plant Consumption Analytics',
+        'plant-consumption',
+        'Wh',
+        ['2026-03-25'],
+        [new Series('plant-consumption', 'Plant Consumption', [])],
+      );
+
+      const result = await groqClientImpl.generateSuggestion(
+        cmdEmptyData,
+        mockBaseline,
+      );
+
+      expect(result.message).toBe('');
+      expect(result.isSuggestion).toBe(false);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return empty suggestion silently on 429 rate limit', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 429,
         text: jest.fn().mockResolvedValue('Rate limit exceeded'),
       } as unknown as Response);
 
-      await expect(
-        groqClientImpl.generateSuggestion(mockCurrent, mockBaseline),
-      ).rejects.toThrow(
-        new HttpException(
-          'The analysis service is temporarily unavailable. Please try again in a few minutes.',
-          HttpStatus.TOO_MANY_REQUESTS,
-        ),
+      const result = await groqClientImpl.generateSuggestion(
+        mockCurrent,
+        mockBaseline,
       );
+
+      expect(result.message).toBe('');
+      expect(result.isSuggestion).toBe(false);
     });
 
     it('should throw HttpException with INTERNAL_SERVER_ERROR on generic API error', async () => {

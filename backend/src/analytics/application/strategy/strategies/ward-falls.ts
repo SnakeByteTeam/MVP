@@ -14,6 +14,8 @@ const FALL = 'Fall';
 const NO_FALL = 'NoFall';
 const DAYS_RANGE = 30;
 const METRIC = 'ward-falls';
+const TITLE = 'Frequenza delle cadute rilevate nel reparto';
+const UNIT = 'allarmi';
 
 @Injectable()
 export class WardFalls implements AnalyticsStrategy {
@@ -32,7 +34,7 @@ export class WardFalls implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot('Ward Falls Analytics', METRIC, 'falls', [], []);
+      return new Plot(TITLE, METRIC, UNIT, [], []);
     }
 
     const snapshots: [string, DatapointValue[]][] = Array.from(
@@ -60,7 +62,7 @@ export class WardFalls implements AnalyticsStrategy {
     }
 
     if (fallsByDay.size === 0) {
-      return new Plot('Ward Falls Analytics', METRIC, 'falls', [], []);
+      return new Plot(TITLE, METRIC, UNIT, [], []);
     }
 
     const labels: string[] = Array.from(fallsByDay.keys()).sort((a, b) =>
@@ -70,8 +72,8 @@ export class WardFalls implements AnalyticsStrategy {
     const data: number[] = labels.map(
       (day: string): number => fallsByDay.get(day) ?? 0,
     );
-    const series: Series[] = [new Series('ward-falls', 'Falls', data)];
+    const series: Series[] = [new Series('', '', data)];
 
-    return new Plot('Ward Falls Analytics', METRIC, 'falls', labels, series);
+    return new Plot(TITLE, METRIC, UNIT, labels, series);
   }
 }

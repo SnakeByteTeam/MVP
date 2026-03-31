@@ -9,6 +9,7 @@ import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Series } from 'src/analytics/domain/series.model';
 
 const DAYS_RANGE = 30;
+const TITLE = 'Frequenza degli allarmi rilevati nel reparto';
 const METRIC = 'ward-alarms-frequency';
 
 @Injectable()
@@ -29,13 +30,7 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     );
 
     if (alarmsByDay.size === 0) {
-      return new Plot(
-        'Ward Alarms Frequency Analytics',
-        METRIC,
-        'alarms',
-        [],
-        [],
-      );
+      return new Plot(TITLE, METRIC, 'alarms', [], []);
     }
 
     const labels: string[] = Array.from(alarmsByDay.keys()).sort((a, b) =>
@@ -47,12 +42,6 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     );
     const series: Series[] = [new Series('ward-alarms', 'Alarms', data)];
 
-    return new Plot(
-      'Ward Alarms Frequency Analytics',
-      METRIC,
-      'alarms',
-      labels,
-      series,
-    );
+    return new Plot(TITLE, METRIC, 'allarmi', labels, series);
   }
 }

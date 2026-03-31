@@ -1,9 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnalyticsController } from './analytics.controller';
 import { Plot } from '../../domain/plot.model';
-import { GetAnalyticsUseCase } from '../../application/ports/in/get-analytics.usecase';
+import { Series } from '../../domain/series.model';
+import { Suggestion } from '../../domain/suggestion.model';
+import {
+  GetAnalyticsUseCase,
+  GET_ANALYTICS_USECASE,
+} from '../../application/ports/in/get-analytics.usecase';
 import { PlotDto } from '../../infrastructure/dtos/plot.dto';
-import { Series } from 'src/analytics/domain/series.model';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -27,7 +31,7 @@ describe('AnalyticsController', () => {
       controllers: [AnalyticsController],
       providers: [
         {
-          provide: 'GET_ANALYTICS_USECASE',
+          provide: GET_ANALYTICS_USECASE,
           useValue: mockUseCase,
         },
       ],
@@ -93,6 +97,42 @@ describe('AnalyticsController', () => {
     const result = await controller.getAnalyticsByPlantId({ plantId: '1' });
 
     expect(result[0].series).toHaveLength(2);
+  });
+
+  it('should return PlotDto with suggestion when plot has suggestion', async () => {
+    const suggestion = new Suggestion('Turn off the lights.', true);
+    const plots: Plot[] = [
+      new Plot(
+        'Plant Consumption Analytics',
+        'plant-consumption',
+        'Wh',
+        [yesterday],
+        [new Series('consumption', 'Consumption', [20])],
+        suggestion,
+      ),
+    ];
+
+    mockUseCase.getAnalyticsByPlantId.mockResolvedValue(plots);
+
+    const result = await controller.getAnalyticsByPlantId({
+      plantId: 'plant-001',
+    });
+
+    expect(result[0].suggestion).toBeDefined();
+    expect(result[0].suggestion?.message).toBe('Turn off the lights.');
+    expect(result[0].suggestion?.isSuggestion).toBe(true);
+  });
+
+  it('should return PlotDto with undefined suggestion when plot has no suggestion', async () => {
+    const plots: Plot[] = [
+      new Plot('Ward Falls Analytics', 'ward-falls', 'falls', [], []),
+    ];
+
+    mockUseCase.getAnalyticsByPlantId.mockResolvedValue(plots);
+
+    const result = await controller.getAnalyticsByPlantId({ plantId: '1' });
+
+    expect(result[0].suggestion).toBeUndefined();
   });
 
   it('should return empty array when use case returns no plots', async () => {

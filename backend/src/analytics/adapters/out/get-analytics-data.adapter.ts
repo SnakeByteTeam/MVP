@@ -68,6 +68,7 @@ export class GetAnalyticsData implements GetAnalyticsPort {
       const existing: DatapointValue[] = map.get(key) ?? [];
       existing.push({
         datapointId: row.datapoint_id,
+        name: row.name,
         value: row.value,
         sfeType: row.sfe_type,
         deviceType: row.device_type,

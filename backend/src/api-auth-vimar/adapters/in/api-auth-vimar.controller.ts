@@ -29,8 +29,6 @@ export class ApiAuthVimarController {
     private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase,
   ) {}
 
-  private redirect_url: string;
-
   @Get('auth')
   @Redirect()
   login(@Query() payload: PlantAuthDto): { url: string; statusCode: number } {
@@ -57,7 +55,8 @@ export class ApiAuthVimarController {
     try {
       this.logger.log(`Callback received with code: ${code}`);
 
-      let redirectUrl = this.redirect_url;
+      let redirectUrl;
+
       if (state) {
         try {
           redirectUrl = Buffer.from(state, 'base64').toString('utf-8');

@@ -4,7 +4,6 @@ import {
   HttpCode,
   Inject,
   Post,
-  UseGuards,
 } from '@nestjs/common';
 import {
   UPDATE_CACHE_USE_CASE,

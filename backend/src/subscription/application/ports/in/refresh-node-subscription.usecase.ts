@@ -1,4 +1,3 @@
-import { RefreshNodeSubCmd } from '../../commands/refresh-node-sub.command';
 
 export interface RefreshNodeSubUseCase {
   refreshSub(): Promise<boolean>;

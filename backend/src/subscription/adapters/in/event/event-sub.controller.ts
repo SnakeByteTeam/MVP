@@ -1,7 +1,6 @@
 import {
   Controller,
   Inject,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {

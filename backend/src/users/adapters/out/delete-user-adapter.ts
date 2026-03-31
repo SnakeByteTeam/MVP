@@ -12,8 +12,8 @@ export class DeleteUserAdapter implements DeleteUserPort {
     private readonly deleteUserRepository: DeleteUserRepository,
   ) {}
 
-  deleteUser(req: DeleteUserCmd): void {
-    return this.deleteUserRepository.deleteUser(req.id);
+  async deleteUser(req: DeleteUserCmd): Promise<void> {
+    return await this.deleteUserRepository.deleteUser(req.id);
   }
 }
 

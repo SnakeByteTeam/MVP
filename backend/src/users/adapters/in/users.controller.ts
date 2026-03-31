@@ -31,6 +31,7 @@ import { plainToInstance } from 'class-transformer';
 import { FindAllUserResDto } from '../../infrastructure/dtos/out/find-all-user-res.dto';
 import { FindAllAvailableUsersUseCase } from '../../application/ports/in/find-all-available-users-use-case.interface';
 import { FindAllAvailableUsersResDto } from '../../infrastructure/dtos/out/find-all-available-users-res-dto';
+import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -47,12 +48,14 @@ export class UsersController {
     private readonly deleteUserUseCase: DeleteUserUseCase,
   ) {}
 
+  @ApiOkResponse({ type: FindAllUserResDto, isArray: true })
   @Get()
   async findAll(): Promise<FindAllUserResDto[]> {
     const users = await this.findAllUsersUseCase.findAllUsers();
     return plainToInstance(FindAllUserResDto, users);
   }
 
+  @ApiOkResponse({ type: FindAllAvailableUsersResDto, isArray: true })
   @Get('/available')
   async findAllAvailable(): Promise<FindAllAvailableUsersResDto[]> {
     const users =
@@ -60,6 +63,7 @@ export class UsersController {
     return plainToInstance(FindAllAvailableUsersResDto, users);
   }
 
+  @ApiOkResponse({ type: UpdateUserResDto })
   @Put('/:id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -71,6 +75,7 @@ export class UsersController {
     return plainToInstance(UpdateUserResDto, user);
   }
 
+  @ApiOkResponse({ type: CreateUserResDto })
   @Post()
   async createUser(@Body() req: CreateUserReqDto): Promise<CreateUserResDto> {
     const createdUser = await this.createUserUseCase.createUser(
@@ -79,8 +84,9 @@ export class UsersController {
     return plainToInstance(CreateUserResDto, createdUser);
   }
 
+  @ApiOkResponse()
   @Delete('/:id')
-  async deleteUser(@Param('id', ParseIntPipe) id: number) {
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.deleteUserUseCase.deleteUser(new DeleteUserCmd(id));
   }
 }

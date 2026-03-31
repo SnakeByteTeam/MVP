@@ -72,7 +72,7 @@ export class UsersRepositoryImpl
 
     return result.rows[0];
   }
-  deleteUser(id: number): void {
-    throw new Error('Method not implemented.');
+  async deleteUser(id: number): Promise<void> {
+    await this.conn.query('DELETE FROM "user" WHERE id = $1;', [id]);
   }
 }

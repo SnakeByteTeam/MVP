@@ -1,54 +1,68 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { AnalyticsStrategy } from '../analytics.strategy';
-import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
+import {
+  GetAnalyticsPort,
+  GET_ANALYTICS_PORT,
+} from '../../ports/out/get-analytics.port';
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
+import { Series } from 'src/analytics/domain/series.model';
+
+const DAYS_RANGE = 30;
+const METRIC = 'ward-resolved-alarm';
 
 @Injectable()
 export class WardResolvedAlarm implements AnalyticsStrategy {
   constructor(
-    @Inject('GET_ANALYTICS_PORT')
+    @Inject(GET_ANALYTICS_PORT)
     private readonly analyticsPort: GetAnalyticsPort,
   ) {}
 
   async execute(cmd: GetAnalyticsCmd): Promise<Plot> {
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
+    startDate.setDate(startDate.getDate() - DAYS_RANGE);
 
-    const resolvedByDay = await this.analyticsPort.getAlarmsForWard(
-      cmd.id,
-      startDate,
-      true,
-    );
+    const [totalByDay, resolvedByDay] = await Promise.all([
+      this.analyticsPort.getAlarmsForWard(cmd.plantId, startDate, false),
+      this.analyticsPort.getAlarmsForWard(cmd.plantId, startDate, true),
+    ]);
 
-    const sentByDay = await this.analyticsPort.getAlarmsForWard(
-      cmd.id,
-      startDate,
-      false,
-    );
+    const allDaysSet = new Set<string>([
+      ...totalByDay.keys(),
+      ...resolvedByDay.keys(),
+    ]);
 
-    const allDays = Array.from(
-      new Set([...resolvedByDay.keys(), ...sentByDay.keys()]),
-    ).sort((a, b) => {
-      const timeA = Date.parse(a);
-      const timeB = Date.parse(b);
-      return timeA - timeB;
-    });
-
-    if (allDays.length === 0) {
-      return new Plot('Ward Resolved Alarm Analytics', cmd.metric, '', [], []);
+    if (allDaysSet.size === 0) {
+      return new Plot(
+        'Ward Resolved Alarm Analytics',
+        METRIC,
+        'alarms',
+        [],
+        [],
+      );
     }
 
-    const series: Record<string, string[]> = {
-      resolved: allDays.map((day) => (resolvedByDay.get(day) ?? 0).toString()),
-    };
+    const labels: string[] = Array.from(allDaysSet).sort((a, b) =>
+      a.localeCompare(b),
+    );
+
+    const totalData: number[] = labels.map(
+      (day: string): number => totalByDay.get(day) ?? 0,
+    );
+    const resolvedData: number[] = labels.map(
+      (day: string): number => resolvedByDay.get(day) ?? 0,
+    );
+
+    const series: Series[] = [
+      new Series('total', 'Total Alarms', totalData),
+      new Series('resolved', 'Resolved Alarms', resolvedData),
+    ];
 
     return new Plot(
       'Ward Resolved Alarm Analytics',
-      cmd.metric,
-      '',
-      allDays,
-      allDays.map((day) => (sentByDay.get(day) ?? 0).toString()),
+      METRIC,
+      'alarms',
+      labels,
       series,
     );
   }

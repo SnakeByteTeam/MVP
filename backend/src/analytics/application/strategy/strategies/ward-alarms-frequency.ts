@@ -1,22 +1,29 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { AnalyticsStrategy } from '../analytics.strategy';
-import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
+import {
+  GetAnalyticsPort,
+  GET_ANALYTICS_PORT,
+} from '../../ports/out/get-analytics.port';
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
+import { Series } from 'src/analytics/domain/series.model';
+
+const DAYS_RANGE = 30;
+const METRIC = 'ward-alarms-frequency';
 
 @Injectable()
 export class WardAlarmsFrequency implements AnalyticsStrategy {
   constructor(
-    @Inject('GET_ANALYTICS_PORT')
+    @Inject(GET_ANALYTICS_PORT)
     private readonly analyticsPort: GetAnalyticsPort,
   ) {}
 
   async execute(cmd: GetAnalyticsCmd): Promise<Plot> {
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
+    startDate.setDate(startDate.getDate() - DAYS_RANGE);
 
     const alarmsByDay = await this.analyticsPort.getAlarmsForWard(
-      cmd.id,
+      cmd.plantId,
       startDate,
       false,
     );
@@ -24,23 +31,28 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     if (alarmsByDay.size === 0) {
       return new Plot(
         'Ward Alarms Frequency Analytics',
-        cmd.metric,
-        '',
+        METRIC,
+        'alarms',
         [],
         [],
       );
     }
 
-    const sorted = Array.from(alarmsByDay.entries()).sort(([a], [b]) =>
+    const labels: string[] = Array.from(alarmsByDay.keys()).sort((a, b) =>
       a.localeCompare(b),
     );
 
+    const data: number[] = labels.map(
+      (day: string): number => alarmsByDay.get(day) ?? 0,
+    );
+    const series: Series[] = [new Series('ward-alarms', 'Alarms', data)];
+
     return new Plot(
       'Ward Alarms Frequency Analytics',
-      cmd.metric,
-      '',
-      sorted.map(([day]) => day),
-      sorted.map(([, count]) => count.toString()),
+      METRIC,
+      'alarms',
+      labels,
+      series,
     );
   }
 }

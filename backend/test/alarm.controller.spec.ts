@@ -1,21 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AlarmController } from '../src/alarms/adapters/in/alarm.controller';
+import { AlarmRuleController } from '../src/alarms/adapters/in/alarmRule.controller';
 import { AlarmService } from '../src/alarms/application/services/alarm.service';
 import { Alarm } from '../src/alarms/domain/models/alarm.model';
-import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 import { CreateAlarmDto } from '../src/alarms/infrastructure/dtos/create-alarm.dto';
 import { UpdateAlarmDto } from '../src/alarms/infrastructure/dtos/update-alarm.dto';
 
-// Mock del service — il controller non deve sapere nulla della logica interna
 const mockAlarmService = {
   getAllAlarms: jest.fn(),
   getAlarm: jest.fn(),
   createAlarm: jest.fn(),
   updateAlarm: jest.fn(),
   deleteAlarm: jest.fn(),
-  getActiveAlarms: jest.fn(),
-  resolveActiveAlarm: jest.fn(),
 };
 
 const createdAt = new Date('2024-01-01');
@@ -24,21 +20,16 @@ const mockAlarm = new Alarm(
   AlarmPriority.RED, 20, '08:00', '20:00', true, createdAt, createdAt,
 );
 
-const mockActiveAlarm = new ActiveAlarm(
-  'active-id-1', 'alarm-id-1', 'Temperatura soglia',
-  'Temperatura oltre soglia', new Date('2024-01-01'), null,
-);
-
-describe('AlarmController', () => {
-  let controller: AlarmController;
+describe('AlarmRuleController', () => {
+  let controller: AlarmRuleController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AlarmController],
+      controllers: [AlarmRuleController],
       providers: [{ provide: AlarmService, useValue: mockAlarmService }],
     }).compile();
 
-    controller = module.get<AlarmController>(AlarmController);
+    controller = module.get<AlarmRuleController>(AlarmRuleController);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -84,8 +75,6 @@ describe('AlarmController', () => {
       const result = await controller.createAlarm(dto);
 
       expect(result.id).toBe('alarm-id-1');
-      // Verifica che il service sia stato chiamato con un CreateAlarmCmd
-      // che ha i campi giusti tradotti dal DTO
       expect(mockAlarmService.createAlarm).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Temperatura soglia',
@@ -113,28 +102,10 @@ describe('AlarmController', () => {
   });
 
   describe('deleteAlarm', () => {
-    it('dovrebbe chiamare il service con l\'id corretto', async () => {
+    it("dovrebbe chiamare il service con l'id corretto", async () => {
       mockAlarmService.deleteAlarm.mockResolvedValue(undefined);
       await controller.deleteAlarm('alarm-id-1');
       expect(mockAlarmService.deleteAlarm).toHaveBeenCalledWith('alarm-id-1');
-    });
-  });
-
-  describe('getActiveAlarms', () => {
-    it('dovrebbe restituire la lista di ActiveAlarmDto', async () => {
-      mockAlarmService.getActiveAlarms.mockResolvedValue([mockActiveAlarm]);
-      const result = await controller.getActiveAlarms();
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('active-id-1');
-      expect(result[0].resolvedAt).toBeNull();
-    });
-  });
-
-  describe('resolveActiveAlarm', () => {
-    it('dovrebbe chiamare il service con l\'id corretto', async () => {
-      mockAlarmService.resolveActiveAlarm.mockResolvedValue(undefined);
-      await controller.resolveActiveAlarm('active-id-1');
-      expect(mockAlarmService.resolveActiveAlarm).toHaveBeenCalledWith('active-id-1');
     });
   });
 });

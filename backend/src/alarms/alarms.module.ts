@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AlarmController } from './adapters/in/alarm.controller';
+import { AlarmRuleController } from './adapters/in/alarmRule.controller';
+import { ActiveAlarmController } from './adapters/in/active-alarm.controller';
 import { AlarmService } from './application/services/alarm.service';
-
 import { GetAllAlarmsRepository } from './application/repository/get-all-alarms.repository';
 import { GetAlarmByIdRepository } from './application/repository/get-alarm-by-id.repository';
 import { GetAllAlarmsByRequestRepository } from './application/repository/get-all-alarms-by-request.repository';
@@ -29,7 +29,7 @@ import {
 } from './application/ports/out/find-active-alarms.port';
 
 @Module({
-  controllers: [AlarmController],
+  controllers: [AlarmRuleController, ActiveAlarmController],
   providers: [
     AlarmService,
     { provide: GET_ALL_ALARMS_PORT,               useClass: GetAllAlarmsRepository },

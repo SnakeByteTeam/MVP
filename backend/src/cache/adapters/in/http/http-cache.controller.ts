@@ -1,10 +1,5 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Inject,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   UPDATE_CACHE_USE_CASE,
   type UpdateCacheUseCase,
@@ -16,6 +11,7 @@ export class HttpCacheController {
   constructor(
     @Inject(UPDATE_CACHE_USE_CASE)
     private readonly updateCacheUseCase: UpdateCacheUseCase,
+    private readonly emitter: EventEmitter2,
   ) {}
 
   @Post('update')
@@ -47,6 +43,7 @@ export class HttpCacheController {
             err.message,
           );
         }
+        this.emitter.emit('cache.updated', { plantId: plantId });
       }
     });
 

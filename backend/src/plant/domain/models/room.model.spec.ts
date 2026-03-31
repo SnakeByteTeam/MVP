@@ -33,7 +33,9 @@ describe('Room', () => {
     const devices = [mockDevice];
     const room = new Room('room-3', 'Bedroom', devices);
 
-    devices.push(new Device('device-2', 'plant-1', 'Lamp', 'SF_Lamp', 'SS_Lamp', []));
+    devices.push(
+      new Device('device-2', 'plant-1', 'Lamp', 'SF_Lamp', 'SS_Lamp', []),
+    );
 
     expect(room.getDevices()).toHaveLength(1);
   });
@@ -43,7 +45,9 @@ describe('Room', () => {
     const devices1 = room.getDevices();
     const devices2 = room.getDevices();
 
-    devices1.push(new Device('device-2', 'plant-1', 'Lamp', 'SF_Lamp', 'SS_Lamp', []));
+    devices1.push(
+      new Device('device-2', 'plant-1', 'Lamp', 'SF_Lamp', 'SS_Lamp', []),
+    );
 
     expect(room.getDevices()).toHaveLength(1);
     expect(devices2).toHaveLength(1);
@@ -73,8 +77,17 @@ describe('Room', () => {
   });
 
   it('should store and retrieve large device arrays', () => {
-    const devices = Array.from({ length: 50 }, (_, i) =>
-      new Device(`device-${i}`, 'plant-1', `Device ${i}`, 'SF_Generic', 'SS_Generic', []),
+    const devices = Array.from(
+      { length: 50 },
+      (_, i) =>
+        new Device(
+          `device-${i}`,
+          'plant-1',
+          `Device ${i}`,
+          'SF_Generic',
+          'SS_Generic',
+          [],
+        ),
     );
     const room = new Room('room-8', 'Large Room', devices);
 

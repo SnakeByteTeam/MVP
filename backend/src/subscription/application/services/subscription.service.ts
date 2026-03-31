@@ -14,10 +14,15 @@ import {
   REFRESH_DATAPOINT_SUBSCRIPTION_PORT,
   type RefreshDatapointSubPort,
 } from '../ports/out/refresh-datapoint-subscription.port';
+import { RefreshAllSubscriptionUseCase } from '../ports/in/refresh-all-subscription.usecase';
+import { RefreshAllSubCmd } from '../commands/refresh-all-sub.command';
 
 @Injectable()
 export class SubscriptionService
-  implements RefreshNodeSubUseCase, RefreshDatapointSubUseCase
+  implements
+    RefreshNodeSubUseCase,
+    RefreshDatapointSubUseCase,
+    RefreshAllSubscriptionUseCase
 {
   constructor(
     @Inject(REFRESH_NODE_SUBSCRIPTION_PORT)
@@ -87,6 +92,47 @@ export class SubscriptionService
     } catch (error) {
       console.error('Error refreshing datapoint subscription:', error);
       throw error;
+    }
+  }
+
+  async refreshAllSubscription(cmd: RefreshAllSubCmd): Promise<boolean> {
+    const plantId: string = cmd?.plantId;
+    if (!plantId) throw new Error('PlantId is null');
+
+    try {
+      let refreshResult = await this.refreshPort.refreshSub({
+        plantId: plantId,
+      });
+      if (!refreshResult) {
+        console.error(
+          `Failed to refresh node subscription for plant: ${plantId}`,
+        );
+      } else {
+        console.log(
+          `Node subscription refreshed successfully for plant: ${plantId}`,
+        );
+      }
+
+      refreshResult = await this.refreshDatapointPort.refreshDatapointSub({
+        plantId: plantId,
+      });
+      if (!refreshResult) {
+        console.error(
+          `Failed to refresh datapoint subscription for plant: ${plantId}`,
+        );
+      } else {
+        console.log(
+          `Datapoint subscription refreshed successfully for plant: ${plantId}`,
+        );
+      }
+
+      return refreshResult;
+    } catch (err) {
+      console.error(
+        `Error refreshing all subscriptions for plantId: ${plantId}`,
+        err,
+      );
+      return false;
     }
   }
 }

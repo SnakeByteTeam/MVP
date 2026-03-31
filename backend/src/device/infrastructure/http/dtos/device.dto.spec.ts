@@ -71,7 +71,10 @@ describe('DeviceDto', () => {
       deviceDto.plantId = 'plant-1';
       deviceDto.type = 'SF_Multi';
       deviceDto.subType = 'SS_Multi';
-      deviceDto.datapoints = [mockDatapointDto, { ...mockDatapointDto, id: 'dp-2' }];
+      deviceDto.datapoints = [
+        mockDatapointDto,
+        { ...mockDatapointDto, id: 'dp-2' },
+      ];
 
       const device = DeviceDto.toDomain(deviceDto);
 

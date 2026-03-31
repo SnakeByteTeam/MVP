@@ -1,8 +1,10 @@
-import {
-  Controller,
-  Inject,
-} from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { OnEvent } from '@nestjs/event-emitter';
+import {
+  REFRESH_ALL_SUBSCRIPTION_USECASE,
+  type RefreshAllSubscriptionUseCase,
+} from 'src/subscription/application/ports/in/refresh-all-subscription.usecase';
 import {
   REFRESH_DATAPOINT_SUBSCRIPTION_USECASE,
   type RefreshDatapointSubUseCase,
@@ -19,25 +21,48 @@ export class EventSubscriptionController {
     private readonly refreshNodeSub: RefreshNodeSubUseCase,
     @Inject(REFRESH_DATAPOINT_SUBSCRIPTION_USECASE)
     private readonly refreshDatapointSub: RefreshDatapointSubUseCase,
+    @Inject(REFRESH_ALL_SUBSCRIPTION_USECASE)
+    private readonly refreshAllSub: RefreshAllSubscriptionUseCase,
   ) {}
 
   @OnEvent('fetched.tokens')
-  async refreshNodeSubscriptions(): Promise<boolean> {
+  @Cron('0 0 1 * *', {
+    //eseguito ogni primo giorno del mese a mezzanotte
+    name: 'subscription-renewal-node',
+    timeZone: 'UTC',
+  })
+  async refreshNodeSubscriptions(): Promise<void> {
     try {
-      return await this.refreshNodeSub.refreshSub();
+      await this.refreshNodeSub.refreshSub();
     } catch (err) {
       console.error(err);
-      return false;
     }
   }
 
   @OnEvent('fetched.tokens')
-  async refreshDatapointSubscriptions(): Promise<boolean> {
+  @Cron('0 0 1 * *', {
+    //eseguito ogni primo giorno del mese a mezzanotte
+    name: 'subscription-renewal-node',
+    timeZone: 'UTC',
+  })
+  async refreshDatapointSubscriptions(): Promise<void> {
     try {
-      return await this.refreshDatapointSub.refreshDatapointSub();
+      await this.refreshDatapointSub.refreshDatapointSub();
     } catch (err) {
       console.error(err);
-      return false;
+    }
+  }
+
+  @OnEvent('cache.updated')
+  async refreshAllSubsByPlantId(payload: { plantId: string }): Promise<void> {
+    try {
+      if (!payload?.plantId) throw new Error('PlantId is null');
+
+      await this.refreshAllSub.refreshAllSubscription({
+        plantId: payload.plantId,
+      });
+    } catch (err) {
+      console.error(err);
     }
   }
 }

@@ -225,9 +225,9 @@ describe('SubscriptionDtos', () => {
         },
       };
 
-      expect(createDto.data.relationships.subscriptionDatapoints?.data).toHaveLength(
-        2,
-      );
+      expect(
+        createDto.data.relationships.subscriptionDatapoints?.data,
+      ).toHaveLength(2);
       expect(
         createDto.data.relationships.subscriptionDatapoints?.data[0].meta
           ?.expand,

@@ -1,4 +1,3 @@
-
 export interface RefreshNodeSubUseCase {
   refreshSub(): Promise<boolean>;
 }

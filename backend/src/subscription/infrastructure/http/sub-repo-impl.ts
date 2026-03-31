@@ -15,7 +15,8 @@ export class SubscriptionRepoImpl
 
   async refreshSub(validToken: string, plantId: string): Promise<boolean> {
     try {
-      const { callbackUrl, secretPassword, lifetimeSeconds } = this.getNodeSubscriptionConfig();
+      const { callbackUrl, secretPassword, lifetimeSeconds } =
+        this.getNodeSubscriptionConfig();
 
       const subscriptionData: SubscriptionCreateDto = {
         data: {
@@ -50,7 +51,8 @@ export class SubscriptionRepoImpl
     plantId: string,
   ): Promise<boolean> {
     try {
-      const { callbackUrl, secretPassword, lifetimeSeconds } = this.getDatapointSubscriptionConfig();
+      const { callbackUrl, secretPassword, lifetimeSeconds } =
+        this.getDatapointSubscriptionConfig();
 
       const response = await firstValueFrom(
         this.httpService.get(`${this.SUB_DOMAIN}/${plantId}/locations/`, {
@@ -99,11 +101,15 @@ export class SubscriptionRepoImpl
     }
   }
 
-  private getNodeSubscriptionConfig(): { callbackUrl: string; secretPassword: string; lifetimeSeconds: number } {
+  private getNodeSubscriptionConfig(): {
+    callbackUrl: string;
+    secretPassword: string;
+    lifetimeSeconds: number;
+  } {
     const lifetimeSeconds = 0;
     const callbackUrl: string = process.env.NODE_SUB_CALLBACK || '';
     const secretPassword: string = process.env.SECRET_FOR_SUB || '';
-    
+
     if (!secretPassword || !callbackUrl)
       throw new Error(
         'Secret password or callback url are missing for subscription creation',
@@ -112,11 +118,15 @@ export class SubscriptionRepoImpl
     return { callbackUrl, secretPassword, lifetimeSeconds };
   }
 
-  private getDatapointSubscriptionConfig(): { callbackUrl: string; secretPassword: string; lifetimeSeconds: number } {
+  private getDatapointSubscriptionConfig(): {
+    callbackUrl: string;
+    secretPassword: string;
+    lifetimeSeconds: number;
+  } {
     const lifetimeSeconds = 0;
     const callbackUrl: string = process.env.DATAPOINT_SUB_CALLBACK || '';
     const secretPassword: string = process.env.SECRET_FOR_SUB || '';
-    
+
     if (!secretPassword || !callbackUrl)
       throw new Error(
         'Secret password or callback url are missing for subscription creation',

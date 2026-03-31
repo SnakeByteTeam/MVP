@@ -16,13 +16,13 @@ const buildPresenceDatapoint = (
 ): DatapointValue[] => [
   {
     datapointId: 'dp-presence-001',
+    name: 'Presence Sensor',
     value,
     sfeType: 'SFE_State_Presence',
     deviceType: 'SF_Access',
   },
 ];
 
-// Costruisce un timestamp relativo a ieri con ore e minuti specifici
 const ts = (hours: number, minutes: number = 0): string =>
   `${yesterday}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.000Z`;
 
@@ -44,24 +44,24 @@ describe('SensorLongPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
   it('should not detect long presence if duration is less than 30 minutes', async () => {
     const snapshots = new Map([
       [ts(8, 0), buildPresenceDatapoint('Detected')],
-      [ts(8, 20), buildPresenceDatapoint('Detected')], // solo 20 minuti
+      [ts(8, 20), buildPresenceDatapoint('Detected')],
       [ts(8, 25), buildPresenceDatapoint('NotDetected')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toHaveLength(0);
@@ -77,11 +77,11 @@ describe('SensorLongPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('1');
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
   it('should count only one event per long presence session', async () => {
@@ -95,11 +95,11 @@ describe('SensorLongPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('1');
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
   it('should reset and count a new event after NotDetected', async () => {
@@ -115,10 +115,10 @@ describe('SensorLongPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-long-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('2');
+    expect(result.getSeries()[0].getData()[0]).toBe(2);
   });
 });

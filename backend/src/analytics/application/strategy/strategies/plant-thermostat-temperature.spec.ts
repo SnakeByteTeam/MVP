@@ -15,6 +15,7 @@ const twoDaysAgo = toISO(2);
 const buildTempDatapoint = (value: string): DatapointValue[] => [
   {
     datapointId: 'dp-thermo-001-temp',
+    name: 'Temperature',
     value,
     sfeType: 'SFE_State_Temperature',
     deviceType: 'SF_Thermostat',
@@ -38,12 +39,10 @@ describe('PlantThermostatTemperature', () => {
   it('should return an empty Plot if there are no snapshots', async () => {
     mockPort.getDataForPlant.mockResolvedValue(new Map());
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
   it('should calculate daily average temperature', async () => {
@@ -55,13 +54,11 @@ describe('PlantThermostatTemperature', () => {
 
     mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     // media: (20 + 22 + 21) / 3 = 21.0
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('21.0');
+    expect(result.getSeries()[0].getData()[0]).toBe(21.0);
   });
 
   it('should correctly aggregate average temperature over multiple days', async () => {
@@ -74,15 +71,13 @@ describe('PlantThermostatTemperature', () => {
 
     mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toHaveLength(2);
     expect(result.getLabels()[0]).toBe(twoDaysAgo);
     expect(result.getLabels()[1]).toBe(yesterday);
-    expect(result.getData()[0]).toBe('19.0');
-    expect(result.getData()[1]).toBe('23.0');
+    expect(result.getSeries()[0].getData()[0]).toBe(19.0);
+    expect(result.getSeries()[0].getData()[1]).toBe(23.0);
   });
 
   it('should not consider non-temperature datapoints', async () => {
@@ -92,6 +87,7 @@ describe('PlantThermostatTemperature', () => {
         [
           {
             datapointId: 'dp-thermo-001-hvac',
+            name: 'HVAC Mode',
             value: 'Heating',
             sfeType: 'SFE_State_HVACMode',
             deviceType: 'SF_Thermostat',
@@ -102,9 +98,7 @@ describe('PlantThermostatTemperature', () => {
 
     mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('thermostat-temperature', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toHaveLength(0);
   });

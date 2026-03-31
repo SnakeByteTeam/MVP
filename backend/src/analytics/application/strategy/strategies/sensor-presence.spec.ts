@@ -17,6 +17,7 @@ const buildPresenceDatapoint = (
 ): DatapointValue[] => [
   {
     datapointId: 'dp-presence-001',
+    name: 'Presence Sensor',
     value,
     sfeType: 'SFE_State_Presence',
     deviceType: 'SF_Access',
@@ -41,11 +42,11 @@ describe('SensorPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(new Map());
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
   it('should detect presence when it changes from NotDetected to Detected', async () => {
@@ -57,11 +58,11 @@ describe('SensorPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('1');
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
   it('should not count presence if value stays Detected', async () => {
@@ -74,7 +75,7 @@ describe('SensorPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toHaveLength(0);
@@ -91,11 +92,11 @@ describe('SensorPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('2');
+    expect(result.getSeries()[0].getData()[0]).toBe(2);
   });
 
   it('should correctly aggregate presences over multiple days', async () => {
@@ -111,13 +112,13 @@ describe('SensorPresence', () => {
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
 
     const result = await strategy.execute(
-      new GetAnalyticsCmd('sensor-presence', 'dp-presence-001'),
+      new GetAnalyticsCmd('dp-presence-001'),
     );
 
     expect(result.getLabels()).toHaveLength(2);
     expect(result.getLabels()[0]).toBe(twoDaysAgo);
     expect(result.getLabels()[1]).toBe(yesterday);
-    expect(result.getData()[0]).toBe('1');
-    expect(result.getData()[1]).toBe('2');
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
+    expect(result.getSeries()[0].getData()[1]).toBe(2);
   });
 });

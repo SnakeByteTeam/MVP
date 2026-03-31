@@ -113,10 +113,15 @@ describe('GetAnalyticsData', () => {
     it('should call repository.query with correct serialized params', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      await adapter.getDataForWard('ward-001', startDate);
+      await adapter.getAlarmsForWard('plant-001', startDate, false);
 
       expect(mockRepository.query).toHaveBeenCalledWith(
-        JSON.stringify({ wardId: 'ward-001', startDate }),
+        JSON.stringify({
+          wardId: 'plant-001',
+          startDate,
+          alarms: true,
+          onlyResolved: false,
+        }),
       );
     });
 
@@ -146,7 +151,7 @@ describe('GetAnalyticsData', () => {
       await adapter.getDataForSensor('sensor-001', startDate);
 
       expect(mockRepository.query).toHaveBeenCalledWith(
-        JSON.stringify({ sensorId: 'sensor-001', startDate }),
+        JSON.stringify({ plantId: 'sensor-001', startDate, sensor: true }),
       );
     });
 

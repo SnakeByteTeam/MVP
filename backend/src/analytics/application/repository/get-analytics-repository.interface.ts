@@ -4,5 +4,4 @@ export interface GetAnalyticsRepositoryPort {
   query(params: string): Promise<DatapointRow[] | any[]>;
 }
 
-export const READ_TIMESERIES_REPOSITORY_INTERFACE =
-  'READ_TIMESERIES_REPOSITORY_INTERFACE';
+export const GET_ANALYTICS_REPOSITORY = 'GET_ANALYTICS_REPOSITORY';

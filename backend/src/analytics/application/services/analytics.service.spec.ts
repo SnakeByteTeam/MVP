@@ -4,17 +4,16 @@ import { AnalyticsStrategy } from '../strategy/analytics.strategy';
 import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
 
-const mockPlot = new Plot(
+const mockPlot: Plot = new Plot(
   'Plant Consumption Analytics',
   'plant-consumption',
-  'Wh',
+  '',
   [],
   [],
 );
 
 const mockCmd: GetAnalyticsCmd = {
-  id: 'plant-001-a',
-  metric: 'plant-consumption',
+  plantId: 'plant-001-a',
 };
 
 const mockStrategy: jest.Mocked<AnalyticsStrategy> = {
@@ -57,64 +56,36 @@ describe('AnalyticsService', () => {
   });
 
   describe('getAnalytics', () => {
-    it('should return a Plot when a valid strategy is found', async () => {
+    it('should return all Plots when all strategies succeed', async () => {
       mockStrategy.execute.mockResolvedValue(mockPlot);
 
       const result = await service.getAnalyticsByPlantId(mockCmd);
 
-      expect(mockStrategy.execute).toHaveBeenCalledTimes(1);
-      expect(mockStrategy.execute).toHaveBeenCalledWith(mockCmd);
-      expect(result).toEqual(mockPlot);
+      expect(mockStrategy.execute).toHaveBeenCalledTimes(8);
+      expect(result).toHaveLength(8);
+      expect(result[0]).toEqual(mockPlot);
     });
 
-    it('should throw an error when no strategy is found for the given metric', async () => {
-      const unknownCmd: GetAnalyticsCmd = {
-        ...mockCmd,
-        metric: 'unknown-metric',
-      };
-
-      await expect(service.getAnalyticsByPlantId(unknownCmd)).rejects.toThrow(
-        'No strategy found for metric: unknown-metric',
+    it('should throw when all strategies fail', async () => {
+      mockStrategy.execute.mockRejectedValue(
+        new Error('Strategy execution failed'),
       );
-
-      expect(mockStrategy.execute).not.toHaveBeenCalled();
-    });
-
-    it('should call the correct strategy when multiple strategies are registered', async () => {
-      const wardFallsPlot = new Plot(
-        'Ward Falls Analytics',
-        'ward-falls',
-        '',
-        [],
-        [],
-      );
-      const wardFallsStrategy: jest.Mocked<AnalyticsStrategy> = {
-        execute: jest.fn().mockResolvedValue(wardFallsPlot),
-      };
-
-      strategiesMap.set('ward-falls', wardFallsStrategy);
-      mockStrategy.execute.mockResolvedValue(mockPlot);
-
-      const wardFallsCmd: GetAnalyticsCmd = {
-        ...mockCmd,
-        metric: 'ward-falls',
-      };
-      const result = await service.getAnalyticsByPlantId(wardFallsCmd);
-
-      expect(wardFallsStrategy.execute).toHaveBeenCalledWith(wardFallsCmd);
-      expect(mockStrategy.execute).not.toHaveBeenCalled();
-      expect(result).toEqual(wardFallsPlot);
-    });
-
-    it('should propagate errors thrown by the strategy', async () => {
-      const strategyError = new Error('Strategy execution failed');
-      mockStrategy.execute.mockRejectedValue(strategyError);
 
       await expect(service.getAnalyticsByPlantId(mockCmd)).rejects.toThrow(
-        'Strategy execution failed',
+        `No analytics available for plant ${mockCmd.plantId}`,
       );
+    });
 
-      expect(mockStrategy.execute).toHaveBeenCalledWith(mockCmd);
+    it('should return only successful plots when some strategies fail', async () => {
+      const failingStrategy: jest.Mocked<AnalyticsStrategy> = {
+        execute: jest.fn().mockRejectedValue(new Error('fail')),
+      };
+      strategiesMap.set('plant-anomalies', failingStrategy);
+      mockStrategy.execute.mockResolvedValue(mockPlot);
+
+      const result = await service.getAnalyticsByPlantId(mockCmd);
+
+      expect(result).toHaveLength(7);
     });
   });
 });

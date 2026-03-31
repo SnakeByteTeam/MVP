@@ -56,7 +56,7 @@ export class SensorPresence implements AnalyticsStrategy {
         const state = this.getOrCreateSensorState(
           sensorState,
           dp.datapointId,
-          dp.name,
+          dp.name ?? dp.datapointId, // fallback all'id se name è undefined
         );
         const current = dp.value ?? NOT_DETECTED;
 

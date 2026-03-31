@@ -86,7 +86,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
         const state = this.getOrCreateSensorState(
           sensorState,
           sensorId,
-          dp.name,
+          dp.name ?? sensorId, // fallback all'id se name è undefined
         );
         const value = dp.value ?? 'NotDetected';
 

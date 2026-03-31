@@ -13,24 +13,21 @@ export class PlantAnomalies implements AnalyticsStrategy {
   async execute(cmd: GetAnalyticsCmd): Promise<Plot> {
     const consumptionPlot = await this.plantConsumption.execute(cmd);
 
-    const anomalyLabels: string[] = [];
-    const anomalyValues: string[] = [];
     const series = consumptionPlot.getSeries()[0];
+    let anomalyCount = 0;
 
     for (let i = 0; i < consumptionPlot.getLabels().length; i++) {
-      const wh = series.getData()[i];
-      if (wh > ANOMALY_THRESHOLD_WH) {
-        anomalyLabels.push(consumptionPlot.getLabels()[i]);
-        anomalyValues.push(wh.toFixed(2));
+      if (series.getData()[i] > ANOMALY_THRESHOLD_WH) {
+        anomalyCount++;
       }
     }
 
     return new Plot(
       'Plant Anomalies Analytics',
       'plant-anomalies',
-      '',
-      anomalyLabels,
-      [new Series('', '', anomalyValues.map(Number))],
+      'anomalies',
+      ['Total'],
+      [new Series('anomalies', 'Anomalies Detected', [anomalyCount])],
     );
   }
 }

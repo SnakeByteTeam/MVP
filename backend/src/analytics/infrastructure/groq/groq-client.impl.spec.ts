@@ -3,21 +3,26 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GroqClientImpl } from './groq-client.impl';
 import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
+import { Series } from 'src/analytics/domain/series.model';
 
 const mockConfigService = {
   getOrThrow: jest.fn().mockReturnValue('mock-groq-api-key'),
 };
 
 const mockCurrent = new GetSuggestionCmd(
+  'Plant Consumption Analytics',
   'plant-consumption',
+  'Wh',
   ['2026-03-25', '2026-03-26', '2026-03-27'],
-  ['120.00', '130.00', '125.00'],
+  [new Series('plant-consumption', 'Plant Consumption', [120, 130, 125])],
 );
 
 const mockBaseline = new GetSuggestionCmd(
+  'Plant Consumption Analytics',
   'plant-consumption',
+  'Wh',
   ['2026-03-25', '2026-03-26', '2026-03-27'],
-  ['65.00', '68.00', '66.00'],
+  [new Series('plant-consumption', 'Plant Consumption', [65, 68, 66])],
 );
 
 describe('GroqClientImpl', () => {

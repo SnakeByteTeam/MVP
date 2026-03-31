@@ -3,11 +3,12 @@ import { AnalyticsService } from './analytics.service';
 import { AnalyticsStrategy } from '../strategy/analytics.strategy';
 import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
+import { Series } from 'src/analytics/domain/series.model';
 
 const mockPlot: Plot = new Plot(
   'Plant Consumption Analytics',
   'plant-consumption',
-  '',
+  'Wh',
   [],
   [],
 );
@@ -47,7 +48,6 @@ describe('AnalyticsService', () => {
     }).compile();
 
     service = module.get<AnalyticsService>(AnalyticsService);
-
     jest.clearAllMocks();
   });
 
@@ -55,7 +55,7 @@ describe('AnalyticsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getAnalytics', () => {
+  describe('getAnalyticsByPlantId', () => {
     it('should return all Plots when all strategies succeed', async () => {
       mockStrategy.execute.mockResolvedValue(mockPlot);
 
@@ -86,6 +86,22 @@ describe('AnalyticsService', () => {
       const result = await service.getAnalyticsByPlantId(mockCmd);
 
       expect(result).toHaveLength(7);
+    });
+
+    it('should return plots with correct title and metric', async () => {
+      const consumptionPlot = new Plot(
+        'Plant Consumption Analytics',
+        'plant-consumption',
+        'Wh',
+        [],
+        [new Series('consumption', 'Consumption', [20, 40])],
+      );
+      mockStrategy.execute.mockResolvedValue(consumptionPlot);
+
+      const result = await service.getAnalyticsByPlantId(mockCmd);
+
+      expect(result[0].getTitle()).toBe('Plant Consumption Analytics');
+      expect(result[0].getMetric()).toBe('plant-consumption');
     });
   });
 });

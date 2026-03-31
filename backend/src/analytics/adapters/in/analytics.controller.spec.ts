@@ -92,7 +92,7 @@ describe('AnalyticsController', () => {
 
     const result = await controller.getAnalyticsByPlantId({ plantId: '1' });
 
-    expect(result[0].series).toBeDefined();
+    expect(result[0].series).toHaveLength(2);
   });
 
   it('should return empty array when use case returns no plots', async () => {

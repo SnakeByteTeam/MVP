@@ -1,4 +1,5 @@
 import { Series } from './series.model';
+import { Suggestion } from './suggestion.model';
 
 export class Plot {
   constructor(
@@ -7,6 +8,7 @@ export class Plot {
     private readonly unit: string,
     private readonly labels: string[],
     private readonly series: Series[],
+    private suggestion?: Suggestion,
   ) {}
 
   getTitle(): string {
@@ -27,5 +29,13 @@ export class Plot {
 
   getSeries(): Series[] {
     return this.series;
+  }
+
+  getSuggestion(): Suggestion | undefined {
+    return this.suggestion;
+  }
+
+  setSuggestion(s: Suggestion) {
+    this.suggestion = s;
   }
 }

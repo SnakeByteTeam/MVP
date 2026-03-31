@@ -4,24 +4,32 @@ import { AnalyticsService } from './application/services/analytics.service';
 import { GetAnalyticsRepositoryImpl } from './infrastructure/persistence/get-analytics-repository-impl';
 import { GetAnalyticsData } from './adapters/out/get-analytics-data.adapter';
 import { GET_ANALYTICS_PORT } from './application/ports/out/get-analytics.port';
+import { GET_ANALYTICS_USECASE } from './application/ports/in/get-analytics.usecase';
 import { AnalyticsStrategy } from './application/strategy/analytics.strategy';
 
 import { PlantConsumption } from './application/strategy/strategies/plant-consumption';
 import { PlantAnomalies } from './application/strategy/strategies/plant-anomalies';
 import { PlantThermostatTemperature } from './application/strategy/strategies/plant-thermostat-temperature';
-
 import { SensorLongPresence } from './application/strategy/strategies/sensor-long-presence';
 import { SensorPresence } from './application/strategy/strategies/sensor-presence';
-
 import { WardAlarmsFrequency } from './application/strategy/strategies/ward-alarms-frequency';
 import { WardFalls } from './application/strategy/strategies/ward-falls';
 import { WardResolvedAlarm } from './application/strategy/strategies/ward-resolved-alarm';
+import { GET_ANALYTICS_REPOSITORY } from './application/repository/get-analytics-repository.interface';
+import {
+  GET_SUGGESTION_USECASE,
+  GetSuggestionUseCase,
+} from './application/ports/in/get-suggestion.usecase';
+import { SuggestionService } from './application/services/suggestion.service';
+import { LLM_SUGGESTION_PORT } from './application/ports/out/llm-suggestion.port';
+import { LLMSuggestionAdapter } from './adapters/out/llm-suggestion.adapter';
+import { GROQ_CLIENT } from './infrastructure/groq/groq.client';
+import { GroqClientImpl } from './infrastructure/groq/groq-client.impl';
 
 const PLANT_STRATEGIES_TOKEN = 'PLANT_STRATEGIES';
 const SENSOR_STRATEGIES_TOKEN = 'SENSOR_STRATEGIES';
 const WARD_STRATEGIES_TOKEN = 'WARD_STRATEGIES';
-const ANALYTICS_STRATEGIES_TOKEN = 'ANALYTICS_STRATEGIES';
-const GET_ANALYTICS_REPOSITORY = 'GET_ANALYTICS_REPOSITORY';
+export const ANALYTICS_STRATEGIES_TOKEN = 'ANALYTICS_STRATEGIES';
 
 @Module({
   controllers: [AnalyticsController],
@@ -34,6 +42,26 @@ const GET_ANALYTICS_REPOSITORY = 'GET_ANALYTICS_REPOSITORY';
     WardAlarmsFrequency,
     WardFalls,
     WardResolvedAlarm,
+    {
+      provide: GET_ANALYTICS_USECASE,
+      useFactory: (
+        strategies: Map<string, AnalyticsStrategy>,
+        suggestionUseCase: GetSuggestionUseCase,
+      ) => new AnalyticsService(strategies, suggestionUseCase),
+      inject: [ANALYTICS_STRATEGIES_TOKEN, GET_SUGGESTION_USECASE],
+    },
+    {
+      provide: GET_SUGGESTION_USECASE,
+      useClass: SuggestionService,
+    },
+    {
+      provide: LLM_SUGGESTION_PORT,
+      useClass: LLMSuggestionAdapter,
+    },
+    {
+      provide: GROQ_CLIENT,
+      useClass: GroqClientImpl,
+    },
     {
       provide: GET_ANALYTICS_PORT,
       useClass: GetAnalyticsData,
@@ -105,10 +133,6 @@ const GET_ANALYTICS_REPOSITORY = 'GET_ANALYTICS_REPOSITORY';
         SENSOR_STRATEGIES_TOKEN,
         WARD_STRATEGIES_TOKEN,
       ],
-    },
-    {
-      provide: 'GET_ANALYTICS_USECASE',
-      useClass: AnalyticsService,
     },
   ],
 })

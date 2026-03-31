@@ -1,4 +1,4 @@
-import { Suggestion } from '../../domain/suggestion.model';
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
 
 export class SuggestionDto {
   private constructor(

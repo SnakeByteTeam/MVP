@@ -1,7 +1,6 @@
-import { Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { MiddlewareConsumer, RouteInfo } from '@nestjs/common/interfaces';
 
 import { ApiAuthVimarModule } from './api-auth-vimar/api-auth-vimar.module';
 import { AnalyticsModule } from './analytics/analytics.module';

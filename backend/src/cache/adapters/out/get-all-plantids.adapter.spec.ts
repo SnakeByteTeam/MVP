@@ -1,6 +1,6 @@
 import { GetAllPlantIdsAdapter } from './get-all-plantids.adapter';
 import { GetAllPlantIdsRepoPort } from 'src/cache/application/repository/get-all-plantids.repository';
-import { GetValidTokenPort } from 'src/tokens/application/ports/out/get-valid-token.port';
+import { GetValidTokenPort } from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
 
 describe('GetAllPlantIdsAdapter', () => {
   let adapter: GetAllPlantIdsAdapter;

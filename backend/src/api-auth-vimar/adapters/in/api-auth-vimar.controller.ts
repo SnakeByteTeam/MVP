@@ -1,9 +1,21 @@
-import { BadRequestException, Controller, Get, Inject, InternalServerErrorException, Logger, Query, Redirect } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+  Query,
+  Redirect,
+} from '@nestjs/common';
 import {
   APIAUTHUSECASE,
   type ApiAuthUseCase,
 } from 'src/api-auth-vimar/application/ports/in/api-auth.usecase';
-import { type GetTokensCallbackUseCase, GETTOKENSCALLBACKUSECASE } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
+import {
+  type GetTokensCallbackUseCase,
+  GETTOKENSCALLBACKUSECASE,
+} from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
 
 @Controller('my-vimar')
@@ -17,12 +29,10 @@ export class ApiAuthVimarController {
     private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase,
   ) {}
 
-  private redirect_url: string;
-
   @Get('auth')
   @Redirect()
   login(@Query() payload: PlantAuthDto): { url: string; statusCode: number } {
-    if(!payload?.redirect_url) throw new BadRequestException;
+    if (!payload?.redirect_url) throw new BadRequestException();
 
     const state = Buffer.from(payload.redirect_url).toString('base64');
     this.logger.log(`Redirecting with state: ${state}`);
@@ -35,14 +45,18 @@ export class ApiAuthVimarController {
 
   @Get('callback')
   @Redirect()
-  async saveTokens(@Query('code') code: string, @Query('state') state: string): Promise<{ url: string, statusCode: number }> {
+  async saveTokens(
+    @Query('code') code: string,
+    @Query('state') state: string,
+  ): Promise<{ url: string; statusCode: number }> {
     if (!code) {
       throw new BadRequestException('Code is required');
     }
     try {
       this.logger.log(`Callback received with code: ${code}`);
-      
-      let redirectUrl = this.redirect_url;
+
+      let redirectUrl;
+
       if (state) {
         try {
           redirectUrl = Buffer.from(state, 'base64').toString('utf-8');

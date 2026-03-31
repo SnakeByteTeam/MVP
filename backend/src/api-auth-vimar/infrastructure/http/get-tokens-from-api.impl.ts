@@ -12,9 +12,7 @@ export class GetTokensFromApiImpl
 {
   private readonly logger = new Logger(GetTokensFromApiImpl.name);
 
-  constructor(
-    private readonly httpService: HttpService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   private readonly clientId = process.env.CLIENTID;
   private readonly clientSecret = process.env.CLIENTSECRET;

@@ -75,7 +75,6 @@ export class DeviceController {
   ): Promise<DeviceDto> {
     const findByIdCmd: FindDeviceByIdCmd = {
       id: deviceId,
-      plantId: plantId,
     };
 
     try {

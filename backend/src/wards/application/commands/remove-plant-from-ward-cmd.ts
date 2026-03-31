@@ -1,6 +1,3 @@
 export class RemovePlantFromWardCmd {
-  constructor(
-    public wardId: number,
-    public plantId: number,
-  ) {}
+  constructor(public plantId: string) { }
 }

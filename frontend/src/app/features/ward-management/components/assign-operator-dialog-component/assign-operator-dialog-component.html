@@ -20,10 +20,8 @@
             <select id="operator-id" formControlName="userId"
                 class="w-full rounded-md border border-neutral-500 bg-white px-3 py-1.5 text-sm text-neutral-900 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-300">
                 <option [ngValue]="null">Seleziona un operatore</option>
-                @if (operators$ | async; as operators) {
-                @for (operator of operators; track operator.id) {
-                <option [ngValue]="+operator.id">{{ operator.firstName }} {{ operator.lastName }}</option>
-                }
+                @for (operator of availableOperators(); track operator.id) {
+                <option [ngValue]="operator.id">{{ getOperatorLabel(operator) }}</option>
                 }
             </select>
             <p class="mt-1 text-xs text-neutral-600">Campo obbligatorio.</p>

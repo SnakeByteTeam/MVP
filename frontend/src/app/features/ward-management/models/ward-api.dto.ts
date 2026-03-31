@@ -8,9 +8,24 @@ export interface UpdateWardDto {
 
 export interface AssignOperatorDto {
     userId: number;
-    //vedere dto backend
 }
 
 export interface AssignPlantDto {
-    plantId: number;
+    plantId: string;
+}
+
+export interface WardUserDto {
+    id: number;
+    username: string;
+}
+
+//riferito a reparto
+export interface WardPlantDto {
+    id: string;
+    name: string;
+}
+
+export interface WardSummaryDto {
+    id: number;
+    name: string;
 }

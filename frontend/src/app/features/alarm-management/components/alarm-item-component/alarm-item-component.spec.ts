@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.model';
 import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
@@ -45,6 +45,10 @@ describe('AlarmItemComponent', () => {
 
     fixture = TestBed.createComponent(AlarmItemComponent);
     component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    TestBed.resetTestingModule();
   });
 
   it('should create', () => {

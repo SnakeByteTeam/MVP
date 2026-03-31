@@ -9,6 +9,8 @@ import { UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
+  const credentialValue = 'test-value';
+  const temporaryCredentialValue = 'temporary-value';
 
   const mockLoginUseCase = {
     login: jest.fn(),
@@ -47,13 +49,13 @@ describe('AuthController', () => {
       cookie: jest.fn(),
     };
 
-    const reqBody: any = {
+    const reqBody = {
       username: 'user',
-      password: 'pass',
-      tempPassword: 'tmp',
+      password: credentialValue,
+      tempPassword: temporaryCredentialValue,
     };
 
-    const result = await controller.firstLogin(reqBody, mockRes as any);
+    const result = await controller.firstLogin(reqBody as any, mockRes);
 
     expect(mockFirstLoginUseCase.firstLogin).toHaveBeenCalled();
     expect(mockRes.cookie).toHaveBeenCalledWith(
@@ -73,8 +75,8 @@ describe('AuthController', () => {
     };
 
     const result = await controller.login(
-      { username: 'user', password: 'pass' } as any,
-      mockRes as any,
+      { username: 'user', password: credentialValue } as any,
+      mockRes,
     );
 
     expect(mockLoginUseCase.login).toHaveBeenCalled();
@@ -93,7 +95,7 @@ describe('AuthController', () => {
       cookies: { refreshToken: 'at' },
     };
 
-    const result = await controller.refresh(mockReq as any);
+    const result = controller.refresh(mockReq);
 
     expect(mockRefreshUseCase.refresh).toHaveBeenCalled();
     expect(result).toEqual({ accessToken: 'nat' });
@@ -101,7 +103,7 @@ describe('AuthController', () => {
 
   it('refresh: should throw UnauthorizedException when refresh cookie is missing', async () => {
     const mockReq: any = {};
-    expect(() => controller.refresh(mockReq as any)).toThrow(
+    expect(() => controller.refresh(mockReq)).toThrow(
       UnauthorizedException,
     );
   });
@@ -111,7 +113,7 @@ describe('AuthController', () => {
       clearCookie: jest.fn(),
     };
 
-    const result = controller.logout(mockRes as any);
+    const result = controller.logout(mockRes);
 
     expect(mockRes.clearCookie).toHaveBeenCalledWith(
       'refreshToken',

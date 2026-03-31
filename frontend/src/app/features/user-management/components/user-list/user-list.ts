@@ -11,10 +11,10 @@ import { UserDto } from '../../models/in/user.model.dto';
 
 export class UserListComponent {
   users = input<UserDto[]>();
-  deleteUser = output<string>();
+  deleteUser = output<number>();
 
   onDelete(user: UserDto): void {
-    const isConfirmed = window.confirm(
+    const isConfirmed = globalThis.confirm(
       `Sei sicuro di voler eliminare l'operatore ${user.firstName} ${user.lastName}?`
     );
 

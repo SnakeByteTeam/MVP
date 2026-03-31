@@ -1,7 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { EMPTY, Observable, catchError, map, tap } from 'rxjs';
-import type { CreateWardDto, UpdateWardDto } from '../models/ward-api.dto';
+import { EMPTY, Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { UserRole } from '../../../core/models/user-role.enum';
+import type {
+  CreateWardDto,
+  UpdateWardDto,
+  WardPlantDto,
+  WardSummaryDto,
+  WardUserDto,
+} from '../models/ward-api.dto';
+import type { Ward } from '../models/ward.model';
 import { WardApiService } from './ward-api.service';
 import { WardStore } from './ward.store';
 
@@ -12,6 +20,13 @@ export class WardOperationsService {
 
   public loadWards(): Observable<void> {
     return this.api.getWards().pipe(
+      switchMap((wardSummaries) => {
+        if (wardSummaries.length === 0) {
+          return of([] as Ward[]);
+        }
+
+        return forkJoin(wardSummaries.map((wardSummary) => this.toWard(wardSummary)));
+      }),
       tap((wards) => this.store.setWards(wards)),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
@@ -24,7 +39,7 @@ export class WardOperationsService {
 
   public createWard(dto: CreateWardDto): Observable<void> {
     return this.api.createWard(dto).pipe(
-      tap((ward) => this.store.addWard(ward)),
+      tap((ward) => this.store.addWard(this.normalizeMutationWard(ward))),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
       catchError((error) => {
@@ -41,7 +56,7 @@ export class WardOperationsService {
 
   public updateWard(wardId: number, dto: UpdateWardDto): Observable<void> {
     return this.api.updateWard(wardId, dto).pipe(
-      tap((ward) => this.store.replaceWard(ward)),
+      tap((ward) => this.store.replaceWard(this.normalizeMutationWard(ward))),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
       catchError((error) => {
@@ -61,6 +76,48 @@ export class WardOperationsService {
         return EMPTY;
       }),
     );
+  }
+
+  private toWard(wardSummary: WardSummaryDto): Observable<Ward> {
+    return forkJoin({
+      apartmentsDto: this.api.getPlantsByWardId(wardSummary.id),
+      operatorsDto: this.api.getOperatorsByWardId(wardSummary.id),
+    }).pipe(
+      map(({ apartmentsDto, operatorsDto }) => ({
+        id: wardSummary.id,
+        name: wardSummary.name,
+        apartments: this.toApartments(apartmentsDto),
+        operators: this.toOperators(operatorsDto),
+      })),
+    );
+  }
+
+  private normalizeMutationWard(ward: Ward): Ward {
+    const currentWard = this.store.getWardsSnapshot().find((item) => item.id === ward.id);
+
+    return {
+      id: ward.id,
+      name: ward.name,
+      apartments: ward.apartments ?? currentWard?.apartments ?? [],
+      operators: ward.operators ?? currentWard?.operators ?? [],
+    };
+  }
+
+  private toApartments(apartmentsDto: WardPlantDto[]): Ward['apartments'] {
+    return apartmentsDto.map((plant) => ({
+      id: plant.id,
+      name: plant.name,
+    }));
+  }
+
+  private toOperators(operatorsDto: WardUserDto[]): Ward['operators'] {
+    return operatorsDto.map((user) => ({
+      id: user.id,
+      firstName: user.username,
+      lastName: '',
+      username: user.username,
+      role: UserRole.OPERATORE_SANITARIO,
+    }));
   }
 
   private getErrorMessage(error: unknown): string {

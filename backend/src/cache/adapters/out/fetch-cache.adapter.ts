@@ -6,11 +6,11 @@ import {
   type FetchNewCacheRepoPort,
 } from 'src/cache/application/repository/fetch-new-cache.repository';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantDto } from 'src/plant/infrastructure/dtos/plant.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
 import {
   type GetValidTokenPort,
   GETVALIDTOKENPORT,
-} from 'src/tokens/application/ports/out/get-valid-token.port';
+} from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
 
 @Injectable()
 export class FetchNewCacheAdapter implements FetchNewCachePort {

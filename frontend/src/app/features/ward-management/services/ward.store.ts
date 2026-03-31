@@ -29,6 +29,10 @@ export class WardStore {
     this.setState({ wards });
   }
 
+  public getWardsSnapshot(): Ward[] {
+    return this.state$.value.wards;
+  }
+
   public addWard(ward: Ward): void {
     const current = this.state$.value;
     this.setState({
@@ -55,7 +59,7 @@ export class WardStore {
     });
   }
 
-  public patchPlant(plantId: number, patch: Partial<Plant>): void {
+  public patchPlant(plantId: string, patch: Partial<Plant>): void {
     const current = this.state$.value;
     const wards = current.wards.map((ward) => ({
       ...ward,

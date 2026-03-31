@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, retry } from 'rxjs';
 
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
 import { DatapointDto } from 'src/device/infrastructure/http/dtos/datapoint.dto';
@@ -11,44 +11,74 @@ import {
   DatapointResponseDto,
   ApiDatapointDto,
 } from './dtos/in/api-datapoint.dto';
-import { PlantDto } from 'src/plant/infrastructure/dtos/plant.dto';
-import { RoomDto } from 'src/plant/infrastructure/dtos/room.dto';
+import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
+import { RoomDto } from 'src/plant/infrastructure/http/dtos/room.dto';
 import { FetchNewCacheRepoPort } from 'src/cache/application/repository/fetch-new-cache.repository';
+import { GetAllPlantIdsRepoPort } from 'src/cache/application/repository/get-all-plantids.repository';
+import { PlantSeekResponseDto } from './dtos/in/plant-seek.dto';
 
 @Injectable()
-export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
+export class FetchStructureCacheImpl
+  implements FetchNewCacheRepoPort, GetAllPlantIdsRepoPort
+{
   private readonly API_DOMAIN = process.env.HOST3 || '';
 
   constructor(private readonly httpService: HttpService) {}
 
   async fetch(validToken: string, plantId: string): Promise<PlantDto | null> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService
+          .get(`${this.API_DOMAIN}/${plantId}/locations`, {
+            headers: { Authorization: `Bearer ${validToken}` },
+            timeout: 30000,
+          })
+          .pipe(retry({ count: 3, delay: 2000 })),
+      );
+
+      if (!response.data) return null;
+
+      const apiResponse: ApiPlantResponseDto = plainToInstance(
+        ApiPlantResponseDto,
+        response.data,
+        { excludeExtraneousValues: true },
+      );
+
+      const plantdto = new PlantDto();
+      plantdto.id = plantId;
+      plantdto.name = apiResponse.data[0].attributes.title;
+
+      const roomsToFetch = apiResponse.data.filter((room: ApiRoomDto) =>
+        room.meta.type.includes('loc:Location'),
+      );
+
+      plantdto.rooms = await Promise.all(
+        roomsToFetch.map(
+          async (room: ApiRoomDto) =>
+            await this.fetchRoom(validToken, plantId, room),
+        ),
+      );
+
+      return plantdto;
+    } catch (error) {
+      console.error(
+        `[FetchStructureCacheImpl] Error fetching plant structure for ${plantId}:`,
+        error.message,
+      );
+      return null;
+    }
+  }
+
+  async getAllPlantIds(validToken: string): Promise<string[]> {
+    const PLANT_DOMAIN: string = process.env.PLANT_DOMAIN || '';
+
     const response = await firstValueFrom(
-      this.httpService.get(`${this.API_DOMAIN}/${plantId}/locations`, {
+      this.httpService.get<PlantSeekResponseDto>(PLANT_DOMAIN, {
         headers: { Authorization: `Bearer ${validToken}` },
       }),
     );
 
-    if (!response.data) return null;
-
-    const apiResponse: ApiPlantResponseDto = plainToInstance(
-      ApiPlantResponseDto,
-      response.data,
-      { excludeExtraneousValues: true },
-    );
-
-    const plantdto = new PlantDto();
-    plantdto.id = plantId;
-    plantdto.name = apiResponse.data[0].attributes.title;
-    plantdto.rooms = await Promise.all(
-      apiResponse.data
-        .filter((room: ApiRoomDto) => room.meta.type.includes('loc:Location'))
-        .map(
-          async (room: ApiRoomDto) =>
-            await this.fetchRoom(validToken, plantId, room),
-        ),
-    );
-
-    return plantdto;
+    return response.data.api.templates.plantId.values;
   }
 
   private async fetchRoom(
@@ -57,10 +87,12 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     room: ApiRoomDto,
   ): Promise<RoomDto> {
     const response = await firstValueFrom(
-      this.httpService.get(
-        `${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`,
-        { headers: { Authorization: `Bearer ${validToken}` } },
-      ),
+      this.httpService
+        .get(`${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`, {
+          headers: { Authorization: `Bearer ${validToken}` },
+          timeout: 30000,
+        })
+        .pipe(retry({ count: 3, delay: 2000 })),
     );
 
     if (!response.data)
@@ -75,8 +107,10 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     roomdto.id = room.id;
     roomdto.name = room.attributes.title;
 
+    const deviceToFetch: ApiDeviceDto[] = deviceResponse.data;
+
     roomdto.devices = await Promise.all(
-      deviceResponse.data.map(
+      deviceToFetch.map(
         async (device: ApiDeviceDto) =>
           await this.fetchDevice(validToken, plantId, device),
       ),
@@ -91,10 +125,15 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     device: any,
   ): Promise<DeviceDto> {
     const response = await firstValueFrom(
-      this.httpService.get(
-        `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
-        { headers: { Authorization: `Bearer ${validToken}` } },
-      ),
+      this.httpService
+        .get(
+          `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
+          {
+            headers: { Authorization: `Bearer ${validToken}` },
+            timeout: 30000,
+          },
+        )
+        .pipe(retry({ count: 3, delay: 2000 })),
     );
 
     if (!response.data)
@@ -115,18 +154,16 @@ export class FetchStructureCacheImpl implements FetchNewCacheRepoPort {
     devicedto.type = device.meta.ssType;
     devicedto.subType = device.meta.sfType;
 
-    devicedto.datapoints = await Promise.all(
-      datapointReponse.data.map(
-        async (dp: ApiDatapointDto) => await this.fetchDatapoint(dp),
-      ),
+    const datapointTofetch: ApiDatapointDto[] = datapointReponse.data;
+
+    devicedto.datapoints = datapointTofetch.map((dp: ApiDatapointDto) =>
+      this.fetchDatapoint(dp),
     );
 
     return devicedto;
   }
 
-  private async fetchDatapoint(
-    datapoint: ApiDatapointDto,
-  ): Promise<DatapointDto> {
+  private fetchDatapoint(datapoint: ApiDatapointDto): DatapointDto {
     const datapointdto: DatapointDto = {
       id: datapoint.id,
       name: datapoint.attributes.title,

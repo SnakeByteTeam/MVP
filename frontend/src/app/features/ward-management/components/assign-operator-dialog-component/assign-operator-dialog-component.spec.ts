@@ -1,9 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AssignOperatorDialogComponent } from './assign-operator-dialog-component';
 import { UserRole } from '../../../../core/models/user-role.enum';
-import { UserApiService } from '../../../../core/services/user-api.service';
 
 describe('AssignOperatorDialogComponent', () => {
   let component: AssignOperatorDialogComponent;
@@ -11,7 +9,7 @@ describe('AssignOperatorDialogComponent', () => {
 
   const users = [
     {
-      id: 'u-1',
+      id: 1,
       firstName: 'Mario',
       lastName: 'Rossi',
       username: 'mrossi',
@@ -19,23 +17,15 @@ describe('AssignOperatorDialogComponent', () => {
     },
   ];
 
-  const userApiStub = {
-    getUsers: vi.fn(),
-  };
-
-
-
   beforeEach(async () => {
-    //pulisco mocks
     vi.clearAllMocks();
-    userApiStub.getUsers.mockReturnValue(of(users));
 
     await TestBed.configureTestingModule({
       imports: [AssignOperatorDialogComponent],
-      providers: [{ provide: UserApiService, useValue: userApiStub }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AssignOperatorDialogComponent);
+    fixture.componentRef.setInput('availableOperators', users);
     component = fixture.componentInstance;
   });
 
@@ -43,13 +33,24 @@ describe('AssignOperatorDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('dovrebbe caricare gli operatori in ngOnInit chiamando UserApiService', async () => {
+  it('dovrebbe resettare userId in ngOnInit', () => {
+    component.form.controls.userId.setValue(99);
     fixture.detectChanges();
-    expect(userApiStub.getUsers).toHaveBeenCalledTimes(1);
 
-    const result = await firstValueFrom(component.operators$);
-    expect(result).toEqual(users);
-    expect(result).toHaveLength(1);
+    expect(component.form.controls.userId.value).toBeNull();
+  });
+
+  it('getOperatorLabel usa nome completo e fallback su username', () => {
+    expect(component.getOperatorLabel(users[0])).toBe('Mario Rossi');
+    expect(
+      component.getOperatorLabel({
+        id: 2,
+        firstName: '',
+        lastName: '',
+        username: 'lverdi',
+        role: UserRole.OPERATORE_SANITARIO,
+      }),
+    ).toBe('lverdi');
   });
 
   it('non dovrebbe emettere submitted se il form e invalido', () => {

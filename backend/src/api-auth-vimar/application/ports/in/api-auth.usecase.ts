@@ -1,5 +1,5 @@
 export interface ApiAuthUseCase {
-  getLoginUrl(): string;
+  getLoginUrl(state?: string): string;
 }
 
 export const APIAUTHUSECASE = Symbol('ApiAuthUseCase');

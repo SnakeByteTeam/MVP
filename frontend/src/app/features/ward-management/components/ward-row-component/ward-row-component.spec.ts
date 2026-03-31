@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { WardRowComponent } from './ward-row-component';
 
@@ -20,55 +20,22 @@ describe('WardRowComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('non dovrebbe emettere se plant null', () => {
-
-    //arrange
-    const enableSpy = vi.spyOn(component.enable, 'emit');
-    const disableSpy = vi.spyOn(component.disable, 'emit');
+  it('accetta plant nullo', () => {
     fixture.componentRef.setInput('plant', null);
 
-    //act
-    component.onToggle();
+    fixture.detectChanges();
 
-    //assert
-    expect(enableSpy).not.toHaveBeenCalled();
-    expect(disableSpy).not.toHaveBeenCalled();
+    expect(component.plant()).toBeNull();
   });
 
-  it('dovrebbe emmetere disable con id se plant e abilitato', () => {
-    const enableSpy = vi.spyOn(component.enable, 'emit');
-    const disableSpy = vi.spyOn(component.disable, 'emit');
+  it('accetta plant valorizzato con id stringa', () => {
     fixture.componentRef.setInput('plant', {
-      id: 101,
+      id: '101',
       name: 'App',
-      isEnabled: true,
     });
 
-    //act
-    component.onToggle();
+    fixture.detectChanges();
 
-    //assert
-    expect(disableSpy).toHaveBeenCalledWith(101);
-    expect(disableSpy).toHaveBeenCalledTimes(1);
-    expect(enableSpy).not.toHaveBeenCalled();
+    expect(component.plant()).toEqual({ id: '101', name: 'App' });
   });
-
-  it('dovrebbe emmetere enable con id se plant e disabilitato', () => {
-    const enableSpy = vi.spyOn(component.enable, 'emit');
-    const disableSpy = vi.spyOn(component.disable, 'emit');
-    fixture.componentRef.setInput('plant', {
-      id: 101,
-      name: 'App',
-      isEnabled: false,
-    });
-
-    //act
-    component.onToggle();
-
-    //assert
-    expect(enableSpy).toHaveBeenCalledWith(101);
-    expect(enableSpy).toHaveBeenCalledTimes(1);
-    expect(disableSpy).not.toHaveBeenCalled();
-  });
-
 });

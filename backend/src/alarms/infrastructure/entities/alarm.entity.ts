@@ -13,12 +13,13 @@ export interface AlarmEntity {
   created_at: Date;
   updated_at: Date;
 }
-
+ 
 export interface ActiveAlarmEntity {
   id: string;
-  alarm_id: string;
+  alarm_rule_id: string;
   alarm_name: string;
   danger_signal: string;
   triggered_at: Date;
   resolved_at: Date | null;
 }
+ 

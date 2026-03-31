@@ -17,8 +17,19 @@ export class CreateAlarmRepository implements CreateAlarmPort {
       `INSERT INTO alarms (id, name, plant_id, device_id, priority, threshold, activation_time, deactivation_time, enabled, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        RETURNING *`,
-      [uuidv4(), cmd.name, cmd.plantId, cmd.deviceId, cmd.priority, cmd.threshold,
-       cmd.activationTime, cmd.deactivationTime, true, new Date(), new Date()],
+      [
+        uuidv4(),
+        cmd.name,
+        cmd.plantId,
+        cmd.deviceId,
+        cmd.priority,
+        cmd.threshold,
+        cmd.activationTime,
+        cmd.deactivationTime,
+        true,
+        new Date(),
+        new Date(),
+      ],
     );
     return toModel(rows[0]);
   }

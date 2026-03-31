@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AlarmRuleController } from '../src/alarms/adapters/in/alarmRule.controller';
+import { AlarmRuleController } from '../src/alarms/adapters/in/alarms.controller';
 import { AlarmService } from '../src/alarms/application/services/alarm.service';
 import { Alarm } from '../src/alarms/domain/models/alarm.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
@@ -16,8 +16,17 @@ const mockAlarmService = {
 
 const createdAt = new Date('2024-01-01');
 const mockAlarm = new Alarm(
-  'alarm-id-1', 'Temperatura soglia', 'plant-1', 'device-1',
-  AlarmPriority.RED, 20, '08:00', '20:00', true, createdAt, createdAt,
+  'alarm-id-1',
+  'Temperatura soglia',
+  'plant-1',
+  'device-1',
+  AlarmPriority.RED,
+  20,
+  '08:00',
+  '20:00',
+  true,
+  createdAt,
+  createdAt,
 );
 
 describe('AlarmRuleController', () => {
@@ -96,7 +105,10 @@ describe('AlarmRuleController', () => {
 
       expect(result.id).toBe('alarm-id-1');
       expect(mockAlarmService.updateAlarm).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'alarm-id-1', priority: AlarmPriority.GREEN }),
+        expect.objectContaining({
+          id: 'alarm-id-1',
+          priority: AlarmPriority.GREEN,
+        }),
       );
     });
   });

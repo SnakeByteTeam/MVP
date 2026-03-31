@@ -6,7 +6,6 @@ import { AlarmsModule } from './alarms/alarms.module';
   imports: [
     DatabaseModule, // @Global() ->  pool disponibile in tutti i moduli
     AlarmsModule,
-    
   ],
   controllers: [],
   providers: [],

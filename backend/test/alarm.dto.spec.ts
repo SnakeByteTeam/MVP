@@ -37,7 +37,7 @@ describe('AlarmDto', () => {
       expect(dto.updatedAt).toBe(updatedAt);
     });
 
-    it('dovrebbe restituire un\'istanza di AlarmDto', () => {
+    it("dovrebbe restituire un'istanza di AlarmDto", () => {
       const dto = AlarmDto.fromDomain(mockAlarm);
       expect(dto).toBeInstanceOf(AlarmDto);
     });

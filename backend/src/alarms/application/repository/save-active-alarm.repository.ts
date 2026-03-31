@@ -15,7 +15,14 @@ export class SaveActiveAlarmRepository implements SaveActiveAlarmPort {
       `INSERT INTO active_alarms (id, alarm_rule_id, alarm_name, danger_signal, triggered_at, resolved_at)
        VALUES ($1,$2,$3,$4,$5,$6)
        RETURNING *`,
-      [alarm.id, alarm.alarmId, alarm.alarmName, alarm.dangerSignal, alarm.triggeredAt, alarm.resolvedAt],
+      [
+        alarm.id,
+        alarm.alarmId,
+        alarm.alarmName,
+        alarm.dangerSignal,
+        alarm.triggeredAt,
+        alarm.resolvedAt,
+      ],
     );
     return toActiveModel(rows[0]);
   }

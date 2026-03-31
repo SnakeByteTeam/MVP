@@ -10,13 +10,22 @@ import { toModel } from './alarm-mapper';
 export class GetAllAlarmsByRequestRepository implements GetAllAlarmsByRequestPort {
   constructor(@InjectPool() private readonly pool: Pool) {}
 
-  async getAllAlarmsByRequest(plantId?: string, deviceId?: string): Promise<Alarm[]> {
+  async getAllAlarmsByRequest(
+    plantId?: string,
+    deviceId?: string,
+  ): Promise<Alarm[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
 
-    if (plantId)  { conditions.push(`plant_id = $${i++}`);  values.push(plantId); }
-    if (deviceId) { conditions.push(`device_id = $${i++}`); values.push(deviceId); }
+    if (plantId) {
+      conditions.push(`plant_id = $${i++}`);
+      values.push(plantId);
+    }
+    if (deviceId) {
+      conditions.push(`device_id = $${i++}`);
+      values.push(deviceId);
+    }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const { rows } = await this.pool.query<AlarmEntity>(

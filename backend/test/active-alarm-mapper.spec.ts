@@ -19,7 +19,7 @@ describe('active-alarm-mapper - toActiveModel', () => {
 
     expect(activeAlarm).toBeInstanceOf(ActiveAlarm);
     expect(activeAlarm.id).toBe('active-id-1');
-    expect(activeAlarm.alarmId).toBe('alarm-id-1');  // alarm_rule_id → alarmRuleId
+    expect(activeAlarm.alarmId).toBe('alarm-id-1'); // alarm_rule_id → alarmRuleId
     expect(activeAlarm.alarmName).toBe('Temperatura soglia');
     expect(activeAlarm.dangerSignal).toBe('Temperatura oltre soglia');
     expect(activeAlarm.triggeredAt).toBe(triggeredAt);

@@ -10,7 +10,8 @@ export interface FindActiveAlarmByIdPort {
   findById(id: string): Promise<ActiveAlarm | null>;
 }
 
-export const FIND_ACTIVE_ALARM_BY_RULE_ID_PORT = 'FIND_ACTIVE_ALARM_BY_RULE_ID_PORT';
+export const FIND_ACTIVE_ALARM_BY_RULE_ID_PORT =
+  'FIND_ACTIVE_ALARM_BY_RULE_ID_PORT';
 export interface FindActiveAlarmByRuleIdPort {
   // Controlla se esiste già un allarme attivo (non risolto) per questa regola.
   // Questo è il controllo che evita duplicati quando il sensore continua

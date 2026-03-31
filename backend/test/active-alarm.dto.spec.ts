@@ -37,8 +37,12 @@ describe('ActiveAlarmDto', () => {
   describe('fromDomain - allarme risolto', () => {
     const resolvedAt = new Date('2024-01-01T12:00:00.000Z');
     const resolvedAlarm = new ActiveAlarm(
-      'active-id-2', 'alarm-id-1', 'Test', 'Test signal',
-      triggeredAt, resolvedAt,
+      'active-id-2',
+      'alarm-id-1',
+      'Test',
+      'Test signal',
+      triggeredAt,
+      resolvedAt,
     );
 
     it('dovrebbe convertire resolvedAt in stringa ISO se risolto', () => {

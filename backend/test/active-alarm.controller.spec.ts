@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ActiveAlarmController } from '../src/alarms/adapters/in/active-alarm.controller';
+import { ActiveAlarmController } from '../src/alarms/adapters/in/active-alarms.controller';
 import { AlarmService } from '../src/alarms/application/services/alarm.service';
 import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
 
@@ -9,8 +9,12 @@ const mockAlarmService = {
 };
 
 const mockActiveAlarm = new ActiveAlarm(
-  'active-id-1', 'alarm-id-1', 'Temperatura soglia',
-  'Temperatura oltre soglia', new Date('2024-01-01'), null,
+  'active-id-1',
+  'alarm-id-1',
+  'Temperatura soglia',
+  'Temperatura oltre soglia',
+  new Date('2024-01-01'),
+  null,
 );
 
 describe('ActiveAlarmController', () => {
@@ -47,7 +51,9 @@ describe('ActiveAlarmController', () => {
     it("dovrebbe chiamare il service con l'id corretto", async () => {
       mockAlarmService.resolveActiveAlarm.mockResolvedValue(undefined);
       await controller.resolveActiveAlarm('active-id-1');
-      expect(mockAlarmService.resolveActiveAlarm).toHaveBeenCalledWith('active-id-1');
+      expect(mockAlarmService.resolveActiveAlarm).toHaveBeenCalledWith(
+        'active-id-1',
+      );
     });
   });
 });

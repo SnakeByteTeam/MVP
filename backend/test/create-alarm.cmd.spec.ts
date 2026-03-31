@@ -24,10 +24,15 @@ describe('CreateAlarmCmd', () => {
 
   it('i campi dovrebbero essere readonly — non modificabili dopo la creazione', () => {
     const cmd = new CreateAlarmCmd(
-      'Test', 'plant-1', 'device-1',
-      AlarmPriority.WHITE, 10, '00:00', '23:59',
+      'Test',
+      'plant-1',
+      'device-1',
+      AlarmPriority.WHITE,
+      10,
+      '00:00',
+      '23:59',
     );
-//test che verifica che il valore rimanga invariato a runtime
+    //test che verifica che il valore rimanga invariato a runtime
     expect(() => {
       (cmd as any).name = 'Modified';
     }).toThrow();

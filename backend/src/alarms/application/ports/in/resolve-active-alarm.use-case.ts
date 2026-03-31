@@ -1,5 +1,7 @@
-export const RESOLVE_ACTIVE_ALARM_USE_CASE = 'RESOLVE_ACTIVE_ALARM_USE_CASE';
+import { ResolveActiveAlarmCmd } from '../../commands/resolve-active-alarm-cmd';
 
 export interface ResolveActiveAlarmUseCase {
-  resolveActiveAlarm(id: string): Promise<void>;
+  resolveActiveAlarm(req: ResolveActiveAlarmCmd): Promise<void>;
 }
+
+export const RESOLVE_ACTIVE_ALARM_USE_CASE = 'RESOLVE_ACTIVE_ALARM_USE_CASE';

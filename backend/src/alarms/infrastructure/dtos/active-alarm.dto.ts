@@ -5,7 +5,7 @@ export class ActiveAlarmDto {
   alarmId: string;
   alarmName: string;
   dangerSignal: string;
-  triggeredAt: string; 
+  triggeredAt: string;
   resolvedAt: string | null;
 
   static fromDomain(alarm: ActiveAlarm): ActiveAlarmDto {

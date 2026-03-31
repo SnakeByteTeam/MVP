@@ -22,7 +22,14 @@ export class UpdateAlarmRepository implements UpdateAlarmPort {
         updated_at        = NOW()
        WHERE id = $1
        RETURNING *`,
-      [id, cmd.priority, cmd.threshold, cmd.activationTime, cmd.deactivationTime, cmd.enabled],
+      [
+        id,
+        cmd.priority,
+        cmd.threshold,
+        cmd.activationTime,
+        cmd.deactivationTime,
+        cmd.enabled,
+      ],
     );
     return toModel(rows[0]);
   }

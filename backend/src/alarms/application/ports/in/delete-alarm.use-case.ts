@@ -1,5 +1,7 @@
-export const DELETE_ALARM_USE_CASE = 'DELETE_ALARM_USE_CASE';
+import { DeleteAlarmCmd } from '../../commands/delete-alarm-cmd';
 
 export interface DeleteAlarmUseCase {
-  deleteAlarm(id: string): Promise<void>;
+  deleteAlarm(req: DeleteAlarmCmd): Promise<void>;
 }
+
+export const DELETE_ALARM_USE_CASE = 'DELETE_ALARM_USE_CASE';

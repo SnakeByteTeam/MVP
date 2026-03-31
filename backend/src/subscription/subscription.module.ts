@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { ApiAuthVimarModule } from 'src/api-auth-vimar/api-auth-vimar.module';
 import { CacheModule } from 'src/cache/cache.module';
@@ -12,6 +13,7 @@ import { REFRESH_NODE_SUBSCRIPTION_USECASE } from './application/ports/in/refres
 import { REFRESH_DATAPOINT_SUBSCRIPTION_USECASE } from './application/ports/in/refresh-datapoint-subscription.usecase';
 import { REFRESH_DATAPOINT_SUBSCRIPTION_PORT } from './application/ports/out/refresh-datapoint-subscription.port';
 import { REFRESH_DATAPOINT_SUBSCRIPTION_REPO_PORT } from './application/repository/refresh-datapoint-subscription.respository';
+import { REFRESH_ALL_SUBSCRIPTION_USECASE } from './application/ports/in/refresh-all-subscription.usecase';
 
 import { SubscriptionRepoImpl } from './infrastructure/http/sub-repo-impl';
 import { SubscriptionService } from './application/services/subscription.service';
@@ -19,7 +21,12 @@ import { RefreshNodeSubscriptionAdapter } from './adapters/out/refresh-node-subs
 import { RefreshDatapointSubAdapter } from './adapters/out/refresh-datapoint-subscription.adapter';
 
 @Module({
-  imports: [ApiAuthVimarModule, HttpModule, CacheModule],
+  imports: [
+    ApiAuthVimarModule,
+    HttpModule,
+    CacheModule,
+    ScheduleModule.forRoot(),
+  ],
   controllers: [EventSubscriptionController],
   providers: [
     {
@@ -45,6 +52,10 @@ import { RefreshDatapointSubAdapter } from './adapters/out/refresh-datapoint-sub
     {
       provide: REFRESH_DATAPOINT_SUBSCRIPTION_REPO_PORT,
       useClass: SubscriptionRepoImpl,
+    },
+    {
+      provide: REFRESH_ALL_SUBSCRIPTION_USECASE,
+      useClass: SubscriptionService,
     },
   ],
 })

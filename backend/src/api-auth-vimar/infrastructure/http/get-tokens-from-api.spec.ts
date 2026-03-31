@@ -25,9 +25,7 @@ describe('GetTokensFromApiImpl', () => {
     process.env.HOST2 = 'https://auth.example.com/token';
     process.env.REDIRECT_URI = 'http://localhost:3000/callback';
 
-    apiImpl = new GetTokensFromApiImpl(
-      httpService as unknown as HttpService,
-    );
+    apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
   });
 
   describe('getTokensWithCode', () => {

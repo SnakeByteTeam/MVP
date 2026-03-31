@@ -252,7 +252,9 @@ describe('SubscriptionRepoImpl', () => {
         config: {} as any,
       };
 
-      (httpService.get as jest.Mock).mockReturnValue(of(emptyLocationsResponse));
+      (httpService.get as jest.Mock).mockReturnValue(
+        of(emptyLocationsResponse),
+      );
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await repo.refreshDatapointSub('valid-token', 'plant-1');
@@ -265,7 +267,10 @@ describe('SubscriptionRepoImpl', () => {
       const newRepo = new SubscriptionRepoImpl(httpService);
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      const result = await newRepo.refreshDatapointSub('valid-token', 'plant-1');
+      const result = await newRepo.refreshDatapointSub(
+        'valid-token',
+        'plant-1',
+      );
 
       expect(result).toBe(false);
     });
@@ -301,9 +306,9 @@ describe('SubscriptionRepoImpl', () => {
       await repo.refreshDatapointSub('valid-token', 'plant-1');
 
       const callArgs = (httpService.post as jest.Mock).mock.calls[0];
-      expect(callArgs[1].data.relationships.subscriptionDatapoints.data[0].id).toBe(
-        'loc-special-id-456',
-      );
+      expect(
+        callArgs[1].data.relationships.subscriptionDatapoints.data[0].id,
+      ).toBe('loc-special-id-456');
     });
 
     it('should include authorization header in locations request', async () => {

@@ -1,7 +1,7 @@
 import { toModel } from '../src/alarms/application/repository/alarm-mapper';
-import { AlarmEntity } from '../src/alarms/infrastructure/entities/alarm.entity';
+import { AlarmEntity } from '../src/alarms/infrastructure/entities/alarm-rule-entity';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
 
 describe('alarm-mapper - toModel', () => {
   const createdAt = new Date('2024-01-01');

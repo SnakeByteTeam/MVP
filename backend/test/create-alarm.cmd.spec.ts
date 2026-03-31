@@ -1,4 +1,4 @@
-import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm.cmd';
+import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm-rule.cmd';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 
 describe('CreateAlarmCmd', () => {

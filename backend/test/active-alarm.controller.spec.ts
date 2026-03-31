@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ActiveAlarmController } from '../src/alarms/adapters/in/active-alarms.controller';
-import { AlarmService } from '../src/alarms/application/services/alarm.service';
-import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
+import { ActiveAlarmController } from '../src/alarms/adapters/in/event-alarms.controller';
+import { AlarmService } from '../src/alarms/application/services/alarm-rule.service';
+import { ActiveAlarm } from '../src/alarms/domain/models/alarm-event.model';
 
 const mockAlarmService = {
   getActiveAlarms: jest.fn(),

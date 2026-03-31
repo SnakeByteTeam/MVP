@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AlarmRuleController } from '../src/alarms/adapters/in/alarms.controller';
-import { AlarmService } from '../src/alarms/application/services/alarm.service';
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
+import { AlarmRuleController } from '../src/alarms/adapters/in/alarm-rules.controller';
+import { AlarmService } from '../src/alarms/application/services/alarm-rule.service';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 import { CreateAlarmDto } from '../src/alarms/infrastructure/dtos/create-alarm.dto';
 import { UpdateAlarmDto } from '../src/alarms/infrastructure/dtos/update-alarm.dto';

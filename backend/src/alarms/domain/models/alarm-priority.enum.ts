@@ -1,7 +1,6 @@
-// livello di priorità di un'allarme
 export enum AlarmPriority {
-  WHITE = 'WHITE',
-  GREEN = 'GREEN',
-  ORANGE = 'ORANGE',
-  RED = 'RED',
+  WHITE = 1,
+  GREEN = 2,
+  ORANGE = 3,
+  RED = 4,
 }

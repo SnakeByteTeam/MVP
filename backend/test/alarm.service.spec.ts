@@ -1,26 +1,26 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { AlarmService } from '../src/alarms/application/services/alarm.service';
+import { AlarmService } from '../src/alarms/application/services/alarm-rule.service';
 
-import { GET_ALL_ALARMS_PORT } from '../src/alarms/application/ports/out/get-all-alarms.port';
-import { GET_ALARM_BY_ID_PORT } from '../src/alarms/application/ports/out/get-alarm-by-id.port';
+import { GET_ALL_ALARMS_PORT } from '../src/alarms/application/ports/out/get-all-alarm-rules.port';
+import { GET_ALARM_BY_ID_PORT } from '../src/alarms/application/ports/out/get-alarm-rule-by-id.port';
 import { GET_ALL_ALARMS_BY_REQUEST_PORT } from '../src/alarms/application/ports/out/get-all-alarms-by-request.port';
-import { CREATE_ALARM_PORT } from '../src/alarms/application/ports/out/create-alarm.port';
+import { CREATE_ALARM_PORT } from '../src/alarms/application/ports/out/create-alarm-rule.port';
 import { UPDATE_ALARM_PORT } from '../src/alarms/application/ports/out/update-alarm.port';
-import { DELETE_ALARM_PORT } from '../src/alarms/application/ports/out/delete-alarm.port';
+import { DELETE_ALARM_PORT } from '../src/alarms/application/ports/out/delete-alarm-rule.port';
 import {
   FIND_ALL_ACTIVE_ALARMS_PORT,
   FIND_ACTIVE_ALARM_BY_ID_PORT,
   FIND_ACTIVE_ALARM_BY_RULE_ID_PORT,
   SAVE_ACTIVE_ALARM_PORT,
   RESOLVE_ACTIVE_ALARM_PORT,
-} from '../src/alarms/application/ports/out/find-active-alarms.port';
+} from '../src/alarms/application/ports/out/get-all-active-alarms.port';
 
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
-import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
+import { ActiveAlarm } from '../src/alarms/domain/models/alarm-event.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
-import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm.cmd';
-import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm.cmd';
+import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm-rule.cmd';
+import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm-rule.cmd';
 import { TriggerActiveAlarmCmd } from '../src/alarms/application/commands/trigger-active-alarm.cmd';
 
 const mockGetAllAlarmsPort = { getAllAlarms: jest.fn() };

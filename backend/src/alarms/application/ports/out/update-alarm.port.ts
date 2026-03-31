@@ -1,8 +1,8 @@
-import { Alarm } from '../../../domain/models/alarm.model';
-import { UpdateAlarmCmd } from '../../commands/update-alarm.cmd';
-
-export const UPDATE_ALARM_PORT = 'UPDATE_ALARM_PORT';
+import { Alarm } from '../../../domain/models/alarm-rule.model';
+import { UpdateAlarmCmd } from '../../commands/update-alarm-rule.cmd';
 
 export interface UpdateAlarmPort {
-  updateAlarm(id: string, cmd: UpdateAlarmCmd): Promise<Alarm>;
+  updateAlarm(cmd: UpdateAlarmCmd): Promise<Alarm>;
 }
+
+export const UPDATE_ALARM_PORT = 'UPDATE_ALARM_PORT';

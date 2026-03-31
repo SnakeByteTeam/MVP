@@ -1,4 +1,4 @@
-import { ActiveAlarm } from '../../../domain/models/active-alarm.model';
+import { ActiveAlarm } from '../../../domain/models/alarm-event.model';
 
 export interface GetActiveAlarmsUseCase {
   getActiveAlarms(): Promise<ActiveAlarm[]>;

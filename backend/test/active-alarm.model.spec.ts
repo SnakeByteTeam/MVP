@@ -1,4 +1,4 @@
-import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
+import { ActiveAlarm } from '../src/alarms/domain/models/alarm-event.model';
 
 describe('ActiveAlarm', () => {
   const triggeredAt = new Date('2024-01-01T10:00:00');

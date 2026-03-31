@@ -1,4 +1,4 @@
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 
 describe('Alarm', () => {

@@ -1,6 +1,6 @@
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
-    name VARCHAR2(255) UNIQUE
+    name VARCHAR(255) UNIQUE
 );
 
 INSERT INTO role (name) VALUES 
@@ -9,18 +9,18 @@ INSERT INTO role (name) VALUES
 
 CREATE TABLE ward (
     id SERIAL PRIMARY KEY,
-    name VARCHAR2(255) UNIQUE 
+    name VARCHAR(255) UNIQUE 
 );
 
 INSERT INTO ward (name) VALUES ('test-ward');
 
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
-    username VARCHAR2(255) UNIQUE NOT NULL,
-    surname VARCHAR2(255) NOT NULL,
-    name VARCHAR2(255) NOT NULL,
-    password VARCHAR2(255) NOT NULL,
-    temp_password VARCHAR2 (255) UNIQUE NOT NULL,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    surname VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    temp_password VARCHAR(255) UNIQUE NOT NULL,
     first_access BOOLEAN DEFAULT TRUE,
     roleId INTEGER NOT NULL,
     FOREIGN KEY (roleId) REFERENCES role(id)
@@ -35,9 +35,9 @@ ON CONFLICT (username) DO NOTHING;
 
 
 CREATE TABLE plant (
-    id VARCHAR2(255) PRIMARY KEY,
+    id VARCHAR(255) PRIMARY KEY,
     ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL,
-    name VARCHAR2(255) UNIQUE
+    name VARCHAR(255) UNIQUE
 );
 
 
@@ -120,7 +120,7 @@ CREATE UNLOGGED TABLE token_cache (
 
 CREATE TABLE plant (
     cached_at TIMESTAMPTZ NOT NULL,
-    id VARCHAR2(36) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
     data JSONB NOT NULL,
     ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL
 );

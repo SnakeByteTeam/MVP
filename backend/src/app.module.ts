@@ -24,7 +24,7 @@ import { SuggestionModule } from './suggestion/suggestion.module';
     DeviceModule,
     PlantModule,
     AuthModule,
-    WardsModule, AlarmsModule
+    WardsModule, AlarmsModule,
     CacheModule,
     SubscriptionModule,
     EventEmitterModule.forRoot(), UsersModule, SuggestionModule

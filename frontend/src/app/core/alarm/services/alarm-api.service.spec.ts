@@ -91,7 +91,7 @@ describe('AlarmApiService', () => {
             deviceId: 'device-7',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
-            threshold: '22',
+            threshold_value: '22',
             activationTime: '09:00',
             deactivationTime: '18:00',
         };

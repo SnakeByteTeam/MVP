@@ -38,6 +38,7 @@ export class AlarmConfigStateService {
         return this.requireField(priority, 'priority');
     }
 
+
     private toThresholdOperatorCode(operator: ThresholdOperator | null): string {
         return this.requireField(operator, 'thresholdOperator');
     }
@@ -156,7 +157,7 @@ export class AlarmConfigStateService {
             deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            threshold: String(this.requireField(formValue.threshold, 'threshold')),
+            threshold_value: String(this.requireField(formValue.threshold, 'threshold')),
             activationTime: formValue.activationTime,
             deactivationTime: formValue.deactivationTime,
         };

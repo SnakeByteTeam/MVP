@@ -1,8 +1,26 @@
 import { Injectable, inject } from '@angular/core';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
-import { BehaviorSubject, EMPTY, combineLatest, map, shareReplay, tap, catchError, finalize, take } from 'rxjs';
-import { AlarmListVm } from '../models/alarm-list-vm.model';
+import {
+    BehaviorSubject,
+    EMPTY,
+    Observable,
+    combineLatest,
+    forkJoin,
+    map,
+    of,
+    shareReplay,
+    startWith,
+    switchMap,
+    tap,
+    catchError,
+    finalize,
+    take,
+} from 'rxjs';
+import { ActiveAlarm } from '../../../core/alarm/models/active-alarm.model';
+import { AlarmListVm, AlarmScope } from '../models/alarm-list-vm.model';
+import { AlarmRuleLookupService } from './alarm-rule-lookup.service';
+import { OperatorAlarmScopeContext, OperatorAlarmScopeService } from './operator-alarm-scope.service';
 
 // Nasconde la complessità della composizione tra `AlarmStateService` e
 // `AlarmApiService` dietro un'interfaccia minimale: un unico Observable `vm$`
@@ -28,21 +46,54 @@ import { AlarmListVm } from '../models/alarm-list-vm.model';
 export class AlarmManagementService {
     private readonly alarmStateService = inject(AlarmStateService);
     private readonly alarmApiService = inject(AlarmApiService);
+    private readonly alarmRuleLookupService = inject(AlarmRuleLookupService);
+    private readonly operatorAlarmScopeService = inject(OperatorAlarmScopeService);
 
     private readonly resolvingId$ = new BehaviorSubject<string | null>(null);
     private readonly resolveError$ = new BehaviorSubject<string | null>(null);
+    private readonly activeScope$ = new BehaviorSubject<AlarmScope>('all');
     private pendingResolveRequests = 0;
 
-    public readonly vm$ = combineLatest([
+    private readonly scopeSelection$ = combineLatest([
+        this.activeScope$.asObservable(),
+        this.operatorAlarmScopeService.context$,
+    ]).pipe(
+        map(([requestedScope, context]): ScopeSelection => {
+            const availableScopes: AlarmScope[] = context.isOperator ? ['all', 'mine'] : ['all'];
+            const activeScope = availableScopes.includes(requestedScope) ? requestedScope : 'all';
+
+            return {
+                activeScope,
+                availableScopes,
+                context,
+            };
+        }),
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    private readonly scopedAlarms$ = combineLatest([
         this.alarmStateService.getActiveAlarms$(),
+        this.scopeSelection$,
+    ]).pipe(
+        switchMap(([alarms, scopeSelection]) => this.resolveScopedAlarms$(alarms, scopeSelection)),
+        shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    public readonly vm$ = combineLatest([
+        this.scopedAlarms$,
         this.resolvingId$.asObservable(),
         this.resolveError$.asObservable(),
+        this.scopeSelection$,
     ]).pipe(
-        map(([alarms, resolvingId, resolveError]): AlarmListVm => ({
-            alarms,
+        map(([scopedAlarms, resolvingId, resolveError, scopeSelection]): AlarmListVm => ({
+            alarms: scopedAlarms.alarms,
             isResolving: this.pendingResolveRequests > 0,
             resolvingId,
             resolveError,
+            activeScope: scopeSelection.activeScope,
+            availableScopes: scopeSelection.availableScopes,
+            scopeInfoMessage: scopedAlarms.scopeInfoMessage,
+            scopeLoading: scopedAlarms.scopeLoading,
         })),
         shareReplay({ bufferSize: 1, refCount: true })
     );
@@ -67,6 +118,10 @@ export class AlarmManagementService {
 
     public initialize(): void {
         this.loadInitialActiveAlarms();
+    }
+
+    public switchScope(scope: AlarmScope): void {
+        this.activeScope$.next(scope);
     }
 
     public resolveAlarm(activeAlarmId: string): void {
@@ -114,4 +169,94 @@ export class AlarmManagementService {
         return 'Errore durante la risoluzione dell\'allarme.';
     }
 
+    private resolveScopedAlarms$(alarms: ActiveAlarm[], scopeSelection: ScopeSelection): Observable<ScopedAlarmsResult> {
+        if (scopeSelection.activeScope === 'all') {
+            return of({
+                alarms,
+                scopeInfoMessage: null,
+                scopeLoading: false,
+            });
+        }
+
+        const context = scopeSelection.context;
+        if (context.errorMessage) {
+            return of({
+                alarms: [],
+                scopeInfoMessage: context.errorMessage,
+                scopeLoading: false,
+            });
+        }
+
+        if (context.assignedWardIds.length === 0 || context.assignedPlantIds.length === 0) {
+            return of({
+                alarms: [],
+                scopeInfoMessage: 'Non hai reparti assegnati.',
+                scopeLoading: false,
+            });
+        }
+
+        if (alarms.length === 0) {
+            return of({
+                alarms: [],
+                scopeInfoMessage: 'Nessun allarme attivo nei reparti assegnati.',
+                scopeLoading: false,
+            });
+        }
+
+        return this.filterMineAlarms$(alarms, new Set(context.assignedPlantIds)).pipe(
+            map((filteredAlarms): ScopedAlarmsResult => ({
+                alarms: filteredAlarms,
+                scopeInfoMessage:
+                    filteredAlarms.length === 0 ? 'Nessun allarme attivo nei reparti assegnati.' : null,
+                scopeLoading: false,
+            })),
+            startWith({
+                alarms: [],
+                scopeInfoMessage: null,
+                scopeLoading: true,
+            })
+        );
+    }
+
+    private filterMineAlarms$(alarms: ActiveAlarm[], assignedPlantIds: ReadonlySet<string>): Observable<ActiveAlarm[]> {
+        if (alarms.length === 0 || assignedPlantIds.size === 0) {
+            return of([]);
+        }
+
+        return forkJoin(
+            alarms.map((alarm) =>
+                this.alarmRuleLookupService.getAlarmRuleById(alarm.alarmRuleId).pipe(
+                    map((alarmRule) => {
+                        if (!alarmRule) {
+                            return null;
+                        }
+
+                        const plantId = alarmRule.apartmentId.trim();
+                        if (!plantId || !assignedPlantIds.has(plantId)) {
+                            return null;
+                        }
+
+                        return alarm;
+                    })
+                )
+            )
+        ).pipe(
+            map((matchingAlarms) =>
+                matchingAlarms.filter((alarm): alarm is ActiveAlarm => alarm !== null)
+            )
+        );
+    }
+
+}
+
+interface ScopeSelection {
+    activeScope: AlarmScope;
+    availableScopes: AlarmScope[];
+    context: OperatorAlarmScopeContext;
+}
+
+interface ScopedAlarmsResult {
+    alarms: ActiveAlarm[];
+    scopeInfoMessage: string | null;
+    scopeLoading: boolean;
 }

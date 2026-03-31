@@ -5,10 +5,25 @@
     </header>
 
     @if (vm$ | async; as vm) {
+    @if (vm.availableScopes.length > 1) {
+    <nav class="alarm-management__scope-switcher" aria-label="Filtro visualizzazione allarmi">
+        <button type="button" (click)="onScopeChange('all')" [attr.aria-pressed]="vm.activeScope === 'all'">
+            Tutti
+        </button>
+        <button type="button" (click)="onScopeChange('mine')" [attr.aria-pressed]="vm.activeScope === 'mine'">
+            I miei reparti
+        </button>
+    </nav>
+    }
+
     @if (vm.resolveError) {
     <p class="alarm-management__error" role="alert" aria-live="assertive">
         {{ vm.resolveError }}
     </p>
+    }
+
+    @if (vm.scopeLoading) {
+    <p class="alarm-management__status" aria-live="polite">Aggiornamento filtro reparti in corso...</p>
     }
 
     @if (vm.isResolving) {
@@ -16,7 +31,11 @@
     }
 
     @if (vm.alarms.length === 0) {
+    @if (vm.scopeInfoMessage) {
+    <p class="alarm-management__empty">{{ vm.scopeInfoMessage }}</p>
+    } @else {
     <p class="alarm-management__empty">Nessun allarme attivo al momento.</p>
+    }
     } @else {
     <ul class="alarm-management__list" aria-label="Lista allarmi attivi">
         @for (alarm of vm.alarms; track alarm.id) {

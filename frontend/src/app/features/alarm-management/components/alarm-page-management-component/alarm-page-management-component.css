@@ -13,6 +13,26 @@
     color: #3a3a3a;
 }
 
+.alarm-management__scope-switcher {
+    display: inline-flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.alarm-management__scope-switcher button {
+    border: 1px solid #b8c4d8;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #27406d;
+    font-weight: 600;
+    padding: 0.45rem 0.9rem;
+}
+
+.alarm-management__scope-switcher button[aria-pressed='true'] {
+    border-color: #1f4b99;
+    background: #e8f0ff;
+}
+
 .alarm-management__error {
     margin: 1rem 0;
     padding: 0.75rem 1rem;

@@ -1,15 +1,20 @@
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject, Subject, firstValueFrom, of, take, throwError } from 'rxjs';
+import { BehaviorSubject, Subject, filter, firstValueFrom, of, take, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
 import type { ActiveAlarm } from '../../../core/alarm/models/active-alarm.model';
+import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
+import type { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
+import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
+import { AlarmRuleLookupService } from './alarm-rule-lookup.service';
 import { AlarmManagementService } from './alarm-management.service';
+import { OperatorAlarmScopeContext, OperatorAlarmScopeService } from './operator-alarm-scope.service';
 
 describe('AlarmManagementService', () => {
     let service: AlarmManagementService;
     let activeAlarmsSubject: BehaviorSubject<ActiveAlarm[]>;
+    let scopeContextSubject: BehaviorSubject<OperatorAlarmScopeContext>;
 
     const alarmStateStub = {
         getActiveAlarms$: vi.fn(),
@@ -20,6 +25,14 @@ describe('AlarmManagementService', () => {
     const alarmApiStub = {
         getActiveAlarms: vi.fn(),
         resolveAlarm: vi.fn(),
+    };
+
+    const operatorScopeStub = {
+        context$: undefined as unknown,
+    };
+
+    const alarmRuleLookupStub = {
+        getAlarmRuleById: vi.fn(),
     };
 
     const alarmA: ActiveAlarm = {
@@ -46,19 +59,43 @@ describe('AlarmManagementService', () => {
         vi.clearAllMocks();
 
         activeAlarmsSubject = new BehaviorSubject<ActiveAlarm[]>([]);
+        scopeContextSubject = new BehaviorSubject<OperatorAlarmScopeContext>({
+            isOperator: false,
+            assignedWardIds: [],
+            assignedPlantIds: [],
+            errorMessage: null,
+        });
+
         alarmStateStub.getActiveAlarms$.mockReturnValue(activeAlarmsSubject.asObservable());
         alarmApiStub.getActiveAlarms.mockReturnValue(of([]));
+        operatorScopeStub.context$ = scopeContextSubject.asObservable();
+        alarmRuleLookupStub.getAlarmRuleById.mockReturnValue(of(null));
 
         TestBed.configureTestingModule({
             providers: [
                 AlarmManagementService,
                 { provide: AlarmStateService, useValue: alarmStateStub },
                 { provide: AlarmApiService, useValue: alarmApiStub },
+                { provide: OperatorAlarmScopeService, useValue: operatorScopeStub },
+                { provide: AlarmRuleLookupService, useValue: alarmRuleLookupStub },
             ],
         });
     });
 
     const createService = (): AlarmManagementService => TestBed.inject(AlarmManagementService);
+
+    const createAlarmRule = (id: string, apartmentId: string): AlarmRule => ({
+        id,
+        name: `Rule ${id}`,
+        apartmentId,
+        deviceId: `device-${id}`,
+        priority: AlarmPriority.RED,
+        thresholdOperator: ThresholdOperator.GREATER_THAN,
+        threshold: 10,
+        activationTime: '08:00',
+        deactivationTime: '20:00',
+        enabled: true,
+    });
 
     it('non carica lo snapshot iniziale automaticamente alla creazione', () => {
         service = createService();
@@ -90,7 +127,7 @@ describe('AlarmManagementService', () => {
         expect(vm.resolveError).toBe('bootstrap error');
     });
 
-    it('espone vm iniziale con lista vuota e nessuna risoluzione in corso', async () => {
+    it('espone vm iniziale con scope all e nessuna risoluzione in corso', async () => {
         service = createService();
         const vm = await firstValueFrom(service.vm$);
 
@@ -99,7 +136,73 @@ describe('AlarmManagementService', () => {
             isResolving: false,
             resolvingId: null,
             resolveError: null,
+            activeScope: 'all',
+            availableScopes: ['all'],
+            scopeInfoMessage: null,
+            scopeLoading: false,
         });
+    });
+
+    it('espone scope all e mine per operatore sanitario', async () => {
+        scopeContextSubject.next({
+            isOperator: true,
+            assignedWardIds: [1],
+            assignedPlantIds: ['apt-1'],
+            errorMessage: null,
+        });
+
+        service = createService();
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+
+        expect(vm.availableScopes).toEqual(['all', 'mine']);
+        expect(vm.activeScope).toBe('all');
+    });
+
+    it('switchScope su mine filtra gli allarmi per reparti assegnati', async () => {
+        scopeContextSubject.next({
+            isOperator: true,
+            assignedWardIds: [1],
+            assignedPlantIds: ['apt-1'],
+            errorMessage: null,
+        });
+
+        alarmRuleLookupStub.getAlarmRuleById.mockImplementation((alarmRuleId: string) => {
+            if (alarmRuleId === 'rule-1') {
+                return of(createAlarmRule('rule-1', 'apt-1'));
+            }
+
+            return of(createAlarmRule('rule-2', 'apt-2'));
+        });
+
+        service = createService();
+        activeAlarmsSubject.next([alarmA, alarmB]);
+
+        service.switchScope('mine');
+
+        const vm = await firstValueFrom(service.vm$.pipe(filter((candidate) => !candidate.scopeLoading), take(1)));
+        expect(vm.activeScope).toBe('mine');
+        expect(vm.alarms).toEqual([alarmA]);
+        expect(alarmRuleLookupStub.getAlarmRuleById).toHaveBeenCalledWith('rule-1');
+        expect(alarmRuleLookupStub.getAlarmRuleById).toHaveBeenCalledWith('rule-2');
+    });
+
+    it('scope mine mostra lista vuota e messaggio quando l operatore non ha reparti assegnati', async () => {
+        scopeContextSubject.next({
+            isOperator: true,
+            assignedWardIds: [],
+            assignedPlantIds: [],
+            errorMessage: null,
+        });
+
+        service = createService();
+        activeAlarmsSubject.next([alarmA]);
+        service.switchScope('mine');
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.activeScope).toBe('mine');
+        expect(vm.alarms).toEqual([]);
+        expect(vm.scopeInfoMessage).toBe('Non hai reparti assegnati.');
+        expect(vm.scopeLoading).toBe(false);
     });
 
     it('resolveAlarm segue il flusso successo: resolving true, API call, update state, resolving false', async () => {
@@ -172,7 +275,7 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.onAlarmResolved).not.toHaveBeenCalled();
     });
 
-    it('consente richieste concorrenti e termina lo stato di resolving solo a completamento di tutte', async () => {
+    it('consente richieste concorrenti e termina resolving solo a completamento di tutte', async () => {
         service = createService();
         const reqA$ = new Subject<void>();
         const reqB$ = new Subject<void>();

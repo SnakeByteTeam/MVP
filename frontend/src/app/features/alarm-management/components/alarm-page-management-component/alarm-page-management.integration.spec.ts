@@ -57,6 +57,7 @@ describe('AlarmManagement feature integration', () => {
         vm$: undefined as unknown,
         initialize: vi.fn(),
         resolveAlarm: vi.fn(),
+        switchScope: vi.fn(),
     };
 
     beforeEach(async () => {
@@ -67,6 +68,10 @@ describe('AlarmManagement feature integration', () => {
             isResolving: false,
             resolvingId: null,
             resolveError: null,
+            activeScope: 'all',
+            availableScopes: ['all', 'mine'],
+            scopeInfoMessage: null,
+            scopeLoading: false,
         });
 
         alarmManagementStub.vm$ = vmSubject.asObservable();
@@ -104,6 +109,10 @@ describe('AlarmManagement feature integration', () => {
             isResolving: true,
             resolvingId: 'active-1',
             resolveError: null,
+            activeScope: 'all',
+            availableScopes: ['all', 'mine'],
+            scopeInfoMessage: null,
+            scopeLoading: false,
         });
         fixture.detectChanges();
 
@@ -122,6 +131,10 @@ describe('AlarmManagement feature integration', () => {
             isResolving: false,
             resolvingId: null,
             resolveError: null,
+            activeScope: 'all',
+            availableScopes: ['all', 'mine'],
+            scopeInfoMessage: null,
+            scopeLoading: false,
         });
         fixture.detectChanges();
 

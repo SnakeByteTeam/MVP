@@ -14,12 +14,11 @@
 
 export interface CreateAlarmRequestDto {
     name: string; //nome della nuova regola
-    apartmentId: string;
     deviceId: string; //obbligatorio da AdR, altrimenti errore
     //come numero e non stringa (mapToCreateRequest fa la conversione)
     priority: number; //obbligatorio da AdR, altrimenti errore
     thresholdOperator: string;     //Inviato come `CHAR` (`'GT'`, `'LT'`, `'EQ'`), ottenuto dalla conversione `ThresholdOperator` → stringa in `mapToCreateRequest()`
-    threshold: string; //obbligatorio da AdR, altrimenti errore
+    threshold_value: string; //obbligatorio da AdR, altrimenti errore
     activationTime: string; //formato HH:mm
     deactivationTime: string; //formato HH:mm
 }

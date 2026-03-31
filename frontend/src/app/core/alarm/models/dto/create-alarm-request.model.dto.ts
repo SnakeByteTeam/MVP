@@ -5,7 +5,7 @@
 
 // Trasporta i dati necessari alla creazione di una nuova regola di allarme
 // (UC33). Viene costruito da `AlarmConfigStateService.mapToCreateRequest()` a
-// partire dal valore del `FormGroup`, e passato a `AlarmApiService.createAlarm()`.
+// partire dal valore del `FormGroup`, e passato a `AlarmApiService.createAlarmRule()`.
 
 // Tutti i campi sono obbligatori — la loro presenza è garantita dai validatori
 // `Validators.required` nel form, che implementano le restrizioni definite da
@@ -24,10 +24,6 @@ export interface CreateAlarmRequestDto {
     deactivationTime: string; //formato HH:mm
 }
 
-//CAPIRE:
-// > **Nota su `apartmentId`:** il campo `apartmentId` di `AlarmRule` non è
-// > incluso in `CreateAlarmRequest` perché il backend ricava l'appartamento
-// > dal `DEVICE_ID` tramite la relazione `Device → Room → Apartment`. Il
-// > frontend usa `apartmentId` solo per filtrare i sensori disponibili nel
-// > form (UC33.1 → UC33.2); non viene trasmesso al backend.
+// Nota: il campo `apartmentId` e parte del payload frontend corrente e viene
+// trasmesso in `CreateAlarmRequestDto`.
 

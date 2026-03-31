@@ -12,11 +12,11 @@ describe('AlarmConfigStateService', () => {
     let service: AlarmConfigStateService;
 
     const apiStub = {
-        getAlarms: vi.fn(),
-        getAlarm: vi.fn(),
-        createAlarm: vi.fn(),
-        updateAlarm: vi.fn(),
-        deleteAlarm: vi.fn(),
+        getAlarmRules: vi.fn(),
+        getAlarmRule: vi.fn(),
+        createAlarmRule: vi.fn(),
+        updateAlarmRule: vi.fn(),
+        deleteAlarmRule: vi.fn(),
     };
 
     const alarmA: AlarmRule = {
@@ -75,48 +75,48 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.error$)).toBeNull();
     });
 
-    it('loadAlarms aggiorna stato locale quando API risponde con successo', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA, alarmB]));
+    it('loadAlarmRules aggiorna stato locale quando API risponde con successo', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
 
-        service.loadAlarms();
+        service.loadAlarmRules();
 
         const alarms = await firstValueFrom(service.alarms$);
-        expect(apiStub.getAlarms).toHaveBeenCalledTimes(1);
+        expect(apiStub.getAlarmRules).toHaveBeenCalledTimes(1);
         expect(alarms).toEqual([alarmA, alarmB]);
         expect(alarms).toHaveLength(2);
         expect(await firstValueFrom(service.error$)).toBeNull();
     });
 
-    it('loadAlarms espone messaggio errore e pulisce error precedente al retry', async () => {
-        apiStub.getAlarms.mockReturnValueOnce(throwError(() => new Error('network')));
+    it('loadAlarmRules espone messaggio errore e pulisce error precedente al retry', async () => {
+        apiStub.getAlarmRules.mockReturnValueOnce(throwError(() => new Error('network')));
 
-        service.loadAlarms();
+        service.loadAlarmRules();
         expect(await firstValueFrom(service.error$)).toBe('Errore durante il caricamento degli allarmi.');
 
-        apiStub.getAlarms.mockReturnValueOnce(of([alarmA]));
-        service.loadAlarms();
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA]));
+        service.loadAlarmRules();
 
         expect(await firstValueFrom(service.error$)).toBeNull();
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
     });
 
-    it('getAlarmById inoltra il valore di API in caso di successo', () => {
-        apiStub.getAlarm.mockReturnValue(of(alarmA));
+    it('getAlarmRuleById inoltra il valore di API in caso di successo', () => {
+        apiStub.getAlarmRule.mockReturnValue(of(alarmA));
 
         let result: AlarmRule | null = null;
-        service.getAlarmById('alarm-1').subscribe((alarm) => {
+        service.getAlarmRuleById('alarm-1').subscribe((alarm) => {
             result = alarm;
         });
 
-        expect(apiStub.getAlarm).toHaveBeenCalledWith('alarm-1');
+        expect(apiStub.getAlarmRule).toHaveBeenCalledWith('alarm-1');
         expect(result).toEqual(alarmA);
     });
 
-    it('getAlarmById in errore imposta messaggio e completa senza emissioni', async () => {
-        apiStub.getAlarm.mockReturnValue(throwError(() => new Error('404')));
+    it('getAlarmRuleById in errore imposta messaggio e completa senza emissioni', async () => {
+        apiStub.getAlarmRule.mockReturnValue(throwError(() => new Error('404')));
 
         let emitted = false;
-        service.getAlarmById('missing').subscribe(() => {
+        service.getAlarmRuleById('missing').subscribe(() => {
             emitted = true;
         });
 
@@ -124,18 +124,18 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.error$)).toBe('Errore durante il recupero dell\'allarme.');
     });
 
-    it('createAlarm mappa il payload, chiama API e aggiunge il nuovo allarme allo stato', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA]));
-        service.loadAlarms();
+    it('createAlarmRule mappa il payload, chiama API e aggiunge il nuovo allarme allo stato', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        service.loadAlarmRules();
 
-        apiStub.createAlarm.mockReturnValue(of(alarmB));
+        apiStub.createAlarmRule.mockReturnValue(of(alarmB));
 
         let created: AlarmRule | null = null;
-        service.createAlarm(validForm).subscribe((alarm) => {
+        service.createAlarmRule(validForm).subscribe((alarm) => {
             created = alarm;
         });
 
-        expect(apiStub.createAlarm).toHaveBeenCalledWith({
+        expect(apiStub.createAlarmRule).toHaveBeenCalledWith({
             name: 'Nuovo allarme',
             apartmentId: 'apt-1',
             deviceId: 'dev-3',
@@ -149,32 +149,32 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
     });
 
-    it('createAlarm con form invalido non chiama API e imposta errore di validazione', async () => {
+    it('createAlarmRule con form invalido non chiama API e imposta errore di validazione', async () => {
         const invalidForm: AlarmConfigFormValue = {
             ...validForm,
             name: '   ',
         };
 
         let emitted = false;
-        service.createAlarm(invalidForm).subscribe(() => {
+        service.createAlarmRule(invalidForm).subscribe(() => {
             emitted = true;
         });
 
         expect(emitted).toBe(false);
-        expect(apiStub.createAlarm).not.toHaveBeenCalled();
+        expect(apiStub.createAlarmRule).not.toHaveBeenCalled();
         expect(await firstValueFrom(service.error$)).toBe(
             'Dati del form non validi per la creazione dell\'allarme.'
         );
     });
 
-    it('createAlarm in errore API imposta messaggio e non altera lo stato locale', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA]));
-        service.loadAlarms();
+    it('createAlarmRule in errore API imposta messaggio e non altera lo stato locale', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        service.loadAlarmRules();
 
-        apiStub.createAlarm.mockReturnValue(throwError(() => new Error('create failed')));
+        apiStub.createAlarmRule.mockReturnValue(throwError(() => new Error('create failed')));
 
         let emitted = false;
-        service.createAlarm(validForm).subscribe(() => {
+        service.createAlarmRule(validForm).subscribe(() => {
             emitted = true;
         });
 
@@ -183,16 +183,16 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
     });
 
-    it('updateAlarm mappa payload update e sostituisce l allarme nello stato', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA, alarmB]));
-        service.loadAlarms();
+    it('updateAlarmRule mappa payload update e sostituisce l allarme nello stato', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
 
         const updatedAlarm: AlarmRule = { ...alarmA, name: 'Temperatura reparto', threshold: 35 };
-        apiStub.updateAlarm.mockReturnValue(of(updatedAlarm));
+        apiStub.updateAlarmRule.mockReturnValue(of(updatedAlarm));
 
-        service.updateAlarm('alarm-1', validForm).subscribe();
+        service.updateAlarmRule('alarm-1', validForm).subscribe();
 
-        expect(apiStub.updateAlarm).toHaveBeenCalledWith('alarm-1', {
+        expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
             name: 'Nuovo allarme',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
@@ -205,32 +205,32 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.alarms$)).toEqual([updatedAlarm, alarmB]);
     });
 
-    it('updateAlarm con form invalido non chiama API e imposta errore', async () => {
+    it('updateAlarmRule con form invalido non chiama API e imposta errore', async () => {
         const invalidForm: AlarmConfigFormValue = {
             ...validForm,
             threshold: null,
         };
 
         let emitted = false;
-        service.updateAlarm('alarm-1', invalidForm).subscribe(() => {
+        service.updateAlarmRule('alarm-1', invalidForm).subscribe(() => {
             emitted = true;
         });
 
         expect(emitted).toBe(false);
-        expect(apiStub.updateAlarm).not.toHaveBeenCalled();
+        expect(apiStub.updateAlarmRule).not.toHaveBeenCalled();
         expect(await firstValueFrom(service.error$)).toBe(
             'Dati del form non validi per l\'aggiornamento dell\'allarme.'
         );
     });
 
-    it('updateAlarm in errore API imposta messaggio e mantiene lo stato invariato', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA, alarmB]));
-        service.loadAlarms();
+    it('updateAlarmRule in errore API imposta messaggio e mantiene lo stato invariato', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
 
-        apiStub.updateAlarm.mockReturnValue(throwError(() => new Error('update failed')));
+        apiStub.updateAlarmRule.mockReturnValue(throwError(() => new Error('update failed')));
 
         let emitted = false;
-        service.updateAlarm('alarm-1', validForm).subscribe(() => {
+        service.updateAlarmRule('alarm-1', validForm).subscribe(() => {
             emitted = true;
         });
 
@@ -240,15 +240,15 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('toggleEnabled aggiorna enabled costruendo payload dai dati locali', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA]));
-        service.loadAlarms();
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        service.loadAlarmRules();
 
         const toggledAlarm: AlarmRule = { ...alarmA, enabled: false };
-        apiStub.updateAlarm.mockReturnValue(of(toggledAlarm));
+        apiStub.updateAlarmRule.mockReturnValue(of(toggledAlarm));
 
         service.toggleEnabled('alarm-1', false).subscribe();
 
-        expect(apiStub.updateAlarm).toHaveBeenCalledWith('alarm-1', {
+        expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
             name: alarmA.name,
             priority: alarmA.priority,
             thresholdOperator: alarmA.thresholdOperator,
@@ -262,8 +262,8 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('toggleEnabled su allarme assente non chiama API e imposta errore', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA]));
-        service.loadAlarms();
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        service.loadAlarmRules();
 
         let emitted = false;
         service.toggleEnabled('missing-id', true).subscribe(() => {
@@ -271,15 +271,15 @@ describe('AlarmConfigStateService', () => {
         });
 
         expect(emitted).toBe(false);
-        expect(apiStub.updateAlarm).not.toHaveBeenCalled();
+        expect(apiStub.updateAlarmRule).not.toHaveBeenCalled();
         expect(await firstValueFrom(service.error$)).toBe('Allarme non trovato nello stato locale.');
     });
 
     it('toggleEnabled in errore API imposta messaggio e mantiene lo stato invariato', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA]));
-        service.loadAlarms();
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        service.loadAlarmRules();
 
-        apiStub.updateAlarm.mockReturnValue(throwError(() => new Error('toggle failed')));
+        apiStub.updateAlarmRule.mockReturnValue(throwError(() => new Error('toggle failed')));
 
         let emitted = false;
         service.toggleEnabled('alarm-1', false).subscribe(() => {
@@ -291,30 +291,30 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
     });
 
-    it('deleteAlarm rimuove l allarme locale quando API conferma', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA, alarmB]));
-        service.loadAlarms();
+    it('deleteAlarmRule rimuove l allarme locale quando API conferma', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
 
-        apiStub.deleteAlarm.mockReturnValue(of(void 0));
+        apiStub.deleteAlarmRule.mockReturnValue(of(void 0));
 
         let emitted = false;
-        service.deleteAlarm('alarm-1').subscribe(() => {
+        service.deleteAlarmRule('alarm-1').subscribe(() => {
             emitted = true;
         });
 
         expect(emitted).toBe(true);
-        expect(apiStub.deleteAlarm).toHaveBeenCalledWith('alarm-1');
+        expect(apiStub.deleteAlarmRule).toHaveBeenCalledWith('alarm-1');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmB]);
     });
 
-    it('deleteAlarm in errore API imposta messaggio e mantiene lo stato invariato', async () => {
-        apiStub.getAlarms.mockReturnValue(of([alarmA, alarmB]));
-        service.loadAlarms();
+    it('deleteAlarmRule in errore API imposta messaggio e mantiene lo stato invariato', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
 
-        apiStub.deleteAlarm.mockReturnValue(throwError(() => new Error('delete failed')));
+        apiStub.deleteAlarmRule.mockReturnValue(throwError(() => new Error('delete failed')));
 
         let emitted = false;
-        service.deleteAlarm('alarm-1').subscribe(() => {
+        service.deleteAlarmRule('alarm-1').subscribe(() => {
             emitted = true;
         });
 

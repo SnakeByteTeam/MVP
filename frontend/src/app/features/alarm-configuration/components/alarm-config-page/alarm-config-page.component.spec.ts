@@ -18,9 +18,9 @@ describe('AlarmConfigPageComponent', () => {
     const stateServiceStub = {
         alarms$: alarmsSubject.asObservable(),
         error$: errorSubject.asObservable(),
-        loadAlarms: vi.fn(),
+        loadAlarmRules: vi.fn(),
         toggleEnabled: vi.fn(() => of({} as AlarmRule)),
-        deleteAlarm: vi.fn(() => of(void 0)),
+        deleteAlarmRule: vi.fn(() => of(void 0)),
     };
 
     const routerStub = {
@@ -70,7 +70,7 @@ describe('AlarmConfigPageComponent', () => {
     });
 
     it('ngOnInit assegna stream e carica gli allarmi', () => {
-        expect(stateServiceStub.loadAlarms).toHaveBeenCalledTimes(1);
+        expect(stateServiceStub.loadAlarmRules).toHaveBeenCalledTimes(1);
 
         let latestAlarms: AlarmRule[] = [];
         let latestError: string | null = null;
@@ -107,10 +107,10 @@ describe('AlarmConfigPageComponent', () => {
         expect(stateServiceStub.toggleEnabled).toHaveBeenCalledWith('alarm-1', false);
     });
 
-    it('onDelete invoca deleteAlarm con id', () => {
+    it('onDelete invoca deleteAlarmRule con id', () => {
         component.onDelete('alarm-1');
 
-        expect(stateServiceStub.deleteAlarm).toHaveBeenCalledWith('alarm-1');
+        expect(stateServiceStub.deleteAlarmRule).toHaveBeenCalledWith('alarm-1');
     });
 
     it('renderizza la lista e il label corretto del pulsante toggle', () => {

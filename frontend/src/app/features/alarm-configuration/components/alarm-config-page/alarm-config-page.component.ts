@@ -23,7 +23,7 @@ export class AlarmConfigPageComponent implements OnInit {
 	public ngOnInit(): void {
 		this.alarms$ = this.stateService.alarms$;
 		this.error$ = this.stateService.error$;
-		this.stateService.loadAlarms();
+		this.stateService.loadAlarmRules();
 	}
 
 	public onCreateNew(): void {
@@ -39,6 +39,6 @@ export class AlarmConfigPageComponent implements OnInit {
 	}
 
 	public onDelete(id: string): void {
-		this.stateService.deleteAlarm(id).subscribe();
+		this.stateService.deleteAlarmRule(id).subscribe();
 	}
 }

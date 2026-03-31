@@ -12,23 +12,23 @@ export class AlarmApiService {
     private readonly alarmsBaseUrl = '/alarm-rules';
     private readonly activeAlarmsBaseUrl = '/active-alarms';
 
-    public getAlarms(): Observable<AlarmRule[]> {
+    public getAlarmRules(): Observable<AlarmRule[]> {
         return this.http.get<AlarmRule[]>(this.alarmsBaseUrl);
     }
 
-    public getAlarm(id: string): Observable<AlarmRule> {
+    public getAlarmRule(id: string): Observable<AlarmRule> {
         return this.http.get<AlarmRule>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`);
     }
 
-    public createAlarm(payload: CreateAlarmRequestDto): Observable<AlarmRule> {
+    public createAlarmRule(payload: CreateAlarmRequestDto): Observable<AlarmRule> {
         return this.http.post<AlarmRule>(this.alarmsBaseUrl, payload);
     }
 
-    public updateAlarm(id: string, payload: UpdateAlarmRequestDto): Observable<AlarmRule> {
+    public updateAlarmRule(id: string, payload: UpdateAlarmRequestDto): Observable<AlarmRule> {
         return this.http.patch<AlarmRule>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`, payload);
     }
 
-    public deleteAlarm(id: string): Observable<void> {
+    public deleteAlarmRule(id: string): Observable<void> {
         return this.http.delete<void>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`);
     }
 

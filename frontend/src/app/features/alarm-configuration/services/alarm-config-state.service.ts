@@ -63,10 +63,11 @@ export class AlarmConfigStateService {
     }
 
 
-    public loadAlarms(): void {
+    //carica soglie di allarme
+    public loadAlarmRules(): void {
         this.clearError();
         this.api
-            .getAlarms()
+            .getAlarmRules()
             .pipe(
                 tap((alarms) => this.alarmsSubject.next(alarms)),
                 catchError(() => this.handleError<AlarmRule[]>('Errore durante il caricamento degli allarmi.'))
@@ -74,12 +75,12 @@ export class AlarmConfigStateService {
             .subscribe();
     }
 
-    public getAlarmById(id: string): Observable<AlarmRule> {
+    public getAlarmRuleById(id: string): Observable<AlarmRule> {
         this.clearError();
-        return this.api.getAlarm(id).pipe(catchError(() => this.handleError<AlarmRule>('Errore durante il recupero dell\'allarme.')));
+        return this.api.getAlarmRule(id).pipe(catchError(() => this.handleError<AlarmRule>('Errore durante il recupero dell\'allarme.')));
     }
 
-    public createAlarm(formValue: AlarmConfigFormValue): Observable<AlarmRule> {
+    public createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule> {
         this.clearError();
         let payload: CreateAlarmRequestDto;
         try {
@@ -88,7 +89,7 @@ export class AlarmConfigStateService {
             return this.handleError<AlarmRule>('Dati del form non validi per la creazione dell\'allarme.');
         }
 
-        return this.api.createAlarm(payload).pipe(
+        return this.api.createAlarmRule(payload).pipe(
             tap((createdAlarm) => {
                 const currentAlarms = this.alarmsSubject.getValue();
                 this.alarmsSubject.next([...currentAlarms, createdAlarm]);
@@ -97,7 +98,7 @@ export class AlarmConfigStateService {
         );
     }
 
-    public updateAlarm(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule> {
+    public updateAlarmRule(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule> {
         this.clearError();
         let payload: UpdateAlarmRequestDto;
         try {
@@ -106,7 +107,7 @@ export class AlarmConfigStateService {
             return this.handleError<AlarmRule>('Dati del form non validi per l\'aggiornamento dell\'allarme.');
         }
 
-        return this.api.updateAlarm(alarmId, payload).pipe(
+        return this.api.updateAlarmRule(alarmId, payload).pipe(
             tap((updatedAlarm) => this.replaceAlarmInState(updatedAlarm)),
             catchError(() => this.handleError<AlarmRule>('Errore durante l\'aggiornamento dell\'allarme.'))
         );
@@ -129,16 +130,16 @@ export class AlarmConfigStateService {
             enabled,
         };
 
-        return this.api.updateAlarm(alarmId, payload).pipe(
+        return this.api.updateAlarmRule(alarmId, payload).pipe(
             tap((updatedAlarm) => this.replaceAlarmInState(updatedAlarm)),
             catchError(() => this.handleError<AlarmRule>('Errore durante la modifica dello stato dell\'allarme.'))
         );
     }
 
-    public deleteAlarm(alarmId: string): Observable<void> {
+    public deleteAlarmRule(alarmId: string): Observable<void> {
         this.clearError();
 
-        return this.api.deleteAlarm(alarmId).pipe(
+        return this.api.deleteAlarmRule(alarmId).pipe(
             tap(() => {
                 const currentAlarms = this.alarmsSubject.getValue();
                 this.alarmsSubject.next(currentAlarms.filter((alarm) => alarm.id !== alarmId));

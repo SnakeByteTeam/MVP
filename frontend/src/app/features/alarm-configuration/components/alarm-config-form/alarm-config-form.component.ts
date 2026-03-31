@@ -71,7 +71,7 @@ export class AlarmConfigFormComponent implements OnInit {
 			return;
 		}
 
-		this.stateService.getAlarmById(id).pipe(defaultIfEmpty(null)).subscribe({
+		this.stateService.getAlarmRuleById(id).pipe(defaultIfEmpty(null)).subscribe({
 			next: (rule) => {
 				if (!rule) {
 					void this.router.navigate(['../'], { relativeTo: this.route });
@@ -100,13 +100,13 @@ export class AlarmConfigFormComponent implements OnInit {
 				return;
 			}
 
-			this.stateService.updateAlarm(id, formValue).subscribe(() => {
+			this.stateService.updateAlarmRule(id, formValue).subscribe(() => {
 				void this.router.navigate(['../'], { relativeTo: this.route });
 			});
 			return;
 		}
 
-		this.stateService.createAlarm(formValue).subscribe(() => {
+		this.stateService.createAlarmRule(formValue).subscribe(() => {
 			void this.router.navigate(['../'], { relativeTo: this.route });
 		});
 	}

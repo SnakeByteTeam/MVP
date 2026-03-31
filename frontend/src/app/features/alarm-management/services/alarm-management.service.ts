@@ -17,7 +17,7 @@ import { AlarmListVm } from '../models/alarm-list-vm.model';
 // **Flusso di `resolveAlarm()`:**
 
 // 1. Imposta `resolvingId$.next(activeAlarmId)` — il ViewModel emette con `isResolving: true`
-// 2. Chiama `alarmApiService.resolveAlarm(activeAlarmId)` → `PATCH /api/active-alarms/{activeAlarmId}/resolve`
+// 2. Chiama `alarmApiService.resolveAlarm(activeAlarmId)` → `PATCH /active-alarms/{activeAlarmId}/resolve`
 // 3. Al completamento HTTP, chiama `alarmStateService.onAlarmResolved(activeAlarmId)` — la lista degli allarmi attivi si aggiorna nella sorgente di verità
 // 4. Reimposta `resolvingId$.next(null)` — il ViewModel emette con `isResolving: false`
 

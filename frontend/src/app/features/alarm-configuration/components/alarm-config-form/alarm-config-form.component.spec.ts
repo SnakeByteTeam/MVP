@@ -23,9 +23,9 @@ describe('AlarmConfigFormComponent', () => {
     };
 
     const stateServiceStub = {
-        getAlarmById: vi.fn(),
-        createAlarm: vi.fn(() => of({} as AlarmRule)),
-        updateAlarm: vi.fn(() => of({} as AlarmRule)),
+        getAlarmRuleById: vi.fn(),
+        createAlarmRule: vi.fn(() => of({} as AlarmRule)),
+        updateAlarmRule: vi.fn(() => of({} as AlarmRule)),
     };
 
     const existingRule: AlarmRule = {
@@ -56,7 +56,7 @@ describe('AlarmConfigFormComponent', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         routeStub.snapshot.paramMap = convertToParamMap({});
-        stateServiceStub.getAlarmById.mockReturnValue(of(existingRule));
+        stateServiceStub.getAlarmRuleById.mockReturnValue(of(existingRule));
 
         await TestBed.configureTestingModule({
             imports: [AlarmConfigFormComponent],
@@ -83,7 +83,7 @@ describe('AlarmConfigFormComponent', () => {
         fixture.detectChanges();
 
         expect(component.isEditMode).toBe(false);
-        expect(stateServiceStub.getAlarmById).not.toHaveBeenCalled();
+        expect(stateServiceStub.getAlarmRuleById).not.toHaveBeenCalled();
     });
 
     it('inizializza in edit mode se id e presente e precompila il form', () => {
@@ -92,7 +92,7 @@ describe('AlarmConfigFormComponent', () => {
         fixture.detectChanges();
 
         expect(component.isEditMode).toBe(true);
-        expect(stateServiceStub.getAlarmById).toHaveBeenCalledWith('alarm-42');
+        expect(stateServiceStub.getAlarmRuleById).toHaveBeenCalledWith('alarm-42');
         expect(component.form.getRawValue()).toEqual({
             name: 'Porta aperta',
             apartmentId: 'apt-9',
@@ -108,16 +108,16 @@ describe('AlarmConfigFormComponent', () => {
 
     it('in edit mode naviga indietro se il caricamento regola fallisce', () => {
         routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.getAlarmById.mockReturnValue(throwError(() => new Error('boom')));
+        stateServiceStub.getAlarmRuleById.mockReturnValue(throwError(() => new Error('boom')));
 
         fixture.detectChanges();
 
         expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
     });
 
-    it('in edit mode naviga indietro se getAlarmById completa senza emissioni', () => {
+    it('in edit mode naviga indietro se getAlarmRuleById completa senza emissioni', () => {
         routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.getAlarmById.mockReturnValue(EMPTY);
+        stateServiceStub.getAlarmRuleById.mockReturnValue(EMPTY);
 
         fixture.detectChanges();
 
@@ -140,47 +140,47 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.threshold.invalid).toBe(true);
     });
 
-    it('onSubmit in create mode invoca createAlarm e naviga alla lista', () => {
+    it('onSubmit in create mode invoca createAlarmRule e naviga alla lista', () => {
         fixture.detectChanges();
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarm).toHaveBeenCalledWith(validFormValue);
+        expect(stateServiceStub.createAlarmRule).toHaveBeenCalledWith(validFormValue);
         expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
     });
 
-    it('onSubmit in create mode non naviga se createAlarm non emette (errore gestito)', () => {
-        stateServiceStub.createAlarm.mockReturnValueOnce(EMPTY);
+    it('onSubmit in create mode non naviga se createAlarmRule non emette (errore gestito)', () => {
+        stateServiceStub.createAlarmRule.mockReturnValueOnce(EMPTY);
         fixture.detectChanges();
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarm).toHaveBeenCalledWith(validFormValue);
+        expect(stateServiceStub.createAlarmRule).toHaveBeenCalledWith(validFormValue);
         expect(routerStub.navigate).not.toHaveBeenCalled();
     });
 
-    it('onSubmit in edit mode invoca updateAlarm con id route e naviga alla lista', () => {
+    it('onSubmit in edit mode invoca updateAlarmRule con id route e naviga alla lista', () => {
         routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
         fixture.detectChanges();
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.updateAlarm).toHaveBeenCalledWith('alarm-42', validFormValue);
+        expect(stateServiceStub.updateAlarmRule).toHaveBeenCalledWith('alarm-42', validFormValue);
         expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
     });
 
-    it('onSubmit in edit mode non naviga se updateAlarm non emette (errore gestito)', () => {
+    it('onSubmit in edit mode non naviga se updateAlarmRule non emette (errore gestito)', () => {
         routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.updateAlarm.mockReturnValueOnce(EMPTY);
+        stateServiceStub.updateAlarmRule.mockReturnValueOnce(EMPTY);
         fixture.detectChanges();
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.updateAlarm).toHaveBeenCalledWith('alarm-42', validFormValue);
+        expect(stateServiceStub.updateAlarmRule).toHaveBeenCalledWith('alarm-42', validFormValue);
         expect(routerStub.navigate).not.toHaveBeenCalled();
     });
 
@@ -195,8 +195,8 @@ describe('AlarmConfigFormComponent', () => {
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarm).not.toHaveBeenCalled();
-        expect(stateServiceStub.updateAlarm).not.toHaveBeenCalled();
+        expect(stateServiceStub.createAlarmRule).not.toHaveBeenCalled();
+        expect(stateServiceStub.updateAlarmRule).not.toHaveBeenCalled();
     });
 
     it('onSubmit in edit mode senza id non invia update', () => {
@@ -207,7 +207,7 @@ describe('AlarmConfigFormComponent', () => {
 
         component.onSubmit();
 
-        expect(stateServiceStub.updateAlarm).not.toHaveBeenCalled();
+        expect(stateServiceStub.updateAlarmRule).not.toHaveBeenCalled();
     });
 
     it('onCancel naviga verso ../', () => {

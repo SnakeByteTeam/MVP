@@ -14,7 +14,7 @@ describe('AlarmApiService', () => {
     let service: AlarmApiService;
     let httpController: HttpTestingController;
 
-    const baseUrl = '/api/alarms';
+    const baseUrl = '/alarm-rules';
 
     const alarm: AlarmRule = {
         id: 'alarm-1',
@@ -52,8 +52,8 @@ describe('AlarmApiService', () => {
         httpController.verify();
     });
 
-    it('getAlarms chiama GET /api/alarms e restituisce la lista', () => {
-        service.getAlarms().subscribe((result) => {
+    it('getAlarmRules chiama GET /alarm-rules e restituisce la lista', () => {
+        service.getAlarmRules().subscribe((result) => {
             expect(result).toEqual([alarm]);
             expect(result).toHaveLength(1);
         });
@@ -63,8 +63,8 @@ describe('AlarmApiService', () => {
         request.flush([alarm]);
     });
 
-    it('getAlarm chiama GET /api/alarms/:id e restituisce il dettaglio', () => {
-        service.getAlarm('alarm-1').subscribe((result) => {
+    it('getAlarmRule chiama GET /alarm-rules/:id e restituisce il dettaglio', () => {
+        service.getAlarmRule('alarm-1').subscribe((result) => {
             expect(result).toEqual(alarm);
             expect(result.id).toBe('alarm-1');
         });
@@ -74,8 +74,8 @@ describe('AlarmApiService', () => {
         request.flush(alarm);
     });
 
-    it('getAlarm codifica id con caratteri riservati', () => {
-        service.getAlarm('alarm/1').subscribe((result) => {
+    it('getAlarmRule codifica id con caratteri riservati', () => {
+        service.getAlarmRule('alarm/1').subscribe((result) => {
             expect(result).toEqual(alarm);
         });
 
@@ -84,7 +84,7 @@ describe('AlarmApiService', () => {
         request.flush(alarm);
     });
 
-    it('createAlarm chiama POST /api/alarms con payload corretto', () => {
+    it('createAlarmRule chiama POST /alarm-rules con payload corretto', () => {
         const payload: CreateAlarmRequestDto = {
             name: 'Nuovo allarme',
             apartmentId: 'apt-1',
@@ -96,7 +96,7 @@ describe('AlarmApiService', () => {
             deactivationTime: '18:00',
         };
 
-        service.createAlarm(payload).subscribe((result) => {
+        service.createAlarmRule(payload).subscribe((result) => {
             expect(result).toEqual(alarm);
         });
 
@@ -106,7 +106,7 @@ describe('AlarmApiService', () => {
         request.flush(alarm);
     });
 
-    it('updateAlarm chiama PATCH /api/alarms/:id con payload corretto', () => {
+    it('updateAlarmRule chiama PATCH /alarm-rules/:id con payload corretto', () => {
         const payload: UpdateAlarmRequestDto = {
             name: 'Allarme aggiornato',
             priority: AlarmPriority.ORANGE,
@@ -117,7 +117,7 @@ describe('AlarmApiService', () => {
             enabled: false,
         };
 
-        service.updateAlarm('alarm-2', payload).subscribe((result) => {
+        service.updateAlarmRule('alarm-2', payload).subscribe((result) => {
             expect(result).toEqual(alarm);
         });
 
@@ -127,8 +127,8 @@ describe('AlarmApiService', () => {
         request.flush(alarm);
     });
 
-    it('deleteAlarm chiama DELETE /api/alarms/:id', () => {
-        service.deleteAlarm('alarm-3').subscribe((result) => {
+    it('deleteAlarmRule chiama DELETE /alarm-rules/:id', () => {
+        service.deleteAlarmRule('alarm-3').subscribe((result) => {
             expect(result).toBeNull();
         });
 
@@ -137,23 +137,23 @@ describe('AlarmApiService', () => {
         request.flush(null);
     });
 
-    it('getActiveAlarms chiama GET /api/active-alarms e restituisce la lista', () => {
+    it('getActiveAlarms chiama GET /active-alarms e restituisce la lista', () => {
         service.getActiveAlarms().subscribe((result) => {
             expect(result).toEqual([activeAlarm]);
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne('/api/active-alarms');
+        const request = httpController.expectOne('/active-alarms');
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
 
-    it('resolveAlarm chiama PATCH /api/active-alarms/:id/resolve', () => {
+    it('resolveAlarm chiama PATCH /active-alarms/:id/resolve', () => {
         service.resolveAlarm('active-1').subscribe((result) => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/api/active-alarms/active-1/resolve');
+        const request = httpController.expectOne('/active-alarms/active-1/resolve');
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({});
         request.flush(null);
@@ -164,7 +164,7 @@ describe('AlarmApiService', () => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/api/active-alarms/active%2F1/resolve');
+        const request = httpController.expectOne('/active-alarms/active%2F1/resolve');
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({});
         request.flush(null);
@@ -173,7 +173,7 @@ describe('AlarmApiService', () => {
     it('propaga l errore HTTP al chiamante', () => {
         let receivedStatus: number | null = null;
 
-        service.getAlarm('missing').subscribe({
+        service.getAlarmRule('missing').subscribe({
             next: () => {
                 throw new Error('Non dovrebbe emettere next in caso di errore');
             },

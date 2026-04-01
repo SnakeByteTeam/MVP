@@ -17,7 +17,7 @@ export class ApiAuthVimarController {
     private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase,
   ) {}
 
-  private redirect_url: string;
+  private readonly redirect_url: string;
 
   @Get('auth')
   @Redirect()

@@ -26,7 +26,7 @@ export abstract class AuthBaseComponent {
 		}
 
 		const returnUrl = this.route?.snapshot.queryParamMap.get('returnUrl');
-		if (returnUrl && returnUrl.startsWith('/')) {
+		if (returnUrl?.startsWith('/')) {
 			void this.router.navigateByUrl(returnUrl);
 			return;
 		}

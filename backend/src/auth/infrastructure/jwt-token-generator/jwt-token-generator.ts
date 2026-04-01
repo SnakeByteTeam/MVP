@@ -17,7 +17,7 @@ export class JwtTokenGenerator
     JwtChangePasswordAccessTokenGenerator,
     JwtChangePasswordRefreshTokenGenerator
 {
-  private jwtService = new JwtService();
+  private readonly jwtService = new JwtService();
 
   private sanitizePayload(payload: Payload): Payload {
     const { exp, iat, nbf, ...claims } = payload as Payload & {

@@ -42,67 +42,47 @@ import { UPDATE_ALARM_RULE_PORT } from './application/ports/out/update-alarm-rul
   controllers: [AlarmRulesController, AlarmEventsController],
   providers: [
     { provide: CREATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
-    { provide: DELETE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
-    { provide: GET_ALARM_RULE_BY_ID_USE_CASE, useClass: AlarmRuleService },
-    { provide: GET_ALL_ALARM_RULES_USE_CASE, useClass: AlarmRuleService },
-    { provide: UPDATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
-
-    // { provide: GET_ACTIVE_ALARMS_USE_CASE, useClass: AlarmService },
-    // { provide: RESOLVE_ACTIVE_ALARM_USE_CASE, useClass: AlarmService },
-    // { provide: TRIGGER_ACTIVE_ALARM_USE_CASE, useClass: AlarmService },
-
     { provide: CREATE_ALARM_RULE_PORT, useClass: CreateAlarmRuleAdapter },
     {
       provide: CREATE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
 
+    { provide: DELETE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
     { provide: DELETE_ALARM_RULE_PORT, useClass: DeleteAlarmRuleAdapter },
     {
       provide: DELETE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
 
+    { provide: GET_ALL_ALARM_RULES_USE_CASE, useClass: AlarmRuleService },
     {
       provide: GET_ALL_ALARM_RULES_PORT,
       useClass: GetAllAlarmRulesAdapter,
     },
     {
       provide: GET_ALL_ALARM_RULES_REPOSITORY,
-      useClass: AlarmRulesRepositoryImpl
+      useClass: AlarmRulesRepositoryImpl,
     },
 
+    { provide: GET_ALARM_RULE_BY_ID_USE_CASE, useClass: AlarmRuleService },
     {
       provide: GET_ALARM_RULE_BY_ID_PORT,
       useClass: GetAlarmRuleByIdAdapter,
     },
     {
       provide: GET_ALARM_RULE_BY_ID_REPOSITORY,
-      useClass: AlarmRulesRepositoryImpl
+      useClass: AlarmRulesRepositoryImpl,
     },
 
+    { provide: UPDATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
     {
       provide: UPDATE_ALARM_RULE_PORT,
-      useClass: UpdateAlarmRuleAdapter
+      useClass: UpdateAlarmRuleAdapter,
     },
     {
       provide: UPDATE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
-    },
-
-    { provide: GET_ALARM_RULE_BY_ID_REPOSITORY, useClass: AlarmRulesRepositoryImpl },
-
-    {
-      provide: RESOLVE_ALARM_EVENT_USE_CASE,
-      useClass: AlarmEventsService,
-    },
-    {
-      provide: RESOLVE_ALARM_EVENT_PORT,
-      useClass: ResolveAlarmEventAdapter,
-    },
-    {
-      provide: RESOLVE_ALARM_EVENT_REPOSITORY,
-      useClass: AlarmEventsRepositoryImpl,
     },
 
     {
@@ -128,6 +108,19 @@ import { UPDATE_ALARM_RULE_PORT } from './application/ports/out/update-alarm-rul
     },
     {
       provide: GET_ALL_ALARM_EVENTS_BY_USER_ID_REPOSITORY,
+      useClass: AlarmEventsRepositoryImpl,
+    },
+
+    {
+      provide: RESOLVE_ALARM_EVENT_USE_CASE,
+      useClass: AlarmEventsService,
+    },
+    {
+      provide: RESOLVE_ALARM_EVENT_PORT,
+      useClass: ResolveAlarmEventAdapter,
+    },
+    {
+      provide: RESOLVE_ALARM_EVENT_REPOSITORY,
       useClass: AlarmEventsRepositoryImpl,
     },
   ],

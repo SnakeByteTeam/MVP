@@ -84,7 +84,9 @@ export class AlarmRulesController {
 
   @ApiOkResponse({ type: GetAlarmRuleByIdResDto })
   @Get(':id')
-  async getAlarmRuleById(@Param('id') id: string): Promise<GetAlarmRuleByIdResDto> {
+  async getAlarmRuleById(
+    @Param('id') id: string,
+  ): Promise<GetAlarmRuleByIdResDto> {
     const alarm = await this.getAlarmRuleByIdUseCase.getAlarmRuleById(
       new GetAlarmRuleByIdCmd(id),
     );

@@ -25,7 +25,10 @@ import {
   CREATE_ALARM_RULE_PORT,
   CreateAlarmRulePort,
 } from '../ports/out/create-alarm-rule.port';
-import { UPDATE_ALARM_RULE_PORT, UpdateAlarmRulePort } from '../ports/out/update-alarm-rule.port';
+import {
+  UPDATE_ALARM_RULE_PORT,
+  UpdateAlarmRulePort,
+} from '../ports/out/update-alarm-rule.port';
 
 @Injectable()
 export class AlarmRuleService

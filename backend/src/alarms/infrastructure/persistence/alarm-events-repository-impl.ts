@@ -22,8 +22,9 @@ export class AlarmEventsRepositoryImpl
 
   async getAllAlarmEventsByUserId(id: number): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
-      'SELECT * FROM alarm_event WHERE id = $1 ORDER BY activation_time DESC', [id]
-    )
+      'SELECT * FROM alarm_event WHERE id = $1 ORDER BY activation_time DESC',
+      [id],
+    );
 
     return result.rows;
   }

@@ -8,6 +8,6 @@ export class AlarmEventEntity {
     public readonly priority: AlarmPriority,
     public activation_time: Date,
     public resolution_time: Date | null,
-    public user_id: number | null
+    public user_id: number | null,
   ) {}
 }

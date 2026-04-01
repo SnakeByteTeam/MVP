@@ -12,6 +12,9 @@ export class ResolveAlarmEventAdapter implements ResolveAlarmEventPort {
     private readonly resolveAlarmEventRepository: ResolveAlarmEventRepository,
   ) {}
   async resolveAlarmEvent(req: ResolveAlarmEventCmd): Promise<void> {
-    return await this.resolveAlarmEventRepository.resolveAlarmEvent(req.alarmId, req.userId);
+    return await this.resolveAlarmEventRepository.resolveAlarmEvent(
+      req.alarmId,
+      req.userId,
+    );
   }
 }

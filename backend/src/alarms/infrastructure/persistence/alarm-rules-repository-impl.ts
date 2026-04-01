@@ -20,11 +20,11 @@ export class AlarmRulesRepositoryImpl
   constructor(@Inject(PG_POOL) private readonly pool) {}
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {
-    const rows = await this.pool.query(
+    const result = await this.pool.query(
       'SELECT * FROM alarm_rule WHERE id = $1',
       [id],
     );
-    return rows.length > 0 ? rows[0] : null;
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
   async createAlarmRule(
@@ -36,10 +36,10 @@ export class AlarmRulesRepositoryImpl
     armingTime: string,
     dearmingTime: string,
   ): Promise<AlarmRuleEntity> {
-    const rows = await this.pool.query(
+    const result = await this.pool.query(
       `INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, 
        arming_time, dearming_time, is_armed, device_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9)
        RETURNING *`,
       [
         uuidv4(),
@@ -53,7 +53,7 @@ export class AlarmRulesRepositoryImpl
         deviceId,
       ],
     );
-    return rows[0];
+    return result.rows[0];
   }
 
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
@@ -76,14 +76,15 @@ export class AlarmRulesRepositoryImpl
     dearmingTime: string,
     isArmed: boolean,
   ): Promise<AlarmRuleEntity> {
-    const rows = await this.pool.query(
+    const result = await this.pool.query(
       `UPDATE alarm_rule SET
-        priority          = COALESCE($2, priority),
-        threshold         = COALESCE($3, threshold),
-        activation_time   = COALESCE($4, activation_time),
-        deactivation_time = COALESCE($5, deactivation_time),
-        enabled           = COALESCE($6, enabled),
-        updated_at        = NOW()
+        priority = $2,
+        threshold_operator = $3,
+        threshold_value = $4,
+        arming_time = $5,
+        dearming_time = $6,
+        is_armed = $7,
+        updated_at = NOW()
         WHERE id = $1
         RETURNING *`,
       [
@@ -96,6 +97,6 @@ export class AlarmRulesRepositoryImpl
         isArmed,
       ],
     );
-    return rows[0];
+    return result.rows[0];
   }
 }

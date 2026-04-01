@@ -1,4 +1,4 @@
-import { ResolveActiveAlarmAdapter } from './resolve-active-alarm-adapter';
+import { ResolveActiveAlarmAdapter } from './resolve-alarm-event-adapter';
 
 describe('ResolveActiveAlarmAdapter', () => {
   it('should be defined', () => {

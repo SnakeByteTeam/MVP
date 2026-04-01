@@ -1,4 +1,4 @@
-import { AlarmRuleEntity } from "../../infrastructure/entities/alarm-rule-entity";
+import { AlarmRuleEntity } from '../../infrastructure/entities/alarm-rule-entity';
 
 export interface GetAllAlarmRulesRepository {
   getAllAlarmRules(): Promise<AlarmRuleEntity[]>;

@@ -1,3 +1,3 @@
-export class ResolveActiveAlarmCmd {
+export class ResolveAlarmEventCmd {
   constructor(public id: string) {}
 }

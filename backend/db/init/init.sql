@@ -1,4 +1,4 @@
-CREATE TABLE alarms (
+CREATE TABLE alarm_rule (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     plant_id VARCHAR(255) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE alarms (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO alarms (id, name, plant_id, device_id, priority, threshold, arming_time, dearming_time, enabled)
+INSERT INTO alarm_rule (id, name, plant_id, device_id, priority, threshold, arming_time, dearming_time, enabled)
 VALUES
 ('ALM001', 'Temperatura alta', 'PLANT01', 'DEV001', 1, 75.50, '08:00:00', '18:00:00', TRUE),
 ('ALM002', 'Pressione bassa', 'PLANT01', 'DEV002', 2, 30.00, '00:00:00', '23:59:59', TRUE),
@@ -22,3 +22,11 @@ VALUES
 ('ALM006', 'Corrente alta', 'PLANT01', 'DEV006', 2, 15.80, '00:00:00', '23:59:59', TRUE),
 ('ALM007', 'Gas rilevato', 'PLANT04', 'DEV007', 1, 10.00, '00:00:00', '23:59:59', TRUE),
 ('ALM008', 'Porta aperta', 'PLANT03', 'DEV008', 3, 1.00, '18:00:00', '06:00:00', TRUE);
+
+CREATE TABLE alarm_event (
+    id VARCHAR(255) PRIMARY KEY,
+    alarm_rule_id VARCHAR(255) NOT NULL,
+    activation_time TIMESTAMP NOT NULL,
+    resolution_time TIMESTAMP,
+    FOREIGN KEY (alarm_rule_id) REFERENCES alarm_rule(id)
+);

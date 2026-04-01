@@ -1,23 +1,27 @@
-import { Global, Module, Inject } from '@nestjs/common';
+import { Module, Global } from '@nestjs/common';
 import { Pool } from 'pg';
 
-export const PG_POOL = 'PG_POOL';
+export const PG_POOL = Symbol('PG_POOL');
 
-export const InjectPool = () => Inject(PG_POOL);
-
-@Global() // rende il Pool disponibile in tutta l'app senza re-importare il modulo
+@Global()
 @Module({
   providers: [
     {
       provide: PG_POOL,
-      useFactory: () =>
-        new Pool({
-          host: process.env.DB_HOST,
-          port: parseInt(process.env.DB_PORT ?? '5432'),
-          database: process.env.DB_NAME,
-          user: process.env.DB_USER,
-          password: process.env.DB_PASSWORD,
-        }),
+      useFactory: () => {
+        const pool = new Pool({
+          connectionString: process.env.PG_CONNECTION_STRING,
+          max: 10,
+          idleTimeoutMillis: 3000,
+          connectionTimeoutMillis: 2000,
+        });
+
+        pool.on('error', (err) => {
+          console.error('Error on PostreSQL Pool');
+        });
+
+        return pool;
+      },
     },
   ],
   exports: [PG_POOL],

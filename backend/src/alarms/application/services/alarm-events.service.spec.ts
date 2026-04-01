@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ActiveAlarmsService } from './active-alarms.service';
+import { AlarmEventsService } from './alarm-events.service';
 
-describe('ActiveAlarmsService', () => {
-  let service: ActiveAlarmsService;
+describe('AlarmEventsService', () => {
+  let service: AlarmEventsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ActiveAlarmsService],
+      providers: [AlarmEventsService],
     }).compile();
 
-    service = module.get<ActiveAlarmsService>(ActiveAlarmsService);
+    service = module.get<AlarmEventsService>(AlarmEventsService);
   });
 
   it('should be defined', () => {

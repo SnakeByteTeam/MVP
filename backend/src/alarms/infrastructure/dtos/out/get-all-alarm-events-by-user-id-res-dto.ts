@@ -1,31 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AlarmPriority } from '../../../domain/models/alarm-priority.enum';
 
-export class UpdateAlarmRuleResDto {
+export class GetAllAlarmEventsByUserIdResDto {
   @ApiProperty()
   id!: string;
 
   @ApiProperty()
-  name!: string;
+  alarmRuleId!: string;
 
   @ApiProperty()
-  thresholdOperator!: string;
-
-  @ApiProperty()
-  thresholdValue!: string;
+  alarmName!: string;
 
   @ApiProperty()
   priority!: AlarmPriority;
 
   @ApiProperty()
-  armingTime!: Date;
+  activationTime!: Date;
 
   @ApiProperty()
-  dearmingTime!: Date;
-
-  @ApiProperty()
-  isArmed!: boolean;
-
-  @ApiProperty()
-  deviceId!: string;
+  resolutionTime!: Date | null;
 }

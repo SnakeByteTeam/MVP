@@ -1,6 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, map, tap } from 'rxjs';
+import {
+	BehaviorSubject,
+	Observable,
+	catchError,
+	finalize,
+	map,
+	of,
+	shareReplay,
+	tap,
+} from 'rxjs';
 import { UserRole } from '../models/user-role.enum';
 import { API_BASE_URL } from '../tokens/api-base-url.token';
 import { UserSession } from '../../features/user-auth/models/user-session.model';
@@ -30,10 +39,15 @@ export class InternalAuthService {
 
 	private readonly currentUser$ = new BehaviorSubject<UserSession | null>(null);
 	private token: string | null = null;
+	private restoreSessionInFlight$: Observable<boolean> | null = null;
 
 	public login(username: string, password: string): Observable<UserSession> {
 		return this.http
-			.post<LoginResponse>(`${this.baseUrl}/auth/login`, { username, password })
+			.post<LoginResponse>(
+				`${this.baseUrl}/auth/login`,
+				{ username, password },
+				{ withCredentials: true }
+			)
 			.pipe(map((response) => this.buildSessionFromAccessToken(response.accessToken)))
 			.pipe(tap((session) => this.setSession(session)));
 	}
@@ -43,11 +57,15 @@ export class InternalAuthService {
 		temporaryPassword: string,
 		newPassword: string
 	): Observable<void> {
-		return this.http.post<void>(`${this.baseUrl}/auth/first-login`, {
-			username,
-			tempPassword: temporaryPassword,
-			password: newPassword,
-		});
+		return this.http.post<void>(
+			`${this.baseUrl}/auth/first-login`,
+			{
+				username,
+				tempPassword: temporaryPassword,
+				password: newPassword,
+			},
+			{ withCredentials: true }
+		);
 	}
 
 	public refreshAccessToken(): Observable<string> {
@@ -62,6 +80,23 @@ export class InternalAuthService {
 				tap((session) => this.setSession(session)),
 				map((session) => session.accessToken)
 			);
+	}
+
+	public restoreSessionFromRefresh(): Observable<boolean> {
+		if (this.isAuthenticated()) {
+			return of(true);
+		}
+
+		this.restoreSessionInFlight$ ??= this.refreshAccessToken().pipe(
+			map(() => true),
+			catchError(() => of(false)),
+			finalize(() => {
+				this.restoreSessionInFlight$ = null;
+			}),
+			shareReplay(1)
+		);
+
+		return this.restoreSessionInFlight$;
 	}
 
 	public logout(): void {

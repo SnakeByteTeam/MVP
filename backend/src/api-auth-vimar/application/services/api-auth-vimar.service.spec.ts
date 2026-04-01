@@ -39,17 +39,16 @@ describe('ApiAuthVimarService', () => {
     const service = new ApiAuthVimarService();
 
     expect(() => service.getLoginUrl()).toThrow(
-      'There is no redirect_url setted',
+      'MyVimar OAuth configuration is missing: REDIRECT_URI',
     );
   });
 
-  it('should use empty client_id when CLIENTID is not set', () => {
+  it('should throw when CLIENTID is not set', () => {
     delete process.env.CLIENTID;
     const service = new ApiAuthVimarService();
 
-    const loginUrl = service.getLoginUrl();
-    const parsedUrl = new URL(loginUrl);
-
-    expect(parsedUrl.searchParams.get('client_id')).toBe('');
+    expect(() => service.getLoginUrl()).toThrow(
+      'MyVimar OAuth configuration is missing: CLIENTID',
+    );
   });
 });

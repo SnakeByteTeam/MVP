@@ -11,7 +11,6 @@ describe('MyVimarPageComponent', () => {
   const serviceStub: IVimarCloudApiService = {
     getLinkedAccount: vi.fn(() => of({ email: '', isLinked: false })),
     initiateOAuth: vi.fn(),
-    handleOAuthCallback: vi.fn(() => of(void 0)),
     unlinkAccount: vi.fn(() => of(void 0)),
   };
 

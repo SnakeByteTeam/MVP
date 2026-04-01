@@ -16,7 +16,9 @@ import { SuggestionModule } from './suggestion/suggestion.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      envFilePath: ['.env', '../.env'],
+    }),
     AnalyticsModule,
     ApiAuthVimarModule,
     DatabaseModule,

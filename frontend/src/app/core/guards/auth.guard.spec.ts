@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { InternalAuthService } from '../services/internal-auth.service';
 import { authGuard } from './auth.guard';
@@ -11,6 +12,7 @@ describe('authGuard', () => {
 
   const authServiceMock = {
     isAuthenticated: vi.fn(),
+    restoreSessionFromRefresh: vi.fn(),
   };
 
   beforeEach(() => {
@@ -31,15 +33,31 @@ describe('authGuard', () => {
     const result = TestBed.runInInjectionContext(() => authGuard({} as never, {} as never));
 
     expect(result).toBe(true);
+    expect(authServiceMock.restoreSessionFromRefresh).not.toHaveBeenCalled();
     expect(routerMock.createUrlTree).not.toHaveBeenCalled();
   });
 
-  it('redirect su /auth/login quando non autenticato', () => {
+  it('consente accesso quando restore sessione riesce', async () => {
     authServiceMock.isAuthenticated.mockReturnValue(false);
+    authServiceMock.restoreSessionFromRefresh.mockReturnValue(of(true));
 
     const result = TestBed.runInInjectionContext(() => authGuard({} as never, {} as never));
 
-    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/auth/login']);
-    expect(result).toEqual({ redirected: true });
+    expect(await firstValueFrom(result as ReturnType<typeof of>)).toBe(true);
+    expect(routerMock.createUrlTree).not.toHaveBeenCalled();
+  });
+
+  it('redirect su /auth/login quando restore sessione fallisce', async () => {
+    authServiceMock.isAuthenticated.mockReturnValue(false);
+    authServiceMock.restoreSessionFromRefresh.mockReturnValue(of(false));
+
+    const result = TestBed.runInInjectionContext(() =>
+      authGuard({} as never, { url: '/vimar-link' } as never)
+    );
+
+    expect(await firstValueFrom(result as ReturnType<typeof of>)).toEqual({ redirected: true });
+    expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/auth/login'], {
+      queryParams: { returnUrl: '/vimar-link' },
+    });
   });
 });

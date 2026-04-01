@@ -4,6 +4,9 @@ import {
   Param,
   Inject,
   InternalServerErrorException,
+  HttpCode,
+  Post,
+  Body,
 } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
@@ -12,8 +15,13 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import {
+  NotificationDataDto,
+  SubNotificationPayloadDto,
+} from 'src/cache/infrastructure/http/dtos/in/subNotification.dto';
 import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-by-id.command';
 import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-device-by-plantid.command';
+import { IngestTimeseriesCmd } from 'src/device/application/commands/ingest-timeseries.command';
 import {
   type FindDeviceByIdUseCase,
   FIND_DEVICE_BY_ID_USECASE,
@@ -22,6 +30,10 @@ import {
   type FindDeviceByPlantIdUseCase,
   FIND_DEVICE_BY_PLANTID_USECASE,
 } from 'src/device/application/ports/in/find-device-by-plantid.usecase';
+import {
+  INGEST_TIMESERIES_USE_CASE,
+  type IngestTimeseriesUseCase,
+} from 'src/device/application/ports/in/ingest-timeseris.usecase';
 import { Device } from 'src/device/domain/models/device.model';
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
 
@@ -33,6 +45,8 @@ export class DeviceController {
     private readonly findByIdUseCase: FindDeviceByIdUseCase,
     @Inject(FIND_DEVICE_BY_PLANTID_USECASE)
     private readonly findByPlantIdUseCase: FindDeviceByPlantIdUseCase,
+    @Inject(INGEST_TIMESERIES_USE_CASE)
+    private readonly ingestTimeseries: IngestTimeseriesUseCase,
   ) {}
 
   @Get(':id')
@@ -124,5 +138,40 @@ export class DeviceController {
     } catch {
       throw new InternalServerErrorException('Internal server error');
     }
+  }
+
+  @Post('update')
+  @HttpCode(202)
+  async onDatapointUpdate(
+    @Body() payload: SubNotificationPayloadDto,
+  ): Promise<{ message: string; statusCode: number }> {
+    const ingestCmds: IngestTimeseriesCmd[] = payload.data
+      .filter((item: NotificationDataDto) => item.type === 'datapoint')
+      .map((item: NotificationDataDto) => ({
+        datapointId: item.id,
+        value: item.attributes.value as string,
+        timestamp: item.attributes.timestamp as string,
+      }));
+
+    setImmediate(async () => {
+      for (const cmd of ingestCmds) {
+        try {
+          console.log(
+            `[CacheController] Starting ingestion for ${cmd.datapointId}`,
+          );
+          await this.ingestTimeseries.ingestTimeseries(cmd);
+          console.log(
+            `[CacheController] Ingestion ended successfully for ${cmd.datapointId}`,
+          );
+        } catch (err) {
+          console.error(
+            `[CacheController] Error ingesting for ${cmd.datapointId}:`,
+            err.message,
+          );
+        }
+      }
+    });
+
+    return { message: 'Datapoints updated received', statusCode: 200 };
   }
 }

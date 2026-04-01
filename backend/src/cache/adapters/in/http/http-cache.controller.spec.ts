@@ -94,7 +94,6 @@ describe('HttpCacheController', () => {
 
       await controller.updateCache(body);
 
-  
       await flushPromises();
 
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
@@ -164,7 +163,6 @@ describe('HttpCacheController', () => {
 
       await controller.updateCache(body);
 
-    
       await flushPromises();
 
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({

@@ -74,7 +74,7 @@ export class DeviceRepositoryImpl
         [timestamp, datapointId, value],
       );
 
-      if(!result.rowCount) return false;
+      if (!result.rowCount) return false;
       return result.rowCount > 0;
     } catch (err) {
       throw new Error(`Database error: ${err.message}`);

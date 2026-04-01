@@ -77,9 +77,7 @@ describe('RefreshDatapointSubAdapter', () => {
     it('should propagate repo errors', async () => {
       const cmd = { plantId: 'plant-123' };
       getValidTokenPort.getValidToken.mockResolvedValue('valid-token');
-      repo.refreshDatapointSub.mockRejectedValue(
-        new Error('Repo error'),
-      );
+      repo.refreshDatapointSub.mockRejectedValue(new Error('Repo error'));
 
       await expect(adapter.refreshDatapointSub(cmd)).rejects.toThrow(
         'Repo error',
@@ -107,5 +105,3 @@ describe('RefreshDatapointSubAdapter', () => {
     });
   });
 });
-
-

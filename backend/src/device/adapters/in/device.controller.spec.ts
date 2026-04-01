@@ -210,9 +210,9 @@ describe('DeviceController', () => {
   it('should throw an InternalServerErrorException when catch an error', async () => {
     findDeviceById.findById.mockRejectedValue(new Error('Error'));
 
-    await expect(() =>
-      controller.findById('someId'),
-    ).rejects.toThrow(InternalServerErrorException);
+    await expect(() => controller.findById('someId')).rejects.toThrow(
+      InternalServerErrorException,
+    );
   });
 
   it('should throw an InternalServerErrorException when catch an error', async () => {
@@ -277,7 +277,7 @@ describe('DeviceController', () => {
       ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
 
       await controller.onDatapointUpdate(payload);
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       // Should only call ingestTimeseries for one datapoint
       expect(ingestTimeseries.ingestTimeseries).toHaveBeenCalledTimes(1);
@@ -312,7 +312,7 @@ describe('DeviceController', () => {
       ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
 
       await controller.onDatapointUpdate(payload);
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(ingestTimeseries.ingestTimeseries).toHaveBeenCalledTimes(2);
     });
@@ -336,7 +336,7 @@ describe('DeviceController', () => {
       ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
 
       await controller.onDatapointUpdate(payload);
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(ingestTimeseries.ingestTimeseries).toHaveBeenCalledWith({
         datapointId: 'dp-123',
@@ -417,7 +417,7 @@ describe('DeviceController', () => {
       ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
 
       await controller.onDatapointUpdate(payload);
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(ingestTimeseries.ingestTimeseries).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -445,7 +445,7 @@ describe('DeviceController', () => {
       ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
 
       await controller.onDatapointUpdate(payload);
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(ingestTimeseries.ingestTimeseries).toHaveBeenCalledWith(
         expect.objectContaining({

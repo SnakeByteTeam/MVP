@@ -304,7 +304,11 @@ describe('DeviceRepositoryImpl', () => {
     it('should use correct parameter order: timestamp, datapointId, value', async () => {
       mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
 
-      await repository.ingestTimeseries('dp-test', 'test-value', 'test-timestamp');
+      await repository.ingestTimeseries(
+        'dp-test',
+        'test-value',
+        'test-timestamp',
+      );
 
       const calls = (mockClient.query as jest.Mock).mock.calls;
       expect(calls[0][1]).toEqual(['test-timestamp', 'dp-test', 'test-value']);
@@ -313,7 +317,11 @@ describe('DeviceRepositoryImpl', () => {
     it('should cast parameters to correct types', async () => {
       mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
 
-      await repository.ingestTimeseries('dp-123', '99.99', '2026-04-01T15:00:00Z');
+      await repository.ingestTimeseries(
+        'dp-123',
+        '99.99',
+        '2026-04-01T15:00:00Z',
+      );
 
       const query = (mockClient.query as jest.Mock).mock.calls[0][0];
       expect(query).toContain('TIMESTAMPTZ');
@@ -323,7 +331,11 @@ describe('DeviceRepositoryImpl', () => {
     it('should handle ON CONFLICT DO UPDATE clause', async () => {
       mockClient.query.mockResolvedValueOnce({ rowCount: 1 });
 
-      await repository.ingestTimeseries('dp-123', '25.5', '2026-04-01T13:41:58Z');
+      await repository.ingestTimeseries(
+        'dp-123',
+        '25.5',
+        '2026-04-01T13:41:58Z',
+      );
 
       const query = (mockClient.query as jest.Mock).mock.calls[0][0];
       expect(query).toContain('ON CONFLICT');
@@ -344,7 +356,11 @@ describe('DeviceRepositoryImpl', () => {
       mockClient.query.mockRejectedValueOnce(new Error('Query failed'));
 
       try {
-        await repository.ingestTimeseries('dp-123', '25.5', '2026-04-01T13:41:58Z');
+        await repository.ingestTimeseries(
+          'dp-123',
+          '25.5',
+          '2026-04-01T13:41:58Z',
+        );
       } catch (e) {
         // Expected
       }

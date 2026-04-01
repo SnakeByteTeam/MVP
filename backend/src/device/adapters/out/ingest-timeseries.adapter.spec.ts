@@ -138,7 +138,7 @@ describe('IngestTimeseriesAdapter', () => {
     });
 
     it('should propagate repo errors', async () => {
-      const cmd: IngestTimeseriesCmd= {
+      const cmd: IngestTimeseriesCmd = {
         datapointId: 'dp-123',
         value: '25.5',
         timestamp: '2026-04-01T13:41:58Z',

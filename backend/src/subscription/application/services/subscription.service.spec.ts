@@ -324,9 +324,7 @@ describe('SubscriptionService', () => {
 
     it('should handle errors during refreshAllSubscription', async () => {
       const cmd = { plantId: 'plant-123' };
-      refreshNodePort.refreshSub.mockRejectedValue(
-        new Error('Port error'),
-      );
+      refreshNodePort.refreshSub.mockRejectedValue(new Error('Port error'));
 
       const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 

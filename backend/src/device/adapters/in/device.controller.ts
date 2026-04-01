@@ -83,9 +83,7 @@ export class DeviceController {
       },
     },
   })
-  async findById(
-    @Param('id') deviceId: string,
-  ): Promise<DeviceDto> {
+  async findById(@Param('id') deviceId: string): Promise<DeviceDto> {
     const findByIdCmd: FindDeviceByIdCmd = {
       id: deviceId,
     };

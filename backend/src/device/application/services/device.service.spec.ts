@@ -27,7 +27,11 @@ describe('DeviceService', () => {
       ingestTimeseries: jest.fn(),
     };
 
-    service = new DeviceService(findByIdPort, findByPlantIdPort, ingestTimeseriesPort);
+    service = new DeviceService(
+      findByIdPort,
+      findByPlantIdPort,
+      ingestTimeseriesPort,
+    );
   });
 
   it('should return the same device that FindByIdPort returns', async () => {

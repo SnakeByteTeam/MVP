@@ -35,7 +35,10 @@ describe('EventSubscriptionController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EventSubscriptionController],
       providers: [
-        { provide: REFRESH_NODE_SUBSCRIPTION_USECASE, useValue: refreshNodeSub },
+        {
+          provide: REFRESH_NODE_SUBSCRIPTION_USECASE,
+          useValue: refreshNodeSub,
+        },
         {
           provide: REFRESH_DATAPOINT_SUBSCRIPTION_USECASE,
           useValue: refreshDatapointSub,
@@ -73,9 +76,7 @@ describe('EventSubscriptionController', () => {
 
       await controller.refreshNodeSubscriptions();
 
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.any(Error),
-      );
+      expect(errorSpy).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 
@@ -96,9 +97,7 @@ describe('EventSubscriptionController', () => {
 
       await controller.refreshDatapointSubscriptions();
 
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.any(Error),
-      );
+      expect(errorSpy).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 
@@ -140,9 +139,7 @@ describe('EventSubscriptionController', () => {
 
       await controller.refreshAllSubsByPlantId(payload);
 
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.any(Error),
-      );
+      expect(errorSpy).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should process multiple plant refreshes', async () => {
@@ -158,4 +155,3 @@ describe('EventSubscriptionController', () => {
     });
   });
 });
-

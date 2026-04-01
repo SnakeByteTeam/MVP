@@ -75,7 +75,7 @@ export class SensorPresence implements AnalyticsStrategy {
         allDays.add(day);
       }
     }
-    const labels: string[] = Array.from(allDays).sort();
+    const labels = Array.from(allDays).sort((a, b) => a.localeCompare(b));
 
     const entries: [string, SensorState][] = Array.from(sensorState.entries());
     const series: Series[] = entries.map(

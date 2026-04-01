@@ -113,7 +113,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
         allDays.add(day);
       }
     }
-    const labels = Array.from(allDays).sort();
+    const labels = Array.from(allDays).sort((a, b) => a.localeCompare(b));
 
     const seriesMap = new Map<
       string,

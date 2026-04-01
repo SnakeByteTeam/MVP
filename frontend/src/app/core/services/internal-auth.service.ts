@@ -99,6 +99,15 @@ export class InternalAuthService {
 		return this.restoreSessionInFlight$;
 	}
 
+	public logoutFromBackend(): Observable<void> {
+		return this.http
+			.post<void>(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true })
+			.pipe(
+				catchError(() => of(void 0)),
+				tap(() => this.logout())
+			);
+	}
+
 	public logout(): void {
 		this.token = null;
 		this.currentUser$.next(null);

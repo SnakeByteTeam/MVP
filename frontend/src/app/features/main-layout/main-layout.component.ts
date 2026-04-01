@@ -10,7 +10,7 @@ import { TopbarComponent } from './components/topbar/topbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { UserRole } from '../../core/models/user-role.enum';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { UserInfo } from '../../core/models/user-info.model';
 import { NotificationBadgeComponent } from '../notification/components/notification-badge-component/notification-badge-component';
 
@@ -34,6 +34,7 @@ export class MainLayoutComponent implements OnInit {
     private readonly navService = inject(NavService);
     private readonly internalAuthService = inject(InternalAuthService);
     private readonly alarmStateService = inject(AlarmStateService);
+    private readonly router = inject(Router);
 
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
 
@@ -74,6 +75,8 @@ export class MainLayoutComponent implements OnInit {
     }
 
     public logout(): void{
-        this.internalAuthService.logout();
+        this.internalAuthService.logoutFromBackend().subscribe(() => {
+            void this.router.navigate(['/auth/login']);
+        });
     }
 }

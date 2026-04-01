@@ -7,7 +7,7 @@ import { UserRole } from '../../core/models/user-role.enum';
 import { of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { firstValueFrom } from 'rxjs'; 
-import { provideRouter } from '@angular/router'; 
+import { provideRouter, Router } from '@angular/router'; 
 
 
 describe('MainLayoutComponent', () => {
@@ -16,7 +16,8 @@ describe('MainLayoutComponent', () => {
 
     const mockAuthService = {
         getRole: vi.fn(),
-        logout: vi.fn()
+        logout: vi.fn(),
+        logoutFromBackend: vi.fn().mockReturnValue(of(void 0)),
     };
     const mockNavService = {
         getNavItems: vi.fn().mockReturnValue([{ label: 'Test', route: '/test' }])
@@ -59,8 +60,13 @@ describe('MainLayoutComponent', () => {
     });
 
     it('invoca correttamente logout', () => {
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
         component.logout();
-        expect(mockAuthService.logout).toHaveBeenCalled();
+
+        expect(mockAuthService.logoutFromBackend).toHaveBeenCalled();
+        expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
     });
 
 

@@ -3,20 +3,49 @@ import { GetAnalyticsUseCase } from '../ports/in/get-analytics.usecase';
 import { AnalyticsStrategy } from '../strategy/analytics.strategy';
 import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
+import {
+  GET_SUGGESTION_USECASE,
+  GetSuggestionUseCase,
+} from '../ports/in/get-suggestion.usecase';
+import { GetSuggestionCmd } from '../commands/get-suggestion.cmd';
+import { ANALYTICS_STRATEGIES_TOKEN } from 'src/analytics/analytics.module';
 
 @Injectable()
 export class AnalyticsService implements GetAnalyticsUseCase {
   constructor(
-    @Inject('ANALYTICS_STRATEGIES')
+    @Inject(ANALYTICS_STRATEGIES_TOKEN)
     private readonly strategies: Map<string, AnalyticsStrategy>,
+
+    @Inject(GET_SUGGESTION_USECASE)
+    private readonly getSuggestionUseCase: GetSuggestionUseCase,
   ) {}
 
-  async getAnalytics(cmd: GetAnalyticsCmd): Promise<Plot> {
-    const strategy = this.strategies.get(cmd.metric);
+  async getAnalyticsByPlantId(cmd: GetAnalyticsCmd): Promise<Plot[]> {
+    const plots: Plot[] = [];
 
-    if (!strategy) {
-      throw new Error(`No strategy found for metric: ${cmd.metric}`);
+    for (const [key, strategy] of this.strategies.entries()) {
+      try {
+        const plot = await strategy.execute(cmd);
+        const suggestion = await this.getSuggestionUseCase.getSuggestion(
+          new GetSuggestionCmd(
+            plot.getMetric(),
+            plot.getMetric(),
+            plot.getUnit(),
+            plot.getLabels(),
+            plot.getSeries(),
+          ),
+        );
+        plot.setSuggestion(suggestion);
+        plots.push(plot);
+      } catch (err) {
+        console.error(`Error executing strategy ${key}:`, err);
+      }
     }
-    return strategy.execute(cmd);
+
+    if (plots.length === 0) {
+      throw new Error(`No analytics available for plant ${cmd.plantId}`);
+    }
+
+    return plots;
   }
 }

@@ -4,6 +4,10 @@ import { PlantConsumption } from './plant-consumption';
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { ANOMALY_THRESHOLD_WH } from './consumption-config';
+import { Series } from 'src/analytics/domain/series.model';
+
+const TITLE = 'Anomalie di impianto';
+const METRIC = 'plant-anomalies';
 
 @Injectable()
 export class PlantAnomalies implements AnalyticsStrategy {
@@ -12,23 +16,19 @@ export class PlantAnomalies implements AnalyticsStrategy {
   async execute(cmd: GetAnalyticsCmd): Promise<Plot> {
     const consumptionPlot = await this.plantConsumption.execute(cmd);
 
-    const anomalyLabels: string[] = [];
-    const anomalyValues: string[] = [];
+    const labels = consumptionPlot.getLabels();
+    const series = consumptionPlot.getSeries()[0];
 
-    for (let i = 0; i < consumptionPlot.getLabels().length; i++) {
-      const wh = Number.parseFloat(consumptionPlot.getData()[i]);
-      if (wh > ANOMALY_THRESHOLD_WH) {
-        anomalyLabels.push(consumptionPlot.getLabels()[i]);
-        anomalyValues.push(wh.toFixed(2));
-      }
+    if (labels.length === 0 || !series) {
+      return new Plot(TITLE, METRIC, 'anomalie', [], []);
     }
 
-    return new Plot(
-      'Plant Anomalies Analytics',
-      cmd.metric,
-      '',
-      anomalyLabels,
-      anomalyValues,
+    const anomalyData: number[] = labels.map((_, i) =>
+      series.getData()[i] > ANOMALY_THRESHOLD_WH ? 1 : 0,
     );
+
+    return new Plot(TITLE, METRIC, 'anomalie', labels, [
+      new Series(METRIC, TITLE, anomalyData),
+    ]);
   }
 }

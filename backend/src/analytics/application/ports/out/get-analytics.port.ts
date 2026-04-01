@@ -1,20 +1,20 @@
 import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
 
 export interface GetAnalyticsPort {
-  getDataByPlantId(
+  getDataForPlant(
     plantId: string,
     startDate: Date,
   ): Promise<Map<string, DatapointValue[]>>;
-  getDataByWardId(
+  getDataForWard(
     wardId: string,
     startDate: Date,
   ): Promise<Map<string, DatapointValue[]>>;
-  getAlarmsByWardId(
+  getAlarmsForWard(
     wardId: string,
     startDate: Date,
     onlyResolved: boolean,
   ): Promise<Map<string, number>>;
-  getDataBySensorId(
+  getDataForSensor(
     sensorId: string,
     startDate: Date,
   ): Promise<Map<string, DatapointValue[]>>;

@@ -1,5 +1,5 @@
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
 import { GetSuggestionCmd } from '../../commands/get-suggestion.cmd';
-import { Suggestion } from 'src/suggestion/domain/suggestion.model';
 
 export interface LLMSuggestionPort {
   generateSuggestion(cmd: GetSuggestionCmd): Promise<Suggestion>;

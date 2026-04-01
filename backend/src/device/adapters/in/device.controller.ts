@@ -125,4 +125,12 @@ export class DeviceController {
       throw new InternalServerErrorException('Internal server error');
     }
   }
+
+  @Get('update')
+  async onDatapointUpdate(): Promise<{message: string, statusCode: number}> {
+    
+
+    return { message: 'Datapoint updated successfully', statusCode: 200 };
+  }
+
 }

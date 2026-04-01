@@ -24,12 +24,18 @@ import { DeviceRepositoryImpl } from './infrastructure/persistence/device-reposi
     { provide: FIND_DEVICE_BY_ID_USECASE, useClass: DeviceService },
     { provide: FIND_DEVICE_BY_PLANTID_USECASE, useClass: DeviceService },
     { provide: FIND_DEVICE_BY_ID_PORT, useClass: FindDeviceByIdAdapter },
-    { provide: FIND_DEVICE_BY_PLANTID_PORT, useClass: FindDeviceByPlantIdAdapter },
+    {
+      provide: FIND_DEVICE_BY_PLANTID_PORT,
+      useClass: FindDeviceByPlantIdAdapter,
+    },
     { provide: FIND_DEVICE_BY_ID_REPO_PORT, useClass: DeviceRepositoryImpl },
-    { provide: FIND_DEVICE_BY_PLANT_ID_REPO_PORT, useClass: DeviceRepositoryImpl },
-    { provide: INGEST_TIMESERIES_USE_CASE, useClass: DeviceService }, 
-    { provide: INGEST_TIMESERIES_PORT, useClass: IngestTimeseriesAdapter}, 
-    { provide: INGEST_TIMESERIES_REPO_PORT, useClass: DeviceRepositoryImpl }
+    {
+      provide: FIND_DEVICE_BY_PLANT_ID_REPO_PORT,
+      useClass: DeviceRepositoryImpl,
+    },
+    { provide: INGEST_TIMESERIES_USE_CASE, useClass: DeviceService },
+    { provide: INGEST_TIMESERIES_PORT, useClass: IngestTimeseriesAdapter },
+    { provide: INGEST_TIMESERIES_REPO_PORT, useClass: DeviceRepositoryImpl },
   ],
 })
 export class DeviceModule {}

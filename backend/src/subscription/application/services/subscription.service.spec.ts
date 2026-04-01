@@ -252,4 +252,135 @@ describe('SubscriptionService', () => {
       });
     });
   });
+
+  describe('refreshAllSubscription', () => {
+    it('should refresh both node and datapoint subscriptions for a plant', async () => {
+      const cmd = { plantId: 'plant-123' };
+      refreshNodePort.refreshSub.mockResolvedValue(true);
+      refreshDatapointPort.refreshDatapointSub.mockResolvedValue(true);
+
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(true);
+      expect(refreshNodePort.refreshSub).toHaveBeenCalledWith({
+        plantId: 'plant-123',
+      });
+      expect(refreshDatapointPort.refreshDatapointSub).toHaveBeenCalledWith({
+        plantId: 'plant-123',
+      });
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Node subscription refreshed successfully for plant: plant-123',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Datapoint subscription refreshed successfully for plant: plant-123',
+      );
+    });
+
+    it('should throw error when plantId is null', async () => {
+      const cmd = { plantId: null };
+
+      await expect(service.refreshAllSubscription(cmd as any)).rejects.toThrow(
+        'PlantId is null',
+      );
+    });
+
+    it('should throw error when cmd is null', async () => {
+      await expect(service.refreshAllSubscription(null as any)).rejects.toThrow(
+        'PlantId is null',
+      );
+    });
+
+    it('should handle node subscription refresh failure', async () => {
+      const cmd = { plantId: 'plant-123' };
+      refreshNodePort.refreshSub.mockResolvedValue(false);
+      refreshDatapointPort.refreshDatapointSub.mockResolvedValue(true);
+
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(true);
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Failed to refresh node subscription for plant: plant-123',
+      );
+    });
+
+    it('should handle datapoint subscription refresh failure', async () => {
+      const cmd = { plantId: 'plant-123' };
+      refreshNodePort.refreshSub.mockResolvedValue(true);
+      refreshDatapointPort.refreshDatapointSub.mockResolvedValue(false);
+
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(false);
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Failed to refresh datapoint subscription for plant: plant-123',
+      );
+    });
+
+    it('should handle errors during refreshAllSubscription', async () => {
+      const cmd = { plantId: 'plant-123' };
+      refreshNodePort.refreshSub.mockRejectedValue(new Error('Port error'));
+
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(false);
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Error refreshing all subscriptions for plantId: plant-123',
+        expect.any(Error),
+      );
+    });
+
+    it('should return false when datapoint port throws error', async () => {
+      const cmd = { plantId: 'plant-456' };
+      refreshNodePort.refreshSub.mockResolvedValue(true);
+      refreshDatapointPort.refreshDatapointSub.mockRejectedValue(
+        new Error('Datapoint error'),
+      );
+
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(false);
+      expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('should handle plantId with special characters', async () => {
+      const cmd = { plantId: 'plant-!@#$%^&*' };
+      refreshNodePort.refreshSub.mockResolvedValue(true);
+      refreshDatapointPort.refreshDatapointSub.mockResolvedValue(true);
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(true);
+      expect(refreshNodePort.refreshSub).toHaveBeenCalledWith({
+        plantId: 'plant-!@#$%^&*',
+      });
+    });
+
+    it('should handle both ports failing', async () => {
+      const cmd = { plantId: 'plant-789' };
+      refreshNodePort.refreshSub.mockResolvedValue(false);
+      refreshDatapointPort.refreshDatapointSub.mockResolvedValue(false);
+
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await service.refreshAllSubscription(cmd);
+
+      expect(result).toBe(false);
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Failed to refresh node subscription for plant: plant-789',
+      );
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Failed to refresh datapoint subscription for plant: plant-789',
+      );
+    });
+  });
 });

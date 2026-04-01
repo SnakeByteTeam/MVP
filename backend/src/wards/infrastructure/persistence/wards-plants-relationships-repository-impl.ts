@@ -29,7 +29,7 @@ export class WardsPlantsRelationshipsRepositoryImpl
       }
 
       await client.query(
-        'UPDATE structure_cache SET ward_id = $1 WHERE plant_id = $2',
+        'UPDATE plant SET ward_id = $1 WHERE id = $2',
         [wardId, plantId],
       );
 
@@ -63,7 +63,7 @@ export class WardsPlantsRelationshipsRepositoryImpl
       ]);
 
       await client.query(
-        'UPDATE structure_cache SET ward_id = NULL WHERE plant_id = $1',
+        'UPDATE plant SET ward_id = NULL WHERE id = $1',
         [plantId],
       );
 

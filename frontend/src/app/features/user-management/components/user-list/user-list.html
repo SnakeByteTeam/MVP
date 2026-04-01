@@ -1,37 +1,78 @@
-<div class="user-list-container">
-    <h1>Elenco Operatori Sanitari</h1>
+<section class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5"
+    aria-label="Elenco operatori sanitari">
+    <header class="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+        <h2 class="text-base font-semibold text-slate-900">Elenco operatori sanitari</h2>
+        <span class="rounded bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">{{ users()?.length ?? 0 }}
+            utenti</span>
+    </header>
 
-    <table class="table-users">
-        <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Cognome</th>
-                <th>Username</th>
-                <th>Azioni</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-separate border-spacing-0 text-left text-sm text-slate-800">
+            <thead>
+                <tr>
+                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Nome</th>
+                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Cognome
+                    </th>
+                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Username
+                    </th>
+                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (user of users(); track user.id) {
+                <tr class="odd:bg-white even:bg-slate-50/50">
+                    <td class="border-b border-slate-200 px-3 py-2">{{ user.name }}</td>
+                    <td class="border-b border-slate-200 px-3 py-2">{{ user.surname }}</td>
+                    <td class="border-b border-slate-200 px-3 py-2 font-medium text-slate-900">{{ user.username }}</td>
+                    <td class="border-b border-slate-200 px-3 py-2">
+                        <button type="button" (click)="onDeleteRequest(user)"
+                            class="inline-flex items-center rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
+                            Elimina
+                        </button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="4" class="px-3 py-10 text-center text-sm text-slate-600">
+                        Nessun operatore sanitario presente a sistema.
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-            @for (user of users(); track user.id) {
-            <tr>
-                <td>{{ user.firstName }}</td>
-                <td>{{ user.lastName }}</td>
-                <td>{{ user.username }}</td>
+    @if (pendingDeleteUser(); as userToDelete) {
+    <dialog open aria-labelledby="delete-user-dialog-title"
+        class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md rounded-lg border border-neutral-500 bg-[#efefef] p-4 shadow-2xl backdrop:bg-black/45 focus:outline-none">
+        <div class="mb-3 flex items-start justify-between gap-3 border-b border-neutral-400 pb-2">
+            <div>
+                <h3 id="delete-user-dialog-title" class="text-base font-bold text-neutral-900">Conferma eliminazione
+                </h3>
+                <p class="text-xs text-neutral-700">Questa operazione non può essere annullata.</p>
+            </div>
+            <button type="button" (click)="onDeleteCancel()" aria-label="Chiudi"
+                class="rounded-md border border-neutral-600 bg-white px-2 py-0.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-100">
+                x
+            </button>
+        </div>
 
-                <td>
-                    <button type="button" class="btn-danger" (click)="onDelete(user)">
-                        Elimina
-                    </button>
-                </td>
-            </tr>
-            } @empty {
-            <tr>
-                <td colspan="4" class="empty-state-message text-center">
-                    Nessun operatore sanitario presente a sistema.
-                </td>
-            </tr>
-            }
+        <p class="text-sm text-neutral-800">
+            Vuoi eliminare l'operatore
+            <strong>{{ userToDelete.name }} {{ userToDelete.surname }}</strong>
+            ({{ userToDelete.username }})?
+        </p>
 
-        </tbody>
-    </table>
-</div>
+        <div class="mt-4 flex items-center justify-end gap-2">
+            <button type="button" (click)="onDeleteCancel()"
+                class="rounded-md border border-neutral-600 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-800 hover:bg-neutral-100">
+                Annulla
+            </button>
+            <button type="button" (click)="onDeleteConfirm()"
+                class="rounded-md border border-red-700 bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700">
+                Elimina
+            </button>
+        </div>
+    </dialog>
+    }
+</section>

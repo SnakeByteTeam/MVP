@@ -1,30 +1,33 @@
-<div class="management-layout">
-
-    <header class="page-header">
-        <h1>Gestione Operatori Sanitari</h1>
+<section aria-label="Gestione operatori sanitari" class="flex h-full min-h-0 flex-col gap-4 bg-slate-100 p-4 lg:p-6">
+    <header class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900">Gestione Operatori Sanitari</h1>
+            <p class="text-sm text-slate-600">Crea nuovi profili OSS e gestisci l'anagrafica utenti esistente.</p>
+        </div>
     </header>
 
-    <div class="content-grid">
-        <aside class="sidebar">
+    <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[22rem_minmax(0,1fr)]">
+        <aside class="min-h-[22rem] lg:sticky lg:top-6 lg:self-start">
             <app-create-user-form [errorType]="formError()" (formSubmit)="onFormSubmit($event)">
             </app-create-user-form>
         </aside>
 
-        <main class="main-content">
+        <main class="min-h-[22rem]">
             @if (users$ | async; as users) {
             <app-user-list [users]="users" (deleteUser)="onUserDeleted($event)">
             </app-user-list>
             } @else {
-            <div class="loading-spinner">
-                <p>Caricamento operatori in corso...</p>
+            <div class="rounded-xl border border-slate-300 bg-white p-8 text-center text-slate-600 shadow-sm">
+                Caricamento operatori in corso...
             </div>
             }
         </main>
     </div>
 
-</div>
-
-@if (createdResponse(); as response) {
-<app-user-created-dialog [response]="response" (closed)="onDialogClosed()">
-</app-user-created-dialog>
-}
+    @if (createdResponse(); as response) {
+    @if (createdUser(); as createdUser) {
+    <app-user-created-dialog [response]="response" [user]="createdUser" (closed)="onDialogClosed()">
+    </app-user-created-dialog>
+    }
+    }
+</section>

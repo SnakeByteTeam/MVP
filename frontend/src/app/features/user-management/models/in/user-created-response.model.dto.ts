@@ -1,7 +1,4 @@
-import { UserDto } from "./user.model.dto";
-
-// Descrive la risposta inviata dal backend alla chiamata `POST /users
+// Risposta minima della create user: il backend espone solo la password temporanea.
 export interface UserCreatedResponseDto {
-    user: UserDto;
-    temporaryPassword: string;
+    tempPassword: string;
 }

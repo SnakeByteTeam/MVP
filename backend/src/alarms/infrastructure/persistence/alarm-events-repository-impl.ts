@@ -14,20 +14,24 @@ export class AlarmEventsRepositoryImpl
   constructor(@Inject(PG_POOL) private readonly pool) {}
 
   async getAllAlarmEvents(): Promise<AlarmEventEntity[]> {
-    const { rows } = await this.pool.query(
-      'SELECT * FROM active_alarms WHERE resolved_at IS NULL ORDER BY triggered_at DESC',
+    const result = await this.pool.query(
+      'SELECT * FROM alarm_event ORDER BY activation_time DESC, resolution_time DESC',
     );
-    return rows;
+    return result.rows;
   }
 
-  getAllAlarmEventsByUserId(id: string): Promise<AlarmEventEntity[]> {
-    throw new Error('Method not implemented.');
+  async getAllAlarmEventsByUserId(id: number): Promise<AlarmEventEntity[]> {
+    const result = await this.pool.query(
+      'SELECT * FROM alarm_event WHERE id = $1 ORDER BY activation_time DESC', [id]
+    )
+
+    return result.rows;
   }
 
-  async resolveAlarmEvent(id: string): Promise<void> {
+  async resolveAlarmEvent(alarmId: string, userId: number): Promise<void> {
     await this.pool.query(
-      'UPDATE active_alarms SET resolved_at = NOW() WHERE id = $1',
-      [id],
+      'UPDATE alarm_event SET resolution_time = NOW(), user_id = $2 WHERE id = $1',
+      [alarmId, userId],
     );
   }
 }

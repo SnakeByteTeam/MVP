@@ -1,5 +1,5 @@
 export interface ResolveAlarmEventRepository {
-  resolveAlarmEvent(id: string): Promise<void>;
+  resolveAlarmEvent(alarmId: string, userId: number): Promise<void>;
 }
 
 export const RESOLVE_ALARM_EVENT_REPOSITORY = 'RESOLVE_ALARM_EVENT_REPOSITORY';

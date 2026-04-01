@@ -35,6 +35,8 @@ import { GetAlarmRuleByIdAdapter } from './adapters/out/get-alarm-rule-by-id-ada
 import { GET_ALARM_RULE_BY_ID_PORT } from './application/ports/out/get-alarm-rule-by-id.port';
 import { GET_ALL_ALARM_RULES_REPOSITORY } from './application/repository/get-all-alarm-rules-repository.interface';
 import { GET_ALARM_RULE_BY_ID_REPOSITORY } from './application/repository/get-alarm-rule-by-id-repository.interface';
+import { UpdateAlarmRuleAdapter } from './adapters/out/update-alarm-rule-adapter';
+import { UPDATE_ALARM_RULE_PORT } from './application/ports/out/update-alarm-rule.port';
 
 @Module({
   controllers: [AlarmRulesController, AlarmEventsController],
@@ -79,6 +81,10 @@ import { GET_ALARM_RULE_BY_ID_REPOSITORY } from './application/repository/get-al
       useClass: AlarmRulesRepositoryImpl
     },
 
+    {
+      provide: UPDATE_ALARM_RULE_PORT,
+      useClass: UpdateAlarmRuleAdapter
+    },
     {
       provide: UPDATE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,

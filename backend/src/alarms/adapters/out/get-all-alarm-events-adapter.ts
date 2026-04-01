@@ -24,6 +24,7 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
           alarmEvent.priority,
           alarmEvent.activation_time,
           alarmEvent.resolution_time,
+          alarmEvent.user_id
         ),
     );
   }

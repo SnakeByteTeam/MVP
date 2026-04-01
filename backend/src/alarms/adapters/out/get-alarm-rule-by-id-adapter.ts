@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { GetAlarmRuleByIdCmd } from '../../application/commands/get-alarm-rule-by-id-cmd';
-import { GET_ALARM_RULE_BY_ID_PORT, GetAlarmRuleByIdPort } from '../../application/ports/out/get-alarm-rule-by-id.port';
+import { GetAlarmRuleByIdPort } from '../../application/ports/out/get-alarm-rule-by-id.port';
 import { AlarmRule } from '../../domain/models/alarm-rule.model';
 import { GET_ALARM_RULE_BY_ID_REPOSITORY, GetAlarmRuleByIdRepository } from '../../application/repository/get-alarm-rule-by-id-repository.interface';
 

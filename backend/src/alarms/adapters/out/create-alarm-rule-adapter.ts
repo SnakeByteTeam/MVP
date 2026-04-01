@@ -33,7 +33,7 @@ export class CreateAlarmRuleAdapter implements CreateAlarmRulePort {
       alarmRule.arming_time,
       alarmRule.dearming_time,
       alarmRule.is_armed,
-      alarmRule.device_id,
+      alarmRule.device_id
     );
   }
 }

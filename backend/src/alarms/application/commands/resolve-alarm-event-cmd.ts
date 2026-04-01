@@ -1,3 +1,6 @@
 export class ResolveAlarmEventCmd {
-  constructor(public id: string) {}
+  constructor(
+    public alarmId: string,
+    public userId: number
+  ) {}
 }

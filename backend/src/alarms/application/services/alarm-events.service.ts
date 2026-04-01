@@ -44,7 +44,7 @@ export class AlarmEventsService
     req: GetAllAlarmEventsByUserIdCmd,
   ): Promise<AlarmEvent[]> {
     return await this.getAllAlarmEventsByUserIdPort.getAllAlarmEventsByUserId(
-      req,
+      req
     );
   }
 

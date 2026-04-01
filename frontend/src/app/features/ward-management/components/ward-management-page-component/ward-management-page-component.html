@@ -1,138 +1,295 @@
-<section aria-label="Gestione reparti" class="flex h-full min-h-0 flex-col gap-4 bg-slate-100 p-4 lg:p-6">
-    <header class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-            <h1 class="text-2xl font-semibold text-slate-900">Gestione Reparti</h1>
-            <p class="text-sm text-slate-600">Navigazione a colonne: Reparti, Appartamenti, Operatori.</p>
-        </div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+    rel="stylesheet">
 
-        <button type="button" (click)="onCreateWard()"
-            class="inline-flex items-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600">
-            Nuovo reparto
-        </button>
+<style>
+    :root {
+        --font-display: 'Syne', sans-serif;
+        --font-body: 'DM Sans', sans-serif;
+    }
+
+    * {
+        font-family: var(--font-body);
+    }
+
+    .font-display {
+        font-family: var(--font-display);
+    }
+
+    .dot-grid {
+        background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+        background-size: 22px 22px;
+    }
+
+    /* Finder-style column separator */
+    .col-separator {
+        border-right: 1px solid #e2e8f0;
+    }
+
+    /* Scrollbar */
+    .col-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .col-scroll::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .col-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
+</style>
+
+<section aria-label="Gestione reparti" class="dot-grid flex min-h-screen flex-col gap-5 bg-slate-100 p-5 lg:p-8">
+
+    <!-- Page Header -->
+    <header class="flex flex-wrap items-end justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 shadow-lg">
+                <svg class="h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+                </svg>
+            </div>
+            <div>
+                <h1 class="font-display text-2xl font-bold tracking-tight text-slate-900">Gestione Reparti</h1>
+                <p class="mt-0.5 text-sm text-slate-500">Navigazione a colonne: Reparti → Appartamenti → Operatori.</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div
+                class="flex items-center gap-2 rounded-full border border-slate-300 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-sm">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                Sistema attivo
+            </div>
+            <button type="button" (click)="onCreateWard()"
+                class="inline-flex items-center gap-2 rounded-lg border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 active:scale-[0.98]">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Nuovo reparto
+            </button>
+        </div>
     </header>
 
+    <!-- Snackbar error -->
     @if (snackbarMessage(); as errorMessage) {
     <div role="alert" aria-live="assertive"
-        class="flex items-center justify-between rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-        <span>{{ errorMessage }}</span>
-        <button type="button" (click)="dismissSnackbar()" aria-label="Chiudi messaggio errore"
-            class="rounded px-2 py-1 font-medium hover:bg-red-100">
+        class="flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">
+        <div class="flex items-center gap-2">
+            <svg class="h-4 w-4 flex-shrink-0 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd" />
+            </svg>
+            <span>{{ errorMessage }}</span>
+        </div>
+        <button type="button" (click)="dismissSnackbar()"
+            class="rounded-md border border-red-200 bg-white px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">
             Chiudi
         </button>
     </div>
     }
 
+    <!-- Loading -->
     @if (isLoading$ | async) {
-    <p aria-live="polite" class="text-sm text-slate-600">Caricamento in corso...</p>
+    <div class="flex items-center gap-3 text-sm text-slate-500" aria-live="polite">
+        <div class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"></div>
+        Caricamento in corso…
+    </div>
     }
 
-    <!--Prima sezione reparti-->
     @if (wards$ | async; as wards) {
     @if (wards.length === 0) {
-    <div class="rounded-lg border border-slate-300 bg-white p-8 text-center text-slate-600">Nessun reparto disponibile.
+    <!-- Empty state -->
+    <div
+        class="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white/70 p-16 text-center shadow-sm backdrop-blur-sm">
+        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+            <svg class="h-7 w-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z" />
+            </svg>
+        </div>
+        <p class="mt-4 text-sm font-semibold text-slate-700">Nessun reparto disponibile</p>
+        <p class="mt-1 text-xs text-slate-400">Crea il primo reparto con il pulsante in alto a destra.</p>
     </div>
+
     } @else {
+
+    <!-- Mobile step selector (visible only when a ward is selected) -->
     @if (selectedWard(); as activeWard) {
-    <div class="rounded-xl border border-slate-300 bg-slate-200 p-2 lg:hidden">
-        <div class="grid grid-cols-3 gap-2 text-xs font-semibold uppercase tracking-wide text-slate-700">
-            <button type="button" (click)="showWardListStep()"
-                [class]="mobileStep() === 'wards' ? 'rounded-md px-3 py-2 transition bg-white text-slate-950 shadow-sm' : 'rounded-md px-3 py-2 transition bg-transparent hover:bg-slate-300'">
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:hidden">
+        <div class="grid grid-cols-3 divide-x divide-slate-100 text-xs font-semibold">
+            <button type="button" (click)="showWardListStep()" [class]="mobileStep() === 'wards'
+                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-amber-50 text-amber-700'
+                : 'flex items-center justify-center gap-1.5 px-3 py-2.5 text-slate-500 hover:bg-slate-50'">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zm9.75-9.75A2.25 2.25 0 0115.75 3.75H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zm0 9.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                </svg>
                 Reparti
             </button>
-            <button type="button" (click)="showApartmentsStep()"
-                [class]="mobileStep() === 'apartments' ? 'rounded-md px-3 py-2 transition bg-white text-slate-950 shadow-sm' : 'rounded-md px-3 py-2 transition bg-transparent hover:bg-slate-300'">
+            <button type="button" (click)="showApartmentsStep()" [class]="mobileStep() === 'apartments'
+                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-sky-50 text-sky-700'
+                : 'flex items-center justify-center gap-1.5 px-3 py-2.5 text-slate-500 hover:bg-slate-50'">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
                 Appartamenti
             </button>
-            <button type="button" (click)="showOperatorsStep()"
-                [class]="mobileStep() === 'operators' ? 'rounded-md px-3 py-2 transition bg-white text-slate-950 shadow-sm' : 'rounded-md px-3 py-2 transition bg-transparent hover:bg-slate-300'">
+            <button type="button" (click)="showOperatorsStep()" [class]="mobileStep() === 'operators'
+                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-50 text-emerald-700'
+                : 'flex items-center justify-center gap-1.5 px-3 py-2.5 text-slate-500 hover:bg-slate-50'">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
                 Operatori
             </button>
         </div>
-        <p class="mt-2 truncate px-1 text-xs text-slate-600">Reparto attivo: {{ activeWard.name }}</p>
+        <p class="border-t border-slate-100 px-4 py-2 text-xs text-slate-400">
+            Reparto attivo: <span class="font-semibold text-slate-600">{{ activeWard.name }}</span>
+        </p>
     </div>
     }
 
-    <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[18rem_minmax(0,1fr)_minmax(0,1fr)]">
+    <!-- ══════════════ 3-COLUMN FINDER LAYOUT ══════════════ -->
+    <div class="flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+        style="min-height: 32rem;">
+
+        <!-- ── COL 1: WARD LIST ── -->
         <aside aria-label="Elenco reparti"
-            class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
+            class="col-separator col-scroll flex w-60 flex-shrink-0 flex-col overflow-y-auto lg:flex"
             [class.hidden]="mobileStep() !== 'wards'">
-            <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-                <h2 class="text-base font-semibold text-slate-900">Reparti</h2>
+
+            <div
+                class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm">
+                <span class="font-display text-xs font-bold uppercase tracking-widest text-slate-400">Reparti</span>
                 <button type="button" (click)="onCreateWard()" aria-label="Nuovo reparto"
-                    class="rounded-full bg-emerald-500 px-2.5 py-0.5 text-lg leading-none text-white transition hover:bg-emerald-400">
-                    +
+                    class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-slate-900 transition hover:bg-amber-400">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
                 </button>
             </div>
 
-            <ul class="max-h-[28rem] space-y-2 overflow-y-auto p-3">
+            <ul class="flex-1 space-y-0.5 p-2">
                 @for (ward of wards; track ward.id) {
                 <li>
                     <button type="button" (click)="selectWard(ward.id)"
                         [class]="selectedWardId() === ward.id
-                            ? 'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition border-amber-400 bg-amber-100 text-slate-950'
-                            : 'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100'">
-                        <span class="truncate font-medium">{{ ward.name }}</span>
-                        <span class="rounded bg-slate-200 px-2 py-0.5 text-xs text-slate-700">{{ ward.apartments.length
-                            }}</span>
+                    ? 'group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition bg-amber-500 text-slate-900 shadow-sm'
+                    : 'group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition text-slate-700 hover:bg-slate-50'">
+                        <div class="flex min-w-0 items-center gap-2">
+                            <svg class="h-3.5 w-3.5 flex-shrink-0 opacity-60" fill="none" viewBox="0 0 24 24"
+                                stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21" />
+                            </svg>
+                            <span class="truncate text-sm font-medium">{{ ward.name }}</span>
+                        </div>
+                        <span
+                            [class]="selectedWardId() === ward.id
+                    ? 'ml-1 flex-shrink-0 rounded-full bg-white/30 px-1.5 py-0.5 text-[10px] font-bold text-slate-800'
+                    : 'ml-1 flex-shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500'">
+                            {{ ward.apartments.length }}
+                        </span>
                     </button>
                 </li>
                 }
             </ul>
         </aside>
 
-        <!--Seconda sezione appartamenti del reparto-->
-        <section aria-label="Dettagli reparto e appartamenti"
-            class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
+        <!-- ── COL 2: APARTMENTS ── -->
+        <section aria-label="Appartamenti del reparto"
+            class="col-separator col-scroll flex flex-1 flex-col overflow-y-auto lg:flex"
             [class.hidden]="mobileStep() !== 'apartments'">
+
             @if (selectedWard(); as activeWard) {
-            <div class="border-b border-slate-200 px-4 py-3">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-lg font-semibold text-slate-900">{{ activeWard.name }}</h2>
-                        <p class="text-sm text-slate-600">Dettaglio appartamenti assegnati al reparto.</p>
+
+            <div class="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span
+                            class="font-display text-xs font-bold uppercase tracking-widest text-slate-400">Appartamenti</span>
+                        <h2 class="mt-0.5 truncate text-sm font-semibold text-slate-800">{{ activeWard.name }}</h2>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-shrink-0 items-center gap-1.5">
                         <button type="button" (click)="onEditWard(activeWard)"
-                            class="rounded-md border border-slate-400 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                            Modifica
+                            class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                            aria-label="Modifica reparto">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                            </svg>
                         </button>
                         <button type="button" (click)="onDeleteWard(activeWard.id)"
-                            class="rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-100">
-                            Elimina
+                            class="flex h-7 w-7 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-400 transition hover:border-red-200 hover:bg-red-100 hover:text-red-600"
+                            aria-label="Elimina reparto">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
+                        </button>
+                        <button type="button" (click)="onAssignPlant(activeWard.id)"
+                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white transition hover:bg-sky-500"
+                            aria-label="Assegna appartamento">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="p-3">
-                <div class="mb-3 flex items-center justify-between gap-2">
-                    <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Appartamenti del reparto
-                    </h3>
-                    <button type="button" (click)="onAssignPlant(activeWard.id)"
-                        class="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-blue-500">
-                        Assegna appartamento
-                    </button>
-                </div>
-
+            <div class="flex-1 p-3">
                 @if (activeWard.apartments.length === 0) {
-                <p class="rounded-md border border-dashed border-slate-300 px-3 py-5 text-sm text-slate-600">Nessun
-                    appartamento assegnato.</p>
+                <div
+                    class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 text-center">
+                    <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    <p class="mt-3 text-xs font-medium text-slate-400">Nessun appartamento assegnato</p>
+                </div>
                 } @else {
-                <ul class="max-h-[24rem] space-y-2 overflow-y-auto">
+                <ul class="space-y-0.5">
                     @for (apartment of activeWard.apartments; track apartment.id) {
                     <li>
-                        <div class="flex items-center gap-2 rounded-md border px-3 py-2" [class]="selectedApartmentId() === apartment.id
-                                ? 'flex items-center gap-2 rounded-md border px-3 py-2 border-blue-400 bg-blue-50'
-                                : 'flex items-center gap-2 rounded-md border px-3 py-2 border-slate-300 bg-slate-50'">
+                        <div
+                            [class]="selectedApartmentId() === apartment.id
+                        ? 'group flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 bg-sky-500 text-white shadow-sm'
+                        : 'group flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-slate-700 hover:bg-slate-50'">
                             <button type="button" (click)="selectApartment(apartment.id)"
-                                class="min-w-0 flex-1 truncate text-left text-sm font-medium text-slate-900">
-                                {{ apartment.name }}
+                                class="flex min-w-0 flex-1 items-center gap-2 text-left">
+                                <svg [class]="selectedApartmentId() === apartment.id ? 'h-3.5 w-3.5 flex-shrink-0 text-white/70' : 'h-3.5 w-3.5 flex-shrink-0 text-slate-400'"
+                                    fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                </svg>
+                                <span class="truncate text-sm font-medium">{{ apartment.name }}</span>
                             </button>
                             <button type="button"
                                 (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
                                 aria-label="Rimuovi appartamento"
-                                class="rounded-full bg-red-500 px-2 py-0.5 text-sm font-semibold text-white transition hover:bg-red-400">
-                                x
+                                [class]="selectedApartmentId() === apartment.id
+                            ? 'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white/20 text-white opacity-0 transition hover:bg-white/30 group-hover:opacity-100'
+                            : 'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100'">
+                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </button>
                         </div>
                     </li>
@@ -140,46 +297,76 @@
                 </ul>
                 }
             </div>
+
             } @else {
-            <div class="p-6 text-sm text-slate-600">Seleziona un reparto per visualizzare gli appartamenti.</div>
+            <div class="flex flex-1 flex-col items-center justify-center p-8 text-center">
+                <svg class="h-10 w-10 text-slate-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zm-7.518-.267A8.25 8.25 0 1120.25 10.5M8.288 14.212A5.25 5.25 0 1117.25 10.5" />
+                </svg>
+                <p class="mt-4 text-sm font-medium text-slate-400">Seleziona un reparto</p>
+                <p class="mt-1 text-xs text-slate-300">Gli appartamenti appariranno qui</p>
+            </div>
             }
         </section>
 
-        <!--Terza sezione operatori del reparto-->
-        <section aria-label="Operatori assegnati"
-            class="min-h-[22rem] overflow-hidden rounded-xl border border-slate-300 bg-white lg:block"
+        <!-- ── COL 3: OPERATORS ── -->
+        <section aria-label="Operatori assegnati" class="col-scroll flex flex-1 flex-col overflow-y-auto lg:flex"
             [class.hidden]="mobileStep() !== 'operators'">
+
             @if (selectedWard(); as activeWard) {
-            <div class="border-b border-slate-200 px-4 py-3">
-                <div class="flex items-center justify-between gap-2">
-                    <div>
-                        <h2 class="text-lg font-semibold text-slate-900">Operatori Socio Sanitari</h2>
-                        <p class="text-sm text-slate-600">{{ activeWard.name }}</p>
+
+            <div class="sticky top-0 z-10 border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm">
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <span
+                            class="font-display text-xs font-bold uppercase tracking-widest text-slate-400">Operatori</span>
+                        <h2 class="mt-0.5 truncate text-sm font-semibold text-slate-800">{{ activeWard.name }}</h2>
                     </div>
                     <button type="button" (click)="onAssignOperator(activeWard.id)"
-                        class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-500">
-                        Aggiungi operatore
+                        class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white transition hover:bg-emerald-500"
+                        aria-label="Aggiungi operatore">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
                     </button>
                 </div>
             </div>
 
-            <div class="p-3">
+            <div class="flex-1 p-3">
                 @if (activeWard.operators.length === 0) {
-                <p class="rounded-md border border-dashed border-slate-300 px-3 py-5 text-sm text-slate-600">Nessun
-                    operatore assegnato.</p>
+                <div
+                    class="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-12 text-center">
+                    <svg class="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                    <p class="mt-3 text-xs font-medium text-slate-400">Nessun operatore assegnato</p>
+                </div>
                 } @else {
-                <ul class="max-h-[24rem] space-y-2 overflow-y-auto">
+                <ul class="space-y-0.5">
                     @for (operator of activeWard.operators; track operator.id) {
                     <li>
                         <div
-                            class="flex items-center justify-between gap-2 rounded-md border border-slate-300 bg-slate-50 px-3 py-2">
-                            <span class="truncate text-sm font-medium text-slate-900">{{
-                                getOperatorDisplayName(operator.firstName, operator.lastName) }}</span>
+                            class="group flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-slate-700 hover:bg-slate-50">
+                            <div class="flex min-w-0 items-center gap-2.5">
+                                <div
+                                    class="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-700">
+                                    {{ operator.firstName[0] }}{{ operator.lastName[0] }}
+                                </div>
+                                <span class="truncate text-sm font-medium">{{ getOperatorDisplayName(operator.firstName,
+                                    operator.lastName) }}</span>
+                            </div>
                             <button type="button"
                                 (click)="onRemoveOperator({ wardId: activeWard.id, userId: operator.id })"
                                 aria-label="Rimuovi operatore"
-                                class="rounded-full bg-red-500 px-2 py-0.5 text-sm font-semibold text-white transition hover:bg-red-400">
-                                x
+                                class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100">
+                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </button>
                         </div>
                     </li>
@@ -187,46 +374,45 @@
                 </ul>
                 }
             </div>
+
             } @else {
-            <div class="p-6 text-sm text-slate-600">Seleziona un reparto per visualizzare gli operatori assegnati.</div>
+            <div class="flex flex-1 flex-col items-center justify-center p-8 text-center">
+                <svg class="h-10 w-10 text-slate-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                <p class="mt-4 text-sm font-medium text-slate-400">Seleziona un reparto</p>
+                <p class="mt-1 text-xs text-slate-300">Gli operatori appariranno qui</p>
+            </div>
             }
         </section>
-    </div>
 
-    @if (selectedWard()) {
-    <div
-        class="flex items-center justify-between gap-2 rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-700 lg:hidden">
-        <button type="button" (click)="showWardListStep()"
-            class="rounded-md border border-slate-300 px-3 py-1.5">Reparti</button>
-        <button type="button" (click)="showApartmentsStep()"
-            class="rounded-md border border-slate-300 px-3 py-1.5">Appartamenti</button>
-        <button type="button" (click)="showOperatorsStep()"
-            class="rounded-md border border-slate-300 px-3 py-1.5">Operatori</button>
     </div>
-    }
+    <!-- end finder panel -->
+
     }
     }
 
+    <!-- Dialogs -->
     @if (wardDialogMode() !== 'closed') {
     <app-ward-form-dialog-component [ward]="wardDialogValue()"
         (submitted)="wardDialogMode() === 'create' ? onCreateWardSubmit($event) : onEditWardSubmit($event)"
         (cancelled)="onCloseWardDialog()" />
     }
-
     @if (operatorWardId(); as activeWardId) {
     <app-assign-operator-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
         [availableOperators]="availableOperators()" (submitted)="onAssignOperatorSubmit($event)"
         (cancelled)="onCloseAssignOperatorDialog()" />
     }
-
     @if (plantWardId(); as activeWardId) {
     <app-assign-ward-dialog-component [wardId]="activeWardId" [availableWards]="wardsSnapshot()"
         [availablePlants]="availablePlants()" (submitted)="onAssignPlantSubmit($event)"
         (cancelled)="onCloseAssignPlantDialog()" />
     }
-
     @if (confirmState()) {
     <app-confirm-dialog [message]="getConfirmMessage()" [confirmLabel]="getConfirmLabel()" cancelLabel="Annulla"
         (confirmed)="onConfirmDialogConfirmed()" (cancelled)="onConfirmDialogCancelled()" />
     }
+
 </section>

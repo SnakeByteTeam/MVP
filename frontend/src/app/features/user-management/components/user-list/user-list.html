@@ -31,10 +31,11 @@
         <table class="min-w-full text-left text-sm">
             <thead>
                 <tr class="border-b border-slate-100">
-                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Nome</th>
-                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Cognome</th>
                     <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Username
                     </th>
+                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Nome</th>
+                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Cognome</th>
+
                     <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Azioni</th>
                 </tr>
             </thead>
@@ -42,14 +43,15 @@
 
                 @for (user of users(); track user.id) {
                 <tr class="group transition-colors hover:bg-slate-50/80">
-                    <td class="px-5 py-3 text-sm text-slate-700">{{ user.name }}</td>
-                    <td class="px-5 py-3 text-sm text-slate-700">{{ user.surname }}</td>
                     <td class="px-5 py-3">
                         <span
                             class="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">
                             <span class="text-slate-400">@</span>{{ user.username }}
                         </span>
                     </td>
+                    <td class="px-5 py-3 text-sm text-slate-700">{{ user.name }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-700">{{ user.surname }}</td>
+
                     <td class="px-5 py-3">
                         <button type="button" (click)="onDeleteRequest(user)"
                             class="inline-flex items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">

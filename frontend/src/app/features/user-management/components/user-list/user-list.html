@@ -1,78 +1,151 @@
-<section class="rounded-xl border border-slate-300 bg-white p-4 shadow-sm sm:p-5"
+<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
     aria-label="Elenco operatori sanitari">
-    <header class="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-        <h2 class="text-base font-semibold text-slate-900">Elenco operatori sanitari</h2>
-        <span class="rounded bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">{{ users()?.length ?? 0 }}
-            utenti</span>
+
+    <!-- Card Header -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+        <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-sky-100">
+                <svg class="h-4 w-4 text-sky-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="font-display text-sm font-bold tracking-tight text-slate-900"
+                    style="font-family:'Syne',sans-serif">
+                    Elenco operatori sanitari
+                </h2>
+                <p class="text-xs text-slate-500">Anagrafica utenti registrati nel sistema.</p>
+            </div>
+        </div>
+        <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+            {{ users()?.length ?? 0 }} utenti
+        </span>
     </header>
 
+    <!-- Table -->
     <div class="overflow-x-auto">
-        <table class="min-w-full border-separate border-spacing-0 text-left text-sm text-slate-800">
+        <table class="min-w-full text-left text-sm">
             <thead>
-                <tr>
-                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Nome</th>
-                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Cognome
+                <tr class="border-b border-slate-100">
+                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Nome</th>
+                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Cognome</th>
+                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Username
                     </th>
-                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Username
-                    </th>
-                    <th class="border-b border-slate-300 bg-slate-50 px-3 py-2 font-semibold text-slate-700">Azioni</th>
+                    <th class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Azioni</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-50">
+
                 @for (user of users(); track user.id) {
-                <tr class="odd:bg-white even:bg-slate-50/50">
-                    <td class="border-b border-slate-200 px-3 py-2">{{ user.name }}</td>
-                    <td class="border-b border-slate-200 px-3 py-2">{{ user.surname }}</td>
-                    <td class="border-b border-slate-200 px-3 py-2 font-medium text-slate-900">{{ user.username }}</td>
-                    <td class="border-b border-slate-200 px-3 py-2">
+                <tr class="group transition-colors hover:bg-slate-50/80">
+                    <td class="px-5 py-3 text-sm text-slate-700">{{ user.name }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-700">{{ user.surname }}</td>
+                    <td class="px-5 py-3">
+                        <span
+                            class="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">
+                            <span class="text-slate-400">@</span>{{ user.username }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3">
                         <button type="button" (click)="onDeleteRequest(user)"
-                            class="inline-flex items-center rounded-md border border-red-300 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
+                            class="inline-flex items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                            </svg>
                             Elimina
                         </button>
                     </td>
                 </tr>
                 } @empty {
                 <tr>
-                    <td colspan="4" class="px-3 py-10 text-center text-sm text-slate-600">
-                        Nessun operatore sanitario presente a sistema.
+                    <td colspan="4" class="px-5 py-14 text-center">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+                                <svg class="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-slate-600">Nessun operatore sanitario presente</p>
+                                <p class="mt-0.5 text-xs text-slate-400">Usa il form a sinistra per aggiungere il primo
+                                    profilo.</p>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 }
+
             </tbody>
         </table>
     </div>
 
+    <!-- Delete Confirm Dialog -->
     @if (pendingDeleteUser(); as userToDelete) {
     <dialog open aria-labelledby="delete-user-dialog-title"
-        class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md rounded-lg border border-neutral-500 bg-[#efefef] p-4 shadow-2xl backdrop:bg-black/45 focus:outline-none">
-        <div class="mb-3 flex items-start justify-between gap-3 border-b border-neutral-400 pb-2">
-            <div>
-                <h3 id="delete-user-dialog-title" class="text-base font-bold text-neutral-900">Conferma eliminazione
-                </h3>
-                <p class="text-xs text-neutral-700">Questa operazione non può essere annullata.</p>
+        class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-900/50 focus:outline-none">
+
+        <!-- Dialog Header -->
+        <div class="flex items-start justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                    <svg class="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 id="delete-user-dialog-title" class="text-sm font-bold text-slate-900">Conferma eliminazione
+                    </h3>
+                    <p class="text-xs text-slate-500">Questa operazione non può essere annullata.</p>
+                </div>
             </div>
             <button type="button" (click)="onDeleteCancel()" aria-label="Chiudi"
-                class="rounded-md border border-neutral-600 bg-white px-2 py-0.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-100">
-                x
+                class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">
+                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
 
-        <p class="text-sm text-neutral-800">
-            Vuoi eliminare l'operatore
-            <strong>{{ userToDelete.name }} {{ userToDelete.surname }}</strong>
-            ({{ userToDelete.username }})?
-        </p>
+        <!-- Dialog Body -->
+        <div class="px-5 py-5">
+            <p class="text-sm text-slate-700">
+                Stai per eliminare l'operatore
+                <strong class="font-semibold text-slate-900">{{ userToDelete.name }} {{ userToDelete.surname
+                    }}</strong>.
+            </p>
+            <div class="mt-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
+                <svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span class="font-mono font-medium text-slate-600">@{{ userToDelete.username }}</span>
+            </div>
+        </div>
 
-        <div class="mt-4 flex items-center justify-end gap-2">
+        <!-- Dialog Actions -->
+        <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
             <button type="button" (click)="onDeleteCancel()"
-                class="rounded-md border border-neutral-600 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-800 hover:bg-neutral-100">
+                class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400">
                 Annulla
             </button>
             <button type="button" (click)="onDeleteConfirm()"
-                class="rounded-md border border-red-700 bg-red-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-red-700">
-                Elimina
+                class="rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
+                Elimina operatore
             </button>
         </div>
+
     </dialog>
     }
+
 </section>

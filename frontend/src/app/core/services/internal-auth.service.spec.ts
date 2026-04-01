@@ -173,6 +173,33 @@ describe('InternalAuthService', () => {
     expect(service.isAuthenticated()).toBe(false);
   });
 
+  it('chiama /auth/logout con credenziali e resetta sessione locale', async () => {
+    const loginSub = service.login('mrossi', loginCredential).subscribe();
+    const loginRequest = httpMock.expectOne('http://localhost:3000/auth/login');
+    loginRequest.flush({
+      accessToken: createAccessToken({
+        userId: 'user-1',
+        username: 'mrossi',
+        role: UserRole.AMMINISTRATORE,
+        isFirstAccess: false,
+      }),
+    });
+    loginSub.unsubscribe();
+
+    const logoutPromise = firstValueFrom(service.logoutFromBackend());
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/logout');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.body).toEqual({});
+    request.flush(null);
+
+    await logoutPromise;
+    expect(service.getToken()).toBeNull();
+    expect(service.getRole()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
   it('espone stream utente corrente con valore iniziale null', async () => {
     const currentUser = await firstValueFrom(service.getCurrentUser$());
     expect(currentUser).toBeNull();

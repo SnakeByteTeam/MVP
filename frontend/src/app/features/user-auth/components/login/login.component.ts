@@ -6,6 +6,7 @@ import { AuthBaseComponent } from '../auth-base/auth-base.component';
 	selector: 'app-login',
 	imports: [ReactiveFormsModule],
 	templateUrl: './login.component.html',
+	styleUrls: ['./login.component.css'],
 })
 export class LoginComponent extends AuthBaseComponent implements OnInit {
 	private readonly fb = inject(FormBuilder);

@@ -1,7 +1,9 @@
 import { FindDeviceByIdPort } from '../ports/out/find-device-by-id.port';
 import { FindDeviceByPlantIdPort } from '../ports/out/find-device-by-plantid.port';
+import { IngestTimeseriesPort } from '../ports/out/ingest-timeseries.port';
 import { FindDeviceByIdCmd } from '../commands/find-device-by-id.command';
 import { FindDeviceByPlantIdCmd } from '../commands/find-device-by-plantid.command';
+import { IngestTimeseriesCmd } from '../commands/ingest-timeseries.command';
 import { Device } from 'src/device/domain/models/device.model';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
 import { DeviceService } from './device.service';
@@ -10,6 +12,7 @@ describe('DeviceService', () => {
   let service: DeviceService;
   let findByIdPort: jest.Mocked<FindDeviceByIdPort>;
   let findByPlantIdPort: jest.Mocked<FindDeviceByPlantIdPort>;
+  let ingestTimeseriesPort: jest.Mocked<IngestTimeseriesPort>;
 
   beforeEach(() => {
     findByIdPort = {
@@ -20,7 +23,11 @@ describe('DeviceService', () => {
       findByPlantId: jest.fn(),
     };
 
-    service = new DeviceService(findByIdPort, findByPlantIdPort);
+    ingestTimeseriesPort = {
+      ingestTimeseries: jest.fn(),
+    };
+
+    service = new DeviceService(findByIdPort, findByPlantIdPort, ingestTimeseriesPort);
   });
 
   it('should return the same device that FindByIdPort returns', async () => {
@@ -103,5 +110,84 @@ describe('DeviceService', () => {
     expect(findByPlantIdPort.findByPlantId).toHaveBeenCalledWith(cmd);
     expect(findByPlantIdPort.findByPlantId).toHaveBeenCalledTimes(1);
     expect(devices).toBe(returnedDevices);
+  });
+
+  describe('ingestTimeseries', () => {
+    it('should successfully ingest timeseries data', async () => {
+      const cmd: IngestTimeseriesCmd = {
+        datapointId: 'dp-123',
+        value: '25.5',
+        timestamp: '2026-04-01T13:41:58Z',
+      };
+
+      ingestTimeseriesPort.ingestTimeseries.mockResolvedValue(undefined);
+
+      await service.ingestTimeseries(cmd);
+
+      expect(ingestTimeseriesPort.ingestTimeseries).toHaveBeenCalledWith(cmd);
+      expect(ingestTimeseriesPort.ingestTimeseries).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error when cmd is null', async () => {
+      await expect(service.ingestTimeseries(null as any)).rejects.toThrow(
+        "Can't ingest timeseries without parameters",
+      );
+      expect(ingestTimeseriesPort.ingestTimeseries).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when cmd is undefined', async () => {
+      await expect(service.ingestTimeseries(undefined as any)).rejects.toThrow(
+        "Can't ingest timeseries without parameters",
+      );
+      expect(ingestTimeseriesPort.ingestTimeseries).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when datapointId is missing', async () => {
+      const cmd = {
+        value: 25.5,
+        timestamp: '2026-04-01T13:41:58Z',
+      } as any;
+
+      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
+        "Can't ingest timeseries without parameters",
+      );
+    });
+
+    it('should throw error when value is missing', async () => {
+      const cmd = {
+        datapointId: 'dp-123',
+        timestamp: '2026-04-01T13:41:58Z',
+      } as any;
+
+      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
+        "Can't ingest timeseries without parameters",
+      );
+    });
+
+    it('should throw error when timestamp is missing', async () => {
+      const cmd = {
+        datapointId: 'dp-123',
+        value: 25.5,
+      } as any;
+
+      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
+        "Can't ingest timeseries without parameters",
+      );
+    });
+
+    it('should handle port errors', async () => {
+      const cmd: IngestTimeseriesCmd = {
+        datapointId: 'dp-123',
+        value: '25.5',
+        timestamp: '2026-04-01T13:41:58Z',
+      };
+
+      const error = new Error('Database connection failed');
+      ingestTimeseriesPort.ingestTimeseries.mockRejectedValue(error);
+
+      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
+        'Database connection failed',
+      );
+    });
   });
 });

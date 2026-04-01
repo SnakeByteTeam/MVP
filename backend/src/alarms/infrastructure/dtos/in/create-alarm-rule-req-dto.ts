@@ -1,4 +1,4 @@
-import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { AlarmPriority } from '../../../domain/models/alarm-priority.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -14,10 +14,11 @@ export class CreateAlarmRuleReqDto {
   @ApiProperty({ enum: AlarmPriority })
   priority!: AlarmPriority;
 
-  @ApiProperty()
+  @ApiProperty({ enum: ['>', '<', '>=', '<='] })
   @IsString()
   @MinLength(1)
-  @MaxLength(1)
+  @MaxLength(2)
+  @IsIn(['>', '<', '>=', '<='])
   thresholdOperator!: string;
 
   @ApiProperty()

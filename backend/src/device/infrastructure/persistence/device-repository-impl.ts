@@ -69,12 +69,13 @@ export class DeviceRepositoryImpl
     try {
       const result = await client.query(
         `INSERT INTO datapoint_history (timestamp, datapoint_id, value)
-       VALUES ($1::TIMESTAMPTZ, $2::VARCHAR(128), $3::VARCHAR(50))
+       VALUES ($1::TIMESTAMPTZ, $2::TEXT, $3::TEXT)
        ON CONFLICT (timestamp, datapoint_id) DO UPDATE SET value = EXCLUDED.value`,
         [timestamp, datapointId, value],
       );
 
-      return result.rows.length > 0;
+      if(!result.rowCount) return false;
+      return result.rowCount > 0;
     } catch (err) {
       throw new Error(`Database error: ${err.message}`);
     } finally {

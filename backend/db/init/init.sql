@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+
 DROP TABLE IF EXISTS token_cache;
 DROP TABLE IF EXISTS plant;
 
@@ -25,8 +27,8 @@ CREATE TABLE plant (
 
 CREATE TABLE datapoint_history (
     timestamp    TIMESTAMPTZ  NOT NULL,
-    datapoint_id VARCHAR(128)  NOT NULL,
-    value        VARCHAR(50)  NOT NULL,
+    datapoint_id TEXT NOT NULL,
+    value        TEXT NOT NULL,
     PRIMARY KEY (timestamp, datapoint_id)
 );
 

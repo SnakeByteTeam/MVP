@@ -16,13 +16,13 @@ export class IngestTimeseriesAdapter implements IngestTimeseriesPort {
     if (!cmd?.datapointId || !cmd?.value || !cmd?.timestamp)
       throw new Error("Can't ingest timeseries without parameters");
 
-    if (
-      !(await this.ingestRepoPort.ingestTimeseries(
-        cmd.datapointId,
-        cmd.value,
-        cmd.timestamp,
-      ))
-    )
-      throw new Error(`Error ingesting timeseries of ${cmd.datapointId}`);
+    const result: boolean = 
+      await this.ingestRepoPort.ingestTimeseries(
+          cmd.datapointId,
+          cmd.value,
+          cmd.timestamp,
+        );
+   
+    if(!result) throw new Error(`Error ingesting timeseries of ${cmd.datapointId}`);
   }
 }

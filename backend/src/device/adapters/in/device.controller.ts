@@ -38,7 +38,7 @@ import { Device } from 'src/device/domain/models/device.model';
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
 
 @ApiTags('device')
-@Controller(':plantId/device')
+@Controller('/device')
 export class DeviceController {
   constructor(
     @Inject(FIND_DEVICE_BY_ID_USECASE)
@@ -49,7 +49,7 @@ export class DeviceController {
     private readonly ingestTimeseries: IngestTimeseriesUseCase,
   ) {}
 
-  @Get(':id')
+  @Get('/:id')
   @ApiOperation({
     summary: 'Get a single device by ID',
     description:
@@ -84,7 +84,6 @@ export class DeviceController {
     },
   })
   async findById(
-    @Param('plantId') plantId: string,
     @Param('id') deviceId: string,
   ): Promise<DeviceDto> {
     const findByIdCmd: FindDeviceByIdCmd = {
@@ -99,7 +98,7 @@ export class DeviceController {
     }
   }
 
-  @Get('')
+  @Get('/plant/:plantId')
   @ApiOperation({
     summary: 'Get all devices for a plant',
     description: 'Retrieves all devices within a specific plant.',
@@ -157,15 +156,15 @@ export class DeviceController {
       for (const cmd of ingestCmds) {
         try {
           console.log(
-            `[CacheController] Starting ingestion for ${cmd.datapointId}`,
+            `[DeviceController] Starting ingestion for ${cmd.datapointId}`,
           );
           await this.ingestTimeseries.ingestTimeseries(cmd);
           console.log(
-            `[CacheController] Ingestion ended successfully for ${cmd.datapointId}`,
+            `[DeviceController] Ingestion ended successfully for ${cmd.datapointId}`,
           );
         } catch (err) {
           console.error(
-            `[CacheController] Error ingesting for ${cmd.datapointId}:`,
+            `[DeviceController] Error ingesting for ${cmd.datapointId}:`,
             err.message,
           );
         }

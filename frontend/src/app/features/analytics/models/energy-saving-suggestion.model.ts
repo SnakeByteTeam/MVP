@@ -1,1 +1,4 @@
-export interface EnergySavingSuggestionDto {}
+export interface EnergySavingSuggestionDto {
+    description: string;
+    isSuggestion: boolean;
+}

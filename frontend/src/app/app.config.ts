@@ -21,10 +21,13 @@ const apiBaseUrl = (() => {
   return normalized;
 })();
 
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    provideCharts(withDefaultRegisterables()),
     provideHttpClient(withInterceptors([authInterceptor])),
     { provide: API_BASE_URL, useValue: apiBaseUrl },
     provideAppInitializer(() => {
@@ -32,3 +35,5 @@ export const appConfig: ApplicationConfig = {
     }),
   ]
 };
+
+

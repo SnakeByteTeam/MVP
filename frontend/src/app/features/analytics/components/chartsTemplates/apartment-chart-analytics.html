@@ -1,0 +1,22 @@
+<div class="block w-full h-full p-4 ">
+  <div class="border-b pb-1 mb-5">
+    <h1 class="font-bold">{{chartInfo.title}}</h1>
+    <h2>Appartamento</h2>
+  </div>
+  <canvas baseChart
+    [data]="renderedChartData"
+    [options]="chartOptions"
+    [type]="chartType">
+  </canvas>
+  <div *ngIf="chartInfo.suggestion.isSuggestion">
+    <div class="flex justify-end">
+    <button (click)="showHideSugg()" class="m-2">
+      <span>{{ showSuggestions ? 'Nascondi' : 'Mostra' }}</span>
+    </button>
+    </div>
+    <div *ngIf="showSuggestions"  class="p-4 rounded-2xl bg-[rgb(255,220,50)]">
+    <p class="font-bold">SUGGERIMENTO</p>
+    <p>{{chartInfo.suggestion.description}}</p>
+    </div>
+  </div>
+</div>

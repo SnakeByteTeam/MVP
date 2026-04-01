@@ -44,7 +44,7 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
 
             {
                 path: 'analytics',
-                canActivate: [authGuard],
+                //canActivate: [authGuard],
                 loadChildren: () => import('../analytics/analytics.routes').then((m) => m.ANALYTICS_ROUTES)
             },
             {

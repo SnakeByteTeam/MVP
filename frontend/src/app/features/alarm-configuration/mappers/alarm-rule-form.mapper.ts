@@ -15,8 +15,8 @@ export class AlarmRuleFormMapper {
             priority: rule.priority,
             thresholdOperator: this.toFormThresholdOperator(rule.thresholdOperator),
             threshold: this.toFormThreshold(rule.thresholdValue),
-            activationTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
-            deactivationTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
+            armingTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
+            dearmingTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
             enabled: rule.isArmed,
         };
     }

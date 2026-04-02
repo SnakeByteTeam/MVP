@@ -148,24 +148,22 @@ describe('EventSubscriptionService', () => {
       eventType: PushEventType.ALARM_TRIGGERED,
       timestamp: '2026-03-19T10:00:00.000Z',
       payload: {
-        activeAlarmId: 'active-alarm-123',
+        id: 'active-alarm-123',
         alarmRuleId: 'alarm-rule-123',
         alarmName: 'Caduta rilevata',
         priority: AlarmPriority.RED,
-        triggeredAt: '2026-03-19T10:00:00.000Z',
-        resolvedAt: null,
-        user_id: 'user-123',
+        activationTime: '2026-03-19T10:00:00.000Z',
+        resolutionTime: null,
       },
     });
 
     expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith({
-      activeAlarmId: 'active-alarm-123',
+      id: 'active-alarm-123',
       alarmRuleId: 'alarm-rule-123',
       alarmName: 'Caduta rilevata',
       priority: AlarmPriority.RED,
-      triggeredAt: '2026-03-19T10:00:00.000Z',
-      resolvedAt: null,
-      user_id: 'user-123',
+      activationTime: '2026-03-19T10:00:00.000Z',
+      resolutionTime: null,
     });
   });
 
@@ -176,7 +174,7 @@ describe('EventSubscriptionService', () => {
       eventType: PushEventType.ALARM_RESOLVED,
       timestamp: '2026-03-19T10:00:00.000Z',
       payload: {
-        activeAlarmId: 'active-alarm-123',
+        id: 'active-alarm-123',
       },
     });
 
@@ -216,7 +214,7 @@ describe('EventSubscriptionService', () => {
       eventType: PushEventType.ALARM_TRIGGERED,
       timestamp: '2026-03-19T10:00:00.000Z',
       payload: {
-        activeAlarmId: 'active-alarm-123',
+        id: 'active-alarm-123',
       },
     });
 

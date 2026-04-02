@@ -7,11 +7,10 @@ import { GetAllAlarmEventsByUserIdRepository } from '../../application/repositor
 
 export class AlarmEventsRepositoryImpl
   implements
-    ResolveAlarmEventRepository,
-    GetAllAlarmEventsRepository,
-    GetAllAlarmEventsByUserIdRepository
-{
-  constructor(@Inject(PG_POOL) private readonly pool) {}
+  ResolveAlarmEventRepository,
+  GetAllAlarmEventsRepository,
+  GetAllAlarmEventsByUserIdRepository {
+  constructor(@Inject(PG_POOL) private readonly pool) { }
 
   async getAllAlarmEvents(): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
@@ -22,7 +21,7 @@ export class AlarmEventsRepositoryImpl
 
   async getAllAlarmEventsByUserId(id: number): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
-      'SELECT * FROM alarm_event WHERE id = $1 ORDER BY activation_time DESC',
+      'SELECT * FROM alarm_event WHERE user_id = $1 ORDER BY activation_time DESC',
       [id],
     );
 

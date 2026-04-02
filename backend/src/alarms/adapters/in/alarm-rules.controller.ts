@@ -54,7 +54,7 @@ export class AlarmRulesController {
     private readonly getAllAlarmRulesUseCase: GetAllAlarmRulesUseCase,
     @Inject(UPDATE_ALARM_RULE_USE_CASE)
     private readonly updateAlarmRuleUseCase: UpdateAlarmRuleUseCase,
-  ) {}
+  ) { }
 
   @ApiOkResponse({ type: CreateAlarmRuleResDto })
   @Post()
@@ -68,8 +68,8 @@ export class AlarmRulesController {
         req.priority,
         req.thresholdOperator,
         req.thresholdValue,
-        req.activationTime,
-        req.deactivationTime,
+        req.armingTime,
+        req.dearmingTime,
       ),
     );
     return plainToInstance(CreateAlarmRuleResDto, alarm);
@@ -105,8 +105,8 @@ export class AlarmRulesController {
         req.priority,
         req.thresholdOperator,
         req.thresholdValue,
-        req.activationTime,
-        req.deactivationTime,
+        req.armingTime,
+        req.dearmingTime,
         req.isArmed,
       ),
     );

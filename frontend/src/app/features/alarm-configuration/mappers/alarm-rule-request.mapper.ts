@@ -18,8 +18,8 @@ export class AlarmRuleRequestMapper {
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
             thresholdValue: String(this.requireField(formValue.threshold, 'threshold')),
-            activationTime: formValue.activationTime,
-            deactivationTime: formValue.deactivationTime,
+            armingTime: formValue.armingTime,
+            dearmingTime: formValue.dearmingTime,
         };
     }
 
@@ -28,8 +28,8 @@ export class AlarmRuleRequestMapper {
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
             thresholdValue: String(this.requireField(formValue.threshold, 'threshold')),
-            activationTime: formValue.activationTime,
-            deactivationTime: formValue.deactivationTime,
+            armingTime: formValue.armingTime,
+            dearmingTime: formValue.dearmingTime,
             isArmed: formValue.enabled,
         };
     }
@@ -39,8 +39,8 @@ export class AlarmRuleRequestMapper {
             priority: rule.priority,
             thresholdOperator: rule.thresholdOperator,
             thresholdValue: rule.thresholdValue,
-            activationTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
-            deactivationTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
+            armingTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
+            dearmingTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
             isArmed,
         };
     }

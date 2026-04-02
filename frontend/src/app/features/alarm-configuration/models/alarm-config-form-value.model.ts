@@ -7,7 +7,7 @@ export interface AlarmConfigFormValue {
     priority: AlarmPriority | null;
     thresholdOperator: ThresholdOperator | null;
     threshold: number | null;
-    activationTime: string;
-    deactivationTime: string;
+    armingTime: string;
+    dearmingTime: string;
     enabled: boolean;
 }

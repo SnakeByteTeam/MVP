@@ -6,8 +6,8 @@ export class UpdateAlarmRuleCmd {
     public readonly priority: AlarmPriority,
     public readonly thresholdOperator: string,
     public readonly thresholdValue: string,
-    public readonly activationTime: string,
-    public readonly deactivationTime: string,
+    public readonly armingTime: string,
+    public readonly dearmingTime: string,
     public readonly isArmed: boolean,
-  ) {}
+  ) { }
 }

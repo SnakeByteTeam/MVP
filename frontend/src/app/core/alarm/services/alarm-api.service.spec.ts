@@ -32,9 +32,8 @@ describe('AlarmApiService', () => {
         alarmRuleId: 'alarm-1',
         alarmName: 'Temperatura alta',
         priority: AlarmPriority.RED,
-        triggeredAt: '2026-03-24T10:00:00.000Z',
-        resolvedAt: null,
-        userId: null,
+        activationTime: '2026-03-24T10:00:00.000Z',
+        resolutionTime: null,
     };
 
     beforeEach(() => {
@@ -89,8 +88,8 @@ describe('AlarmApiService', () => {
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
-            activationTime: '09:00',
-            deactivationTime: '18:00',
+            armingTime: '09:00',
+            dearmingTime: '18:00',
         };
 
         service.createAlarmRule(payload).subscribe((result) => {
@@ -108,8 +107,8 @@ describe('AlarmApiService', () => {
             priority: AlarmPriority.ORANGE,
             thresholdOperator: '<',
             thresholdValue: '15',
-            activationTime: '00:00',
-            deactivationTime: '23:59',
+            armingTime: '00:00',
+            dearmingTime: '23:59',
             isArmed: false,
         };
 
@@ -155,25 +154,25 @@ describe('AlarmApiService', () => {
         request.flush([activeAlarm]);
     });
 
-    it('resolveAlarm chiama PATCH /alarm-events/:id/resolve', () => {
-        service.resolveAlarm('active-1').subscribe((result) => {
+    it('resolveAlarm chiama POST /alarm-events/resolve', () => {
+        service.resolveAlarm('active-1', 7).subscribe((result) => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/alarm-events/active-1/resolve');
-        expect(request.request.method).toBe('PATCH');
-        expect(request.request.body).toEqual({});
+        const request = httpController.expectOne('/alarm-events/resolve');
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({ alarmId: 'active-1', userId: 7 });
         request.flush(null);
     });
 
-    it('resolveAlarm codifica activeAlarmId con caratteri riservati', () => {
-        service.resolveAlarm('active/1').subscribe((result) => {
+    it('resolveAlarm invia alarmId nel body anche con caratteri riservati', () => {
+        service.resolveAlarm('active/1', 9).subscribe((result) => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/alarm-events/active%2F1/resolve');
-        expect(request.request.method).toBe('PATCH');
-        expect(request.request.body).toEqual({});
+        const request = httpController.expectOne('/alarm-events/resolve');
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual({ alarmId: 'active/1', userId: 9 });
         request.flush(null);
     });
 

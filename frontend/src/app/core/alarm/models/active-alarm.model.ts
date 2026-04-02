@@ -5,7 +5,6 @@ export interface ActiveAlarm {
 	alarmRuleId: string;
 	alarmName: string;
 	priority: AlarmPriority;
-	triggeredAt: string;
-	resolvedAt: string | null;
-	userId: string | null;
+	activationTime: string;
+	resolutionTime: string | null;
 }

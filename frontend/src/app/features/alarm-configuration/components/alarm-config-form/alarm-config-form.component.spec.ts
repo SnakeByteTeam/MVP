@@ -46,8 +46,8 @@ describe('AlarmConfigFormComponent', () => {
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
         threshold: 12,
-        activationTime: '08:00',
-        deactivationTime: '18:00',
+        armingTime: '08:00',
+        dearmingTime: '18:00',
         enabled: true,
     };
 
@@ -97,8 +97,8 @@ describe('AlarmConfigFormComponent', () => {
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             threshold: 5,
-            activationTime: '07:00',
-            deactivationTime: '19:00',
+            armingTime: '07:00',
+            dearmingTime: '19:00',
             enabled: true,
         });
     });

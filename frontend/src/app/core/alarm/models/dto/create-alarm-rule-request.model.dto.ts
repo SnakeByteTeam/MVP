@@ -6,8 +6,8 @@ export interface CreateAlarmRuleRequestDto {
     priority: number;
     thresholdOperator: string;
     thresholdValue: string;
-    activationTime: string;
-    deactivationTime: string;
+    armingTime: string;
+    dearmingTime: string;
 }
 
 

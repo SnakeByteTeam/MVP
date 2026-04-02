@@ -40,7 +40,7 @@ export class AlarmApiService {
         return this.http.get<ActiveAlarm[]>(`${this.alarmEventsBaseUrl}/${encodeURIComponent(operatorId)}`);
     }
 
-    public resolveAlarm(activeAlarmId: string): Observable<void> {
-        return this.http.patch<void>(`${this.alarmEventsBaseUrl}/${encodeURIComponent(activeAlarmId)}/resolve`, {});
+    public resolveAlarm(alarmId: string, userId: number): Observable<void> {
+        return this.http.post<void>(`${this.alarmEventsBaseUrl}/resolve`, { alarmId, userId });
     }
 }

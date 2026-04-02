@@ -41,8 +41,8 @@ export class AlarmConfigFormComponent implements OnInit {
 			priority: [null as AlarmPriority | null, [Validators.required]],
 			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
 			threshold: [null as number | null, [Validators.required]],
-			activationTime: [''],
-			deactivationTime: [''],
+			armingTime: [''],
+			dearmingTime: [''],
 			enabled: [true],
 		});
 	}

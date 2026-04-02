@@ -34,9 +34,8 @@ describe('AlarmPageManagementComponent', () => {
     alarmRuleId: 'rule-1',
     alarmName: 'Antipanico',
     priority: AlarmPriority.RED,
-    triggeredAt: '2026-03-24T10:00:00.000Z',
-    resolvedAt: null,
-    userId: null,
+    activationTime: '2026-03-24T10:00:00.000Z',
+    resolutionTime: null,
   };
 
   const alarm2: ActiveAlarm = {
@@ -44,9 +43,8 @@ describe('AlarmPageManagementComponent', () => {
     alarmRuleId: 'rule-2',
     alarmName: 'Porta aperta',
     priority: AlarmPriority.ORANGE,
-    triggeredAt: '2026-03-24T10:01:00.000Z',
-    resolvedAt: null,
-    userId: null,
+    activationTime: '2026-03-24T10:01:00.000Z',
+    resolutionTime: null,
   };
 
   const alarmManagementStub = {

@@ -15,7 +15,6 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
 import { SuggestionModule } from './suggestion/suggestion.module';
 import { ValidationModule } from './validation/validation.module';
-import { Alarm } from './alarms/domain/models/alarm.model';
 
 
 @Module({

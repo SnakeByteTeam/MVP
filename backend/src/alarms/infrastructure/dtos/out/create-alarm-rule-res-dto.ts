@@ -21,8 +21,11 @@ export class CreateAlarmRuleResDto {
   thresholdValue!: string;
 
   @ApiProperty()
-  activationTime!: string;
+  armingTime!: Date;
 
   @ApiProperty()
-  deactivationTime!: string;
+  dearmingTime!: Date;
+
+  @ApiProperty()
+  isArmed!: boolean;
 }

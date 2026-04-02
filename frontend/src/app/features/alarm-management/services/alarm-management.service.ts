@@ -63,9 +63,18 @@ export class AlarmManagementService {
         this.resolvingId$.next(activeAlarmId);
         this.resolveError$.next(null);
 
-        this.alarmApiService
-            .resolveAlarm(activeAlarmId)
+        this.authService
+            .getCurrentUser$()
             .pipe(
+                take(1),
+                switchMap((session) => {
+                    const numericUserId = Number(session?.userId);
+                    if (!Number.isInteger(numericUserId)) {
+                        throw new TypeError('Utente corrente non valido per risolvere l\'allarme.');
+                    }
+
+                    return this.alarmApiService.resolveAlarm(activeAlarmId, numericUserId);
+                }),
                 tap(() => {
                     this.alarmStateService.onAlarmResolved(activeAlarmId);
                 }),

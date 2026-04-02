@@ -22,20 +22,19 @@ export class AlarmStateService {
 	}
 
 	public onAlarmTriggered(event: AlarmEvent): void {
-		this.locallyResolvedActiveAlarmIds.delete(event.activeAlarmId);
+		this.locallyResolvedActiveAlarmIds.delete(event.id);
 
 		const current = this.activeAlarms$.getValue();
 		const nextAlarm: ActiveAlarm = {
-			id: event.activeAlarmId,
+			id: event.id,
 			alarmRuleId: event.alarmRuleId,
 			alarmName: event.alarmName,
 			priority: event.priority,
-			triggeredAt: event.triggeredAt,
-			resolvedAt: event.resolvedAt,
-			userId: event.user_id,
+			activationTime: event.activationTime,
+			resolutionTime: event.resolutionTime,
 		};
 
-		const existingIndex = current.findIndex((alarm) => alarm.id === event.activeAlarmId);
+		const existingIndex = current.findIndex((alarm) => alarm.id === event.id);
 		if (existingIndex >= 0) {
 			const updated = [...current];
 			updated[existingIndex] = nextAlarm;

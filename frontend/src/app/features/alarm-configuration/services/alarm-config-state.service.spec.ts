@@ -49,8 +49,8 @@ describe('AlarmConfigStateService', () => {
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.EQUAL_TO,
         threshold: 22,
-        activationTime: '09:00',
-        deactivationTime: '18:00',
+        armingTime: '09:00',
+        dearmingTime: '18:00',
         enabled: true,
     };
 
@@ -138,8 +138,8 @@ describe('AlarmConfigStateService', () => {
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
-            activationTime: '09:00',
-            deactivationTime: '18:00',
+            armingTime: '09:00',
+            dearmingTime: '18:00',
         });
         expect(created).toEqual(alarmB);
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
@@ -192,8 +192,8 @@ describe('AlarmConfigStateService', () => {
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
-            activationTime: '09:00',
-            deactivationTime: '18:00',
+            armingTime: '09:00',
+            dearmingTime: '18:00',
             isArmed: true,
         });
 
@@ -247,8 +247,8 @@ describe('AlarmConfigStateService', () => {
             priority: alarmA.priority,
             thresholdOperator: alarmA.thresholdOperator,
             thresholdValue: alarmA.thresholdValue,
-            activationTime: '08:00',
-            deactivationTime: '20:00',
+            armingTime: '08:00',
+            dearmingTime: '20:00',
             isArmed: false,
         });
 

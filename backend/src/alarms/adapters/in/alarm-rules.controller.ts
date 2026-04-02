@@ -68,8 +68,8 @@ export class AlarmRulesController {
         req.priority,
         req.thresholdOperator,
         req.thresholdValue,
-        req.activationTime,
-        req.deactivationTime,
+        req.armingTime,
+        req.dearmingTime,
       ),
     );
     return plainToInstance(CreateAlarmRuleResDto, alarm);
@@ -102,11 +102,12 @@ export class AlarmRulesController {
     const alarm = await this.updateAlarmRuleUseCase.updateAlarmRule(
       new UpdateAlarmRuleCmd(
         id,
+        req.name,
         req.priority,
         req.thresholdOperator,
         req.thresholdValue,
-        req.activationTime,
-        req.deactivationTime,
+        req.armingTime,
+        req.dearmingTime,
         req.isArmed,
       ),
     );

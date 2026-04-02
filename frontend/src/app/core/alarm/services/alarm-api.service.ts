@@ -35,7 +35,7 @@ export class AlarmApiService {
     }
 
     public getActiveAlarms(): Observable<ActiveAlarm[]> {
-        return this.http.get<ActiveAlarm[]>(this.alarmEventsBaseUrl);
+        return this.http.get<ActiveAlarm[]>(this.alarmEventsBaseUrl + '/10/0');
     }
 
     public getActiveAlarmsOfOperator(operatorId: string): Observable<ActiveAlarm[]> {

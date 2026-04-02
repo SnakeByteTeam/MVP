@@ -84,13 +84,18 @@ describe('AlarmPageManagementComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('ngOnInit assegna vm$ dalla facade', () => {
-    expect(component.vm$).toBeUndefined();
+  it('ngOnInit inizializza la facade e mantiene il vm sincronizzato', () => {
+    expect(component.vm()).toEqual({
+      alarms: [],
+      isResolving: false,
+      resolvingId: null,
+      resolveError: null,
+    });
 
     component.ngOnInit();
 
     expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
-    expect(component.vm$).toBe(alarmManagementStub.vm$);
+    expect(component.vm()?.alarms).toEqual([]);
   });
 
   it('onResolve delega a facade.resolveAlarm', () => {

@@ -57,30 +57,16 @@ describe('AlarmItemComponent', () => {
 
   it('priorityUi mappa correttamente label per tutti i livelli', () => {
     setInputs({ ...baseAlarm, priority: AlarmPriority.RED });
-    expect(component.priorityUi().label).toBe('Alta');
+    expect(component.vm().priorityLabel).toBe('Alta');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.ORANGE });
-    expect(component.priorityUi().label).toBe('Media');
+    expect(component.vm().priorityLabel).toBe('Media');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.GREEN });
-    expect(component.priorityUi().label).toBe('Bassa');
+    expect(component.vm().priorityLabel).toBe('Bassa');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.WHITE });
-    expect(component.priorityUi().label).toBe('Informativa');
-  });
-
-  it('priorityUi mappa correttamente className per tutti i livelli', () => {
-    setInputs({ ...baseAlarm, priority: AlarmPriority.RED });
-    expect(component.priorityUi().className).toBe('priority-red');
-
-    setInputs({ ...baseAlarm, priority: AlarmPriority.ORANGE });
-    expect(component.priorityUi().className).toBe('priority-orange');
-
-    setInputs({ ...baseAlarm, priority: AlarmPriority.GREEN });
-    expect(component.priorityUi().className).toBe('priority-green');
-
-    setInputs({ ...baseAlarm, priority: AlarmPriority.WHITE });
-    expect(component.priorityUi().className).toBe('priority-white');
+    expect(component.vm().priorityLabel).toBe('Informativa');
   });
 
   it('onResolveClick emette alarm.id', () => {
@@ -97,10 +83,12 @@ describe('AlarmItemComponent', () => {
     setInputs(baseAlarm);
     const nativeElement = fixture.nativeElement as HTMLElement;
     const metaValues = nativeElement.querySelectorAll('.alarm-item__meta dd');
+    const resolveButton = nativeElement.querySelector('button');
 
     expect(nativeElement.querySelector('.alarm-item__title')?.textContent).toContain('Allarme antipanico');
     expect(nativeElement.querySelector('.alarm-item__priority')?.textContent).toContain('Alta');
     expect(metaValues.item(1)?.textContent).toContain('mock-elapsed:2026-03-24T10:00:00.000Z');
+    expect(resolveButton?.getAttribute('aria-label')).toContain('Risolvi allarme Allarme antipanico');
   });
 
   it('quando isResolving e true disabilita il bottone e mostra lo stato di avanzamento', () => {

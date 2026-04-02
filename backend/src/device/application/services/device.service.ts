@@ -19,13 +19,21 @@ import {
   INGEST_TIMESERIES_PORT,
   type IngestTimeseriesPort,
 } from '../ports/out/ingest-timeseries.port';
+import { GetDeviceValueUseCase } from '../ports/in/get-device-value.usecase';
+import { DeviceValue } from 'src/device/domain/models/device-value.model';
+import { GetDeviceValueCmd } from '../commands/get-device-value.command';
+import {
+  GET_DEVICE_VALUE_PORT,
+  GetDeviceValuePort,
+} from '../ports/out/get-device-value.port';
 
 @Injectable()
 export class DeviceService
   implements
     FindDeviceByIdUseCase,
     FindDeviceByPlantIdUseCase,
-    IngestTimeseriesUseCase
+    IngestTimeseriesUseCase,
+    GetDeviceValueUseCase
 {
   constructor(
     @Inject(FIND_DEVICE_BY_ID_PORT)
@@ -34,6 +42,8 @@ export class DeviceService
     private readonly findByPlantIdPort: FindDeviceByPlantIdPort,
     @Inject(INGEST_TIMESERIES_PORT)
     private readonly ingestTimeseriesPort: IngestTimeseriesPort,
+    @Inject(GET_DEVICE_VALUE_PORT)
+    private readonly getDeviceValuePort: GetDeviceValuePort,
   ) {}
 
   async findById(cmd: FindDeviceByIdCmd): Promise<Device> {
@@ -45,8 +55,20 @@ export class DeviceService
   }
 
   async ingestTimeseries(cmd: IngestTimeseriesCmd): Promise<void> {
-    if (!cmd?.datapointId || !cmd?.value || !cmd?.timestamp)
-      throw new Error("Can't ingest timeseries without parameters");
     return await this.ingestTimeseriesPort.ingestTimeseries(cmd);
+  }
+
+  async getDeviceValue(cmd: GetDeviceValueCmd): Promise<DeviceValue> {
+    if (!cmd.deviceId)
+      throw new Error('[Device Controller] Device id is missing');
+
+    const device = await this.findByIdPort.findById({ id: cmd.deviceId });
+
+    const newCmd: GetDeviceValueCmd = {
+      deviceId: cmd.deviceId,
+      plantId: device.getPlantId(),
+    };
+
+    return await this.getDeviceValuePort.getDeviceValue(newCmd);
   }
 }

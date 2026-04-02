@@ -4,16 +4,18 @@ import { FindDeviceByPlantIdUseCase } from 'src/device/application/ports/in/find
 import { IngestTimeseriesUseCase } from 'src/device/application/ports/in/ingest-timeseris.usecase';
 import { Device } from 'src/device/domain/models/device.model';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
-import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
-import { DatapointDto } from 'src/device/infrastructure/http/dtos/datapoint.dto';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
+import { DatapointDto } from 'src/device/infrastructure/http/dtos/out/datapoint.dto';
 import { SubNotificationPayloadDto } from 'src/cache/infrastructure/http/dtos/in/subNotification.dto';
 import { InternalServerErrorException } from '@nestjs/common';
+import { GetDeviceValueUseCase } from 'src/device/application/ports/in/get-device-value.usecase';
 
 describe('DeviceController', () => {
   let controller: DeviceController;
   let findDeviceById: jest.Mocked<FindDeviceByIdUseCase>;
   let findDeviceByPlantId: jest.Mocked<FindDeviceByPlantIdUseCase>;
   let ingestTimeseries: jest.Mocked<IngestTimeseriesUseCase>;
+  let getDeviceValue: jest.Mocked<GetDeviceValueUseCase>;
 
   beforeEach(() => {
     findDeviceById = {
@@ -28,10 +30,15 @@ describe('DeviceController', () => {
       ingestTimeseries: jest.fn(),
     };
 
+    getDeviceValue = {
+      getDeviceValue: jest.fn(),
+    } as any;
+
     controller = new DeviceController(
       findDeviceById,
       findDeviceByPlantId,
       ingestTimeseries,
+      getDeviceValue,
     );
   });
 

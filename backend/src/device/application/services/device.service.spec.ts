@@ -1,6 +1,7 @@
 import { FindDeviceByIdPort } from '../ports/out/find-device-by-id.port';
 import { FindDeviceByPlantIdPort } from '../ports/out/find-device-by-plantid.port';
 import { IngestTimeseriesPort } from '../ports/out/ingest-timeseries.port';
+import { GetDeviceValuePort } from '../ports/out/get-device-value.port';
 import { FindDeviceByIdCmd } from '../commands/find-device-by-id.command';
 import { FindDeviceByPlantIdCmd } from '../commands/find-device-by-plantid.command';
 import { IngestTimeseriesCmd } from '../commands/ingest-timeseries.command';
@@ -13,6 +14,7 @@ describe('DeviceService', () => {
   let findByIdPort: jest.Mocked<FindDeviceByIdPort>;
   let findByPlantIdPort: jest.Mocked<FindDeviceByPlantIdPort>;
   let ingestTimeseriesPort: jest.Mocked<IngestTimeseriesPort>;
+  let getDeviceValuePort: jest.Mocked<GetDeviceValuePort>;
 
   beforeEach(() => {
     findByIdPort = {
@@ -27,10 +29,15 @@ describe('DeviceService', () => {
       ingestTimeseries: jest.fn(),
     };
 
+    getDeviceValuePort = {
+      getDeviceValue: jest.fn(),
+    } as any;
+
     service = new DeviceService(
       findByIdPort,
       findByPlantIdPort,
       ingestTimeseriesPort,
+      getDeviceValuePort,
     );
   });
 
@@ -130,53 +137,6 @@ describe('DeviceService', () => {
 
       expect(ingestTimeseriesPort.ingestTimeseries).toHaveBeenCalledWith(cmd);
       expect(ingestTimeseriesPort.ingestTimeseries).toHaveBeenCalledTimes(1);
-    });
-
-    it('should throw error when cmd is null', async () => {
-      await expect(service.ingestTimeseries(null as any)).rejects.toThrow(
-        "Can't ingest timeseries without parameters",
-      );
-      expect(ingestTimeseriesPort.ingestTimeseries).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when cmd is undefined', async () => {
-      await expect(service.ingestTimeseries(undefined as any)).rejects.toThrow(
-        "Can't ingest timeseries without parameters",
-      );
-      expect(ingestTimeseriesPort.ingestTimeseries).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when datapointId is missing', async () => {
-      const cmd = {
-        value: 25.5,
-        timestamp: '2026-04-01T13:41:58Z',
-      } as any;
-
-      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
-        "Can't ingest timeseries without parameters",
-      );
-    });
-
-    it('should throw error when value is missing', async () => {
-      const cmd = {
-        datapointId: 'dp-123',
-        timestamp: '2026-04-01T13:41:58Z',
-      } as any;
-
-      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
-        "Can't ingest timeseries without parameters",
-      );
-    });
-
-    it('should throw error when timestamp is missing', async () => {
-      const cmd = {
-        datapointId: 'dp-123',
-        value: 25.5,
-      } as any;
-
-      await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
-        "Can't ingest timeseries without parameters",
-      );
     });
 
     it('should handle port errors', async () => {

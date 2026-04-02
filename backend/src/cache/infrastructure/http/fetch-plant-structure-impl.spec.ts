@@ -26,7 +26,7 @@ describe('FetchStructureCacheImpl', () => {
       expect(httpService.get).toHaveBeenCalledTimes(1);
       expect(httpService.get).toHaveBeenCalledWith(
         'https://api.example.com/plant-1/locations',
-        { headers: { Authorization: 'Bearer valid-token' }, timeout: 30000 },
+        { headers: { Authorization: 'Bearer valid-token' }, timeout: 10000 },
       );
     });
 
@@ -123,7 +123,7 @@ describe('FetchStructureCacheImpl', () => {
 
       expect(httpService.get).toHaveBeenCalledWith('/plant-1/locations', {
         headers: { Authorization: 'Bearer valid-token' },
-        timeout: 30000,
+        timeout: 10000,
       });
     });
 

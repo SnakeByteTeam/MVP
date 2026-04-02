@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
-import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
 import { Room } from 'src/plant/domain/models/room.model';
 
 export class RoomDto {

@@ -1,7 +1,7 @@
 import { RoomDto } from './room.dto';
 import { Room } from 'src/plant/domain/models/room.model';
 import { Device } from 'src/device/domain/models/device.model';
-import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
 
 describe('RoomDto', () => {
   let mockDeviceDto: DeviceDto;

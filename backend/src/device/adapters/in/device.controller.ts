@@ -7,6 +7,7 @@ import {
   HttpCode,
   Post,
   Body,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
@@ -31,11 +32,17 @@ import {
   FIND_DEVICE_BY_PLANTID_USECASE,
 } from 'src/device/application/ports/in/find-device-by-plantid.usecase';
 import {
+  GET_DEVICE_VALUE_USECASE,
+  GetDeviceValueUseCase,
+} from 'src/device/application/ports/in/get-device-value.usecase';
+import {
   INGEST_TIMESERIES_USE_CASE,
   type IngestTimeseriesUseCase,
 } from 'src/device/application/ports/in/ingest-timeseris.usecase';
+import { DeviceValue } from 'src/device/domain/models/device-value.model';
 import { Device } from 'src/device/domain/models/device.model';
-import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
+import { DeviceValueDto } from 'src/device/infrastructure/http/dtos/out/device-value.dto';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
 
 @ApiTags('device')
 @Controller('/device')
@@ -47,6 +54,8 @@ export class DeviceController {
     private readonly findByPlantIdUseCase: FindDeviceByPlantIdUseCase,
     @Inject(INGEST_TIMESERIES_USE_CASE)
     private readonly ingestTimeseries: IngestTimeseriesUseCase,
+    @Inject(GET_DEVICE_VALUE_USECASE)
+    private readonly getDeviceValueUseCase: GetDeviceValueUseCase,
   ) {}
 
   @Get('/:id')
@@ -124,6 +133,8 @@ export class DeviceController {
     },
   })
   async findByPlantId(@Param('plantId') plantId: string): Promise<DeviceDto[]> {
+    if(!plantId) throw BadRequestException;
+    
     const findByPlantIdCmd: FindDeviceByPlantIdCmd = {
       id: plantId,
     };
@@ -170,5 +181,20 @@ export class DeviceController {
     });
 
     return { message: 'Datapoints updated received', statusCode: 200 };
+  }
+
+  @Get(':deviceId/value')
+  async getDeviceValue(@Param('deviceId') deviceId: string): Promise<any> {
+    if (!deviceId) {
+      throw new BadRequestException('Device ID is required');
+    }
+
+    try {
+      const value: DeviceValue =
+        await this.getDeviceValueUseCase.getDeviceValue({ deviceId: deviceId });
+      return DeviceValueDto.fromDomain(value);
+    } catch {
+      throw new InternalServerErrorException();
+    }
   }
 }

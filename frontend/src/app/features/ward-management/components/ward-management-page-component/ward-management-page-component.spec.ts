@@ -314,16 +314,19 @@ describe('WardManagementPageComponent', () => {
   it('getConfirmMessage dovrebbe restituire il testo corretto per ogni stato', () => {
     component.confirmState.set(null);
     expect(component.getConfirmMessage()).toBe('Confermi questa operazione?');
+    expect(component.getConfirmLabel()).toBe('Conferma');
 
     component.confirmState.set({ kind: 'delete-ward', wardId: 1 });
     expect(component.getConfirmMessage()).toBe('Confermi l\'eliminazione del reparto?');
+    expect(component.getConfirmLabel()).toBe('Conferma');
 
     component.confirmState.set({ kind: 'remove-operator', wardId: 1, userId: 2 });
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'operatore dal reparto?');
+    expect(component.getConfirmLabel()).toBe('Rimuovi');
 
     component.confirmState.set({ kind: 'remove-plant', wardId: 1, plantId: '101' });
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'appartamento dal reparto?');
-    expect(component.getConfirmLabel()).toBe('Conferma');
+    expect(component.getConfirmLabel()).toBe('Rimuovi');
   });
 
   it('availablePlants dovrebbe deduplicare e escludere quelli gia assegnati al ward selezionato', () => {

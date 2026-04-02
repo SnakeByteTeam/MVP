@@ -72,14 +72,11 @@
     <!-- Footer -->
     <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
         <button type="button" (click)="onCancel()"
-            class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
             Annulla
         </button>
         <button type="submit" (click)="onSubmit()" [disabled]="form.invalid"
-            class="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
             Assegna
         </button>
     </div>

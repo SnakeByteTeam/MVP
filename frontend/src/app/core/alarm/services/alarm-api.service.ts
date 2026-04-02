@@ -43,6 +43,6 @@ export class AlarmApiService {
     }
 
     public resolveAlarm(alarmId: string, userId: number): Observable<void> {
-        return this.http.post<void>(`${this.alarmEventsBaseUrl}/resolve`, { alarmId, userId });
+        return this.http.patch<void>(`${this.alarmEventsBaseUrl}/resolve`, { alarmId, userId });
     }
 }

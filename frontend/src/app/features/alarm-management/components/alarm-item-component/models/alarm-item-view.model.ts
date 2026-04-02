@@ -13,6 +13,8 @@ export type AlarmItemPriorityUiMap = Readonly<Record<AlarmPriority, AlarmItemPri
 export type AlarmItemViewModel = {
     readonly id: string;
     readonly alarmName: string;
+    readonly position: string;
+    readonly alarmTitle: string;
     readonly alarmRuleId: string;
     readonly activationTime: string;
     readonly isResolving: boolean;

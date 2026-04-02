@@ -46,10 +46,13 @@ export class AlarmItemPresenterService {
     public toViewModel(alarm: ActiveAlarm, isResolving: boolean): AlarmItemViewModel {
         const priorityUi = PRIORITY_UI[alarm.priority];
         const safeAlarmName = this.getSafeAlarmName(alarm.alarmName);
+        const safePosition = this.getSafePosition(alarm.position);
 
         return {
             id: alarm.id,
             alarmName: alarm.alarmName,
+            position: safePosition,
+            alarmTitle: `${safeAlarmName} in "${safePosition}"`,
             alarmRuleId: alarm.alarmRuleId,
             activationTime: alarm.activationTime,
             isResolving,
@@ -93,5 +96,14 @@ export class AlarmItemPresenterService {
         }
 
         return 'senza nome';
+    }
+
+    private getSafePosition(position: string): string {
+        const normalizedPosition = position.trim();
+        if (normalizedPosition.length > 0) {
+            return normalizedPosition;
+        }
+
+        return 'posizione sconosciuta';
     }
 }

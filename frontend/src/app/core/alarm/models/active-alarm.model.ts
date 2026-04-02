@@ -7,4 +7,6 @@ export interface ActiveAlarm {
 	priority: AlarmPriority;
 	activationTime: string;
 	resolutionTime: string | null;
+	position: string;
+	userId: number | null;
 }

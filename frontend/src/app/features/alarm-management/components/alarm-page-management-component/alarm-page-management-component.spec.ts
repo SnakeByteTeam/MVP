@@ -36,6 +36,8 @@ describe('AlarmPageManagementComponent', () => {
     priority: AlarmPriority.RED,
     activationTime: '2026-03-24T10:00:00.000Z',
     resolutionTime: null,
+    position: 'Camera 201',
+    userId: 1,
   };
 
   const alarm2: ActiveAlarm = {
@@ -45,6 +47,8 @@ describe('AlarmPageManagementComponent', () => {
     priority: AlarmPriority.ORANGE,
     activationTime: '2026-03-24T10:01:00.000Z',
     resolutionTime: null,
+    position: 'Corridoio Nord',
+    userId: 2,
   };
 
   const alarmManagementStub = {

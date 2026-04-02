@@ -38,6 +38,8 @@ describe('AlarmManagementService', () => {
         priority: AlarmPriority.RED,
         activationTime: '2026-03-24T10:00:00.000Z',
         resolutionTime: null,
+        position: 'Camera 201',
+        userId: 99,
     };
 
     const alarmB: ActiveAlarm = {
@@ -47,6 +49,8 @@ describe('AlarmManagementService', () => {
         priority: AlarmPriority.ORANGE,
         activationTime: '2026-03-24T10:01:00.000Z',
         resolutionTime: null,
+        position: 'Corridoio Nord',
+        userId: 7,
     };
 
     beforeEach(() => {
@@ -98,7 +102,7 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
     });
 
-    it('initialize per OSS usa endpoint dedicato con userId', () => {
+    it('initialize per OSS filtra gli allarmi per userId', () => {
         sessionSubject.next({
             userId: '7',
             username: 'oss',
@@ -107,15 +111,15 @@ describe('AlarmManagementService', () => {
             isFirstAccess: false,
         });
 
-        const initialSnapshot: ActiveAlarm[] = [alarmA];
-        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of(initialSnapshot));
+        const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
 
         service = createService();
         service.initialize();
 
-        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7');
-        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
-        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmB]);
     });
 
     it('se initialize fallisce non propaga eccezioni e valorizza l errore nel vm', async () => {

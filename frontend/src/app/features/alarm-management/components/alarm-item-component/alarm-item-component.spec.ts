@@ -24,6 +24,8 @@ describe('AlarmItemComponent', () => {
     priority: AlarmPriority.RED,
     activationTime: '2026-03-24T10:00:00.000Z',
     resolutionTime: null,
+    position: 'Camera 101',
+    userId: 10,
   };
 
   const setInputs = (alarm: ActiveAlarm, isResolving = false): void => {
@@ -85,7 +87,7 @@ describe('AlarmItemComponent', () => {
     const metaValues = nativeElement.querySelectorAll('.alarm-item__meta dd');
     const resolveButton = nativeElement.querySelector('button');
 
-    expect(nativeElement.querySelector('.alarm-item__title')?.textContent).toContain('Allarme antipanico');
+    expect(nativeElement.querySelector('.alarm-item__title')?.textContent).toContain('Allarme antipanico in "Camera 101"');
     expect(nativeElement.querySelector('.alarm-item__priority')?.textContent).toContain('Alta');
     expect(metaValues.item(1)?.textContent).toContain('mock-elapsed:2026-03-24T10:00:00.000Z');
     expect(resolveButton?.getAttribute('aria-label')).toContain('Risolvi allarme Allarme antipanico');

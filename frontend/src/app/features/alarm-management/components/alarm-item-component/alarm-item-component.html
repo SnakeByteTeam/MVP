@@ -11,7 +11,7 @@
 
             <div class="min-w-0">
                 <h2 class="alarm-item__title truncate text-sm font-bold text-slate-900 md:text-base">{{
-                    vm().alarmName }}</h2>
+                    vm().alarmTitle }}</h2>
                 <p class="mt-0.5 text-xs text-slate-500">Regola: {{ vm().alarmRuleId }}</p>
             </div>
         </div>
@@ -32,6 +32,7 @@
             <dt class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Attivo da</dt>
             <dd class="mt-1 text-sm font-semibold text-slate-700">{{ vm().activationTime | elapsedTime }}</dd>
         </div>
+
     </dl>
 
     <div class="alarm-item__actions mt-2 flex items-center justify-between gap-3">

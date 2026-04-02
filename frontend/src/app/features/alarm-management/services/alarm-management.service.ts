@@ -17,6 +17,7 @@ import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service'
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import { UserSession } from '../../user-auth/models/user-session.model';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
 
 @Injectable({ providedIn: 'root' })
@@ -31,11 +32,12 @@ export class AlarmManagementService {
 
     public readonly vm$ = combineLatest([
         this.alarmStateService.getActiveAlarms$(),
+        this.authService.getCurrentUser$(),
         this.resolvingId$.asObservable(),
         this.resolveError$.asObservable(),
     ]).pipe(
-        map(([alarms, resolvingId, resolveError]): AlarmListVm => ({
-            alarms,
+        map(([alarms, session, resolvingId, resolveError]): AlarmListVm => ({
+            alarms: this.filterAlarmsBySession(alarms, session),
             isResolving: this.pendingResolveRequests > 0,
             resolvingId,
             resolveError,
@@ -97,13 +99,24 @@ export class AlarmManagementService {
         return this.authService.getCurrentUser$().pipe(
             take(1),
             switchMap((session) => {
-                if (session?.role === UserRole.OPERATORE_SANITARIO) {
-                    return this.alarmApiService.getActiveAlarmsOfOperator(session.userId);
-                }
-
-                return this.alarmApiService.getActiveAlarms();
+                return this.alarmApiService.getActiveAlarms().pipe(
+                    map((alarms) => this.filterAlarmsBySession(alarms, session))
+                );
             })
         );
+    }
+
+    private filterAlarmsBySession(alarms: ActiveAlarm[], session: UserSession | null): ActiveAlarm[] {
+        if (session?.role !== UserRole.OPERATORE_SANITARIO) {
+            return alarms;
+        }
+
+        const numericUserId = Number(session.userId);
+        if (!Number.isInteger(numericUserId)) {
+            return [];
+        }
+
+        return alarms.filter((alarm) => alarm.userId === numericUserId);
     }
 
     private mapResolveError(error: unknown): string {

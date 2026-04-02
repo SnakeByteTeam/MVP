@@ -37,6 +37,8 @@ describe('AlarmApiService', () => {
         priority: AlarmPriority.RED,
         activationTime: '2026-03-24T10:00:00.000Z',
         resolutionTime: null,
+        position: 'Camera 101',
+        userId: 7,
     };
 
     beforeEach(() => {

@@ -163,6 +163,8 @@ describe('AlarmStateService', () => {
         priority: AlarmPriority.RED,
         activationTime: '2026-03-19T10:00:00.000Z',
         resolutionTime: null,
+        position: 'Camera 102',
+        userId: 3,
       },
     ];
 
@@ -188,6 +190,8 @@ describe('AlarmStateService', () => {
         priority: AlarmPriority.RED,
         activationTime: '2026-03-19T10:00:00.000Z',
         resolutionTime: null,
+        position: 'Camera 103',
+        userId: 4,
       },
     ];
 
@@ -214,6 +218,8 @@ describe('AlarmStateService', () => {
         priority: alarmEventA.priority,
         activationTime: alarmEventA.activationTime,
         resolutionTime: null,
+        position: 'Camera 104',
+        userId: 5,
       },
     ];
 
@@ -266,6 +272,8 @@ function createAlarmCollector(
     priority: AlarmPriority;
     activationTime: string;
     resolutionTime: string | null;
+    position: string;
+    userId: number | null;
   }>
 ): Array<{
   id: string;
@@ -274,6 +282,8 @@ function createAlarmCollector(
   priority: AlarmPriority;
   activationTime: string;
   resolutionTime: string | null;
+  position: string;
+  userId: number | null;
 }> {
   return alarms.map((alarm) => ({
     id: alarm.id,
@@ -282,5 +292,7 @@ function createAlarmCollector(
     priority: alarm.priority,
     activationTime: alarm.activationTime,
     resolutionTime: alarm.resolutionTime,
+    position: alarm.position,
+    userId: alarm.userId,
   }));
 }

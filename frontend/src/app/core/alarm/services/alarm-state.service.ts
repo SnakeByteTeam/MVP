@@ -32,6 +32,8 @@ export class AlarmStateService {
 			priority: event.priority,
 			activationTime: event.activationTime,
 			resolutionTime: event.resolutionTime,
+			position: 'posizione sconosciuta',
+			userId: null,
 		};
 
 		const existingIndex = current.findIndex((alarm) => alarm.id === event.id);

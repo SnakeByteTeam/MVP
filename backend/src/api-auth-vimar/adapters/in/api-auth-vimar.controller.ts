@@ -9,6 +9,11 @@ import {
   Redirect,
 } from '@nestjs/common';
 import {
+  ApiOperation,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
+import {
   APIAUTHUSECASE,
   type ApiAuthUseCase,
 } from 'src/api-auth-vimar/application/ports/in/api-auth.usecase';
@@ -18,6 +23,7 @@ import {
 } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
 
+@ApiTags('auth')
 @Controller('my-vimar')
 export class ApiAuthVimarController {
   private readonly logger = new Logger(ApiAuthVimarController.name);
@@ -31,6 +37,17 @@ export class ApiAuthVimarController {
 
   @Get('auth')
   @Redirect()
+  @ApiOperation({
+    summary: 'Login with Vimar API',
+    description: 'Initiates authentication flow by redirecting to Vimar login.',
+  })
+  @ApiQuery({
+    name: 'redirect_url',
+    required: true,
+    type: String,
+    description: 'URL to redirect after login',
+    example: 'http://localhost:4200/dashboard',
+  })
   login(@Query() payload: PlantAuthDto): { url: string; statusCode: number } {
     if (!payload?.redirect_url) throw new BadRequestException();
 
@@ -45,6 +62,22 @@ export class ApiAuthVimarController {
 
   @Get('callback')
   @Redirect()
+  @ApiOperation({
+    summary: 'OAuth callback',
+    description: 'Handles OAuth callback from Vimar authentication.',
+  })
+  @ApiQuery({
+    name: 'code',
+    required: true,
+    type: String,
+    description: 'Authorization code',
+  })
+  @ApiQuery({
+    name: 'state',
+    required: false,
+    type: String,
+    description: 'Encoded redirect URL',
+  })
   async saveTokens(
     @Query('code') code: string,
     @Query('state') state: string,

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Inject, Body, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, Inject, Body, ParseIntPipe, Patch } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ResolveAlarmEventCmd } from '../../application/commands/resolve-alarm-event-cmd';
@@ -60,7 +60,7 @@ export class AlarmEventsController {
     return plainToInstance(GetAllAlarmEventsResDto, alarmEvents);
   }
 
-  @Post('/resolve')
+  @Patch('/resolve')
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {
     return this.resolveAlarmEventUseCase.resolveAlarmEvent(
       new ResolveAlarmEventCmd(req.alarmId, req.userId),

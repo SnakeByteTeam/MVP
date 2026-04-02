@@ -8,5 +8,6 @@ import { UserInfo } from '../../../../core/models/user-info.model';
     styleUrl: './topbar.component.css'})
 export class TopbarComponent {
     @Input() user!: UserInfo;
+    @Output() profileClicked = new EventEmitter<void>();
     @Output() logoutClicked = new EventEmitter<void>();
 }

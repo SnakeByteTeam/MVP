@@ -43,4 +43,13 @@ describe('TopbarComponent', () => {
 
     expect(spy).toHaveBeenCalled();
   });
+
+  it('dovrebbe emettere profileClicked quando viene premuto il nome utente', () => {
+    const spy = vi.spyOn(component.profileClicked, 'emit');
+
+    const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
+    profileButton.click();
+
+    expect(spy).toHaveBeenCalled();
+  });
 });

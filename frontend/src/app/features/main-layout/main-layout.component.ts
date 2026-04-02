@@ -13,6 +13,8 @@ import { UserRole } from '../../core/models/user-role.enum';
 import { Router, RouterOutlet } from '@angular/router';
 import { UserInfo } from '../../core/models/user-info.model';
 import { NotificationBadgeComponent } from '../notification/components/notification-badge-component/notification-badge-component';
+import { MyVimarAccount } from '../my-vimar-integration/models/my-vimar-account.model';
+import { IVimarCloudApiService, VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 
 @Component({ 
     selector: 'app-main-layout', 
@@ -30,11 +32,16 @@ import { NotificationBadgeComponent } from '../notification/components/notificat
 export class MainLayoutComponent implements OnInit {
     public isCollapsed: boolean = false;
     public navItems!: NavItem[];
+    public isProfilePanelOpen = false;
+    public isVimarStatusLoading = false;
+    public vimarStatusError = '';
+    public vimarAccount: MyVimarAccount | null = null;
 
     private readonly navService = inject(NavService);
     private readonly internalAuthService = inject(InternalAuthService);
     private readonly alarmStateService = inject(AlarmStateService);
     private readonly router = inject(Router);
+    private readonly myVimarService = inject(VIMAR_CLOUD_API_SERVICE, { optional: true }) as IVimarCloudApiService | null;
 
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
 
@@ -74,9 +81,45 @@ export class MainLayoutComponent implements OnInit {
         this.isCollapsed = !this.isCollapsed;
     }
 
+    public toggleProfilePanel(): void {
+        this.isProfilePanelOpen = !this.isProfilePanelOpen;
+
+        if (this.isProfilePanelOpen) {
+            this.loadVimarStatus();
+        }
+    }
+
+    public goToVimarLink(): void {
+        void this.router.navigate(['/vimar-link']);
+    }
+
     public logout(): void{
         this.internalAuthService.logoutFromBackend().subscribe(() => {
             void this.router.navigate(['/auth/login']);
+        });
+    }
+
+    private loadVimarStatus(): void {
+        if (!this.myVimarService) {
+            this.vimarAccount = { email: '', isLinked: false };
+            this.vimarStatusError = 'Servizio MyVimar non disponibile in questa sezione.';
+            this.isVimarStatusLoading = false;
+            return;
+        }
+
+        this.isVimarStatusLoading = true;
+        this.vimarStatusError = '';
+
+        this.myVimarService.getLinkedAccount().subscribe({
+            next: (account) => {
+                this.vimarAccount = account;
+                this.isVimarStatusLoading = false;
+            },
+            error: () => {
+                this.vimarAccount = { email: '', isLinked: false };
+                this.vimarStatusError = 'Impossibile recuperare lo stato del collegamento MyVimar.';
+                this.isVimarStatusLoading = false;
+            }
         });
     }
 }

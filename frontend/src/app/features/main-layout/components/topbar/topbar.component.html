@@ -13,13 +13,18 @@
             Notifiche
         </button>
 
-        <div class="flex items-center gap-3">
+        <button
+            type="button"
+            aria-label="Apri profilo"
+            (click)="profileClicked.emit()"
+            class="flex items-center gap-3 rounded px-2 py-1 hover:bg-amber-100 transition-colors"
+        >
             <img src="user-avatar.png" class="w-8 h-8 border border-black">
-            <div class="text-sm leading-none">
+            <div class="text-left text-sm leading-none">
                 <p>{{user.firstName}}</p>
                 <p >{{user.lastName}}</p>
             </div>
-        </div>
+        </button>
 
         <button 
             (click)="logoutClicked.emit()" 

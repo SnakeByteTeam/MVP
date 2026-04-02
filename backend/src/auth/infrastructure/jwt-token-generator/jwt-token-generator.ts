@@ -17,28 +17,38 @@ export class JwtTokenGenerator
     JwtChangePasswordAccessTokenGenerator,
     JwtChangePasswordRefreshTokenGenerator
 {
-  private jwtService = new JwtService();
+  private readonly jwtService = new JwtService();
+
+  private sanitizePayload(payload: Payload): Payload {
+    const { exp, iat, nbf, ...claims } = payload as Payload & {
+      exp?: number;
+      iat?: number;
+      nbf?: number;
+    };
+
+    return claims as Payload;
+  }
 
   generateChangePasswordAccessToken(payload: Payload): string {
-    return this.jwtService.sign(JSON.parse(JSON.stringify(payload)), {
+    return this.jwtService.sign(this.sanitizePayload(payload), {
       secret: process.env.ACCESS_SECRET,
       expiresIn: '5m',
     });
   }
   generateChangePasswordRefreshToken(payload: Payload): string {
-    return this.jwtService.sign(JSON.parse(JSON.stringify(payload)), {
+    return this.jwtService.sign(this.sanitizePayload(payload), {
       secret: process.env.REFRESH_SECRET,
       expiresIn: '1h',
     });
   }
   generateAccessToken(payload: Payload): string {
-    return this.jwtService.sign(JSON.parse(JSON.stringify(payload)), {
+    return this.jwtService.sign(this.sanitizePayload(payload), {
       secret: process.env.ACCESS_SECRET,
       expiresIn: '10m',
     });
   }
   generateRefreshToken(payload: Payload): string {
-    return this.jwtService.sign(JSON.parse(JSON.stringify(payload)), {
+    return this.jwtService.sign(this.sanitizePayload(payload), {
       secret: process.env.REFRESH_SECRET,
       expiresIn: '7d',
     });

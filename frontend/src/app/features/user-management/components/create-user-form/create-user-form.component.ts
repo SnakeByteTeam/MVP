@@ -1,41 +1,30 @@
-import { Component, input, output, inject, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, FormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, input, output, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CreateUserDto } from '../../models/out/create-user.model.dto';
 import { UserManagementErrorType } from '../../models/user-management-error-type.enum';
 
-
-//si potrebbe usare per tipizzare FormGroup<>
-// interface CreateUserForm {
-//   firstName: FormControl<string>;
-//   lastName: FormControl<string>;
-//   username: FormControl<string>;
-// }
-
 @Component({
   selector: 'app-create-user-form',
-  standalone: true, // 2. Componente Standalone
-  imports: [ReactiveFormsModule], // Importiamo direttamente i form reattivi
+  imports: [ReactiveFormsModule],
   templateUrl: './create-user-form.html',
-  styleUrls: ['./create-user-form.css']
+  styleUrls: ['./create-user-form.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
-export class CreateUserFormComponent implements OnInit {
+export class CreateUserFormComponent {
   errorType = input<UserManagementErrorType | null>(null);
   formSubmit = output<CreateUserDto>();
 
+  @ViewChild('nameInput')
+  private readonly nameInput?: ElementRef<HTMLInputElement>;
+
   private readonly fb = inject(FormBuilder);
-  public form!: FormGroup;
+  public readonly form = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    surname: ['', [Validators.required, Validators.minLength(2)]],
+    username: ['', [Validators.required, Validators.minLength(4)]],
+  });
 
-
-  ngOnInit(): void {
-    this.form = this.fb.nonNullable.group({
-      firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
-      username: ['', [Validators.required, Validators.minLength(4)]]
-    });
-  }
-
-  submit(): void {
+  public submit(): void {
     if (this.form.valid) {
       this.formSubmit.emit(this.form.getRawValue());
     } else {
@@ -43,7 +32,21 @@ export class CreateUserFormComponent implements OnInit {
     }
   }
 
-  reset(): void {
-    this.form.reset();
+  public reset(): void {
+    this.form.reset({
+      name: '',
+      surname: '',
+      username: '',
+    });
+  }
+
+  public resetAndFocus(): void {
+    this.reset();
+    this.form.markAsPristine();
+    this.form.markAsUntouched();
+
+    queueMicrotask(() => {
+      this.nameInput?.nativeElement.focus();
+    });
   }
 }

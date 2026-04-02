@@ -83,4 +83,17 @@ describe('authInterceptor', () => {
 
     expect(authServiceMock.refreshAccessToken).not.toHaveBeenCalled();
   });
+
+  it('non tenta refresh quando la 401 arriva da /auth/first-login', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-old');
+
+    const request = new HttpRequest('POST', '/auth/first-login', null);
+    const next = vi.fn(() => throwError(() => new HttpErrorResponse({ status: 401 })));
+
+    TestBed.runInInjectionContext(() => authInterceptor(request, next)).subscribe({
+      error: () => undefined,
+    });
+
+    expect(authServiceMock.refreshAccessToken).not.toHaveBeenCalled();
+  });
 });

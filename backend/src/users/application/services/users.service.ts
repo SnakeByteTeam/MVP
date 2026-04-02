@@ -87,8 +87,8 @@ export class UsersService
       base64Password,
     );
   }
-  deleteUser(req: DeleteUserCmd) {
-    return this.deleteUserPort.deleteUser(req);
+  async deleteUser(req: DeleteUserCmd): Promise<void> {
+    return await this.deleteUserPort.deleteUser(req);
   }
 }
 

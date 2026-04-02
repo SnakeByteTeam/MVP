@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InternalAuthService } from '../../../../core/services/internal-auth.service';
 import { AuthErrorType } from '../../models/auth-error-type.enum';
 import { UserSession } from '../../models/user-session.model';
@@ -8,6 +8,7 @@ import { UserSession } from '../../models/user-session.model';
 export abstract class AuthBaseComponent {
 	protected readonly authService = inject(InternalAuthService);
 	protected readonly router = inject(Router);
+	protected readonly route = inject(ActivatedRoute, { optional: true });
 
 	public errorType: AuthErrorType | null = null;
 	public isLoading = false;
@@ -21,6 +22,12 @@ export abstract class AuthBaseComponent {
 
 		if (session.isFirstAccess) {
 			void this.router.navigate(['/auth/first-access']);
+			return;
+		}
+
+		const returnUrl = this.route?.snapshot.queryParamMap.get('returnUrl');
+		if (returnUrl?.startsWith('/')) {
+			void this.router.navigateByUrl(returnUrl);
 			return;
 		}
 

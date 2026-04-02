@@ -18,8 +18,8 @@ describe('UserListComponent', () => {
     fixture.componentRef.setInput('users', [
       {
         id: 1,
-        firstName: 'Mario',
-        lastName: 'Rossi',
+        name: 'Mario',
+        surname: 'Rossi',
         username: 'mrossi',
         role: UserRole.OPERATORE_SANITARIO,
       },
@@ -32,40 +32,52 @@ describe('UserListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('onDelete emette deleteUser con id numerico quando confermato', () => {
-    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true);
-    const emitSpy = vi.spyOn(component.deleteUser, 'emit');
+  it('onDelete apre il dialog di conferma', () => {
     const user = {
       id: 1,
-      firstName: 'Mario',
-      lastName: 'Rossi',
+      name: 'Mario',
+      surname: 'Rossi',
       username: 'mrossi',
       role: UserRole.OPERATORE_SANITARIO,
     };
 
     component.onDelete(user);
 
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
-    expect(emitSpy).toHaveBeenCalledWith(1);
-    expect(emitSpy).toHaveBeenCalledTimes(1);
-    confirmSpy.mockRestore();
+    expect(component.pendingDeleteUser()).toEqual(user);
   });
 
-  it('onDelete non emette deleteUser quando non confermato', () => {
-    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(false);
+  it('onDeleteConfirm emette deleteUser con id numerico', () => {
     const emitSpy = vi.spyOn(component.deleteUser, 'emit');
     const user = {
       id: 1,
-      firstName: 'Mario',
-      lastName: 'Rossi',
+      name: 'Mario',
+      surname: 'Rossi',
       username: 'mrossi',
       role: UserRole.OPERATORE_SANITARIO,
     };
 
-    component.onDelete(user);
+    component.onDeleteRequest(user);
+    component.onDeleteConfirm();
 
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    expect(emitSpy).toHaveBeenCalledWith(1);
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+    expect(component.pendingDeleteUser()).toBeNull();
+  });
+
+  it('onDeleteCancel non emette deleteUser e chiude il dialog', () => {
+    const emitSpy = vi.spyOn(component.deleteUser, 'emit');
+    const user = {
+      id: 1,
+      name: 'Mario',
+      surname: 'Rossi',
+      username: 'mrossi',
+      role: UserRole.OPERATORE_SANITARIO,
+    };
+
+    component.onDeleteRequest(user);
+    component.onDeleteCancel();
+
     expect(emitSpy).not.toHaveBeenCalled();
-    confirmSpy.mockRestore();
+    expect(component.pendingDeleteUser()).toBeNull();
   });
 });

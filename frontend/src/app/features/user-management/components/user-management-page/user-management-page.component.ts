@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { UserListComponent } from '../user-list/user-list';
 import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
 import { UserCreatedDialogComponent } from '../user-created-dialog/user-created-dialog';
@@ -15,7 +15,7 @@ import { CreateUserDto } from '../../models/out/create-user.model.dto';
   imports: [AsyncPipe, UserListComponent, CreateUserFormComponent, UserCreatedDialogComponent],
   templateUrl: './user-management-page.html',
   styleUrl: './user-management-page.css',
-  standalone: true
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserManagementPageComponent implements OnInit {
 
@@ -25,7 +25,11 @@ export class UserManagementPageComponent implements OnInit {
 
   public users$!: Observable<UserDto[]>;
   public createdResponse = signal<UserCreatedResponseDto | null>(null);
+  public createdUser = signal<CreateUserDto | null>(null);
   public formError = signal<UserManagementErrorType | null>(null);
+
+  @ViewChild(CreateUserFormComponent)
+  private readonly createUserFormComponent?: CreateUserFormComponent;
 
 
 
@@ -53,7 +57,10 @@ export class UserManagementPageComponent implements OnInit {
         //Successo
         //mostra dialog e aggiorna la lista
         this.createdResponse.set(response);
+        this.createdUser.set(dto);
         this.refreshTrigger$.next(); // ricarica la lista
+        this.formError.set(null);
+        this.createUserFormComponent?.resetAndFocus();
       },
       error: (err) => {
         if (err.status === 409) {
@@ -82,6 +89,7 @@ export class UserManagementPageComponent implements OnInit {
   //quando l'amministratore chiude il dialog della creazione utente avvenuta con display tempPassword
   onDialogClosed(): void {
     this.createdResponse.set(null);
+    this.createdUser.set(null);
   }
 
 

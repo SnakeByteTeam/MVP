@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserManagementPageComponent } from './user-management-page.component';
 import { API_BASE_URL } from '../../../../core/tokens/api-base-url.token';
 import { UserApiService } from '../../../../core/services/user-api.service';
-import { UserRole } from '../../../../core/models/user-role.enum';
 import { UserManagementErrorType } from '../../models/user-management-error-type.enum';
 
 describe('UserManagementPage', () => {
@@ -22,14 +21,7 @@ describe('UserManagementPage', () => {
         getUsersMock.mockReturnValue(of([]));
         createUserMock.mockReturnValue(
             of({
-                user: {
-                    id: 1,
-                    firstName: 'Mario',
-                    lastName: 'Rossi',
-                    username: 'mrossi',
-                    role: UserRole.OPERATORE_SANITARIO,
-                },
-                temporaryPassword: 'TempPass123',
+                tempPassword: 'TempPass123',
             }),
         );
         deleteUserMock.mockReturnValue(of(undefined));
@@ -62,17 +54,22 @@ describe('UserManagementPage', () => {
 
     it('onFormSubmit in successo imposta createdResponse e triggera refresh lista', () => {
         component.onFormSubmit({
-            firstName: 'Mario',
-            lastName: 'Rossi',
+            name: 'Mario',
+            surname: 'Rossi',
             username: 'mrossi',
         });
 
         expect(createUserMock).toHaveBeenCalledWith({
-            firstName: 'Mario',
-            lastName: 'Rossi',
+            name: 'Mario',
+            surname: 'Rossi',
             username: 'mrossi',
         });
-        expect(component.createdResponse()?.user.id).toBe(1);
+        expect(component.createdResponse()?.tempPassword).toBe('TempPass123');
+        expect(component.createdUser()).toEqual({
+            name: 'Mario',
+            surname: 'Rossi',
+            username: 'mrossi',
+        });
         expect(component.formError()).toBeNull();
         expect(getUsersMock).toHaveBeenCalledTimes(2);
     });
@@ -81,8 +78,8 @@ describe('UserManagementPage', () => {
         createUserMock.mockReturnValueOnce(throwError(() => ({ status: 409 })));
 
         component.onFormSubmit({
-            firstName: 'Mario',
-            lastName: 'Rossi',
+            name: 'Mario',
+            surname: 'Rossi',
             username: 'mrossi',
         });
 
@@ -93,8 +90,8 @@ describe('UserManagementPage', () => {
         createUserMock.mockReturnValueOnce(throwError(() => ({ status: 500 })));
 
         component.onFormSubmit({
-            firstName: 'Mario',
-            lastName: 'Rossi',
+            name: 'Mario',
+            surname: 'Rossi',
             username: 'mrossi',
         });
 
@@ -110,19 +107,18 @@ describe('UserManagementPage', () => {
 
     it('onDialogClosed azzera createdResponse', () => {
         component.createdResponse.set({
-            user: {
-                id: 1,
-                firstName: 'Mario',
-                lastName: 'Rossi',
-                username: 'mrossi',
-                role: UserRole.OPERATORE_SANITARIO,
-            },
-            temporaryPassword: 'TempPass123',
+            tempPassword: 'TempPass123',
+        });
+        component.createdUser.set({
+            name: 'Mario',
+            surname: 'Rossi',
+            username: 'mrossi',
         });
 
         component.onDialogClosed();
 
         expect(component.createdResponse()).toBeNull();
+        expect(component.createdUser()).toBeNull();
     });
 
     it('users$ ritorna [] se il caricamento utenti fallisce', async () => {

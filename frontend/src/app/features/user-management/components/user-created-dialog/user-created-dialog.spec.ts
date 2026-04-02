@@ -3,7 +3,6 @@ import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UserCreatedDialogComponent } from './user-created-dialog';
-import { UserRole } from '../../../../core/models/user-role.enum';
 
 describe('UserCreatedDialogComponent', () => {
   let component: UserCreatedDialogComponent;
@@ -15,15 +14,13 @@ describe('UserCreatedDialogComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserCreatedDialogComponent);
+    fixture.componentRef.setInput('user', {
+      name: 'Mario',
+      surname: 'Rossi',
+      username: 'mrossi',
+    });
     fixture.componentRef.setInput('response', {
-      user: {
-        id: 1,
-        firstName: 'Mario',
-        lastName: 'Rossi',
-        username: 'mrossi',
-        role: UserRole.OPERATORE_SANITARIO,
-      },
-      temporaryPassword: 'TempPass123',
+      tempPassword: 'TempPass123',
     });
     fixture.detectChanges();
     component = fixture.componentInstance;

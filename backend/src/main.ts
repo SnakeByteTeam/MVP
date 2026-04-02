@@ -10,9 +10,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
 
+  const frontendOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:4200')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
   app.use(helmet());
   app.enableCors({
-    //origin: process.env.FRONTEND_URL, sostituito poi con l'url del frontend
+    origin: frontendOrigins,
     credentials: true,
   });
 

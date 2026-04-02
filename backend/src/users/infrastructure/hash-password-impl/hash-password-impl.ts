@@ -1,5 +1,5 @@
 import { HashPasswordPort } from '../../application/ports/out/hash-password-port.interface';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 export class HashPasswordImpl implements HashPasswordPort {
   hashPassword(password: string): string {

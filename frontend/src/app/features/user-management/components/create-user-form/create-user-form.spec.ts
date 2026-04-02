@@ -25,16 +25,16 @@ describe('CreateUserForm', () => {
   it('submit emette formSubmit quando il form e valido', () => {
     const submitSpy = vi.spyOn(component.formSubmit, 'emit');
     component.form.setValue({
-      firstName: 'Mario',
-      lastName: 'Rossi',
+      name: 'Mario',
+      surname: 'Rossi',
       username: 'mrossi',
     });
 
     component.submit();
 
     expect(submitSpy).toHaveBeenCalledWith({
-      firstName: 'Mario',
-      lastName: 'Rossi',
+      name: 'Mario',
+      surname: 'Rossi',
       username: 'mrossi',
     });
     expect(submitSpy).toHaveBeenCalledTimes(1);
@@ -43,42 +43,42 @@ describe('CreateUserForm', () => {
   it('submit non emette e marca touched quando il form e invalido', () => {
     const submitSpy = vi.spyOn(component.formSubmit, 'emit');
     component.form.setValue({
-      firstName: 'M',
-      lastName: '',
+      name: 'M',
+      surname: '',
       username: 'abc',
     });
 
     component.submit();
 
     expect(component.form.invalid).toBe(true);
-    expect(component.form.controls['firstName'].touched).toBe(true);
-    expect(component.form.controls['lastName'].touched).toBe(true);
+    expect(component.form.controls['name'].touched).toBe(true);
+    expect(component.form.controls['surname'].touched).toBe(true);
     expect(component.form.controls['username'].touched).toBe(true);
     expect(submitSpy).not.toHaveBeenCalled();
   });
 
   it('applica validazioni required e minLength', () => {
-    component.form.controls['firstName'].setValue('');
-    component.form.controls['lastName'].setValue('R');
+    component.form.controls['name'].setValue('');
+    component.form.controls['surname'].setValue('R');
     component.form.controls['username'].setValue('abc');
 
-    expect(component.form.controls['firstName'].hasError('required')).toBe(true);
-    expect(component.form.controls['lastName'].hasError('minlength')).toBe(true);
+    expect(component.form.controls['name'].hasError('required')).toBe(true);
+    expect(component.form.controls['surname'].hasError('minlength')).toBe(true);
     expect(component.form.controls['username'].hasError('minlength')).toBe(true);
   });
 
   it('reset pulisce il form', () => {
     component.form.setValue({
-      firstName: 'Mario',
-      lastName: 'Rossi',
+      name: 'Mario',
+      surname: 'Rossi',
       username: 'mrossi',
     });
 
     component.reset();
 
     expect(component.form.value).toEqual({
-      firstName: '',
-      lastName: '',
+      name: '',
+      surname: '',
       username: '',
     });
   });

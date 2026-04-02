@@ -68,7 +68,7 @@
                 Sistema attivo
             </div>
             <button type="button" (click)="onCreateWard()"
-                class="inline-flex items-center gap-2 rounded-lg border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 active:scale-[0.98]">
+                class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 active:scale-[0.98]">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
@@ -136,7 +136,7 @@
                 Reparti
             </button>
             <button type="button" (click)="showApartmentsStep()" [class]="mobileStep() === 'apartments'
-                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-sky-50 text-sky-700'
+                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-amber-50 text-amber-700'
                 : 'flex items-center justify-center gap-1.5 px-3 py-2.5 text-slate-500 hover:bg-slate-50'">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -145,7 +145,7 @@
                 Appartamenti
             </button>
             <button type="button" (click)="showOperatorsStep()" [class]="mobileStep() === 'operators'
-                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-50 text-emerald-700'
+                ? 'flex items-center justify-center gap-1.5 px-3 py-2.5 bg-amber-50 text-amber-700'
                 : 'flex items-center justify-center gap-1.5 px-3 py-2.5 text-slate-500 hover:bg-slate-50'">
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -173,7 +173,7 @@
                 class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3 backdrop-blur-sm">
                 <span class="font-display text-xs font-bold uppercase tracking-widest text-slate-400">Reparti</span>
                 <button type="button" (click)="onCreateWard()" aria-label="Nuovo reparto"
-                    class="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-slate-900 transition hover:bg-amber-400">
+                    class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
@@ -185,8 +185,8 @@
                 <li>
                     <button type="button" (click)="selectWard(ward.id)"
                         [class]="selectedWardId() === ward.id
-                    ? 'group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition bg-amber-500 text-slate-900 shadow-sm'
-                    : 'group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition text-slate-700 hover:bg-slate-50'">
+                    ? 'group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-left transition bg-amber-300 text-slate-900 shadow-sm'
+                    : 'group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-left transition text-slate-700 hover:bg-slate-50'">
                         <div class="flex min-w-0 items-center gap-2">
                             <svg class="h-3.5 w-3.5 flex-shrink-0 opacity-60" fill="none" viewBox="0 0 24 24"
                                 stroke-width="2" stroke="currentColor">
@@ -208,7 +208,7 @@
         </aside>
 
         <!-- ── COL 2: APARTMENTS ── -->
-        <section aria-label="Appartamenti del reparto"
+        <section aria-label="Dettagli reparto e appartamenti"
             class="col-separator col-scroll flex flex-1 flex-col overflow-y-auto lg:flex"
             [class.hidden]="mobileStep() !== 'apartments'">
 
@@ -230,23 +230,26 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                             </svg>
+                            <span class="sr-only">Modifica</span>
                         </button>
                         <button type="button" (click)="onDeleteWard(activeWard.id)"
-                            class="flex h-7 w-7 items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-400 transition hover:border-red-200 hover:bg-red-100 hover:text-red-600"
+                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-400 transition hover:border-red-200 hover:bg-red-100 hover:text-red-600"
                             aria-label="Elimina reparto">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                             </svg>
+                            <span class="sr-only">Elimina</span>
                         </button>
                         <button type="button" (click)="onAssignPlant(activeWard.id)"
-                            class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white transition hover:bg-sky-500"
+                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-amber-300 text-slate-900 transition hover:bg-amber-200"
                             aria-label="Assegna appartamento">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
+                            <span class="sr-only">Assegna appartamento</span>
                         </button>
                     </div>
                 </div>
@@ -269,10 +272,10 @@
                     <li>
                         <div
                             [class]="selectedApartmentId() === apartment.id
-                        ? 'group flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 bg-sky-500 text-white shadow-sm'
+                        ? 'group flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 bg-amber-300 text-slate-900 shadow-sm'
                         : 'group flex items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-slate-700 hover:bg-slate-50'">
                             <button type="button" (click)="selectApartment(apartment.id)"
-                                class="flex min-w-0 flex-1 items-center gap-2 text-left">
+                                class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left">
                                 <svg [class]="selectedApartmentId() === apartment.id ? 'h-3.5 w-3.5 flex-shrink-0 text-white/70' : 'h-3.5 w-3.5 flex-shrink-0 text-slate-400'"
                                     fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -284,9 +287,9 @@
                                 (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
                                 aria-label="Rimuovi appartamento"
                                 [class]="selectedApartmentId() === apartment.id
-                            ? 'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-white/20 text-white opacity-0 transition hover:bg-white/30 group-hover:opacity-100'
-                            : 'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100'">
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                            ? 'flex h-8 w-8 cursor-pointer flex-shrink-0 items-center justify-center rounded-full border border-red-300 bg-red-100 text-red-700 transition hover:bg-red-200'
+                            : 'flex h-8 w-8 cursor-pointer flex-shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-500 transition hover:bg-red-100 hover:text-red-700'">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -325,11 +328,12 @@
                         <h2 class="mt-0.5 truncate text-sm font-semibold text-slate-800">{{ activeWard.name }}</h2>
                     </div>
                     <button type="button" (click)="onAssignOperator(activeWard.id)"
-                        class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white transition hover:bg-emerald-500"
+                        class="flex h-7 w-7 cursor-pointer flex-shrink-0 items-center justify-center rounded-lg bg-amber-300 text-slate-900 transition hover:bg-amber-200"
                         aria-label="Aggiungi operatore">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
+                        <span class="sr-only">Aggiungi operatore</span>
                     </button>
                 </div>
             </div>
@@ -362,8 +366,8 @@
                             <button type="button"
                                 (click)="onRemoveOperator({ wardId: activeWard.id, userId: operator.id })"
                                 aria-label="Rimuovi operatore"
-                                class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100">
-                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                class="flex h-8 w-8 cursor-pointer flex-shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-500 transition hover:bg-red-100 hover:text-red-700">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>

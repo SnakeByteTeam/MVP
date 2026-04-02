@@ -13,6 +13,7 @@ const mockDatapointRows: DatapointRow[] = [
   {
     timestamp: '2024-01-01T08:00:00.000Z',
     datapoint_id: 'dp-001',
+    name: 'Temperature Sensor',
     value: '42.5',
     sfe_type: 'temperature',
     device_type: 'sensor',
@@ -20,6 +21,7 @@ const mockDatapointRows: DatapointRow[] = [
   {
     timestamp: '2024-01-01T08:00:00.000Z',
     datapoint_id: 'dp-002',
+    name: 'Humidity Sensor',
     value: '55.0',
     sfe_type: 'humidity',
     device_type: 'sensor',
@@ -27,6 +29,7 @@ const mockDatapointRows: DatapointRow[] = [
   {
     timestamp: '2024-01-01T09:00:00.000Z',
     datapoint_id: 'dp-003',
+    name: 'Thermostat',
     value: '38.1',
     sfe_type: 'temperature',
     device_type: 'thermostat',
@@ -41,14 +44,13 @@ describe('GetAnalyticsData', () => {
       providers: [
         GetAnalyticsData,
         {
-          provide: 'READ_TIMESERIES_REPOSITORY_PORT',
+          provide: 'GET_ANALYTICS_REPOSITORY',
           useValue: mockRepository,
         },
       ],
     }).compile();
 
     adapter = module.get<GetAnalyticsData>(GetAnalyticsData);
-
     jest.clearAllMocks();
   });
 
@@ -56,11 +58,11 @@ describe('GetAnalyticsData', () => {
     expect(adapter).toBeDefined();
   });
 
-  describe('getDataByPlantId', () => {
+  describe('getDataForPlant', () => {
     it('should call repository.query with correct serialized params', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      await adapter.getDataByPlantId('plant-001', startDate);
+      await adapter.getDataForPlant('plant-001', startDate);
 
       expect(mockRepository.query).toHaveBeenCalledTimes(1);
       expect(mockRepository.query).toHaveBeenCalledWith(
@@ -71,7 +73,7 @@ describe('GetAnalyticsData', () => {
     it('should return a map grouped by ISO timestamp with correct datapoint fields', async () => {
       mockRepository.query.mockResolvedValue(mockDatapointRows);
 
-      const result = await adapter.getDataByPlantId('plant-001', startDate);
+      const result = await adapter.getDataForPlant('plant-001', startDate);
 
       expect(result.size).toBe(2);
 
@@ -79,12 +81,14 @@ describe('GetAnalyticsData', () => {
       expect(slot8).toHaveLength(2);
       expect(slot8![0]).toEqual({
         datapointId: 'dp-001',
+        name: 'Temperature Sensor',
         value: '42.5',
         sfeType: 'temperature',
         deviceType: 'sensor',
       });
       expect(slot8![1]).toEqual({
         datapointId: 'dp-002',
+        name: 'Humidity Sensor',
         value: '55.0',
         sfeType: 'humidity',
         deviceType: 'sensor',
@@ -94,6 +98,7 @@ describe('GetAnalyticsData', () => {
       expect(slot9).toHaveLength(1);
       expect(slot9![0]).toEqual({
         datapointId: 'dp-003',
+        name: 'Thermostat',
         value: '38.1',
         sfeType: 'temperature',
         deviceType: 'thermostat',
@@ -103,17 +108,17 @@ describe('GetAnalyticsData', () => {
     it('should return an empty map when repository returns no rows', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      const result = await adapter.getDataByPlantId('plant-001', startDate);
+      const result = await adapter.getDataForPlant('plant-001', startDate);
 
       expect(result.size).toBe(0);
     });
   });
 
-  describe('getDataByWardId', () => {
+  describe('getDataForWard', () => {
     it('should call repository.query with correct serialized params', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      await adapter.getDataByWardId('ward-001', startDate);
+      await adapter.getDataForWard('ward-001', startDate);
 
       expect(mockRepository.query).toHaveBeenCalledWith(
         JSON.stringify({ wardId: 'ward-001', startDate }),
@@ -123,7 +128,7 @@ describe('GetAnalyticsData', () => {
     it('should return a correctly grouped map', async () => {
       mockRepository.query.mockResolvedValue(mockDatapointRows);
 
-      const result = await adapter.getDataByWardId('ward-001', startDate);
+      const result = await adapter.getDataForWard('ward-001', startDate);
 
       expect(result.size).toBe(2);
       expect(result.get('2024-01-01T08:00:00.000Z')).toHaveLength(2);
@@ -133,27 +138,27 @@ describe('GetAnalyticsData', () => {
     it('should return an empty map when repository returns no rows', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      const result = await adapter.getDataByWardId('ward-001', startDate);
+      const result = await adapter.getDataForWard('ward-001', startDate);
 
       expect(result.size).toBe(0);
     });
   });
 
-  describe('getDataBySensorId', () => {
+  describe('getDataForSensor', () => {
     it('should call repository.query with correct serialized params', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      await adapter.getDataBySensorId('sensor-001', startDate);
+      await adapter.getDataForSensor('plant-001', startDate);
 
       expect(mockRepository.query).toHaveBeenCalledWith(
-        JSON.stringify({ sensorId: 'sensor-001', startDate }),
+        JSON.stringify({ plantId: 'plant-001', startDate, sensor: true }),
       );
     });
 
     it('should return a correctly grouped map', async () => {
       mockRepository.query.mockResolvedValue(mockDatapointRows);
 
-      const result = await adapter.getDataBySensorId('sensor-001', startDate);
+      const result = await adapter.getDataForSensor('plant-001', startDate);
 
       expect(result.size).toBe(2);
       expect(result.get('2024-01-01T08:00:00.000Z')).toHaveLength(2);
@@ -162,13 +167,13 @@ describe('GetAnalyticsData', () => {
     it('should return an empty map when repository returns no rows', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      const result = await adapter.getDataBySensorId('sensor-001', startDate);
+      const result = await adapter.getDataForSensor('plant-001', startDate);
 
       expect(result.size).toBe(0);
     });
   });
 
-  describe('getAlarmsByWardId', () => {
+  describe('getAlarmsForWard', () => {
     const mockAlarmRows = [
       { day: '2024-01-01', alarm_count: '3' },
       { day: '2024-01-02', alarm_count: '7' },
@@ -181,7 +186,7 @@ describe('GetAnalyticsData', () => {
     it('should call repository.query with correct params when onlyResolved is false', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      await adapter.getAlarmsByWardId('ward-001', startDate, false);
+      await adapter.getAlarmsForWard('ward-001', startDate, false);
 
       expect(mockRepository.query).toHaveBeenCalledWith(
         JSON.stringify({
@@ -196,7 +201,7 @@ describe('GetAnalyticsData', () => {
     it('should call repository.query with correct params when onlyResolved is true', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      await adapter.getAlarmsByWardId('ward-001', startDate, true);
+      await adapter.getAlarmsForWard('ward-001', startDate, true);
 
       expect(mockRepository.query).toHaveBeenCalledWith(
         JSON.stringify({
@@ -211,7 +216,7 @@ describe('GetAnalyticsData', () => {
     it('should return a map keyed by day string with parsed alarm counts', async () => {
       mockRepository.query.mockResolvedValue(mockAlarmRows);
 
-      const result = await adapter.getAlarmsByWardId(
+      const result = await adapter.getAlarmsForWard(
         'ward-001',
         startDate,
         false,
@@ -225,7 +230,7 @@ describe('GetAnalyticsData', () => {
     it('should handle day field as a Date object and convert it to ISO date string', async () => {
       mockRepository.query.mockResolvedValue(mockAlarmRowsWithDateObject);
 
-      const result = await adapter.getAlarmsByWardId(
+      const result = await adapter.getAlarmsForWard(
         'ward-001',
         startDate,
         false,
@@ -238,7 +243,7 @@ describe('GetAnalyticsData', () => {
     it('should return an empty map when repository returns no rows', async () => {
       mockRepository.query.mockResolvedValue([]);
 
-      const result = await adapter.getAlarmsByWardId(
+      const result = await adapter.getAlarmsForWard(
         'ward-001',
         startDate,
         false,

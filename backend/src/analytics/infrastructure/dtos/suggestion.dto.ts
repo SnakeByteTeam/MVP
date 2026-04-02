@@ -1,8 +1,8 @@
-import { Suggestion } from '../../domain/suggestion.model';
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
 
 export class SuggestionDto {
   private constructor(
-    public readonly message: string,
+    public readonly message: string[],
     public readonly isSuggestion: boolean,
   ) {}
 

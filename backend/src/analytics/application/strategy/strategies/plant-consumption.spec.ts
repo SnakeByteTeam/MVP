@@ -15,6 +15,7 @@ const twoDaysAgo = toISO(2);
 const buildLightDatapoint = (value: 'On' | 'Off'): DatapointValue[] => [
   {
     datapointId: 'dp-light-001-onoff',
+    name: 'Light OnOff',
     value,
     sfeType: 'SFE_State_OnOff',
     deviceType: 'SF_Light',
@@ -27,23 +28,21 @@ describe('PlantConsumption', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new PlantConsumption(mockPort);
   });
 
   it('should return an empty Plot if there are no snapshots', async () => {
-    mockPort.getDataByPlantId.mockResolvedValue(new Map());
+    mockPort.getDataForPlant.mockResolvedValue(new Map());
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-consumption', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
   it('should calculate consumption when light is On', async () => {
@@ -52,15 +51,13 @@ describe('PlantConsumption', () => {
       [`${yesterday}T10:00:00.000Z`, buildLightDatapoint('Off')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-consumption', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     // 10W * 2h = 20Wh
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('20.00');
+    expect(result.getSeries()[0].getData()[0]).toBe(20);
   });
 
   it('should not calculate consumption when light is Off', async () => {
@@ -69,14 +66,12 @@ describe('PlantConsumption', () => {
       [`${yesterday}T10:00:00.000Z`, buildLightDatapoint('Off')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-consumption', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('0.00');
+    expect(result.getSeries()[0].getData()[0]).toBe(0);
   });
 
   it('should correctly aggregate consumption over multiple days', async () => {
@@ -87,17 +82,15 @@ describe('PlantConsumption', () => {
       [`${yesterday}T12:00:00.000Z`, buildLightDatapoint('Off')],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-consumption', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toHaveLength(2);
     expect(result.getLabels()[0]).toBe(twoDaysAgo);
     expect(result.getLabels()[1]).toBe(yesterday);
-    expect(result.getData()[0]).toBe('20.00');
-    expect(result.getData()[1]).toBe('40.00');
+    expect(result.getSeries()[0].getData()[0]).toBe(20);
+    expect(result.getSeries()[0].getData()[1]).toBe(40);
   });
 
   it('should not consider non-light datapoints', async () => {
@@ -107,6 +100,7 @@ describe('PlantConsumption', () => {
         [
           {
             datapointId: 'dp-thermo-001-hvac',
+            name: 'HVAC Mode',
             value: 'Heating',
             sfeType: 'SFE_State_HVACMode',
             deviceType: 'SF_Thermostat',
@@ -118,6 +112,7 @@ describe('PlantConsumption', () => {
         [
           {
             datapointId: 'dp-thermo-001-hvac',
+            name: 'HVAC Mode',
             value: 'Off',
             sfeType: 'SFE_State_HVACMode',
             deviceType: 'SF_Thermostat',
@@ -126,12 +121,10 @@ describe('PlantConsumption', () => {
       ],
     ]);
 
-    mockPort.getDataByPlantId.mockResolvedValue(snapshots);
+    mockPort.getDataForPlant.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-consumption', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
-    expect(result.getData()[0]).toBe('0.00');
+    expect(result.getSeries()[0].getData()[0]).toBe(0);
   });
 });

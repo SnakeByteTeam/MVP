@@ -30,7 +30,7 @@ export class NavService {
             {
                 label: "Gestione allarmi",
                 icon: "",
-                route: "alarm-configuration",
+                route: "alarms/alarm-configuration",
                 requiredRole: UserRole.AMMINISTRATORE
             },
             {

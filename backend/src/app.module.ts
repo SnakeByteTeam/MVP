@@ -13,9 +13,12 @@ import { AlarmsModule } from './alarms/alarms.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
+<<<<<<< HEAD
 import { SuggestionModule } from './suggestion/suggestion.module';
 import { ValidationModule } from './validation/validation.module';
 
+=======
+>>>>>>> prova_integrazione
 
 @Module({
   imports: [
@@ -31,8 +34,8 @@ import { ValidationModule } from './validation/validation.module';
     WardsModule, AlarmsModule,
     CacheModule,
     SubscriptionModule,
-    EventEmitterModule.forRoot(), UsersModule, SuggestionModule,
-    AlarmsModule, ValidationModule
+    AnalyticsModule,
+    EventEmitterModule.forRoot(), UsersModule,
   ],
 
   controllers: [],

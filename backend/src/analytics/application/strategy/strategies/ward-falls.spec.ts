@@ -15,6 +15,7 @@ const twoDaysAgo = toISO(2);
 const buildFallDatapoint = (value: string): DatapointValue[] => [
   {
     datapointId: 'dp-fall-001',
+    name: 'Fall Detector',
     value,
     sfeType: 'SFE_State_Fall',
     deviceType: 'SF_FallDetector',
@@ -24,6 +25,7 @@ const buildFallDatapoint = (value: string): DatapointValue[] => [
 const buildPresenceDatapoint = (value: string): DatapointValue[] => [
   {
     datapointId: 'dp-presence-001',
+    name: 'Presence Sensor',
     value,
     sfeType: 'SFE_State_Presence',
     deviceType: 'SF_Access',
@@ -36,23 +38,21 @@ describe('WardFalls', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new WardFalls(mockPort);
   });
 
   it('should return an empty Plot if there are no snapshots', async () => {
-    mockPort.getDataByWardId.mockResolvedValue(new Map());
+    mockPort.getDataForWard.mockResolvedValue(new Map());
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-falls', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
   it('should detect a Fall when it changes from NoFall to Fall', async () => {
@@ -61,14 +61,12 @@ describe('WardFalls', () => {
       [`${yesterday}T09:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-falls', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('1');
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
   it('should not count a fall if the value stays to Fall', async () => {
@@ -78,11 +76,9 @@ describe('WardFalls', () => {
       [`${yesterday}T10:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-falls', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toHaveLength(0);
   });
@@ -95,14 +91,12 @@ describe('WardFalls', () => {
       [`${yesterday}T11:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-falls', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('2');
+    expect(result.getSeries()[0].getData()[0]).toBe(2);
   });
 
   it('should correctly aggregate falls per day', async () => {
@@ -116,17 +110,15 @@ describe('WardFalls', () => {
       [`${yesterday}T11:00:00.000Z`, buildFallDatapoint('Fall')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-falls', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toHaveLength(2);
     expect(result.getLabels()[0]).toBe(twoDaysAgo);
     expect(result.getLabels()[1]).toBe(yesterday);
-    expect(result.getData()[0]).toBe('1');
-    expect(result.getData()[1]).toBe('2');
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
+    expect(result.getSeries()[0].getData()[1]).toBe(2);
   });
 
   it('should not consider a fall if the datapoint is not SFE_State_Fall', async () => {
@@ -134,11 +126,9 @@ describe('WardFalls', () => {
       [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Detected')],
     ]);
 
-    mockPort.getDataByWardId.mockResolvedValue(snapshots);
+    mockPort.getDataForWard.mockResolvedValue(snapshots);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-falls', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toHaveLength(0);
   });

@@ -12,9 +12,11 @@ export class AnalyticsController {
   ) {}
 
   @Get()
-  async getAnalytics(@Query() dto: GetAnalyticsDto): Promise<PlotDto> {
-    const cmd = new GetAnalyticsCmd(dto.metric, dto.id);
-    const plot = await this.getAnalyticsUseCase.getAnalytics(cmd);
-    return PlotDto.fromDomain(plot);
+  async getAnalyticsByPlantId(
+    @Query() dto: GetAnalyticsDto,
+  ): Promise<PlotDto[]> {
+    const cmd = new GetAnalyticsCmd(dto.plantId);
+    const plots = await this.getAnalyticsUseCase.getAnalyticsByPlantId(cmd);
+    return plots.map((p) => PlotDto.fromDomain(p));
   }
 }

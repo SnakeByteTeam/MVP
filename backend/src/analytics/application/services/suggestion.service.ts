@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { GetSuggestionUseCase } from '../ports/in/get-suggestion.usecase';
-import { Suggestion } from 'src/suggestion/domain/suggestion.model';
-import { GetSuggestionCmd } from '../commands/get-suggestion.cmd';
 import { LLMSuggestionPort } from '../ports/out/llm-suggestion.port';
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
+import { GetSuggestionCmd } from '../commands/get-suggestion.cmd';
 
 @Injectable()
 export class SuggestionService implements GetSuggestionUseCase {

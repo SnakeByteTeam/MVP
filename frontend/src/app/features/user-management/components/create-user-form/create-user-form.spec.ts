@@ -82,4 +82,20 @@ describe('CreateUserForm', () => {
       username: '',
     });
   });
+
+  it('requestClose emette closeRequest', () => {
+    const closeSpy = vi.spyOn(component.closeRequest, 'emit');
+
+    component.requestClose();
+
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('requestOpen emette openRequest', () => {
+    const openSpy = vi.spyOn(component.openRequest, 'emit');
+
+    component.requestOpen();
+
+    expect(openSpy).toHaveBeenCalledTimes(1);
+  });
 });

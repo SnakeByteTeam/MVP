@@ -1,9 +1,7 @@
 export class GetAnalyticsCmd {
-  readonly metric: string;
-  readonly id: string;
+  readonly plantId: string;
 
-  constructor(metric: string, id: string) {
-    this.metric = metric;
-    this.id = id;
+  constructor(plantId: string) {
+    this.plantId = plantId;
   }
 }

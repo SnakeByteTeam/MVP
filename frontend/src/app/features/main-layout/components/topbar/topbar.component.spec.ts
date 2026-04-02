@@ -43,4 +43,36 @@ describe('TopbarComponent', () => {
 
     expect(spy).toHaveBeenCalled();
   });
+
+  it('dovrebbe emettere profileClicked quando viene premuto il nome utente', () => {
+    const spy = vi.spyOn(component.profileClicked, 'emit');
+
+    const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
+    profileButton.click();
+
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('non emette profileClicked quando utente non admin', () => {
+    const spy = vi.spyOn(component.profileClicked, 'emit');
+    fixture.componentRef.setInput('user', {
+      ...mockUser,
+      role: UserRole.OPERATORE_SANITARIO,
+    });
+    fixture.detectChanges();
+
+    const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
+    profileButton.click();
+
+    expect(spy).not.toHaveBeenCalled();
+    expect(profileButton.disabled).toBe(true);
+  });
+
+  it('evidenzia in giallo il profilo quando attivo', () => {
+    fixture.componentRef.setInput('isProfileActive', true);
+    fixture.detectChanges();
+
+    const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
+    expect(profileButton.classList.contains('bg-amber-300')).toBe(true);
+  });
 });

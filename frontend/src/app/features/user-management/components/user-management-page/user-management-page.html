@@ -16,16 +16,14 @@
 
     </header>
 
-    <!-- Main Grid -->
-    <div class="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[21rem_minmax(0,1fr)]">
+    <!-- Main Content -->
+    <div class="min-h-0 flex-1">
+        <app-create-user-form [errorType]="formError()" [isOpen]="isCreateFormOpen()" (openRequest)="openCreateForm()"
+            (formSubmit)="onFormSubmit($event)" (closeRequest)="closeCreateForm()">
+        </app-create-user-form>
 
-        <!-- Sidebar: Create Form -->
-        <aside class="lg:sticky lg:top-6 lg:self-start">
-            <app-create-user-form [errorType]="formError()" (formSubmit)="onFormSubmit($event)">
-            </app-create-user-form>
-        </aside>
+        <div class="h-4 lg:h-6" aria-hidden="true"></div>
 
-        <!-- Main: User List -->
         <main class="min-h-[22rem]">
             @if (users$ | async; as users) {
             <app-user-list [users]="users" (deleteUser)="onUserDeleted($event)">
@@ -40,7 +38,6 @@
             </div>
             }
         </main>
-
     </div>
 
     <!-- Success Dialog -->

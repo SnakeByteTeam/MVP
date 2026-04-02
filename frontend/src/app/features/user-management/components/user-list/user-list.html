@@ -54,7 +54,7 @@
 
                     <td class="px-5 py-3">
                         <button type="button" (click)="onDeleteRequest(user)"
-                            class="inline-flex items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-400">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -77,8 +77,8 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-slate-600">Nessun operatore sanitario presente</p>
-                                <p class="mt-0.5 text-xs text-slate-400">Usa il form a sinistra per aggiungere il primo
-                                    profilo.</p>
+                                <p class="mt-0.5 text-xs text-slate-400">Usa il pulsante "Inserisci Nuovo Operatore" per
+                                    aggiungere il primo profilo.</p>
                             </div>
                         </div>
                     </td>
@@ -138,11 +138,11 @@
         <!-- Dialog Actions -->
         <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
             <button type="button" (click)="onDeleteCancel()"
-                class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400">
+                class="rounded-lg cursor-pointer border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400">
                 Annulla
             </button>
             <button type="button" (click)="onDeleteConfirm()"
-                class="rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
+                class="rounded-lg cursor-pointer border border-red-600 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
                 Elimina operatore
             </button>
         </div>

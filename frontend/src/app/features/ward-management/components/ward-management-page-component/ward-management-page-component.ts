@@ -314,6 +314,15 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   }
 
   public getConfirmLabel(): string {
+    const state = this.confirmState();
+    if (!state) {
+      return 'Conferma';
+    }
+
+    if (state.kind === 'remove-operator' || state.kind === 'remove-plant') {
+      return 'Rimuovi';
+    }
+
     return 'Conferma';
   }
 

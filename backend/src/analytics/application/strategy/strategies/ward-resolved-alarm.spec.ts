@@ -18,115 +18,125 @@ describe('WardResolvedAlarm', () => {
 
   beforeEach(() => {
     mockPort = {
-      getDataByPlantId: jest.fn(),
-      getDataByWardId: jest.fn(),
-      getAlarmsByWardId: jest.fn(),
-      getDataBySensorId: jest.fn(),
+      getDataForPlant: jest.fn(),
+      getDataForWard: jest.fn(),
+      getAlarmsForWard: jest.fn(),
+      getDataForSensor: jest.fn(),
     };
     strategy = new WardResolvedAlarm(mockPort);
   });
 
   it('should return an empty Plot if there are no alarms', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map()); // risolti
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map()); // inviati
+    mockPort.getAlarmsForWard.mockResolvedValue(new Map());
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-resolved-alarm', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
-  it('should return sent and resolved alarms for the same day', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map([[yesterday, 2]]));
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map([[yesterday, 3]]));
+  it('should return total and resolved alarms series for the same day', async () => {
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(new Map([[yesterday, 3]])); // total
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(new Map([[yesterday, 2]])); // resolved
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-resolved-alarm', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('3');
-    expect(result.getSeries()?.resolved[0]).toBe('2');
+
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'total');
+    const resolvedSeries = result
+      .getSeries()
+      .find((s) => s.getId() === 'resolved');
+
+    expect(totalSeries?.getData()[0]).toBe(3);
+    expect(resolvedSeries?.getData()[0]).toBe(2);
   });
 
   it('should return 0 for resolved if no alarms were resolved that day', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map());
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map([[yesterday, 5]]));
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(new Map([[yesterday, 5]])); // total
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(new Map()); // resolved
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-resolved-alarm', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe('5');
-    expect(result.getSeries()?.resolved[0]).toBe('0');
+
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'total');
+    const resolvedSeries = result
+      .getSeries()
+      .find((s) => s.getId() === 'resolved');
+
+    expect(totalSeries?.getData()[0]).toBe(5);
+    expect(resolvedSeries?.getData()[0]).toBe(0);
   });
 
   it('should correctly aggregate alarms over multiple days', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(
-      new Map([
-        [threeDaysAgo, 1],
-        [twoDaysAgo, 3],
-        [yesterday, 2],
-      ]), // risolti
-    );
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(
       new Map([
         [threeDaysAgo, 2],
         [twoDaysAgo, 4],
         [yesterday, 2],
-      ]), // inviati
+      ]), // total
+    );
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(
+      new Map([
+        [threeDaysAgo, 1],
+        [twoDaysAgo, 3],
+        [yesterday, 2],
+      ]), // resolved
     );
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-resolved-alarm', '1'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
     expect(result.getLabels()).toHaveLength(3);
     expect(result.getLabels()[0]).toBe(threeDaysAgo);
     expect(result.getLabels()[1]).toBe(twoDaysAgo);
     expect(result.getLabels()[2]).toBe(yesterday);
 
-    expect(result.getData()[0]).toBe('2'); // inviati
-    expect(result.getData()[1]).toBe('4');
-    expect(result.getData()[2]).toBe('2');
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'total')!;
+    const resolvedSeries = result
+      .getSeries()
+      .find((s) => s.getId() === 'resolved')!;
 
-    expect(result.getSeries()?.resolved[0]).toBe('1'); // risolti
-    expect(result.getSeries()?.resolved[1]).toBe('3');
-    expect(result.getSeries()?.resolved[2]).toBe('2');
+    expect(totalSeries.getData()[0]).toBe(2);
+    expect(totalSeries.getData()[1]).toBe(4);
+    expect(totalSeries.getData()[2]).toBe(2);
+
+    expect(resolvedSeries.getData()[0]).toBe(1);
+    expect(resolvedSeries.getData()[1]).toBe(3);
+    expect(resolvedSeries.getData()[2]).toBe(2);
   });
 
-  it('should call getAlarmsByWardId twice — once for resolved and once for sent', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValue(new Map());
+  it('should call getAlarmsForWard twice — once for total and once for resolved', async () => {
+    mockPort.getAlarmsForWard.mockResolvedValue(new Map());
 
-    await strategy.execute(new GetAnalyticsCmd('ward-resolved-alarm', '1'));
+    await strategy.execute(new GetAnalyticsCmd('1'));
 
-    expect(mockPort.getAlarmsByWardId).toHaveBeenCalledTimes(2);
-    expect(mockPort.getAlarmsByWardId).toHaveBeenCalledWith(
-      '1',
-      expect.any(Date),
-      true,
-    );
-    expect(mockPort.getAlarmsByWardId).toHaveBeenCalledWith(
+    expect(mockPort.getAlarmsForWard).toHaveBeenCalledTimes(2);
+    expect(mockPort.getAlarmsForWard).toHaveBeenCalledWith(
       '1',
       expect.any(Date),
       false,
     );
+    expect(mockPort.getAlarmsForWard).toHaveBeenCalledWith(
+      '1',
+      expect.any(Date),
+      true,
+    );
   });
 
-  it('resolved alarms should never exceed sent alarms', async () => {
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map([[yesterday, 2]]));
-    mockPort.getAlarmsByWardId.mockResolvedValueOnce(new Map([[yesterday, 3]]));
+  it('resolved alarms should never exceed total alarms', async () => {
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(new Map([[yesterday, 3]])); // total
+    mockPort.getAlarmsForWard.mockResolvedValueOnce(new Map([[yesterday, 2]])); // resolved
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('ward-resolved-alarm', '1'),
+    const result = await strategy.execute(new GetAnalyticsCmd('1'));
+
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'total')!;
+    const resolvedSeries = result
+      .getSeries()
+      .find((s) => s.getId() === 'resolved')!;
+
+    expect(resolvedSeries.getData()[0]).toBeLessThanOrEqual(
+      totalSeries.getData()[0],
     );
-
-    const sent = parseInt(result.getData()[0]);
-    const resolved = parseInt(result.getSeries()?.resolved[0] ?? '0');
-
-    expect(resolved).toBeLessThanOrEqual(sent);
   });
 });

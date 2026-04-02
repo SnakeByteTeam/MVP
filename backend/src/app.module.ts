@@ -12,7 +12,6 @@ import { PlantModule } from './plant/plant.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
-import { SuggestionModule } from './suggestion/suggestion.module';
 
 @Module({
   imports: [
@@ -28,7 +27,8 @@ import { SuggestionModule } from './suggestion/suggestion.module';
     WardsModule,
     CacheModule,
     SubscriptionModule,
-    EventEmitterModule.forRoot(), UsersModule, SuggestionModule
+    AnalyticsModule,
+    EventEmitterModule.forRoot(), UsersModule,
   ],
 })
 export class AppModule { }

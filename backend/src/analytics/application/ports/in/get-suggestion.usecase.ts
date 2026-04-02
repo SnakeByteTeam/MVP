@@ -1,4 +1,4 @@
-import { Suggestion } from '../../../domain/suggestion.model';
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
 import { GetSuggestionCmd } from '../../commands/get-suggestion.cmd';
 
 export interface GetSuggestionUseCase {

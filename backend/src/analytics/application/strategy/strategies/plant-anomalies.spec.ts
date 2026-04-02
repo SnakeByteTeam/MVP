@@ -3,6 +3,7 @@ import { PlantConsumption } from './plant-consumption';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { ANOMALY_THRESHOLD_WH } from './consumption-config';
 import { Plot } from 'src/analytics/domain/plot.model';
+import { Series } from 'src/analytics/domain/series.model';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -12,6 +13,18 @@ const toISO = (daysAgo: number): string => {
 
 const yesterday = toISO(1);
 const twoDaysAgo = toISO(2);
+const threeDaysAgo = toISO(3);
+
+const buildConsumptionPlot = (labels: string[], values: number[]): Plot =>
+  new Plot(
+    'Plant Consumption Analytics',
+    'plant-consumption',
+    'Wh',
+    labels,
+    labels.length > 0
+      ? [new Series('plant-consumption', 'Consumption', values)]
+      : [],
+  );
 
 describe('PlantAnomalies', () => {
   let strategy: PlantAnomalies;
@@ -20,89 +33,86 @@ describe('PlantAnomalies', () => {
   beforeEach(() => {
     mockPlantConsumption = {
       execute: jest.fn(),
+      supports: jest.fn(),
     } as unknown as jest.Mocked<PlantConsumption>;
 
     strategy = new PlantAnomalies(mockPlantConsumption);
   });
 
-  it('should return an empty Plot if there are no consumption data', async () => {
-    const emptyPlot = new Plot(
-      'Plant Consumption Analytics',
-      'plant-consumption',
-      'Wh',
-      [],
-      [],
+  it('should return an empty Plot if consumption plot has no data', async () => {
+    mockPlantConsumption.execute.mockResolvedValue(
+      buildConsumptionPlot([], []),
     );
-    mockPlantConsumption.execute.mockResolvedValue(emptyPlot);
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
-    );
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
     expect(result.getLabels()).toHaveLength(0);
-    expect(result.getData()).toHaveLength(0);
+    expect(result.getSeries()).toHaveLength(0);
   });
 
-  it('should detect anomaly when consumption exceeds threshold', async () => {
-    const anomalyValue = (ANOMALY_THRESHOLD_WH + 10).toFixed(2);
+  it('should return 1 for a day that exceeds the threshold', async () => {
+    const anomalyValue = ANOMALY_THRESHOLD_WH + 10;
 
-    const plotWithData = new Plot(
-      'Plant Consumption Analytics',
-      'plant-consumption',
-      'Wh',
-      [yesterday],
-      [anomalyValue],
+    mockPlantConsumption.execute.mockResolvedValue(
+      buildConsumptionPlot([yesterday], [anomalyValue]),
     );
 
-    mockPlantConsumption.execute.mockResolvedValue(plotWithData);
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
-    );
-
-    expect(result.getLabels()).toContain(yesterday);
-    expect(result.getData()[0]).toBe(anomalyValue);
+    expect(result.getLabels()).toEqual([yesterday]);
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
-  it('should not detect anomaly when consumption is below threshold', async () => {
-    const normalValue = (ANOMALY_THRESHOLD_WH - 10).toFixed(2);
-    const plotWithData = new Plot(
-      'Plant Consumption Analytics',
-      'plant-consumption',
-      'Wh',
-      [yesterday],
-      [normalValue],
+  it('should return 0 for a day that is below the threshold', async () => {
+    const normalValue = ANOMALY_THRESHOLD_WH - 10;
+
+    mockPlantConsumption.execute.mockResolvedValue(
+      buildConsumptionPlot([yesterday], [normalValue]),
     );
 
-    mockPlantConsumption.execute.mockResolvedValue(plotWithData);
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
-    );
-
-    expect(result.getLabels()).toHaveLength(0);
+    expect(result.getLabels()).toEqual([yesterday]);
+    expect(result.getSeries()[0].getData()[0]).toBe(0);
   });
 
-  it('should detect anomalies only on days that exceed threshold', async () => {
-    const anomalyValue = (ANOMALY_THRESHOLD_WH + 10).toFixed(2);
-    const normalValue = (ANOMALY_THRESHOLD_WH - 10).toFixed(2);
+  it('should return correct anomaly flags for each day', async () => {
+    const anomalyValue = ANOMALY_THRESHOLD_WH + 10;
+    const normalValue = ANOMALY_THRESHOLD_WH - 10;
 
-    const plotWithData = new Plot(
-      'Plant Consumption Analytics',
-      'plant-consumption',
-      'Wh',
-      [twoDaysAgo, yesterday],
-      [normalValue, anomalyValue],
+    mockPlantConsumption.execute.mockResolvedValue(
+      buildConsumptionPlot(
+        [threeDaysAgo, twoDaysAgo, yesterday],
+        [normalValue, anomalyValue, anomalyValue],
+      ),
     );
 
-    mockPlantConsumption.execute.mockResolvedValue(plotWithData);
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
 
-    const result = await strategy.execute(
-      new GetAnalyticsCmd('plant-anomalies', 'plant-001'),
+    expect(result.getLabels()).toEqual([threeDaysAgo, twoDaysAgo, yesterday]);
+    expect(result.getSeries()[0].getData()).toEqual([0, 1, 1]);
+  });
+
+  it('should preserve labels alignment between labels and data', async () => {
+    const values = [
+      ANOMALY_THRESHOLD_WH + 1,
+      ANOMALY_THRESHOLD_WH - 1,
+      ANOMALY_THRESHOLD_WH + 1,
+    ];
+
+    mockPlantConsumption.execute.mockResolvedValue(
+      buildConsumptionPlot([threeDaysAgo, twoDaysAgo, yesterday], values),
     );
 
-    expect(result.getLabels()).toHaveLength(1);
-    expect(result.getLabels()[0]).toBe(yesterday);
-    expect(result.getData()[0]).toBe(anomalyValue);
+    const result = await strategy.execute(new GetAnalyticsCmd('plant-001'));
+
+    expect(result.getLabels()).toHaveLength(3);
+    expect(result.getSeries()[0].getData()).toHaveLength(3);
+    expect(result.getLabels()[0]).toBe(threeDaysAgo);
+    expect(result.getSeries()[0].getData()[0]).toBe(1);
+    expect(result.getLabels()[1]).toBe(twoDaysAgo);
+    expect(result.getSeries()[0].getData()[1]).toBe(0);
+    expect(result.getLabels()[2]).toBe(yesterday);
+    expect(result.getSeries()[0].getData()[2]).toBe(1);
   });
 });

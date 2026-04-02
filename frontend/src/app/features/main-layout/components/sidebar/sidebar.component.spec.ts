@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SidebarComponent } from './sidebar.component';
 import { provideRouter } from '@angular/router';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
@@ -41,12 +41,11 @@ describe('SidebarComponent', () => {
     expect(content).toContain('Menu di navigazione vuoto!');
   });
 
-  it('emettere evento collapsed', () => {
-    const spy = vi.spyOn(component.collapsed, 'emit');
+  it('non mostra controllo di chiusura sidebar', () => {
+    component.navItems = [{ label: 'test', route: 'path', icon: '' }];
+    fixture.detectChanges();
+
     const button = fixture.nativeElement.querySelector('button');
-    
-    button.click();
-    
-    expect(spy).toHaveBeenCalled();
+    expect(button).toBeNull();
   });
 });

@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
+import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
 import { AlarmConfigPageComponent } from './alarm-config-page.component';
@@ -18,18 +18,10 @@ describe('AlarmConfigPageComponent', () => {
         alarms$: alarmsSubject.asObservable(),
         error$: errorSubject.asObservable(),
         loadAlarmRules: vi.fn(),
+        createAlarmRule: vi.fn(() => of({} as AlarmRule)),
+        updateAlarmRule: vi.fn(() => of({} as AlarmRule)),
         toggleEnabled: vi.fn(() => of({} as AlarmRule)),
         deleteAlarmRule: vi.fn(() => of(void 0)),
-    };
-
-    const routerStub = {
-        navigate: vi.fn().mockResolvedValue(true),
-    };
-
-    const routeStub = {
-        snapshot: {
-            paramMap: convertToParamMap({}),
-        },
     };
 
     const alarmRule: AlarmRule = {
@@ -44,6 +36,17 @@ describe('AlarmConfigPageComponent', () => {
         deviceId: 'dev-1',
     };
 
+    const formValue = {
+        name: 'Nuova regola',
+        sensorId: 'sensor-1',
+        priority: AlarmPriority.GREEN,
+        thresholdOperator: ThresholdOperator.GREATER_THAN,
+        threshold: 12,
+        armingTime: '08:00',
+        dearmingTime: '18:00',
+        enabled: true,
+    };
+
     beforeEach(async () => {
         vi.clearAllMocks();
         alarmsSubject.next([]);
@@ -53,8 +56,6 @@ describe('AlarmConfigPageComponent', () => {
             imports: [AlarmConfigPageComponent],
             providers: [
                 { provide: AlarmConfigStateService, useValue: stateServiceStub },
-                { provide: Router, useValue: routerStub },
-                { provide: ActivatedRoute, useValue: routeStub },
             ],
         }).compileComponents();
 
@@ -67,40 +68,66 @@ describe('AlarmConfigPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('ngOnInit assegna stream e carica gli allarmi', () => {
+    it('ngOnInit carica gli allarmi e aggiorna le righe tabellari', () => {
         expect(stateServiceStub.loadAlarmRules).toHaveBeenCalledTimes(1);
-
-        let latestAlarms: AlarmRule[] = [];
-        let latestError: string | null = null;
-
-        component.alarms$.subscribe((alarms) => {
-            latestAlarms = alarms;
-        });
-        component.error$.subscribe((error) => {
-            latestError = error;
-        });
 
         alarmsSubject.next([alarmRule]);
         errorSubject.next('Errore test');
+        fixture.detectChanges();
 
-        expect(latestAlarms).toEqual([alarmRule]);
-        expect(latestError).toBe('Errore test');
+        expect(component.rows().length).toBe(1);
+        expect(component.error()).toBe('Errore test');
     });
 
-    it('onCreateNew naviga verso ./new', () => {
+    it('onCreateNew apre la modale in create mode', () => {
         component.onCreateNew();
 
-        expect(routerStub.navigate).toHaveBeenCalledWith(['./new'], { relativeTo: routeStub });
+        expect(component.isModalOpen()).toBe(true);
+        expect(component.editingRule()).toBeNull();
     });
 
-    it('onEdit naviga verso ./:id/edit', () => {
-        component.onEdit(alarmRule);
+    it('onEdit apre la modale in edit mode con regola selezionata', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
 
-        expect(routerStub.navigate).toHaveBeenCalledWith(['./', 'alarm-1', 'edit'], { relativeTo: routeStub });
+        component.onEdit('alarm-1');
+
+        expect(component.isModalOpen()).toBe(true);
+        expect(component.editingRule()?.id).toBe('alarm-1');
     });
 
-    it('onToggleEnabled invoca toggleEnabled invertendo enabled', () => {
-        component.onToggleEnabled(alarmRule);
+    it('onEdit ignora id non trovato', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
+
+        component.onEdit('unknown-id');
+
+        expect(component.isModalOpen()).toBe(false);
+        expect(component.editingRule()).toBeNull();
+    });
+
+    it('onFormSubmitted in create mode invoca create e chiude modale', () => {
+        component.onCreateNew();
+
+        component.onFormSubmitted(formValue);
+
+        expect(stateServiceStub.createAlarmRule).toHaveBeenCalledWith(formValue);
+        expect(component.isModalOpen()).toBe(false);
+    });
+
+    it('onFormSubmitted in edit mode invoca update e chiude modale', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
+        component.onEdit('alarm-1');
+
+        component.onFormSubmitted(formValue);
+
+        expect(stateServiceStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', formValue);
+        expect(component.isModalOpen()).toBe(false);
+    });
+
+    it('onToggleEnabled invoca toggleEnabled con lo stato richiesto', () => {
+        component.onToggleEnabled('alarm-1', false);
 
         expect(stateServiceStub.toggleEnabled).toHaveBeenCalledWith('alarm-1', false);
     });
@@ -111,13 +138,30 @@ describe('AlarmConfigPageComponent', () => {
         expect(stateServiceStub.deleteAlarmRule).toHaveBeenCalledWith('alarm-1');
     });
 
-    it('renderizza la lista e il label corretto del pulsante toggle', () => {
+    it('onModalClosed chiude modale e resetta editingRule', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
+        component.onEdit('alarm-1');
+
+        component.onModalClosed();
+
+        expect(component.isModalOpen()).toBe(false);
+        expect(component.editingRule()).toBeNull();
+    });
+
+    it('renderizza la tabella con le righe e i pulsanti azione', () => {
         alarmsSubject.next([alarmRule]);
         fixture.detectChanges();
 
-        const content = fixture.nativeElement.textContent as string;
+        const nativeElement = fixture.nativeElement as HTMLElement;
+        const content = nativeElement.textContent ?? '';
+        const tableRows = nativeElement.querySelectorAll('tbody tr');
+
+        expect(tableRows.length).toBe(1);
         expect(content).toContain('Temperatura alta');
-        expect(content).toContain('Disabilita');
+        expect(content).toContain('Appartamento');
+        expect(content).toContain('MODIFICA');
+        expect(content).toContain('ELIMINA');
     });
 
     it('renderizza messaggio vuoto quando non ci sono regole', () => {
@@ -126,5 +170,13 @@ describe('AlarmConfigPageComponent', () => {
 
         const content = fixture.nativeElement.textContent as string;
         expect(content).toContain('Nessuna regola configurata.');
+    });
+
+    it('renderizza il form in modale quando la modale e aperta', () => {
+        component.onCreateNew();
+        fixture.detectChanges();
+
+        const modalForm = fixture.nativeElement.querySelector('app-alarm-config-form');
+        expect(modalForm).not.toBeNull();
     });
 });

@@ -1,80 +1,91 @@
-<section aria-labelledby="alarm-config-form-title">
-    <h1 id="alarm-config-form-title">
-        {{ isEditMode ? 'Modifica regola allarme' : 'Nuova regola allarme' }}
-    </h1>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-3 text-sm text-slate-900">
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="name" class="font-semibold text-slate-700">Nome:</label>
+        <input id="name" type="text" formControlName="name"
+            class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600" />
+    </div>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="sensorId" class="font-semibold text-slate-700">Dispositivo:</label>
         <div>
-            <label for="name">Nome regola</label>
-            <input id="name" type="text" formControlName="name" />
-        </div>
-
-        <div>
-            <label for="sensorId">Sensore</label>
             <input id="sensorId" type="text" formControlName="sensorId"
+                class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched" />
             @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
-            <p role="alert">Il sensore e obbligatorio.</p>
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">Il dispositivo e obbligatorio.</p>
             }
         </div>
+    </div>
 
-        <div>
-            <label for="priority">Priorita</label>
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="priority" class="font-semibold text-slate-700">Priorita:</label>
+        <div class="flex items-center gap-2">
             <select id="priority" formControlName="priority"
+                class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.priority.invalid && form.controls.priority.touched">
-                <option [ngValue]="null">Seleziona priorita</option>
+                <option [ngValue]="null">Seleziona</option>
                 @for (priority of priorityOptions; track priority) {
                 <option [ngValue]="priority">{{ priority }}</option>
                 }
             </select>
-            @if (form.controls.priority.invalid && form.controls.priority.touched) {
-            <p role="alert">La priorita e obbligatoria.</p>
+
+            @if (form.controls.priority.value; as selectedPriority) {
+            <app-alarm-priority-indicator [priority]="selectedPriority" />
             }
         </div>
+    </div>
 
-        <div>
-            <label for="thresholdOperator">Operatore soglia</label>
+    @if (form.controls.priority.invalid && form.controls.priority.touched) {
+    <p role="alert" class="text-xs font-medium text-rose-700">La priorita e obbligatoria.</p>
+    }
+
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="thresholdOperator" class="font-semibold text-slate-700">Attiva se il valore e:</label>
+        <div class="flex items-center gap-2">
             <select id="thresholdOperator" formControlName="thresholdOperator"
+                class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched">
-                <option [ngValue]="null">Seleziona operatore</option>
+                <option [ngValue]="null">Operatore</option>
                 @for (operator of thresholdOperatorOptions; track operator) {
                 <option [ngValue]="operator">{{ operator }}</option>
                 }
             </select>
-            @if (form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched) {
-            <p role="alert">L'operatore di soglia e obbligatorio.</p>
-            }
-        </div>
 
-        <div>
-            <label for="threshold">Soglia</label>
             <input id="threshold" type="number" formControlName="threshold"
+                class="h-8 w-24 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.threshold.invalid && form.controls.threshold.touched" />
-            @if (form.controls.threshold.invalid && form.controls.threshold.touched) {
-            <p role="alert">La soglia e obbligatoria.</p>
-            }
         </div>
+    </div>
 
-        <div>
-            <label for="armingTime">Ora attivazione</label>
-            <input id="armingTime" type="time" formControlName="armingTime" />
-        </div>
+    @if (form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched) {
+    <p role="alert" class="text-xs font-medium text-rose-700">L'operatore di soglia e obbligatorio.</p>
+    }
 
-        <div>
-            <label for="dearmingTime">Ora disattivazione</label>
-            <input id="dearmingTime" type="time" formControlName="dearmingTime" />
-        </div>
+    @if (form.controls.threshold.invalid && form.controls.threshold.touched) {
+    <p role="alert" class="text-xs font-medium text-rose-700">La soglia e obbligatoria.</p>
+    }
 
-        <div>
-            <label for="enabled">Abilitato</label>
-            <input id="enabled" type="checkbox" formControlName="enabled" />
-        </div>
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="armingTime" class="font-semibold text-slate-700">Orario attivazione:</label>
+        <input id="armingTime" type="time" formControlName="armingTime"
+            class="h-8 w-24 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600" />
+    </div>
 
-        <div>
-            <button type="submit">
-                {{ isEditMode ? 'Salva modifiche' : 'Crea regola' }}
-            </button>
-            <button type="button" (click)="onCancel()">Annulla</button>
-        </div>
-    </form>
-</section>
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="dearmingTime" class="font-semibold text-slate-700">Orario disattivazione:</label>
+        <input id="dearmingTime" type="time" formControlName="dearmingTime"
+            class="h-8 w-24 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600" />
+    </div>
+
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <span class="font-semibold text-slate-700">Abilita:</span>
+        <app-alarm-toggle-switch [checked]="form.controls.enabled.value" [ariaLabel]="'Abilita regola allarme'"
+            (toggled)="onEnabledToggled($event)" />
+    </div>
+
+    <div class="mt-4 flex items-center justify-end gap-2 border-t border-slate-300 pt-3">
+        <app-alarm-action-button label="ANNULLA" tone="neutral" (pressed)="onCancel()" />
+        <app-alarm-action-button [label]="isEditMode() ? 'APPLICA MODIFICHE' : 'CREA ALLARME'" tone="primary"
+            (pressed)="onSubmit()" />
+    </div>
+</form>

@@ -1,0 +1,19 @@
+@if (open()) {
+<dialog open aria-labelledby="app-modal-shell-title"
+    [attr.aria-describedby]="description() ? 'app-modal-shell-description' : null"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-3xl rounded-2xl border border-slate-400 bg-slate-100 p-4 shadow-2xl backdrop:bg-black/45 focus:outline-none">
+    <header class="mb-3 flex items-center justify-between border-b border-slate-400 pb-2">
+        <h2 id="app-modal-shell-title" class="text-base font-bold text-slate-900">{{ title() }}</h2>
+        <button type="button" (click)="onClose()" [attr.aria-label]="closeLabel()"
+            class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-500 bg-white text-sm font-bold text-slate-800 transition hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600">
+            x
+        </button>
+    </header>
+
+    @if (description()) {
+    <p id="app-modal-shell-description" class="mb-3 text-sm text-slate-700">{{ description() }}</p>
+    }
+
+    <ng-content />
+</dialog>
+}

@@ -1,32 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { EMPTY, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
-import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
 import { AlarmConfigFormComponent } from './alarm-config-form.component';
 
 describe('AlarmConfigFormComponent', () => {
     let component: AlarmConfigFormComponent;
     let fixture: ComponentFixture<AlarmConfigFormComponent>;
-
-    const routeStub = {
-        snapshot: {
-            paramMap: convertToParamMap({}),
-        },
-    };
-
-    const routerStub = {
-        navigate: vi.fn().mockResolvedValue(true),
-    };
-
-    const stateServiceStub = {
-        getAlarmRuleById: vi.fn(),
-        createAlarmRule: vi.fn(() => of({} as AlarmRule)),
-        updateAlarmRule: vi.fn(() => of({} as AlarmRule)),
-    };
 
     const existingRule: AlarmRule = {
         id: 'alarm-42',
@@ -53,44 +34,47 @@ describe('AlarmConfigFormComponent', () => {
 
     beforeEach(async () => {
         vi.clearAllMocks();
-        routeStub.snapshot.paramMap = convertToParamMap({});
-        stateServiceStub.getAlarmRuleById.mockReturnValue(of(existingRule));
 
         await TestBed.configureTestingModule({
             imports: [AlarmConfigFormComponent],
-            providers: [
-                { provide: AlarmConfigStateService, useValue: stateServiceStub },
-                { provide: Router, useValue: routerStub },
-                { provide: ActivatedRoute, useValue: routeStub },
-            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AlarmConfigFormComponent);
         component = fixture.componentInstance;
     });
 
-    it('crea il componente', () => {
+    const setInputs = (mode: 'create' | 'edit', initialRule: AlarmRule | null): void => {
+        fixture.componentRef.setInput('mode', mode);
+        fixture.componentRef.setInput('initialRule', initialRule);
         fixture.detectChanges();
+    };
+
+    it('crea il componente', () => {
+        setInputs('create', null);
 
         expect(component).toBeTruthy();
     });
 
-    it('inizializza in create mode se id non e presente', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({});
+    it('inizializza in create mode con form vuoto', () => {
+        setInputs('create', null);
 
-        fixture.detectChanges();
-
-        expect(component.isEditMode).toBe(false);
-        expect(stateServiceStub.getAlarmRuleById).not.toHaveBeenCalled();
+        expect(component.isEditMode()).toBe(false);
+        expect(component.form.getRawValue()).toEqual({
+            name: '',
+            sensorId: '',
+            priority: null,
+            thresholdOperator: null,
+            threshold: null,
+            armingTime: '',
+            dearmingTime: '',
+            enabled: true,
+        });
     });
 
-    it('inizializza in edit mode se id e presente e precompila il form', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
+    it('inizializza in edit mode con prefill da initialRule', () => {
+        setInputs('edit', existingRule);
 
-        fixture.detectChanges();
-
-        expect(component.isEditMode).toBe(true);
-        expect(stateServiceStub.getAlarmRuleById).toHaveBeenCalledWith('alarm-42');
+        expect(component.isEditMode()).toBe(true);
         expect(component.form.getRawValue()).toEqual({
             name: 'Porta aperta',
             sensorId: 'sensor-9',
@@ -103,26 +87,8 @@ describe('AlarmConfigFormComponent', () => {
         });
     });
 
-    it('in edit mode naviga indietro se il caricamento regola fallisce', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.getAlarmRuleById.mockReturnValue(throwError(() => new Error('boom')));
-
-        fixture.detectChanges();
-
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
-    });
-
-    it('in edit mode naviga indietro se getAlarmRuleById completa senza emissioni', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.getAlarmRuleById.mockReturnValue(EMPTY);
-
-        fixture.detectChanges();
-
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
-    });
-
     it('buildForm applica i validatori required ai campi richiesti', () => {
-        fixture.detectChanges();
+        setInputs('create', null);
 
         component.form.patchValue({
             sensorId: '',
@@ -137,52 +103,31 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.threshold.invalid).toBe(true);
     });
 
-    it('onSubmit in create mode invoca createAlarmRule e naviga alla lista', () => {
-        fixture.detectChanges();
+    it('onSubmit emette submittedForm in create mode con form valido', () => {
+        setInputs('create', null);
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarmRule).toHaveBeenCalledWith(validFormValue);
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
+        expect(emitSpy).toHaveBeenCalledWith(validFormValue);
+        expect(emitSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('onSubmit in create mode non naviga se createAlarmRule non emette (errore gestito)', () => {
-        stateServiceStub.createAlarmRule.mockReturnValueOnce(EMPTY);
-        fixture.detectChanges();
+    it('onSubmit in edit mode emette submittedForm con form valido', () => {
+        setInputs('edit', existingRule);
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarmRule).toHaveBeenCalledWith(validFormValue);
-        expect(routerStub.navigate).not.toHaveBeenCalled();
-    });
-
-    it('onSubmit in edit mode invoca updateAlarmRule con id route e naviga alla lista', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        fixture.detectChanges();
-        component.form.setValue(validFormValue);
-
-        component.onSubmit();
-
-        expect(stateServiceStub.updateAlarmRule).toHaveBeenCalledWith('alarm-42', validFormValue);
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
-    });
-
-    it('onSubmit in edit mode non naviga se updateAlarmRule non emette (errore gestito)', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.updateAlarmRule.mockReturnValueOnce(EMPTY);
-        fixture.detectChanges();
-        component.form.setValue(validFormValue);
-
-        component.onSubmit();
-
-        expect(stateServiceStub.updateAlarmRule).toHaveBeenCalledWith('alarm-42', validFormValue);
-        expect(routerStub.navigate).not.toHaveBeenCalled();
+        expect(emitSpy).toHaveBeenCalledWith(validFormValue);
+        expect(emitSpy).toHaveBeenCalledTimes(1);
     });
 
     it('onSubmit non invia se il form e invalido', () => {
-        fixture.detectChanges();
+        setInputs('create', null);
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
         component.form.patchValue({
             sensorId: '',
             priority: null,
@@ -192,31 +137,28 @@ describe('AlarmConfigFormComponent', () => {
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarmRule).not.toHaveBeenCalled();
-        expect(stateServiceStub.updateAlarmRule).not.toHaveBeenCalled();
+        expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('onSubmit in edit mode senza id non invia update', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({});
-        fixture.detectChanges();
-        component.isEditMode = true;
-        component.form.setValue(validFormValue);
-
-        component.onSubmit();
-
-        expect(stateServiceStub.updateAlarmRule).not.toHaveBeenCalled();
-    });
-
-    it('onCancel naviga verso ../', () => {
-        fixture.detectChanges();
+    it('onCancel emette evento cancelled', () => {
+        setInputs('create', null);
+        const emitSpy = vi.spyOn(component.cancelled, 'emit');
 
         component.onCancel();
 
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
+        expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('onEnabledToggled aggiorna il controllo enabled', () => {
+        setInputs('create', null);
+
+        component.onEnabledToggled(false);
+
+        expect(component.form.controls.enabled.value).toBe(false);
     });
 
     it('espone opzioni enum per priorita e operatore', () => {
-        fixture.detectChanges();
+        setInputs('create', null);
 
         expect(component.priorityOptions).toEqual([
             AlarmPriority.WHITE,

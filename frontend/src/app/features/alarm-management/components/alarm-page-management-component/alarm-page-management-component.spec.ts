@@ -1,28 +1,11 @@
-import { Component, output, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.model';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import type { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
-import { AlarmItemComponent } from '../alarm-item-component/alarm-item-component';
 import { AlarmPageManagementComponent } from './alarm-page-management-component';
-
-@Component({
-  selector: 'app-alarm-item-component',
-  template: '<button type="button" class="stub-resolve" (click)="emitResolve()">resolve</button>',
-})
-class MockAlarmItemComponent {
-  public readonly alarm = input.required<ActiveAlarm>();
-  public readonly isResolving = input<boolean>(false);
-  public readonly resolve = output<string>();
-
-  public emitResolve(): void {
-    this.resolve.emit(this.alarm().id);
-  }
-}
 
 describe('AlarmPageManagementComponent', () => {
   let component: AlarmPageManagementComponent;
@@ -72,12 +55,7 @@ describe('AlarmPageManagementComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AlarmPageManagementComponent],
       providers: [{ provide: AlarmManagementService, useValue: alarmManagementStub }],
-    })
-      .overrideComponent(AlarmPageManagementComponent, {
-        remove: { imports: [AlarmItemComponent] },
-        add: { imports: [MockAlarmItemComponent] },
-      })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AlarmPageManagementComponent);
     component = fixture.componentInstance;
@@ -123,7 +101,7 @@ describe('AlarmPageManagementComponent', () => {
     expect(nativeElement.querySelector('.alarm-management__empty')?.textContent).toContain(
       'Nessun allarme attivo al momento.'
     );
-    expect(nativeElement.querySelectorAll('app-alarm-item-component').length).toBe(0);
+    expect(nativeElement.querySelectorAll('tbody tr').length).toBe(0);
   });
 
   it('renderizza errore e stato resolving quando presenti nel vm', () => {
@@ -145,7 +123,7 @@ describe('AlarmPageManagementComponent', () => {
     );
   });
 
-  it('renderizza un child per ogni allarme e passa correttamente isResolving per-item', () => {
+  it('renderizza tabella con una riga per ogni allarme', () => {
     vmSubject.next({
       alarms: [alarm1, alarm2],
       isResolving: true,
@@ -155,19 +133,19 @@ describe('AlarmPageManagementComponent', () => {
 
     fixture.detectChanges();
 
-    const childDebugElements = fixture.debugElement.queryAll(By.directive(MockAlarmItemComponent));
-    expect(childDebugElements.length).toBe(2);
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    const rows = nativeElement.querySelectorAll('tbody tr');
+    const manageButtons = nativeElement.querySelectorAll('button[aria-label^="Gestisci allarme"]');
 
-    const firstChild = childDebugElements[0].componentInstance as MockAlarmItemComponent;
-    const secondChild = childDebugElements[1].componentInstance as MockAlarmItemComponent;
-
-    expect(firstChild.alarm().id).toBe('active-1');
-    expect(firstChild.isResolving()).toBe(false);
-    expect(secondChild.alarm().id).toBe('active-2');
-    expect(secondChild.isResolving()).toBe(true);
+    expect(rows.length).toBe(2);
+    expect(nativeElement.textContent).toContain('Priorita');
+    expect(nativeElement.textContent).toContain('Dispositivo');
+    expect(nativeElement.textContent).toContain('Corridoio Nord');
+    expect(manageButtons.length).toBe(2);
+    expect((manageButtons.item(1) as HTMLButtonElement).disabled).toBe(true);
   });
 
-  it('propaga evento resolve dal child verso facade.resolveAlarm', () => {
+  it('click su GESTISCI propaga resolve verso facade', () => {
     vmSubject.next({
       alarms: [alarm1],
       isResolving: false,
@@ -176,10 +154,11 @@ describe('AlarmPageManagementComponent', () => {
     });
 
     fixture.detectChanges();
-    const childDebugElement = fixture.debugElement.query(By.directive(MockAlarmItemComponent));
-    const childComponent = childDebugElement.componentInstance as MockAlarmItemComponent;
+    const manageButton = (fixture.nativeElement as HTMLElement).querySelector(
+      'button[aria-label="Gestisci allarme Antipanico"]'
+    );
 
-    childComponent.emitResolve();
+    manageButton?.dispatchEvent(new MouseEvent('click'));
 
     expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledWith('active-1');
     expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledTimes(1);

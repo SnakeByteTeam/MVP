@@ -1,44 +1,57 @@
-<section aria-labelledby="alarm-config-title">
-    <header>
-        <h1 id="alarm-config-title">Configurazione allarmi</h1>
-        <button type="button" (click)="onCreateNew()" aria-label="Crea una nuova regola di allarme">
-            Nuova regola
-        </button>
-    </header>
-
-    @if (error$ | async; as error) {
-    @if (error) {
-    <p role="alert" aria-live="polite">{{ error }}</p>
+<section aria-label="Configurazione allarmi" class="min-h-screen bg-zinc-200 p-5 lg:p-8">
+    @if (error(); as errorMessage) {
+    @if (errorMessage) {
+    <p role="alert" aria-live="polite"
+        class="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        {{ errorMessage }}
+    </p>
     }
     }
 
-    @if (alarms$ | async; as alarms) {
-    @if (alarms.length === 0) {
-    <p>Nessuna regola configurata.</p>
-    } @else {
-    <ul aria-label="Lista regole allarme">
-        @for (rule of alarms; track rule.id) {
-        <li>
-            <article>
-                <h2>{{ rule.name }}</h2>
-                <p>Priorita: {{ rule.priority }}</p>
-                <p>Stato: {{ rule.isArmed ? 'Attivo' : 'Disattivo' }}</p>
-                <div>
-                    <button type="button" (click)="onEdit(rule)" [attr.aria-label]="'Modifica regola ' + rule.name">
-                        Modifica
-                    </button>
-                    <button type="button" (click)="onToggleEnabled(rule)"
-                        [attr.aria-label]="(rule.isArmed ? 'Disabilita ' : 'Abilita ') + rule.name">
-                        {{ rule.isArmed ? 'Disabilita' : 'Abilita' }}
-                    </button>
-                    <button type="button" (click)="onDelete(rule.id)" [attr.aria-label]="'Elimina regola ' + rule.name">
-                        Elimina
-                    </button>
+    <app-alarm-table-shell [title]="'Allarmi'" [caption]="'Tabella configurazione allarmi'" [columns]="columns"
+        [showCreateButton]="true" [createButtonAriaLabel]="'Crea nuova regola allarme'"
+        (createRequested)="onCreateNew()">
+        @if (rows().length === 0) {
+        <tr>
+            <td [attr.colspan]="columns.length"
+                class="rounded-lg border border-slate-300 bg-slate-100 px-4 py-3 text-center text-sm text-slate-700">
+                Nessuna regola configurata.
+            </td>
+        </tr>
+        } @else {
+        @for (row of rows(); track row.id) {
+        <tr class="text-xs text-slate-800">
+            <td
+                class="border-y border-l border-slate-400 bg-slate-100 px-3 py-2 align-middle first:rounded-l-lg first:pl-4">
+                {{ row.name }}
+            </td>
+            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.apartment }}</td>
+            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.device }}</td>
+            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">
+                <app-alarm-priority-indicator [priority]="row.priority" />
+            </td>
+            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.threshold }}</td>
+            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.armingTime }}</td>
+            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.dearmingTime }}</td>
+            <td
+                class="border-y border-r border-slate-400 bg-slate-100 px-3 py-2 align-middle last:rounded-r-lg last:pr-4">
+                <div class="flex items-center gap-1.5">
+                    <app-alarm-action-button label="MODIFICA" [ariaLabel]="'Modifica regola ' + row.name"
+                        (pressed)="onEdit(row.id)" />
+                    <app-alarm-action-button label="ELIMINA" tone="danger" [ariaLabel]="'Elimina regola ' + row.name"
+                        (pressed)="onDelete(row.id)" />
+                    <app-alarm-toggle-switch [checked]="row.isEnabled" [ariaLabel]="'Abilita regola ' + row.name"
+                        (toggled)="onToggleEnabled(row.id, $event)" />
                 </div>
-            </article>
-        </li>
+            </td>
+        </tr>
         }
-    </ul>
-    }
-    }
+        }
+    </app-alarm-table-shell>
+
+    <app-modal-shell [open]="isModalOpen()" title="Creazione/modifica allarme"
+        description="Compila i campi richiesti e conferma per salvare la regola." (closed)="onModalClosed()">
+        <app-alarm-config-form [mode]="editingRule() ? 'edit' : 'create'" [initialRule]="editingRule()"
+            (submittedForm)="onFormSubmitted($event)" (cancelled)="onModalClosed()" />
+    </app-modal-shell>
 </section>

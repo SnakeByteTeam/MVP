@@ -1,39 +1,50 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { defaultIfEmpty } from 'rxjs';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
+import { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
 import { AlarmRuleFormMapper } from '../../mappers/alarm-rule-form.mapper';
-import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
+import { AlarmConfigFormValue } from '../../models/alarm-config-form-value.model';
+import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
+import { AlarmToggleSwitchComponent } from '../../../../shared/components/alarm-table/alarm-toggle-switch.component';
+import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
 
 @Component({
 	selector: 'app-alarm-config-form',
 	templateUrl: './alarm-config-form.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [ReactiveFormsModule],
-	standalone: true
+	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmToggleSwitchComponent, AlarmActionButtonComponent],
 })
-export class AlarmConfigFormComponent implements OnInit {
+export class AlarmConfigFormComponent {
+	public readonly mode = input<'create' | 'edit'>('create');
+	public readonly initialRule = input<AlarmRule | null>(null);
 
-	//form, costruisco con funzione helper
-	public form!:
-		ReturnType<AlarmConfigFormComponent['buildForm']>;
-	public isEditMode = false;
-	//per le enum
+	public readonly submittedForm = output<AlarmConfigFormValue>();
+	public readonly cancelled = output<void>();
+
+	private readonly fb = inject(FormBuilder);
+	private readonly formMapper = inject(AlarmRuleFormMapper);
+
+	public readonly form = this.buildForm();
+	public readonly isEditMode = computed(() => this.mode() === 'edit');
+
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
 		(value): value is AlarmPriority => typeof value === 'number'
 	);
 	public readonly thresholdOperatorOptions = Object.values(ThresholdOperator);
 
-	private readonly fb = inject(FormBuilder);
-	private readonly stateService = inject(AlarmConfigStateService);
-	private readonly formMapper = inject(AlarmRuleFormMapper);
-	private readonly route = inject(ActivatedRoute);
-	private readonly router = inject(Router);
+	constructor() {
+		effect(() => {
+			const rule = this.initialRule();
+			if (rule) {
+				this.form.reset(this.formMapper.toFormValue(rule));
+				return;
+			}
 
+			this.form.reset(this.createEmptyFormValue());
+		});
+	}
 
-	//helper
 	private buildForm() {
 		return this.fb.nonNullable.group({
 			name: [''],
@@ -47,28 +58,17 @@ export class AlarmConfigFormComponent implements OnInit {
 		});
 	}
 
-	public ngOnInit(): void {
-		const id = this.route.snapshot.paramMap.get('id');
-		this.isEditMode = !!id;
-		this.form = this.buildForm();
-
-		if (!id) {
-			return;
-		}
-
-		this.stateService.getAlarmRuleById(id).pipe(defaultIfEmpty(null)).subscribe({
-			next: (rule) => {
-				if (!rule) {
-					void this.router.navigate(['../'], { relativeTo: this.route });
-					return;
-				}
-
-				this.form.patchValue(this.formMapper.toFormValue(rule));
-			},
-			error: () => {
-				void this.router.navigate(['../'], { relativeTo: this.route });
-			},
-		});
+	private createEmptyFormValue(): AlarmConfigFormValue {
+		return {
+			name: '',
+			sensorId: '',
+			priority: null,
+			thresholdOperator: null,
+			threshold: null,
+			armingTime: '',
+			dearmingTime: '',
+			enabled: true,
+		};
 	}
 
 	public onSubmit(): void {
@@ -77,27 +77,14 @@ export class AlarmConfigFormComponent implements OnInit {
 			return;
 		}
 
-		const formValue = this.form.getRawValue();
-
-		if (this.isEditMode) {
-			const id = this.route.snapshot.paramMap.get('id');
-			if (!id) {
-				return;
-			}
-
-			this.stateService.updateAlarmRule(id, formValue).subscribe(() => {
-				void this.router.navigate(['../'], { relativeTo: this.route });
-			});
-			return;
-		}
-
-		this.stateService.createAlarmRule(formValue).subscribe(() => {
-			void this.router.navigate(['../'], { relativeTo: this.route });
-		});
+		this.submittedForm.emit(this.form.getRawValue());
 	}
 
 	public onCancel(): void {
-		void this.router.navigate(['../'], { relativeTo: this.route });
+		this.cancelled.emit();
 	}
 
+	public onEnabledToggled(nextValue: boolean): void {
+		this.form.controls.enabled.setValue(nextValue);
+	}
 }

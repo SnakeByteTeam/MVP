@@ -32,6 +32,9 @@ describe('MainLayoutComponent', () => {
     };
     
     beforeEach(async () => {
+        vi.clearAllMocks();
+        mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
+
         await TestBed.configureTestingModule({
         imports: [MainLayoutComponent],
         providers: [
@@ -80,6 +83,15 @@ describe('MainLayoutComponent', () => {
         expect(component.isProfilePanelOpen).toBe(true);
         expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalledTimes(1);
         expect(component.vimarAccount).toEqual({ email: '', isLinked: false });
+    });
+
+    it('non apre il pannello profilo per utenti non admin', () => {
+        mockAuthService.getRole.mockReturnValue(UserRole.OPERATORE_SANITARIO);
+
+        component.toggleProfilePanel();
+
+        expect(component.isProfilePanelOpen).toBe(false);
+        expect(mockMyVimarService.getLinkedAccount).not.toHaveBeenCalled();
     });
 
     it('naviga a vimar-link dalla sezione profilo', () => {

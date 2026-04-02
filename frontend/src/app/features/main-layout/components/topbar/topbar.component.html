@@ -1,40 +1,41 @@
-<section class="flex items-center justify-between p-4 bg-white border-b border-black h-full">
-    
-    <div class="flex items-center gap-4">
-        <img src="logo.png" alt="Logo" class="w-10 h-10">
+<section class="topbar-shell">
+    <div class="topbar-brand">
+        <img src="logo.png" alt="Logo" class="topbar-logo">
         <div>
-            <h1 class="font-bold text-2xl leading-tight">View4Life</h1>
-            <nav class="text-xs text-gray-500">breadcrumb</nav>
+            <h1 class="topbar-title">View4Life</h1>
+            <nav class="topbar-breadcrumb">Breadcrumb?</nav>
         </div>
     </div>
 
-    <div class="flex items-center gap-6">
-        <button class="p-2 border border-black">
+    <div class="topbar-actions">
+        <button type="button" class="topbar-button topbar-button-neutral">
             Notifiche
         </button>
 
         <button
             type="button"
             aria-label="Apri profilo"
-            (click)="profileClicked.emit()"
-            class="flex items-center gap-3 rounded border px-2 py-1 transition-colors"
-            [class.bg-amber-300]="isProfileActive"
-            [class.border-amber-400]="isProfileActive"
-            [class.hover:bg-amber-100]="!isProfileActive"
-            [class.border-transparent]="!isProfileActive"
+            (click)="onProfileClick()"
+            [disabled]="!canOpenProfile"
+            [attr.title]="canOpenProfile ? 'Apri pannello profilo' : 'Solo amministratore'"
+            class="topbar-profile"
+            [class.profile-active]="isProfileActive && canOpenProfile"
+            [class.bg-amber-300]="isProfileActive && canOpenProfile"
+            [class.profile-disabled]="!canOpenProfile"
         >
-            <img src="user-avatar.png" class="w-8 h-8 border border-black">
-            <div class="text-left text-sm leading-none">
+            <img src="user-avatar.png" class="topbar-avatar" alt="Avatar utente">
+            <div class="topbar-user-meta">
                 <p>{{user.firstName}}</p>
-                <p >{{user.lastName}}</p>
+                <p>{{user.lastName}}</p>
             </div>
         </button>
 
-        <button 
-            (click)="logoutClicked.emit()" 
-            class="px-4 py-2 border">
+        <button
+            type="button"
+            (click)="logoutClicked.emit()"
+            class="topbar-button topbar-button-logout"
+        >
             Logout
         </button>
     </div>
-
 </section>

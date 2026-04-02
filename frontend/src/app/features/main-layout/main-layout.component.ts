@@ -69,9 +69,13 @@ export class MainLayoutComponent implements OnInit {
 
     public ngOnInit(): void{
         const role = this.internalAuthService.getRole();
-        if(role)
+        if(role) {
+            this.currentUser = {
+                ...this.currentUser,
+                role,
+            };
             this.navItems = this.navService.getNavItems(role);
-        else{
+        } else {
             this.navItems = [];
             this.navItems = this.navService.getNavItems(UserRole.AMMINISTRATORE);//solo di prova
         }
@@ -82,6 +86,11 @@ export class MainLayoutComponent implements OnInit {
     }
 
     public toggleProfilePanel(): void {
+        if (!this.canOpenProfilePanel()) {
+            this.isProfilePanelOpen = false;
+            return;
+        }
+
         this.isProfilePanelOpen = !this.isProfilePanelOpen;
 
         if (this.isProfilePanelOpen) {
@@ -101,6 +110,11 @@ export class MainLayoutComponent implements OnInit {
         this.internalAuthService.logoutFromBackend().subscribe(() => {
             void this.router.navigate(['/auth/login']);
         });
+    }
+
+    private canOpenProfilePanel(): boolean {
+        const role = this.internalAuthService.getRole() ?? this.currentUser.role;
+        return role === UserRole.AMMINISTRATORE;
     }
 
     private loadVimarStatus(): void {

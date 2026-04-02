@@ -21,7 +21,8 @@ export class AlarmRulesRepositoryImpl
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {
     const result = await this.pool.query(
-      'SELECT * FROM alarm_rule WHERE id = $1',
+      `SELECT * FROM alarm_rule
+       WHERE id = $1`,
       [id],
     );
     return result.rows.length > 0 ? result.rows[0] : null;
@@ -58,13 +59,14 @@ export class AlarmRulesRepositoryImpl
 
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
-      'SELECT * FROM alarm_rule ORDER BY created_at ASC',
+      `SELECT * FROM alarm_rule 
+       ORDER BY created_at ASC`,
     );
     return result.rows;
   }
 
   async deleteAlarmRule(id: string): Promise<void> {
-    await this.pool.query('DELETE FROM alarm_rule WHERE id = $1', [id]);
+    await this.pool.query(`DELETE FROM alarm_rule WHERE id = $1`, [id]);
   }
 
   async updateAlarmRule(

@@ -13,17 +13,39 @@ export class AlarmEventsRepositoryImpl
 {
   constructor(@Inject(PG_POOL) private readonly pool) {}
 
-  async getAllAlarmEvents(limit: number = 5, offset: number = 0): Promise<AlarmEventEntity[]> {
+  async getAllAlarmEvents(
+    limit: number = 5,
+    offset: number = 0,
+  ): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
-      'SELECT * FROM alarm_event ORDER BY activation_time DESC, resolution_time DESC LIMIT $1 OFFSET $2',
-      [limit, offset]
+      `SELECT 
+         ae.id,
+         '' AS room_name,
+         ar.device_id AS device_name,
+         ae.alarm_rule_id,
+         ar.name AS alarm_name,
+         ar.priority,
+         ae.activation_time,
+         ae.resolution_time,
+         ae.user_id
+       FROM alarm_event ae
+       LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+       ORDER BY ae.activation_time DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset],
     );
     return result.rows;
   }
 
-  async getAllAlarmEventsByUserId(id: number, limit: number = 10, offset: number = 0): Promise<AlarmEventEntity[]> {
+  async getAllAlarmEventsByUserId(
+    id: number,
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
-      'SELECT * FROM alarm_event WHERE id = $1 ORDER BY activation_time DESC LIMIT $2 OFFSET $3',
+      `SELECT * FROM alarm_event 
+      WHERE id = $1 
+      ORDER BY activation_time DESC LIMIT $2 OFFSET $3`,
       [id, limit, offset],
     );
 
@@ -32,7 +54,8 @@ export class AlarmEventsRepositoryImpl
 
   async resolveAlarmEvent(alarmId: string, userId: number): Promise<void> {
     await this.pool.query(
-      'UPDATE alarm_event SET resolution_time = NOW(), user_id = $2 WHERE id = $1',
+      `UPDATE alarm_event SET resolution_time = NOW(), user_id = $2 
+      WHERE id = $1`,
       [alarmId, userId],
     );
   }

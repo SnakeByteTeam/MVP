@@ -6,6 +6,9 @@ export class GetAllAlarmEventsResDto {
   id!: string;
 
   @ApiProperty()
+  position!: string;
+
+  @ApiProperty()
   alarmRuleId!: string;
 
   @ApiProperty()
@@ -19,4 +22,7 @@ export class GetAllAlarmEventsResDto {
 
   @ApiProperty()
   resolutionTime!: Date | null;
+
+  @ApiProperty()
+  userId!: number | null;
 }

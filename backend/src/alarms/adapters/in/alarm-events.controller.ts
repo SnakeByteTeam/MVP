@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Inject, Body, ParseIntPipe, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Inject,
+  Body,
+  ParseIntPipe,
+  Patch,
+} from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ResolveAlarmEventCmd } from '../../application/commands/resolve-alarm-event-cmd';
@@ -47,15 +55,12 @@ export class AlarmEventsController {
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })
   @Get('/:limit/:offset')
-  async getActiveAlarms(
+  async getAllAlarmEvents(
     @Param('limit', ParseIntPipe) limit: number,
     @Param('offset', ParseIntPipe) offset: number,
   ): Promise<GetAllAlarmEventsResDto[]> {
     const alarmEvents = await this.getAllAlarmEventsUseCase.getAllAlarmEvents(
-      new GetAllAlarmEventsCmd(
-        limit,
-        offset
-      )
+      new GetAllAlarmEventsCmd(limit, offset),
     );
     return plainToInstance(GetAllAlarmEventsResDto, alarmEvents);
   }

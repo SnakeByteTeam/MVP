@@ -5,8 +5,8 @@
     <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
         <div class="flex items-center gap-3">
             <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                [class]="isEditMode() ? 'bg-sky-100' : 'bg-amber-100'">
-                <svg [class]="isEditMode() ? 'h-4 w-4 text-sky-700' : 'h-4 w-4 text-amber-700'" fill="none"
+                [class]="'bg-yellow-100'">
+                <svg [class]="'h-4 w-4 text-yellow-700'" fill="none"
                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     @if (isEditMode()) {
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -25,7 +25,7 @@
             </div>
         </div>
         <button type="button" (click)="onCancel()" aria-label="Chiudi"
-            class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -40,7 +40,7 @@
                 Nome reparto <span class="text-rose-500">*</span>
             </label>
             <input id="ward-name" type="text" formControlName="name" maxlength="100"
-                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-sky-500 focus:bg-white focus:ring-3 focus:ring-sky-100"
+                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-yellow-500 focus:bg-white focus:ring-3 focus:ring-yellow-100"
                 placeholder="Es. Reparto autosufficienti" />
             <p class="text-[11px] text-slate-400">Campo obbligatorio. Massimo 100 caratteri.</p>
 
@@ -69,8 +69,8 @@
         </button>
         <button type="submit" (click)="onSubmit()" [disabled]="form.invalid"
             [class]="isEditMode()
-        ? 'inline-flex items-center gap-1.5 rounded-lg border border-sky-600 bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400'
-        : 'inline-flex items-center gap-1.5 rounded-lg border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400'">
+        ? 'inline-flex items-center gap-1.5 rounded-lg border border-yellow-500 bg-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400'
+        : 'inline-flex items-center gap-1.5 rounded-lg border border-yellow-500 bg-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400'">
             {{ isEditMode() ? 'Salva modifiche' : 'Crea reparto' }}
         </button>
     </div>

@@ -52,6 +52,31 @@ describe('UserManagementPage', () => {
         expect(getUsersMock).toHaveBeenCalledTimes(1);
     });
 
+        it('mostra di default solo la tabella e non il form OSS', () => {
+            const nativeElement = fixture.nativeElement as HTMLElement;
+
+            expect(component.isCreateFormOpen()).toBe(false);
+            expect(nativeElement.textContent).toContain('Elenco operatori sanitari');
+            expect(nativeElement.textContent).not.toContain('Compila il form per registrare un nuovo profilo OSS.');
+        });
+
+        it('apre e chiude il form OSS con i pulsanti dedicati', () => {
+            component.openCreateForm();
+            fixture.detectChanges();
+
+            expect(component.isCreateFormOpen()).toBe(true);
+
+            component.openCreateForm();
+            fixture.detectChanges();
+
+            expect(component.isCreateFormOpen()).toBe(true);
+
+            component.closeCreateForm();
+            fixture.detectChanges();
+
+            expect(component.isCreateFormOpen()).toBe(false);
+        });
+
     it('onFormSubmit in successo imposta createdResponse e triggera refresh lista', () => {
         component.onFormSubmit({
             name: 'Mario',

@@ -27,6 +27,7 @@ export class UserManagementPageComponent implements OnInit {
   public createdResponse = signal<UserCreatedResponseDto | null>(null);
   public createdUser = signal<CreateUserDto | null>(null);
   public formError = signal<UserManagementErrorType | null>(null);
+  public isCreateFormOpen = signal(false);
 
   @ViewChild(CreateUserFormComponent)
   private readonly createUserFormComponent?: CreateUserFormComponent;
@@ -43,6 +44,14 @@ export class UserManagementPageComponent implements OnInit {
         return of([]);
       })
     )
+  }
+
+  public openCreateForm(): void {
+    this.isCreateFormOpen.set(true);
+  }
+
+  public closeCreateForm(): void {
+    this.isCreateFormOpen.set(false);
   }
 
 

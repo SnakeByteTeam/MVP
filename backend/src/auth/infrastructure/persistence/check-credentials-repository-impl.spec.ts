@@ -25,7 +25,7 @@ describe('CheckCredentialsRepositoryImpl', () => {
           id: 1,
           username: 'testuser',
           role: 'admin',
-          first_access: false
+          first_access: false,
         },
       ],
     });

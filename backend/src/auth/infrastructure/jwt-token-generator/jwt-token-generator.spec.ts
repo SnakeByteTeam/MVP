@@ -1,5 +1,3 @@
-// ...existing code...
-import { first } from 'rxjs';
 import { JwtTokenGenerator } from './jwt-token-generator';
 import { UnauthorizedException } from '@nestjs/common';
 
@@ -63,13 +61,17 @@ describe('JwtTokenGenerator', () => {
     it('should throw if change-password access token signed with different secret', () => {
       const token = generator.generateChangePasswordAccessToken(cpPayload);
       process.env.ACCESS_SECRET = 'other-secret';
-      expect(() => generator.extractAccessTokenPayload(token)).toThrow(UnauthorizedException);
+      expect(() => generator.extractAccessTokenPayload(token)).toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw if change-password refresh token signed with different secret', () => {
       const token = generator.generateChangePasswordRefreshToken(cpPayload);
       process.env.REFRESH_SECRET = 'other-secret';
-      expect(() => generator.extractRefreshTokenPayload(token)).toThrow(UnauthorizedException);
+      expect(() => generator.extractRefreshTokenPayload(token)).toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -125,4 +127,3 @@ describe('JwtTokenGenerator', () => {
     });
   });
 });
-// ...existing code...

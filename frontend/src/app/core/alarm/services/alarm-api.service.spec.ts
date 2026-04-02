@@ -7,13 +7,16 @@ import type { AlarmRule } from '../models/alarm-rule.model';
 import type { ActiveAlarm } from '../models/active-alarm.model';
 import type { CreateAlarmRuleRequestDto } from '../models/dto/create-alarm-rule-request.model.dto';
 import type { UpdateAlarmRuleRequestDto } from '../models/dto/update-alarm-rule-request.model.dto';
+import { API_BASE_URL } from '../../tokens/api-base-url.token';
 import { AlarmApiService } from './alarm-api.service';
 
 describe('AlarmApiService', () => {
     let service: AlarmApiService;
     let httpController: HttpTestingController;
 
-    const baseUrl = '/alarm-rules';
+    const apiBaseUrl = 'http://localhost:3000';
+    const alarmRulesBaseUrl = `${apiBaseUrl}/alarm-rules`;
+    const alarmEventsBaseUrl = `${apiBaseUrl}/alarm-events`;
 
     const alarm: AlarmRule = {
         id: 'alarm-1',
@@ -38,7 +41,12 @@ describe('AlarmApiService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [AlarmApiService, provideHttpClient(), provideHttpClientTesting()],
+            providers: [
+                AlarmApiService,
+                provideHttpClient(),
+                provideHttpClientTesting(),
+                { provide: API_BASE_URL, useValue: apiBaseUrl },
+            ],
         });
 
         service = TestBed.inject(AlarmApiService);
@@ -55,7 +63,7 @@ describe('AlarmApiService', () => {
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne(baseUrl);
+        const request = httpController.expectOne(alarmRulesBaseUrl);
         expect(request.request.method).toBe('GET');
         request.flush([alarm]);
     });
@@ -66,7 +74,7 @@ describe('AlarmApiService', () => {
             expect(result.id).toBe('alarm-1');
         });
 
-        const request = httpController.expectOne(`${baseUrl}/alarm-1`);
+        const request = httpController.expectOne(`${alarmRulesBaseUrl}/alarm-1`);
         expect(request.request.method).toBe('GET');
         request.flush(alarm);
     });
@@ -76,7 +84,7 @@ describe('AlarmApiService', () => {
             expect(result).toEqual(alarm);
         });
 
-        const request = httpController.expectOne(`${baseUrl}/alarm%2F1`);
+        const request = httpController.expectOne(`${alarmRulesBaseUrl}/alarm%2F1`);
         expect(request.request.method).toBe('GET');
         request.flush(alarm);
     });
@@ -96,7 +104,7 @@ describe('AlarmApiService', () => {
             expect(result).toEqual(alarm);
         });
 
-        const request = httpController.expectOne(baseUrl);
+        const request = httpController.expectOne(alarmRulesBaseUrl);
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual(payload);
         request.flush(alarm);
@@ -116,7 +124,7 @@ describe('AlarmApiService', () => {
             expect(result).toEqual(alarm);
         });
 
-        const request = httpController.expectOne(`${baseUrl}/alarm-2`);
+        const request = httpController.expectOne(`${alarmRulesBaseUrl}/alarm-2`);
         expect(request.request.method).toBe('PUT');
         expect(request.request.body).toEqual(payload);
         request.flush(alarm);
@@ -127,7 +135,7 @@ describe('AlarmApiService', () => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne(`${baseUrl}/alarm-3`);
+        const request = httpController.expectOne(`${alarmRulesBaseUrl}/alarm-3`);
         expect(request.request.method).toBe('DELETE');
         request.flush(null);
     });
@@ -138,7 +146,7 @@ describe('AlarmApiService', () => {
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne('/alarm-events');
+        const request = httpController.expectOne(alarmEventsBaseUrl);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
@@ -149,7 +157,7 @@ describe('AlarmApiService', () => {
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne('/alarm-events/operator-7');
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/operator-7`);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
@@ -159,7 +167,7 @@ describe('AlarmApiService', () => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/alarm-events/resolve');
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/resolve`);
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual({ alarmId: 'active-1', userId: 7 });
         request.flush(null);
@@ -170,7 +178,7 @@ describe('AlarmApiService', () => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/alarm-events/resolve');
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/resolve`);
         expect(request.request.method).toBe('POST');
         expect(request.request.body).toEqual({ alarmId: 'active/1', userId: 9 });
         request.flush(null);
@@ -188,7 +196,7 @@ describe('AlarmApiService', () => {
             },
         });
 
-        const request = httpController.expectOne(`${baseUrl}/missing`);
+        const request = httpController.expectOne(`${alarmRulesBaseUrl}/missing`);
         request.flush('Not found', { status: 404, statusText: 'Not Found' });
 
         expect(receivedStatus).toBe(404);

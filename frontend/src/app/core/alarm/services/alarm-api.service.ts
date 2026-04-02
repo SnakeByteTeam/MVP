@@ -5,12 +5,14 @@ import { AlarmRule } from '../models/alarm-rule.model';
 import { CreateAlarmRuleRequestDto } from '../models/dto/create-alarm-rule-request.model.dto';
 import { UpdateAlarmRuleRequestDto } from '../models/dto/update-alarm-rule-request.model.dto';
 import { ActiveAlarm } from '../models/active-alarm.model';
+import { API_BASE_URL } from '../../tokens/api-base-url.token';
 
 @Injectable({ providedIn: 'root' })
 export class AlarmApiService {
     private readonly http = inject(HttpClient);
-    private readonly alarmsBaseUrl = '/alarm-rules';
-    private readonly alarmEventsBaseUrl = '/alarm-events';
+    private readonly baseUrl = inject(API_BASE_URL);
+    private readonly alarmsBaseUrl = `${this.baseUrl}/alarm-rules`;
+    private readonly alarmEventsBaseUrl = `${this.baseUrl}/alarm-events`;
 
     public getAlarmRules(): Observable<AlarmRule[]> {
         return this.http.get<AlarmRule[]>(this.alarmsBaseUrl);

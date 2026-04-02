@@ -2,7 +2,14 @@
   <ul class="sidebar-nav">
     @for (item of navItems; track item.label) {
       <li>
-        <a [routerLink]="item.route" routerLinkActive="is-active" class="sidebar-link">
+        <a
+          [routerLink]="item.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [class.is-active]="!isProfileMode && rla.isActive"
+          class="sidebar-link"
+          (click)="navItemSelected.emit()"
+        >
           <span class="sidebar-link-icon">{{ item.icon || '•' }}</span>
           <span class="sidebar-link-label">{{ item.label }}</span>
         </a>

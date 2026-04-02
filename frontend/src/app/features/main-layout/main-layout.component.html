@@ -3,6 +3,7 @@
 <app-topbar
     class=" block h-[10vh]"
     [user]="currentUser"
+    [isProfileActive]="isProfilePanelOpen"
     (profileClicked)="toggleProfilePanel()"
     (logoutClicked)="logout()">
 </app-topbar>
@@ -25,13 +26,15 @@ CORRETTO
         class=" block h-full"
         [navItems]="navItems"
         [isCollapsed]="isCollapsed"
+        [isProfileMode]="isProfilePanelOpen"
         [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
-        (collapsed)="toggleSidebar()">
+        (collapsed)="toggleSidebar()"
+        (navItemSelected)="closeProfilePanel()">
     </app-sidebar>
 
-    <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
+    <main class="flex-1 overflow-y-auto p-6 bg-slate-50" (click)="closeProfilePanel()">
         @if (isProfilePanelOpen) {
-            <section class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+            <section class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm" (click)="$event.stopPropagation()">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <h2 class="text-base font-semibold text-slate-800">Profilo {{ currentUser.firstName }} {{ currentUser.lastName }}</h2>
@@ -70,7 +73,9 @@ CORRETTO
             </section>
         }
 
-        <router-outlet></router-outlet>
+        @if (!isProfilePanelOpen) {
+            <router-outlet></router-outlet>
+        }
     </main>
     
 </div>

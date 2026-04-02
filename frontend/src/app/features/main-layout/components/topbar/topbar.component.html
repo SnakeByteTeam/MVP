@@ -17,7 +17,11 @@
             type="button"
             aria-label="Apri profilo"
             (click)="profileClicked.emit()"
-            class="flex items-center gap-3 rounded px-2 py-1 hover:bg-amber-100 transition-colors"
+            class="flex items-center gap-3 rounded border px-2 py-1 transition-colors"
+            [class.bg-amber-300]="isProfileActive"
+            [class.border-amber-400]="isProfileActive"
+            [class.hover:bg-amber-100]="!isProfileActive"
+            [class.border-transparent]="!isProfileActive"
         >
             <img src="user-avatar.png" class="w-8 h-8 border border-black">
             <div class="text-left text-sm leading-none">

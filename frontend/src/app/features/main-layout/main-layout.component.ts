@@ -89,6 +89,10 @@ export class MainLayoutComponent implements OnInit {
         }
     }
 
+    public closeProfilePanel(): void {
+        this.isProfilePanelOpen = false;
+    }
+
     public goToVimarLink(): void {
         void this.router.navigate(['/vimar-link']);
     }

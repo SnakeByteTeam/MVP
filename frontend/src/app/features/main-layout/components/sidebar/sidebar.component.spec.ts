@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SidebarComponent } from './sidebar.component';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('SidebarComponent', () => {
   let component: SidebarComponent;
@@ -47,5 +47,16 @@ describe('SidebarComponent', () => {
 
     const button = fixture.nativeElement.querySelector('button');
     expect(button).toBeNull();
+  });
+
+  it('emette navItemSelected quando si clicca una voce menu', () => {
+    const spy = vi.spyOn(component.navItemSelected, 'emit');
+    component.navItems = [{ label: 'test', route: 'path', icon: '' }];
+    fixture.detectChanges();
+
+    const link = fixture.nativeElement.querySelector('a') as HTMLAnchorElement;
+    link.dispatchEvent(new MouseEvent('click', { button: 1, bubbles: true }));
+
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });

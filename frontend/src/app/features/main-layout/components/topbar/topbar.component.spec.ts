@@ -52,4 +52,12 @@ describe('TopbarComponent', () => {
 
     expect(spy).toHaveBeenCalled();
   });
+
+  it('evidenzia in giallo il profilo quando attivo', () => {
+    fixture.componentRef.setInput('isProfileActive', true);
+    fixture.detectChanges();
+
+    const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
+    expect(profileButton.classList.contains('bg-amber-300')).toBe(true);
+  });
 });

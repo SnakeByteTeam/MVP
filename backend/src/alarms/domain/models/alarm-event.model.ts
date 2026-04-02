@@ -3,6 +3,7 @@ import { AlarmPriority } from './alarm-priority.enum';
 export class AlarmEvent {
   constructor(
     public readonly id: string,
+    public readonly position: string,
     public readonly alarmRuleId: string,
     public readonly alarmName: string,
     public readonly priority: AlarmPriority,

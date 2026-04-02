@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Inject, Body } from '@nestjs/common';
+import { Controller, Get, Param, Inject, Body, ParseIntPipe, Patch } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ResolveAlarmEventCmd } from '../../application/commands/resolve-alarm-event-cmd';
@@ -18,6 +18,7 @@ import {
 } from '../../application/ports/in/get-all-alarm-events-use-case.interface';
 import { GetAllAlarmEventsResDto } from '../../infrastructure/dtos/out/get-all-alarm-events-res-dto';
 import { ResolveAlarmEventReqDto } from '../../infrastructure/dtos/in/resolve-alarm-event-req-dto';
+import { GetAllAlarmEventsCmd } from '../../application/commands/get-all-alarm-events-cmd';
 
 @Controller('alarm-events')
 export class AlarmEventsController {
@@ -31,25 +32,35 @@ export class AlarmEventsController {
   ) {}
 
   @ApiOkResponse({ type: GetAllAlarmEventsByUserIdResDto, isArray: true })
-  @Get('/:userId')
+  @Get('/:userId/:limit/:offset')
   async getAllAlarmEventsByUserId(
-    @Param('userId') userId: number,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('limit', ParseIntPipe) limit: number,
+    @Param('offset', ParseIntPipe) offset: number,
   ): Promise<GetAllAlarmEventsByUserIdResDto[]> {
     const alarmEvents =
       await this.getAllAlarmEventsByUserIdUseCase.getAllAlarmEventsByUserId(
-        new GetAllAlarmEventsByUserIdCmd(userId),
+        new GetAllAlarmEventsByUserIdCmd(userId, limit, offset),
       );
     return plainToInstance(GetAllAlarmEventsByUserIdResDto, alarmEvents);
   }
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })
-  @Get()
-  async getActiveAlarms(): Promise<GetAllAlarmEventsResDto[]> {
-    const alarmEvents = await this.getAllAlarmEventsUseCase.getAllAlarmEvents();
+  @Get('/:limit/:offset')
+  async getActiveAlarms(
+    @Param('limit', ParseIntPipe) limit: number,
+    @Param('offset', ParseIntPipe) offset: number,
+  ): Promise<GetAllAlarmEventsResDto[]> {
+    const alarmEvents = await this.getAllAlarmEventsUseCase.getAllAlarmEvents(
+      new GetAllAlarmEventsCmd(
+        limit,
+        offset
+      )
+    );
     return plainToInstance(GetAllAlarmEventsResDto, alarmEvents);
   }
 
-  @Post('/resolve')
+  @Patch('/resolve')
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {
     return this.resolveAlarmEventUseCase.resolveAlarmEvent(
       new ResolveAlarmEventCmd(req.alarmId, req.userId),

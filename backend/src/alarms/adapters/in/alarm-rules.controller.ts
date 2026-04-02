@@ -102,6 +102,7 @@ export class AlarmRulesController {
     const alarm = await this.updateAlarmRuleUseCase.updateAlarmRule(
       new UpdateAlarmRuleCmd(
         id,
+        req.name,
         req.priority,
         req.thresholdOperator,
         req.thresholdValue,

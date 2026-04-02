@@ -17,6 +17,7 @@ import {
   GET_ALL_ALARM_EVENTS_BY_USER_ID_PORT,
   GetAllAlarmEventsByUserIdPort,
 } from '../ports/out/get-all-alarms-events-by-user-id-port.interface';
+import { GetAllAlarmEventsCmd } from '../commands/get-all-alarm-events-cmd';
 
 @Injectable()
 export class AlarmEventsService
@@ -36,8 +37,8 @@ export class AlarmEventsService
     private readonly resolveAlarmEventPort: ResolveAlarmEventPort,
   ) {}
 
-  async getAllAlarmEvents(): Promise<AlarmEvent[]> {
-    return await this.getAllAlarmEventsPort.getAllAlarmEvents();
+  async getAllAlarmEvents(req: GetAllAlarmEventsCmd): Promise<AlarmEvent[]> {
+    return await this.getAllAlarmEventsPort.getAllAlarmEvents(req);
   }
 
   async getAllAlarmEventsByUserId(

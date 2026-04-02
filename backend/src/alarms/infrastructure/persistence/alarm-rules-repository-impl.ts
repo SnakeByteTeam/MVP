@@ -69,6 +69,7 @@ export class AlarmRulesRepositoryImpl
 
   async updateAlarmRule(
     id: string,
+    name: string,
     priority: AlarmPriority,
     thresholdOperator: string,
     thresholdValue: string,
@@ -78,17 +79,19 @@ export class AlarmRulesRepositoryImpl
   ): Promise<AlarmRuleEntity> {
     const result = await this.pool.query(
       `UPDATE alarm_rule SET
-        priority = $2,
-        threshold_operator = $3,
-        threshold_value = $4,
-        arming_time = $5,
-        dearming_time = $6,
-        is_armed = $7,
+        name = $2,
+        priority = $3,
+        threshold_operator = $4,
+        threshold_value = $5,
+        arming_time = $6,
+        dearming_time = $7,
+        is_armed = $8,
         updated_at = NOW()
         WHERE id = $1
         RETURNING *`,
       [
         id,
+        name,
         priority,
         thresholdOperator,
         thresholdValue,

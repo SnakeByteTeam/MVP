@@ -15,6 +15,7 @@ export class UpdateAlarmRuleAdapter {
   async updateAlarmRule(req: UpdateAlarmRuleCmd): Promise<AlarmRule> {
     const alarmRule = await this.updateAlarmRuleRepository.updateAlarmRule(
       req.id,
+      req.name,
       req.priority,
       req.thresholdOperator,
       req.thresholdValue,

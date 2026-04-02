@@ -14,6 +14,10 @@ export class UpdateAlarmRuleReqDto {
 
   @ApiProperty()
   @IsString()
+  name!: string;
+
+  @ApiProperty()
+  @IsString()
   @MinLength(1)
   @MaxLength(1)
   thresholdOperator!: string;

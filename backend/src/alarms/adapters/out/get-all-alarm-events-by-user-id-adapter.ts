@@ -19,12 +19,15 @@ export class GetAllAlarmEventsByUserIdAdapter implements GetAllAlarmEventsByUser
     const alarmEvents =
       await this.getAllAlarmEventsByUserIdRepository.getAllAlarmEventsByUserId(
         req.id,
+        req.limit,
+        req.offset
       );
 
     return alarmEvents.map(
       (alarmEvent) =>
         new AlarmEvent(
           alarmEvent.id,
+          alarmEvent.room_name + " " + alarmEvent.device_name,
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,

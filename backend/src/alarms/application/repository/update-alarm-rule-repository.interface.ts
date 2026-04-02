@@ -4,6 +4,7 @@ import { AlarmRuleEntity } from '../../infrastructure/entities/alarm-rule-entity
 export interface UpdateAlarmRuleRepository {
   updateAlarmRule(
     id: string,
+    name: string,
     priority: AlarmPriority,
     thresholdOperator: string,
     thresholdValue: string,

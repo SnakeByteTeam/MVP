@@ -5,6 +5,7 @@ import {
   GET_ALL_ALARM_EVENTS_REPOSITORY,
   GetAllAlarmEventsRepository,
 } from '../../application/repository/get-all-alarm-events-repository.interface';
+import { GetAllAlarmEventsCmd } from '../../application/commands/get-all-alarm-events-cmd';
 
 export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
   constructor(
@@ -12,14 +13,14 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
     private readonly getAllAlarmEventsRepository: GetAllAlarmEventsRepository,
   ) {}
 
-  async getAllAlarmEvents(): Promise<AlarmEvent[]> {
+  async getAllAlarmEvents(req: GetAllAlarmEventsCmd): Promise<AlarmEvent[]> {
     const alarmEvents =
-      await this.getAllAlarmEventsRepository.getAllAlarmEvents();
+      await this.getAllAlarmEventsRepository.getAllAlarmEvents(req.limit, req.offset);
     return alarmEvents.map(
       (alarmEvent) =>
         new AlarmEvent(
           alarmEvent.id,
-          "",
+          alarmEvent.room_name + " " + alarmEvent.device_name,
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,

@@ -158,6 +158,9 @@ SET
     ward_id = EXCLUDED.ward_id;
 
 
+
+
+
 CREATE TABLE alarm_rule (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -187,7 +190,7 @@ INSERT INTO alarm_rule (
 ('ALM002', 'Pressione bassa', 'DEV002', 2, '<', '30.00', '00:00:00', '23:59:59', TRUE),
 ('ALM003', 'Livello serbatoio', 'DEV003', 3, '>', '60.25', '06:00:00', '20:00:00', FALSE),
 ('ALM004', 'Vibrazione motore', 'DEV004', 1, '>', '5.75', '07:30:00', '19:30:00', TRUE),
-('ALM005', 'Umidità ambiente', 'DEV005', 4, '>', '85.00', '09:00:00', '17:00:00', FALSE),
+('ALM005', 'UmiditÃ  ambiente', 'DEV005', 4, '>', '85.00', '09:00:00', '17:00:00', FALSE),
 ('ALM006', 'Corrente alta', 'DEV006', 2, '>', '15.80', '00:00:00', '23:59:59', TRUE),
 ('ALM007', 'Gas rilevato', 'DEV007', 1, '>', '10.00', '00:00:00', '23:59:59', TRUE),
 ('ALM008', 'Porta aperta', 'DEV008', 3, '=', '1.00', '18:00:00', '06:00:00', TRUE);
@@ -228,3 +231,4 @@ VALUES
 
 -- Eventi per ALM008 (Porta aperta, fascia notturna)
 ('EVT009', 'ALM008', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);
+

@@ -1,15 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { LLMSuggestionPort } from 'src/suggestion/application/ports/out/llm-suggestion.port';
-import { GetSuggestionCmd } from 'src/suggestion/application/commands/get-suggestion.cmd';
-import { Suggestion } from 'src/suggestion/domain/suggestion.model';
-import {
-  GROQ_CLIENT,
-  GroqClient,
-} from 'src/suggestion/infrastructure/groq/groq.client';
+import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';
+import { LLMSuggestionPort } from 'src/analytics/application/ports/out/llm-suggestion.port';
+import { Suggestion } from 'src/analytics/domain/suggestion.model';
 import {
   BASELINE_REGISTRY,
   SupportedMetric,
-} from 'src/suggestion/infrastructure/config/suggestion-baseline.config';
+} from 'src/analytics/infrastructure/config-suggestion/suggestion-baseline.config';
+import {
+  GROQ_CLIENT,
+  GroqClient,
+} from 'src/analytics/infrastructure/groq/groq.client';
 
 @Injectable()
 export class LLMSuggestionAdapter implements LLMSuggestionPort {
@@ -22,9 +22,7 @@ export class LLMSuggestionAdapter implements LLMSuggestionPort {
     const baselineFactory = BASELINE_REGISTRY[cmd.metric as SupportedMetric];
 
     if (!baselineFactory) {
-      throw new Error(
-        `No baseline configuration found for metric: ${cmd.metric}`,
-      );
+      return new Suggestion([], false);
     }
 
     const baseline = baselineFactory();

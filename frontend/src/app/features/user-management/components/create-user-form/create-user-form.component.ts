@@ -12,7 +12,10 @@ import { UserManagementErrorType } from '../../models/user-management-error-type
 })
 export class CreateUserFormComponent {
   errorType = input<UserManagementErrorType | null>(null);
+  isOpen = input(false);
   formSubmit = output<CreateUserDto>();
+  openRequest = output<void>();
+  closeRequest = output<void>();
 
   @ViewChild('nameInput')
   private readonly nameInput?: ElementRef<HTMLInputElement>;
@@ -48,5 +51,13 @@ export class CreateUserFormComponent {
     queueMicrotask(() => {
       this.nameInput?.nativeElement.focus();
     });
+  }
+
+  public requestClose(): void {
+    this.closeRequest.emit();
+  }
+
+  public requestOpen(): void {
+    this.openRequest.emit();
   }
 }

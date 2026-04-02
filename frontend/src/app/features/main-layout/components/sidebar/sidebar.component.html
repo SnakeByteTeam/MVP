@@ -1,24 +1,25 @@
-<button 
-  (click)="collapsed.emit()" 
-  class="border border-black p-2 m-2 bg-[rgb(240,240,240)]">
-  Sidebar
-</button>
+<aside class="sidebar-shell">
+  <ul class="sidebar-nav">
+    @for (item of navItems; track item.label) {
+      <li>
+        <a
+          [routerLink]="item.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [class.is-active]="!isProfileMode && rla.isActive"
+          class="sidebar-link"
+          (click)="navItemSelected.emit()"
+        >
+          <span class="sidebar-link-icon">{{ item.icon || '•' }}</span>
+          <span class="sidebar-link-label">{{ item.label }}</span>
+        </a>
+      </li>
+    } @empty {
+      <li class="sidebar-empty">Menu di navigazione vuoto!</li>
+    }
+  </ul>
 
-<ul class="flex flex-col gap-4">
-  @for(item of navItems; track item.label){
-  <li>
-    <a 
-      [routerLink]="item.route" 
-      routerLinkActive="bg-[rgb(255,212,0)] text-black font-bold" 
-      class="block w-full p-3 border border-black text-center">
-      {{item.label}}
-    </a>
-  </li>
+  @if (activeAlarmCount > 0) {
+    <p class="sidebar-alert">Allarmi attivi: {{ activeAlarmCount }}</p>
   }
-  
-  @empty {
-  <li class="p-4 border border-dashed border-gray-400 text-center text-gray-500 italic">
-    Menu di navigazione vuoto!
-  </li>
-  }
-</ul>
+</aside>

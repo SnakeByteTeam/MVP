@@ -4,8 +4,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
         <div class="flex items-center gap-3">
-            <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-sky-100">
-                <svg class="h-4 w-4 text-sky-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                <svg class="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
@@ -16,11 +16,11 @@
                     style="font-family:'Syne',sans-serif">
                     Assegna appartamento
                 </h2>
-                <p class="text-xs text-slate-500">Seleziona un appartamento non ancora assegnato.</p>
+                <p class="text-xs text-slate-500">Seleziona un appartamento non ancora assegnato</p>
             </div>
         </div>
         <button type="button" (click)="onCancel()" aria-label="Chiudi"
-            class="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -46,7 +46,7 @@
                     Appartamento <span class="text-rose-500">*</span>
                 </label>
                 <select id="apartment-id" formControlName="plantId"
-                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-sky-500 focus:bg-white focus:ring-3 focus:ring-sky-100">
+                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100">
                     <option [ngValue]="null">Seleziona un appartamento…</option>
                     @for (apartment of availablePlants(); track apartment.id) {
                     <option [ngValue]="apartment.id">{{ apartment.name }}</option>
@@ -72,14 +72,11 @@
     <!-- Footer -->
     <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
         <button type="button" (click)="onCancel()"
-            class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
             Annulla
         </button>
         <button type="submit" (click)="onSubmit()" [disabled]="form.invalid"
-            class="inline-flex items-center gap-1.5 rounded-lg border border-sky-600 bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
             Assegna
         </button>
     </div>

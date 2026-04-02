@@ -262,12 +262,12 @@ describe('WardManagement feature integration', () => {
     it('rimuove operatore e appartamento passando dal confirm dialog', () => {
         clickButtonByAriaLabel('Rimuovi operatore');
         expect(getDialog()?.textContent).toContain('rimozione dell\'operatore');
-        clickButtonByText('Conferma');
+        clickButtonByText('Rimuovi');
         expect(wardApiStub.removeOperatorFromWard).toHaveBeenCalledWith(1, 1);
 
         clickButtonByAriaLabel('Rimuovi appartamento');
         expect(getDialog()?.textContent).toContain('rimozione dell\'appartamento');
-        clickButtonByText('Conferma');
+        clickButtonByText('Rimuovi');
         expect(wardApiStub.removePlantFromWard).toHaveBeenCalledWith(1, '101');
     });
 

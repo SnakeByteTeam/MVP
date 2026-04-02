@@ -2,12 +2,21 @@ import { Routes } from '@angular/router';
 import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
 import { UserRole } from '../../core/models/user-role.enum';
+import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
+import { MyVimarCloudApiFeatureService } from '../my-vimar-integration/services/my-vimar-cloud-api-feature.service';
 
 //guardie commentate solo per vedere il funzionamento
 
 export const MAIN_LAYOUT_ROUTES: Routes = [
     {
         path: '',
+        providers: [
+            MyVimarCloudApiFeatureService,
+            {
+                provide: VIMAR_CLOUD_API_SERVICE,
+                useExisting: MyVimarCloudApiFeatureService,
+            },
+        ],
         //canActivate: [authGuard],	// DA DECOMMENTARE
         loadComponent: () => import('./main-layout.component').then((m) => m.MainLayoutComponent),
         children: [

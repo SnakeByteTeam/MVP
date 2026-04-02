@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { GroqClientImpl } from './groq-client.impl';
 import { Series } from 'src/analytics/domain/series.model';
 import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';

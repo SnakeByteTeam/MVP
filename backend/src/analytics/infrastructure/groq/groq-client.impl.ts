@@ -1,4 +1,4 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GroqClient } from './groq.client';
 import { GroqSuggestionResultDto } from '../dtos/groq-suggestion-result.dto';
 import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';

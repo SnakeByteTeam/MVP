@@ -24,6 +24,7 @@ import {
 import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-by-id.command';
 import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-device-by-plantid.command';
 import { IngestTimeseriesCmd } from 'src/device/application/commands/ingest-timeseries.command';
+import { WriteDatapointValueCmd } from 'src/device/application/commands/write-datapoint-value.command';
 import {
   type FindDeviceByIdUseCase,
   FIND_DEVICE_BY_ID_USECASE,
@@ -40,8 +41,10 @@ import {
   INGEST_TIMESERIES_USE_CASE,
   type IngestTimeseriesUseCase,
 } from 'src/device/application/ports/in/ingest-timeseris.usecase';
+import { WRITE_DATAPOINT_VALUE_USECASE, WriteDatapointValueUseCase } from 'src/device/application/ports/in/write-datapoint-value.usecase';
 import { DeviceValue } from 'src/device/domain/models/device-value.model';
 import { Device } from 'src/device/domain/models/device.model';
+import { WriteDatapointDto } from 'src/device/infrastructure/http/dtos/in/write-datapoint-value.dto';
 import { DeviceValueDto } from 'src/device/infrastructure/http/dtos/out/device-value.dto';
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
 
@@ -57,6 +60,8 @@ export class DeviceController {
     private readonly ingestTimeseries: IngestTimeseriesUseCase,
     @Inject(GET_DEVICE_VALUE_USECASE)
     private readonly getDeviceValueUseCase: GetDeviceValueUseCase,
+    @Inject(WRITE_DATAPOINT_VALUE_USECASE)
+    private readonly writeDatapointUseCase: WriteDatapointValueUseCase
   ) {}
 
   @Get('/:id')
@@ -88,6 +93,22 @@ export class DeviceController {
       return DeviceDto.fromDomain(device);
     } catch {
       throw new InternalServerErrorException('Internal server error');
+    }
+  }
+
+  @Post('')
+  async writeDatapointValue(@Body() req: WriteDatapointDto) {
+    if(!req.datapointId || !req.value) throw new BadRequestException;
+
+    try {
+      const cmd: WriteDatapointValueCmd = {
+        datapointId: req.datapointId,
+        value: req.value
+      }
+
+      await this.writeDatapointUseCase.writeDatapointValue(cmd);
+    } catch {
+
     }
   }
 

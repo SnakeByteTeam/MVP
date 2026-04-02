@@ -25,4 +25,7 @@ export class CreateAlarmRuleResDto {
 
   @ApiProperty()
   dearmingTime!: string;
+
+  @ApiProperty()
+  isArmed!: boolean;
 }

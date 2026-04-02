@@ -19,6 +19,7 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
       (alarmEvent) =>
         new AlarmEvent(
           alarmEvent.id,
+          "",
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,

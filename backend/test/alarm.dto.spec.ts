@@ -1,5 +1,5 @@
 import { AlarmDto } from '../src/alarms/infrastructure/dtos/alarm.dto';
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 
 describe('AlarmDto', () => {
@@ -37,7 +37,7 @@ describe('AlarmDto', () => {
       expect(dto.updatedAt).toBe(updatedAt);
     });
 
-    it('dovrebbe restituire un\'istanza di AlarmDto', () => {
+    it("dovrebbe restituire un'istanza di AlarmDto", () => {
       const dto = AlarmDto.fromDomain(mockAlarm);
       expect(dto).toBeInstanceOf(AlarmDto);
     });

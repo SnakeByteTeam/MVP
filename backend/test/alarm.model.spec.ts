@@ -1,4 +1,4 @@
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 
 describe('Alarm', () => {
@@ -35,9 +35,17 @@ describe('Alarm', () => {
 
   it('dovrebbe creare un Alarm disabilitato', () => {
     const alarm = new Alarm(
-      'alarm-id-2', 'Test', 'plant-1', 'device-1',
-      AlarmPriority.WHITE, 10, '00:00', '23:59',
-      false, createdAt, updatedAt,
+      'alarm-id-2',
+      'Test',
+      'plant-1',
+      'device-1',
+      AlarmPriority.WHITE,
+      10,
+      '00:00',
+      '23:59',
+      false,
+      createdAt,
+      updatedAt,
     );
 
     expect(alarm.enabled).toBe(false);

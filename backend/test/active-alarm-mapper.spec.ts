@@ -1,6 +1,6 @@
 import { toActiveModel } from '../src/alarms/application/repository/active-alarm-mapper';
-import { ActiveAlarmEntity } from '../src/alarms/infrastructure/entities/alarm.entity';
-import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
+import { ActiveAlarmEntity } from '../src/alarms/infrastructure/entities/alarm-rule-entity';
+import { ActiveAlarm } from '../src/alarms/domain/models/alarm-event.model';
 
 describe('active-alarm-mapper - toActiveModel', () => {
   const triggeredAt = new Date('2024-01-01T10:00:00');
@@ -19,7 +19,7 @@ describe('active-alarm-mapper - toActiveModel', () => {
 
     expect(activeAlarm).toBeInstanceOf(ActiveAlarm);
     expect(activeAlarm.id).toBe('active-id-1');
-    expect(activeAlarm.alarmId).toBe('alarm-id-1');  // alarm_rule_id → alarmRuleId
+    expect(activeAlarm.alarmId).toBe('alarm-id-1'); // alarm_rule_id → alarmRuleId
     expect(activeAlarm.alarmName).toBe('Temperatura soglia');
     expect(activeAlarm.dangerSignal).toBe('Temperatura oltre soglia');
     expect(activeAlarm.triggeredAt).toBe(triggeredAt);

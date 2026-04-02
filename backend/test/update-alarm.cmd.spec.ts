@@ -1,4 +1,4 @@
-import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm.cmd';
+import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm-rule.cmd';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
 
 describe('UpdateAlarmCmd', () => {

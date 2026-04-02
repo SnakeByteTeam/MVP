@@ -1,49 +1,62 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
-import { AlarmService } from '../src/alarms/application/services/alarm.service';
+import { AlarmService } from '../src/alarms/application/services/alarm-rule.service';
 
-import { GET_ALL_ALARMS_PORT } from '../src/alarms/application/ports/out/get-all-alarms.port';
-import { GET_ALARM_BY_ID_PORT } from '../src/alarms/application/ports/out/get-alarm-by-id.port';
+import { GET_ALL_ALARMS_PORT } from '../src/alarms/application/ports/out/get-all-alarm-rules.port';
+import { GET_ALARM_BY_ID_PORT } from '../src/alarms/application/ports/out/get-alarm-rule-by-id.port';
 import { GET_ALL_ALARMS_BY_REQUEST_PORT } from '../src/alarms/application/ports/out/get-all-alarms-by-request.port';
-import { CREATE_ALARM_PORT } from '../src/alarms/application/ports/out/create-alarm.port';
-import { UPDATE_ALARM_PORT } from '../src/alarms/application/ports/out/update-alarm.port';
-import { DELETE_ALARM_PORT } from '../src/alarms/application/ports/out/delete-alarm.port';
+import { CREATE_ALARM_PORT } from '../src/alarms/application/ports/out/create-alarm-rule.port';
+import { UPDATE_ALARM_PORT } from '../src/alarms/application/ports/out/update-alarm-rule.port';
+import { DELETE_ALARM_PORT } from '../src/alarms/application/ports/out/delete-alarm-rule.port';
 import {
   FIND_ALL_ACTIVE_ALARMS_PORT,
   FIND_ACTIVE_ALARM_BY_ID_PORT,
   FIND_ACTIVE_ALARM_BY_RULE_ID_PORT,
   SAVE_ACTIVE_ALARM_PORT,
   RESOLVE_ACTIVE_ALARM_PORT,
-} from '../src/alarms/application/ports/out/find-active-alarms.port';
+} from '../src/alarms/application/ports/out/get-all-alarm-events.port';
 
-import { Alarm } from '../src/alarms/domain/models/alarm.model';
-import { ActiveAlarm } from '../src/alarms/domain/models/active-alarm.model';
+import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
+import { ActiveAlarm } from '../src/alarms/domain/models/alarm-event.model';
 import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
-import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm.cmd';
-import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm.cmd';
+import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm-rule.cmd';
+import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm-rule.cmd';
 import { TriggerActiveAlarmCmd } from '../src/alarms/application/commands/trigger-active-alarm.cmd';
 
-const mockGetAllAlarmsPort            = { getAllAlarms: jest.fn() };
-const mockGetAlarmByIdPort            = { getAlarmById: jest.fn() };
-const mockGetAllAlarmsByRequestPort   = { getAllAlarmsByRequest: jest.fn() };
-const mockCreateAlarmPort             = { createAlarm: jest.fn() };
-const mockUpdateAlarmPort             = { updateAlarm: jest.fn() };
-const mockDeleteAlarmPort             = { deleteAlarm: jest.fn() };
-const mockFindAllActiveAlarmsPort     = { findAllActive: jest.fn() };
-const mockFindActiveAlarmByIdPort     = { findById: jest.fn() };
-const mockFindActiveByRuleIdPort      = { findActiveByRuleId: jest.fn() };
-const mockSaveActiveAlarmPort         = { save: jest.fn() };
-const mockResolveActiveAlarmPort      = { resolve: jest.fn() };
+const mockGetAllAlarmsPort = { getAllAlarms: jest.fn() };
+const mockGetAlarmByIdPort = { getAlarmById: jest.fn() };
+const mockGetAllAlarmsByRequestPort = { getAllAlarmsByRequest: jest.fn() };
+const mockCreateAlarmPort = { createAlarm: jest.fn() };
+const mockUpdateAlarmPort = { updateAlarm: jest.fn() };
+const mockDeleteAlarmPort = { deleteAlarm: jest.fn() };
+const mockFindAllActiveAlarmsPort = { findAllActive: jest.fn() };
+const mockFindActiveAlarmByIdPort = { findById: jest.fn() };
+const mockFindActiveByRuleIdPort = { findActiveByRuleId: jest.fn() };
+const mockSaveActiveAlarmPort = { save: jest.fn() };
+const mockResolveActiveAlarmPort = { resolve: jest.fn() };
 
 const createdAt = new Date('2024-01-01');
 const mockAlarm = new Alarm(
-  'alarm-id-1', 'Temperatura soglia', 'plant-1', 'device-1',
-  AlarmPriority.RED, 20, '08:00', '20:00', true, createdAt, createdAt,
+  'alarm-id-1',
+  'Temperatura soglia',
+  'plant-1',
+  'device-1',
+  AlarmPriority.RED,
+  20,
+  '08:00',
+  '20:00',
+  true,
+  createdAt,
+  createdAt,
 );
 
 const mockActiveAlarm = new ActiveAlarm(
-  'active-id-1', 'alarm-id-1', 'Temperatura soglia',
-  'Temperatura oltre soglia', new Date('2024-01-01'), null,
+  'active-id-1',
+  'alarm-id-1',
+  'Temperatura soglia',
+  'Temperatura oltre soglia',
+  new Date('2024-01-01'),
+  null,
 );
 
 describe('AlarmService', () => {
@@ -53,17 +66,32 @@ describe('AlarmService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AlarmService,
-        { provide: GET_ALL_ALARMS_PORT,               useValue: mockGetAllAlarmsPort },
-        { provide: GET_ALARM_BY_ID_PORT,              useValue: mockGetAlarmByIdPort },
-        { provide: GET_ALL_ALARMS_BY_REQUEST_PORT,    useValue: mockGetAllAlarmsByRequestPort },
-        { provide: CREATE_ALARM_PORT,                 useValue: mockCreateAlarmPort },
-        { provide: UPDATE_ALARM_PORT,                 useValue: mockUpdateAlarmPort },
-        { provide: DELETE_ALARM_PORT,                 useValue: mockDeleteAlarmPort },
-        { provide: FIND_ALL_ACTIVE_ALARMS_PORT,       useValue: mockFindAllActiveAlarmsPort },
-        { provide: FIND_ACTIVE_ALARM_BY_ID_PORT,      useValue: mockFindActiveAlarmByIdPort },
-        { provide: FIND_ACTIVE_ALARM_BY_RULE_ID_PORT, useValue: mockFindActiveByRuleIdPort },
-        { provide: SAVE_ACTIVE_ALARM_PORT,            useValue: mockSaveActiveAlarmPort },
-        { provide: RESOLVE_ACTIVE_ALARM_PORT,         useValue: mockResolveActiveAlarmPort },
+        { provide: GET_ALL_ALARMS_PORT, useValue: mockGetAllAlarmsPort },
+        { provide: GET_ALARM_BY_ID_PORT, useValue: mockGetAlarmByIdPort },
+        {
+          provide: GET_ALL_ALARMS_BY_REQUEST_PORT,
+          useValue: mockGetAllAlarmsByRequestPort,
+        },
+        { provide: CREATE_ALARM_PORT, useValue: mockCreateAlarmPort },
+        { provide: UPDATE_ALARM_PORT, useValue: mockUpdateAlarmPort },
+        { provide: DELETE_ALARM_PORT, useValue: mockDeleteAlarmPort },
+        {
+          provide: FIND_ALL_ACTIVE_ALARMS_PORT,
+          useValue: mockFindAllActiveAlarmsPort,
+        },
+        {
+          provide: FIND_ACTIVE_ALARM_BY_ID_PORT,
+          useValue: mockFindActiveAlarmByIdPort,
+        },
+        {
+          provide: FIND_ACTIVE_ALARM_BY_RULE_ID_PORT,
+          useValue: mockFindActiveByRuleIdPort,
+        },
+        { provide: SAVE_ACTIVE_ALARM_PORT, useValue: mockSaveActiveAlarmPort },
+        {
+          provide: RESOLVE_ACTIVE_ALARM_PORT,
+          useValue: mockResolveActiveAlarmPort,
+        },
       ],
     }).compile();
 
@@ -92,12 +120,16 @@ describe('AlarmService', () => {
       mockGetAlarmByIdPort.getAlarmById.mockResolvedValue(mockAlarm);
       const result = await service.getAlarm('alarm-id-1');
       expect(result).toEqual(mockAlarm);
-      expect(mockGetAlarmByIdPort.getAlarmById).toHaveBeenCalledWith('alarm-id-1');
+      expect(mockGetAlarmByIdPort.getAlarmById).toHaveBeenCalledWith(
+        'alarm-id-1',
+      );
     });
 
-    it('dovrebbe lanciare NotFoundException se l\'allarme non esiste', async () => {
+    it("dovrebbe lanciare NotFoundException se l'allarme non esiste", async () => {
       mockGetAlarmByIdPort.getAlarmById.mockResolvedValue(null);
-      await expect(service.getAlarm('id-inesistente')).rejects.toThrow(NotFoundException);
+      await expect(service.getAlarm('id-inesistente')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -105,8 +137,13 @@ describe('AlarmService', () => {
     it('dovrebbe creare un allarme e restituirlo', async () => {
       mockCreateAlarmPort.createAlarm.mockResolvedValue(mockAlarm);
       const cmd = new CreateAlarmCmd(
-        'Temperatura soglia', 'plant-1', 'device-1',
-        AlarmPriority.RED, 20, '08:00', '20:00',
+        'Temperatura soglia',
+        'plant-1',
+        'device-1',
+        AlarmPriority.RED,
+        20,
+        '08:00',
+        '20:00',
       );
       const result = await service.createAlarm(cmd);
       expect(result).toEqual(mockAlarm);
@@ -121,10 +158,13 @@ describe('AlarmService', () => {
       const cmd = new UpdateAlarmCmd('alarm-id-1', AlarmPriority.GREEN, 25);
       const result = await service.updateAlarm(cmd);
       expect(result).toEqual(mockAlarm);
-      expect(mockUpdateAlarmPort.updateAlarm).toHaveBeenCalledWith('alarm-id-1', cmd);
+      expect(mockUpdateAlarmPort.updateAlarm).toHaveBeenCalledWith(
+        'alarm-id-1',
+        cmd,
+      );
     });
 
-    it('dovrebbe lanciare NotFoundException se l\'allarme non esiste', async () => {
+    it("dovrebbe lanciare NotFoundException se l'allarme non esiste", async () => {
       mockGetAlarmByIdPort.getAlarmById.mockResolvedValue(null);
       const cmd = new UpdateAlarmCmd('id-inesistente');
       await expect(service.updateAlarm(cmd)).rejects.toThrow(NotFoundException);
@@ -137,19 +177,25 @@ describe('AlarmService', () => {
       mockGetAlarmByIdPort.getAlarmById.mockResolvedValue(mockAlarm);
       mockDeleteAlarmPort.deleteAlarm.mockResolvedValue(undefined);
       await service.deleteAlarm('alarm-id-1');
-      expect(mockDeleteAlarmPort.deleteAlarm).toHaveBeenCalledWith('alarm-id-1');
+      expect(mockDeleteAlarmPort.deleteAlarm).toHaveBeenCalledWith(
+        'alarm-id-1',
+      );
     });
 
-    it('dovrebbe lanciare NotFoundException se l\'allarme non esiste', async () => {
+    it("dovrebbe lanciare NotFoundException se l'allarme non esiste", async () => {
       mockGetAlarmByIdPort.getAlarmById.mockResolvedValue(null);
-      await expect(service.deleteAlarm('id-inesistente')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteAlarm('id-inesistente')).rejects.toThrow(
+        NotFoundException,
+      );
       expect(mockDeleteAlarmPort.deleteAlarm).not.toHaveBeenCalled();
     });
   });
 
   describe('getActiveAlarms', () => {
     it('dovrebbe restituire tutti gli allarmi attivi', async () => {
-      mockFindAllActiveAlarmsPort.findAllActive.mockResolvedValue([mockActiveAlarm]);
+      mockFindAllActiveAlarmsPort.findAllActive.mockResolvedValue([
+        mockActiveAlarm,
+      ]);
       const result = await service.getActiveAlarms();
       expect(result).toEqual([mockActiveAlarm]);
     });
@@ -167,13 +213,16 @@ describe('AlarmService', () => {
       mockResolveActiveAlarmPort.resolve.mockResolvedValue(undefined);
       await service.resolveActiveAlarm('active-id-1');
       expect(mockResolveActiveAlarmPort.resolve).toHaveBeenCalledWith(
-        'active-id-1', expect.any(Date),
+        'active-id-1',
+        expect.any(Date),
       );
     });
 
-    it('dovrebbe lanciare NotFoundException se l\'allarme attivo non esiste', async () => {
+    it("dovrebbe lanciare NotFoundException se l'allarme attivo non esiste", async () => {
       mockFindActiveAlarmByIdPort.findById.mockResolvedValue(null);
-      await expect(service.resolveActiveAlarm('id-inesistente')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.resolveActiveAlarm('id-inesistente'),
+      ).rejects.toThrow(NotFoundException);
       expect(mockResolveActiveAlarmPort.resolve).not.toHaveBeenCalled();
     });
   });
@@ -183,7 +232,9 @@ describe('AlarmService', () => {
       mockFindActiveByRuleIdPort.findActiveByRuleId.mockResolvedValue(null);
       mockSaveActiveAlarmPort.save.mockResolvedValue(mockActiveAlarm);
       const cmd = new TriggerActiveAlarmCmd(
-        'alarm-id-1', 'Temperatura soglia', 'Temperatura oltre soglia',
+        'alarm-id-1',
+        'Temperatura soglia',
+        'Temperatura oltre soglia',
       );
       await service.triggerActiveAlarm(cmd);
       expect(mockSaveActiveAlarmPort.save).toHaveBeenCalledWith(
@@ -197,7 +248,9 @@ describe('AlarmService', () => {
     });
 
     it('NON dovrebbe creare un ActiveAlarm se ne esiste già uno attivo', async () => {
-      mockFindActiveByRuleIdPort.findActiveByRuleId.mockResolvedValue(mockActiveAlarm);
+      mockFindActiveByRuleIdPort.findActiveByRuleId.mockResolvedValue(
+        mockActiveAlarm,
+      );
       const cmd = new TriggerActiveAlarmCmd('alarm-id-1', 'Test', 'Signal');
       await service.triggerActiveAlarm(cmd);
       expect(mockSaveActiveAlarmPort.save).not.toHaveBeenCalled();

@@ -14,6 +14,9 @@ import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
 import { SuggestionModule } from './suggestion/suggestion.module';
+import { ValidationModule } from './validation/validation.module';
+import { Alarm } from './alarms/domain/models/alarm.model';
+
 
 @Module({
   imports: [
@@ -29,8 +32,10 @@ import { SuggestionModule } from './suggestion/suggestion.module';
     WardsModule, AlarmsModule,
     CacheModule,
     SubscriptionModule,
-    EventEmitterModule.forRoot(), UsersModule, SuggestionModule
+    EventEmitterModule.forRoot(), UsersModule, SuggestionModule,
+    AlarmsModule, ValidationModule
   ],
+
   controllers: [],
   providers: [],
 })

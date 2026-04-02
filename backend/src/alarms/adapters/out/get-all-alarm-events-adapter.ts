@@ -15,12 +15,15 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
 
   async getAllAlarmEvents(req: GetAllAlarmEventsCmd): Promise<AlarmEvent[]> {
     const alarmEvents =
-      await this.getAllAlarmEventsRepository.getAllAlarmEvents(req.limit, req.offset);
+      await this.getAllAlarmEventsRepository.getAllAlarmEvents(
+        req.limit,
+        req.offset,
+      );
     return alarmEvents.map(
       (alarmEvent) =>
         new AlarmEvent(
           alarmEvent.id,
-          alarmEvent.room_name + " " + alarmEvent.device_name,
+          alarmEvent.room_name + ' ' + alarmEvent.device_name,
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,

@@ -1,20 +1,19 @@
 import { TestBed } from '@angular/core/testing';
-import { BehaviorSubject, Subject, filter, firstValueFrom, of, take, throwError } from 'rxjs';
+import { BehaviorSubject, Subject, firstValueFrom, of, take, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveAlarm } from '../../../core/alarm/models/active-alarm.model';
 import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
-import type { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
-import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
+import { UserRole } from '../../../core/models/user-role.enum';
+import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import type { UserSession } from '../../user-auth/models/user-session.model';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
-import { AlarmRuleLookupService } from './alarm-rule-lookup.service';
 import { AlarmManagementService } from './alarm-management.service';
-import { OperatorAlarmScopeContext, OperatorAlarmScopeService } from './operator-alarm-scope.service';
 
 describe('AlarmManagementService', () => {
     let service: AlarmManagementService;
     let activeAlarmsSubject: BehaviorSubject<ActiveAlarm[]>;
-    let scopeContextSubject: BehaviorSubject<OperatorAlarmScopeContext>;
+    let sessionSubject: BehaviorSubject<UserSession | null>;
 
     const alarmStateStub = {
         getActiveAlarms$: vi.fn(),
@@ -24,15 +23,12 @@ describe('AlarmManagementService', () => {
 
     const alarmApiStub = {
         getActiveAlarms: vi.fn(),
+        getActiveAlarmsOfOperator: vi.fn(),
         resolveAlarm: vi.fn(),
     };
 
-    const operatorScopeStub = {
-        context$: undefined as unknown,
-    };
-
-    const alarmRuleLookupStub = {
-        getAlarmRuleById: vi.fn(),
+    const authServiceStub = {
+        getCurrentUser$: vi.fn(),
     };
 
     const alarmA: ActiveAlarm = {
@@ -42,7 +38,7 @@ describe('AlarmManagementService', () => {
         priority: AlarmPriority.RED,
         triggeredAt: '2026-03-24T10:00:00.000Z',
         resolvedAt: null,
-        user_id: null,
+        userId: null,
     };
 
     const alarmB: ActiveAlarm = {
@@ -52,59 +48,47 @@ describe('AlarmManagementService', () => {
         priority: AlarmPriority.ORANGE,
         triggeredAt: '2026-03-24T10:01:00.000Z',
         resolvedAt: null,
-        user_id: null,
+        userId: null,
     };
 
     beforeEach(() => {
         vi.clearAllMocks();
 
         activeAlarmsSubject = new BehaviorSubject<ActiveAlarm[]>([]);
-        scopeContextSubject = new BehaviorSubject<OperatorAlarmScopeContext>({
-            isOperator: false,
-            assignedWardIds: [],
-            assignedPlantIds: [],
-            errorMessage: null,
+        sessionSubject = new BehaviorSubject<UserSession | null>({
+            userId: '99',
+            username: 'admin',
+            role: UserRole.AMMINISTRATORE,
+            accessToken: 'token',
+            isFirstAccess: false,
         });
 
         alarmStateStub.getActiveAlarms$.mockReturnValue(activeAlarmsSubject.asObservable());
         alarmApiStub.getActiveAlarms.mockReturnValue(of([]));
-        operatorScopeStub.context$ = scopeContextSubject.asObservable();
-        alarmRuleLookupStub.getAlarmRuleById.mockReturnValue(of(null));
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValue(of([]));
+        authServiceStub.getCurrentUser$.mockReturnValue(sessionSubject.asObservable());
 
         TestBed.configureTestingModule({
             providers: [
                 AlarmManagementService,
                 { provide: AlarmStateService, useValue: alarmStateStub },
                 { provide: AlarmApiService, useValue: alarmApiStub },
-                { provide: OperatorAlarmScopeService, useValue: operatorScopeStub },
-                { provide: AlarmRuleLookupService, useValue: alarmRuleLookupStub },
+                { provide: InternalAuthService, useValue: authServiceStub },
             ],
         });
     });
 
     const createService = (): AlarmManagementService => TestBed.inject(AlarmManagementService);
 
-    const createAlarmRule = (id: string, apartmentId: string): AlarmRule => ({
-        id,
-        name: `Rule ${id}`,
-        apartmentId,
-        deviceId: `device-${id}`,
-        priority: AlarmPriority.RED,
-        thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 10,
-        activationTime: '08:00',
-        deactivationTime: '20:00',
-        enabled: true,
-    });
-
     it('non carica lo snapshot iniziale automaticamente alla creazione', () => {
         service = createService();
 
         expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
+        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
         expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
     });
 
-    it('initialize carica gli allarmi attivi iniziali via API e idrata AlarmStateService', () => {
+    it('initialize per amministratore carica gli allarmi attivi globali', () => {
         const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
         alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
 
@@ -112,6 +96,27 @@ describe('AlarmManagementService', () => {
         service.initialize();
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
+    });
+
+    it('initialize per OSS usa endpoint dedicato con userId', () => {
+        sessionSubject.next({
+            userId: '7',
+            username: 'oss',
+            role: UserRole.OPERATORE_SANITARIO,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
+        const initialSnapshot: ActiveAlarm[] = [alarmA];
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of(initialSnapshot));
+
+        service = createService();
+        service.initialize();
+
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7');
+        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
     });
 
@@ -127,82 +132,16 @@ describe('AlarmManagementService', () => {
         expect(vm.resolveError).toBe('bootstrap error');
     });
 
-    it('espone vm iniziale con scope all e nessuna risoluzione in corso', async () => {
+    it('espone vm iniziale senza campi scope e nessuna risoluzione in corso', async () => {
         service = createService();
-        const vm = await firstValueFrom(service.vm$);
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
 
         expect(vm).toEqual({
             alarms: [],
             isResolving: false,
             resolvingId: null,
             resolveError: null,
-            activeScope: 'all',
-            availableScopes: ['all'],
-            scopeInfoMessage: null,
-            scopeLoading: false,
         });
-    });
-
-    it('espone scope all e mine per operatore sanitario', async () => {
-        scopeContextSubject.next({
-            isOperator: true,
-            assignedWardIds: [1],
-            assignedPlantIds: ['apt-1'],
-            errorMessage: null,
-        });
-
-        service = createService();
-        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
-
-        expect(vm.availableScopes).toEqual(['all', 'mine']);
-        expect(vm.activeScope).toBe('all');
-    });
-
-    it('switchScope su mine filtra gli allarmi per reparti assegnati', async () => {
-        scopeContextSubject.next({
-            isOperator: true,
-            assignedWardIds: [1],
-            assignedPlantIds: ['apt-1'],
-            errorMessage: null,
-        });
-
-        alarmRuleLookupStub.getAlarmRuleById.mockImplementation((alarmRuleId: string) => {
-            if (alarmRuleId === 'rule-1') {
-                return of(createAlarmRule('rule-1', 'apt-1'));
-            }
-
-            return of(createAlarmRule('rule-2', 'apt-2'));
-        });
-
-        service = createService();
-        activeAlarmsSubject.next([alarmA, alarmB]);
-
-        service.switchScope('mine');
-
-        const vm = await firstValueFrom(service.vm$.pipe(filter((candidate) => !candidate.scopeLoading), take(1)));
-        expect(vm.activeScope).toBe('mine');
-        expect(vm.alarms).toEqual([alarmA]);
-        expect(alarmRuleLookupStub.getAlarmRuleById).toHaveBeenCalledWith('rule-1');
-        expect(alarmRuleLookupStub.getAlarmRuleById).toHaveBeenCalledWith('rule-2');
-    });
-
-    it('scope mine mostra lista vuota e messaggio quando l operatore non ha reparti assegnati', async () => {
-        scopeContextSubject.next({
-            isOperator: true,
-            assignedWardIds: [],
-            assignedPlantIds: [],
-            errorMessage: null,
-        });
-
-        service = createService();
-        activeAlarmsSubject.next([alarmA]);
-        service.switchScope('mine');
-
-        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(vm.activeScope).toBe('mine');
-        expect(vm.alarms).toEqual([]);
-        expect(vm.scopeInfoMessage).toBe('Non hai reparti assegnati.');
-        expect(vm.scopeLoading).toBe(false);
     });
 
     it('resolveAlarm segue il flusso successo: resolving true, API call, update state, resolving false', async () => {
@@ -211,38 +150,24 @@ describe('AlarmManagementService', () => {
         const resolveRequest$ = new Subject<void>();
         alarmApiStub.resolveAlarm.mockReturnValue(resolveRequest$.asObservable());
 
-        const emissions: Array<{
-            alarms: ActiveAlarm[];
-            isResolving: boolean;
-            resolvingId: string | null;
-            resolveError: string | null;
-        }> = [];
-
-        const subscription = service.vm$.subscribe((vm) => {
-            emissions.push(vm);
-        });
-
         service.resolveAlarm(alarmA.id);
 
-        const duringResolve = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(duringResolve.isResolving).toBe(true);
-        expect(duringResolve.resolvingId).toBe(alarmA.id);
-        expect(duringResolve.resolveError).toBeNull();
+        let vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.isResolving).toBe(true);
+        expect(vm.resolvingId).toBe(alarmA.id);
+        expect(vm.resolveError).toBeNull();
 
         resolveRequest$.next();
         resolveRequest$.complete();
 
-        const afterResolve = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(afterResolve.isResolving).toBe(false);
-        expect(afterResolve.resolvingId).toBeNull();
-        expect(afterResolve.resolveError).toBeNull();
+        vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.isResolving).toBe(false);
+        expect(vm.resolvingId).toBeNull();
+        expect(vm.resolveError).toBeNull();
 
         expect(alarmApiStub.resolveAlarm).toHaveBeenCalledWith(alarmA.id);
         expect(alarmStateStub.onAlarmResolved).toHaveBeenCalledWith(alarmA.id);
         expect(alarmStateStub.onAlarmResolved).toHaveBeenCalledTimes(1);
-        expect(emissions.length).toBeGreaterThanOrEqual(3);
-
-        subscription.unsubscribe();
     });
 
     it('non mantiene copia locale degli allarmi: vm riflette solo AlarmStateService', async () => {

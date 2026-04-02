@@ -35,7 +35,7 @@ export class AlarmConfigPageComponent implements OnInit {
 	}
 
 	public onToggleEnabled(rule: AlarmRule): void {
-		this.stateService.toggleEnabled(rule.id, !rule.enabled).subscribe();
+		this.stateService.toggleEnabled(rule.id, !rule.isArmed).subscribe();
 	}
 
 	public onDelete(id: string): void {

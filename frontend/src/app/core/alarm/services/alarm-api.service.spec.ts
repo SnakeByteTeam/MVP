@@ -5,9 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import type { AlarmRule } from '../models/alarm-rule.model';
 import type { ActiveAlarm } from '../models/active-alarm.model';
-import type { CreateAlarmRequestDto } from '../models/dto/create-alarm-request.model.dto';
-import { ThresholdOperator } from '../models/threshold-operator.enum';
-import type { UpdateAlarmRequestDto } from '../models/dto/update-alarm-request.model.dto';
+import type { CreateAlarmRuleRequestDto } from '../models/dto/create-alarm-rule-request.model.dto';
+import type { UpdateAlarmRuleRequestDto } from '../models/dto/update-alarm-rule-request.model.dto';
 import { AlarmApiService } from './alarm-api.service';
 
 describe('AlarmApiService', () => {
@@ -19,14 +18,13 @@ describe('AlarmApiService', () => {
     const alarm: AlarmRule = {
         id: 'alarm-1',
         name: 'Temperatura alta',
-        apartmentId: 'apt-1',
-        deviceId: 'device-1',
+        thresholdOperator: '>',
+        thresholdValue: '30',
         priority: AlarmPriority.RED,
-        thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 30,
-        activationTime: '08:00',
-        deactivationTime: '20:00',
-        enabled: true,
+        armingTime: '08:00:00',
+        dearmingTime: '20:00:00',
+        isArmed: true,
+        deviceId: 'device-1',
     };
 
     const activeAlarm: ActiveAlarm = {
@@ -36,7 +34,7 @@ describe('AlarmApiService', () => {
         priority: AlarmPriority.RED,
         triggeredAt: '2026-03-24T10:00:00.000Z',
         resolvedAt: null,
-        user_id: null,
+        userId: null,
     };
 
     beforeEach(() => {
@@ -85,13 +83,12 @@ describe('AlarmApiService', () => {
     });
 
     it('createAlarmRule chiama POST /alarm-rules con payload corretto', () => {
-        const payload: CreateAlarmRequestDto = {
+        const payload: CreateAlarmRuleRequestDto = {
             name: 'Nuovo allarme',
-            apartmentId: 'apt-1',
             deviceId: 'device-7',
             priority: AlarmPriority.GREEN,
-            thresholdOperator: ThresholdOperator.EQUAL_TO,
-            threshold_value: '22',
+            thresholdOperator: '=',
+            thresholdValue: '22',
             activationTime: '09:00',
             deactivationTime: '18:00',
         };
@@ -106,15 +103,14 @@ describe('AlarmApiService', () => {
         request.flush(alarm);
     });
 
-    it('updateAlarmRule chiama PATCH /alarm-rules/:id con payload corretto', () => {
-        const payload: UpdateAlarmRequestDto = {
-            name: 'Allarme aggiornato',
+    it('updateAlarmRule chiama PUT /alarm-rules/:id con payload corretto', () => {
+        const payload: UpdateAlarmRuleRequestDto = {
             priority: AlarmPriority.ORANGE,
-            thresholdOperator: ThresholdOperator.LESS_THAN,
-            threshold: '15',
+            thresholdOperator: '<',
+            thresholdValue: '15',
             activationTime: '00:00',
             deactivationTime: '23:59',
-            enabled: false,
+            isArmed: false,
         };
 
         service.updateAlarmRule('alarm-2', payload).subscribe((result) => {
@@ -122,7 +118,7 @@ describe('AlarmApiService', () => {
         });
 
         const request = httpController.expectOne(`${baseUrl}/alarm-2`);
-        expect(request.request.method).toBe('PATCH');
+        expect(request.request.method).toBe('PUT');
         expect(request.request.body).toEqual(payload);
         request.flush(alarm);
     });
@@ -137,23 +133,34 @@ describe('AlarmApiService', () => {
         request.flush(null);
     });
 
-    it('getActiveAlarms chiama GET /active-alarms e restituisce la lista', () => {
+    it('getActiveAlarms chiama GET /alarm-events e restituisce la lista', () => {
         service.getActiveAlarms().subscribe((result) => {
             expect(result).toEqual([activeAlarm]);
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne('/active-alarms');
+        const request = httpController.expectOne('/alarm-events');
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
 
-    it('resolveAlarm chiama PATCH /active-alarms/:id/resolve', () => {
+    it('getActiveAlarmsOfOperator chiama GET /alarm-events/:userId', () => {
+        service.getActiveAlarmsOfOperator('operator-7').subscribe((result) => {
+            expect(result).toEqual([activeAlarm]);
+            expect(result).toHaveLength(1);
+        });
+
+        const request = httpController.expectOne('/alarm-events/operator-7');
+        expect(request.request.method).toBe('GET');
+        request.flush([activeAlarm]);
+    });
+
+    it('resolveAlarm chiama PATCH /alarm-events/:id/resolve', () => {
         service.resolveAlarm('active-1').subscribe((result) => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/active-alarms/active-1/resolve');
+        const request = httpController.expectOne('/alarm-events/active-1/resolve');
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({});
         request.flush(null);
@@ -164,7 +171,7 @@ describe('AlarmApiService', () => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne('/active-alarms/active%2F1/resolve');
+        const request = httpController.expectOne('/alarm-events/active%2F1/resolve');
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({});
         request.flush(null);

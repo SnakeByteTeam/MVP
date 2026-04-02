@@ -22,14 +22,14 @@
             <article>
                 <h2>{{ rule.name }}</h2>
                 <p>Priorita: {{ rule.priority }}</p>
-                <p>Stato: {{ rule.enabled ? 'Attivo' : 'Disattivo' }}</p>
+                <p>Stato: {{ rule.isArmed ? 'Attivo' : 'Disattivo' }}</p>
                 <div>
                     <button type="button" (click)="onEdit(rule)" [attr.aria-label]="'Modifica regola ' + rule.name">
                         Modifica
                     </button>
                     <button type="button" (click)="onToggleEnabled(rule)"
-                        [attr.aria-label]="(rule.enabled ? 'Disabilita ' : 'Abilita ') + rule.name">
-                        {{ rule.enabled ? 'Disabilita' : 'Abilita' }}
+                        [attr.aria-label]="(rule.isArmed ? 'Disabilita ' : 'Abilita ') + rule.name">
+                        {{ rule.isArmed ? 'Disabilita' : 'Abilita' }}
                     </button>
                     <button type="button" (click)="onDelete(rule.id)" [attr.aria-label]="'Elimina regola ' + rule.name">
                         Elimina

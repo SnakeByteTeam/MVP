@@ -2,16 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
-import { CreateAlarmRequestDto } from '../../../core/alarm/models/dto/create-alarm-request.model.dto';
-import { UpdateAlarmRequestDto } from '../../../core/alarm/models/dto/update-alarm-request.model.dto';
-import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
-import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
+import { CreateAlarmRuleRequestDto } from '../../../core/alarm/models/dto/create-alarm-rule-request.model.dto';
+import { UpdateAlarmRuleRequestDto } from '../../../core/alarm/models/dto/update-alarm-rule-request.model.dto';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
+import { AlarmRuleRequestMapper } from '../mappers/alarm-rule-request.mapper';
 import { AlarmConfigFormValue } from '../models/alarm-config-form-value.model';
 
 @Injectable()
 export class AlarmConfigStateService {
     private readonly api = inject(AlarmApiService);
+    private readonly requestMapper = inject(AlarmRuleRequestMapper);
 
     private readonly alarmsSubject = new BehaviorSubject<AlarmRule[]>([]);
     private readonly errorSubject = new BehaviorSubject<string | null>(null);
@@ -23,33 +23,6 @@ export class AlarmConfigStateService {
     private replaceAlarmInState(updatedAlarm: AlarmRule): void {
         const currentAlarms = this.alarmsSubject.getValue();
         this.alarmsSubject.next(currentAlarms.map((alarm) => (alarm.id === updatedAlarm.id ? updatedAlarm : alarm)));
-    }
-
-    private requireField<T>(value: T | null, fieldName: string): T {
-        if (value === null) {
-            throw new Error(`Campo obbligatorio mancante: ${fieldName}`);
-        }
-
-        return value;
-    }
-
-    //per convertire le enum
-    private toPriorityNumber(priority: AlarmPriority | null): number {
-        return this.requireField(priority, 'priority');
-    }
-
-
-    private toThresholdOperatorCode(operator: ThresholdOperator | null): string {
-        return this.requireField(operator, 'thresholdOperator');
-    }
-
-    private requireNonEmptyString(value: string, fieldName: string): string {
-        const trimmed = value.trim();
-        if (trimmed.length === 0) {
-            throw new Error(`Campo obbligatorio mancante: ${fieldName}`);
-        }
-
-        return trimmed;
     }
 
     private clearError(): void {
@@ -84,9 +57,9 @@ export class AlarmConfigStateService {
     //a partire dal form -> mapping a DTO -> service API -> aggiornamento stato locale
     public createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule> {
         this.clearError();
-        let payload: CreateAlarmRequestDto;
+        let payload: CreateAlarmRuleRequestDto;
         try {
-            payload = this.mapToCreateRequest(formValue);
+            payload = this.requestMapper.toCreateRequest(formValue);
         } catch {
             return this.handleError<AlarmRule>('Dati del form non validi per la creazione dell\'allarme.');
         }
@@ -102,9 +75,9 @@ export class AlarmConfigStateService {
 
     public updateAlarmRule(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule> {
         this.clearError();
-        let payload: UpdateAlarmRequestDto;
+        let payload: UpdateAlarmRuleRequestDto;
         try {
-            payload = this.mapToUpdateRequest(formValue);
+            payload = this.requestMapper.toUpdateRequest(formValue);
         } catch {
             return this.handleError<AlarmRule>('Dati del form non validi per l\'aggiornamento dell\'allarme.');
         }
@@ -122,15 +95,7 @@ export class AlarmConfigStateService {
             return this.handleError<AlarmRule>('Allarme non trovato nello stato locale.');
         }
 
-        const payload: UpdateAlarmRequestDto = {
-            name: currentAlarm.name,
-            priority: currentAlarm.priority,
-            thresholdOperator: currentAlarm.thresholdOperator,
-            threshold: String(currentAlarm.threshold),
-            activationTime: currentAlarm.activationTime,
-            deactivationTime: currentAlarm.deactivationTime,
-            enabled,
-        };
+        const payload = this.requestMapper.toToggleRequest(currentAlarm, enabled);
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
             tap((updatedAlarm) => this.replaceAlarmInState(updatedAlarm)),
@@ -150,29 +115,4 @@ export class AlarmConfigStateService {
         );
     }
 
-    //per convertire da FORM a richiesta DTO da inviare al backend
-    private mapToCreateRequest(formValue: AlarmConfigFormValue): CreateAlarmRequestDto {
-        return {
-            name: this.requireNonEmptyString(formValue.name, 'name'),
-            apartmentId: formValue.apartmentId,
-            deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
-            priority: this.toPriorityNumber(formValue.priority),
-            thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            threshold_value: String(this.requireField(formValue.threshold, 'threshold')),
-            activationTime: formValue.activationTime,
-            deactivationTime: formValue.deactivationTime,
-        };
-    }
-
-    private mapToUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRequestDto {
-        return {
-            name: this.requireNonEmptyString(formValue.name, 'name'),
-            priority: this.toPriorityNumber(formValue.priority),
-            thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            threshold: String(this.requireField(formValue.threshold, 'threshold')),
-            activationTime: formValue.activationTime,
-            deactivationTime: formValue.deactivationTime,
-            enabled: formValue.enabled,
-        };
-    }
 }

@@ -1,7 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AlarmListVm, AlarmScope } from '../../models/alarm-list-vm.model';
+import { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
 import { AlarmItemComponent } from '../alarm-item-component/alarm-item-component';
 
@@ -25,9 +25,5 @@ export class AlarmPageManagementComponent implements OnInit {
 
   public onResolve(activeAlarmId: string): void {
     this.alarmManagementService.resolveAlarm(activeAlarmId);
-  }
-
-  public onScopeChange(scope: AlarmScope): void {
-    this.alarmManagementService.switchScope(scope);
   }
 }

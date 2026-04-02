@@ -3,9 +3,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { defaultIfEmpty } from 'rxjs';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
-import { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
-import { AlarmConfigFormValue } from '../../models/alarm-config-form-value.model';
+import { AlarmRuleFormMapper } from '../../mappers/alarm-rule-form.mapper';
 import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
 
 @Component({
@@ -29,6 +28,7 @@ export class AlarmConfigFormComponent implements OnInit {
 
 	private readonly fb = inject(FormBuilder);
 	private readonly stateService = inject(AlarmConfigStateService);
+	private readonly formMapper = inject(AlarmRuleFormMapper);
 	private readonly route = inject(ActivatedRoute);
 	private readonly router = inject(Router);
 
@@ -37,7 +37,6 @@ export class AlarmConfigFormComponent implements OnInit {
 	private buildForm() {
 		return this.fb.nonNullable.group({
 			name: [''],
-			apartmentId: [''],
 			sensorId: ['', [Validators.required]],
 			priority: [null as AlarmPriority | null, [Validators.required]],
 			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
@@ -46,20 +45,6 @@ export class AlarmConfigFormComponent implements OnInit {
 			deactivationTime: [''],
 			enabled: [true],
 		});
-	}
-
-	private toFormValue(rule: AlarmRule): AlarmConfigFormValue {
-		return {
-			name: rule.name,
-			apartmentId: rule.apartmentId,
-			sensorId: rule.deviceId,
-			priority: rule.priority,
-			thresholdOperator: rule.thresholdOperator,
-			threshold: rule.threshold,
-			activationTime: rule.activationTime,
-			deactivationTime: rule.deactivationTime,
-			enabled: rule.enabled,
-		};
 	}
 
 	public ngOnInit(): void {
@@ -78,7 +63,7 @@ export class AlarmConfigFormComponent implements OnInit {
 					return;
 				}
 
-				this.form.patchValue(this.toFormValue(rule));
+				this.form.patchValue(this.formMapper.toFormValue(rule));
 			},
 			error: () => {
 				void this.router.navigate(['../'], { relativeTo: this.route });

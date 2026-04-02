@@ -24,7 +24,7 @@ describe('AlarmItemComponent', () => {
     priority: AlarmPriority.RED,
     triggeredAt: '2026-03-24T10:00:00.000Z',
     resolvedAt: null,
-    user_id: null,
+    userId: null,
   };
 
   const setInputs = (alarm: ActiveAlarm, isResolving = false): void => {

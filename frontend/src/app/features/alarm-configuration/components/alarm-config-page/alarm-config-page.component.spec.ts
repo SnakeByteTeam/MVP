@@ -3,7 +3,6 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
-import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
 import { AlarmConfigPageComponent } from './alarm-config-page.component';
@@ -36,14 +35,13 @@ describe('AlarmConfigPageComponent', () => {
     const alarmRule: AlarmRule = {
         id: 'alarm-1',
         name: 'Temperatura alta',
-        apartmentId: 'apt-1',
-        deviceId: 'dev-1',
+        thresholdOperator: '>',
+        thresholdValue: '30',
         priority: AlarmPriority.RED,
-        thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 30,
-        activationTime: '08:00',
-        deactivationTime: '20:00',
-        enabled: true,
+        armingTime: '08:00:00',
+        dearmingTime: '20:00:00',
+        isArmed: true,
+        deviceId: 'dev-1',
     };
 
     beforeEach(async () => {

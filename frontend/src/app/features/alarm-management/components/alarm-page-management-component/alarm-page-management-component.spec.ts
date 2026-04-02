@@ -36,7 +36,7 @@ describe('AlarmPageManagementComponent', () => {
     priority: AlarmPriority.RED,
     triggeredAt: '2026-03-24T10:00:00.000Z',
     resolvedAt: null,
-    user_id: null,
+    userId: null,
   };
 
   const alarm2: ActiveAlarm = {
@@ -46,14 +46,13 @@ describe('AlarmPageManagementComponent', () => {
     priority: AlarmPriority.ORANGE,
     triggeredAt: '2026-03-24T10:01:00.000Z',
     resolvedAt: null,
-    user_id: null,
+    userId: null,
   };
 
   const alarmManagementStub = {
     vm$: undefined as unknown,
     initialize: vi.fn(),
     resolveAlarm: vi.fn(),
-    switchScope: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -64,10 +63,6 @@ describe('AlarmPageManagementComponent', () => {
       isResolving: false,
       resolvingId: null,
       resolveError: null,
-      activeScope: 'all',
-      availableScopes: ['all'],
-      scopeInfoMessage: null,
-      scopeLoading: false,
     });
 
     alarmManagementStub.vm$ = vmSubject.asObservable();
@@ -107,23 +102,12 @@ describe('AlarmPageManagementComponent', () => {
     expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledTimes(1);
   });
 
-  it('onScopeChange delega a facade.switchScope', () => {
-    component.onScopeChange('mine');
-
-    expect(alarmManagementStub.switchScope).toHaveBeenCalledWith('mine');
-    expect(alarmManagementStub.switchScope).toHaveBeenCalledTimes(1);
-  });
-
   it('renderizza stato lista vuota quando non ci sono allarmi', () => {
     vmSubject.next({
       alarms: [],
       isResolving: false,
       resolvingId: null,
       resolveError: null,
-      activeScope: 'all',
-      availableScopes: ['all'],
-      scopeInfoMessage: null,
-      scopeLoading: false,
     });
 
     fixture.detectChanges();
@@ -141,10 +125,6 @@ describe('AlarmPageManagementComponent', () => {
       isResolving: true,
       resolvingId: alarm1.id,
       resolveError: 'Errore durante la risoluzione',
-      activeScope: 'all',
-      availableScopes: ['all', 'mine'],
-      scopeInfoMessage: null,
-      scopeLoading: false,
     });
 
     fixture.detectChanges();
@@ -164,10 +144,6 @@ describe('AlarmPageManagementComponent', () => {
       isResolving: true,
       resolvingId: alarm2.id,
       resolveError: null,
-      activeScope: 'all',
-      availableScopes: ['all', 'mine'],
-      scopeInfoMessage: null,
-      scopeLoading: false,
     });
 
     fixture.detectChanges();
@@ -190,10 +166,6 @@ describe('AlarmPageManagementComponent', () => {
       isResolving: false,
       resolvingId: null,
       resolveError: null,
-      activeScope: 'all',
-      availableScopes: ['all'],
-      scopeInfoMessage: null,
-      scopeLoading: false,
     });
 
     fixture.detectChanges();

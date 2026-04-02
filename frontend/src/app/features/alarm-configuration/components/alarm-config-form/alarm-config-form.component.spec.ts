@@ -31,19 +31,17 @@ describe('AlarmConfigFormComponent', () => {
     const existingRule: AlarmRule = {
         id: 'alarm-42',
         name: 'Porta aperta',
-        apartmentId: 'apt-9',
-        deviceId: 'sensor-9',
+        thresholdOperator: '=',
+        thresholdValue: '5',
         priority: AlarmPriority.ORANGE,
-        thresholdOperator: ThresholdOperator.EQUAL_TO,
-        threshold: 5,
-        activationTime: '07:00',
-        deactivationTime: '19:00',
-        enabled: true,
+        armingTime: '07:00:00',
+        dearmingTime: '19:00:00',
+        isArmed: true,
+        deviceId: 'sensor-9',
     };
 
     const validFormValue = {
         name: 'Nuova regola',
-        apartmentId: 'apt-1',
         sensorId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
@@ -95,7 +93,6 @@ describe('AlarmConfigFormComponent', () => {
         expect(stateServiceStub.getAlarmRuleById).toHaveBeenCalledWith('alarm-42');
         expect(component.form.getRawValue()).toEqual({
             name: 'Porta aperta',
-            apartmentId: 'apt-9',
             sensorId: 'sensor-9',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,

@@ -40,7 +40,7 @@ describe('AlarmManagement feature integration', () => {
         priority: AlarmPriority.RED,
         triggeredAt: '2026-03-24T10:00:00.000Z',
         resolvedAt: null,
-        user_id: null,
+        userId: null,
     };
 
     const alarm2: ActiveAlarm = {
@@ -50,14 +50,13 @@ describe('AlarmManagement feature integration', () => {
         priority: AlarmPriority.ORANGE,
         triggeredAt: '2026-03-24T10:01:00.000Z',
         resolvedAt: null,
-        user_id: null,
+        userId: null,
     };
 
     const alarmManagementStub = {
         vm$: undefined as unknown,
         initialize: vi.fn(),
         resolveAlarm: vi.fn(),
-        switchScope: vi.fn(),
     };
 
     beforeEach(async () => {
@@ -68,10 +67,6 @@ describe('AlarmManagement feature integration', () => {
             isResolving: false,
             resolvingId: null,
             resolveError: null,
-            activeScope: 'all',
-            availableScopes: ['all', 'mine'],
-            scopeInfoMessage: null,
-            scopeLoading: false,
         });
 
         alarmManagementStub.vm$ = vmSubject.asObservable();
@@ -109,10 +104,6 @@ describe('AlarmManagement feature integration', () => {
             isResolving: true,
             resolvingId: 'active-1',
             resolveError: null,
-            activeScope: 'all',
-            availableScopes: ['all', 'mine'],
-            scopeInfoMessage: null,
-            scopeLoading: false,
         });
         fixture.detectChanges();
 
@@ -131,10 +122,6 @@ describe('AlarmManagement feature integration', () => {
             isResolving: false,
             resolvingId: null,
             resolveError: null,
-            activeScope: 'all',
-            availableScopes: ['all', 'mine'],
-            scopeInfoMessage: null,
-            scopeLoading: false,
         });
         fixture.detectChanges();
 

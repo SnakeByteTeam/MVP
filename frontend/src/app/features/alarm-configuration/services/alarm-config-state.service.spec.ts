@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
-import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
 import type { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
+import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
 import type { AlarmConfigFormValue } from '../models/alarm-config-form-value.model';
 import { AlarmConfigStateService } from './alarm-config-state.service';
@@ -22,32 +22,29 @@ describe('AlarmConfigStateService', () => {
     const alarmA: AlarmRule = {
         id: 'alarm-1',
         name: 'Temperatura stanza',
-        apartmentId: 'apt-1',
-        deviceId: 'dev-1',
+        thresholdOperator: '>',
+        thresholdValue: '30',
         priority: AlarmPriority.RED,
-        thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 30,
-        activationTime: '08:00',
-        deactivationTime: '20:00',
-        enabled: true,
+        armingTime: '08:00:00',
+        dearmingTime: '20:00:00',
+        isArmed: true,
+        deviceId: 'dev-1',
     };
 
     const alarmB: AlarmRule = {
         id: 'alarm-2',
         name: 'Umidita critica',
-        apartmentId: 'apt-2',
-        deviceId: 'dev-2',
+        thresholdOperator: '<',
+        thresholdValue: '10',
         priority: AlarmPriority.ORANGE,
-        thresholdOperator: ThresholdOperator.LESS_THAN,
-        threshold: 10,
-        activationTime: '00:00',
-        deactivationTime: '23:59',
-        enabled: false,
+        armingTime: '00:00:00',
+        dearmingTime: '23:59:00',
+        isArmed: false,
+        deviceId: 'dev-2',
     };
 
     const validForm: AlarmConfigFormValue = {
         name: '  Nuovo allarme  ',
-        apartmentId: 'apt-1',
         sensorId: 'dev-3',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.EQUAL_TO,
@@ -137,11 +134,10 @@ describe('AlarmConfigStateService', () => {
 
         expect(apiStub.createAlarmRule).toHaveBeenCalledWith({
             name: 'Nuovo allarme',
-            apartmentId: 'apt-1',
             deviceId: 'dev-3',
             priority: AlarmPriority.GREEN,
-            thresholdOperator: ThresholdOperator.EQUAL_TO,
-            threshold: '22',
+            thresholdOperator: '=',
+            thresholdValue: '22',
             activationTime: '09:00',
             deactivationTime: '18:00',
         });
@@ -187,19 +183,18 @@ describe('AlarmConfigStateService', () => {
         apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
         service.loadAlarmRules();
 
-        const updatedAlarm: AlarmRule = { ...alarmA, name: 'Temperatura reparto', threshold: 35 };
+        const updatedAlarm: AlarmRule = { ...alarmA, name: 'Temperatura reparto', thresholdValue: '35' };
         apiStub.updateAlarmRule.mockReturnValue(of(updatedAlarm));
 
         service.updateAlarmRule('alarm-1', validForm).subscribe();
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
-            name: 'Nuovo allarme',
             priority: AlarmPriority.GREEN,
-            thresholdOperator: ThresholdOperator.EQUAL_TO,
-            threshold: '22',
+            thresholdOperator: '=',
+            thresholdValue: '22',
             activationTime: '09:00',
             deactivationTime: '18:00',
-            enabled: true,
+            isArmed: true,
         });
 
         expect(await firstValueFrom(service.alarms$)).toEqual([updatedAlarm, alarmB]);
@@ -243,19 +238,18 @@ describe('AlarmConfigStateService', () => {
         apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
         service.loadAlarmRules();
 
-        const toggledAlarm: AlarmRule = { ...alarmA, enabled: false };
+        const toggledAlarm: AlarmRule = { ...alarmA, isArmed: false };
         apiStub.updateAlarmRule.mockReturnValue(of(toggledAlarm));
 
         service.toggleEnabled('alarm-1', false).subscribe();
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
-            name: alarmA.name,
             priority: alarmA.priority,
             thresholdOperator: alarmA.thresholdOperator,
-            threshold: String(alarmA.threshold),
-            activationTime: alarmA.activationTime,
-            deactivationTime: alarmA.deactivationTime,
-            enabled: false,
+            thresholdValue: alarmA.thresholdValue,
+            activationTime: '08:00',
+            deactivationTime: '20:00',
+            isArmed: false,
         });
 
         expect(await firstValueFrom(service.alarms$)).toEqual([toggledAlarm]);

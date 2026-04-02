@@ -23,17 +23,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-<<<<<<< HEAD
     "types": [
       "node",
       "jest"
     ]
-=======
-    "types": [
-      "node",
-      "jest"
-    ]
->>>>>>> feature/alarms
   },
   "include": [
     "src/**/*.ts",

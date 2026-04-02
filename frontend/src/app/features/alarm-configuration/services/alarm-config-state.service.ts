@@ -81,6 +81,7 @@ export class AlarmConfigStateService {
         return this.api.getAlarmRule(id).pipe(catchError(() => this.handleError<AlarmRule>('Errore durante il recupero dell\'allarme.')));
     }
 
+    //a partire dal form -> mapping a DTO -> service API -> aggiornamento stato locale
     public createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule> {
         this.clearError();
         let payload: CreateAlarmRequestDto;

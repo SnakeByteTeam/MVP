@@ -4,8 +4,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
         <div class="flex items-center gap-3">
-            <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-yellow-100">
-                <svg class="h-4 w-4 text-yellow-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                <svg class="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
@@ -46,7 +46,7 @@
                     Operatore <span class="text-rose-500">*</span>
                 </label>
                 <select id="operator-id" formControlName="userId"
-                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-yellow-500 focus:bg-white focus:ring-3 focus:ring-yellow-100">
+                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100">
                     <option [ngValue]="null">Seleziona un operatore…</option>
                     @for (operator of availableOperators(); track operator.id) {
                     <option [ngValue]="operator.id">{{ getOperatorLabel(operator) }}</option>
@@ -76,7 +76,7 @@
             Annulla
         </button>
         <button type="submit" (click)="onSubmit()" [disabled]="form.invalid"
-            class="inline-flex items-center gap-1.5 rounded-lg border border-yellow-500 bg-yellow-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
+            class="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>

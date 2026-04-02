@@ -14,34 +14,15 @@
             </div>
         </div>
 
-        <button type="button" (click)="openCreateForm()"
-            class="inline-flex items-center gap-2 rounded-lg border border-amber-500 bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 active:scale-[0.98]">
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Nuovo operatore sanitario
-        </button>
-
     </header>
 
     <!-- Main Content -->
-    <div class="min-h-0 flex-1 space-y-4">
-        @if (isCreateFormOpen()) {
-        <section class="rounded-2xl border border-amber-200 bg-white/90 p-4 shadow-sm backdrop-blur-sm">
-            <div class="mb-3 flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div>
-                    <h2 class="text-sm font-bold text-slate-900">Nuovo operatore sanitario</h2>
-                    <p class="text-xs text-slate-500">Compila il form per registrare un nuovo profilo OSS.</p>
-                </div>
-                <button type="button" (click)="closeCreateForm()"
-                    class="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100 hover:text-red-700">
-                    Chiudi
-                </button>
-            </div>
-            <app-create-user-form [errorType]="formError()" (formSubmit)="onFormSubmit($event)">
-            </app-create-user-form>
-        </section>
-        }
+    <div class="min-h-0 flex-1">
+        <app-create-user-form [errorType]="formError()" [isOpen]="isCreateFormOpen()" (openRequest)="openCreateForm()"
+            (formSubmit)="onFormSubmit($event)" (closeRequest)="closeCreateForm()">
+        </app-create-user-form>
+
+        <div class="h-4 lg:h-6" aria-hidden="true"></div>
 
         <main class="min-h-[22rem]">
             @if (users$ | async; as users) {

@@ -54,10 +54,12 @@ describe('UserManagementPage', () => {
 
         it('mostra di default solo la tabella e non il form OSS', () => {
             const nativeElement = fixture.nativeElement as HTMLElement;
+            const panel = nativeElement.querySelector('[data-testid="create-user-panel"]') as HTMLElement | null;
 
             expect(component.isCreateFormOpen()).toBe(false);
             expect(nativeElement.textContent).toContain('Elenco operatori sanitari');
-            expect(nativeElement.textContent).not.toContain('Compila il form per registrare un nuovo profilo OSS.');
+            expect(panel).not.toBeNull();
+            expect(panel?.className).toContain('max-h-0');
         });
 
         it('apre e chiude il form OSS con i pulsanti dedicati', () => {

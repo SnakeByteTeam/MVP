@@ -11,7 +11,7 @@ describe('CreateUserCmd', () => {
     expect(cmd).toMatchObject({
       username: 'u',
       surname: 's',
-      name: 'n'
+      name: 'n',
     });
   });
 });

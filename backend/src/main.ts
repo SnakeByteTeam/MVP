@@ -5,7 +5,6 @@ import helmet from 'helmet'; //Middleware per la sicurezza HTTP, setta correttam
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());

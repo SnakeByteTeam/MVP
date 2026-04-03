@@ -3,4 +3,3 @@ export interface DeleteWardRepository {
 }
 
 export const DELETE_WARD_REPOSITORY = 'DELETE_WARD_REPOSITORY';
-

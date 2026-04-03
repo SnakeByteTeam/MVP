@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 
 import {
   REFRESH_NODE_SUBSCRIPTION_PORT,
@@ -9,24 +8,35 @@ import {
   GET_ALL_PLANTIDS_PORT,
   type GetAllPlantIdsPort,
 } from 'src/cache/application/ports/out/get-all-plantids.port';
+import { RefreshNodeSubUseCase } from '../ports/in/refresh-node-subscription.usecase';
+import { RefreshDatapointSubUseCase } from '../ports/in/refresh-datapoint-subscription.usecase';
+import {
+  REFRESH_DATAPOINT_SUBSCRIPTION_PORT,
+  type RefreshDatapointSubPort,
+} from '../ports/out/refresh-datapoint-subscription.port';
+import { RefreshAllSubscriptionUseCase } from '../ports/in/refresh-all-subscription.usecase';
+import { RefreshAllSubCmd } from '../commands/refresh-all-sub.command';
 
 @Injectable()
-export class SubscriptionService {
+export class SubscriptionService
+  implements
+    RefreshNodeSubUseCase,
+    RefreshDatapointSubUseCase,
+    RefreshAllSubscriptionUseCase
+{
   constructor(
     @Inject(REFRESH_NODE_SUBSCRIPTION_PORT)
     private readonly refreshPort: RefreshNodeSubscriptionPort,
+    @Inject(REFRESH_DATAPOINT_SUBSCRIPTION_PORT)
+    private readonly refreshDatapointPort: RefreshDatapointSubPort,
     @Inject(GET_ALL_PLANTIDS_PORT)
     private readonly getAllPlantIdsPort: GetAllPlantIdsPort,
   ) {}
 
-  @OnEvent('fetched.tokens')
-  async renewNodeSubcription() {
+  async refreshSub(): Promise<boolean> {
     const plantIds: string[] = await this.getAllPlantIdsPort.getAllPlantIds();
 
-    if (plantIds.length === 0) {
-      console.warn('No plant IDs found. Skipping subscription refresh.');
-      return;
-    }
+    if (plantIds.length === 0) throw new Error('No plant IDs found.');
 
     try {
       for (const plantId of plantIds) {
@@ -36,13 +46,93 @@ export class SubscriptionService {
         });
 
         if (!refreshResult) {
-          console.error('Failed to refresh node subscription');
+          console.error(
+            `Failed to refresh node subscription for plant: ${plantId}`,
+          );
         } else {
-          console.log('Node subscription refreshed successfully');
+          console.log(
+            `Node subscription refreshed successfully for plant: ${plantId}`,
+          );
         }
       }
+
+      return true;
     } catch (error) {
       console.error('Error refreshing node subscription:', error);
+      throw error;
+    }
+  }
+
+  async refreshDatapointSub(): Promise<boolean> {
+    const plantIds: string[] = await this.getAllPlantIdsPort.getAllPlantIds();
+
+    if (plantIds.length === 0) throw new Error('No plant IDs found.');
+
+    try {
+      for (const plantId of plantIds) {
+        console.log(
+          `Refreshing datapoint subscription for plantId: ${plantId}`,
+        );
+        const refreshResult =
+          await this.refreshDatapointPort.refreshDatapointSub({
+            plantId: plantId,
+          });
+
+        if (!refreshResult) {
+          console.error(
+            `Failed to refresh datapoint subscription for plant: ${plantId}`,
+          );
+        } else {
+          console.log(
+            `Datapoint subscription refreshed successfully for plant: ${plantId}`,
+          );
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error('Error refreshing datapoint subscription:', error);
+      throw error;
+    }
+  }
+
+  async refreshAllSubscription(cmd: RefreshAllSubCmd): Promise<boolean> {
+    const plantId: string = cmd?.plantId;
+    if (!plantId) throw new Error('PlantId is null');
+
+    try {
+      let refreshResult = await this.refreshPort.refreshSub({
+        plantId: plantId,
+      });
+      if (!refreshResult) {
+        console.error(
+          `Failed to refresh node subscription for plant: ${plantId}`,
+        );
+      } else {
+        console.log(
+          `Node subscription refreshed successfully for plant: ${plantId}`,
+        );
+      }
+
+      refreshResult = await this.refreshDatapointPort.refreshDatapointSub({
+        plantId: plantId,
+      });
+      if (!refreshResult) {
+        console.error(
+          `Failed to refresh datapoint subscription for plant: ${plantId}`,
+        );
+      } else {
+        console.log(
+          `Datapoint subscription refreshed successfully for plant: ${plantId}`,
+        );
+      }
+
+      return refreshResult;
+    } catch (err) {
+      console.error(
+        `Error refreshing all subscriptions for plantId: ${plantId}`,
+        err,
+      );
+      return false;
     }
   }
 }

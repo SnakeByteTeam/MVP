@@ -7,7 +7,7 @@ import { WriteCacheRepoPort } from 'src/cache/application/repository/write-cache
 
 @Injectable()
 export class StructureCacheImpl implements WriteCacheRepoPort {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
   async write(plant: PlantEntity): Promise<boolean> {
     const client = await this.pool.connect();

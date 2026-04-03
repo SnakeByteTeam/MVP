@@ -7,6 +7,8 @@ import {
 
 @Controller()
 export class EventCacheController {
+  private isCacheSyncRunning = false;
+
   constructor(
     @Inject(UPDATE_CACHE_ALL_PLANTS_USECASE)
     private readonly cache: UpdateCacheAllPlantsUseCase,
@@ -14,9 +16,23 @@ export class EventCacheController {
 
   @OnEvent('fetched.tokens')
   async updateCache() {
+    if (this.isCacheSyncRunning) {
+      console.warn(
+        'Event received: fetched.tokens. Cache update already running, skipping duplicate event.',
+      );
+      return;
+    }
+
+    this.isCacheSyncRunning = true;
+
     console.log(
       'Event received: fetched.tokens. Updating cache for all plants...',
     );
-    await this.cache.updateAllCache();
+
+    try {
+      await this.cache.updateAllCache();
+    } finally {
+      this.isCacheSyncRunning = false;
+    }
   }
 }

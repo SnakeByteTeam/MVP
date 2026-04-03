@@ -1,4 +1,3 @@
-
 import { AuthModule } from './auth/auth.module';
 import { WardsModule } from './wards/wards.module';
 import { DatabaseModule } from './database/database.module';
@@ -28,8 +27,8 @@ import { UsersModule } from './users/users.module';
     CacheModule,
     SubscriptionModule,
     AnalyticsModule,
-    EventEmitterModule.forRoot(), UsersModule,
+    EventEmitterModule.forRoot(),
+    UsersModule,
   ],
 })
-export class AppModule { }
-
+export class AppModule {}

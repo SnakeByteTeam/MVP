@@ -5,8 +5,8 @@ import {
   FIND_ALL_PLANTS_BY_WARD_ID_REPOSITORY,
   FindAllPlantsByWardIdRepository,
 } from '../../application/repository/find-all-plants-by-ward-id-repository.interface';
-import { Plant } from '../../domain/plant';
 import { PlantEntity } from '../../infrastructure/entities/plant-entity';
+import { Plant } from 'src/plant/domain/models/plant.model';
 
 export class FindAllPlantsByWardIdAdapter implements FindAllPlantsByWardIdPort {
   constructor(

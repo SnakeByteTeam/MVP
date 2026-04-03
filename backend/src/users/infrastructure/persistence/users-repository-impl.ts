@@ -9,12 +9,13 @@ import { FindAllAvailableUsersRepository } from '../../application/repository/fi
 
 export class UsersRepositoryImpl
   implements
-  FindAllUsersRepository,
-  FindAllAvailableUsersRepository,
-  UpdateUserRepository,
-  CreateUserRepository,
-  DeleteUserRepository {
-  constructor(@Inject(PG_POOL) private readonly conn) { }
+    FindAllUsersRepository,
+    FindAllAvailableUsersRepository,
+    UpdateUserRepository,
+    CreateUserRepository,
+    DeleteUserRepository
+{
+  constructor(@Inject(PG_POOL) private readonly conn) {}
 
   async findAllUsers(): Promise<UserEntity[]> {
     const result = await this.conn.query(
@@ -27,7 +28,7 @@ export class UsersRepositoryImpl
   async findAllAvailableUsers(): Promise<UserEntity[]> {
     const result = await this.conn.query(
       ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id ' +
-      'WHERE u.id NOT IN (SELECT user_id FROM ward_user) ',
+        'WHERE u.id NOT IN (SELECT user_id FROM ward_user) ',
     );
 
     return result.rows;
@@ -41,8 +42,8 @@ export class UsersRepositoryImpl
   ): Promise<UserEntity> {
     const result = await this.conn.query(
       ' WITH updated_user AS ( UPDATE "user" SET username = $1, surname = $2, name = $3 WHERE id = $4 RETURNING * )' +
-      ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.name AS role ' +
-      ' FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;',
+        ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.name AS role ' +
+        ' FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;',
       [username, surname, name, id],
     );
 
@@ -60,8 +61,8 @@ export class UsersRepositoryImpl
   ): Promise<UserEntity> {
     const result = await this.conn.query(
       ` WITH operator_role AS ( SELECT id FROM role WHERE name = 'Operatore sanitario' LIMIT 1 ), ` +
-      ` created_user AS ( INSERT INTO "user" (username, surname, name, password, temp_password, roleId) SELECT $1, $2, $3, $4, $4, id FROM operator_role RETURNING * ) ` +
-      ` SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;`,
+        ` created_user AS ( INSERT INTO "user" (username, surname, name, password, temp_password, roleId) SELECT $1, $2, $3, $4, $4, id FROM operator_role RETURNING * ) ` +
+        ` SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;`,
       [username, surname, name, tempPassword],
     );
 

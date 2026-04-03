@@ -28,7 +28,7 @@ describe('DeleteUserAdapter', () => {
 
   it('should propagate repository errors', async () => {
     const cmd = new DeleteUserCmd(1);
-    const error = new Error("Repository error");
+    const error = new Error('Repository error');
     mockRepo.deleteUser.mockRejectedValue(error);
 
     await expect(adapter.deleteUser(cmd)).rejects.toThrow(error);

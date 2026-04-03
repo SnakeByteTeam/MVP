@@ -1,12 +1,14 @@
 import { Plant } from 'src/plant/domain/models/plant.model';
 import { FindPlantByIdPort } from '../ports/out/find-plant-by-id.port';
 import { FindAllAvailablePlantsPort } from '../ports/out/find-all-available-plants.port';
+import { FindAllPlantsPort } from '../ports/out/find-all-plants.port';
 import { PlantService } from './plant.service';
 
 describe('PlantService', () => {
   let service: PlantService;
   let findByIdPort: jest.Mocked<FindPlantByIdPort>;
   let findAllAvailablePlantsPort: jest.Mocked<FindAllAvailablePlantsPort>;
+  let findAllPlantsPort: jest.Mocked<FindAllPlantsPort>;
 
   beforeEach(() => {
     findByIdPort = {
@@ -15,8 +17,15 @@ describe('PlantService', () => {
     findAllAvailablePlantsPort = {
       findAllAvailablePlants: jest.fn(),
     };
+    findAllPlantsPort = {
+      findAllPlants: jest.fn(),
+    };
 
-    service = new PlantService(findByIdPort, findAllAvailablePlantsPort);
+    service = new PlantService(
+      findByIdPort,
+      findAllAvailablePlantsPort,
+      findAllPlantsPort,
+    );
   });
 
   it('should return plant from port', async () => {
@@ -91,6 +100,38 @@ describe('PlantService', () => {
 
       await expect(service.findAllAvailablePlants()).rejects.toThrow(
         'Port error',
+      );
+    });
+  });
+
+  describe('findAllPlants', () => {
+    it('should return all plants', async () => {
+      const plant1 = new Plant('plant-1', 'Plant A', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant B', [], 2);
+
+      findAllPlantsPort.findAllPlants.mockResolvedValue([plant1, plant2]);
+
+      const result = await service.findAllPlants();
+
+      expect(result).toHaveLength(2);
+      expect(findAllPlantsPort.findAllPlants).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw error when no plants are returned', async () => {
+      findAllPlantsPort.findAllPlants.mockResolvedValue(null);
+
+      await expect(service.findAllPlants()).rejects.toThrow(
+        Error('No plants found'),
+      );
+    });
+
+    it('should propagate port errors', async () => {
+      findAllPlantsPort.findAllPlants.mockRejectedValue(
+        new Error('Find all plants port error'),
+      );
+
+      await expect(service.findAllPlants()).rejects.toThrow(
+        'Find all plants port error',
       );
     });
   });

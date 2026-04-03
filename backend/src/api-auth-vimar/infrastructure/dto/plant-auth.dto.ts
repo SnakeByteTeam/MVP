@@ -1,3 +1,3 @@
 export interface PlantAuthDto {
-    redirect_url: string;
+  redirect_url: string;
 }

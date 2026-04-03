@@ -11,7 +11,7 @@ describe('MyVimarCloudApiFeatureService', () => {
   let httpController: HttpTestingController;
 
   const baseUrl = 'http://api.example.test';
-  const mockLocation = { href: 'http://localhost:4200/vimar-link' };
+  const mockLocation = { href: 'http://localhost:4200/vimar-link', origin: 'http://localhost:4200' };
   const mockDocument = {
     defaultView: {
       location: mockLocation,
@@ -35,44 +35,74 @@ describe('MyVimarCloudApiFeatureService', () => {
 
   afterEach(() => {
     httpController.verify();
+    TestBed.resetTestingModule();
   });
 
-  it('chiama GET /api/vimar-account in getLinkedAccount', () => {
+  it('chiama GET /my-vimar/account in getLinkedAccount', () => {
     service.getLinkedAccount().subscribe((account) => {
       expect(account).toEqual({ email: 'admin@example.com', isLinked: true });
     });
 
-    const request = httpController.expectOne(`${baseUrl}/api/vimar-account`);
+    const request = httpController.expectOne(`${baseUrl}/my-vimar/account`);
     expect(request.request.method).toBe('GET');
     request.flush({ email: 'admin@example.com', isLinked: true });
   });
 
-  it('chiama POST /api/vimar-account/oauth/callback in handleOAuthCallback', () => {
-    const payload = { code: 'code-123', state: 'state-abc' };
-
-    service.handleOAuthCallback(payload).subscribe((result) => {
-      expect(result).toBeNull();
+  it('fallback su /api/vimar-account quando /my-vimar/account risponde 404', () => {
+    service.getLinkedAccount().subscribe((account) => {
+      expect(account).toEqual({ email: 'admin@example.com', isLinked: true });
     });
 
-    const request = httpController.expectOne(`${baseUrl}/api/vimar-account/oauth/callback`);
-    expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual(payload);
-    request.flush(null);
+    const firstRequest = httpController.expectOne(`${baseUrl}/my-vimar/account`);
+    expect(firstRequest.request.method).toBe('GET');
+    firstRequest.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+
+    const fallbackRequest = httpController.expectOne(`${baseUrl}/api/vimar-account`);
+    expect(fallbackRequest.request.method).toBe('GET');
+    fallbackRequest.flush({ email: 'admin@example.com', isLinked: true });
   });
 
-  it('chiama DELETE /api/vimar-account in unlinkAccount', () => {
+  it('ritorna account scollegato quando entrambi gli endpoint non esistono', () => {
+    service.getLinkedAccount().subscribe((account) => {
+      expect(account).toEqual({ email: '', isLinked: false });
+    });
+
+    const firstRequest = httpController.expectOne(`${baseUrl}/my-vimar/account`);
+    firstRequest.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+
+    const fallbackRequest = httpController.expectOne(`${baseUrl}/api/vimar-account`);
+    fallbackRequest.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+  });
+
+  it('chiama DELETE /my-vimar/account in unlinkAccount', () => {
     service.unlinkAccount().subscribe((result) => {
       expect(result).toBeNull();
     });
 
-    const request = httpController.expectOne(`${baseUrl}/api/vimar-account`);
+    const request = httpController.expectOne(`${baseUrl}/my-vimar/account`);
     expect(request.request.method).toBe('DELETE');
     request.flush(null);
   });
 
-  it('reindirizza il browser a /api/vimar-account/oauth/authorize in initiateOAuth', () => {
+  it('fallback su DELETE /api/vimar-account quando /my-vimar/account non esiste', () => {
+    service.unlinkAccount().subscribe((result) => {
+      expect(result).toBeNull();
+    });
+
+    const firstRequest = httpController.expectOne(`${baseUrl}/my-vimar/account`);
+    expect(firstRequest.request.method).toBe('DELETE');
+    firstRequest.flush({ message: 'Not Found' }, { status: 404, statusText: 'Not Found' });
+
+    const fallbackRequest = httpController.expectOne(`${baseUrl}/api/vimar-account`);
+    expect(fallbackRequest.request.method).toBe('DELETE');
+    fallbackRequest.flush(null);
+  });
+
+  it('naviga su /my-vimar/auth con redirect_url in initiateOAuth', () => {
     service.initiateOAuth();
 
-    expect(mockLocation.href).toBe(`${baseUrl}/api/vimar-account/oauth/authorize`);
+    expect(mockLocation.href).toBe(
+      `${baseUrl}/my-vimar/auth?redirect_url=http%3A%2F%2Flocalhost%3A4200%2Fvimar-link`
+    );
   });
 });

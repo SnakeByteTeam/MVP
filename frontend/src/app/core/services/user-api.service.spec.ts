@@ -26,15 +26,16 @@ describe('UserApiService', () => {
     });
 
     afterEach(() => {
-        httpController.verify();
+        httpController?.verify();
+        TestBed.resetTestingModule();
     });
 
-    it('deleteUser codifica id con caratteri riservati', () => {
-        service.deleteUser('user/42').subscribe((result) => {
+    it('deleteUser chiama DELETE /users/:id con id numerico', () => {
+        service.deleteUser(42).subscribe((result) => {
             expect(result).toBeNull();
         });
 
-        const request = httpController.expectOne(`${baseUrl}/users/user%2F42`);
+        const request = httpController.expectOne(`${baseUrl}/users/42`);
         expect(request.request.method).toBe('DELETE');
         request.flush(null);
     });

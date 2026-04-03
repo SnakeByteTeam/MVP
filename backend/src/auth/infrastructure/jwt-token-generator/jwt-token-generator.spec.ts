@@ -24,6 +24,19 @@ describe('JwtTokenGenerator', () => {
       expect(token).toBeDefined();
       expect(typeof token).toBe('string');
     });
+
+    it('should generate access token even when payload already contains exp/iat', () => {
+      const payloadWithJwtClaims = {
+        ...payload,
+        exp: Math.floor(Date.now() / 1000) + 60,
+        iat: Math.floor(Date.now() / 1000),
+      };
+
+      const token = generator.generateAccessToken(payloadWithJwtClaims as any);
+
+      expect(token).toBeDefined();
+      expect(typeof token).toBe('string');
+    });
   });
 
   describe('generateRefreshToken', () => {

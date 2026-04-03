@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,6 +15,15 @@ describe('LoginComponent', () => {
 
   const routerMock = {
     navigate: vi.fn().mockResolvedValue(true),
+    navigateByUrl: vi.fn().mockResolvedValue(true),
+  };
+
+  const activatedRouteMock = {
+    snapshot: {
+      queryParamMap: {
+        get: vi.fn().mockReturnValue(null),
+      },
+    },
   };
 
   const authServiceMock = {
@@ -35,6 +44,7 @@ describe('LoginComponent', () => {
       imports: [LoginComponent],
       providers: [
         { provide: Router, useValue: routerMock },
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: InternalAuthService, useValue: authServiceMock },
       ],
     }).compileComponents();
@@ -74,6 +84,26 @@ describe('LoginComponent', () => {
     expect(routerMock.navigate).toHaveBeenCalledWith(['/apartment-monitor']);
     expect(component.errorType).toBeNull();
     expect(component.isLoading).toBe(false);
+  });
+
+  it('invoca login e naviga su returnUrl se presente', () => {
+    activatedRouteMock.snapshot.queryParamMap.get.mockReturnValue('/vimar-link');
+    authServiceMock.login.mockReturnValue(
+      of({
+        userId: 'u1',
+        username: 'mrossi',
+        role: UserRole.OPERATORE_SANITARIO,
+        accessToken: 'jwt-token',
+        isFirstAccess: false,
+      })
+    );
+
+    component.onUsernameChange('mrossi');
+    component.onPasswordChange(userCredential);
+    component.onSubmit();
+
+    expect(authServiceMock.login).toHaveBeenCalledWith('mrossi', userCredential);
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/vimar-link');
   });
 
   it('imposta errore USERNAME_OR_PASSWORD_WRONG su 401', () => {

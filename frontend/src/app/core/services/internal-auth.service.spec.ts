@@ -43,6 +43,7 @@ describe('InternalAuthService', () => {
 
     const request = httpMock.expectOne('http://localhost:3000/auth/login');
     expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
     expect(request.request.body).toEqual({ username: 'mrossi', password: loginCredential });
 
     const accessToken = createAccessToken({
@@ -70,6 +71,7 @@ describe('InternalAuthService', () => {
 
     const request = httpMock.expectOne('http://localhost:3000/auth/first-login');
     expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
     expect(request.request.body).toEqual({
       username: 'mrossi',
       tempPassword: temporaryCredential,
@@ -101,6 +103,56 @@ describe('InternalAuthService', () => {
     expect(service.getToken()).toBe(accessToken);
   });
 
+  it('ripristina sessione da refresh cookie quando token in memoria manca', async () => {
+    const restorePromise = firstValueFrom(service.restoreSessionFromRefresh());
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/refresh');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+
+    const accessToken = createAccessToken({
+      userId: 'user-1',
+      username: 'mrossi',
+      role: UserRole.AMMINISTRATORE,
+      isFirstAccess: false,
+    });
+    request.flush({ accessToken });
+
+    expect(await restorePromise).toBe(true);
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.getRole()).toBe(UserRole.AMMINISTRATORE);
+  });
+
+  it('restituisce false quando restore sessione fallisce', async () => {
+    const restorePromise = firstValueFrom(service.restoreSessionFromRefresh());
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/refresh');
+    request.flush(
+      { message: 'Unauthorized' },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+
+    expect(await restorePromise).toBe(false);
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('esegue una sola richiesta refresh con restore concorrenti', async () => {
+    const restorePromiseOne = firstValueFrom(service.restoreSessionFromRefresh());
+    const restorePromiseTwo = firstValueFrom(service.restoreSessionFromRefresh());
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/refresh');
+    const accessToken = createAccessToken({
+      userId: 'user-1',
+      username: 'mrossi',
+      role: UserRole.OPERATORE_SANITARIO,
+      isFirstAccess: false,
+    });
+    request.flush({ accessToken });
+
+    expect(await restorePromiseOne).toBe(true);
+    expect(await restorePromiseTwo).toBe(true);
+  });
+
   it('resetta token e utente al logout', () => {
     const requestSub = service.login('mrossi', loginCredential).subscribe();
     const request = httpMock.expectOne('http://localhost:3000/auth/login');
@@ -116,6 +168,33 @@ describe('InternalAuthService', () => {
 
     service.logout();
 
+    expect(service.getToken()).toBeNull();
+    expect(service.getRole()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('chiama /auth/logout con credenziali e resetta sessione locale', async () => {
+    const loginSub = service.login('mrossi', loginCredential).subscribe();
+    const loginRequest = httpMock.expectOne('http://localhost:3000/auth/login');
+    loginRequest.flush({
+      accessToken: createAccessToken({
+        userId: 'user-1',
+        username: 'mrossi',
+        role: UserRole.AMMINISTRATORE,
+        isFirstAccess: false,
+      }),
+    });
+    loginSub.unsubscribe();
+
+    const logoutPromise = firstValueFrom(service.logoutFromBackend());
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/logout');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.withCredentials).toBe(true);
+    expect(request.request.body).toEqual({});
+    request.flush(null);
+
+    await logoutPromise;
     expect(service.getToken()).toBeNull();
     expect(service.getRole()).toBeNull();
     expect(service.isAuthenticated()).toBe(false);

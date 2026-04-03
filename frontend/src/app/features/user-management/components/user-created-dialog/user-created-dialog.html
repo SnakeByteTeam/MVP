@@ -1,34 +1,82 @@
-<div class="dialog-overlay">
-    <div class="dialog-content">
+<dialog open aria-labelledby="created-user-dialog-title"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-900/50 focus:outline-none">
 
-        <header>
-            <h1>Utente Creato con Successo</h1>
-        </header>
+    <!-- Dialog Header -->
+    <div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
+            <svg class="h-4 w-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+        </div>
+        <div>
+            <h2 id="created-user-dialog-title" class="text-sm font-bold text-slate-900"
+                style="font-family:'Syne',sans-serif">
+                Utente creato con successo
+            </h2>
+            <p class="text-xs text-slate-500">Conferma e comunica subito la password temporanea.</p>
+        </div>
+    </div>
 
-        <div class="dialog-body">
-            <p>
-                L'operatore sanitario <strong>{{ response().user.firstName }}</strong>
-                (Username: <strong>{{ response().user.username }}</strong>) è stato creato correttamente nel sistema.
-            </p>
+    <!-- Dialog Body -->
+    <div class="space-y-4 px-5 py-5">
 
-            <div class="alert-warning">
-                <h2>⚠️ Attenzione: Password Temporanea</h2>
-                <p>
-                    Comunica questa password all'utente. <strong>Non sarà più possibile recuperarla</strong>
-                    una volta chiusa questa finestra.
+        <!-- User Summary -->
+        <div class="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+            <div
+                class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-600">
+                {{ user().name[0] }}{{ user().surname[0] }}
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-slate-900">{{ user().name }} {{ user().surname }}</p>
+                <p class="flex items-center gap-1 text-xs text-slate-500">
+                    <span class="text-slate-300">@</span>
+                    <span class="font-mono font-medium">{{ user().username }}</span>
                 </p>
-
-                <div class="password-box">
-                    <code>{{ response().temporaryPassword }}</code>
-                </div>
+            </div>
+            <div
+                class="ml-auto flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                Attivo
             </div>
         </div>
 
-        <footer>
-            <button type="button" class="btn-primary" (click)="closeDialog()">
-                Ho comunicato la password (Chiudi)
-            </button>
-        </footer>
+        <!-- Temp Password Section -->
+        <section class="overflow-hidden rounded-xl border border-amber-200 bg-amber-50"
+            aria-label="Password temporanea">
+            <div class="flex items-center gap-2 border-b border-amber-200 bg-amber-100/60 px-4 py-3">
+                <svg class="h-4 w-4 flex-shrink-0 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <h3 class="text-xs font-bold uppercase tracking-wide text-amber-800">Password temporanea</h3>
+            </div>
+            <div class="px-4 py-4">
+                <p class="mb-3 text-xs text-amber-800">
+                    Comunica questa password all'utente.
+                    <strong>Non sarà più recuperabile</strong> una volta chiusa la finestra.
+                </p>
+                <div
+                    class="flex items-center justify-between gap-3 rounded-lg border border-amber-300 bg-white px-4 py-3 shadow-sm">
+                    <code class="break-all font-mono text-sm font-bold tracking-wide text-slate-800">
+            {{ response().tempPassword }}
+          </code>
+                </div>
+            </div>
+        </section>
 
     </div>
-</div>
+
+    <!-- Dialog Footer -->
+    <div class="flex items-center justify-end border-t border-slate-100 bg-slate-50 px-5 py-3">
+        <button type="button" (click)="closeDialog()"
+            class="inline-flex items-center gap-2 rounded-lg border border-sky-600 bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-sky-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 active:scale-[0.98]">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+            Ho comunicato la password
+        </button>
+    </div>
+
+</dialog>

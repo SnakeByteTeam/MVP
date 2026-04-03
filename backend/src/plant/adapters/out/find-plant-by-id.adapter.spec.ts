@@ -1,48 +1,65 @@
 import { FindPlantByIdAdapter } from './find-plant-by-id.adapter';
-import { GetValidCachePort } from 'src/cache/application/ports/out/get-valid-cache.port';
-import { Plant } from 'src/plant/domain/models/plant.model';
-import { Room } from 'src/plant/domain/models/room.model';
+import { FindPlantByIdRepoPort } from 'src/plant/application/repository/find-plant-by-id.repository';
+import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant.entity';
+import { RoomEntity } from 'src/cache/infrastructure/persistence/entities/room.entity';
 
 describe('FindPlantByIdAdapter', () => {
   let adapter: FindPlantByIdAdapter;
-  let cachePort: jest.Mocked<GetValidCachePort>;
+  let repo: jest.Mocked<FindPlantByIdRepoPort>;
 
   beforeEach(() => {
-    cachePort = {
-      getValidCache: jest.fn(),
+    repo = {
+      findById: jest.fn(),
     };
 
-    adapter = new FindPlantByIdAdapter(cachePort);
+    adapter = new FindPlantByIdAdapter(repo);
   });
 
-  it('should throw PlantId is null when cmd.id is absent', async () => {
+  it('should return mapped plant when repository finds entity', async () => {
+    const roomEntity = new RoomEntity();
+    roomEntity.id = 'room-1';
+    roomEntity.name = 'Living Room';
+    roomEntity.devices = [];
+
+    const plantEntity = new PlantEntity();
+    plantEntity.id = 'plant-1';
+    plantEntity.data = {
+      name: 'My Plant',
+      rooms: [roomEntity],
+    };
+
+    repo.findById.mockResolvedValue(plantEntity);
+
+    const result = await adapter.findById({ id: 'plant-1' });
+
+    expect(result).not.toBeNull();
+    expect(result?.getId()).toBe('plant-1');
+    expect(result?.getName()).toBe('My Plant');
+    expect(result?.getRooms()).toHaveLength(1);
+    expect(result?.getRooms()[0]?.getId()).toBe('room-1');
+    expect(repo.findById).toHaveBeenCalledWith('plant-1');
+    expect(repo.findById).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return null when repository returns null', async () => {
+    repo.findById.mockResolvedValue(null);
+
+    const result = await adapter.findById({ id: 'non-existent' });
+
+    expect(result).toBeNull();
+    expect(repo.findById).toHaveBeenCalledWith('non-existent');
+  });
+
+  it('should throw error when plantId is empty', async () => {
     await expect(adapter.findById({ id: '' })).rejects.toThrow(
-      Error('PlantId is null'),
+      'PlantId is null',
     );
   });
 
-  it('should return null when plant not found in cache', async () => {
-    cachePort.getValidCache.mockResolvedValue(null as any);
+  it('should propagate repository errors', async () => {
+    const dbError = new Error('Database connection failed');
+    repo.findById.mockRejectedValue(dbError);
 
-    const result = await adapter.findById({ id: 'plant-1' });
-
-    expect(result).toBeNull();
-    expect(cachePort.getValidCache).toHaveBeenCalledWith({
-      plantId: 'plant-1',
-    });
-  });
-
-  it('should return plant when found in cache', async () => {
-    const room = new Room('room-1', 'Living Room', []);
-    const plant = new Plant('plant-1', 'My Plant', [room]);
-
-    cachePort.getValidCache.mockResolvedValue(plant);
-
-    const result = await adapter.findById({ id: 'plant-1' });
-
-    expect(result).toBe(plant);
-    expect(cachePort.getValidCache).toHaveBeenCalledWith({
-      plantId: 'plant-1',
-    });
+    await expect(adapter.findById({ id: 'plant-1' })).rejects.toThrow(dbError);
   });
 });

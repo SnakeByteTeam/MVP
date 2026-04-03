@@ -6,10 +6,10 @@ import { DELETE_WARD_REPOSITORY } from '../../application/repository/delete-ward
 export class DeleteWardAdapter implements DeleteWardPort {
   constructor(
     @Inject(DELETE_WARD_REPOSITORY) private readonly deleteWardRepository,
-  ) {}
+  ) { }
 
-  deleteWard(req: DeleteWardCmd): void {
-    return this.deleteWardRepository.deleteWard(req.id);
+  async deleteWard(req: DeleteWardCmd): Promise<void> {
+    return await this.deleteWardRepository.deleteWard(req.id);
   }
 }
 

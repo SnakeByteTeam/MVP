@@ -1,19 +1,20 @@
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { ReadCachePort } from '../ports/out/read-cache.port';
 import { FetchNewCachePort } from '../ports/out/fetch-new-cache.port';
 import { WriteCachePort } from '../ports/out/write-cache.port';
+import { GetAllPlantIdsPort } from '../ports/out/get-all-plantids.port';
 import { SyncCacheService } from './sync-cache.service';
 
 describe('SyncCacheService', () => {
   let service: SyncCacheService;
-  let readPort: jest.Mocked<ReadCachePort>;
   let fetchPort: jest.Mocked<FetchNewCachePort>;
   let writePort: jest.Mocked<WriteCachePort>;
+  let getAllPlantIdsPort: jest.Mocked<GetAllPlantIdsPort>;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    readPort = {
-      readCache: jest.fn(),
-    };
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     fetchPort = {
       fetch: jest.fn(),
@@ -23,44 +24,159 @@ describe('SyncCacheService', () => {
       writeStructure: jest.fn(),
     };
 
-    service = new SyncCacheService(readPort, fetchPort, writePort);
+    getAllPlantIdsPort = {
+      getAllPlantIds: jest.fn(),
+    };
+
+    service = new SyncCacheService(fetchPort, writePort, getAllPlantIdsPort);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should throw PlantId is null when cmd.plantId is absent', async () => {
-    await expect(service.getValidCache({ plantId: '' })).rejects.toThrow(
-      Error('PlantId is null'),
+    await expect(service.updateCache({ plantId: '' })).rejects.toThrow(
+      new Error('PlantId is null'),
     );
   });
 
-  it('should return valid cached plant when cache is fresh', async () => {
-    const cachedAt = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
-    const cachedPlant = new Plant('plant-1', 'My Plant', [], cachedAt);
+  it('should fetch and write plant structure when updateCache is called', async () => {
+    const fetchedPlant = new Plant('plant-1', 'New Plant', [], 1);
 
-    readPort.readCache.mockResolvedValue(cachedPlant);
-
-    const result = await service.getValidCache({ plantId: 'plant-1' });
-
-    expect(result).toBe(cachedPlant);
-    expect(readPort.readCache).toHaveBeenCalledTimes(1);
-    expect(fetchPort.fetch).toHaveBeenCalledTimes(0); // should not fetch if cache is valid
-  });
-
-  it('should fetch and write plant structure when cache is stale', async () => {
-    const staleCachedAt = new Date(Date.now() - 13 * 60 * 60 * 1000); // 13 hours ago
-    const stalePlant = new Plant('plant-1', 'Old Plant', [], staleCachedAt);
-    const fetchedPlant = new Plant('plant-1', 'New Plant', []);
-
-    readPort.readCache.mockResolvedValue(stalePlant);
     fetchPort.fetch.mockResolvedValue(fetchedPlant);
     writePort.writeStructure.mockResolvedValue(true);
 
-    const result = await service.getValidCache({ plantId: 'plant-1' });
+    const result = await service.updateCache({ plantId: 'plant-1' });
 
-    expect(result).toBe(fetchedPlant);
-    expect(readPort.readCache).toHaveBeenCalledTimes(1);
+    expect(result).toBe(true);
     expect(fetchPort.fetch).toHaveBeenCalledWith({ plantId: 'plant-1' });
     expect(fetchPort.fetch).toHaveBeenCalledTimes(1);
     expect(writePort.writeStructure).toHaveBeenCalledWith(fetchedPlant);
     expect(writePort.writeStructure).toHaveBeenCalledTimes(1);
+  });
+
+  it('should throw error when write cache fails', async () => {
+    const fetchedPlant = new Plant('plant-1', 'New Plant', [], 1);
+    fetchPort.fetch.mockResolvedValue(fetchedPlant);
+    writePort.writeStructure.mockResolvedValue(false);
+
+    await expect(service.updateCache({ plantId: 'plant-1' })).rejects.toThrow(
+      new Error('Failed to write cache'),
+    );
+  });
+
+  it('should propagate fetch errors', async () => {
+    const fetchError = new Error('API call failed');
+    fetchPort.fetch.mockRejectedValue(fetchError);
+
+    await expect(service.updateCache({ plantId: 'plant-1' })).rejects.toThrow(
+      fetchError,
+    );
+  });
+
+  describe('updateAllCache', () => {
+    it('should update cache for all plants', async () => {
+      const plant1 = new Plant('plant-1', 'Plant 1', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant 2', [], 2);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([
+        'plant-1',
+        'plant-2',
+      ]);
+      fetchPort.fetch
+        .mockResolvedValueOnce(plant1)
+        .mockResolvedValueOnce(plant2);
+      writePort.writeStructure
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(true);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(getAllPlantIdsPort.getAllPlantIds).toHaveBeenCalledTimes(1);
+      expect(fetchPort.fetch).toHaveBeenCalledTimes(2);
+      expect(writePort.writeStructure).toHaveBeenCalledTimes(2);
+    });
+
+    it('should continue with next plant when fetch fails for one plant', async () => {
+      const plant2 = new Plant('plant-2', 'Plant 2', [], 2);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([
+        'plant-1',
+        'plant-2',
+      ]);
+      fetchPort.fetch
+        .mockRejectedValueOnce(new Error('Fetch failed for plant-1'))
+        .mockResolvedValueOnce(plant2);
+      writePort.writeStructure.mockResolvedValue(true);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error updating cache for plantId: plant-1'),
+      );
+      expect(writePort.writeStructure).toHaveBeenCalledTimes(1);
+      expect(writePort.writeStructure).toHaveBeenCalledWith(plant2);
+    });
+
+    it('should continue with next plant when write fails for one plant', async () => {
+      const plant1 = new Plant('plant-1', 'Plant 1', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant 2', [], 2);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([
+        'plant-1',
+        'plant-2',
+      ]);
+      fetchPort.fetch
+        .mockResolvedValueOnce(plant1)
+        .mockResolvedValueOnce(plant2);
+      writePort.writeStructure
+        .mockResolvedValueOnce(false)
+        .mockResolvedValueOnce(true);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error updating cache for plantId: plant-1'),
+      );
+    });
+
+    it('should log success message when cache is updated for a plant', async () => {
+      const plant1 = new Plant('plant-1', 'Plant 1', [], 1);
+
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue(['plant-1']);
+      fetchPort.fetch.mockResolvedValue(plant1);
+      writePort.writeStructure.mockResolvedValue(true);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        'Cache updated successfully for plantId: plant-1',
+      );
+    });
+
+    it('should handle empty plant ids list', async () => {
+      getAllPlantIdsPort.getAllPlantIds.mockResolvedValue([]);
+
+      const result = await service.updateAllCache();
+
+      expect(result).toBe(true);
+      expect(fetchPort.fetch).not.toHaveBeenCalled();
+      expect(writePort.writeStructure).not.toHaveBeenCalled();
+    });
+
+    it('should propagate error when getAllPlantIds fails', async () => {
+      getAllPlantIdsPort.getAllPlantIds.mockRejectedValue(
+        new Error('Failed to get plant ids'),
+      );
+
+      await expect(service.updateAllCache()).rejects.toThrow(
+        'Failed to get plant ids',
+      );
+    });
   });
 });

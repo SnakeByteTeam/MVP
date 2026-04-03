@@ -7,7 +7,8 @@ import { UserRole } from '../../core/models/user-role.enum';
 import { of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { firstValueFrom } from 'rxjs'; 
-import { provideRouter } from '@angular/router'; 
+import { provideRouter, Router } from '@angular/router'; 
+import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 
 
 describe('MainLayoutComponent', () => {
@@ -16,7 +17,8 @@ describe('MainLayoutComponent', () => {
 
     const mockAuthService = {
         getRole: vi.fn(),
-        logout: vi.fn()
+        logout: vi.fn(),
+        logoutFromBackend: vi.fn().mockReturnValue(of(void 0)),
     };
     const mockNavService = {
         getNavItems: vi.fn().mockReturnValue([{ label: 'Test', route: '/test' }])
@@ -25,14 +27,21 @@ describe('MainLayoutComponent', () => {
         getActiveAlarmsCount$: vi.fn().mockReturnValue(of(0)),
         getUnreadNotificationsCount$: vi.fn().mockReturnValue(of(0))
     };
+    const mockMyVimarService = {
+        getLinkedAccount: vi.fn().mockReturnValue(of({ email: '', isLinked: false })),
+    };
     
     beforeEach(async () => {
+        vi.clearAllMocks();
+        mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
+
         await TestBed.configureTestingModule({
         imports: [MainLayoutComponent],
         providers: [
             { provide: InternalAuthService, useValue: mockAuthService },
             { provide: NavService, useValue: mockNavService },
             { provide: AlarmStateService, useValue: mockAlarmService },
+            { provide: VIMAR_CLOUD_API_SERVICE, useValue: mockMyVimarService },
             provideRouter([])
         ]
         }).compileComponents();
@@ -59,8 +68,39 @@ describe('MainLayoutComponent', () => {
     });
 
     it('invoca correttamente logout', () => {
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
         component.logout();
-        expect(mockAuthService.logout).toHaveBeenCalled();
+
+        expect(mockAuthService.logoutFromBackend).toHaveBeenCalled();
+        expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
+    });
+
+    it('apre il pannello profilo e carica stato MyVimar', () => {
+        component.toggleProfilePanel();
+
+        expect(component.isProfilePanelOpen).toBe(true);
+        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalledTimes(1);
+        expect(component.vimarAccount).toEqual({ email: '', isLinked: false });
+    });
+
+    it('non apre il pannello profilo per utenti non admin', () => {
+        mockAuthService.getRole.mockReturnValue(UserRole.OPERATORE_SANITARIO);
+
+        component.toggleProfilePanel();
+
+        expect(component.isProfilePanelOpen).toBe(false);
+        expect(mockMyVimarService.getLinkedAccount).not.toHaveBeenCalled();
+    });
+
+    it('naviga a vimar-link dalla sezione profilo', () => {
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+        component.goToVimarLink();
+
+        expect(navigateSpy).toHaveBeenCalledWith(['/vimar-link']);
     });
 
 

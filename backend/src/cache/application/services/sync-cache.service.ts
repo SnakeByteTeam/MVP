@@ -9,70 +9,67 @@ import {
   WRITE_CACHE_PORT,
   type WriteCachePort,
 } from '../ports/out/write-cache.port';
-import { GetValidCachePort } from '../ports/out/get-valid-cache.port';
+import { UpdateCacheUseCase } from '../ports/in/update-cache.usecase';
 import { GetValidCacheCmd } from '../commands/get-valid-cache.command';
+import { UpdateCacheAllPlantsUseCase } from '../ports/in/update-cache-all-plants.usecase';
 import {
-  READ_CACHE_PORT,
-  type ReadCachePort,
-} from '../ports/out/read-cache.port';
+  GET_ALL_PLANTIDS_PORT,
+  type GetAllPlantIdsPort,
+} from '../ports/out/get-all-plantids.port';
 
 @Injectable()
-export class SyncCacheService implements GetValidCachePort {
+export class SyncCacheService
+  implements UpdateCacheUseCase, UpdateCacheAllPlantsUseCase
+{
   constructor(
-    @Inject(READ_CACHE_PORT)
-    private readonly readCachePort: ReadCachePort,
     @Inject(FETCH_NEW_CACHE_PORT)
     private readonly fetchCachePort: FetchNewCachePort,
     @Inject(WRITE_CACHE_PORT)
     private readonly writeStructurePort: WriteCachePort,
+    @Inject(GET_ALL_PLANTIDS_PORT)
+    private readonly getAllPlantIdsPort: GetAllPlantIdsPort,
   ) {}
 
-  async getValidCache(cmd: GetValidCacheCmd): Promise<Plant> {
+  async updateCache(cmd: GetValidCacheCmd): Promise<boolean> {
     if (!cmd?.plantId) throw new Error('PlantId is null');
 
-    console.log(
-      `[SyncCacheService] Getting valid cache for plantId: ${cmd.plantId}`,
-    );
-
-    const plant: Plant | null = await this.readCachePort.readCache({
-      plantId: cmd.plantId,
-    });
-    console.log(
-      `[SyncCacheService] Read cache result:`,
-      plant ? 'found' : 'not found',
-    );
-
-    if (
-      plant &&
-      plant.getCachedAt() > new Date(Date.now() - 12 * 60 * 60 * 1000)
-    ) {
-      console.log(`[SyncCacheService] Cache is valid, returning`);
-      return plant;
-    }
-
-    console.log(
-      `[SyncCacheService] Cache is stale or missing, fetching new...`,
-    );
     try {
       const fetchedPlant: Plant = await this.fetchCachePort.fetch({
         plantId: cmd.plantId,
       });
-      console.log(
-        `[SyncCacheService] Fetched plant:`,
-        fetchedPlant ? 'success' : 'failed',
-      );
 
       const writeResult =
         await this.writeStructurePort.writeStructure(fetchedPlant);
-      console.log(`[SyncCacheService] Write result:`, writeResult);
 
       if (!writeResult) throw new Error('Failed to write cache');
 
-      console.log(`[SyncCacheService] Cache written successfully`);
-      return fetchedPlant;
+      return true;
     } catch (error) {
-      console.error(`[SyncCacheService] Error during fetch/write:`, error);
       throw error;
     }
+  }
+
+  async updateAllCache(): Promise<boolean> {
+    const plantIds: string[] = await this.getAllPlantIdsPort.getAllPlantIds();
+
+    for (const plantId of plantIds) {
+      try {
+        const fetchedPlant: Plant = await this.fetchCachePort.fetch({
+          plantId,
+        });
+
+        const writeResult =
+          await this.writeStructurePort.writeStructure(fetchedPlant);
+
+        if (!writeResult)
+          throw new Error(`Failed to write cache for plantId: ${plantId}`);
+        else console.log(`Cache updated successfully for plantId: ${plantId}`);
+      } catch (error) {
+        console.error(
+          `Error updating cache for plantId: ${plantId}. Error: ${error}`,
+        );
+      }
+    }
+    return true;
   }
 }

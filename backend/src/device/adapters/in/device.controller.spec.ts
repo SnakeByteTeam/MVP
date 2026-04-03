@@ -64,7 +64,6 @@ describe('DeviceController', () => {
 
     expect(findDeviceById.findById).toHaveBeenCalledWith({
       id: '123',
-      plantId: 'plant-123',
     });
     expect(findDeviceById.findById).toHaveBeenCalledTimes(1);
     expect(findDeviceByPlantId.findByPlantId).toHaveBeenCalledTimes(0);

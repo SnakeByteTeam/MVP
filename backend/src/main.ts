@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-
 import helmet from 'helmet'; //Middleware per la sicurezza HTTP, setta correttamente gli header HTTP per proteggere da vulnerabilità note.
 
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -11,9 +10,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
 
+  const frontendOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:4200')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
   app.use(helmet());
   app.enableCors({
-    //origin: process.env.FRONTEND_URL, sostituito poi con l'url del frontend
+    origin: frontendOrigins,
     credentials: true,
   });
 

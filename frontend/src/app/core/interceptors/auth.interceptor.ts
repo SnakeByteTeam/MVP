@@ -44,5 +44,5 @@ function withAuthorization(req: HttpRequest<unknown>, token: string): HttpReques
 }
 
 function isAuthEndpoint(url: string): boolean {
-	return /\/auth\/(login|refresh|first-access|logout)/.test(url);
+	return /\/auth\/(login|refresh|first-login|logout)/.test(url);
 }

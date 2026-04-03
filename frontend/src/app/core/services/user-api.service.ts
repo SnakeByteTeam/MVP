@@ -20,7 +20,8 @@ export class UserApiService {
         return this.http.post<UserCreatedResponseDto>(`${this.baseUrl}/users`, dto);
     }
 
-    public deleteUser(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.baseUrl}/users/${encodeURIComponent(id)}`);
+    public deleteUser(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/users/${encodeURIComponent(id.toString())}`);
     }
+
 }

@@ -1,7 +1,8 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { EMPTY, Subject, catchError, map, takeUntil, tap } from 'rxjs';
-import { ApartmentApiService } from '../../apartment-monitor/services/apartment-api.service';
+import { Observable, Subject, catchError, of, takeUntil } from 'rxjs';
+import type { User } from '../../../core/models/user.model';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../models/ward-api.dto';
+import type { Plant } from '../models/plant.model';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardOperationsService } from './ward-operations.service';
 import { WardStore } from './ward.store';
@@ -11,7 +12,6 @@ export class WardManagementStore implements OnDestroy {
     private readonly wardStore = inject(WardStore);
     private readonly wardOperations = inject(WardOperationsService);
     private readonly wardAssignmentOperations = inject(AssignmentOperationsService);
-    private readonly apartmentApi = inject(ApartmentApiService);
     private readonly destroy$ = new Subject<void>();
 
     public readonly wards$ = this.wardStore.wards$;
@@ -79,7 +79,7 @@ export class WardManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public removePlant(wardId: number, plantId: number): void {
+    public removePlant(wardId: number, plantId: string): void {
         this.wardStore.setLoading(true);
         this.wardAssignmentOperations
             .removePlant(wardId, plantId)
@@ -87,38 +87,22 @@ export class WardManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public enablePlant(plantId: number): void {
-        this.wardStore.setLoading(true);
-        this.apartmentApi
-            .enableApartment(String(plantId))
-            .pipe(
-                tap(() => this.wardStore.patchPlant(plantId, { isEnabled: true })),
-                tap(() => this.wardStore.setLoading(false)),
-                map(() => void 0),
-                catchError((error) => {
-                    this.wardStore.setError(this.getErrorMessage(error));
-                    return EMPTY;
-                }),
-                takeUntil(this.destroy$),
-            )
-            .subscribe();
+    public getAvailablePlantsForWard(wardId: number): Observable<Plant[] | null> {
+        return this.wardAssignmentOperations.getAvailablePlantsForWard(wardId).pipe(
+            catchError((error) => {
+                this.wardStore.setError(this.getErrorMessage(error));
+                return of(null);
+            }),
+        );
     }
 
-    public disablePlant(plantId: number): void {
-        this.wardStore.setLoading(true);
-        this.apartmentApi
-            .disableApartment(String(plantId))
-            .pipe(
-                tap(() => this.wardStore.patchPlant(plantId, { isEnabled: false })),
-                tap(() => this.wardStore.setLoading(false)),
-                map(() => void 0),
-                catchError((error) => {
-                    this.wardStore.setError(this.getErrorMessage(error));
-                    return EMPTY;
-                }),
-                takeUntil(this.destroy$),
-            )
-            .subscribe();
+    public getAvailableUsersForWard(wardId: number): Observable<User[] | null> {
+        return this.wardAssignmentOperations.getAvailableUsersForWard(wardId).pipe(
+            catchError((error) => {
+                this.wardStore.setError(this.getErrorMessage(error));
+                return of(null);
+            }),
+        );
     }
 
     private getErrorMessage(error: unknown): string {

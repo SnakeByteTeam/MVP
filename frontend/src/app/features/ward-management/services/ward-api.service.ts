@@ -7,6 +7,9 @@ import type {
     AssignOperatorDto,
     CreateWardDto,
     UpdateWardDto,
+    WardSummaryDto,
+    WardUserDto,
+    WardPlantDto,
 } from '../models/ward-api.dto';
 import type { Ward } from '../models/ward.model';
 
@@ -17,9 +20,11 @@ export class WardApiService {
     private readonly wardsEndpoint = `${this.baseUrl}/wards`;
     private readonly wardUsersRelationshipsEndpoint = `${this.baseUrl}/wards-users-relationships`;
     private readonly wardPlantsRelationshipsEndpoint = `${this.baseUrl}/wards-plants-relationships`;
+    private readonly plantEndpoint = `${this.baseUrl}/plant`;
+    private readonly usersEndpoint = `${this.baseUrl}/users`;
 
-    public getWards(): Observable<Ward[]> {
-        return this.http.get<Ward[]>(this.wardsEndpoint);
+    public getWards(): Observable<WardSummaryDto[]> {
+        return this.http.get<WardSummaryDto[]>(this.wardsEndpoint);
     }
 
     public createWard(dto: CreateWardDto): Observable<Ward> {
@@ -34,15 +39,26 @@ export class WardApiService {
         return this.http.delete<void>(`${this.wardsEndpoint}/${encodeURIComponent(String(wardId))}`);
     }
 
+
+
+    public getOperatorsByWardId(wardId: number): Observable<WardUserDto[]> {
+        return this.http.get<WardUserDto[]>(
+            `${this.wardUsersRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}`,
+        );
+    }
+
+    public getAvailableOperators(): Observable<WardUserDto[]> {
+        return this.http.get<WardUserDto[]>(
+            `${this.usersEndpoint}/available`,
+        );
+    }
+
     public assignOperatorToWard(wardId: number, dto: AssignOperatorDto): Observable<void> {
         return this.http.post<void>(this.wardUsersRelationshipsEndpoint, {
             wardId,
             userId: dto.userId,
         });
     }
-
-    //aggiungere get per operatori di un reparto
-
 
     public removeOperatorFromWard(wardId: number, userId: number): Observable<void> {
         return this.http.delete<void>(
@@ -51,7 +67,19 @@ export class WardApiService {
     }
 
 
-    //wards plants relationships
+    public getPlantsByWardId(wardId: number): Observable<WardPlantDto[]> {
+        return this.http.get<WardPlantDto[]>(
+            `${this.wardPlantsRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}`,
+        );
+    }
+
+    public getAvailablePlants(): Observable<WardPlantDto[]> {
+        return this.http.get<WardPlantDto[]>(
+            `${this.plantEndpoint}/available`,
+        );
+    }
+
+
     public assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void> {
         return this.http.post<void>(this.wardPlantsRelationshipsEndpoint, {
             wardId,
@@ -59,11 +87,10 @@ export class WardApiService {
         });
     }
 
-    //aggiungere get per appartamenti di un impianto
 
-    public removePlantFromWard(wardId: number, plantId: number): Observable<void> {
+    public removePlantFromWard(wardId: number, plantId: string): Observable<void> {
         return this.http.delete<void>(
-            `${this.wardPlantsRelationshipsEndpoint}/${encodeURIComponent(String(wardId))}/${encodeURIComponent(String(plantId))}`,
+            `${this.wardPlantsRelationshipsEndpoint}/${encodeURIComponent(String(plantId))}`,
         );
     }
 }

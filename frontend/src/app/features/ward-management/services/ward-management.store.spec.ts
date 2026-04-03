@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { UserRole } from '../../../core/models/user-role.enum';
 import { AssignmentOperationsService } from './assignment-operations.service';
 import { WardManagementStore } from './ward-management.store';
 import { WardOperationsService } from './ward-operations.service';
 import { WardStore } from './ward.store';
-import { ApartmentApiService } from '../../apartment-monitor/services/apartment-api.service';
 
 describe('WardManagementStore', () => {
     let store: WardManagementStore;
@@ -16,7 +16,6 @@ describe('WardManagementStore', () => {
         error$: of(null),
         setLoading: vi.fn(),
         setError: vi.fn(),
-        patchPlant: vi.fn(),
     };
 
     const wardOperationsStub = {
@@ -31,11 +30,8 @@ describe('WardManagementStore', () => {
         removeOperator: vi.fn(),
         assignPlant: vi.fn(),
         removePlant: vi.fn(),
-    };
-
-    const apartmentApiStub = {
-        enableApartment: vi.fn(),
-        disableApartment: vi.fn(),
+        getAvailableUsersForWard: vi.fn(),
+        getAvailablePlantsForWard: vi.fn(),
     };
 
     beforeEach(() => {
@@ -50,9 +46,8 @@ describe('WardManagementStore', () => {
         assignmentOperationsStub.removeOperator.mockReturnValue(of(void 0));
         assignmentOperationsStub.assignPlant.mockReturnValue(of(void 0));
         assignmentOperationsStub.removePlant.mockReturnValue(of(void 0));
-
-        apartmentApiStub.enableApartment.mockReturnValue(of(void 0));
-        apartmentApiStub.disableApartment.mockReturnValue(of(void 0));
+        assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(of([]));
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(of([]));
 
         TestBed.configureTestingModule({
             providers: [
@@ -60,7 +55,6 @@ describe('WardManagementStore', () => {
                 { provide: WardStore, useValue: wardStoreStub },
                 { provide: WardOperationsService, useValue: wardOperationsStub },
                 { provide: AssignmentOperationsService, useValue: assignmentOperationsStub },
-                { provide: ApartmentApiService, useValue: apartmentApiStub },
             ],
         });
 
@@ -89,36 +83,63 @@ describe('WardManagementStore', () => {
     it('assign/remove operator e plant delegano ad AssignmentOperationsService', () => {
         store.assignOperator(1, { userId: 2 });
         store.removeOperator(1, 2);
-        store.assignPlant(1, { plantId: 102 });
-        store.removePlant(1, 102);
+        store.assignPlant(1, { plantId: '102' });
+        store.removePlant(1, '102');
 
         expect(assignmentOperationsStub.assignOperator).toHaveBeenCalledWith(1, {
             userId: 2,
         });
         expect(assignmentOperationsStub.removeOperator).toHaveBeenCalledWith(1, 2);
         expect(assignmentOperationsStub.assignPlant).toHaveBeenCalledWith(1, {
-            plantId: 102,
+            plantId: '102',
         });
-        expect(assignmentOperationsStub.removePlant).toHaveBeenCalledWith(1, 102);
+        expect(assignmentOperationsStub.removePlant).toHaveBeenCalledWith(1, '102');
         expect(wardStoreStub.setLoading).toHaveBeenCalledTimes(4);
     });
 
-    it('enablePlant aggiorna store con isEnabled=true e loading=false', () => {
-        store.enablePlant(101);
+    it('getAvailablePlantsForWard delega ad AssignmentOperationsService', async () => {
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(
+            of([{ id: '200', name: 'App. 200' }]),
+        );
 
-        expect(apartmentApiStub.enableApartment).toHaveBeenCalledWith('101');
-        expect(wardStoreStub.patchPlant).toHaveBeenCalledWith(101, { isEnabled: true });
-        expect(wardStoreStub.setLoading).toHaveBeenCalledWith(false);
+        const result = await firstValueFrom(store.getAvailablePlantsForWard(10));
+
+        expect(assignmentOperationsStub.getAvailablePlantsForWard).toHaveBeenCalledWith(10);
+        expect(result).toEqual([{ id: '200', name: 'App. 200' }]);
         expect(wardStoreStub.setError).not.toHaveBeenCalled();
     });
 
-    it('disablePlant in errore salva messaggio di errore', () => {
-        apartmentApiStub.disableApartment.mockReturnValue(throwError(() => new Error('No network')));
+    it('getAvailablePlantsForWard in errore ritorna null e setta errore', async () => {
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(
+            throwError(() => new Error('fetch failed')),
+        );
 
-        store.disablePlant(101);
+        const result = await firstValueFrom(store.getAvailablePlantsForWard(10));
 
-        expect(wardStoreStub.setError).toHaveBeenCalledWith('No network');
-        expect(wardStoreStub.patchPlant).not.toHaveBeenCalled();
-        expect(wardStoreStub.setLoading).toHaveBeenCalledWith(true);
+        expect(result).toBeNull();
+        expect(wardStoreStub.setError).toHaveBeenCalledWith('fetch failed');
+    });
+
+    it('getAvailableUsersForWard delega ad AssignmentOperationsService', async () => {
+        assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(
+            of([{ id: 7, firstName: 'Mario', lastName: 'Rossi', username: 'mrossi', role: UserRole.OPERATORE_SANITARIO }]),
+        );
+
+        const result = await firstValueFrom(store.getAvailableUsersForWard(10));
+
+        expect(assignmentOperationsStub.getAvailableUsersForWard).toHaveBeenCalledWith(10);
+        expect(result).toEqual([{ id: 7, firstName: 'Mario', lastName: 'Rossi', username: 'mrossi', role: UserRole.OPERATORE_SANITARIO }]);
+        expect(wardStoreStub.setError).not.toHaveBeenCalled();
+    });
+
+    it('getAvailableUsersForWard in errore ritorna null e setta errore', async () => {
+        assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(
+            throwError(() => new Error('users fetch failed')),
+        );
+
+        const result = await firstValueFrom(store.getAvailableUsersForWard(10));
+
+        expect(result).toBeNull();
+        expect(wardStoreStub.setError).toHaveBeenCalledWith('users fetch failed');
     });
 });

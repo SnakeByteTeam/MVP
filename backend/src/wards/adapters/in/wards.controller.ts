@@ -8,8 +8,8 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { CreateWardReqDto } from '../../infrastructure/dtos/in/create-ward-req-dto';
-import { UpdateWardReqDto } from '../../infrastructure/dtos/in/update-ward-req-dto';
+import { CreateWardReqDto } from '../../infrastructure/dtos/in/create-ward-req.dto';
+import { UpdateWardReqDto } from '../../infrastructure/dtos/in/update-ward-req.dto';
 import { CreateWardUseCase } from '../../application/ports/in/create-ward-use-case.interface';
 import { FindAllWardsUseCase } from '../../application/ports/in/find-all-wards-use-case.interface';
 import { UpdateWardUseCase } from '../../application/ports/in/update-ward-use-case.interface';
@@ -22,6 +22,11 @@ import {
   FIND_ALL_WARD_USE_CASE,
   UPDATE_WARD_USE_CASE,
 } from '../../application/services/ward.service';
+import { DeleteWardUseCase } from '../../application/ports/in/delete-ward-use-case.interface';
+import { CreateWardResDto } from '../../infrastructure/dtos/out/create-ward-res.dto';
+import { plainToInstance } from 'class-transformer';
+import { FindAllWardsResDto } from '../../infrastructure/dtos/out/find-all-wards-res.dto';
+import { UpdateWardResDto } from '../../infrastructure/dtos/out/update-ward-res.dto';
 
 @Controller('wards')
 export class WardsController {
@@ -33,26 +38,36 @@ export class WardsController {
     @Inject(UPDATE_WARD_USE_CASE)
     private readonly updateWardUseCase: UpdateWardUseCase,
     @Inject(DELETE_WARD_USE_CASE)
-    private readonly deleteWardUseCase: DeleteWardCmd,
-  ) {}
+    private readonly deleteWardUseCase: DeleteWardUseCase,
+  ) { }
 
   @Post()
-  async createWard(@Body() req: CreateWardReqDto) {
-    return this.createWardUseCase.createWard(new CreateWardCmd(req.name));
+  async createWard(@Body() req: CreateWardReqDto): Promise<CreateWardResDto> {
+    const ward = await this.createWardUseCase.createWard(
+      new CreateWardCmd(req.name),
+    );
+    return plainToInstance(CreateWardResDto, ward);
   }
 
   @Get()
-  async findAllWards() {
-    return this.findAllWardUseCase.findAllWard();
+  async findAllWards(): Promise<FindAllWardsResDto[]> {
+    const wards = await this.findAllWardUseCase.findAllWards();
+    return plainToInstance(FindAllWardsResDto, wards);
   }
 
   @Put('/:id')
-  async updateWard(@Param('id') id: number, @Body() req: UpdateWardReqDto) {
-    return this.updateWardUseCase.updateWard(new UpdateWardCmd(id, req.name));
+  async updateWard(
+    @Param('id') id: number,
+    @Body() req: UpdateWardReqDto,
+  ): Promise<UpdateWardResDto> {
+    const ward = await this.updateWardUseCase.updateWard(
+      new UpdateWardCmd(id, req.name),
+    );
+    return plainToInstance(UpdateWardResDto, ward);
   }
 
   @Delete('/:id')
-  async deleteWard(@Param('id') id: number) {
-    return this.deleteWardUseCase.deleteWard(new DeleteWardCmd(id));
+  async deleteWard(@Param('id') id: number): Promise<void> {
+    return await this.deleteWardUseCase.deleteWard(new DeleteWardCmd(id));
   }
 }

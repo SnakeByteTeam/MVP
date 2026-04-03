@@ -2,6 +2,6 @@ import { RemoveUserFromWardCmd } from './remove-user-from-ward-cmd';
 
 describe('RemoveUserFromWardCmd', () => {
   it('should be defined', () => {
-    expect(new RemoveUserFromWardCmd()).toBeDefined();
+    expect(new RemoveUserFromWardCmd(1, 1)).toBeDefined();
   });
 });

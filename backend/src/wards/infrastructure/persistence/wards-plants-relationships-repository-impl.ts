@@ -4,39 +4,75 @@ import { AddPlantToWardRepository } from '../../application/repository/add-plant
 import { FindAllPlantsByWardIdRepository } from '../../application/repository/find-all-plants-by-ward-id-repository.interface';
 import { RemovePlantFromWardRepository } from '../../application/repository/remove-plant-from-ward-repository.interface';
 import { PlantEntity } from '../entities/plant-entity';
+import { Pool } from 'pg';
 
 export class WardsPlantsRelationshipsRepositoryImpl
   implements
-    AddPlantToWardRepository,
-    FindAllPlantsByWardIdRepository,
-    RemovePlantFromWardRepository
-{
-  constructor(@Inject(PG_POOL) private readonly conn) {}
+  AddPlantToWardRepository,
+  FindAllPlantsByWardIdRepository,
+  RemovePlantFromWardRepository {
+  constructor(@Inject(PG_POOL) private readonly conn: Pool) { }
 
-  async addPlantToWard(wardId: number, plantId: number): Promise<PlantEntity> {
-    const result = await this.conn.query(
-      'WITH inserted AS ( INSERT INTO ward_plant (ward_id, plant_id) VALUES ($1, $2) RETURNING plant_id) SELECT id, name FROM plant WHERE id = (SELECT plant_id FROM inserted)',
-      [wardId, plantId],
-    );
+  async addPlantToWard(wardId: number, plantId: string): Promise<PlantEntity> {
+    const client = await this.conn.connect();
 
-    if (result.rowCount === 0) {
-      throw new Error('Add plant not found');
+    try {
+      await client.query('BEGIN');
+
+      const result = await client.query(
+        'UPDATE plant p SET ward_id = $1 WHERE p.id = $2 RETURNING *',
+        [wardId, plantId],
+      );
+
+      if (result.rowCount === 0) {
+        throw new Error('Add plant to ward failed');
+      }
+
+      await client.query(
+        'UPDATE plant SET ward_id = $1 WHERE id = $2',
+        [wardId, plantId],
+      );
+
+      await client.query('COMMIT');
+      return result.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
-
-    return result.rows[0];
   }
+
   async findAllPlantsByWardId(wardId: number): Promise<PlantEntity[]> {
     const result = await this.conn.query(
-      'SELECT p.id, p.name FROM plant p JOIN ward_plant wp ON p.id = wp.plant_id WHERE wp.ward_id = $1',
+      'SELECT p.id, p.data->>\'name\' as name FROM plant p WHERE p.ward_id = $1',
       [wardId],
     );
 
     return result.rows;
   }
-  async removePlantFromWard(wardId: number, plantId: number): Promise<void> {
-    await this.conn.query(
-      'DELETE FROM ward_plant WHERE ward_id = $1 AND plant_id = $2',
-      [wardId, plantId],
-    );
+
+  async removePlantFromWard(plantId: string): Promise<void> {
+    const client = await this.conn.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      await client.query('UPDATE plant p SET ward_id = NULL WHERE p.id = $1', [
+        plantId,
+      ]);
+
+      await client.query(
+        'UPDATE plant SET ward_id = NULL WHERE id = $1',
+        [plantId],
+      );
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }

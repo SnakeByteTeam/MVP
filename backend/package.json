@@ -25,6 +25,7 @@
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.2",
+    "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/schedule": "^6.1.1",
     "@nestjs/swagger": "^11.2.6",
@@ -32,6 +33,7 @@
     "class-validator": "^0.15.1",
     "helmet": "^8.1.0",
     "cookie-parser": "^1.4.7",
+    "generate-password": "^1.7.1",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"

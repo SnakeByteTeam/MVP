@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, input, output } from '@angular/core';
 import { UserDto } from '../../models/in/user.model.dto';
 
 @Component({
@@ -6,21 +6,34 @@ import { UserDto } from '../../models/in/user.model.dto';
   imports: [],
   templateUrl: './user-list.html',
   styleUrl: './user-list.css',
-  standalone: true
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
 export class UserListComponent {
   users = input<UserDto[]>();
-  deleteUser = output<string>();
+  deleteUser = output<number>();
+
+  public readonly pendingDeleteUser = signal<UserDto | null>(null);
+
+  onDeleteRequest(user: UserDto): void {
+    this.pendingDeleteUser.set(user);
+  }
+
+  onDeleteCancel(): void {
+    this.pendingDeleteUser.set(null);
+  }
+
+  onDeleteConfirm(): void {
+    const user = this.pendingDeleteUser();
+    if (!user) {
+      return;
+    }
+
+    this.deleteUser.emit(user.id);
+    this.pendingDeleteUser.set(null);
+  }
 
   onDelete(user: UserDto): void {
-    const isConfirmed = window.confirm(
-      `Sei sicuro di voler eliminare l'operatore ${user.firstName} ${user.lastName}?`
-    );
-
-    // Se l'amministratore conferma, emettiamo l'evento verso il componente Smart
-    if (isConfirmed) {
-      this.deleteUser.emit(user.id); //passo id
-    }
+    this.onDeleteRequest(user);
   }
 }

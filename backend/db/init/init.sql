@@ -279,7 +279,7 @@ INSERT INTO alarm_rule (
 ('ALM005', 'UmiditÃ  ambiente', 'DEV005', 4, '>', '85.00', '09:00:00', '17:00:00', FALSE),
 ('ALM006', 'Corrente alta', 'DEV006', 2, '>', '15.80', '00:00:00', '23:59:59', TRUE),
 ('ALM007', 'Gas rilevato', 'DEV007', 1, '>', '10.00', '00:00:00', '23:59:59', TRUE),
-('ALM008', 'Porta aperta', 'DEV008', 3, '=', '1.00', '18:00:00', '06:00:00', TRUE);
+('ALM008', 'Porta aperta', 'DEV008', 3, '=', 'ON', '18:00:00', '06:00:00', TRUE);
 
 CREATE TABLE alarm_event (
     id VARCHAR(255) PRIMARY KEY,

@@ -91,7 +91,14 @@ describe('AlarmManagement feature integration', () => {
         );
 
         vmSubject.next({
-            alarms: [],
+            alarms: [
+                {
+                    ...alarm1,
+                    resolutionTime: '2026-03-24T10:05:00.000Z',
+                    userId: 99,
+                },
+                alarm2,
+            ],
             isResolving: false,
             resolvingId: null,
             resolveError: null,
@@ -101,9 +108,10 @@ describe('AlarmManagement feature integration', () => {
         nativeElement = fixture.nativeElement as HTMLElement;
         resolveButtons = nativeElement.querySelectorAll('button[aria-label^="Gestisci allarme"]');
 
-        expect(resolveButtons.length).toBe(0);
-        expect(nativeElement.querySelector('.alarm-management__empty')?.textContent).toContain(
-            'Nessun allarme attivo al momento.'
-        );
+        const managedButton = nativeElement.querySelector('button[aria-label="Allarme gia gestito Antipanico"]');
+        expect(resolveButtons.length).toBe(1);
+        expect(managedButton).not.toBeNull();
+        expect((managedButton as HTMLButtonElement).disabled).toBe(true);
+        expect(nativeElement.textContent).toContain('Non da gestire');
     });
 });

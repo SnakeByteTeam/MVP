@@ -1,26 +1,28 @@
-<section class="rounded-2xl border border-slate-300 bg-slate-100/95 p-3 shadow-sm">
-    <header class="mb-2 flex items-center justify-between border-b border-slate-400 pb-2">
-        <h2 class="text-base font-bold text-slate-900">{{ title() }}</h2>
+<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <header class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+        <h2 class="text-sm font-bold tracking-tight text-slate-900">{{ title() }}</h2>
 
         @if (showCreateButton()) {
         <button type="button" (click)="onCreateRequest()" [attr.aria-label]="createButtonAriaLabel()"
-            class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-emerald-700 bg-emerald-600 text-base font-bold leading-none text-white transition hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600">
+            class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-amber-300 bg-amber-300 text-base font-bold leading-none text-slate-900 transition hover:bg-amber-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
             +
         </button>
         }
     </header>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full border-separate border-spacing-y-2 text-sm" [attr.aria-label]="caption()">
+        <table class="min-w-full text-left text-sm" [attr.aria-label]="caption()">
             <caption class="sr-only">{{ caption() }}</caption>
             <thead>
-                <tr class="text-left text-xs font-semibold uppercase tracking-wide text-slate-700">
+                <tr class="border-b border-slate-100">
                     @for (column of columns(); track column.id) {
-                    <th scope="col" class="px-3 py-1.5 first:pl-4 last:pr-4">{{ column.label }}</th>
+                    <th scope="col" class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        {{
+                        column.label }}</th>
                     }
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-50">
                 <ng-content />
             </tbody>
         </table>

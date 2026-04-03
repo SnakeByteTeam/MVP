@@ -1,4 +1,18 @@
-<section aria-label="Gestione allarmi" class="min-h-screen bg-zinc-200 p-5 lg:p-8">
+<section aria-label="Gestione allarmi" class="alarm-management-page min-h-screen bg-slate-100 p-5 lg:p-8">
+    <header class="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Gestione allarmi attivi</h1>
+            <p class="mt-0.5 text-sm text-slate-500">Monitora gli eventi e marca gli allarmi gia presi in carico.</p>
+        </div>
+
+        @if (rows().length > 0) {
+        <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+            {{ rows().length }} in tabella
+        </span>
+        }
+    </header>
 
     @if (vm(); as vmState) {
     @if (vmState.resolveError) {
@@ -23,7 +37,7 @@
 
     @if (rows().length === 0) {
     <div
-        class="alarm-management__empty mt-3 flex flex-col items-center justify-center rounded-2xl border border-slate-300 bg-slate-100 p-12 text-center shadow-sm">
+        class="alarm-management__empty mt-3 flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white/70 p-14 text-center shadow-sm backdrop-blur-sm">
         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
             <svg class="h-7 w-7 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                 aria-hidden="true">
@@ -37,33 +51,45 @@
     } @else {
     <app-alarm-table-shell [title]="'Allarmi attivi'" [caption]="'Tabella allarmi attivi'" [columns]="columns">
         @for (row of rows(); track row.id) {
-        <tr class="text-xs text-slate-800">
-            <td
-                class="border-y border-l border-slate-400 bg-slate-100 px-3 py-2 align-middle first:rounded-l-lg first:pl-4">
+        <tr class="group transition-colors hover:bg-slate-50/80" [attr.data-testid]="'alarm-row-' + row.id">
+            <td class="px-5 py-3.5 align-middle">
                 <app-alarm-priority-indicator [priority]="row.priority" />
             </td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle font-medium text-slate-900">{{
-                row.name }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.device }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.location }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.status }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.openedAt }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.closedAt }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.manager }}</td>
-            <td
-                class="border-y border-r border-slate-400 bg-slate-100 px-3 py-2 align-middle last:rounded-r-lg last:pr-4">
-                <app-alarm-action-button [label]="row.isResolving ? 'GESTIONE...' : 'GESTISCI'" tone="primary"
-                    [disabled]="row.isResolving" [ariaLabel]="'Gestisci allarme ' + row.name"
-                    (pressed)="onResolve(row.id)" />
+            <td class="px-5 py-3.5 align-middle text-sm font-semibold text-slate-900">{{ row.name }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <span
+                    class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-medium text-slate-700">{{
+                    row.device }}</span>
+            </td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.location }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <span
+                    [class]="row.isManaged
+                    ? 'inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600'
+                    : 'inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700'">
+                    {{ row.status }}
+                </span>
+            </td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.openedAt }}</td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.closedAt }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <span
+                    class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{{
+                    row.manager }}</span>
+            </td>
+            <td class="px-5 py-3.5 align-middle">
+                <app-alarm-action-button [label]="row.actionLabel" [tone]="row.isManaged ? 'neutral' : 'primary'"
+                    [disabled]="row.isActionDisabled" [ariaLabel]="row.actionAriaLabel" (pressed)="onResolve(row.id)" />
             </td>
         </tr>
         }
     </app-alarm-table-shell>
     }
     } @else {
-    <div class="rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm text-slate-600" aria-live="polite">
+    <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm"
+        aria-live="polite">
         <div class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-slate-500"></div>
-        Caricamento allarmi in corso…
+        Caricamento allarmi in corso...
     </div>
     }
 </section>

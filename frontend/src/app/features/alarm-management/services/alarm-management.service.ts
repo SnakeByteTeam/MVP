@@ -26,26 +26,35 @@ export class AlarmManagementService {
     private readonly alarmApiService = inject(AlarmApiService);
     private readonly authService = inject(InternalAuthService);
 
+    private readonly locallyManagedAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
     private readonly resolvingId$ = new BehaviorSubject<string | null>(null);
     private readonly resolveError$ = new BehaviorSubject<string | null>(null);
     private pendingResolveRequests = 0;
 
     public readonly vm$ = combineLatest([
         this.alarmStateService.getActiveAlarms$(),
+        this.locallyManagedAlarms$.asObservable(),
         this.authService.getCurrentUser$(),
         this.resolvingId$.asObservable(),
         this.resolveError$.asObservable(),
     ]).pipe(
-        map(([alarms, session, resolvingId, resolveError]): AlarmListVm => ({
-            alarms: this.filterAlarmsBySession(alarms, session),
-            isResolving: this.pendingResolveRequests > 0,
-            resolvingId,
-            resolveError,
-        })),
+        map(([alarms, locallyManagedAlarms, session, resolvingId, resolveError]): AlarmListVm => {
+            const visibleActiveAlarms = this.filterAlarmsBySession(alarms, session);
+            const visibleLocallyManagedAlarms = this.filterAlarmsBySession(locallyManagedAlarms, session);
+
+            return {
+                alarms: this.mergeAlarmsForView(visibleActiveAlarms, visibleLocallyManagedAlarms),
+                isResolving: this.pendingResolveRequests > 0,
+                resolvingId,
+                resolveError,
+            };
+        }),
         shareReplay({ bufferSize: 1, refCount: true })
     );
 
     public initialize(): void {
+        this.locallyManagedAlarms$.next([]);
+
         this.getInitialActiveAlarms$()
             .pipe(
                 take(1),
@@ -75,9 +84,10 @@ export class AlarmManagementService {
                         throw new TypeError('Utente corrente non valido per risolvere l\'allarme.');
                     }
 
-                    return this.alarmApiService.resolveAlarm(activeAlarmId, numericUserId);
+                    return this.resolveAlarmRequest$(activeAlarmId, numericUserId);
                 }),
-                tap(() => {
+                tap(({ numericUserId, sourceAlarm }) => {
+                    this.addLocallyManagedAlarm(activeAlarmId, numericUserId, sourceAlarm);
                     this.alarmStateService.onAlarmResolved(activeAlarmId);
                 }),
                 catchError((error: unknown) => {
@@ -117,6 +127,60 @@ export class AlarmManagementService {
         }
 
         return alarms.filter((alarm) => alarm.userId === numericUserId);
+    }
+
+    private mergeAlarmsForView(activeAlarms: ActiveAlarm[], locallyManagedAlarms: ActiveAlarm[]): ActiveAlarm[] {
+        const activeAlarmIds = new Set(activeAlarms.map((alarm) => alarm.id));
+        const managedOnly = locallyManagedAlarms.filter((alarm) => !activeAlarmIds.has(alarm.id));
+
+        return [...activeAlarms, ...managedOnly];
+    }
+
+    private resolveAlarmRequest$(
+        activeAlarmId: string,
+        numericUserId: number
+    ): Observable<{ numericUserId: number; sourceAlarm: ActiveAlarm | null }> {
+        return this.alarmStateService.getActiveAlarms$().pipe(
+            take(1),
+            map((alarms) => this.findSourceAlarm(activeAlarmId, alarms)),
+            switchMap((sourceAlarm) =>
+                this.alarmApiService.resolveAlarm(activeAlarmId, numericUserId).pipe(
+                    map(() => ({
+                        numericUserId,
+                        sourceAlarm,
+                    }))
+                )
+            )
+        );
+    }
+
+    private findSourceAlarm(activeAlarmId: string, activeAlarms: ActiveAlarm[]): ActiveAlarm | null {
+        const fromActiveAlarms = activeAlarms.find((alarm) => alarm.id === activeAlarmId);
+        if (fromActiveAlarms) {
+            return fromActiveAlarms;
+        }
+
+        return this.locallyManagedAlarms$.getValue().find((alarm) => alarm.id === activeAlarmId) ?? null;
+    }
+
+    private addLocallyManagedAlarm(
+        activeAlarmId: string,
+        managerUserId: number,
+        sourceAlarm: ActiveAlarm | null
+    ): void {
+        if (sourceAlarm === null) {
+            return;
+        }
+
+        const managedAlarm: ActiveAlarm = {
+            ...sourceAlarm,
+            resolutionTime: sourceAlarm.resolutionTime ?? new Date().toISOString(),
+            userId: managerUserId,
+        };
+
+        const currentManagedAlarms = this.locallyManagedAlarms$.getValue();
+        const deduplicatedManagedAlarms = currentManagedAlarms.filter((alarm) => alarm.id !== activeAlarmId);
+        this.locallyManagedAlarms$.next([managedAlarm, ...deduplicatedManagedAlarms]);
     }
 
     private mapResolveError(error: unknown): string {

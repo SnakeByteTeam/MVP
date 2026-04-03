@@ -34,6 +34,12 @@ describe('AlarmPageManagementComponent', () => {
     userId: 2,
   };
 
+  const managedAlarm: ActiveAlarm = {
+    ...alarm1,
+    resolutionTime: '2026-03-24T10:05:00.000Z',
+    userId: 99,
+  };
+
   const alarmManagementStub = {
     vm$: undefined as unknown,
     initialize: vi.fn(),
@@ -162,5 +168,27 @@ describe('AlarmPageManagementComponent', () => {
 
     expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledWith('active-1');
     expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledTimes(1);
+  });
+
+  it('mantiene la riga visibile se l allarme e gia gestito e disabilita l azione', () => {
+    vmSubject.next({
+      alarms: [managedAlarm],
+      isResolving: false,
+      resolvingId: null,
+      resolveError: null,
+    });
+
+    fixture.detectChanges();
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    const rows = nativeElement.querySelectorAll('tbody tr');
+    const managedButton = nativeElement.querySelector(
+      'button[aria-label="Allarme gia gestito Antipanico"]'
+    ) as HTMLButtonElement | null;
+
+    expect(rows.length).toBe(1);
+    expect(nativeElement.textContent).toContain('Non da gestire');
+    expect(managedButton).not.toBeNull();
+    expect(managedButton?.disabled).toBe(true);
+    expect(managedButton?.textContent).toContain('GESTITO');
   });
 });

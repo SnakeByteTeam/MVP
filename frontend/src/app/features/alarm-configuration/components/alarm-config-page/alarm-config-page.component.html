@@ -1,8 +1,15 @@
-<section aria-label="Configurazione allarmi" class="min-h-screen bg-zinc-200 p-5 lg:p-8">
+<section aria-label="Configurazione allarmi" class="alarm-config-page min-h-screen bg-slate-100 p-5 lg:p-8">
+    <header class="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Configurazione allarmi</h1>
+            <p class="mt-0.5 text-sm text-slate-500">Gestisci soglie e pianificazioni con una vista tabellare unica.</p>
+        </div>
+    </header>
+
     @if (error(); as errorMessage) {
     @if (errorMessage) {
     <p role="alert" aria-live="polite"
-        class="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        class="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-sm">
         {{ errorMessage }}
     </p>
     }
@@ -13,29 +20,30 @@
         (createRequested)="onCreateNew()">
         @if (rows().length === 0) {
         <tr>
-            <td [attr.colspan]="columns.length"
-                class="rounded-lg border border-slate-300 bg-slate-100 px-4 py-3 text-center text-sm text-slate-700">
+            <td [attr.colspan]="columns.length" class="px-5 py-14 text-center text-sm text-slate-600">
                 Nessuna regola configurata.
             </td>
         </tr>
         } @else {
         @for (row of rows(); track row.id) {
-        <tr class="text-xs text-slate-800">
-            <td
-                class="border-y border-l border-slate-400 bg-slate-100 px-3 py-2 align-middle first:rounded-l-lg first:pl-4">
+        <tr class="group transition-colors hover:bg-slate-50/80">
+            <td class="px-5 py-3.5 align-middle text-sm font-semibold text-slate-900">
                 {{ row.name }}
             </td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.apartment }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.device }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.apartment }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <span
+                    class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-medium text-slate-700">{{
+                    row.device }}</span>
+            </td>
+            <td class="px-5 py-3.5 align-middle">
                 <app-alarm-priority-indicator [priority]="row.priority" />
             </td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.threshold }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.armingTime }}</td>
-            <td class="border-y border-slate-400 bg-slate-100 px-3 py-2 align-middle">{{ row.dearmingTime }}</td>
-            <td
-                class="border-y border-r border-slate-400 bg-slate-100 px-3 py-2 align-middle last:rounded-r-lg last:pr-4">
-                <div class="flex items-center gap-1.5">
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.threshold }}</td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.armingTime }}</td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.dearmingTime }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <div class="flex items-center gap-2">
                     <app-alarm-action-button label="MODIFICA" [ariaLabel]="'Modifica regola ' + row.name"
                         (pressed)="onEdit(row.id)" />
                     <app-alarm-action-button label="ELIMINA" tone="danger" [ariaLabel]="'Elimina regola ' + row.name"

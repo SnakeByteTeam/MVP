@@ -10,5 +10,9 @@ export type ActiveAlarmTableRow = {
     readonly openedAt: string;
     readonly closedAt: string;
     readonly manager: string;
+    readonly isManaged: boolean;
     readonly isResolving: boolean;
+    readonly isActionDisabled: boolean;
+    readonly actionLabel: string;
+    readonly actionAriaLabel: string;
 };

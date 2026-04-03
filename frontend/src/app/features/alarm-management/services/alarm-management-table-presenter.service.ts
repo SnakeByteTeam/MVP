@@ -5,18 +5,48 @@ import { ActiveAlarmTableRow } from '../models/active-alarm-table-row.model';
 @Injectable({ providedIn: 'root' })
 export class AlarmManagementTablePresenterService {
     public toRows(alarms: ActiveAlarm[], resolvingId: string | null): ActiveAlarmTableRow[] {
-        return alarms.map((alarm) => ({
-            id: alarm.id,
-            priority: alarm.priority,
-            name: alarm.alarmName,
-            device: alarm.alarmRuleId,
-            location: this.getSafeLocation(alarm.position),
-            status: alarm.resolutionTime ? 'Chiuso' : 'Aperto',
-            openedAt: this.toShortTime(alarm.activationTime),
-            closedAt: this.toShortTime(alarm.resolutionTime),
-            manager: alarm.userId === null ? '-' : String(alarm.userId),
-            isResolving: resolvingId === alarm.id,
-        }));
+        return alarms.map((alarm) => {
+            const isOpen = alarm.resolutionTime === null;
+            const isManaged = !isOpen;
+            const isResolving = resolvingId === alarm.id;
+
+            return {
+                isManaged,
+                id: alarm.id,
+                priority: alarm.priority,
+                name: alarm.alarmName,
+                device: alarm.alarmRuleId,
+                location: this.getSafeLocation(alarm.position),
+                status: isOpen ? 'Da gestire' : 'Non da gestire',
+                openedAt: this.toShortTime(alarm.activationTime),
+                closedAt: this.toShortTime(alarm.resolutionTime),
+                manager: alarm.userId === null ? '-' : String(alarm.userId),
+                isResolving,
+                isActionDisabled: isManaged || isResolving,
+                actionLabel: this.getActionLabel(isResolving, isManaged),
+                actionAriaLabel: this.getActionAriaLabel(alarm.alarmName, isManaged),
+            };
+        });
+    }
+
+    private getActionLabel(isResolving: boolean, isManaged: boolean): string {
+        if (isResolving) {
+            return 'GESTIONE...';
+        }
+
+        if (isManaged) {
+            return 'GESTITO';
+        }
+
+        return 'GESTISCI';
+    }
+
+    private getActionAriaLabel(alarmName: string, isManaged: boolean): string {
+        if (isManaged) {
+            return `Allarme gia gestito ${alarmName}`;
+        }
+
+        return `Gestisci allarme ${alarmName}`;
     }
 
     private getSafeLocation(position: string): string {

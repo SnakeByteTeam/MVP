@@ -15,6 +15,7 @@ import { AlarmConfigTablePresenterService } from '../../services/alarm-config-ta
 @Component({
 	selector: 'app-alarm-config-page',
 	templateUrl: './alarm-config-page.component.html',
+	styleUrl: './alarm-config-page.component.css',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	imports: [
 		AlarmTableShellComponent,

@@ -17,17 +17,17 @@ export class AlarmActionButtonComponent {
 
     public readonly buttonClass = computed(() => {
         const baseClass =
-            'inline-flex min-w-[74px] items-center justify-center rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide transition focus-visible:outline-2 focus-visible:outline-offset-2';
+            'inline-flex min-h-8 min-w-[92px] items-center justify-center rounded-md border px-3 py-1.5 text-xs font-semibold tracking-wide transition focus-visible:outline-2 focus-visible:outline-offset-2';
 
         if (this.tone() === 'primary') {
-            return `${baseClass} border-yellow-600 bg-yellow-400 text-slate-900 hover:bg-yellow-300 focus-visible:outline-yellow-500 disabled:border-slate-400 disabled:bg-slate-300 disabled:text-slate-600`;
+            return `${baseClass} border-amber-300 bg-amber-300 text-slate-900 hover:bg-amber-200 focus-visible:outline-amber-400 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400`;
         }
 
         if (this.tone() === 'danger') {
-            return `${baseClass} border-rose-700 bg-rose-500 text-white hover:bg-rose-400 focus-visible:outline-rose-500 disabled:border-slate-400 disabled:bg-slate-300 disabled:text-slate-600`;
+            return `${baseClass} border-red-600 bg-red-600 text-white hover:bg-red-700 focus-visible:outline-red-600 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400`;
         }
 
-        return `${baseClass} border-slate-500 bg-white text-slate-900 hover:bg-slate-100 focus-visible:outline-slate-500 disabled:border-slate-400 disabled:bg-slate-200 disabled:text-slate-600`;
+        return `${baseClass} border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus-visible:outline-slate-400 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400`;
     });
 
     public onPressed(): void {

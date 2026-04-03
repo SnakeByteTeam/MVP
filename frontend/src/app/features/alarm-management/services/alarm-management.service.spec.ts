@@ -66,6 +66,13 @@ describe('AlarmManagementService', () => {
         });
 
         alarmStateStub.getActiveAlarms$.mockReturnValue(activeAlarmsSubject.asObservable());
+        alarmStateStub.onAlarmResolved.mockImplementation((resolvedId: string) => {
+            const next = activeAlarmsSubject
+                .getValue()
+                .filter((alarm) => alarm.id !== resolvedId);
+
+            activeAlarmsSubject.next(next);
+        });
         alarmApiStub.getActiveAlarms.mockReturnValue(of([]));
         alarmApiStub.getActiveAlarmsOfOperator.mockReturnValue(of([]));
         authServiceStub.getCurrentUser$.mockReturnValue(sessionSubject.asObservable());
@@ -172,7 +179,7 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.onAlarmResolved).toHaveBeenCalledTimes(1);
     });
 
-    it('non mantiene copia locale degli allarmi: vm riflette solo AlarmStateService', async () => {
+    it('prima della resolve il vm riflette solo AlarmStateService', async () => {
         service = createService();
         const vmHistory: ActiveAlarm[][] = [];
         const subscription = service.vm$.subscribe((vm) => {
@@ -187,6 +194,58 @@ describe('AlarmManagementService', () => {
         expect(vmHistory.at(-1)).toEqual([alarmB]);
 
         subscription.unsubscribe();
+    });
+
+    it('mantiene localmente l allarme gestito anche quando lo stato globale lo rimuove', async () => {
+        service = createService();
+        activeAlarmsSubject.next([alarmA, alarmB]);
+        alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
+
+        service.resolveAlarm(alarmA.id);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        const managedAlarm = vm.alarms.find((alarm) => alarm.id === alarmA.id);
+
+        expect(managedAlarm).toBeDefined();
+        expect(managedAlarm?.resolutionTime).not.toBeNull();
+        expect(managedAlarm?.userId).toBe(99);
+        expect(vm.alarms.map((alarm) => alarm.id)).toContain(alarmB.id);
+    });
+
+    it('se lo stesso id torna aperto nel globale, prevale la versione aperta', async () => {
+        service = createService();
+        activeAlarmsSubject.next([alarmA]);
+        alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
+
+        service.resolveAlarm(alarmA.id);
+
+        const reopenedAlarm: ActiveAlarm = {
+            ...alarmA,
+            alarmName: 'Antipanico riattivato',
+            resolutionTime: null,
+        };
+        activeAlarmsSubject.next([reopenedAlarm]);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+
+        expect(vm.alarms.length).toBe(1);
+        expect(vm.alarms[0].id).toBe(alarmA.id);
+        expect(vm.alarms[0].resolutionTime).toBeNull();
+        expect(vm.alarms[0].alarmName).toBe('Antipanico riattivato');
+    });
+
+    it('initialize resetta la cache locale dei gestiti', async () => {
+        service = createService();
+        activeAlarmsSubject.next([alarmA]);
+        alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
+
+        service.resolveAlarm(alarmA.id);
+
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([]));
+        service.initialize();
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.alarms).toEqual([]);
     });
 
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {

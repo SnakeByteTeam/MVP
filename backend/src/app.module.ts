@@ -13,12 +13,8 @@ import { AlarmsModule } from './alarms/alarms.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
-<<<<<<< HEAD
-import { SuggestionModule } from './suggestion/suggestion.module';
 import { ValidationModule } from './validation/validation.module';
 
-=======
->>>>>>> prova_integrazione
 
 @Module({
   imports: [

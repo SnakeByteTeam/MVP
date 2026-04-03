@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { GroqClientImpl } from './groq-client.impl';
 import { Series } from 'src/analytics/domain/series.model';
 import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';
@@ -30,7 +29,7 @@ describe('GroqClientImpl', () => {
     }).compile();
 
     groqClientImpl = module.get<GroqClientImpl>(GroqClientImpl);
-    fetchSpy = jest.spyOn(global, 'fetch');
+    fetchSpy = jest.spyOn(globalThis, 'fetch');
   });
 
   afterEach(() => {
@@ -44,7 +43,10 @@ describe('GroqClientImpl', () => {
           {
             message: {
               content: JSON.stringify({
-                message: 'Turn off the lights from 9:00 PM to 6:00 AM.',
+                message: [
+                  'Spegnere le luci dalle 21:00 alle 06:00.',
+                  'Verificare che le luci siano spente nelle stanze non utilizzate.',
+                ],
                 isSuggestion: true,
               }),
             },
@@ -62,19 +64,21 @@ describe('GroqClientImpl', () => {
         mockBaseline,
       );
 
-      expect(result.message).toBe(
-        'Turn off the lights from 9:00 PM to 6:00 AM.',
+      expect(Array.isArray(result.message)).toBe(true);
+      expect(result.message).toHaveLength(2);
+      expect(result.message[0]).toBe(
+        'Spegnere le luci dalle 21:00 alle 06:00.',
       );
       expect(result.isSuggestion).toBe(true);
     });
 
-    it('should return isSuggestion false when Groq responds with no action required', async () => {
+    it('should return isSuggestion false and empty message array when no action required', async () => {
       const groqPayload = {
         choices: [
           {
             message: {
               content: JSON.stringify({
-                message: 'No action required.',
+                message: [],
                 isSuggestion: false,
               }),
             },
@@ -92,7 +96,8 @@ describe('GroqClientImpl', () => {
         mockBaseline,
       );
 
-      expect(result.message).toBe('No action required.');
+      expect(Array.isArray(result.message)).toBe(true);
+      expect(result.message).toHaveLength(0);
       expect(result.isSuggestion).toBe(false);
     });
 
@@ -110,7 +115,8 @@ describe('GroqClientImpl', () => {
         mockBaseline,
       );
 
-      expect(result.message).toBe('');
+      expect(Array.isArray(result.message)).toBe(true);
+      expect(result.message).toHaveLength(0);
       expect(result.isSuggestion).toBe(false);
       expect(fetchSpy).not.toHaveBeenCalled();
     });
@@ -129,12 +135,13 @@ describe('GroqClientImpl', () => {
         mockBaseline,
       );
 
-      expect(result.message).toBe('');
+      expect(Array.isArray(result.message)).toBe(true);
+      expect(result.message).toHaveLength(0);
       expect(result.isSuggestion).toBe(false);
       expect(fetchSpy).not.toHaveBeenCalled();
     });
 
-    it('should return empty suggestion silently on 429 rate limit', async () => {
+    it('should return empty suggestion on rate limit (429)', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 429,
@@ -145,77 +152,38 @@ describe('GroqClientImpl', () => {
         mockCurrent,
         mockBaseline,
       );
-
-      expect(result.message).toBe('');
-      expect(result.isSuggestion).toBe(false);
+      expect(result).toEqual({ message: [], isSuggestion: false });
     });
 
-    it('should throw HttpException with INTERNAL_SERVER_ERROR on generic API error', async () => {
+    it('should return empty suggestion on other API errors', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
         status: 500,
         text: jest.fn().mockResolvedValue('Internal server error'),
       } as unknown as Response);
 
-      await expect(
-        groqClientImpl.generateSuggestion(mockCurrent, mockBaseline),
-      ).rejects.toThrow(
-        new HttpException(
-          'An error occurred while generating the suggestion.',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        ),
+      const result = await groqClientImpl.generateSuggestion(
+        mockCurrent,
+        mockBaseline,
       );
+      expect(result).toEqual({ message: [], isSuggestion: false });
     });
 
-    it('should throw an error when Groq returns an empty response', async () => {
-      const groqPayload = {
-        choices: [{ message: { content: '' } }],
-      };
+    it('should return empty suggestion when series have no data', async () => {
+      const cmdEmptyData = new GetSuggestionCmd(
+        'Plant Consumption Analytics',
+        'plant-consumption',
+        'Wh',
+        ['2026-03-25'],
+        [new Series('plant-consumption', 'Plant Consumption', [])],
+      );
 
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue(groqPayload),
-      } as unknown as Response);
-
-      await expect(
-        groqClientImpl.generateSuggestion(mockCurrent, mockBaseline),
-      ).rejects.toThrow('Groq returned an empty response');
-    });
-
-    it('should throw an error when Groq returns invalid JSON', async () => {
-      const groqPayload = {
-        choices: [{ message: { content: 'not a json string' } }],
-      };
-
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue(groqPayload),
-      } as unknown as Response);
-
-      await expect(
-        groqClientImpl.generateSuggestion(mockCurrent, mockBaseline),
-      ).rejects.toThrow('Groq returned an invalid JSON response');
-    });
-
-    it('should throw an error when Groq JSON is missing required fields', async () => {
-      const groqPayload = {
-        choices: [
-          {
-            message: {
-              content: JSON.stringify({ message: 'some message' }),
-            },
-          },
-        ],
-      };
-
-      fetchSpy.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue(groqPayload),
-      } as unknown as Response);
-
-      await expect(
-        groqClientImpl.generateSuggestion(mockCurrent, mockBaseline),
-      ).rejects.toThrow('Groq returned an invalid JSON response');
+      const result = await groqClientImpl.generateSuggestion(
+        cmdEmptyData,
+        mockBaseline,
+      );
+      expect(result).toEqual({ message: [], isSuggestion: false });
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
   });
 });

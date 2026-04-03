@@ -1,6 +1,11 @@
+import { AlarmPriority } from './alarm-priority.enum';
+
 export interface AlarmEvent {
-	alarmId: string;
+	activeAlarmId: string;
+	alarmRuleId: string;
 	alarmName: string;
-	dangerSignal: string;
+	priority: AlarmPriority;
 	triggeredAt: string;
+	resolvedAt: string | null;
+	user_id: string | null;
 }

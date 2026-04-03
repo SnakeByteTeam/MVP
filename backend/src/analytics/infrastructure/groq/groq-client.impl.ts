@@ -1,4 +1,4 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GroqClient } from './groq.client';
 import { GroqSuggestionResultDto } from '../dtos/groq-suggestion-result.dto';
 import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';
@@ -31,12 +31,10 @@ const SEASON_LABELS: Record<number, Season> = {
 const METRIC_LABELS: Record<string, string> = {
   'plant-consumption': 'daily energy consumption of the plant lights',
   'thermostat-temperature': 'temperature detected by the plant thermostat',
-  'sensor-presence': 'presence detection events per sensor',
-  'sensor-long-presence': 'prolonged presence events (>30 min) per sensor',
 };
 
 const EMPTY_SUGGESTION: GroqSuggestionResultDto = {
-  message: '',
+  message: [],
   isSuggestion: false,
 };
 
@@ -55,9 +53,7 @@ export class GroqClientImpl implements GroqClient {
     current: GetSuggestionCmd,
     baseline: GetSuggestionCmd,
   ): Promise<GroqSuggestionResultDto> {
-    const hasSeries =
-      current.series.length > 0 &&
-      current.series.some((s) => s.getData().length > 0);
+    const hasSeries = current.series.some((s) => s.getData().length > 0);
 
     if (!hasSeries) {
       return EMPTY_SUGGESTION;
@@ -91,46 +87,43 @@ export class GroqClientImpl implements GroqClient {
 
     if (!response.ok) {
       const error = await response.text();
-      this.logger.error(`Groq API error: ${error}`);
 
       if (response.status === 429) {
-        this.logger.warn(
-          'Groq rate limit exceeded — returning empty suggestion',
-        );
+        this.logger.warn('Groq rate limit exceeded');
         return EMPTY_SUGGESTION;
       }
 
-      throw new HttpException(
-        'An error occurred while generating the suggestion.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      this.logger.error(`Groq API error: ${error}`);
+      return EMPTY_SUGGESTION;
     }
 
     const body = (await response.json()) as GroqApiResponse;
     const text = body.choices?.[0]?.message?.content;
 
     if (!text) {
-      throw new Error('Groq returned an empty response');
+      this.logger.error('Groq returned empty response');
+      return EMPTY_SUGGESTION;
     }
 
     try {
       const parsed = JSON.parse(text) as GroqSuggestionResultDto;
       if (
-        typeof parsed.message !== 'string' ||
+        !Array.isArray(parsed.message) ||
+        !parsed.message.every((m) => typeof m === 'string') ||
         typeof parsed.isSuggestion !== 'boolean'
       ) {
-        throw new Error('Invalid JSON structure');
+        this.logger.error(`Invalid JSON structure: ${text}`);
+        return EMPTY_SUGGESTION;
       }
       return parsed;
-    } catch {
-      this.logger.error(`Groq returned invalid JSON: ${text}`);
-      throw new Error('Groq returned an invalid JSON response');
+    } catch (err) {
+      this.logger.error(
+        'Unexpected Groq error',
+        err instanceof Error ? err.stack : String(err),
+      );
     }
+    return EMPTY_SUGGESTION;
   }
-
-  // ---------------------------------------------------------------------------
-  // PROMPT BUILDER
-  // ---------------------------------------------------------------------------
 
   private buildPrompt(
     current: GetSuggestionCmd,
@@ -139,11 +132,12 @@ export class GroqClientImpl implements GroqClient {
     const month = new Date().getMonth() + 1;
     const season: Season = SEASON_LABELS[month];
     const description = METRIC_LABELS[current.metric] ?? current.metric;
-    const hasSeries = current.series.length > 0;
 
-    const statisticsSection = hasSeries
-      ? this.buildSeriesStatistics(current, baseline)
-      : this.buildScalarStatistics(current, baseline);
+    const isScalar = current.metric in METRIC_LABELS;
+
+    const statisticsSection = isScalar
+      ? this.buildScalarStatistics(current, baseline)
+      : this.buildSeriesStatistics(current, baseline);
 
     return `
 You are analyzing plant monitoring data for non-technical staff (nurses, healthcare assistants).
@@ -159,49 +153,67 @@ You are analyzing plant monitoring data for non-technical staff (nurses, healthc
 ${statisticsSection}
 
 ## Instructions
-${hasSeries ? this.buildSeriesInstructions() : this.buildScalarInstructions()}
+${isScalar ? this.buildScalarInstructions(current.metric) : this.buildSeriesInstructions()}
 
 ## Response format
 Respond ONLY with a valid JSON object, no markdown, no extra text:
-{"message": "<action or No action required.>", "isSuggestion": <true|false>}
-Message content must be in Italian.
-    `.trim();
+{"message": ["<action 1>", "<action 2>"], "isSuggestion": <true|false>}
+- If no action is required: "message" must an empty array [] and "isSuggestion" must be false.
+- If action is required: "message" must contain al least 2 concrete actions in Italian.
+  `.trim();
   }
-
-  // ---------------------------------------------------------------------------
-  // SCALAR STATISTICS (plant-consumption, thermostat-temperature)
-  // ---------------------------------------------------------------------------
 
   private buildScalarStatistics(
     current: GetSuggestionCmd,
     baseline: GetSuggestionCmd,
   ): string {
+    const currValues = current.series[0]?.getData() ?? [];
     const currAvg = this.averageFromLabels(current);
+
+    if (current.metric === 'thermostat-temperature') {
+      const { min, max } = this.rangeFromBaseline(baseline);
+      return `
+- Current period values: ${currValues.join(', ')} ${current.unit}
+- Current period average: ${currAvg.toFixed(2)} ${current.unit}
+- Acceptable range (from baseline): ${min.toFixed(2)} – ${max.toFixed(2)} ${current.unit}
+    `.trim();
+    }
+
     const baseAvg = this.averageFromLabels(baseline);
     const dev = this.deviationBetween(currAvg, baseAvg);
 
     return `
+- Current period values: ${currValues.join(', ')} ${current.unit}
 - Current period average: ${currAvg.toFixed(2)} ${current.unit}
 - Baseline period average: ${baseAvg.toFixed(2)} ${current.unit}
 - Deviation from baseline: ${dev}%
-    `.trim();
+  `.trim();
   }
 
-  private buildScalarInstructions(): string {
-    return `
-- If deviation is below +15%: set "isSuggestion" to false and "message" to "No action required."
-- If deviation is above +15%: set "isSuggestion" to true and write a direct action in "message" to reduce usage.
-- Actions must be concrete (e.g. "Turn off the lights from 9:00 PM to 6:00 AM." or "Set the thermostat to 20°C during the night.").
-- Do NOT mention device names.
-- Do NOT explain the problem. Only state the action.
-- Message must be maximum 2 sentences long.
+  private buildScalarInstructions(metric: string): string {
+    if (metric === 'thermostat-temperature') {
+      return `
+- The acceptable range is provided in the statistical summary above.
+- If the current average is within the acceptable range: set "isSuggestion" to false and "message" to "Nessun intervento necessario."
+- If the current average is above the maximum: set "isSuggestion" to true and suggest lowering the temperature to stay within range.
+- If the current average is below the minimum: set "isSuggestion" to true and suggest raising the temperature (cold is dangerous for elderly residents).
+- Actions must be concrete (e.g. "Impostare il termostato a 20°C.").
+- Do NOT mention device names. Only state the action.
+- Do NOT suggest checking the heating system.
 - Tone: formal, direct, imperative.
     `.trim();
-  }
+    }
 
-  // ---------------------------------------------------------------------------
-  // SERIES STATISTICS (sensor-presence, sensor-long-presence)
-  // ---------------------------------------------------------------------------
+    return `
+- If deviation from baseline is below +15%: set "isSuggestion" to false and "message" to "Nessun intervento necessario."
+- If current average is 0 or very close to 0: set "isSuggestion" to false and "message" to "Nessun intervento necessario."
+- If deviation is above +15%: set "isSuggestion" to true and write a direct action to reduce consumption.
+- Actions must be concrete and must refer to concrete hours (e.g. "Spegnere le luci dalle 21:00 alle 06:00.").
+- Do NOT mention device names. Only state the action.
+- Do NOT suggest checking the lightning system.
+- Tone: formal, direct, imperative.
+  `.trim();
+  }
 
   private buildSeriesStatistics(
     current: GetSuggestionCmd,
@@ -240,10 +252,26 @@ Message content must be in Italian.
     `.trim();
   }
 
+  private rangeFromBaseline(baseline: GetSuggestionCmd): {
+    min: number;
+    max: number;
+  } {
+    const data = baseline.series[0]?.getData() ?? [];
+    const values = data.filter(
+      (v) => typeof v === 'number' && !Number.isNaN(v) && Number.isFinite(v),
+    );
+    if (values.length === 0) return { min: 0, max: 0 };
+    return {
+      min: Math.min(...values),
+      max: Math.max(...values),
+    };
+  }
+
   private averageFromLabels(cmd: GetSuggestionCmd): number {
-    const values = cmd.labels
-      .map((_, i) => parseFloat(cmd.series[0]?.getData()[i]?.toString() ?? '0'))
-      .filter((v) => !isNaN(v));
+    const data = cmd.series[0]?.getData() ?? [];
+    const values = data.filter(
+      (v) => typeof v === 'number' && !Number.isNaN(v) && Number.isFinite(v),
+    );
     if (values.length === 0) return 0;
     return values.reduce((a, b) => a + b, 0) / values.length;
   }

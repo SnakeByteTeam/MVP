@@ -23,7 +23,7 @@ function getSeason(month: number): Season {
 
 function stableRandom(seed: number, min: number, max: number): number {
   const pseudo = Math.abs(Math.sin(seed * 9301 + 49297) * 233280) % 1;
-  return parseFloat((min + pseudo * (max - min)).toFixed(2));
+  return Number.parseFloat((min + pseudo * (max - min)).toFixed(2));
 }
 
 function isWeekend(dateStr: string): boolean {

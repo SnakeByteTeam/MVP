@@ -42,7 +42,7 @@ describe('SuggestionService', () => {
   describe('getSuggestion', () => {
     it('should return the suggestion from the LLM port', async () => {
       const suggestion = new Suggestion(
-        'Turn off the lights from 9:00 PM to 6:00 AM.',
+        ['Turn off the lights from 9:00 PM to 6:00 AM.'],
         true,
       );
       mockLLMPort.generateSuggestion.mockResolvedValue(suggestion);
@@ -50,14 +50,14 @@ describe('SuggestionService', () => {
       const result = await service.getSuggestion(mockCmd);
 
       expect(result).toBe(suggestion);
-      expect(result.getMessage()).toBe(
+      expect(result.getMessage()).toEqual([
         'Turn off the lights from 9:00 PM to 6:00 AM.',
-      );
+      ]);
       expect(result.getIsSuggestion()).toBe(true);
     });
 
     it('should call generateSuggestion with the correct cmd', async () => {
-      const suggestion = new Suggestion('No action required.', false);
+      const suggestion = new Suggestion(['No action required.'], false);
       mockLLMPort.generateSuggestion.mockResolvedValue(suggestion);
 
       await service.getSuggestion(mockCmd);
@@ -87,13 +87,13 @@ describe('SuggestionService', () => {
     });
 
     it('should return a suggestion with isSuggestion=false when no action is needed', async () => {
-      const suggestion = new Suggestion('No action required.', false);
+      const suggestion = new Suggestion(['No action required.'], false);
       mockLLMPort.generateSuggestion.mockResolvedValue(suggestion);
 
       const result = await service.getSuggestion(mockCmd);
 
       expect(result.getIsSuggestion()).toBe(false);
-      expect(result.getMessage()).toBe('No action required.');
+      expect(suggestion.getMessage()).toEqual(['No action required.']);
     });
   });
 });

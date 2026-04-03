@@ -3,6 +3,9 @@ import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
 
+const FALL = 'True';
+const NO_FALL = 'False';
+
 const toISO = (daysAgo: number): string => {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
@@ -17,7 +20,7 @@ const buildFallDatapoint = (value: string): DatapointValue[] => [
     datapointId: 'dp-fall-001',
     name: 'Fall Detector',
     value,
-    sfeType: 'SFE_State_Fall',
+    sfeType: 'SFE_State_ManDown',
     deviceType: 'SF_FallDetector',
   },
 ];
@@ -55,10 +58,10 @@ describe('WardFalls', () => {
     expect(result.getSeries()).toHaveLength(0);
   });
 
-  it('should detect a Fall when it changes from NoFall to Fall', async () => {
+  it('should detect a Fall when it changes from False to True', async () => {
     const snapshots = new Map([
-      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint('Fall')],
+      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint(FALL)],
     ]);
 
     mockPort.getDataForWard.mockResolvedValue(snapshots);
@@ -71,9 +74,9 @@ describe('WardFalls', () => {
 
   it('should not count a fall if the value stays to Fall', async () => {
     const snapshots = new Map([
-      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint('Fall')],
-      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint('Fall')],
-      [`${yesterday}T10:00:00.000Z`, buildFallDatapoint('Fall')],
+      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint(FALL)],
+      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint(FALL)],
+      [`${yesterday}T10:00:00.000Z`, buildFallDatapoint(FALL)],
     ]);
 
     mockPort.getDataForWard.mockResolvedValue(snapshots);
@@ -85,10 +88,10 @@ describe('WardFalls', () => {
 
   it('should count two separate falls on the same day', async () => {
     const snapshots = new Map([
-      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint('Fall')],
-      [`${yesterday}T10:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${yesterday}T11:00:00.000Z`, buildFallDatapoint('Fall')],
+      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint(FALL)],
+      [`${yesterday}T10:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${yesterday}T11:00:00.000Z`, buildFallDatapoint(FALL)],
     ]);
 
     mockPort.getDataForWard.mockResolvedValue(snapshots);
@@ -101,13 +104,13 @@ describe('WardFalls', () => {
 
   it('should correctly aggregate falls per day', async () => {
     const snapshots = new Map([
-      [`${twoDaysAgo}T08:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${twoDaysAgo}T09:00:00.000Z`, buildFallDatapoint('Fall')],
-      [`${twoDaysAgo}T10:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint('Fall')],
-      [`${yesterday}T10:00:00.000Z`, buildFallDatapoint('NoFall')],
-      [`${yesterday}T11:00:00.000Z`, buildFallDatapoint('Fall')],
+      [`${twoDaysAgo}T08:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${twoDaysAgo}T09:00:00.000Z`, buildFallDatapoint(FALL)],
+      [`${twoDaysAgo}T10:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${yesterday}T08:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${yesterday}T09:00:00.000Z`, buildFallDatapoint(FALL)],
+      [`${yesterday}T10:00:00.000Z`, buildFallDatapoint(NO_FALL)],
+      [`${yesterday}T11:00:00.000Z`, buildFallDatapoint(FALL)],
     ]);
 
     mockPort.getDataForWard.mockResolvedValue(snapshots);
@@ -121,7 +124,7 @@ describe('WardFalls', () => {
     expect(result.getSeries()[0].getData()[1]).toBe(2);
   });
 
-  it('should not consider a fall if the datapoint is not SFE_State_Fall', async () => {
+  it('should not consider a fall if the datapoint is not SFE_State_ManDown', async () => {
     const snapshots = new Map([
       [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Detected')],
     ]);

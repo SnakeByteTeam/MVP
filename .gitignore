@@ -12,6 +12,10 @@ out-tsc/
 bazel-out/
 *.tsbuildinfo
 
+# keep frontend API DTOs under features/*/models/out tracked
+!frontend/src/app/features/user-management/models/out/
+!frontend/src/app/features/user-management/models/out/*.ts
+
 # temporary files
 tmp/
 .temp/
@@ -66,7 +70,6 @@ typings/
 
 # VS Code
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -74,3 +77,4 @@ typings/
 
 # local documentation / notes
 .ignore/
+.vscode/settings.json

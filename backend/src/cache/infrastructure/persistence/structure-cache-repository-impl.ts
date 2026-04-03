@@ -7,7 +7,7 @@ import { WriteCacheRepoPort } from 'src/cache/application/repository/write-cache
 
 @Injectable()
 export class StructureCacheImpl implements WriteCacheRepoPort {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async write(plant: PlantEntity): Promise<boolean> {
     const client = await this.pool.connect();
@@ -18,7 +18,8 @@ export class StructureCacheImpl implements WriteCacheRepoPort {
                 VALUES ($1, $2, NOW(), $3)
                 ON CONFLICT (id) DO UPDATE
                 SET data      = EXCLUDED.data,
-                    cached_at = NOW()`,
+                    cached_at = NOW(),
+                    ward_id   = EXCLUDED.ward_id`,
         [plant.id, JSON.stringify(plant.data), plant.ward_id],
       );
       return true;

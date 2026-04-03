@@ -9,6 +9,9 @@ describe('HttpCacheController', () => {
   let setImmediateSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
     updateCacheUseCase = {
       updateCache: jest.fn().mockResolvedValue(true),
     } as any;
@@ -35,6 +38,10 @@ describe('HttpCacheController', () => {
     if (setImmediateSpy) {
       setImmediateSpy.mockRestore();
     }
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {

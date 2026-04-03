@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { UserRole } from './core/models/user-role.enum';
 
 export const routes: Routes = [
 	{
@@ -6,55 +9,20 @@ export const routes: Routes = [
 		loadChildren: () => import('./features/user-auth/user-auth.routes').then((m) => m.USER_AUTH_ROUTES)
 	},
 	{
-		path: 'alarm-management',
-		loadChildren: () =>
-			import('./features/alarm-management/alarm-management.routes').then((m) => m.ALARM_MANAGEMENT_ROUTES)
-	},
-	{
-		path: 'alarm-configuration',
-		loadChildren: () =>
-			import('./features/alarm-configuration/alarm-configuration.routes').then((m) => m.ALARM_CONFIGURATION_ROUTES)
-	},
-	{
-		path: 'analytics',
-		loadChildren: () => import('./features/analytics/analytics.routes').then((m) => m.ANALYTICS_ROUTES)
-	},
-	{
-		path: 'apartment-monitor',
-		loadChildren: () =>
-			import('./features/apartment-monitor/apartment-monitor.routes').then((m) => m.APARTMENT_MONITOR_ROUTES)
-	},
-	{
-		path: 'device-interaction',
-		loadChildren: () =>
-			import('./features/device-interaction/device-interaction.routes').then((m) => m.DEVICE_INTERACTION_ROUTES)
-	},
-	{
-		path: 'my-vimar',
+		path: 'vimar-link',
+		canActivate: [authGuard, roleGuard],
+		data: { requiredRole: UserRole.AMMINISTRATORE },
 		loadChildren: () =>
 			import('./features/my-vimar-integration/my-vimar-integration.routes').then((m) => m.MY_VIMAR_INTEGRATION_ROUTES)
 	},
 	{
-		path: 'notifications',
-		loadChildren: () => import('./features/notification/notification.routes').then((m) => m.NOTIFICATION_ROUTES)
-	},
-	{
-		path: 'plant-management',
-		loadChildren: () =>
-			import('./features/plant-management/plant-management.routes').then((m) => m.PLANT_MANAGEMENT_ROUTES)
-	},
-	{
-		path: 'user-management',
-		loadChildren: () =>
-			import('./features/user-management/user-management.routes').then((m) => m.USER_MANAGEMENT_ROUTES)
-	},
-	{
 		path: '',
-		pathMatch: 'full',
-		redirectTo: 'apartment-monitor'
+		//canActivate: [authGuard],
+		loadChildren: () =>
+			import('./features/main-layout/main-layout.routes').then((m) => m.MAIN_LAYOUT_ROUTES)
 	},
 	{
 		path: '**',
-		redirectTo: 'apartment-monitor'
+		redirectTo: ''
 	}
 ];

@@ -1,16 +1,23 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, fromEvent, takeUntil } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { AlarmEvent } from '../models/alarm-event.model';
+import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
-import { NotificationEvent } from '../models/notification-event.model';
+import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { PushEvent } from '../models/push-event.model';
 import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 
+export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>('SOCKET_IO_FACTORY', {
+	providedIn: 'root',
+	factory: () => io,
+});
+
 @Injectable({ providedIn: 'root' })
 export class EventSubscriptionService implements OnDestroy {
+	private readonly socketIoFactory = inject(SOCKET_IO_FACTORY);
 	private readonly alarmStateService = inject(AlarmStateService);
 	private readonly apiBaseUrl = inject(API_BASE_URL, { optional: true });
 
@@ -62,7 +69,7 @@ export class EventSubscriptionService implements OnDestroy {
 			return;
 		}
 
-		this.socket = io(this.resolveSocketUrl(), {
+		this.socket = this.socketIoFactory(this.resolveSocketUrl(), {
 			transports: ['websocket'],
 			reconnection: true,
 			autoConnect: true,
@@ -139,12 +146,12 @@ export class EventSubscriptionService implements OnDestroy {
 
 	private dispatchAlarmEvent(event: PushEvent): void {
 		if (event.eventType === PushEventType.ALARM_RESOLVED) {
-			const alarmId = this.extractAlarmId(event.payload);
-			if (!alarmId) {
+			const activeAlarmId = this.extractActiveAlarmId(event.payload);
+			if (!activeAlarmId) {
 				return;
 			}
 
-			this.alarmStateService.onAlarmResolved(alarmId);
+			this.alarmStateService.onAlarmResolved(activeAlarmId);
 			return;
 		}
 
@@ -170,25 +177,34 @@ export class EventSubscriptionService implements OnDestroy {
 			return null;
 		}
 
-		const alarmId = payload['alarmId'];
+		const activeAlarmId = payload['activeAlarmId'];
+		const alarmRuleId = payload['alarmRuleId'];
 		const alarmName = payload['alarmName'];
-		const dangerSignal = payload['dangerSignal'];
+		const priority = payload['priority'];
 		const triggeredAt = payload['triggeredAt'];
+		const resolvedAt = payload['resolvedAt'];
+		const userId = payload['user_id'];
 
 		if (
-			typeof alarmId !== 'string' ||
+			typeof activeAlarmId !== 'string' ||
+			typeof alarmRuleId !== 'string' ||
 			typeof alarmName !== 'string' ||
-			typeof dangerSignal !== 'string' ||
-			typeof triggeredAt !== 'string'
+			!this.isAlarmPriority(priority) ||
+			typeof triggeredAt !== 'string' ||
+			!(typeof resolvedAt === 'string' || resolvedAt === null) ||
+			!(typeof userId === 'string' || userId === null)
 		) {
 			return null;
 		}
 
 		return {
-			alarmId,
+			activeAlarmId,
+			alarmRuleId,
 			alarmName,
-			dangerSignal,
+			priority,
 			triggeredAt,
+			resolvedAt,
+			user_id: userId,
 		};
 	}
 
@@ -216,13 +232,13 @@ export class EventSubscriptionService implements OnDestroy {
 		};
 	}
 
-	private extractAlarmId(payload: unknown): string | null {
+	private extractActiveAlarmId(payload: unknown): string | null {
 		if (!this.isObject(payload)) {
 			return null;
 		}
 
-		const alarmId = payload['alarmId'];
-		return typeof alarmId === 'string' ? alarmId : null;
+		const activeAlarmId = payload['activeAlarmId'];
+		return typeof activeAlarmId === 'string' ? activeAlarmId : null;
 	}
 
 	private rejoinAllRooms(): void {
@@ -242,6 +258,18 @@ export class EventSubscriptionService implements OnDestroy {
 
 	private isPushEventType(value: unknown): value is PushEventType {
 		return typeof value === 'string' && Object.values(PushEventType).includes(value as PushEventType);
+	}
+
+	private isAlarmPriority(value: unknown): value is AlarmPriority {
+		if (typeof value !== 'number') {
+			return false;
+		}
+
+		const numericPriorities = Object.values(AlarmPriority).filter(
+			(enumValue): enumValue is number => typeof enumValue === 'number'
+		);
+
+		return numericPriorities.includes(value);
 	}
 
 	private isObject(value: unknown): value is Record<string, unknown> {

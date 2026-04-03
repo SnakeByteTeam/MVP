@@ -1,15 +1,18 @@
 import { Test } from '@nestjs/testing';
 import { EventEmitterModule, EventEmitter2 } from '@nestjs/event-emitter';
-import { UpdateCacheAllPlantsUseCase } from 'src/cache/application/ports/in/update-cache-all-plants.usecase';
 import { EventCacheController } from './event-cache.controller';
-import { UPDATE_CACHE_ALL_PLANTS_USECASE } from 'src/cache/application/ports/in/update-cache-all-plants.usecase';
+import {
+  UpdateCacheAllPlantsUseCase,
+  UPDATE_CACHE_ALL_PLANTS_USECASE,
+} from 'src/cache/application/ports/in/update-cache-all-plants.usecase';
 
 describe('EventCacheController', () => {
-  let controller: EventCacheController;
   let emitter: EventEmitter2;
   let useCase: jest.Mocked<UpdateCacheAllPlantsUseCase>;
 
   beforeEach(async () => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+
     useCase = {
       updateAllCache: jest.fn().mockResolvedValue(true),
     } as any;
@@ -27,8 +30,11 @@ describe('EventCacheController', () => {
 
     await moduleRef.init();
 
-    controller = moduleRef.get<EventCacheController>(EventCacheController);
     emitter = moduleRef.get<EventEmitter2>(EventEmitter2);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should call updateAllCache when fetched.tokens event is emitted', async () => {

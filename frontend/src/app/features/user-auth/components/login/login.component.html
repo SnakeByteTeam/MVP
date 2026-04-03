@@ -1,0 +1,40 @@
+<section class="auth-shell">
+  <div class="auth-bg-orb auth-bg-orb-left" aria-hidden="true"></div>
+  <div class="auth-bg-orb auth-bg-orb-right" aria-hidden="true"></div>
+
+  <div class="auth-card">
+    <p class="auth-kicker">Area Riservata</p>
+    <h1>Benvenuto su View4Life</h1>
+    <p class="auth-subtitle">Accedi con le tue credenziali per gestire monitoraggio e allarmi</p>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        formControlName="username"
+        (input)="onUsernameChange($any($event.target).value)"
+        placeholder="Inserisci username"
+        autocomplete="username"
+      />
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        (input)="onPasswordChange($any($event.target).value)"
+        placeholder="Inserisci password"
+        autocomplete="current-password"
+      />
+
+      <button type="submit" [disabled]="isLoading" class="auth-submit">
+        {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
+      </button>
+
+      @if (errorType) {
+        <p class="auth-error" role="alert">{{ errorType }}</p>
+      }
+    </form>
+  </div>
+</section>

@@ -55,7 +55,7 @@ describe('LLMSuggestionAdapter', () => {
       const result = await adapter.generateSuggestion(cmd);
 
       expect(result).toBeInstanceOf(Suggestion);
-      expect(result.getMessage()).toBe('');
+      expect(result.getMessage()).toEqual([]);
       expect(result.getIsSuggestion()).toBe(false);
       expect(mockGroqClient.generateSuggestion).not.toHaveBeenCalled();
     });
@@ -63,7 +63,7 @@ describe('LLMSuggestionAdapter', () => {
     it('should map GroqSuggestionResult correctly to Suggestion when isSuggestion is true', async () => {
       const cmd = buildCmd('plant-consumption', [120, 130, 125]);
       const groqResult: GroqSuggestionResultDto = {
-        message: 'Turn off the lights from 9:00 PM to 6:00 AM.',
+        message: ['Turn off the lights from 9:00 PM to 6:00 AM.'],
         isSuggestion: true,
       };
       mockGroqClient.generateSuggestion.mockResolvedValue(groqResult);
@@ -71,30 +71,30 @@ describe('LLMSuggestionAdapter', () => {
       const result = await adapter.generateSuggestion(cmd);
 
       expect(result).toBeInstanceOf(Suggestion);
-      expect(result.getMessage()).toBe(
+      expect(result.getMessage()).toEqual([
         'Turn off the lights from 9:00 PM to 6:00 AM.',
-      );
+      ]);
       expect(result.getIsSuggestion()).toBe(true);
     });
 
     it('should map GroqSuggestionResult correctly to Suggestion when isSuggestion is false', async () => {
       const cmd = buildCmd('plant-consumption', [65, 68, 66]);
       const groqResult: GroqSuggestionResultDto = {
-        message: 'No action required.',
+        message: ['No action required.'],
         isSuggestion: false,
       };
       mockGroqClient.generateSuggestion.mockResolvedValue(groqResult);
 
       const result = await adapter.generateSuggestion(cmd);
 
-      expect(result.getMessage()).toBe('No action required.');
+      expect(result.getMessage()).toEqual(['No action required.']);
       expect(result.getIsSuggestion()).toBe(false);
     });
 
     it('should call groqClient with the correct cmd and baseline', async () => {
       const cmd = buildCmd('thermostat-temperature', [26.5]);
       const groqResult: GroqSuggestionResultDto = {
-        message: 'Set the thermostat to 20°C during the night.',
+        message: ['Set the thermostat to 20°C during the night.'],
         isSuggestion: true,
       };
       mockGroqClient.generateSuggestion.mockResolvedValue(groqResult);

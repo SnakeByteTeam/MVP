@@ -1,0 +1,41 @@
+<section class="grid gap-4 rounded-2xl border border-[#1f2933]/10 bg-[#fffdf8]/95 p-5 shadow-sm sm:p-6">
+  @if (error()) {
+  <p class="rounded-xl border border-[#fecaca] bg-[#fef2f2] px-4 py-3 text-sm font-semibold text-[#b91c1c]"
+    role="alert">
+    {{ error() }}
+  </p>
+  }
+
+  @if (account().isLinked) {
+  <div class="grid gap-4">
+    <div class="rounded-xl border border-[#fcd34d]/35 bg-[#fff7d1] px-4 py-4 text-sm leading-6 text-[#5c6470]">
+      <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[#7c5d00]">Account collegato</p>
+      <p class="mt-2">
+        Account collegato: <strong class="text-[#1f2933]">{{ account().email }}</strong>
+      </p>
+    </div>
+
+    <button type="button" [disabled]="isLoading()" (click)="onUnlinkAccount()"
+      class="inline-flex w-fit items-center justify-center rounded-xl bg-gradient-to-r from-[#fcd34d] to-[#fcd34d] px-4 py-3 text-sm font-bold text-[#1f2933] transition hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
+      @if (isLoading()) {
+      Rimozione in corso...
+      } @else {
+      Rimuovi account
+      }
+    </button>
+  </div>
+  } @else {
+  <div class="grid gap-4">
+    <div
+      class="rounded-xl border border-dashed border-[#fcd34d]/70 bg-[#fff7d1] px-4 py-4 text-sm leading-6 text-[#5c6470]">
+      <p class="text-xs font-semibold uppercase tracking-[0.12em] text-[#7c5d00]">Nessun account collegato</p>
+      <p class="mt-2">Nessun account MyVimar collegato.</p>
+    </div>
+
+    <button type="button" [disabled]="isLoading()" (click)="onLinkAccount()"
+      class="inline-flex w-fit items-center justify-center rounded-xl bg-gradient-to-r from-[#fcd34d] to-[#fcd34d] px-4 py-3 text-sm font-bold text-[#1f2933] transition hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
+      Collega account MyVimar
+    </button>
+  </div>
+  }
+</section>

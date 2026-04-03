@@ -1,4 +1,4 @@
 export interface GroqSuggestionResultDto {
-  message: string;
+  message: string[];
   isSuggestion: boolean;
 }

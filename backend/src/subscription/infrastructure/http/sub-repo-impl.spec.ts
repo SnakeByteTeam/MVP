@@ -6,8 +6,13 @@ import { SubscriptionRepoImpl } from './sub-repo-impl';
 describe('SubscriptionRepoImpl', () => {
   let repo: SubscriptionRepoImpl;
   let httpService: jest.Mocked<HttpService>;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
     httpService = {
       post: jest.fn(),
       get: jest.fn(),
@@ -23,6 +28,7 @@ describe('SubscriptionRepoImpl', () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     delete process.env.HOST3;
     delete process.env.DATAPOINT_SUB_CALLBACK;
     delete process.env.NODE_SUB_CALLBACK;
@@ -41,7 +47,6 @@ describe('SubscriptionRepoImpl', () => {
       };
 
       (httpService.post as jest.Mock).mockReturnValue(of(mockResponse));
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
 
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
@@ -81,7 +86,6 @@ describe('SubscriptionRepoImpl', () => {
       (httpService.post as jest.Mock).mockReturnValue(
         throwError(() => new Error('Network error')),
       );
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
@@ -94,7 +98,6 @@ describe('SubscriptionRepoImpl', () => {
     it('should throw error when SECRET_FOR_SUB is missing', async () => {
       delete process.env.SECRET_FOR_SUB;
       const newRepo = new SubscriptionRepoImpl(httpService);
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await newRepo.refreshSub('valid-token', 'plant-1');
 

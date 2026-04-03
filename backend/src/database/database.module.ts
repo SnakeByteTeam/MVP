@@ -16,7 +16,7 @@ export const PG_POOL = Symbol('PG_POOL');
           connectionTimeoutMillis: 2000,
         });
 
-        pool.on('error', () => {
+        pool.on('error', (err) => {
           console.error('Error on PostreSQL Pool');
         });
 
@@ -26,4 +26,4 @@ export const PG_POOL = Symbol('PG_POOL');
   ],
   exports: [PG_POOL],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

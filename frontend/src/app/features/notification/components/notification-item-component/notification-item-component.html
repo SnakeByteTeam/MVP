@@ -1,0 +1,8 @@
+<article class="notification-item" aria-label="Notifica ricevuta">
+    <h2 class="notification-item__title">{{ notification().title }}</h2>
+    <p class="notification-item__meta">
+        <time class="notification-item__time" [attr.datetime]="sentAt()">
+            {{ sentAt() | elapsedTime }}
+        </time>
+    </p>
+</article>

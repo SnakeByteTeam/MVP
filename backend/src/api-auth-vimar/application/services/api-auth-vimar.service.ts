@@ -10,9 +10,9 @@ export class ApiAuthVimarService implements ApiAuthUseCase {
 
     const options: Record<string, string> = {
       response_type: 'code',
-      client_id: process.env.CLIENTID || '',
+      client_id: this.clientId,
       scope: 'read write manage',
-      redirect_uri: this.REDIRECT_URI,
+      redirect_uri: this.redirectUri,
     };
 
     if (state) {
@@ -21,6 +21,6 @@ export class ApiAuthVimarService implements ApiAuthUseCase {
 
     const params = new URLSearchParams(options);
 
-    return `${process.env.HOST1}?${params.toString()}`;
+    return `${this.authorizeHost}?${params.toString()}`;
   }
 }

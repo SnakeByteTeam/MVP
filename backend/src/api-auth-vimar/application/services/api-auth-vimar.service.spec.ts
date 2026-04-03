@@ -59,10 +59,9 @@ describe('ApiAuthVimarService', () => {
     delete process.env.CLIENTID;
     const service = new ApiAuthVimarService();
 
-    const loginUrl = service.getLoginUrl();
-    const parsedUrl = new URL(loginUrl);
-
-    expect(parsedUrl.searchParams.get('client_id')).toBe('');
+    expect(() => service.getLoginUrl()).toThrow(
+      'MyVimar OAuth configuration is missing: CLIENTID',
+    );
   });
 
   it('should include all required OAuth parameters', () => {

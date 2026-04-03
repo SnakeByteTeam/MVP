@@ -1,0 +1,26 @@
+<dialog open aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md overflow-hidden rounded-2xl border border-amber-200 bg-white p-0 shadow-2xl backdrop:bg-slate-900/50 focus:outline-none">
+    <div class="flex items-center gap-3 border-b border-amber-200 bg-amber-50 px-5 py-4">
+        <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100">
+            <svg class="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.73 0-2.813-1.874-1.948-3.374L10.051 3.378c.866-1.5 3.032-1.5 3.898 0l7.354 12.748zM12 16.5h.007v.008H12V16.5z" />
+            </svg>
+        </div>
+        <h2 id="confirm-dialog-title" class="text-sm font-bold text-slate-900">Conferma operazione</h2>
+    </div>
+
+    <p id="confirm-dialog-message" class="px-5 py-4 text-sm text-slate-700">{{ message() }}</p>
+
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
+        <button type="button" (click)="onCancel()"
+            class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400">
+            {{ cancelLabel() }}
+        </button>
+        <button type="button" (click)="onConfirm()"
+            class="cursor-pointer rounded-lg border border-red-600 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
+            {{ confirmLabel() }}
+        </button>
+    </div>
+</dialog>

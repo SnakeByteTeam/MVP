@@ -19,6 +19,9 @@ describe('ApiAuthVimarController', () => {
     apiAuthUseCase = {
       getLoginUrl: jest.fn(),
     };
+    getTokensCallbackUseCase = {
+      getTokens: jest.fn(),
+    };
 
     getTokensCallbackUseCase = {
       getTokens: jest.fn(),

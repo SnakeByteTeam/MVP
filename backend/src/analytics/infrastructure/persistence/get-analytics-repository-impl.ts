@@ -52,10 +52,10 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
         device_type: string;
       }>(
         `WITH latest_cache AS (
-           SELECT DISTINCT ON (plant_id) data
-           FROM structure_cache
-           WHERE plant_id = $1
-           ORDER BY plant_id, cached_at DESC
+           SELECT DISTINCT ON (id) data
+           FROM plant
+           WHERE id = $1
+           ORDER BY id, cached_at DESC
          ),
          dp_meta AS (
            SELECT
@@ -94,10 +94,10 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
         device_type: string;
       }>(
         `WITH latest_cache AS (
-           SELECT DISTINCT ON (plant_id) data
-           FROM structure_cache
-           WHERE plant_id = $1
-           ORDER BY plant_id, cached_at DESC
+           SELECT DISTINCT ON (id) data
+           FROM plant
+           WHERE id = $1
+           ORDER BY id, cached_at DESC
          ),
          dp_meta AS (
            SELECT
@@ -136,10 +136,10 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
         device_type: string;
       }>(
         `WITH latest_cache AS (
-           SELECT DISTINCT ON (plant_id) data
-           FROM structure_cache
-           WHERE plant_id = $1
-           ORDER BY plant_id, cached_at DESC
+           SELECT DISTINCT ON (id) data
+           FROM plant
+           WHERE id = $1
+           ORDER BY id, cached_at DESC
          ),
          dp_meta AS (
            SELECT

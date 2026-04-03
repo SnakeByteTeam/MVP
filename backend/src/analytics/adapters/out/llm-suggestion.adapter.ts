@@ -22,7 +22,7 @@ export class LLMSuggestionAdapter implements LLMSuggestionPort {
     const baselineFactory = BASELINE_REGISTRY[cmd.metric as SupportedMetric];
 
     if (!baselineFactory) {
-      return new Suggestion('', false);
+      return new Suggestion([], false);
     }
 
     const baseline = baselineFactory();

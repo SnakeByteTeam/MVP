@@ -1,0 +1,58 @@
+services: 
+  database:
+    image: timescale/timescaledb:latest-pg15
+    container_name: postgres-timescale
+    restart: unless-stopped
+    environment: 
+      POSTGRES_USER: ${DBUSER}
+      POSTGRES_PASSWORD: ${DBPASSWORD}
+      POSTGRES_DB: ${DBNAME}
+    ports:
+      - 127.0.0.1:5434:5432
+    volumes: 
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/init:/docker-entrypoint-initdb.d
+    env_file: 
+      - .env
+
+  server: 
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    image: backend
+    ports: 
+      - 3000:3000
+    volumes: 
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run start
+    depends_on:
+      - database
+    env_file: 
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend
+    ports:
+      - 4200:4200
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - server
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - server
+
+volumes: 
+  postgres_data:

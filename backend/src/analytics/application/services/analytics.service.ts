@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { GetAnalyticsUseCase } from '../ports/in/get-analytics.usecase';
 import { AnalyticsStrategy } from '../strategy/analytics.strategy';
 import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
@@ -18,7 +18,7 @@ export class AnalyticsService implements GetAnalyticsUseCase {
 
     @Inject(GET_SUGGESTION_USECASE)
     private readonly getSuggestionUseCase: GetSuggestionUseCase,
-  ) {}
+  ) { }
 
   async getAnalyticsByPlantId(cmd: GetAnalyticsCmd): Promise<Plot[]> {
     const plots: Plot[] = [];
@@ -38,7 +38,11 @@ export class AnalyticsService implements GetAnalyticsUseCase {
         plot.setSuggestion(suggestion);
         plots.push(plot);
       } catch (err) {
-        console.error(`Error executing strategy ${key}:`, err);
+        Logger.error(
+          `Error executing strategy ${key}`,
+          err instanceof Error ? err.stack : String(err),
+          AnalyticsService.name,
+        );
       }
     }
 

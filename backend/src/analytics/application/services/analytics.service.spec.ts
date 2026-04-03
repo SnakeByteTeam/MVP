@@ -5,11 +5,14 @@ import { GetAnalyticsCmd } from '../commands/get-analytics.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
 import { Series } from 'src/analytics/domain/series.model';
 import { Suggestion } from 'src/analytics/domain/suggestion.model';
-import { GetSuggestionUseCase } from '../ports/in/get-suggestion.usecase';
+import {
+  GetSuggestionUseCase,
+  GET_SUGGESTION_USECASE,
+} from '../ports/in/get-suggestion.usecase';
 import { ANALYTICS_STRATEGIES_TOKEN } from 'src/analytics/analytics.module';
-import { GET_SUGGESTION_USECASE } from '../ports/in/get-suggestion.usecase';
+import { Logger } from '@nestjs/common';
 
-const mockSuggestion = new Suggestion('Turn off the lights.', true);
+const mockSuggestion = new Suggestion(['Turn off the lights.'], true);
 
 const mockPlot: Plot = new Plot(
   'Plant Consumption Analytics',
@@ -34,6 +37,10 @@ const mockSuggestionUseCase: jest.Mocked<GetSuggestionUseCase> = {
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
   let strategiesMap: Map<string, AnalyticsStrategy>;
+
+  beforeAll(() => {
+    jest.spyOn(Logger, 'error').mockImplementation(() => {});
+  });
 
   beforeEach(async () => {
     strategiesMap = new Map<string, AnalyticsStrategy>([

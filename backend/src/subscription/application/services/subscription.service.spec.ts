@@ -8,6 +8,9 @@ describe('SubscriptionService', () => {
   let refreshNodePort: jest.Mocked<RefreshNodeSubscriptionPort>;
   let refreshDatapointPort: jest.Mocked<RefreshDatapointSubPort>;
   let getAllPlantIdsPort: jest.Mocked<GetAllPlantIdsPort>;
+  let consoleLogSpy: jest.SpyInstance;
+  let consoleWarnSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     refreshNodePort = {

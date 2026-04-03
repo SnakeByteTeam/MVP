@@ -1,0 +1,38 @@
+.apartment-monitor {
+  display: grid;
+  gap: 1rem;
+}
+
+.apartment-monitor__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.apartment-monitor__header h1,
+.apartment-monitor__header p {
+  margin: 0;
+}
+
+.apartment-monitor__content {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 1rem;
+}
+
+.apartment-monitor__error {
+  margin: 0;
+  color: #a40000;
+}
+
+@media (max-width: 960px) {
+  .apartment-monitor__content {
+    grid-template-columns: 1fr;
+  }
+
+  .apartment-monitor__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

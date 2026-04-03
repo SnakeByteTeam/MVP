@@ -1,0 +1,39 @@
+.alarm-map {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.alarm-map header h2,
+.alarm-map header p {
+  margin: 0;
+}
+
+.alarm-map__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.6rem;
+}
+
+.alarm-map__room {
+  border: 1px solid #d8dee3;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: #fafcfd;
+}
+
+.alarm-map__room--alert {
+  border-color: #d32f2f;
+  background: #fff7f7;
+}
+
+.alarm-map__room h3,
+.alarm-map__room p,
+.alarm-map__summary {
+  margin: 0;
+}
+
+.alarm-map__alert {
+  color: #a40000;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}

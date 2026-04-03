@@ -1,0 +1,23 @@
+.notification-item {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+}
+
+.notification-item__title {
+    color: #111827;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.notification-item__meta {
+    margin: 0.35rem 0 0;
+}
+
+.notification-item__time {
+    color: #4b5563;
+    font-size: 0.875rem;
+}

@@ -1,0 +1,37 @@
+.room-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.room-list h2 {
+  margin: 0;
+}
+
+.room-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.room-list__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 0.5rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.room-list__alarm {
+  font-size: 0.8rem;
+  color: #a40000;
+}
+
+.room-list__empty {
+  margin: 0;
+}

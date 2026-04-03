@@ -48,7 +48,7 @@ describe('Plot', () => {
     });
 
     it('should return the suggestion after setSuggestion is called', () => {
-      const suggestion = new Suggestion('Turn off the lights.', true);
+      const suggestion = new Suggestion(['Turn off the lights.'], true);
       plot.setSuggestion(suggestion);
       expect(plot.getSuggestion()).toBe(suggestion);
     });
@@ -72,7 +72,7 @@ describe('Plot', () => {
 
   describe('with suggestion in constructor', () => {
     it('should return the suggestion passed in the constructor', () => {
-      const suggestion = new Suggestion('No action required.', false);
+      const suggestion = new Suggestion(['No action required.'], false);
       const plot = new Plot(title, metric, unit, labels, series, suggestion);
       expect(plot.getSuggestion()).toBe(suggestion);
     });

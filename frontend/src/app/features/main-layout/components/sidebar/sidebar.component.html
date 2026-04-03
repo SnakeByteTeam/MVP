@@ -1,0 +1,25 @@
+<aside class="sidebar-shell">
+  <ul class="sidebar-nav">
+    @for (item of navItems; track item.label) {
+      <li>
+        <a
+          [routerLink]="item.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [class.is-active]="!isProfileMode && rla.isActive"
+          class="sidebar-link"
+          (click)="navItemSelected.emit()"
+        >
+          <span class="sidebar-link-icon">{{ item.icon || '•' }}</span>
+          <span class="sidebar-link-label">{{ item.label }}</span>
+        </a>
+      </li>
+    } @empty {
+      <li class="sidebar-empty">Menu di navigazione vuoto!</li>
+    }
+  </ul>
+
+  @if (activeAlarmCount > 0) {
+    <p class="sidebar-alert">Allarmi attivi: {{ activeAlarmCount }}</p>
+  }
+</aside>

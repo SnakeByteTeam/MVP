@@ -100,7 +100,7 @@ describe('AnalyticsController', () => {
   });
 
   it('should return PlotDto with suggestion when plot has suggestion', async () => {
-    const suggestion = new Suggestion('Turn off the lights.', true);
+    const suggestion = new Suggestion(['Turn off the lights.'], true);
     const plots: Plot[] = [
       new Plot(
         'Plant Consumption Analytics',
@@ -119,7 +119,7 @@ describe('AnalyticsController', () => {
     });
 
     expect(result[0].suggestion).toBeDefined();
-    expect(result[0].suggestion?.message).toBe('Turn off the lights.');
+    expect(result[0].suggestion?.message).toEqual(['Turn off the lights.']);
     expect(result[0].suggestion?.isSuggestion).toBe(true);
   });
 

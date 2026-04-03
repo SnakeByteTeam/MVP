@@ -7,11 +7,14 @@ import {
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const DAYS_RANGE = 30;
-const METRIC = 'ward-resolved-alarm';
-const TITLE = 'Allarmi inviati e risolti nel reparto';
-const UNIT = 'allarmi';
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+} = AnalyticsMetric.WARD_RESOLVED_ALARM;
 
 @Injectable()
 export class WardResolvedAlarm implements AnalyticsStrategy {

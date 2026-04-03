@@ -62,10 +62,10 @@ export class GetAnalyticsData implements GetAnalyticsPort {
   }
 
   private toMap(rows: DatapointRow[]): Map<string, DatapointValue[]> {
-    const map = new Map<string, DatapointValue[]>();
+    const eventsByTs = new Map<string, DatapointValue[]>();
     for (const row of rows) {
       const key = new Date(row.timestamp).toISOString();
-      const existing: DatapointValue[] = map.get(key) ?? [];
+      const existing = eventsByTs.get(key) ?? [];
       existing.push({
         datapointId: row.datapoint_id,
         name: row.name,
@@ -73,8 +73,22 @@ export class GetAnalyticsData implements GetAnalyticsPort {
         sfeType: row.sfe_type,
         deviceType: row.device_type,
       });
-      map.set(key, existing);
+      eventsByTs.set(key, existing);
     }
-    return map;
+
+    const result = new Map<string, DatapointValue[]>();
+    const lastKnown = new Map<string, DatapointValue>();
+
+    const sortedTs = Array.from(eventsByTs.keys()).sort((a, b) =>
+      a.localeCompare(b),
+    );
+    for (const ts of sortedTs) {
+      for (const dp of eventsByTs.get(ts)!) {
+        lastKnown.set(dp.datapointId, dp);
+      }
+      result.set(ts, Array.from(lastKnown.values()));
+    }
+
+    return result;
   }
 }

@@ -95,8 +95,22 @@ describe('GetAnalyticsData', () => {
       });
 
       const slot9 = result.get('2024-01-01T09:00:00.000Z');
-      expect(slot9).toHaveLength(1);
-      expect(slot9![0]).toEqual({
+      expect(slot9).toHaveLength(3);
+      expect(slot9).toContainEqual({
+        datapointId: 'dp-001',
+        name: 'Temperature Sensor',
+        value: '42.5',
+        sfeType: 'temperature',
+        deviceType: 'sensor',
+      });
+      expect(slot9).toContainEqual({
+        datapointId: 'dp-002',
+        name: 'Humidity Sensor',
+        value: '55.0',
+        sfeType: 'humidity',
+        deviceType: 'sensor',
+      });
+      expect(slot9).toContainEqual({
         datapointId: 'dp-003',
         name: 'Thermostat',
         value: '38.1',
@@ -132,7 +146,7 @@ describe('GetAnalyticsData', () => {
 
       expect(result.size).toBe(2);
       expect(result.get('2024-01-01T08:00:00.000Z')).toHaveLength(2);
-      expect(result.get('2024-01-01T09:00:00.000Z')).toHaveLength(1);
+      expect(result.get('2024-01-01T09:00:00.000Z')).toHaveLength(3);
     });
 
     it('should return an empty map when repository returns no rows', async () => {

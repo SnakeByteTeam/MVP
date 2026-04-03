@@ -25,6 +25,8 @@ export class AlarmRuleRequestMapper {
 
     public toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto {
         return {
+            name: this.requireNonEmptyString(formValue.name, 'name'),
+            deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
             thresholdValue: String(this.requireField(formValue.threshold, 'threshold')),
@@ -36,6 +38,8 @@ export class AlarmRuleRequestMapper {
 
     public toToggleRequest(rule: AlarmRule, isArmed: boolean): UpdateAlarmRuleRequestDto {
         return {
+            name: this.requireNonEmptyString(rule.name, 'name'),
+            deviceId: this.requireNonEmptyString(rule.deviceId, 'deviceId'),
             priority: rule.priority,
             thresholdOperator: rule.thresholdOperator,
             thresholdValue: rule.thresholdValue,

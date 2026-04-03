@@ -84,6 +84,19 @@
         </tr>
         }
     </app-alarm-table-shell>
+
+    <nav aria-label="Navigazione pagine allarmi attivi"
+        class="alarm-pagination mt-4 flex items-center justify-end gap-3">
+        <button type="button" class="alarm-pagination__button" [disabled]="!canGoPrevious()" (click)="onPreviousPage()"
+            aria-label="Pagina precedente allarmi attivi">
+            Precedente
+        </button>
+        <span class="alarm-pagination__status" aria-live="polite">Pagina {{ currentPage() }}</span>
+        <button type="button" class="alarm-pagination__button" [disabled]="!canGoNext()" (click)="onNextPage()"
+            aria-label="Pagina successiva allarmi attivi">
+            Successiva
+        </button>
+    </nav>
     }
     } @else {
     <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm"

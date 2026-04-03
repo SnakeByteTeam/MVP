@@ -400,63 +400,66 @@ UPDATE plant SET data = jsonb_build_object(
     )
 ) WHERE id = 'apt-002';
 
-CREATE TABLE IF NOT EXISTS alarm_rule (
-    id                  VARCHAR(255) PRIMARY KEY,
-    name                VARCHAR(255) NOT NULL,
-    threshold_operator  CHAR(2)      NOT NULL,
-    threshold_value     VARCHAR(20)  NOT NULL,
-    priority            INTEGER      NOT NULL,
-    arming_time         TIME,
-    dearming_time       TIME,
-    is_armed            BOOLEAN      NOT NULL DEFAULT TRUE,
-    device_id           VARCHAR(255) NOT NULL,
-    plant_id            VARCHAR(64)         NOT NULL REFERENCES plant(id),
-    CONSTRAINT chk_armed_arming CHECK (
-        NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
-             CURRENT_TIME BETWEEN arming_time AND dearming_time)
-    )
-);
 
-INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-    ('alarm-rule-001', 'Caduta Bagno Rossi',        '= ', 'Fall', 1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000005', 'apt-001'),
-    ('alarm-rule-002', 'Presenza Prolungata Bagno', '>=', '30',   2, '06:00', '22:00', TRUE, 'fct-AA0011BB0011-1000000004', 'apt-001'),
-    ('alarm-rule-003', 'Temperatura Alta Camera',   '> ', '25',   3, NULL,    NULL,    TRUE, 'fct-AA0011BB0011-1000000002', 'apt-001'),
-    ('alarm-rule-004', 'Caduta Bagno Bianchi',      '= ', 'Fall', 1, '00:00', '23:59', TRUE, 'fct-BB0022CC0022-2000000003', 'apt-002');
 
-CREATE TABLE IF NOT EXISTS status (
-    id   SERIAL PRIMARY KEY,
-    name VARCHAR(30) NOT NULL
-);
 
-INSERT INTO status (name) VALUES
-    ('Attivo'),
-    ('Risolto'),
-    ('In gestione');
+-- CREATE TABLE IF NOT EXISTS alarm_rule (
+--     id                  VARCHAR(255) PRIMARY KEY,
+--     name                VARCHAR(255) NOT NULL,
+--     threshold_operator  CHAR(2)      NOT NULL,
+--     threshold_value     VARCHAR(20)  NOT NULL,
+--     priority            INTEGER      NOT NULL,
+--     arming_time         TIME,
+--     dearming_time       TIME,
+--     is_armed            BOOLEAN      NOT NULL DEFAULT TRUE,
+--     device_id           VARCHAR(255) NOT NULL,
+--     plant_id            VARCHAR(64)         NOT NULL REFERENCES plant(id),
+--     CONSTRAINT chk_armed_arming CHECK (
+--         NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
+--              CURRENT_TIME BETWEEN arming_time AND dearming_time)
+--     )
+-- );
 
-CREATE TABLE IF NOT EXISTS alarm_event (
-    id               SERIAL PRIMARY KEY,
-    activation_time  TIMESTAMP    NOT NULL,
-    resolution_time  TIMESTAMP,
-    status           INTEGER      NOT NULL REFERENCES status(id),
-    alarm_id         VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
-    user_id          INTEGER      REFERENCES "user"(id),
-    CONSTRAINT chk_resolved CHECK (
-        (resolution_time IS NULL     AND user_id IS NULL     AND status = 1) OR
-        (resolution_time IS NOT NULL AND user_id IS NOT NULL AND status = 2) OR
-        (resolution_time IS NULL     AND user_id IS NOT NULL AND status = 3)
-    )
-);
+-- INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
+--     ('alarm-rule-001', 'Caduta Bagno Rossi',        '= ', 'Fall', 1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000005', 'apt-001'),
+--     ('alarm-rule-002', 'Presenza Prolungata Bagno', '>=', '30',   2, '06:00', '22:00', TRUE, 'fct-AA0011BB0011-1000000004', 'apt-001'),
+--     ('alarm-rule-003', 'Temperatura Alta Camera',   '> ', '25',   3, NULL,    NULL,    TRUE, 'fct-AA0011BB0011-1000000002', 'apt-001'),
+--     ('alarm-rule-004', 'Caduta Bagno Bianchi',      '= ', 'Fall', 1, '00:00', '23:59', TRUE, 'fct-BB0022CC0022-2000000003', 'apt-002');
 
-INSERT INTO alarm_event (activation_time, resolution_time, status, alarm_id, user_id) VALUES
-('2026-03-17 10:15:00', '2026-03-17 10:45:00', 2, 'alarm-rule-001', 2),
-('2026-03-17 14:00:00', NULL,                  1, 'alarm-rule-002', NULL),
-('2026-03-18 09:30:00', '2026-03-18 10:00:00', 2, 'alarm-rule-001', 2),
-('2026-03-18 11:05:00', '2026-03-18 11:30:00', 2, 'alarm-rule-003', 3),
-('2026-03-18 15:00:00', NULL,                  3, 'alarm-rule-002', 2),
-('2026-03-19 08:45:00', '2026-03-19 09:15:00', 2, 'alarm-rule-004', 2),
-('2026-03-19 13:00:00', NULL,                  1, 'alarm-rule-001', NULL),
-('2026-03-20 10:00:00', '2026-03-20 11:30:00', 2, 'alarm-rule-003', 2),
-('2026-03-21 13:00:00', NULL,                  3, 'alarm-rule-003', 3),
-('2026-03-25 15:00:00', '2026-03-25 16:00:00', 2, 'alarm-rule-003', 2),
-('2026-03-31 12:00:00', NULL,                  1, 'alarm-rule-003', NULL);
+-- CREATE TABLE IF NOT EXISTS status (
+--     id   SERIAL PRIMARY KEY,
+--     name VARCHAR(30) NOT NULL
+-- );
+
+-- INSERT INTO status (name) VALUES
+--     ('Attivo'),
+--     ('Risolto'),
+--     ('In gestione');
+
+-- CREATE TABLE IF NOT EXISTS alarm_event (
+--     id               SERIAL PRIMARY KEY,
+--     activation_time  TIMESTAMP    NOT NULL,
+--     resolution_time  TIMESTAMP,
+--     status           INTEGER      NOT NULL REFERENCES status(id),
+--     alarm_id         VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
+--     user_id          INTEGER      REFERENCES "user"(id),
+--     CONSTRAINT chk_resolved CHECK (
+--         (resolution_time IS NULL     AND user_id IS NULL     AND status = 1) OR
+--         (resolution_time IS NOT NULL AND user_id IS NOT NULL AND status = 2) OR
+--         (resolution_time IS NULL     AND user_id IS NOT NULL AND status = 3)
+--     )
+-- );
+
+-- INSERT INTO alarm_event (activation_time, resolution_time, status, alarm_id, user_id) VALUES
+-- ('2026-03-17 10:15:00', '2026-03-17 10:45:00', 2, 'alarm-rule-001', 2),
+-- ('2026-03-17 14:00:00', NULL,                  1, 'alarm-rule-002', NULL),
+-- ('2026-03-18 09:30:00', '2026-03-18 10:00:00', 2, 'alarm-rule-001', 2),
+-- ('2026-03-18 11:05:00', '2026-03-18 11:30:00', 2, 'alarm-rule-003', 3),
+-- ('2026-03-18 15:00:00', NULL,                  3, 'alarm-rule-002', 2),
+-- ('2026-03-19 08:45:00', '2026-03-19 09:15:00', 2, 'alarm-rule-004', 2),
+-- ('2026-03-19 13:00:00', NULL,                  1, 'alarm-rule-001', NULL),
+-- ('2026-03-20 10:00:00', '2026-03-20 11:30:00', 2, 'alarm-rule-003', 2),
+-- ('2026-03-21 13:00:00', NULL,                  3, 'alarm-rule-003', 3),
+-- ('2026-03-25 15:00:00', '2026-03-25 16:00:00', 2, 'alarm-rule-003', 2),
+-- ('2026-03-31 12:00:00', NULL,                  1, 'alarm-rule-003', NULL);
 

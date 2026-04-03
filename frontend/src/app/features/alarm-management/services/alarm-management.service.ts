@@ -25,10 +25,13 @@ export class AlarmManagementService {
     private readonly alarmStateService = inject(AlarmStateService);
     private readonly alarmApiService = inject(AlarmApiService);
     private readonly authService = inject(InternalAuthService);
+    private readonly pageLimit = 6;
 
     private readonly locallyManagedAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
     private readonly resolvingId$ = new BehaviorSubject<string | null>(null);
     private readonly resolveError$ = new BehaviorSubject<string | null>(null);
+    private readonly pageOffset$ = new BehaviorSubject<number>(0);
+    private readonly canGoNext$ = new BehaviorSubject<boolean>(false);
     private pendingResolveRequests = 0;
 
     public readonly vm$ = combineLatest([
@@ -37,13 +40,20 @@ export class AlarmManagementService {
         this.authService.getCurrentUser$(),
         this.resolvingId$.asObservable(),
         this.resolveError$.asObservable(),
+        this.pageOffset$.asObservable(),
+        this.canGoNext$.asObservable(),
     ]).pipe(
-        map(([alarms, locallyManagedAlarms, session, resolvingId, resolveError]): AlarmListVm => {
+        map(([alarms, locallyManagedAlarms, session, resolvingId, resolveError, pageOffset, canGoNext]): AlarmListVm => {
             const visibleActiveAlarms = this.filterAlarmsBySession(alarms, session);
             const visibleLocallyManagedAlarms = this.filterAlarmsBySession(locallyManagedAlarms, session);
 
             return {
                 alarms: this.mergeAlarmsForView(visibleActiveAlarms, visibleLocallyManagedAlarms),
+                currentPage: Math.floor(pageOffset / this.pageLimit) + 1,
+                pageLimit: this.pageLimit,
+                pageOffset,
+                canGoPrevious: pageOffset > 0,
+                canGoNext,
                 isResolving: this.pendingResolveRequests > 0,
                 resolvingId,
                 resolveError,
@@ -54,19 +64,28 @@ export class AlarmManagementService {
 
     public initialize(): void {
         this.locallyManagedAlarms$.next([]);
+        this.pageOffset$.next(0);
+        this.canGoNext$.next(false);
+        this.loadPage(0);
+    }
 
-        this.getInitialActiveAlarms$()
-            .pipe(
-                take(1),
-                tap((alarms) => {
-                    this.alarmStateService.setActiveAlarms(alarms);
-                }),
-                catchError((error: unknown) => {
-                    this.resolveError$.next(this.mapResolveError(error));
-                    return EMPTY;
-                })
-            )
-            .subscribe();
+    public nextPage(): void {
+        if (!this.canGoNext$.getValue()) {
+            return;
+        }
+
+        const nextOffset = this.pageOffset$.getValue() + this.pageLimit;
+        this.loadPage(nextOffset);
+    }
+
+    public previousPage(): void {
+        const currentOffset = this.pageOffset$.getValue();
+        if (currentOffset === 0) {
+            return;
+        }
+
+        const previousOffset = Math.max(0, currentOffset - this.pageLimit);
+        this.loadPage(previousOffset);
     }
 
     public resolveAlarm(activeAlarmId: string): void {
@@ -105,15 +124,40 @@ export class AlarmManagementService {
     }
 
     //oss solo i suoi (reparti assegnati), admin tutti
-    private getInitialActiveAlarms$(): Observable<ActiveAlarm[]> {
+    private getInitialActiveAlarms$(offset: number): Observable<ActiveAlarm[]> {
         return this.authService.getCurrentUser$().pipe(
             take(1),
             switchMap((session) => {
-                return this.alarmApiService.getActiveAlarms().pipe(
+                if (session?.role === UserRole.OPERATORE_SANITARIO) {
+                    return this.alarmApiService
+                        .getActiveAlarmsOfOperator(session.userId, this.pageLimit, offset)
+                        .pipe(map((alarms) => this.filterAlarmsBySession(alarms, session)));
+                }
+
+                return this.alarmApiService.getActiveAlarms(this.pageLimit, offset).pipe(
                     map((alarms) => this.filterAlarmsBySession(alarms, session))
                 );
             })
         );
+    }
+
+    private loadPage(offset: number): void {
+        this.resolveError$.next(null);
+
+        this.getInitialActiveAlarms$(offset)
+            .pipe(
+                take(1),
+                tap((alarms) => {
+                    this.alarmStateService.setActiveAlarms(alarms, 'replace');
+                    this.pageOffset$.next(offset);
+                    this.canGoNext$.next(alarms.length === this.pageLimit);
+                }),
+                catchError((error: unknown) => {
+                    this.resolveError$.next(this.mapResolveError(error));
+                    return EMPTY;
+                })
+            )
+            .subscribe();
     }
 
     private filterAlarmsBySession(alarms: ActiveAlarm[], session: UserSession | null): ActiveAlarm[] {

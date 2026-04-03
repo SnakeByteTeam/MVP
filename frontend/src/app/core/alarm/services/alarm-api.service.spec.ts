@@ -114,6 +114,8 @@ describe('AlarmApiService', () => {
 
     it('updateAlarmRule chiama PUT /alarm-rules/:id con payload corretto', () => {
         const payload: UpdateAlarmRuleRequestDto = {
+            name: 'Allarme soglia',
+            deviceId: 'device-2',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: '<',
             thresholdValue: '15',
@@ -142,35 +144,35 @@ describe('AlarmApiService', () => {
         request.flush(null);
     });
 
-    it('getActiveAlarms chiama GET /alarm-events e restituisce la lista', () => {
-        service.getActiveAlarms().subscribe((result) => {
+    it('getActiveAlarms chiama GET /alarm-events/:limit/:offset e restituisce la lista', () => {
+        service.getActiveAlarms(6, 0).subscribe((result) => {
             expect(result).toEqual([activeAlarm]);
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne(alarmEventsBaseUrl);
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/6/0`);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
 
-    it('getActiveAlarmsOfOperator chiama GET /alarm-events/:userId', () => {
-        service.getActiveAlarmsOfOperator('operator-7').subscribe((result) => {
+    it('getActiveAlarmsOfOperator chiama GET /alarm-events/:userId/:limit/:offset', () => {
+        service.getActiveAlarmsOfOperator('operator-7', 6, 12).subscribe((result) => {
             expect(result).toEqual([activeAlarm]);
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne(`${alarmEventsBaseUrl}/operator-7`);
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/operator-7/6/12`);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
 
-    it('resolveAlarm chiama POST /alarm-events/resolve', () => {
+    it('resolveAlarm chiama PATCH /alarm-events/resolve', () => {
         service.resolveAlarm('active-1', 7).subscribe((result) => {
             expect(result).toBeNull();
         });
 
         const request = httpController.expectOne(`${alarmEventsBaseUrl}/resolve`);
-        expect(request.request.method).toBe('POST');
+        expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({ alarmId: 'active-1', userId: 7 });
         request.flush(null);
     });
@@ -181,7 +183,7 @@ describe('AlarmApiService', () => {
         });
 
         const request = httpController.expectOne(`${alarmEventsBaseUrl}/resolve`);
-        expect(request.request.method).toBe('POST');
+        expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({ alarmId: 'active/1', userId: 9 });
         request.flush(null);
     });

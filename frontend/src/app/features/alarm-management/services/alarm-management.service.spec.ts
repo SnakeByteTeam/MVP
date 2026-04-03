@@ -66,6 +66,9 @@ describe('AlarmManagementService', () => {
         });
 
         alarmStateStub.getActiveAlarms$.mockReturnValue(activeAlarmsSubject.asObservable());
+        alarmStateStub.setActiveAlarms.mockImplementation((alarms: ActiveAlarm[]) => {
+            activeAlarmsSubject.next(alarms);
+        });
         alarmStateStub.onAlarmResolved.mockImplementation((resolvedId: string) => {
             const next = activeAlarmsSubject
                 .getValue()
@@ -105,8 +108,9 @@ describe('AlarmManagementService', () => {
         service.initialize();
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
         expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
-        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
     it('initialize per OSS filtra gli allarmi per userId', () => {
@@ -119,14 +123,15 @@ describe('AlarmManagementService', () => {
         });
 
         const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
-        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of(initialSnapshot));
 
         service = createService();
         service.initialize();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
-        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
-        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmB]);
+        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7', 6, 0);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmB], 'replace');
     });
 
     it('se initialize fallisce non propaga eccezioni e valorizza l errore nel vm', async () => {
@@ -147,6 +152,11 @@ describe('AlarmManagementService', () => {
 
         expect(vm).toEqual({
             alarms: [],
+            currentPage: 1,
+            pageLimit: 6,
+            pageOffset: 0,
+            canGoPrevious: false,
+            canGoNext: false,
             isResolving: false,
             resolvingId: null,
             resolveError: null,
@@ -246,6 +256,66 @@ describe('AlarmManagementService', () => {
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.alarms).toEqual([]);
+    });
+
+    it('nextPage usa limit 6 e incrementa offset quando la pagina corrente e piena', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+        const secondPage: ActiveAlarm[] = [{ ...alarmA, id: 'active-7' }];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(2);
+        expect(vm.pageOffset).toBe(6);
+        expect(vm.canGoPrevious).toBe(true);
+        expect(vm.alarms.map((alarm) => alarm.id)).toEqual(['active-7']);
+    });
+
+    it('previousPage decrementa l offset fino a 0', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+        const secondPage: ActiveAlarm[] = [{ ...alarmA, id: 'active-7' }];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of(firstPage));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+        service.previousPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 0);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(1);
+        expect(vm.pageOffset).toBe(0);
+        expect(vm.canGoPrevious).toBe(false);
     });
 
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {

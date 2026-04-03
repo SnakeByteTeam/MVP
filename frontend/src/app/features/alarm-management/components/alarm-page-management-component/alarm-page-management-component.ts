@@ -44,11 +44,23 @@ export class AlarmPageManagementComponent implements OnInit {
     return this.tablePresenter.toRows(vmState.alarms, vmState.resolvingId);
   });
 
+  public readonly canGoPrevious = computed(() => this.vm()?.canGoPrevious ?? false);
+  public readonly canGoNext = computed(() => this.vm()?.canGoNext ?? false);
+  public readonly currentPage = computed(() => this.vm()?.currentPage ?? 1);
+
   public ngOnInit(): void {
     this.alarmManagementService.initialize();
   }
 
   public onResolve(activeAlarmId: string): void {
     this.alarmManagementService.resolveAlarm(activeAlarmId);
+  }
+
+  public onNextPage(): void {
+    this.alarmManagementService.nextPage();
+  }
+
+  public onPreviousPage(): void {
+    this.alarmManagementService.previousPage();
   }
 }

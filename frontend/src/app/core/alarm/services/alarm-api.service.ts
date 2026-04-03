@@ -34,12 +34,16 @@ export class AlarmApiService {
         return this.http.delete<void>(`${this.alarmsBaseUrl}/${encodeURIComponent(id)}`);
     }
 
-    public getActiveAlarms(): Observable<ActiveAlarm[]> {
-        return this.http.get<ActiveAlarm[]>(this.alarmEventsBaseUrl + '/10/0');
+    public getActiveAlarms(limit = 6, offset = 0): Observable<ActiveAlarm[]> {
+        return this.http.get<ActiveAlarm[]>(
+            `${this.alarmEventsBaseUrl}/${encodeURIComponent(String(limit))}/${encodeURIComponent(String(offset))}`
+        );
     }
 
-    public getActiveAlarmsOfOperator(operatorId: string): Observable<ActiveAlarm[]> {
-        return this.http.get<ActiveAlarm[]>(`${this.alarmEventsBaseUrl}/${encodeURIComponent(operatorId)}`);
+    public getActiveAlarmsOfOperator(operatorId: string, limit = 6, offset = 0): Observable<ActiveAlarm[]> {
+        return this.http.get<ActiveAlarm[]>(
+            `${this.alarmEventsBaseUrl}/${encodeURIComponent(operatorId)}/${encodeURIComponent(String(limit))}/${encodeURIComponent(String(offset))}`
+        );
     }
 
     public resolveAlarm(alarmId: string, userId: number): Observable<void> {

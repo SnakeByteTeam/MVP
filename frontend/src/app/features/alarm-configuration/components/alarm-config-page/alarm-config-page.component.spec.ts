@@ -3,6 +3,8 @@ import { BehaviorSubject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
+import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
+import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
 import { AlarmConfigPageComponent } from './alarm-config-page.component';
@@ -24,6 +26,14 @@ describe('AlarmConfigPageComponent', () => {
         deleteAlarmRule: vi.fn(() => of(void 0)),
     };
 
+    const wardApiStub = {
+        getAvailablePlants: vi.fn(() => of([])),
+    };
+
+    const apartmentApiStub = {
+        getApartmentByPlantId: vi.fn(() => of({ id: 'plant-1', name: 'Plant', isEnabled: true, rooms: [] })),
+    };
+
     const alarmRule: AlarmRule = {
         id: 'alarm-1',
         name: 'Temperatura alta',
@@ -38,6 +48,7 @@ describe('AlarmConfigPageComponent', () => {
 
     const formValue = {
         name: 'Nuova regola',
+        plantId: 'plant-1',
         sensorId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
@@ -56,6 +67,8 @@ describe('AlarmConfigPageComponent', () => {
             imports: [AlarmConfigPageComponent],
             providers: [
                 { provide: AlarmConfigStateService, useValue: stateServiceStub },
+                { provide: WardApiService, useValue: wardApiStub },
+                { provide: ApartmentApiService, useValue: apartmentApiStub },
             ],
         }).compileComponents();
 

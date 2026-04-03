@@ -45,6 +45,7 @@ describe('AlarmConfigStateService', () => {
 
     const validForm: AlarmConfigFormValue = {
         name: '  Nuovo allarme  ',
+        plantId: 'plant-1',
         sensorId: 'dev-3',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.EQUAL_TO,
@@ -179,7 +180,7 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
     });
 
-    it('updateAlarmRule mappa payload update e sostituisce l allarme nello stato', async () => {
+    it('updateAlarmRule mantiene il nome originale nel payload update e sostituisce l allarme nello stato', async () => {
         apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
         service.loadAlarmRules();
 
@@ -189,6 +190,8 @@ describe('AlarmConfigStateService', () => {
         service.updateAlarmRule('alarm-1', validForm).subscribe();
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
+            name: 'Temperatura stanza',
+            deviceId: 'dev-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
@@ -244,6 +247,8 @@ describe('AlarmConfigStateService', () => {
         service.toggleEnabled('alarm-1', false).subscribe();
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
+            name: alarmA.name,
+            deviceId: alarmA.deviceId,
             priority: alarmA.priority,
             thresholdOperator: alarmA.thresholdOperator,
             thresholdValue: alarmA.thresholdValue,

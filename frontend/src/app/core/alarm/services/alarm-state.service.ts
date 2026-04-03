@@ -4,14 +4,22 @@ import { ActiveAlarm } from '../models/active-alarm.model';
 import { AlarmEvent } from '../models/alarm-event.model';
 import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 
+type ActiveAlarmsSnapshotMode = 'merge' | 'replace';
+
 @Injectable({ providedIn: 'root' })
 export class AlarmStateService {
 	private readonly activeAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
 	private readonly notifications$ = new BehaviorSubject<NotificationEvent[]>([]);
 	private readonly locallyResolvedActiveAlarmIds = new Set<string>();
 
-	public setActiveAlarms(alarms: ActiveAlarm[]): void {
+	public setActiveAlarms(alarms: ActiveAlarm[], mode: ActiveAlarmsSnapshotMode = 'merge'): void {
 		const filteredIncoming = alarms.filter((alarm) => !this.locallyResolvedActiveAlarmIds.has(alarm.id));
+
+		if (mode === 'replace') {
+			this.activeAlarms$.next(filteredIncoming);
+			return;
+		}
+
 		const current = this.activeAlarms$.getValue();
 		const incomingIds = new Set(filteredIncoming.map((alarm) => alarm.id));
 		const currentOnly = current.filter(

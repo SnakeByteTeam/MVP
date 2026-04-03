@@ -37,6 +37,8 @@ describe('AlarmManagement feature integration', () => {
         vm$: undefined as unknown,
         initialize: vi.fn(),
         resolveAlarm: vi.fn(),
+        nextPage: vi.fn(),
+        previousPage: vi.fn(),
     };
 
     beforeEach(async () => {
@@ -44,6 +46,11 @@ describe('AlarmManagement feature integration', () => {
 
         vmSubject = new BehaviorSubject<AlarmListVm>({
             alarms: [alarm1, alarm2],
+            currentPage: 1,
+            pageLimit: 6,
+            pageOffset: 0,
+            canGoPrevious: false,
+            canGoNext: true,
             isResolving: false,
             resolvingId: null,
             resolveError: null,
@@ -76,6 +83,11 @@ describe('AlarmManagement feature integration', () => {
 
         vmSubject.next({
             alarms: [alarm1, alarm2],
+            currentPage: 1,
+            pageLimit: 6,
+            pageOffset: 0,
+            canGoPrevious: false,
+            canGoNext: true,
             isResolving: true,
             resolvingId: 'active-1',
             resolveError: null,
@@ -99,6 +111,11 @@ describe('AlarmManagement feature integration', () => {
                 },
                 alarm2,
             ],
+            currentPage: 1,
+            pageLimit: 6,
+            pageOffset: 0,
+            canGoPrevious: false,
+            canGoNext: true,
             isResolving: false,
             resolvingId: null,
             resolveError: null,

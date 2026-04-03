@@ -11,6 +11,7 @@ export class AlarmRuleFormMapper {
     public toFormValue(rule: AlarmRule): AlarmConfigFormValue {
         return {
             name: rule.name,
+            plantId: '',
             sensorId: rule.deviceId,
             priority: rule.priority,
             thresholdOperator: this.toFormThresholdOperator(rule.thresholdOperator),

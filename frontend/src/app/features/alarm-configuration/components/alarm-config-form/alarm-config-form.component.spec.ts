@@ -1,13 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
+import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
+import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { AlarmConfigFormComponent } from './alarm-config-form.component';
 
 describe('AlarmConfigFormComponent', () => {
     let component: AlarmConfigFormComponent;
     let fixture: ComponentFixture<AlarmConfigFormComponent>;
+
+    const wardApiStub = {
+        getAvailablePlants: vi.fn(),
+    };
+
+    const apartmentApiStub = {
+        getApartmentByPlantId: vi.fn(),
+    };
 
     const existingRule: AlarmRule = {
         id: 'alarm-42',
@@ -23,6 +34,7 @@ describe('AlarmConfigFormComponent', () => {
 
     const validFormValue = {
         name: 'Nuova regola',
+        plantId: 'plant-1',
         sensorId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
@@ -34,9 +46,42 @@ describe('AlarmConfigFormComponent', () => {
 
     beforeEach(async () => {
         vi.clearAllMocks();
+        wardApiStub.getAvailablePlants.mockReturnValue(
+            of([
+                { id: 'plant-1', name: 'Appartamento 1' },
+                { id: 'plant-2', name: 'Appartamento 2' },
+            ])
+        );
+        apartmentApiStub.getApartmentByPlantId.mockReturnValue(
+            of({
+                id: 'plant-1',
+                name: 'Appartamento 1',
+                isEnabled: true,
+                rooms: [
+                    {
+                        id: 'room-1',
+                        name: 'Soggiorno',
+                        hasActiveAlarm: false,
+                        devices: [
+                            {
+                                id: 'sensor-1',
+                                name: 'Sensore porta',
+                                status: 'ONLINE',
+                                type: 'LIGHT',
+                                actions: [],
+                            },
+                        ],
+                    },
+                ],
+            })
+        );
 
         await TestBed.configureTestingModule({
             imports: [AlarmConfigFormComponent],
+            providers: [
+                { provide: WardApiService, useValue: wardApiStub },
+                { provide: ApartmentApiService, useValue: apartmentApiStub },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AlarmConfigFormComponent);
@@ -61,6 +106,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.isEditMode()).toBe(false);
         expect(component.form.getRawValue()).toEqual({
             name: '',
+            plantId: '',
             sensorId: '',
             priority: null,
             thresholdOperator: null,
@@ -69,6 +115,7 @@ describe('AlarmConfigFormComponent', () => {
             dearmingTime: '',
             enabled: true,
         });
+        expect(component.form.controls.name.disabled).toBe(false);
     });
 
     it('inizializza in edit mode con prefill da initialRule', () => {
@@ -77,6 +124,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.isEditMode()).toBe(true);
         expect(component.form.getRawValue()).toEqual({
             name: 'Porta aperta',
+            plantId: '',
             sensorId: 'sensor-9',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
@@ -85,17 +133,25 @@ describe('AlarmConfigFormComponent', () => {
             dearmingTime: '19:00',
             enabled: true,
         });
+
+        expect(component.form.controls.name.disabled).toBe(true);
+        expect(component.form.controls.sensorId.disabled).toBe(true);
     });
 
     it('buildForm applica i validatori required ai campi richiesti', () => {
         setInputs('create', null);
 
         component.form.patchValue({
-            sensorId: '',
+            plantId: '',
             priority: null,
             thresholdOperator: null,
             threshold: null,
         });
+
+        expect(component.form.controls.plantId.invalid).toBe(true);
+
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.sensorId.setValue('');
 
         expect(component.form.controls.sensorId.invalid).toBe(true);
         expect(component.form.controls.priority.invalid).toBe(true);
@@ -103,9 +159,23 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.threshold.invalid).toBe(true);
     });
 
+    it('in create mode mantiene il dispositivo bloccato finche non viene selezionato un plant', () => {
+        setInputs('create', null);
+
+        expect(component.form.controls.sensorId.disabled).toBe(true);
+
+        component.form.controls.plantId.setValue('plant-1');
+
+        expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
+        expect(component.form.controls.sensorId.enabled).toBe(true);
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+    });
+
     it('onSubmit emette submittedForm in create mode con form valido', () => {
         setInputs('create', null);
         const emitSpy = vi.spyOn(component.submittedForm, 'emit');
+
+        component.form.controls.plantId.setValue('plant-1');
         component.form.setValue(validFormValue);
 
         component.onSubmit();
@@ -117,11 +187,21 @@ describe('AlarmConfigFormComponent', () => {
     it('onSubmit in edit mode emette submittedForm con form valido', () => {
         setInputs('edit', existingRule);
         const emitSpy = vi.spyOn(component.submittedForm, 'emit');
-        component.form.setValue(validFormValue);
+        component.form.setValue({
+            ...validFormValue,
+            name: 'Nome modificato manualmente',
+            plantId: '',
+            sensorId: 'sensor-9',
+        });
 
         component.onSubmit();
 
-        expect(emitSpy).toHaveBeenCalledWith(validFormValue);
+        expect(emitSpy).toHaveBeenCalledWith({
+            ...validFormValue,
+            name: 'Porta aperta',
+            plantId: '',
+            sensorId: 'sensor-9',
+        });
         expect(emitSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -129,6 +209,7 @@ describe('AlarmConfigFormComponent', () => {
         setInputs('create', null);
         const emitSpy = vi.spyOn(component.submittedForm, 'emit');
         component.form.patchValue({
+            plantId: '',
             sensorId: '',
             priority: null,
             thresholdOperator: null,
@@ -171,5 +252,22 @@ describe('AlarmConfigFormComponent', () => {
             ThresholdOperator.LESS_THAN,
             ThresholdOperator.EQUAL_TO,
         ]);
+    });
+
+    it('in edit mode non consente di modificare il dispositivo associato', () => {
+        setInputs('edit', existingRule);
+
+        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-9', label: 'sensor-9' }]);
+    });
+
+    it('imposta errore quando il caricamento dispositivi fallisce', () => {
+        apartmentApiStub.getApartmentByPlantId.mockReturnValueOnce(throwError(() => new Error('network')));
+        setInputs('create', null);
+
+        component.form.controls.plantId.setValue('plant-1');
+
+        expect(component.devicesLoadError()).toBe('Errore durante il caricamento dei dispositivi.');
+        expect(component.form.controls.sensorId.disabled).toBe(true);
     });
 });

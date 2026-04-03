@@ -76,8 +76,13 @@ export class AlarmConfigStateService {
     public updateAlarmRule(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule> {
         this.clearError();
         let payload: UpdateAlarmRuleRequestDto;
+        const currentAlarm = this.alarmsSubject.getValue().find((alarm) => alarm.id === alarmId);
+        const normalizedFormValue = currentAlarm
+            ? { ...formValue, name: currentAlarm.name }
+            : formValue;
+
         try {
-            payload = this.requestMapper.toUpdateRequest(formValue);
+            payload = this.requestMapper.toUpdateRequest(normalizedFormValue);
         } catch {
             return this.handleError<AlarmRule>('Dati del form non validi per l\'aggiornamento dell\'allarme.');
         }

@@ -202,7 +202,7 @@ describe('AlarmStateService', () => {
     );
 
     service.onAlarmTriggered(alarmEventA);
-    service.setActiveAlarms(snapshot);
+    service.setActiveAlarms(snapshot, 'merge');
 
     expect(latestActiveAlarmIds).toEqual(['snapshot-1', alarmEventA.id]);
   });
@@ -231,9 +231,60 @@ describe('AlarmStateService', () => {
 
     service.onAlarmTriggered(alarmEventA);
     service.onAlarmResolved(alarmEventA.id);
-    service.setActiveAlarms(staleSnapshot);
+    service.setActiveAlarms(staleSnapshot, 'merge');
 
     expect(latestActiveAlarmIds).toEqual([]);
+  });
+
+  it('setActiveAlarms in replace sostituisce la pagina corrente senza mantenere elementi precedenti', () => {
+    let latestActiveAlarmIds: string[] = [];
+
+    const firstPage: ActiveAlarm[] = [
+      {
+        id: 'page-1-a',
+        alarmRuleId: 'rule-a',
+        alarmName: 'Allarme pagina 1',
+        priority: AlarmPriority.RED,
+        activationTime: '2026-03-19T10:00:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 201',
+        userId: 1,
+      },
+      {
+        id: 'page-1-b',
+        alarmRuleId: 'rule-b',
+        alarmName: 'Allarme pagina 1 bis',
+        priority: AlarmPriority.ORANGE,
+        activationTime: '2026-03-19T10:01:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 202',
+        userId: 2,
+      },
+    ];
+
+    const secondPage: ActiveAlarm[] = [
+      {
+        id: 'page-2-a',
+        alarmRuleId: 'rule-c',
+        alarmName: 'Allarme pagina 2',
+        priority: AlarmPriority.GREEN,
+        activationTime: '2026-03-19T10:02:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 203',
+        userId: 3,
+      },
+    ];
+
+    subscriptions.push(
+      service.getActiveAlarms$().subscribe((alarms) => {
+        latestActiveAlarmIds = alarms.map((alarm) => alarm.id);
+      })
+    );
+
+    service.setActiveAlarms(firstPage, 'replace');
+    service.setActiveAlarms(secondPage, 'replace');
+
+    expect(latestActiveAlarmIds).toEqual(['page-2-a']);
   });
 
   it('emette conteggi derivati corretti per allarmi e notifiche non lette', () => {

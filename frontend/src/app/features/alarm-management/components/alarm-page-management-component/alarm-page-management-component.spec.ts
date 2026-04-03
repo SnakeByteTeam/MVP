@@ -44,6 +44,8 @@ describe('AlarmPageManagementComponent', () => {
     vm$: undefined as unknown,
     initialize: vi.fn(),
     resolveAlarm: vi.fn(),
+    nextPage: vi.fn(),
+    previousPage: vi.fn(),
   };
 
   beforeEach(async () => {
@@ -51,6 +53,11 @@ describe('AlarmPageManagementComponent', () => {
 
     vmSubject = new BehaviorSubject<AlarmListVm>({
       alarms: [],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: false,
       isResolving: false,
       resolvingId: null,
       resolveError: null,
@@ -75,6 +82,11 @@ describe('AlarmPageManagementComponent', () => {
   it('ngOnInit inizializza la facade e mantiene il vm sincronizzato', () => {
     expect(component.vm()).toEqual({
       alarms: [],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: false,
       isResolving: false,
       resolvingId: null,
       resolveError: null,
@@ -96,6 +108,11 @@ describe('AlarmPageManagementComponent', () => {
   it('renderizza stato lista vuota quando non ci sono allarmi', () => {
     vmSubject.next({
       alarms: [],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: false,
       isResolving: false,
       resolvingId: null,
       resolveError: null,
@@ -113,6 +130,11 @@ describe('AlarmPageManagementComponent', () => {
   it('renderizza errore e stato resolving quando presenti nel vm', () => {
     vmSubject.next({
       alarms: [alarm1],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: false,
       isResolving: true,
       resolvingId: alarm1.id,
       resolveError: 'Errore durante la risoluzione',
@@ -132,6 +154,11 @@ describe('AlarmPageManagementComponent', () => {
   it('renderizza tabella con una riga per ogni allarme', () => {
     vmSubject.next({
       alarms: [alarm1, alarm2],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: true,
       isResolving: true,
       resolvingId: alarm2.id,
       resolveError: null,
@@ -154,6 +181,11 @@ describe('AlarmPageManagementComponent', () => {
   it('click su GESTISCI propaga resolve verso facade', () => {
     vmSubject.next({
       alarms: [alarm1],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: false,
       isResolving: false,
       resolvingId: null,
       resolveError: null,
@@ -173,6 +205,11 @@ describe('AlarmPageManagementComponent', () => {
   it('mantiene la riga visibile se l allarme e gia gestito e disabilita l azione', () => {
     vmSubject.next({
       alarms: [managedAlarm],
+      currentPage: 2,
+      pageLimit: 6,
+      pageOffset: 6,
+      canGoPrevious: true,
+      canGoNext: false,
       isResolving: false,
       resolvingId: null,
       resolveError: null,
@@ -190,5 +227,13 @@ describe('AlarmPageManagementComponent', () => {
     expect(managedButton).not.toBeNull();
     expect(managedButton?.disabled).toBe(true);
     expect(managedButton?.textContent).toContain('GESTITO');
+  });
+
+  it('onNextPage e onPreviousPage delegano al service', () => {
+    component.onNextPage();
+    component.onPreviousPage();
+
+    expect(alarmManagementStub.nextPage).toHaveBeenCalledTimes(1);
+    expect(alarmManagementStub.previousPage).toHaveBeenCalledTimes(1);
   });
 });

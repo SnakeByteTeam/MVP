@@ -39,15 +39,15 @@ export class DeviceApiImpl implements GetDeviceValueRepoPort, WriteDatapointValu
     }
   }
 
-  async writeDeviceValue(validToken: string, datapointId: string, value: string): Promise<boolean> {
+  async writeDeviceValue(validToken: string, plantId: string, datapointId: string, value: string): Promise<boolean> {
     try {
 
       const data = WriteDatapointValueRequestDto.fromDatapoint(datapointId, value);
 
       const response = await firstValueFrom(
         this.httpService
-          .post(
-            `${this.API_DOMAIN}/datapoints/values/`,
+          .put(
+            `${this.API_DOMAIN}/${plantId}/datapoints/values/`,
             data,
             {
               headers: {
@@ -59,10 +59,10 @@ export class DeviceApiImpl implements GetDeviceValueRepoPort, WriteDatapointValu
           )
       );
 
-      if(response.status === 202) return true;
+      return true;
+    } catch (err) {
+      console.log(err);
       return false;
-    } catch {
-      throw new Error(`[DEVICE API IMPL] Error writing ${datapointId} value`);
     }
   }
 }

@@ -7,8 +7,14 @@ import { Datapoint } from 'src/device/domain/models/datapoint.model';
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
 import { DatapointDto } from 'src/device/infrastructure/http/dtos/out/datapoint.dto';
 import { SubNotificationPayloadDto } from 'src/cache/infrastructure/http/dtos/in/subNotification.dto';
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { GetDeviceValueUseCase } from 'src/device/application/ports/in/get-device-value.usecase';
+import { WriteDatapointValueUseCase } from 'src/device/application/ports/in/write-datapoint-value.usecase';
+import { DeviceValue, DatapointValue } from 'src/device/domain/models/device-value.model';
 
 describe('DeviceController', () => {
   let controller: DeviceController;
@@ -16,6 +22,7 @@ describe('DeviceController', () => {
   let findDeviceByPlantId: jest.Mocked<FindDeviceByPlantIdUseCase>;
   let ingestTimeseries: jest.Mocked<IngestTimeseriesUseCase>;
   let getDeviceValue: jest.Mocked<GetDeviceValueUseCase>;
+  let writeDatapointUseCase: jest.Mocked<WriteDatapointValueUseCase>;
 
   beforeEach(() => {
     findDeviceById = {
@@ -34,11 +41,16 @@ describe('DeviceController', () => {
       getDeviceValue: jest.fn(),
     } as any;
 
+    writeDatapointUseCase = {
+      writeDatapointValue: jest.fn(),
+    } as any;
+
     controller = new DeviceController(
       findDeviceById,
       findDeviceByPlantId,
       ingestTimeseries,
       getDeviceValue,
+      writeDatapointUseCase,
     );
   });
 
@@ -228,6 +240,82 @@ describe('DeviceController', () => {
     await expect(() => controller.findByPlantId('plant-id')).rejects.toThrow(
       InternalServerErrorException,
     );
+  });
+
+  describe('writeDatapointValue', () => {
+    it('should throw BadRequestException when datapointId is missing', async () => {
+      await expect(
+        controller.writeDatapointValue({ datapointId: '', value: 'On' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when value is missing', async () => {
+      await expect(
+        controller.writeDatapointValue({ datapointId: 'dp-1', value: '' }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should call use case and return accepted payload on success', async () => {
+      writeDatapointUseCase.writeDatapointValue.mockResolvedValue(undefined);
+
+      const result = await controller.writeDatapointValue({
+        datapointId: 'dp-1',
+        value: 'On',
+      });
+
+      expect(writeDatapointUseCase.writeDatapointValue).toHaveBeenCalledWith({
+        datapointId: 'dp-1',
+        value: 'On',
+      });
+      expect(result).toEqual({
+        message: 'Datapoint value updated successfully',
+        statusCode: 202,
+      });
+    });
+
+    it('should throw ServiceUnavailableException when use case fails', async () => {
+      writeDatapointUseCase.writeDatapointValue.mockRejectedValue(
+        new Error('Remote API error'),
+      );
+
+      await expect(
+        controller.writeDatapointValue({ datapointId: 'dp-1', value: 'On' }),
+      ).rejects.toThrow(ServiceUnavailableException);
+    });
+  });
+
+  describe('getDeviceValue', () => {
+    it('should throw BadRequestException when device id is missing', async () => {
+      await expect(controller.getDeviceValue('')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should return DeviceValueDto on success', async () => {
+      const domainValue = new DeviceValue('device-1', [
+        new DatapointValue('dp-1', 'Power', 'On'),
+      ]);
+
+      getDeviceValue.getDeviceValue.mockResolvedValue(domainValue);
+
+      const result = await controller.getDeviceValue('device-1');
+
+      expect(getDeviceValue.getDeviceValue).toHaveBeenCalledWith({
+        deviceId: 'device-1',
+      });
+      expect(result).toEqual({
+        deviceId: 'device-1',
+        values: [{ datapointId: 'dp-1', name: 'Power', value: 'On' }],
+      });
+    });
+
+    it('should throw InternalServerErrorException on use case error', async () => {
+      getDeviceValue.getDeviceValue.mockRejectedValue(new Error('Failure'));
+
+      await expect(controller.getDeviceValue('device-1')).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
   });
 
   describe('onDatapointUpdate', () => {

@@ -413,4 +413,47 @@ describe('DeviceRepositoryImpl', () => {
       expect(params[1]).toBe('fct-012923FAB00624-1090564616');
     });
   });
+
+  describe('findByDatapointId', () => {
+    it('should return a device when datapoint exists', async () => {
+      const mockDevice: DeviceEntity = {
+        id: 'device-1',
+        name: 'Switch',
+        plantId: 'plant-1',
+        type: 'light',
+        subType: 'switch',
+        datapoints: [],
+      };
+
+      mockClient.query.mockResolvedValueOnce({ rows: [{ device: mockDevice }] });
+
+      const result = await repository.findByDatapointId('dp-1');
+
+      expect(mockPool.connect).toHaveBeenCalled();
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('jsonb_path_query'),
+        ['dp-1'],
+      );
+      expect(result).toEqual(mockDevice);
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('should return null when datapoint is not found', async () => {
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
+
+      const result = await repository.findByDatapointId('dp-missing');
+
+      expect(result).toBeNull();
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('should throw wrapped database error', async () => {
+      mockClient.query.mockRejectedValueOnce(new Error('Query failed'));
+
+      await expect(repository.findByDatapointId('dp-1')).rejects.toThrow(
+        'Database error: Query failed',
+      );
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+  });
 });

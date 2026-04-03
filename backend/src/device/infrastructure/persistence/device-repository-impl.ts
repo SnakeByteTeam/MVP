@@ -5,13 +5,15 @@ import { FindDeviceByIdRepoPort } from 'src/device/application/repository/find-d
 import { FindDeviceByPlantIdRepoPort } from 'src/device/application/repository/find-device-by-plant-id.repository';
 import { DeviceEntity } from './entities/device.entity';
 import { IngestTimeseriesRepoPort } from 'src/device/application/repository/ingest-timeseries.repository';
+import { FindDeviceByDatapointIdRepoPort } from 'src/device/application/repository/find-device-by-datapointId.repository';
 
 @Injectable()
 export class DeviceRepositoryImpl
   implements
     FindDeviceByIdRepoPort,
     FindDeviceByPlantIdRepoPort,
-    IngestTimeseriesRepoPort
+    IngestTimeseriesRepoPort,
+    FindDeviceByDatapointIdRepoPort
 {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
@@ -60,6 +62,7 @@ export class DeviceRepositoryImpl
       client.release();
     }
   }
+
   async ingestTimeseries(
     datapointId: string,
     value: string,
@@ -76,6 +79,30 @@ export class DeviceRepositoryImpl
 
       if (!result.rowCount) return false;
       return result.rowCount > 0;
+    } catch (err) {
+      throw new Error(`Database error: ${err.message}`);
+    } finally {
+      client.release();
+    }
+  }
+
+  async findByDatapointId(datapointId: string): Promise<DeviceEntity | null> {
+    const client = await this.pool.connect();
+    try {
+      const { rows } = await client.query<{ device: DeviceEntity }>(
+        `SELECT jsonb_path_query(
+                      data,
+                      '$.rooms[*].devices[*] ? (exists(@.datapoints[*] ? (@.id == $datapointId)))',
+                      jsonb_build_object('datapointId', $1::text)
+                  ) AS device
+                  FROM plant;`,
+        [datapointId],
+      );
+
+      if (rows.length == 0) return null;
+
+      const device: DeviceEntity = rows[0]?.device;
+      return device;
     } catch (err) {
       throw new Error(`Database error: ${err.message}`);
     } finally {

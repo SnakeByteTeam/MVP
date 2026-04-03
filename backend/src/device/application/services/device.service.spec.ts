@@ -8,6 +8,11 @@ import { IngestTimeseriesCmd } from '../commands/ingest-timeseries.command';
 import { Device } from 'src/device/domain/models/device.model';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
 import { DeviceService } from './device.service';
+import { DeviceValue, DatapointValue } from 'src/device/domain/models/device-value.model';
+import { GetDeviceValueCmd } from '../commands/get-device-value.command';
+import { WriteDatapointValueCmd } from '../commands/write-datapoint-value.command';
+import { WriteDatapointValuePort } from '../ports/out/write-device-value.port';
+import { FindDeviceByDatapointIdPort } from '../ports/out/find-device-by-datapointId';
 
 describe('DeviceService', () => {
   let service: DeviceService;
@@ -15,6 +20,8 @@ describe('DeviceService', () => {
   let findByPlantIdPort: jest.Mocked<FindDeviceByPlantIdPort>;
   let ingestTimeseriesPort: jest.Mocked<IngestTimeseriesPort>;
   let getDeviceValuePort: jest.Mocked<GetDeviceValuePort>;
+  let writeDatapointPort: jest.Mocked<WriteDatapointValuePort>;
+  let findByDatapointIdPort: jest.Mocked<FindDeviceByDatapointIdPort>;
 
   beforeEach(() => {
     findByIdPort = {
@@ -33,11 +40,21 @@ describe('DeviceService', () => {
       getDeviceValue: jest.fn(),
     } as any;
 
+    writeDatapointPort = {
+      writeDatapointValue: jest.fn(),
+    } as any;
+
+    findByDatapointIdPort = {
+      findByDatapointId: jest.fn(),
+    } as any;
+
     service = new DeviceService(
       findByIdPort,
       findByPlantIdPort,
       ingestTimeseriesPort,
       getDeviceValuePort,
+      writeDatapointPort,
+      findByDatapointIdPort,
     );
   });
 
@@ -152,6 +169,74 @@ describe('DeviceService', () => {
       await expect(service.ingestTimeseries(cmd)).rejects.toThrow(
         'Database connection failed',
       );
+    });
+  });
+
+  describe('getDeviceValue', () => {
+    it('should throw when deviceId is missing', async () => {
+      await expect(service.getDeviceValue({ deviceId: '' })).rejects.toThrow(
+        '[Device Controller] Device id is missing',
+      );
+    });
+
+    it('should enrich command with plantId before calling output port', async () => {
+      const device = new Device('device-1', 'plant-1', 'Lamp', 'light', 'dimmer', []);
+      const expectedValue = new DeviceValue('device-1', [
+        new DatapointValue('dp-1', 'Power', 'On'),
+      ]);
+      const cmd: GetDeviceValueCmd = { deviceId: 'device-1' };
+
+      findByIdPort.findById.mockResolvedValue(device);
+      getDeviceValuePort.getDeviceValue.mockResolvedValue(expectedValue);
+
+      const result = await service.getDeviceValue(cmd);
+
+      expect(findByIdPort.findById).toHaveBeenCalledWith({ id: 'device-1' });
+      expect(getDeviceValuePort.getDeviceValue).toHaveBeenCalledWith({
+        deviceId: 'device-1',
+        plantId: 'plant-1',
+      });
+      expect(result).toBe(expectedValue);
+    });
+  });
+
+  describe('writeDatapointValue', () => {
+    it('should resolve plantId from datapoint and call output port', async () => {
+      const cmd: WriteDatapointValueCmd = {
+        datapointId: 'dp-1',
+        value: 'On',
+      };
+      const device = new Device('device-1', 'plant-1', 'Lamp', 'light', 'dimmer', []);
+
+      findByDatapointIdPort.findByDatapointId.mockResolvedValue(device);
+      writeDatapointPort.writeDatapointValue.mockResolvedValue(undefined);
+
+      await service.writeDatapointValue(cmd);
+
+      expect(findByDatapointIdPort.findByDatapointId).toHaveBeenCalledWith({
+        datapointId: 'dp-1',
+      });
+      expect(writeDatapointPort.writeDatapointValue).toHaveBeenCalledWith({
+        datapointId: 'dp-1',
+        value: 'On',
+        plantId: 'plant-1',
+      });
+    });
+
+    it('should propagate errors from findByDatapointId port', async () => {
+      const cmd: WriteDatapointValueCmd = {
+        datapointId: 'dp-1',
+        value: 'On',
+      };
+
+      findByDatapointIdPort.findByDatapointId.mockRejectedValue(
+        new Error('device not found'),
+      );
+
+      await expect(service.writeDatapointValue(cmd)).rejects.toThrow(
+        'device not found',
+      );
+      expect(writeDatapointPort.writeDatapointValue).not.toHaveBeenCalled();
     });
   });
 });

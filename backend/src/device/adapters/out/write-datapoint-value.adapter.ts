@@ -17,7 +17,9 @@ export class WriteDatapointValueAdapter implements WriteDatapointValuePort {
         const token: string | null = await this.tokenPort.getValidToken();
         if(!token) throw new Error('[WRITE DATAPOINT ADAPTER] Token is null');
 
-        const result: boolean = await this.writeDatapointRepoPort.writeDeviceValue(token, cmd.datapointId, cmd.value);
+        if(!cmd.plantId) throw new Error('[WRITE DATAPOINT ADAPTER] Can\'t write datapoint value without plantId');
+
+        const result: boolean = await this.writeDatapointRepoPort.writeDeviceValue(token, cmd.plantId, cmd.datapointId, cmd.value);
         if(!result) throw Error('Bad Request');
     }
 }

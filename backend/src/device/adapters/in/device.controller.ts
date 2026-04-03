@@ -8,7 +8,7 @@ import {
   Post,
   Body,
   BadRequestException,
-  Query,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
@@ -97,8 +97,9 @@ export class DeviceController {
   }
 
   @Post('')
+  @HttpCode(202)
   async writeDatapointValue(@Body() req: WriteDatapointDto) {
-    if(!req.datapointId || !req.value) throw new BadRequestException;
+    if(!req.datapointId || !req.value) throw new BadRequestException();
 
     try {
       const cmd: WriteDatapointValueCmd = {
@@ -107,8 +108,11 @@ export class DeviceController {
       }
 
       await this.writeDatapointUseCase.writeDatapointValue(cmd);
-    } catch {
 
+      return { message: 'Datapoint value updated successfully', statusCode: 202 };
+    } catch (error) {
+      console.error('[DeviceController] Error writing datapoint:', error);
+      throw new ServiceUnavailableException('Failed to process datapoint value');
     }
   }
 

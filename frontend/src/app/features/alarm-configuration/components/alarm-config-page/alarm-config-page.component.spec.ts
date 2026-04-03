@@ -170,10 +170,44 @@ describe('AlarmConfigPageComponent', () => {
         expect(stateServiceStub.toggleEnabled).toHaveBeenCalledWith('alarm-1', false);
     });
 
-    it('onDelete invoca deleteAlarmRule con id', () => {
-        component.onDelete('alarm-1');
+    it('onDelete apre la modale di conferma senza chiamare subito la delete', () => {
+        component.onDelete('alarm-1', 'Temperatura alta');
+
+        expect(component.pendingDelete()).toEqual({ id: 'alarm-1', name: 'Temperatura alta' });
+        expect(stateServiceStub.deleteAlarmRule).not.toHaveBeenCalled();
+    });
+
+    it('onDeleteConfirmed invoca deleteAlarmRule con id e chiude la modale di conferma', () => {
+        component.onDelete('alarm-1', 'Temperatura alta');
+
+        component.onDeleteConfirmed();
 
         expect(stateServiceStub.deleteAlarmRule).toHaveBeenCalledWith('alarm-1');
+        expect(component.pendingDelete()).toBeNull();
+    });
+
+    it('onDeleteCancelled chiude la modale di conferma senza eliminare', () => {
+        component.onDelete('alarm-1', 'Temperatura alta');
+
+        component.onDeleteCancelled();
+
+        expect(component.pendingDelete()).toBeNull();
+        expect(stateServiceStub.deleteAlarmRule).not.toHaveBeenCalled();
+    });
+
+    it('renderizza la modale di conferma cancellazione quando richiesta', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
+
+        component.onDelete('alarm-1', 'Temperatura alta');
+        fixture.detectChanges();
+
+        const nativeElement = fixture.nativeElement as HTMLElement;
+        const confirmDialog = nativeElement.querySelector('app-confirm-dialog');
+        const content = nativeElement.textContent ?? '';
+
+        expect(confirmDialog).not.toBeNull();
+        expect(content).toContain('Confermi l\'eliminazione della soglia "Temperatura alta"?');
     });
 
     it('onModalClosed chiude modale e resetta editingRule', () => {

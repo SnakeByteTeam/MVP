@@ -47,7 +47,7 @@
                     <app-alarm-action-button label="MODIFICA" [ariaLabel]="'Modifica regola ' + row.name"
                         (pressed)="onEdit(row.id)" />
                     <app-alarm-action-button label="ELIMINA" tone="danger" [ariaLabel]="'Elimina regola ' + row.name"
-                        (pressed)="onDelete(row.id)" />
+                        (pressed)="onDelete(row.id, row.name)" />
                     <app-alarm-toggle-switch [checked]="row.isEnabled" [ariaLabel]="'Abilita regola ' + row.name"
                         (toggled)="onToggleEnabled(row.id, $event)" />
                 </div>
@@ -62,4 +62,9 @@
         <app-alarm-config-form [mode]="editingRule() ? 'edit' : 'create'" [initialRule]="editingRule()"
             (submittedForm)="onFormSubmitted($event)" (cancelled)="onModalClosed()" />
     </app-modal-shell>
+
+    @if (pendingDelete()) {
+    <app-confirm-dialog [message]="getDeleteConfirmMessage()" confirmLabel="Elimina" cancelLabel="Annulla"
+        (confirmed)="onDeleteConfirmed()" (cancelled)="onDeleteCancelled()" />
+    }
 </section>

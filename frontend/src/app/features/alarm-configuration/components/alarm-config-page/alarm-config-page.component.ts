@@ -5,6 +5,7 @@ import { AlarmTableShellComponent } from '../../../../shared/components/alarm-ta
 import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
 import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
 import { AlarmToggleSwitchComponent } from '../../../../shared/components/alarm-table/alarm-toggle-switch.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ModalShellComponent } from '../../../../shared/components/modal-shell/modal-shell.component';
 import { AlarmTableColumn } from '../../../../shared/models/alarm-table.model';
 import { AlarmConfigFormComponent } from '../alarm-config-form/alarm-config-form.component';
@@ -22,6 +23,7 @@ import { AlarmConfigTablePresenterService } from '../../services/alarm-config-ta
 		AlarmPriorityIndicatorComponent,
 		AlarmActionButtonComponent,
 		AlarmToggleSwitchComponent,
+		ConfirmDialogComponent,
 		ModalShellComponent,
 		AlarmConfigFormComponent,
 	],
@@ -45,6 +47,7 @@ export class AlarmConfigPageComponent implements OnInit {
 	public readonly error = toSignal(this.stateService.error$, { initialValue: null as string | null });
 	public readonly isModalOpen = signal(false);
 	public readonly editingRule = signal<AlarmRule | null>(null);
+	public readonly pendingDelete = signal<{ id: string; name: string } | null>(null);
 
 	public readonly rows = computed(() => this.tablePresenter.toRows(this.alarms()));
 
@@ -71,8 +74,31 @@ export class AlarmConfigPageComponent implements OnInit {
 		this.stateService.toggleEnabled(alarmRuleId, enabled).subscribe();
 	}
 
-	public onDelete(id: string): void {
-		this.stateService.deleteAlarmRule(id).subscribe();
+	public onDelete(id: string, name: string): void {
+		this.pendingDelete.set({ id, name });
+	}
+
+	public onDeleteConfirmed(): void {
+		const deleteCandidate = this.pendingDelete();
+		if (!deleteCandidate) {
+			return;
+		}
+
+		this.stateService.deleteAlarmRule(deleteCandidate.id).subscribe();
+		this.pendingDelete.set(null);
+	}
+
+	public onDeleteCancelled(): void {
+		this.pendingDelete.set(null);
+	}
+
+	public getDeleteConfirmMessage(): string {
+		const deleteCandidate = this.pendingDelete();
+		if (!deleteCandidate) {
+			return 'Confermi questa operazione?';
+		}
+
+		return `Confermi l'eliminazione della soglia "${deleteCandidate.name}"?`;
 	}
 
 	public onFormSubmitted(formValue: AlarmConfigFormValue): void {

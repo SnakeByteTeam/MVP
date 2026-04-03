@@ -8,11 +8,7 @@ import {
   Query,
   Redirect,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiTags,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import {
   APIAUTHUSECASE,
   type ApiAuthUseCase,

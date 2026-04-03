@@ -1,11 +1,9 @@
 import { HttpCacheController } from './http-cache.controller';
 import { UpdateCacheUseCase } from 'src/cache/application/ports/in/update-cache.usecase';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('HttpCacheController', () => {
   let controller: HttpCacheController;
   let updateCacheUseCase: jest.Mocked<UpdateCacheUseCase>;
-  let eventEmitter: jest.Mocked<EventEmitter2>;
   let setImmediateSpy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -16,12 +14,7 @@ describe('HttpCacheController', () => {
       updateCache: jest.fn().mockResolvedValue(true),
     } as any;
 
-    eventEmitter = {
-      emit: jest.fn(),
-      emitAsync: jest.fn(),
-    } as any;
-
-    controller = new HttpCacheController(updateCacheUseCase, eventEmitter);
+    controller = new HttpCacheController(updateCacheUseCase);
 
     // Run setImmediate callbacks synchronously only for this suite
     setImmediateSpy = jest
@@ -102,6 +95,8 @@ describe('HttpCacheController', () => {
       await controller.updateCache(body);
 
       await flushPromises();
+      await flushPromises();
+      await flushPromises();
 
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
         plantId: 'plant-1',
@@ -111,36 +106,6 @@ describe('HttpCacheController', () => {
       });
       expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
         plantId: 'plant-3',
-      });
-    });
-
-    it('should emit cache.updated event for each plant', async () => {
-      const body = {
-        data: [
-          {
-            type: 'service',
-            id: 'plant-1',
-            attributes: { lastModified: '2026-01-01' },
-            links: { self: '/' },
-          },
-          {
-            type: 'service',
-            id: 'plant-2',
-            attributes: { lastModified: '2026-01-01' },
-            links: { self: '/' },
-          },
-        ],
-      };
-
-      await controller.updateCache(body);
-
-      await flushPromises();
-
-      expect(eventEmitter.emit).toHaveBeenCalledWith('cache.updated', {
-        plantId: 'plant-1',
-      });
-      expect(eventEmitter.emit).toHaveBeenCalledWith('cache.updated', {
-        plantId: 'plant-2',
       });
     });
 
@@ -255,7 +220,7 @@ describe('HttpCacheController', () => {
       consoleSpy.mockRestore();
     });
 
-    it('should emit event even if updateCache fails', async () => {
+    it('should continue processing plants if one updateCache fails', async () => {
       (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
         new Error('Update failed'),
       );
@@ -276,7 +241,7 @@ describe('HttpCacheController', () => {
 
       await flushPromises();
 
-      expect(eventEmitter.emit).toHaveBeenCalledWith('cache.updated', {
+      expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
         plantId: 'plant-1',
       });
     });

@@ -11,7 +11,11 @@ import { PlantRepositoryImpl } from './infrastructure/persistence/plant-reposito
 import { FIND_ALL_AVAILABLE_PLANTS_USECASE } from './application/ports/in/find-all-available-plants.usecase';
 import { FIND_ALL_AVAILABLE_PLANTS_PORT } from './application/ports/out/find-all-available-plants.port';
 import { FindAllAvailablePlantsAdapter } from './adapters/out/find-all-available-plants.adapter';
-import { FIND_ALL_AVAILABLE_PLANTS_REPO_PORT } from './application/repository/find-all-plants.repository';
+import { FIND_ALL_AVAILABLE_PLANTS_REPO_PORT } from './application/repository/find-all-available-plants.repository';
+import { FIND_ALL_PLANTS_USECASE } from './application/ports/in/find-all-plants.usecase';
+import { FIND_ALL_PLANTS_PORT } from './application/ports/out/find-all-plants.port';
+import { FindAllPlantsAdapter } from './adapters/out/find-all-plants.adapter';
+import { FIND_ALL_PLANTS_REPO_PORT } from './application/repository/find-all-plants.repository';
 
 @Module({
   imports: [],
@@ -29,6 +33,9 @@ import { FIND_ALL_AVAILABLE_PLANTS_REPO_PORT } from './application/repository/fi
       provide: FIND_ALL_AVAILABLE_PLANTS_REPO_PORT,
       useClass: PlantRepositoryImpl,
     },
+    { provide: FIND_ALL_PLANTS_USECASE, useClass: PlantService },
+    { provide: FIND_ALL_PLANTS_PORT, useClass: FindAllPlantsAdapter },
+    { provide: FIND_ALL_PLANTS_REPO_PORT, useClass: PlantRepositoryImpl }
   ],
 })
 export class PlantModule {}

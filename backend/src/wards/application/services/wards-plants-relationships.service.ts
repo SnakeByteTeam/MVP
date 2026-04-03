@@ -11,7 +11,7 @@ import { FIND_ALL_PLANTS_BY_WARD_ID_PORT } from '../../adapters/out/find-all-pla
 import { FindAllPlantsByWardIdPort } from '../ports/out/find-all-plants-by-ward-id-port.interface';
 import { REMOVE_PLANT_FROM_WARD_PORT } from '../../adapters/out/remove-plant-from-ward-adapter';
 import { RemovePlantFromWardPort } from '../ports/out/remove-plant-from-ward-port.interface';
-import { Plant } from '../../domain/plant';
+import { Plant } from 'src/plant/domain/models/plant.model';
 
 @Injectable()
 export class WardsPlantsRelationshipsService

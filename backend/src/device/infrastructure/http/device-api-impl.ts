@@ -10,7 +10,9 @@ import { WriteDatapointValueRepoPort } from 'src/device/application/repository/w
 import { WriteDatapointValueRequestDto } from './dtos/out/write-datapoint-value-request.dto';
 
 @Injectable()
-export class DeviceApiImpl implements GetDeviceValueRepoPort, WriteDatapointValueRepoPort {
+export class DeviceApiImpl
+  implements GetDeviceValueRepoPort, WriteDatapointValueRepoPort
+{
   constructor(private readonly httpService: HttpService) {}
 
   private readonly API_DOMAIN = process.env.HOST3 || '';
@@ -22,13 +24,12 @@ export class DeviceApiImpl implements GetDeviceValueRepoPort, WriteDatapointValu
   ): Promise<DatapointExtractedDto[]> {
     try {
       const response = await firstValueFrom(
-        this.httpService
-          .get<DatapointApiResponse>(
-            `${this.API_DOMAIN}/${plantId}/functions/${deviceId}/datapoints`,
-            {
-              headers: { Authorization: `Bearer ${validToken}` },
-            },
-          )
+        this.httpService.get<DatapointApiResponse>(
+          `${this.API_DOMAIN}/${plantId}/functions/${deviceId}/datapoints`,
+          {
+            headers: { Authorization: `Bearer ${validToken}` },
+          },
+        ),
       );
 
       const extracted: DatapointExtractedDto[] =
@@ -39,24 +40,30 @@ export class DeviceApiImpl implements GetDeviceValueRepoPort, WriteDatapointValu
     }
   }
 
-  async writeDeviceValue(validToken: string, plantId: string, datapointId: string, value: string): Promise<boolean> {
+  async writeDeviceValue(
+    validToken: string,
+    plantId: string,
+    datapointId: string,
+    value: string,
+  ): Promise<boolean> {
     try {
-
-      const data = WriteDatapointValueRequestDto.fromDatapoint(datapointId, value);
+      const data = WriteDatapointValueRequestDto.fromDatapoint(
+        datapointId,
+        value,
+      );
 
       const response = await firstValueFrom(
-        this.httpService
-          .put(
-            `${this.API_DOMAIN}/${plantId}/datapoints/values/`,
-            data,
-            {
-              headers: {
-                Authorization: `Bearer ${validToken}`,
-                'Content-Type': 'application/vnd.api+json',
-                accept: 'application/vnd.api+json',
-              },
+        this.httpService.put(
+          `${this.API_DOMAIN}/${plantId}/datapoints/values/`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${validToken}`,
+              'Content-Type': 'application/vnd.api+json',
+              accept: 'application/vnd.api+json',
             },
-          )
+          },
+        ),
       );
 
       return true;
@@ -66,5 +73,3 @@ export class DeviceApiImpl implements GetDeviceValueRepoPort, WriteDatapointValu
     }
   }
 }
-
-

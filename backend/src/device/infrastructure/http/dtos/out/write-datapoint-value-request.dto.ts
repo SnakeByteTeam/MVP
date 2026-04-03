@@ -59,7 +59,10 @@ export class WriteDatapointValueRequestDto {
   /**
    * Factory method to create request DTO from datapoint ID and value
    */
-  static fromDatapoint(datapointId: string, value: string): WriteDatapointValueRequestDto {
+  static fromDatapoint(
+    datapointId: string,
+    value: string,
+  ): WriteDatapointValueRequestDto {
     const dto = new WriteDatapointValueRequestDto();
     dto.data = [
       {

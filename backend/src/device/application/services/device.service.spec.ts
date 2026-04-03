@@ -8,7 +8,10 @@ import { IngestTimeseriesCmd } from '../commands/ingest-timeseries.command';
 import { Device } from 'src/device/domain/models/device.model';
 import { Datapoint } from 'src/device/domain/models/datapoint.model';
 import { DeviceService } from './device.service';
-import { DeviceValue, DatapointValue } from 'src/device/domain/models/device-value.model';
+import {
+  DeviceValue,
+  DatapointValue,
+} from 'src/device/domain/models/device-value.model';
 import { GetDeviceValueCmd } from '../commands/get-device-value.command';
 import { WriteDatapointValueCmd } from '../commands/write-datapoint-value.command';
 import { WriteDatapointValuePort } from '../ports/out/write-device-value.port';
@@ -180,7 +183,14 @@ describe('DeviceService', () => {
     });
 
     it('should enrich command with plantId before calling output port', async () => {
-      const device = new Device('device-1', 'plant-1', 'Lamp', 'light', 'dimmer', []);
+      const device = new Device(
+        'device-1',
+        'plant-1',
+        'Lamp',
+        'light',
+        'dimmer',
+        [],
+      );
       const expectedValue = new DeviceValue('device-1', [
         new DatapointValue('dp-1', 'Power', 'On'),
       ]);
@@ -206,7 +216,14 @@ describe('DeviceService', () => {
         datapointId: 'dp-1',
         value: 'On',
       };
-      const device = new Device('device-1', 'plant-1', 'Lamp', 'light', 'dimmer', []);
+      const device = new Device(
+        'device-1',
+        'plant-1',
+        'Lamp',
+        'light',
+        'dimmer',
+        [],
+      );
 
       findByDatapointIdPort.findByDatapointId.mockResolvedValue(device);
       writeDatapointPort.writeDatapointValue.mockResolvedValue(undefined);

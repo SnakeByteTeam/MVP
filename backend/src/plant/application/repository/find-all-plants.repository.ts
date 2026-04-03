@@ -1,9 +1,7 @@
-import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant.entity';
+import { PlantEntity } from "src/plant/infrastructure/persistence/entities/plant.entity";
 
-export interface FindAllAvailablePlantsRepoPort {
-  findAllAvailablePlants(): Promise<PlantEntity[] | null>;
+export interface FindAllPlantsRepoPort {
+    findAllPlants(): Promise<PlantEntity[] | null>;
 }
 
-export const FIND_ALL_AVAILABLE_PLANTS_REPO_PORT = Symbol(
-  'FindAllAvailablePlantsRepoPort',
-);
+export const FIND_ALL_PLANTS_REPO_PORT = Symbol('FindAllPlantsRepoPort');

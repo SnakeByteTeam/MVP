@@ -6,7 +6,7 @@ import {
   AddPlantToWardRepository,
 } from '../../application/repository/add-plant-to-ward-repository.interface';
 import { PlantEntity } from '../../infrastructure/entities/plant-entity';
-import { Plant } from '../../domain/plant';
+import { Plant } from 'src/plant/domain/models/plant.model';
 
 export class AddPlantToWardAdapter implements AddPlantToWardPort {
   constructor(

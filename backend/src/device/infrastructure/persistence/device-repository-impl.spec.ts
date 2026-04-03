@@ -425,7 +425,9 @@ describe('DeviceRepositoryImpl', () => {
         datapoints: [],
       };
 
-      mockClient.query.mockResolvedValueOnce({ rows: [{ device: mockDevice }] });
+      mockClient.query.mockResolvedValueOnce({
+        rows: [{ device: mockDevice }],
+      });
 
       const result = await repository.findByDatapointId('dp-1');
 

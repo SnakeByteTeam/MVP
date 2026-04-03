@@ -1,4 +1,4 @@
 export interface WriteDatapointDto {
-    datapointId: string;
-    value: string;
+  datapointId: string;
+  value: string;
 }

@@ -36,7 +36,7 @@ describe('FindPlantByIdAdapter', () => {
     expect(result?.getId()).toBe('plant-1');
     expect(result?.getName()).toBe('My Plant');
     expect(result?.getRooms()).toHaveLength(1);
-    expect(result?.getRooms()[0]?.getId()).toBe('room-1');
+    expect(result?.getRooms()?.[0]?.getId()).toBe('room-1');
     expect(repo.findById).toHaveBeenCalledWith('plant-1');
     expect(repo.findById).toHaveBeenCalledTimes(1);
   });

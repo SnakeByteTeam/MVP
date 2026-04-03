@@ -38,7 +38,8 @@ describe('Plant', () => {
     expect(plant.getRooms()).toHaveLength(1);
 
     const returnedRooms = plant.getRooms();
-    returnedRooms.push(new Room('room-3', 'Bedroom', []));
+    expect(returnedRooms).not.toBeNull();
+    returnedRooms?.push(new Room('room-3', 'Bedroom', []));
     expect(plant.getRooms()).toHaveLength(1);
   });
 });

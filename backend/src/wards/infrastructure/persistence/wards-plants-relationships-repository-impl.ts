@@ -8,10 +8,11 @@ import { Pool } from 'pg';
 
 export class WardsPlantsRelationshipsRepositoryImpl
   implements
-  AddPlantToWardRepository,
-  FindAllPlantsByWardIdRepository,
-  RemovePlantFromWardRepository {
-  constructor(@Inject(PG_POOL) private readonly conn: Pool) { }
+    AddPlantToWardRepository,
+    FindAllPlantsByWardIdRepository,
+    RemovePlantFromWardRepository
+{
+  constructor(@Inject(PG_POOL) private readonly conn: Pool) {}
 
   async addPlantToWard(wardId: number, plantId: string): Promise<PlantEntity> {
     const client = await this.conn.connect();
@@ -28,10 +29,10 @@ export class WardsPlantsRelationshipsRepositoryImpl
         throw new Error('Add plant to ward failed');
       }
 
-      await client.query(
-        'UPDATE plant SET ward_id = $1 WHERE id = $2',
-        [wardId, plantId],
-      );
+      await client.query('UPDATE plant SET ward_id = $1 WHERE id = $2', [
+        wardId,
+        plantId,
+      ]);
 
       await client.query('COMMIT');
       return result.rows[0];
@@ -45,7 +46,7 @@ export class WardsPlantsRelationshipsRepositoryImpl
 
   async findAllPlantsByWardId(wardId: number): Promise<PlantEntity[]> {
     const result = await this.conn.query(
-      'SELECT p.id, p.data->>\'name\' as name FROM plant p WHERE p.ward_id = $1',
+      "SELECT p.id, p.data->>'name' as name FROM plant p WHERE p.ward_id = $1",
       [wardId],
     );
 
@@ -62,10 +63,9 @@ export class WardsPlantsRelationshipsRepositoryImpl
         plantId,
       ]);
 
-      await client.query(
-        'UPDATE plant SET ward_id = NULL WHERE id = $1',
-        [plantId],
-      );
+      await client.query('UPDATE plant SET ward_id = NULL WHERE id = $1', [
+        plantId,
+      ]);
 
       await client.query('COMMIT');
     } catch (error) {

@@ -6,6 +6,6 @@ export interface ChartInfoDto {
     datasets: ChartDatasetDto[];
     title: string;
     unit: string;
-    suggestion: EnergySavingSuggestionDto;
+    suggestions: EnergySavingSuggestionDto;
     metric: string;
 }

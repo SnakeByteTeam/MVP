@@ -3,42 +3,42 @@
 class="grid grid-cols-6 gap-4 w-full min-h-screen bg-slate-50 gap-10 p-4 content-start ">
 
     <app-energy-consumption-chart 
-        class="col-span-3 w-full"
+        class="col-span-6 2xl:col-span-3 w-full"
         [chartInfo]="getChartByMetric(data,'plant-consumption')!">
     </app-energy-consumption-chart>
 
     <app-temperature-variations-chart 
-        class="col-span-3"
+        class="col-span-6 2xl:col-span-3"
         [chartInfo]="getChartByMetric(data,'thermostat-temperature')!">
     </app-temperature-variations-chart>
 
     <app-alarm-frequency-chart 
-        class="col-span-2"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
         [chartInfo]="getChartByMetric(data,'ward-alarms-frequency')!">
     </app-alarm-frequency-chart>
 
     <app-alarms-sent-resolved-chart 
-        class="col-span-2"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
         [chartInfo]="getChartByMetric(data,'ward-resolved-alarm')!">
     </app-alarms-sent-resolved-chart>
 
     <app-fall-frequency-chart 
-        class="col-span-2"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
         [chartInfo]="getChartByMetric(data,'ward-falls')!">
     </app-fall-frequency-chart>
 
     <app-plant-anomalies-chart 
-        class="col-span-2"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
         [chartInfo]="getChartByMetric(data,'plant-anomalies')!">
     </app-plant-anomalies-chart>
 
     <app-presence-detection-chart 
-        class="col-span-2"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
         [chartInfo]="getChartByMetric(data,'sensor-presence')!">
     </app-presence-detection-chart>
 
     <app-prolonged-presence-chart 
-        class="col-span-2"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
         [chartInfo]="getChartByMetric(data,'sensor-long-presence')!">
     </app-prolonged-presence-chart>
 

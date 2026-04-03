@@ -1,4 +1,4 @@
 export interface EnergySavingSuggestionDto {
-    description: string;
+    messages: string[];
     isSuggestion: boolean;
 }

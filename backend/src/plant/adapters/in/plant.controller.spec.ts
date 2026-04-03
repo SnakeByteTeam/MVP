@@ -1,12 +1,14 @@
 import { PlantController } from './plant.controller';
 import { FindPlantByIdUseCase } from 'src/plant/application/ports/in/find-plant-by-id.usecase';
 import { FindAllAvailablePlantsUseCase } from 'src/plant/application/ports/in/find-all-available-plants.usecase';
+import { FindAllPlantsUseCase } from 'src/plant/application/ports/in/find-all-plants.usecase';
 import { Plant } from 'src/plant/domain/models/plant.model';
 
 describe('PlantController', () => {
   let controller: PlantController;
   let findPlantByIdUseCase: jest.Mocked<FindPlantByIdUseCase>;
   let findAllAvailablePlantsUseCase: jest.Mocked<FindAllAvailablePlantsUseCase>;
+  let findAllPlantsUseCase: jest.Mocked<FindAllPlantsUseCase>;
 
   beforeEach(() => {
     findPlantByIdUseCase = {
@@ -15,10 +17,14 @@ describe('PlantController', () => {
     findAllAvailablePlantsUseCase = {
       findAllAvailablePlants: jest.fn(),
     };
+    findAllPlantsUseCase = {
+      findAllPlants: jest.fn(),
+    };
 
     controller = new PlantController(
       findPlantByIdUseCase,
       findAllAvailablePlantsUseCase,
+      findAllPlantsUseCase,
     );
   });
 
@@ -109,7 +115,46 @@ describe('PlantController', () => {
       expect(result).toHaveLength(3);
       expect(result[0].id).toBe('plant-1');
       expect(result[0].wardId).toBe(5);
-      expect(result[2].wardId).toBe(0);
+      expect(result[2].wardId).toBeUndefined();
+    });
+  });
+
+  describe('getAllPlants', () => {
+    it('should return all plants as DTOs', async () => {
+      const plant1 = new Plant('plant-1', 'Plant A', [], 1);
+      const plant2 = new Plant('plant-2', 'Plant B', [], 2);
+
+      findAllPlantsUseCase.findAllPlants.mockResolvedValue([plant1, plant2]);
+
+      const result = await controller.getAllPlants();
+
+      expect(findAllPlantsUseCase.findAllPlants).toHaveBeenCalledTimes(1);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        id: 'plant-1',
+        name: 'Plant A',
+        rooms: [],
+        wardId: 1,
+      });
+      expect(result[1]).toEqual({
+        id: 'plant-2',
+        name: 'Plant B',
+        rooms: [],
+        wardId: 2,
+      });
+    });
+
+    it('should return fallback response when no plants are found', async () => {
+      findAllPlantsUseCase.findAllPlants.mockRejectedValue(
+        new Error('No plants found'),
+      );
+
+      const result = await controller.getAllPlants();
+
+      expect(result).toEqual({
+        message: 'No plants found',
+        statusCode: 202,
+      });
     });
   });
 });

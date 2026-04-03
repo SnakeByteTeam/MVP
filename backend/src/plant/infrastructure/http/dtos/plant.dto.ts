@@ -1,31 +1,37 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Plant } from 'src/plant/domain/models/plant.model';
-import { IsArray, IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { RoomDto } from './room.dto';
 
 export class PlantDto {
   @ApiProperty({ example: 'plant-1' })
   @IsString()
   @IsNotEmpty()
-  id: string;
+  id!: string;
 
   @ApiProperty({ example: 'My Apartment' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
-  @ApiProperty({ type: () => RoomDto, isArray: true })
+  @ApiPropertyOptional({ type: () => RoomDto, isArray: true })
   @IsArray()
-  @IsNotEmpty()
-  rooms: RoomDto[];
+  @IsOptional()
+  rooms?: RoomDto[];
 
-  @ApiProperty({ example: '2026-03-25T10:00:00.000Z', format: 'date-time' })
+  @ApiPropertyOptional({ example: 1, type: Number })
   @IsNumber()
-  @IsNotEmpty()
-  wardId: number;
+  @IsOptional()
+  wardId?: number;
 
   static toDomain(dto: PlantDto): Plant {
-    const rooms = dto.rooms.map((room) => RoomDto.toDomain(room));
+    const rooms = (dto.rooms ?? []).map((room) => RoomDto.toDomain(room));
     return new Plant(dto.id, dto.name, rooms, dto.wardId);
   }
 
@@ -33,8 +39,15 @@ export class PlantDto {
     const dto = new PlantDto();
     dto.id = plant.getId();
     dto.name = plant.getName();
-    dto.rooms = plant.getRooms().map((room) => RoomDto.fromDomain(room));
-    dto.wardId = plant.getWardId();
+
+    const rooms = plant.getRooms();
+    dto.rooms = rooms ? rooms.map((room) => RoomDto.fromDomain(room)) : [];
+
+    const wardId = plant.getWardId();
+    if (wardId !== null) {
+      dto.wardId = wardId;
+    }
+
     return dto;
   }
 }

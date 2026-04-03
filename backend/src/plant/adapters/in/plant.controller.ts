@@ -17,6 +17,7 @@ import {
   FIND_ALL_AVAILABLE_PLANTS_USECASE,
   type FindAllAvailablePlantsUseCase,
 } from 'src/plant/application/ports/in/find-all-available-plants.usecase';
+import { FIND_ALL_PLANTS_USECASE, type FindAllPlantsUseCase } from 'src/plant/application/ports/in/find-all-plants.usecase';
 import {
   FIND_PLANT_BY_ID_USECASE,
   type FindPlantByIdUseCase,
@@ -32,6 +33,8 @@ export class PlantController {
     private readonly findPlantById: FindPlantByIdUseCase,
     @Inject(FIND_ALL_AVAILABLE_PLANTS_USECASE)
     private readonly findAllAvailablePlants: FindAllAvailablePlantsUseCase,
+    @Inject(FIND_ALL_PLANTS_USECASE)
+    private readonly findAllPlants: FindAllPlantsUseCase
   ) {}
 
   @Get()
@@ -88,6 +91,21 @@ export class PlantController {
       return plantsDto;
     } catch {
       return { message: 'No available plants found', statusCode: 202 };
+    }
+  }
+
+  @Get('all')
+  async getAllPlants() {
+    try {
+      const plants: Plant[] = await this.findAllPlants.findAllPlants();
+
+      const plantsDto: PlantDto[] = plants.map((plant: Plant) =>
+        PlantDto.fromDomain(plant),
+      );
+
+      return plantsDto;
+    } catch {
+      return { message: 'No plants found', statusCode: 202}
     }
   }
 }

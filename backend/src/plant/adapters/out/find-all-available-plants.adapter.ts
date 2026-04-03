@@ -3,7 +3,7 @@ import { FindAllAvailablePlantsPort } from 'src/plant/application/ports/out/find
 import {
   FIND_ALL_AVAILABLE_PLANTS_REPO_PORT,
   type FindAllAvailablePlantsRepoPort,
-} from 'src/plant/application/repository/find-all-plants.repository';
+} from 'src/plant/application/repository/find-all-available-plants.repository';
 import { Plant } from 'src/plant/domain/models/plant.model';
 import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant.entity';
 

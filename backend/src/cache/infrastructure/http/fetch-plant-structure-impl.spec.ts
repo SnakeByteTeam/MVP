@@ -101,11 +101,11 @@ describe('FetchStructureCacheImpl', () => {
       expect(result?.id).toBe('plant-1');
       expect(result?.name).toBe('Living Room');
       expect(result?.rooms).toHaveLength(1);
-      expect(result?.rooms[0]?.id).toBe('room-1');
-      expect(result?.rooms[0]?.devices).toHaveLength(1);
-      expect(result?.rooms[0]?.devices[0]?.id).toBe('device-1');
-      expect(result?.rooms[0]?.devices[0]?.subType).toBe('SS_Light_Switch');
-      expect(result?.rooms[0]?.devices[0]?.datapoints).toHaveLength(1);
+      expect(result?.rooms?.[0]?.id).toBe('room-1');
+      expect(result?.rooms?.[0]?.devices).toHaveLength(1);
+      expect(result?.rooms?.[0]?.devices[0]?.id).toBe('device-1');
+      expect(result?.rooms?.[0]?.devices[0]?.subType).toBe('SS_Light_Switch');
+      expect(result?.rooms?.[0]?.devices[0]?.datapoints).toHaveLength(1);
 
       expect(httpService.get).toHaveBeenCalledTimes(3);
     });
@@ -329,10 +329,10 @@ describe('FetchStructureCacheImpl', () => {
 
       expect(result).not.toBeNull();
       expect(result?.rooms).toHaveLength(2);
-      expect(result?.rooms[0]?.id).toBe('room-1');
-      expect(result?.rooms[1]?.id).toBe('room-2');
-      expect(result?.rooms[0]?.devices).toHaveLength(1);
-      expect(result?.rooms[1]?.devices).toHaveLength(1);
+      expect(result?.rooms?.[0]?.id).toBe('room-1');
+      expect(result?.rooms?.[1]?.id).toBe('room-2');
+      expect(result?.rooms?.[0]?.devices).toHaveLength(1);
+      expect(result?.rooms?.[1]?.devices).toHaveLength(1);
     });
 
     it('should filter out non-location items', async () => {
@@ -395,7 +395,7 @@ describe('FetchStructureCacheImpl', () => {
 
       // Only room-1 should be fetched, not-location should be filtered
       expect(result?.rooms).toHaveLength(1);
-      expect(result?.rooms[0]?.id).toBe('room-1');
+      expect(result?.rooms?.[0]?.id).toBe('room-1');
     });
   });
 

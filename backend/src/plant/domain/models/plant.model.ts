@@ -3,13 +3,13 @@ import { Room } from '../../../plant/domain/models/room.model';
 export class Plant {
   private readonly id: string;
   private readonly name: string;
-  private readonly rooms: Room[];
-  private readonly wardId: number;
+  private readonly rooms?: Room[];
+  private readonly wardId?: number;
 
-  constructor(id: string, name: string, rooms: Room[], wardId: number) {
+  constructor(id: string, name: string, rooms?: Room[], wardId?: number) {
     this.id = id;
     this.name = name;
-    this.rooms = [...rooms];
+    if(rooms) this.rooms = [...rooms];
     this.wardId = wardId;
   }
 
@@ -21,11 +21,13 @@ export class Plant {
     return this.name;
   }
 
-  getRooms(): Room[] {
-    return [...this.rooms];
+  getRooms(): Room[] | null {
+    if(this.rooms) return [...this.rooms];
+    return null
   }
 
-  getWardId(): number {
-    return this.wardId;
+  getWardId(): number | null {
+    if(this.wardId) return this.wardId;
+    return null;
   }
 }

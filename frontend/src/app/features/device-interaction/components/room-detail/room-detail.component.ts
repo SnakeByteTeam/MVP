@@ -1,9 +1,10 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Observable, Subject, catchError, map, of, startWith, switchMap } from 'rxjs';
+import { EMPTY, Observable, Subject, catchError, finalize, map, of, startWith, switchMap, tap } from 'rxjs';
 import { Room } from '../../../apartment-monitor/models/room.model';
 import { DeviceCardComponent } from '../device-card/device-card.component';
+import { WriteDatapointRequest } from '../../models/write-datapoint-request.model';
 import { DeviceApiService } from '../../services/device-api.service';
 
 @Component({
@@ -26,14 +27,38 @@ export class RoomDetailComponent {
 		switchMap((roomId) =>
 			this.refresh$.pipe(
 				startWith(void 0),
-				switchMap(() => this.deviceApi.getRoom(roomId))
+				switchMap(() => this.deviceApi.getRoom(roomId).pipe(tap(() => {
+					this.loadError = '';
+				}))),
 			)
 		),
 		catchError(() => {
-			this.error = 'Impossibile caricare i dispositivi della stanza.';
+			this.loadError = 'Impossibile caricare i dispositivi della stanza.';
 			return of({ id: '', name: '', hasActiveAlarm: false, devices: [] });
 		})
 	);
 
-	public error = '';
+	public loadError = '';
+	public writeError: string | null = null;
+	public isExecuting = false;
+
+	public onDatapointWriteRequested(request: WriteDatapointRequest): void {
+		if (this.isExecuting) {
+			return;
+		}
+
+		this.writeError = null;
+		this.isExecuting = true;
+
+		this.deviceApi.writeDatapointValue({ datapointId: request.datapointId, value: request.value }).pipe(
+			tap(() => this.refresh$.next()),
+			catchError(() => {
+				this.writeError = 'Impossibile inviare il comando al dispositivo.';
+				return EMPTY;
+			}),
+			finalize(() => {
+				this.isExecuting = false;
+			}),
+		).subscribe();
+	}
 }

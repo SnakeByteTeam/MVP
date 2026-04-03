@@ -9,14 +9,20 @@
     </div>
   </header>
 
-  @if (error) {
-    <p class="room-detail__error" role="alert">{{ error }}</p>
+  @if (loadError) {
+    <p class="room-detail__error" role="alert">{{ loadError }}</p>
   }
 
   @if (room$ | async; as room) {
     <div class="room-detail__grid">
       @for (device of room.devices; track device.id) {
-        <app-device-card [roomId]="room.id" [device]="device" />
+        <app-device-card
+          [roomId]="room.id"
+          [device]="device"
+          [isExecuting]="isExecuting"
+          [error]="writeError"
+          (datapointWriteRequested)="onDatapointWriteRequested($event)"
+        />
       }
     </div>
   } @else {

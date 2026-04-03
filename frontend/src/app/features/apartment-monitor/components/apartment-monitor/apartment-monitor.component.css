@@ -15,6 +15,30 @@
   margin: 0;
 }
 
+.apartment-monitor__title {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.apartment-monitor__selector {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 16rem;
+}
+
+.apartment-monitor__selector label {
+  font-size: 0.85rem;
+  color: #4d5b66;
+}
+
+.apartment-monitor__selector select {
+  min-height: 2.2rem;
+  border: 1px solid #d0d7de;
+  border-radius: 0.45rem;
+  padding: 0 0.6rem;
+  background: #fff;
+}
+
 .apartment-monitor__content {
   display: grid;
   grid-template-columns: 1.7fr 1fr;
@@ -34,5 +58,9 @@
   .apartment-monitor__header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .apartment-monitor__selector {
+    min-width: 0;
   }
 }

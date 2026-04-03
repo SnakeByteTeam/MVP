@@ -63,6 +63,12 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
                     import('../apartment-monitor/apartment-monitor.routes').then((m) => m.APARTMENT_MONITOR_ROUTES)
             },
             {
+                path: 'device-interaction',
+                canActivate: [authGuard],
+                loadChildren: () =>
+                    import('../device-interaction/device-interaction.routes').then((m) => m.DEVICE_INTERACTION_ROUTES)
+            },
+            {
                 path: 'notifications',
                 canActivate: [authGuard],
                 loadChildren: () => import('../notification/notification.routes').then((m) => m.NOTIFICATION_ROUTES)

@@ -3,5 +3,41 @@
     <h3>{{ device().name }}</h3>
     <p>{{ getTypeLabel(device().type) }} · {{ device().status }}</p>
   </header>
+
+  @if (error()) {
+    <p class="device-card__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (hasWritableDatapoints()) {
+    <div class="device-card__writes">
+      @for (datapoint of getWritableEnumDatapoints(); track datapoint.id) {
+        <div class="device-card__write-row">
+          <label [for]="'dp-' + device().id + '-' + datapoint.id">{{ datapoint.name }}</label>
+          <div class="device-card__write-controls">
+            <select
+              [id]="'dp-' + device().id + '-' + datapoint.id"
+              [disabled]="isExecuting()"
+              [value]="getSelectedValue(datapoint.id, datapoint.enum)"
+              (change)="onSelectionChange(datapoint.id, $any($event.target).value)"
+            >
+              @for (enumValue of datapoint.enum; track enumValue) {
+                <option [value]="enumValue">{{ enumValue }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              [disabled]="isExecuting()"
+              (click)="onWriteDatapoint(datapoint.id, datapoint.enum)"
+            >
+              Scrivi
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="device-card__no-write">Nessun datapoint scrivibile.</p>
+  }
+
   <p class="device-card__id">ID stanza: {{ roomId() }} · ID device: {{ device().id }}</p>
 </article>

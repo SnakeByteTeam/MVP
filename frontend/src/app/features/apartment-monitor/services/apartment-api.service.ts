@@ -1,11 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { DeviceType } from '../../device-interaction/models/device-type.enum';
 import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
 import { PlantDto } from '../models/plant-response.model';
+
+export interface ApartmentOption {
+	id: string;
+	name: string;
+}
 
 const DEVICE_TYPE_RULES: ReadonlyArray<{ token: string; type: DeviceType }> = [
 	{ token: 'THERMOSTAT', type: DeviceType.THERMOSTAT },
@@ -20,14 +25,30 @@ const DEVICE_TYPE_RULES: ReadonlyArray<{ token: string; type: DeviceType }> = [
 export class ApartmentApiService {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl: string = inject(API_BASE_URL);
-	private readonly plantEndpoint = `${this.baseUrl}/api/plant`;
+	private readonly plantEndpoint = `${this.baseUrl}/plant`;
 	private readonly apartmentsEndpoint = `${this.baseUrl}/api/apartments`;
 
 	public getCurrentApartment(): Observable<Apartment> {
-		// TO_DO(back-end): sostituire con fonte ufficiale del plant attivo (claim JWT o endpoint dedicato).
-		const plantId = this.getActivePlantId();
+		return this.getAvailablePlants().pipe(
+			map((plants) => {
+				const storedPlantId = this.getActivePlantId();
+				const selectedPlant = plants.find((plant) => plant.id === storedPlantId) ?? plants[0];
 
-		return this.getApartmentByPlantId(plantId);
+				if (!selectedPlant) {
+					throw new Error('No available plants found');
+				}
+
+				this.setActivePlantId(selectedPlant.id);
+				return selectedPlant.id;
+			}),
+			switchMap((plantId) => this.getApartmentByPlantId(plantId)),
+		);
+	}
+
+	public getAvailableApartments(): Observable<ApartmentOption[]> {
+		return this.getAvailablePlants().pipe(
+			map((plants) => plants.map((plant) => ({ id: plant.id, name: plant.name }))),
+		);
 	}
 
 	public getApartmentByPlantId(plantId: string): Observable<Apartment> {
@@ -50,8 +71,26 @@ export class ApartmentApiService {
 		);
 	}
 
-	private getActivePlantId(): string {
-		return localStorage.getItem('activePlantId') ?? 'plant-1';
+	public setActivePlantId(plantId: string): void {
+		const storage = globalThis.localStorage as { setItem?: (key: string, value: string) => void } | undefined;
+
+		if (storage && typeof storage.setItem === 'function') {
+			storage.setItem('activePlantId', plantId);
+		}
+	}
+
+	private getActivePlantId(): string | null {
+		const storage = globalThis.localStorage as { getItem?: (key: string) => string | null } | undefined;
+
+		if (storage && typeof storage.getItem === 'function') {
+			return storage.getItem('activePlantId');
+		}
+
+		return null;
+	}
+
+	private getAvailablePlants(): Observable<PlantDto[]> {
+		return this.http.get<PlantDto[]>(`${this.plantEndpoint}/available`);
 	}
 
 	private mapPlantToApartment(plant: PlantDto): Apartment {
@@ -69,6 +108,7 @@ export class ApartmentApiService {
 					type: this.mapDeviceType(device.type),
 					status: this.mapDeviceStatus(device.type),
 					actions: [],
+					datapoints: [],
 				})),
 			})),
 		};

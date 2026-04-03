@@ -1,10 +1,27 @@
 <section class="apartment-monitor" aria-label="Monitor appartamento">
   <header class="apartment-monitor__header">
     @if (apartment$ | async; as apartment) {
-      <div>
+      <div class="apartment-monitor__title">
         <h1>{{ apartment.name }}</h1>
         <p>Monitoraggio stato appartamento e accesso rapido alle stanze.</p>
       </div>
+    }
+
+    @if (availableApartments$ | async; as apartments) {
+      @if (apartments.length > 0) {
+        <div class="apartment-monitor__selector">
+          <label for="active-apartment">Appartamento attivo</label>
+          <select
+            id="active-apartment"
+            [value]="activeApartmentId"
+            (change)="onApartmentSelected($any($event.target).value)"
+          >
+            @for (apartmentOption of apartments; track apartmentOption.id) {
+              <option [value]="apartmentOption.id">{{ apartmentOption.name }}</option>
+            }
+          </select>
+        </div>
+      }
     }
   </header>
 

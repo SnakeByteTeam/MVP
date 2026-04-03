@@ -11,6 +11,47 @@
   margin: 0;
 }
 
+.device-card__writes {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.device-card__write-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.device-card__write-controls {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.device-card__write-controls select,
+.device-card__write-controls button {
+  min-height: 2rem;
+}
+
+.device-card__write-controls button {
+  cursor: pointer;
+}
+
+.device-card__write-controls button:disabled,
+.device-card__write-controls select:disabled {
+  cursor: not-allowed;
+}
+
+.device-card__error {
+  margin: 0;
+  color: #a40000;
+  font-size: 0.85rem;
+}
+
+.device-card__no-write {
+  color: #5f6b73;
+  font-size: 0.85rem;
+}
+
 .device-card__id {
   font-size: 0.8rem;
   color: #5f6b73;

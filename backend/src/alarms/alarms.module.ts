@@ -43,8 +43,10 @@ import { CheckAlarmRuleAdapter } from './adapters/out/check-alarm-rule-adapter';
 import { CREATE_ALARM_EVENT_REPOSITORY } from './application/repository/create-alarm-event-repository.interface';
 import { CreateAlarmEventAdapter } from './adapters/out/create-alarm-event-adapter';
 import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-event-port.interface';
+import { GuardModule } from '../guard/guard.module';
 
 @Module({
+  imports: [GuardModule],
   controllers: [AlarmRulesController, AlarmEventsController],
   providers: [
     { provide: CREATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
@@ -53,14 +55,12 @@ import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-ev
       provide: CREATE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
-
     { provide: DELETE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
     { provide: DELETE_ALARM_RULE_PORT, useClass: DeleteAlarmRuleAdapter },
     {
       provide: DELETE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
-
     { provide: GET_ALL_ALARM_RULES_USE_CASE, useClass: AlarmRuleService },
     {
       provide: GET_ALL_ALARM_RULES_PORT,
@@ -70,7 +70,6 @@ import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-ev
       provide: GET_ALL_ALARM_RULES_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
-
     { provide: GET_ALARM_RULE_BY_ID_USE_CASE, useClass: AlarmRuleService },
     {
       provide: GET_ALARM_RULE_BY_ID_PORT,
@@ -80,7 +79,6 @@ import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-ev
       provide: GET_ALARM_RULE_BY_ID_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
-
     { provide: UPDATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
     {
       provide: UPDATE_ALARM_RULE_PORT,
@@ -90,7 +88,6 @@ import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-ev
       provide: UPDATE_ALARM_RULE_REPOSITORY,
       useClass: AlarmRulesRepositoryImpl,
     },
-
     {
       provide: GET_ALL_ALARM_EVENTS_USE_CASE,
       useClass: AlarmEventsService,
@@ -103,7 +100,6 @@ import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-ev
       provide: GET_ALL_ALARM_EVENTS_PORT,
       useClass: GetAllAlarmEventsAdapter,
     },
-
     {
       provide: GET_ALL_ALARM_EVENTS_BY_USER_ID_USE_CASE,
       useClass: AlarmEventsService,
@@ -116,7 +112,6 @@ import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-ev
       provide: GET_ALL_ALARM_EVENTS_BY_USER_ID_REPOSITORY,
       useClass: AlarmEventsRepositoryImpl,
     },
-
     {
       provide: RESOLVE_ALARM_EVENT_USE_CASE,
       useClass: AlarmEventsService,

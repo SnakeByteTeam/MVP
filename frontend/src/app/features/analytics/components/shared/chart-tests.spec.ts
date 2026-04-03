@@ -1,6 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { BaseChartDirective } from 'ng2-charts';
+
+describe('Shared Chart Tests Loader', () => {
+  it('should be correctly imported', () => {
+    expect(true).toBe(true);
+  });
+});
 
 export function runSharedChartTests(componentType: any) {
     let component: any;

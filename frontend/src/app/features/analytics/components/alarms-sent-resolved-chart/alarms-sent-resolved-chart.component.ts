@@ -9,7 +9,7 @@ import { ChartType } from 'chart.js';
     selector: 'app-alarms-sent-resolved-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../chartsTemplates/ward-chart-analytics.html'})
+    templateUrl: '../shared/ward-chart-analytics.html'})
 export class AlarmsSentResolvedChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'line';

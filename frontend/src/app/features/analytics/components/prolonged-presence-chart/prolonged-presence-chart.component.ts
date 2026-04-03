@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-prolonged-presence-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../chartsTemplates/device-chart-analytics.html'})
+    templateUrl: '../shared/device-chart-analytics.html'})
 export class ProlongedPresenceChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'bar';

@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-presence-detection-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../chartsTemplates/device-chart-analytics.html'})
+    templateUrl: '../shared/device-chart-analytics.html'})
 export class PresenceDetectionChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'bar';

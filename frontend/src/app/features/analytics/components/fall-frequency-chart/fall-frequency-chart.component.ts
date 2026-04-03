@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-fall-frequency-chart',
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../chartsTemplates/ward-chart-analytics.html'})
+    templateUrl: '../shared/ward-chart-analytics.html'})
 export class FallFrequencyChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'bar';

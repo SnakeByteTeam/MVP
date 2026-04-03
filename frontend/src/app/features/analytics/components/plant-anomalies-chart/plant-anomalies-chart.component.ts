@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-plant-anomalies-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../chartsTemplates/apartment-chart-analytics.html'})
+    templateUrl: '../shared/apartment-chart-analytics.html'})
 export class PlantAnomaliesChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'bar';

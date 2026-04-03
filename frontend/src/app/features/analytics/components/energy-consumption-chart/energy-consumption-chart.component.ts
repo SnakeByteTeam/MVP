@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
     selector: 'app-energy-consumption-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../chartsTemplates/apartment-chart-analytics.html'})
+    templateUrl: '../shared/apartment-chart-analytics.html'})
 export class EnergyConsumptionChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'line';

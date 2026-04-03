@@ -7,10 +7,14 @@ import {
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const DAYS_RANGE = 30;
-const TITLE = 'Frequenza degli allarmi rilevati nel reparto';
-const METRIC = 'ward-alarms-frequency';
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+} = AnalyticsMetric.WARD_ALARMS_FREQUENCY;
 
 @Injectable()
 export class WardAlarmsFrequency implements AnalyticsStrategy {
@@ -30,7 +34,7 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     );
 
     if (alarmsByDay.size === 0) {
-      return new Plot(TITLE, METRIC, 'alarms', [], []);
+      return new Plot(TITLE, METRIC, UNIT, [], []);
     }
 
     const labels: string[] = Array.from(alarmsByDay.keys()).sort((a, b) =>
@@ -40,8 +44,8 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     const data: number[] = labels.map(
       (day: string): number => alarmsByDay.get(day) ?? 0,
     );
-    const series: Series[] = [new Series('ward-alarms', 'Alarms', data)];
+    const series: Series[] = [new Series('', '', data)];
 
-    return new Plot(TITLE, METRIC, 'allarmi', labels, series);
+    return new Plot(TITLE, METRIC, UNIT, labels, series);
   }
 }

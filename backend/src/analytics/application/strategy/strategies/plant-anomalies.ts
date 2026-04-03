@@ -5,9 +5,9 @@ import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { ANOMALY_THRESHOLD_WH } from './consumption-config';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
-const TITLE = 'Anomalie di impianto';
-const METRIC = 'plant-anomalies';
+const { title: TITLE, metric: METRIC } = AnalyticsMetric.PLANT_ANOMALIES;
 
 @Injectable()
 export class PlantAnomalies implements AnalyticsStrategy {

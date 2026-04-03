@@ -8,14 +8,13 @@ import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { AnalyticsStrategy } from '../analytics.strategy';
 import { DatapointValue } from '../../../domain/datapoint-value.model';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const FALL_SFE_TYPE = 'SFE_State_ManDown';
 const FALL = 'True';
 const NO_FALL = 'False';
 const DAYS_RANGE = 30;
-const METRIC = 'ward-falls';
-const TITLE = 'Frequenza delle cadute rilevate nel reparto';
-const UNIT = 'allarmi';
+const { title: TITLE, metric: METRIC, unit: UNIT } = AnalyticsMetric.WARD_FALLS;
 
 @Injectable()
 export class WardFalls implements AnalyticsStrategy {

@@ -16,6 +16,8 @@ import {
 
 @Controller()
 export class EventSubscriptionController {
+  private isBulkRefreshRunning = false;
+
   constructor(
     @Inject(REFRESH_NODE_SUBSCRIPTION_USECASE)
     private readonly refreshNodeSub: RefreshNodeSubUseCase,
@@ -25,7 +27,6 @@ export class EventSubscriptionController {
     private readonly refreshAllSub: RefreshAllSubscriptionUseCase,
   ) {}
 
-  @OnEvent('fetched.tokens')
   @Cron('0 0 1 * *', {
     //eseguito ogni primo giorno del mese a mezzanotte
     name: 'subscription-renewal-node',
@@ -39,10 +40,9 @@ export class EventSubscriptionController {
     }
   }
 
-  @OnEvent('fetched.tokens')
   @Cron('0 0 1 * *', {
     //eseguito ogni primo giorno del mese a mezzanotte
-    name: 'subscription-renewal-node',
+    name: 'subscription-renewal-datapoint',
     timeZone: 'UTC',
   })
   async refreshDatapointSubscriptions(): Promise<void> {
@@ -50,6 +50,34 @@ export class EventSubscriptionController {
       await this.refreshDatapointSub.refreshDatapointSub();
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  @OnEvent('cache.all.updated')
+  async refreshAllSubsAfterFullCacheSync(): Promise<void> {
+    if (this.isBulkRefreshRunning) {
+      console.warn(
+        'Event received: cache.all.updated. Bulk subscription refresh already running, skipping duplicate event.',
+      );
+      return;
+    }
+
+    this.isBulkRefreshRunning = true;
+
+    try {
+      console.log(
+        'Event received: cache.all.updated. Refreshing subscriptions for all plants...',
+      );
+
+      await this.refreshNodeSub.refreshSub();
+      await this.refreshDatapointSub.refreshDatapointSub();
+    } catch (err) {
+      console.error(
+        'Error refreshing subscriptions after full cache sync',
+        err,
+      );
+    } finally {
+      this.isBulkRefreshRunning = false;
     }
   }
 

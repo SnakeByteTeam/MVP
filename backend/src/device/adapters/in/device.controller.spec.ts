@@ -14,7 +14,10 @@ import {
 } from '@nestjs/common';
 import { GetDeviceValueUseCase } from 'src/device/application/ports/in/get-device-value.usecase';
 import { WriteDatapointValueUseCase } from 'src/device/application/ports/in/write-datapoint-value.usecase';
-import { DeviceValue, DatapointValue } from 'src/device/domain/models/device-value.model';
+import {
+  DeviceValue,
+  DatapointValue,
+} from 'src/device/domain/models/device-value.model';
 
 describe('DeviceController', () => {
   let controller: DeviceController;

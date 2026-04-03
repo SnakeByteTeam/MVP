@@ -1,9 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { GetTokensFromApiImpl } from './get-tokens-from-api.impl';
-<<<<<<< HEAD
-=======
 import { Logger } from '@nestjs/common';
->>>>>>> prova_integrazione
+import { GetTokensFromApiImpl } from './get-tokens-from-api.impl';
 import { Observable, of } from 'rxjs';
 import { TokensDto } from '../dto/tokens.dto';
 
@@ -32,20 +29,12 @@ describe('GetTokensFromApiImpl', () => {
       ),
     };
 
-<<<<<<< HEAD
     process.env.CLIENTID = 'my-client-id';
     process.env.CLIENTSECRET = 'my-client-secret';
     process.env.HOST2 = 'https://auth.example.com/token';
     process.env.REDIRECT_URI = 'http://localhost:3000/callback';
 
     apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
-=======
-    apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
->>>>>>> prova_integrazione
   });
 
   describe('getTokensWithCode', () => {
@@ -87,16 +76,11 @@ describe('GetTokensFromApiImpl', () => {
     });
 
     it('should fallback to empty token and redirect urls when config values are missing', async () => {
-<<<<<<< HEAD
       delete process.env.CLIENTID;
       delete process.env.CLIENTSECRET;
       delete process.env.HOST2;
       delete process.env.REDIRECT_URI;
 
-=======
-      delete process.env.HOST2;
-      delete process.env.REDIRECT_URI;
->>>>>>> prova_integrazione
       const apiWithEmptyConfig = new GetTokensFromApiImpl(
         httpService as unknown as HttpService,
       );
@@ -162,10 +146,6 @@ describe('GetTokensFromApiImpl', () => {
 
     it('should fallback to empty token url when config value is missing', async () => {
       delete process.env.HOST2;
-<<<<<<< HEAD
-
-=======
->>>>>>> prova_integrazione
       const apiWithMissingTokenUrl = new GetTokensFromApiImpl(
         httpService as unknown as HttpService,
       );

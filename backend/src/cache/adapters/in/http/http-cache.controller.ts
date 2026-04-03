@@ -1,10 +1,5 @@
 import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiTags,
-  ApiOkResponse,
-} from '@nestjs/swagger';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import {
   UPDATE_CACHE_USE_CASE,
   type UpdateCacheUseCase,
@@ -14,10 +9,11 @@ import { SubNotificationPayloadDto } from 'src/cache/infrastructure/http/dtos/in
 @ApiTags('cache')
 @Controller('cache')
 export class HttpCacheController {
+  private webhookQueue: Promise<void> = Promise.resolve();
+
   constructor(
     @Inject(UPDATE_CACHE_USE_CASE)
     private readonly updateCacheUseCase: UpdateCacheUseCase,
-    private readonly emitter: EventEmitter2,
   ) {}
 
   @Post('update')
@@ -48,23 +44,33 @@ export class HttpCacheController {
     /* setImmediate fa partire le funzioni dopo aver ritornato il 202, con il for + await altrimenti il server di vimar viene 
     bombardato di richieste e risponde con 504 */
     setImmediate(async () => {
-      for (const plantId of plantIds) {
-        try {
-          console.log(
-            `[CacheController] Starting cache update for plant ${plantId}`,
-          );
-          await this.updateCacheUseCase.updateCache({ plantId: plantId });
-          console.log(
-            `[CacheController] Cache updated successfully for plant ${plantId}`,
-          );
-        } catch (err) {
-          console.error(
-            `[CacheController] Error updating cache for plant ${plantId}:`,
-            err.message,
-          );
-        }
-        this.emitter.emit('cache.updated', { plantId: plantId });
-      }
+      this.webhookQueue = this.webhookQueue
+        .then(async () => {
+          for (const plantId of plantIds) {
+            try {
+              console.log(
+                `[CacheController] Starting cache update for plant ${plantId}`,
+              );
+              await this.updateCacheUseCase.updateCache({ plantId: plantId });
+              console.log(
+                `[CacheController] Cache updated successfully for plant ${plantId}`,
+              );
+            } catch (err) {
+              const errorMessage =
+                err instanceof Error ? err.message : String(err);
+
+              console.error(
+                `[CacheController] Error updating cache for plant ${plantId}:`,
+                errorMessage,
+              );
+            }
+          }
+        })
+        .catch((err) => {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+
+          console.error('[CacheController] Error in webhook processing queue:', errorMessage);
+        });
     });
 
     return {

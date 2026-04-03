@@ -37,7 +37,8 @@ export class PlantController {
   @Get()
   @ApiOperation({
     summary: 'Get plant structure',
-    description: 'Retrieves the complete structure of a plant including rooms and devices.',
+    description:
+      'Retrieves the complete structure of a plant including rooms and devices.',
   })
   @ApiQuery({
     name: 'plantid',

@@ -40,9 +40,7 @@ describe('CheckCredentialsAdapter', () => {
     ).toHaveBeenCalledWith('user', 'pass');
 
     expect(result).toBeInstanceOf(Payload);
-    expect(result).toEqual(
-      new Payload(1, 'user', 'OPERATORE_SANITARIO', true),
-    );
+    expect(result).toEqual(new Payload(1, 'user', 'OPERATORE_SANITARIO', true));
   });
 
   it('should propagate error from repository', async () => {

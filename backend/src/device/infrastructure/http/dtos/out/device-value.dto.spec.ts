@@ -1,4 +1,7 @@
-import { DatapointValue, DeviceValue } from 'src/device/domain/models/device-value.model';
+import {
+  DatapointValue,
+  DeviceValue,
+} from 'src/device/domain/models/device-value.model';
 import { DatapointValueDto, DeviceValueDto } from './device-value.dto';
 
 describe('DatapointValueDto', () => {

@@ -1,3 +1,3 @@
 export interface FindDeviceByDatapointIdCmd {
-    datapointId: string;
+  datapointId: string;
 }

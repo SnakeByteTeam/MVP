@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Plant } from 'src/plant/domain/models/plant.model';
 
 import {
@@ -28,6 +29,7 @@ export class SyncCacheService
     private readonly writeStructurePort: WriteCachePort,
     @Inject(GET_ALL_PLANTIDS_PORT)
     private readonly getAllPlantIdsPort: GetAllPlantIdsPort,
+    private readonly emitter: EventEmitter2,
   ) {}
 
   async updateCache(cmd: GetValidCacheCmd): Promise<boolean> {
@@ -43,6 +45,8 @@ export class SyncCacheService
 
       if (!writeResult) throw new Error('Failed to write cache');
 
+      this.emitter.emit('cache.updated', { plantId: cmd.plantId });
+
       return true;
     } catch (error) {
       throw error;
@@ -51,6 +55,7 @@ export class SyncCacheService
 
   async updateAllCache(): Promise<boolean> {
     const plantIds: string[] = await this.getAllPlantIdsPort.getAllPlantIds();
+    let hasErrors = false;
 
     for (const plantId of plantIds) {
       try {
@@ -65,11 +70,14 @@ export class SyncCacheService
           throw new Error(`Failed to write cache for plantId: ${plantId}`);
         else console.log(`Cache updated successfully for plantId: ${plantId}`);
       } catch (error) {
+        hasErrors = true;
         console.error(
           `Error updating cache for plantId: ${plantId}. Error: ${error}`,
         );
       }
     }
-    return true;
+
+    this.emitter.emit('cache.all.updated');
+    return !hasErrors;
   }
 }

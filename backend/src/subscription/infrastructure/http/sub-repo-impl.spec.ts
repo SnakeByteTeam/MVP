@@ -77,7 +77,7 @@ describe('SubscriptionRepoImpl', () => {
           }),
         }),
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         'New subscription created for plant plant-1',
       );
     });
@@ -90,7 +90,7 @@ describe('SubscriptionRepoImpl', () => {
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to create subscription for plant plant-1',
       );
     });
@@ -102,7 +102,7 @@ describe('SubscriptionRepoImpl', () => {
       const result = await newRepo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to create subscription for plant plant-1',
       );
     });

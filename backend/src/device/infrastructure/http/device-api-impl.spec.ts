@@ -82,7 +82,11 @@ describe('DeviceApiImpl', () => {
 
       (httpService.get as jest.Mock).mockReturnValue(of(response));
 
-      const result = await repo.getDeviceValue('token-1', 'plant-1', 'device-1');
+      const result = await repo.getDeviceValue(
+        'token-1',
+        'plant-1',
+        'device-1',
+      );
 
       expect(httpService.get).toHaveBeenCalledWith(
         'https://api.example.com/plant-1/functions/device-1/datapoints',

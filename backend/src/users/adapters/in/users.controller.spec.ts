@@ -63,11 +63,13 @@ describe('UsersController', () => {
 
   it('should call findAllAvailableUsersUseCase.findAllAvailableUsers', async () => {
     await controller.findAllAvailable();
-    expect(mockFindAllAvailableUsersUseCase.findAllAvailableUsers).toHaveBeenCalled();
+    expect(
+      mockFindAllAvailableUsersUseCase.findAllAvailableUsers,
+    ).toHaveBeenCalled();
   });
 
   it('should call updateUserUseCase.updateUser with correct args', async () => {
-    const req = { username: "username", surname: "surname", name: "name" };
+    const req = { username: 'username', surname: 'surname', name: 'name' };
     await controller.updateUser(1, req);
     expect(mockUpdateUserUseCase.updateUser).toHaveBeenCalledWith({
       id: 1,
@@ -78,7 +80,7 @@ describe('UsersController', () => {
   });
 
   it('should call createUserUseCase.createUser with correct args', async () => {
-    const req = { username: "username", surname: "surname", name: "name" };
+    const req = { username: 'username', surname: 'surname', name: 'name' };
     await controller.createUser(req);
     expect(mockCreateUserUseCase.createUser).toHaveBeenCalledWith({
       username: 'username',

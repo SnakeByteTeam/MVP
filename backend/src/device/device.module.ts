@@ -31,8 +31,6 @@ import { DeviceApiImpl } from './infrastructure/http/device-api-impl';
 import { WriteDatapointValueAdapter } from './adapters/out/write-datapoint-value.adapter';
 import { FindDeviceByDatapointIdAdapter } from './adapters/out/find-device-by-datapointId.adapter';
 
-
-
 @Module({
   imports: [HttpModule, ApiAuthVimarModule],
   controllers: [DeviceController],
@@ -54,12 +52,21 @@ import { FindDeviceByDatapointIdAdapter } from './adapters/out/find-device-by-da
     { provide: INGEST_TIMESERIES_REPO_PORT, useClass: DeviceRepositoryImpl },
     { provide: GET_DEVICE_VALUE_USECASE, useClass: DeviceService },
     { provide: GET_DEVICE_VALUE_PORT, useClass: GetDeviceValueAdapter },
-    { provide: GET_DEVICE_VALUE_REPO_PORT, useClass: DeviceApiImpl }, 
-    { provide: WRITE_DATAPOINT_VALUE_USECASE, useClass: DeviceService }, 
-    { provide: WRITE_DATAPOINT_VALUE_PORT, useClass: WriteDatapointValueAdapter },
+    { provide: GET_DEVICE_VALUE_REPO_PORT, useClass: DeviceApiImpl },
+    { provide: WRITE_DATAPOINT_VALUE_USECASE, useClass: DeviceService },
+    {
+      provide: WRITE_DATAPOINT_VALUE_PORT,
+      useClass: WriteDatapointValueAdapter,
+    },
     { provide: WRITE_DATAPOINT_VALUE_REPO_PORT, useClass: DeviceApiImpl },
-    { provide: FIND_DEVICE_BY_DATAPOINTID_PORT, useClass: FindDeviceByDatapointIdAdapter },
-    { provide: FIND_DEVICE_BY_DATAPOINTID_REPO_PORT, useClass: DeviceRepositoryImpl }
+    {
+      provide: FIND_DEVICE_BY_DATAPOINTID_PORT,
+      useClass: FindDeviceByDatapointIdAdapter,
+    },
+    {
+      provide: FIND_DEVICE_BY_DATAPOINTID_REPO_PORT,
+      useClass: DeviceRepositoryImpl,
+    },
   ],
 })
 export class DeviceModule {}

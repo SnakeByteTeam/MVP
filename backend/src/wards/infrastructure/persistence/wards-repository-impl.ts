@@ -9,11 +9,12 @@ import { Pool } from 'pg';
 
 export class WardsRepositoryImpl
   implements
-  CreateWardRepository,
-  DeleteWardRepository,
-  FindAllWardsRepository,
-  UpdateWardRepository {
-  constructor(@Inject(PG_POOL) private readonly conn: Pool) { }
+    CreateWardRepository,
+    DeleteWardRepository,
+    FindAllWardsRepository,
+    UpdateWardRepository
+{
+  constructor(@Inject(PG_POOL) private readonly conn: Pool) {}
 
   async createWard(name: string): Promise<WardEntity> {
     const result = await this.conn.query(
@@ -34,7 +35,9 @@ export class WardsRepositoryImpl
       await client.query('BEGIN');
 
       // Keep apartments alive when a ward is deleted.
-      await client.query('UPDATE plant SET ward_id = NULL WHERE ward_id = $1', [id]);
+      await client.query('UPDATE plant SET ward_id = NULL WHERE ward_id = $1', [
+        id,
+      ]);
 
       // Keep cache consistent for environments where structure_cache is the source of availability.
       await client.query(
@@ -69,6 +72,4 @@ export class WardsRepositoryImpl
 
     return result.rows[0];
   }
-
-
 }

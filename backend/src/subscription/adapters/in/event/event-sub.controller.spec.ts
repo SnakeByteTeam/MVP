@@ -154,4 +154,38 @@ describe('EventSubscriptionController', () => {
       expect(refreshAllSub.refreshAllSubscription).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('refreshAllSubsAfterFullCacheSync', () => {
+    it('should refresh node and datapoint subscriptions sequentially', async () => {
+      refreshNodeSub.refreshSub.mockResolvedValue(true);
+      refreshDatapointSub.refreshDatapointSub.mockResolvedValue(true);
+
+      await controller.refreshAllSubsAfterFullCacheSync();
+
+      expect(refreshNodeSub.refreshSub).toHaveBeenCalledTimes(1);
+      expect(refreshDatapointSub.refreshDatapointSub).toHaveBeenCalledTimes(1);
+
+      const nodeCallOrder = (refreshNodeSub.refreshSub as jest.Mock).mock
+        .invocationCallOrder[0];
+      const datapointCallOrder = (
+        refreshDatapointSub.refreshDatapointSub as jest.Mock
+      ).mock.invocationCallOrder[0];
+
+      expect(nodeCallOrder).toBeLessThan(datapointCallOrder);
+    });
+
+    it('should handle errors in full cache sync subscription refresh', async () => {
+      refreshNodeSub.refreshSub.mockRejectedValue(
+        new Error('Node refresh error'),
+      );
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await controller.refreshAllSubsAfterFullCacheSync();
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        'Error refreshing subscriptions after full cache sync',
+        expect.any(Error),
+      );
+    });
+  });
 });

@@ -1,4 +1,7 @@
-import { DatapointExtractedDto, DatapointApiResponse } from './datapoint-response.dto';
+import {
+  DatapointExtractedDto,
+  DatapointApiResponse,
+} from './datapoint-response.dto';
 
 describe('DatapointExtractedDto', () => {
   const sampleResponse: DatapointApiResponse = {
@@ -48,7 +51,9 @@ describe('DatapointExtractedDto', () => {
   };
 
   it('should map a single api datapoint with fromApiResponse', () => {
-    const result = DatapointExtractedDto.fromApiResponse(sampleResponse.data[0]);
+    const result = DatapointExtractedDto.fromApiResponse(
+      sampleResponse.data[0],
+    );
 
     expect(result.id).toBe('dp-1');
     expect(result.name).toBe('Power');

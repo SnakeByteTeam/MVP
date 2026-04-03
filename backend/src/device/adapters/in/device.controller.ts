@@ -41,7 +41,10 @@ import {
   INGEST_TIMESERIES_USE_CASE,
   type IngestTimeseriesUseCase,
 } from 'src/device/application/ports/in/ingest-timeseris.usecase';
-import { WRITE_DATAPOINT_VALUE_USECASE, WriteDatapointValueUseCase } from 'src/device/application/ports/in/write-datapoint-value.usecase';
+import {
+  WRITE_DATAPOINT_VALUE_USECASE,
+  WriteDatapointValueUseCase,
+} from 'src/device/application/ports/in/write-datapoint-value.usecase';
 import { DeviceValue } from 'src/device/domain/models/device-value.model';
 import { Device } from 'src/device/domain/models/device.model';
 import { WriteDatapointDto } from 'src/device/infrastructure/http/dtos/in/write-datapoint-value.dto';
@@ -61,7 +64,7 @@ export class DeviceController {
     @Inject(GET_DEVICE_VALUE_USECASE)
     private readonly getDeviceValueUseCase: GetDeviceValueUseCase,
     @Inject(WRITE_DATAPOINT_VALUE_USECASE)
-    private readonly writeDatapointUseCase: WriteDatapointValueUseCase
+    private readonly writeDatapointUseCase: WriteDatapointValueUseCase,
   ) {}
 
   @Get('/:id')
@@ -99,20 +102,25 @@ export class DeviceController {
   @Post('')
   @HttpCode(202)
   async writeDatapointValue(@Body() req: WriteDatapointDto) {
-    if(!req.datapointId || !req.value) throw new BadRequestException();
+    if (!req.datapointId || !req.value) throw new BadRequestException();
 
     try {
       const cmd: WriteDatapointValueCmd = {
         datapointId: req.datapointId,
-        value: req.value
-      }
+        value: req.value,
+      };
 
       await this.writeDatapointUseCase.writeDatapointValue(cmd);
 
-      return { message: 'Datapoint value updated successfully', statusCode: 202 };
+      return {
+        message: 'Datapoint value updated successfully',
+        statusCode: 202,
+      };
     } catch (error) {
       console.error('[DeviceController] Error writing datapoint:', error);
-      throw new ServiceUnavailableException('Failed to process datapoint value');
+      throw new ServiceUnavailableException(
+        'Failed to process datapoint value',
+      );
     }
   }
 
@@ -137,8 +145,8 @@ export class DeviceController {
     description: 'Internal server error.',
   })
   async findByPlantId(@Param('plantId') plantId: string): Promise<DeviceDto[]> {
-    if(!plantId) throw BadRequestException;
-    
+    if (!plantId) throw BadRequestException;
+
     const findByPlantIdCmd: FindDeviceByPlantIdCmd = {
       id: plantId,
     };

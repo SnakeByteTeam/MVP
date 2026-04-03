@@ -31,7 +31,9 @@ export class FetchStructureCacheImpl
         this.httpService
           .get(`${this.API_DOMAIN}/${plantId}/locations`, {
             headers: { Authorization: `Bearer ${validToken}` },
+            timeout: 10000,
           })
+          .pipe(retry({ count: 3, delay: 1000 })),
       );
 
       if (!response.data) return null;
@@ -88,7 +90,9 @@ export class FetchStructureCacheImpl
       this.httpService
         .get(`${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`, {
           headers: { Authorization: `Bearer ${validToken}` },
+          timeout: 10000,
         })
+        .pipe(retry({ count: 3, delay: 1000 })),
     );
 
     if (!response.data)
@@ -126,8 +130,10 @@ export class FetchStructureCacheImpl
           `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
           {
             headers: { Authorization: `Bearer ${validToken}` },
+            timeout: 10000,
           },
         )
+        .pipe(retry({ count: 3, delay: 1000 })),
     );
 
     if (!response.data)

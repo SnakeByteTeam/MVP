@@ -93,7 +93,7 @@ describe('WardsPlantsRelationshipsRepositoryImpl', () => {
     const result = await repo.findAllPlantsByWardId(1);
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      'SELECT p.id, p.data->>\'name\' as name FROM plant p WHERE p.ward_id = $1',
+      "SELECT p.id, p.data->>'name' as name FROM plant p WHERE p.ward_id = $1",
       [1],
     );
 

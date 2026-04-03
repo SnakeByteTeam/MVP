@@ -49,7 +49,7 @@ describe('AlarmConfigStateService', () => {
         sensorId: 'dev-3',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.EQUAL_TO,
-        threshold: 22,
+        thresholdValue: '22',
         armingTime: '09:00',
         dearmingTime: '18:00',
         enabled: true,
@@ -180,6 +180,24 @@ describe('AlarmConfigStateService', () => {
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
     });
 
+    it('createAlarmRule pulisce l errore precedente quando una creazione successiva va a buon fine', async () => {
+        const invalidForm: AlarmConfigFormValue = {
+            ...validForm,
+            name: '   ',
+        };
+
+        service.createAlarmRule(invalidForm).subscribe();
+        expect(await firstValueFrom(service.error$)).toBe(
+            'Dati del form non validi per la creazione dell\'allarme.'
+        );
+
+        apiStub.createAlarmRule.mockReturnValueOnce(of(alarmB));
+        service.createAlarmRule(validForm).subscribe();
+
+        expect(await firstValueFrom(service.error$)).toBeNull();
+        expect(await firstValueFrom(service.alarms$)).toEqual([alarmB]);
+    });
+
     it('updateAlarmRule mantiene il nome originale nel payload update e sostituisce l allarme nello stato', async () => {
         apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
         service.loadAlarmRules();
@@ -206,7 +224,7 @@ describe('AlarmConfigStateService', () => {
     it('updateAlarmRule con form invalido non chiama API e imposta errore', async () => {
         const invalidForm: AlarmConfigFormValue = {
             ...validForm,
-            threshold: null,
+            thresholdValue: '',
         };
 
         let emitted = false;
@@ -235,6 +253,38 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(await firstValueFrom(service.error$)).toBe('Errore durante l\'aggiornamento dell\'allarme.');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
+    });
+
+    it('updateAlarmRule senza allarme locale usa il nome del form nel payload', async () => {
+        const updatedAlarm: AlarmRule = {
+            ...alarmA,
+            id: 'missing-id',
+            name: 'Nome dal form',
+            deviceId: 'dev-10',
+            thresholdValue: '44',
+        };
+        apiStub.updateAlarmRule.mockReturnValueOnce(of(updatedAlarm));
+
+        service
+            .updateAlarmRule('missing-id', {
+                ...validForm,
+                name: ' Nome dal form ',
+                sensorId: ' dev-10 ',
+                thresholdOperator: ThresholdOperator.GREATER_THAN,
+                thresholdValue: '44',
+            })
+            .subscribe();
+
+        expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('missing-id', {
+            name: 'Nome dal form',
+            deviceId: 'dev-10',
+            priority: AlarmPriority.GREEN,
+            thresholdOperator: '>',
+            thresholdValue: '44',
+            armingTime: '09:00',
+            dearmingTime: '18:00',
+            isArmed: true,
+        });
     });
 
     it('toggleEnabled aggiorna enabled costruendo payload dai dati locali', async () => {
@@ -320,5 +370,20 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(await firstValueFrom(service.error$)).toBe('Errore durante l\'eliminazione dell\'allarme.');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
+    });
+
+    it('deleteAlarmRule pulisce errore precedente quando un delete successivo riesce', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
+
+        apiStub.deleteAlarmRule.mockReturnValueOnce(throwError(() => new Error('delete failed')));
+        service.deleteAlarmRule('alarm-1').subscribe();
+        expect(await firstValueFrom(service.error$)).toBe('Errore durante l\'eliminazione dell\'allarme.');
+
+        apiStub.deleteAlarmRule.mockReturnValueOnce(of(void 0));
+        service.deleteAlarmRule('alarm-1').subscribe();
+
+        expect(await firstValueFrom(service.error$)).toBeNull();
+        expect(await firstValueFrom(service.alarms$)).toEqual([alarmB]);
     });
 });

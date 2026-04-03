@@ -123,7 +123,7 @@ export class AlarmManagementService {
             .subscribe();
     }
 
-    //oss solo i suoi (reparti assegnati), admin tutti
+    // OSS: endpoint reparto; Admin: endpoint globale
     private getInitialActiveAlarms$(offset: number): Observable<ActiveAlarm[]> {
         return this.authService.getCurrentUser$().pipe(
             take(1),
@@ -161,16 +161,9 @@ export class AlarmManagementService {
     }
 
     private filterAlarmsBySession(alarms: ActiveAlarm[], session: UserSession | null): ActiveAlarm[] {
-        if (session?.role !== UserRole.OPERATORE_SANITARIO) {
-            return alarms;
-        }
 
-        const numericUserId = Number(session.userId);
-        if (!Number.isInteger(numericUserId)) {
-            return [];
-        }
-
-        return alarms.filter((alarm) => alarm.userId === numericUserId);
+        void session;
+        return alarms;
     }
 
     private mergeAlarmsForView(activeAlarms: ActiveAlarm[], locallyManagedAlarms: ActiveAlarm[]): ActiveAlarm[] {

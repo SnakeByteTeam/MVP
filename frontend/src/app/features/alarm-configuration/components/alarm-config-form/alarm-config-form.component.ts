@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
@@ -87,7 +88,7 @@ export class AlarmConfigFormComponent {
 			sensorId: ['', [Validators.required]],
 			priority: [null as AlarmPriority | null, [Validators.required]],
 			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
-			threshold: [null as number | null, [Validators.required]],
+			thresholdValue: ['', [Validators.required]],
 			armingTime: [''],
 			dearmingTime: [''],
 			enabled: [true],
@@ -101,7 +102,7 @@ export class AlarmConfigFormComponent {
 			sensorId: '',
 			priority: null,
 			thresholdOperator: null,
-			threshold: null,
+			thresholdValue: '',
 			armingTime: '',
 			dearmingTime: '',
 			enabled: true,
@@ -156,8 +157,7 @@ export class AlarmConfigFormComponent {
 
 		this.hasRequestedPlants = true;
 
-		this.wardApi
-			.getAvailablePlants()
+		this.loadAllPlants()
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe({
 				next: (plants) => {
@@ -169,6 +169,39 @@ export class AlarmConfigFormComponent {
 					this.plantsLoadError.set('Errore durante il caricamento degli impianti disponibili.');
 				},
 			});
+	}
+
+	private loadAllPlants(): Observable<WardPlantDto[]> {
+		return forkJoin({
+			availablePlants: this.wardApi.getAvailablePlants().pipe(catchError(() => of([] as WardPlantDto[]))),
+			wards: this.wardApi.getWards().pipe(catchError(() => of([]))),
+		}).pipe(
+			switchMap(({ availablePlants, wards }) => {
+				if (wards.length === 0) {
+					return of(this.mergePlants(availablePlants, []));
+				}
+
+				const wardPlantsRequests = wards.map((ward) =>
+					this.wardApi
+						.getPlantsByWardId(ward.id)
+						.pipe(catchError(() => of([] as WardPlantDto[])))
+				);
+
+				return forkJoin(wardPlantsRequests).pipe(
+					map((assignedPlantsByWard) => this.mergePlants(availablePlants, assignedPlantsByWard.flat()))
+				);
+			})
+		);
+	}
+
+	private mergePlants(availablePlants: WardPlantDto[], assignedPlants: WardPlantDto[]): WardPlantDto[] {
+		const mergedMap = new Map<string, WardPlantDto>();
+
+		for (const plant of [...availablePlants, ...assignedPlants]) {
+			mergedMap.set(plant.id, plant);
+		}
+
+		return Array.from(mergedMap.values()).sort((first, second) => first.name.localeCompare(second.name));
 	}
 
 	private onPlantChanged(plantId: string): void {
@@ -214,3 +247,6 @@ export class AlarmConfigFormComponent {
 		this.form.controls.enabled.setValue(nextValue);
 	}
 }
+
+
+

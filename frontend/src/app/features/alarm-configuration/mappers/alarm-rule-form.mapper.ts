@@ -15,7 +15,7 @@ export class AlarmRuleFormMapper {
             sensorId: rule.deviceId,
             priority: rule.priority,
             thresholdOperator: this.toFormThresholdOperator(rule.thresholdOperator),
-            threshold: this.toFormThreshold(rule.thresholdValue),
+            thresholdValue: this.toFormThresholdValue(rule.thresholdValue),
             armingTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
             dearmingTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
             enabled: rule.isArmed,
@@ -33,8 +33,7 @@ export class AlarmRuleFormMapper {
         return ThresholdOperator.EQUAL_TO;
     }
 
-    private toFormThreshold(value: string): number {
-        const parsed = Number(value);
-        return Number.isFinite(parsed) ? parsed : 0;
+    private toFormThresholdValue(value: string): string {
+        return value;
     }
 }

@@ -24,7 +24,7 @@ describe('AlarmRuleRequestMapper', () => {
             sensorId: '  DEV001  ',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.LESS_THAN,
-            threshold: 12,
+            thresholdValue: '12',
             armingTime: '07:15',
             dearmingTime: '22:45',
             enabled: true,
@@ -42,6 +42,90 @@ describe('AlarmRuleRequestMapper', () => {
             dearmingTime: '22:45',
             isArmed: true,
         });
+    });
+
+    it('toCreateRequest supporta soglia booleana con operatore uguale', () => {
+        const onFormValue: AlarmConfigFormValue = {
+            name: 'Allarme acceso',
+            plantId: 'plant-1',
+            sensorId: 'dev-10',
+            priority: AlarmPriority.RED,
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: 'ON',
+            armingTime: '00:00',
+            dearmingTime: '23:59',
+            enabled: true,
+        };
+
+        const offFormValue: AlarmConfigFormValue = {
+            ...onFormValue,
+            name: 'Allarme spento',
+            thresholdValue: 'OFF',
+        };
+
+        expect(mapper.toCreateRequest(onFormValue)).toMatchObject({
+            thresholdOperator: '=',
+            thresholdValue: 'ON',
+        });
+        expect(mapper.toCreateRequest(offFormValue)).toMatchObject({
+            thresholdOperator: '=',
+            thresholdValue: 'OFF',
+        });
+    });
+
+    it('toCreateRequest trimma i campi stringa principali', () => {
+        const formValue: AlarmConfigFormValue = {
+            name: '  Allarme trim  ',
+            plantId: 'plant-1',
+            sensorId: '  dev-42  ',
+            priority: AlarmPriority.GREEN,
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: '  ON  ',
+            armingTime: '06:00',
+            dearmingTime: '23:00',
+            enabled: true,
+        };
+
+        const result = mapper.toCreateRequest(formValue);
+
+        expect(result).toMatchObject({
+            name: 'Allarme trim',
+            deviceId: 'dev-42',
+            thresholdOperator: '=',
+            thresholdValue: 'ON',
+        });
+    });
+
+    it('toCreateRequest fallisce se thresholdValue e vuoto dopo trim', () => {
+        const invalidFormValue: AlarmConfigFormValue = {
+            name: 'Allarme invalido',
+            plantId: 'plant-1',
+            sensorId: 'dev-42',
+            priority: AlarmPriority.GREEN,
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: '   ',
+            armingTime: '06:00',
+            dearmingTime: '23:00',
+            enabled: true,
+        };
+
+        expect(() => mapper.toCreateRequest(invalidFormValue)).toThrow('Campo obbligatorio mancante: thresholdValue');
+    });
+
+    it('toCreateRequest fallisce se thresholdOperator e null', () => {
+        const invalidFormValue: AlarmConfigFormValue = {
+            name: 'Allarme invalido',
+            plantId: 'plant-1',
+            sensorId: 'dev-42',
+            priority: AlarmPriority.GREEN,
+            thresholdOperator: null,
+            thresholdValue: '12',
+            armingTime: '06:00',
+            dearmingTime: '23:00',
+            enabled: true,
+        };
+
+        expect(() => mapper.toCreateRequest(invalidFormValue)).toThrow('Campo obbligatorio mancante: thresholdOperator');
     });
 
     it('toToggleRequest include name e deviceId nel payload', () => {

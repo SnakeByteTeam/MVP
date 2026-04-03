@@ -125,4 +125,37 @@ describe('AlarmItemComponent', () => {
     expect(emitSpy).toHaveBeenCalledWith('active-1');
     expect(emitSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('usa fallback per nome e posizione quando i campi sono vuoti o solo spazi', () => {
+    setInputs({
+      ...baseAlarm,
+      alarmName: '   ',
+      position: '   ',
+    });
+
+    expect(component.vm().alarmTitle).toBe('senza nome in "posizione sconosciuta"');
+    expect(component.vm().articleAriaLabel).toBe('Allarme senza nome');
+    expect(component.vm().resolveButtonAriaLabel).toBe('Risolvi allarme senza nome');
+  });
+
+  it('quando e in resolving aggiorna aria-label del bottone in modo specifico', () => {
+    setInputs(baseAlarm, true);
+
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button');
+
+    expect(component.vm().resolveButtonText).toBe('Risoluzione...');
+    expect(button?.getAttribute('aria-label')).toContain('Risoluzione in corso per Allarme antipanico');
+  });
+
+  it('renderizza nomi con caratteri speciali come testo senza errori runtime', () => {
+    setInputs({
+      ...baseAlarm,
+      alarmName: '<script>alert("xss")</script>',
+      position: 'Sala monitoraggio',
+    });
+
+    const title = (fixture.nativeElement as HTMLElement).querySelector('.alarm-item__title')?.textContent ?? '';
+
+    expect(title).toContain('<script>alert("xss")</script> in "Sala monitoraggio"');
+  });
 });

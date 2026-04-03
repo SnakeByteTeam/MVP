@@ -100,7 +100,7 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
     });
 
-    it('initialize per amministratore carica gli allarmi attivi globali', () => {
+    it('initialize per amministratore mostra tutti gli allarmi senza filtri frontend', () => {
         const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
         alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
 
@@ -113,7 +113,7 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
-    it('initialize per OSS filtra gli allarmi per userId', () => {
+    it('initialize per OSS mantiene tutti gli allarmi restituiti dall endpoint operatore', () => {
         sessionSubject.next({
             userId: '7',
             username: 'oss',
@@ -131,7 +131,7 @@ describe('AlarmManagementService', () => {
         expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
         expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledTimes(1);
         expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7', 6, 0);
-        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmB], 'replace');
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
     it('se initialize fallisce non propaga eccezioni e valorizza l errore nel vm', async () => {
@@ -287,6 +287,46 @@ describe('AlarmManagementService', () => {
         expect(vm.alarms.map((alarm) => alarm.id)).toEqual(['active-7']);
     });
 
+    it('nextPage non fa nulla quando canGoNext e false', async () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([alarmA]));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(1);
+        expect(vm.pageOffset).toBe(0);
+        expect(vm.canGoNext).toBe(false);
+    });
+
+    it('la pagina successiva con meno di 6 elementi imposta canGoNext a false', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of([{ ...alarmA, id: 'active-7' }, { ...alarmA, id: 'active-8' }]));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(2);
+        expect(vm.canGoNext).toBe(false);
+        expect(vm.alarms.map((alarm) => alarm.id)).toEqual(['active-7', 'active-8']);
+    });
+
     it('previousPage decrementa l offset fino a 0', async () => {
         const firstPage: ActiveAlarm[] = [
             alarmA,
@@ -318,6 +358,17 @@ describe('AlarmManagementService', () => {
         expect(vm.canGoPrevious).toBe(false);
     });
 
+    it('previousPage non fa nulla se l offset e gia a zero', () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([alarmA]));
+
+        service = createService();
+        service.initialize();
+        service.previousPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+    });
+
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {
         service = createService();
         alarmApiStub.resolveAlarm.mockReturnValue(throwError(() => new Error('timeout rete')));
@@ -329,6 +380,59 @@ describe('AlarmManagementService', () => {
         expect(vm.resolvingId).toBeNull();
         expect(vm.resolveError).toBe('timeout rete');
         expect(alarmStateStub.onAlarmResolved).not.toHaveBeenCalled();
+    });
+
+    it('resolveAlarm con userId non numerico non chiama API e valorizza errore esplicito', async () => {
+        sessionSubject.next({
+            userId: 'abc',
+            username: 'admin',
+            role: UserRole.AMMINISTRATORE,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
+        service = createService();
+        activeAlarmsSubject.next([alarmA]);
+
+        service.resolveAlarm(alarmA.id);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.isResolving).toBe(false);
+        expect(vm.resolvingId).toBeNull();
+        expect(vm.resolveError).toBe("Utente corrente non valido per risolvere l'allarme.");
+        expect(alarmApiStub.resolveAlarm).not.toHaveBeenCalled();
+        expect(alarmStateStub.onAlarmResolved).not.toHaveBeenCalled();
+    });
+
+    it('initialize con errore non strutturato usa messaggio fallback', async () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(throwError(() => ({ cause: 'unknown' })));
+
+        service = createService();
+        service.initialize();
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.resolveError).toBe("Errore durante la risoluzione dell'allarme.");
+    });
+
+    it('initialize OSS con userId non numerico non applica filtri frontend alla lista', async () => {
+        sessionSubject.next({
+            userId: 'abc',
+            username: 'oss',
+            role: UserRole.OPERATORE_SANITARIO,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of([alarmA, alarmB]));
+
+        service = createService();
+        service.initialize();
+
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('abc', 6, 0);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA, alarmB], 'replace');
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.alarms).toEqual([alarmA, alarmB]);
     });
 
     it('consente richieste concorrenti e termina resolving solo a completamento di tutte', async () => {

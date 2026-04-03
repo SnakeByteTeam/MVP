@@ -178,6 +178,65 @@ describe('AlarmPageManagementComponent', () => {
     expect((manageButtons.item(1) as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it('disabilita solo il bottone associato al resolvingId corrente', () => {
+    vmSubject.next({
+      alarms: [alarm1, alarm2],
+      currentPage: 1,
+      pageLimit: 6,
+      pageOffset: 0,
+      canGoPrevious: false,
+      canGoNext: true,
+      isResolving: true,
+      resolvingId: alarm1.id,
+      resolveError: null,
+    });
+
+    fixture.detectChanges();
+
+    const firstButton = (fixture.nativeElement as HTMLElement).querySelector(
+      'button[aria-label="Gestisci allarme Antipanico"]'
+    ) as HTMLButtonElement | null;
+    const secondButton = (fixture.nativeElement as HTMLElement).querySelector(
+      'button[aria-label="Gestisci allarme Porta aperta"]'
+    ) as HTMLButtonElement | null;
+
+    expect(firstButton?.disabled).toBe(true);
+    expect(secondButton?.disabled).toBe(false);
+  });
+
+  it('renderizza paginazione coerente con vm e delega i click ai metodi del service', () => {
+    vmSubject.next({
+      alarms: [alarm1],
+      currentPage: 3,
+      pageLimit: 6,
+      pageOffset: 12,
+      canGoPrevious: true,
+      canGoNext: false,
+      isResolving: false,
+      resolvingId: null,
+      resolveError: null,
+    });
+
+    fixture.detectChanges();
+
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    const previousButton = nativeElement.querySelector(
+      'button[aria-label="Pagina precedente allarmi attivi"]'
+    ) as HTMLButtonElement | null;
+    const nextButton = nativeElement.querySelector(
+      'button[aria-label="Pagina successiva allarmi attivi"]'
+    ) as HTMLButtonElement | null;
+
+    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 3');
+    expect(previousButton?.disabled).toBe(false);
+    expect(nextButton?.disabled).toBe(true);
+
+    previousButton?.dispatchEvent(new MouseEvent('click'));
+
+    expect(alarmManagementStub.previousPage).toHaveBeenCalledTimes(1);
+    expect(alarmManagementStub.nextPage).not.toHaveBeenCalled();
+  });
+
   it('click su GESTISCI propaga resolve verso facade', () => {
     vmSubject.next({
       alarms: [alarm1],

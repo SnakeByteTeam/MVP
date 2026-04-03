@@ -17,7 +17,7 @@ export class AlarmRuleRequestMapper {
             deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            thresholdValue: String(this.requireField(formValue.threshold, 'threshold')),
+            thresholdValue: this.requireNonEmptyString(formValue.thresholdValue, 'thresholdValue'),
             armingTime: formValue.armingTime,
             dearmingTime: formValue.dearmingTime,
         };
@@ -29,7 +29,7 @@ export class AlarmRuleRequestMapper {
             deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            thresholdValue: String(this.requireField(formValue.threshold, 'threshold')),
+            thresholdValue: this.requireNonEmptyString(formValue.thresholdValue, 'thresholdValue'),
             armingTime: formValue.armingTime,
             dearmingTime: formValue.dearmingTime,
             isArmed: formValue.enabled,

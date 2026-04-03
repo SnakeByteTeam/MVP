@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
@@ -28,6 +28,8 @@ describe('AlarmConfigPageComponent', () => {
 
     const wardApiStub = {
         getAvailablePlants: vi.fn(() => of([])),
+        getWards: vi.fn(() => of([])),
+        getPlantsByWardId: vi.fn(() => of([])),
     };
 
     const apartmentApiStub = {
@@ -52,7 +54,7 @@ describe('AlarmConfigPageComponent', () => {
         sensorId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 12,
+        thresholdValue: '12',
         armingTime: '08:00',
         dearmingTime: '18:00',
         enabled: true,
@@ -128,6 +130,17 @@ describe('AlarmConfigPageComponent', () => {
         expect(component.isModalOpen()).toBe(false);
     });
 
+    it('onFormSubmitted in create mode mantiene aperta la modale se non arriva alcun esito', () => {
+        stateServiceStub.createAlarmRule.mockReturnValueOnce(EMPTY);
+        component.onCreateNew();
+
+        component.onFormSubmitted(formValue);
+
+        expect(stateServiceStub.createAlarmRule).toHaveBeenCalledWith(formValue);
+        expect(component.isModalOpen()).toBe(true);
+        expect(component.editingRule()).toBeNull();
+    });
+
     it('onFormSubmitted in edit mode invoca update e chiude modale', () => {
         alarmsSubject.next([alarmRule]);
         fixture.detectChanges();
@@ -137,6 +150,18 @@ describe('AlarmConfigPageComponent', () => {
 
         expect(stateServiceStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', formValue);
         expect(component.isModalOpen()).toBe(false);
+    });
+
+    it('onFormSubmitted in edit mode mantiene aperta la modale se non arriva alcun esito', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
+        component.onEdit('alarm-1');
+        stateServiceStub.updateAlarmRule.mockReturnValueOnce(EMPTY);
+
+        component.onFormSubmitted(formValue);
+
+        expect(component.isModalOpen()).toBe(true);
+        expect(component.editingRule()?.id).toBe('alarm-1');
     });
 
     it('onToggleEnabled invoca toggleEnabled con lo stato richiesto', () => {
@@ -159,6 +184,17 @@ describe('AlarmConfigPageComponent', () => {
         component.onModalClosed();
 
         expect(component.isModalOpen()).toBe(false);
+        expect(component.editingRule()).toBeNull();
+    });
+
+    it('onCreateNew resetta l eventuale regola in edit e apre la modale in create', () => {
+        alarmsSubject.next([alarmRule]);
+        fixture.detectChanges();
+        component.onEdit('alarm-1');
+
+        component.onCreateNew();
+
+        expect(component.isModalOpen()).toBe(true);
         expect(component.editingRule()).toBeNull();
     });
 

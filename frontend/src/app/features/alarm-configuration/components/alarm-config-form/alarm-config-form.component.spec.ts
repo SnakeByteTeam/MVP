@@ -14,6 +14,8 @@ describe('AlarmConfigFormComponent', () => {
 
     const wardApiStub = {
         getAvailablePlants: vi.fn(),
+        getWards: vi.fn(),
+        getPlantsByWardId: vi.fn(),
     };
 
     const apartmentApiStub = {
@@ -38,7 +40,7 @@ describe('AlarmConfigFormComponent', () => {
         sensorId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 12,
+        thresholdValue: '12',
         armingTime: '08:00',
         dearmingTime: '18:00',
         enabled: true,
@@ -47,6 +49,15 @@ describe('AlarmConfigFormComponent', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         wardApiStub.getAvailablePlants.mockReturnValue(
+            of([
+                { id: 'plant-1', name: 'Appartamento 1' },
+                { id: 'plant-3', name: 'Appartamento 3' },
+            ])
+        );
+        wardApiStub.getWards.mockReturnValue(
+            of([{ id: 10, name: 'Reparto A' }])
+        );
+        wardApiStub.getPlantsByWardId.mockReturnValue(
             of([
                 { id: 'plant-1', name: 'Appartamento 1' },
                 { id: 'plant-2', name: 'Appartamento 2' },
@@ -110,12 +121,13 @@ describe('AlarmConfigFormComponent', () => {
             sensorId: '',
             priority: null,
             thresholdOperator: null,
-            threshold: null,
+            thresholdValue: '',
             armingTime: '',
             dearmingTime: '',
             enabled: true,
         });
         expect(component.form.controls.name.disabled).toBe(false);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3']);
     });
 
     it('inizializza in edit mode con prefill da initialRule', () => {
@@ -128,7 +140,7 @@ describe('AlarmConfigFormComponent', () => {
             sensorId: 'sensor-9',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
-            threshold: 5,
+            thresholdValue: '5',
             armingTime: '07:00',
             dearmingTime: '19:00',
             enabled: true,
@@ -145,7 +157,7 @@ describe('AlarmConfigFormComponent', () => {
             plantId: '',
             priority: null,
             thresholdOperator: null,
-            threshold: null,
+            thresholdValue: '',
         });
 
         expect(component.form.controls.plantId.invalid).toBe(true);
@@ -156,7 +168,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.sensorId.invalid).toBe(true);
         expect(component.form.controls.priority.invalid).toBe(true);
         expect(component.form.controls.thresholdOperator.invalid).toBe(true);
-        expect(component.form.controls.threshold.invalid).toBe(true);
+        expect(component.form.controls.thresholdValue.invalid).toBe(true);
     });
 
     it('in create mode mantiene il dispositivo bloccato finche non viene selezionato un plant', () => {
@@ -213,7 +225,7 @@ describe('AlarmConfigFormComponent', () => {
             sensorId: '',
             priority: null,
             thresholdOperator: null,
-            threshold: null,
+            thresholdValue: '',
         });
 
         component.onSubmit();
@@ -252,6 +264,77 @@ describe('AlarmConfigFormComponent', () => {
             ThresholdOperator.LESS_THAN,
             ThresholdOperator.EQUAL_TO,
         ]);
+    });
+
+    it('accetta valore soglia booleano quando operatore e uguale', () => {
+        setInputs('create', null);
+
+        component.form.controls.thresholdOperator.setValue(ThresholdOperator.EQUAL_TO);
+        component.form.controls.thresholdValue.setValue('ON');
+
+        expect(component.form.controls.thresholdOperator.valid).toBe(true);
+        expect(component.form.controls.thresholdValue.valid).toBe(true);
+    });
+
+    it('carica impianti da piu reparti deduplicando per id', () => {
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(
+            of([{ id: 'plant-1', name: 'Appartamento 1' }])
+        );
+        wardApiStub.getWards.mockReturnValueOnce(
+            of([
+                { id: 10, name: 'Reparto A' },
+                { id: 20, name: 'Reparto B' },
+            ])
+        );
+        wardApiStub.getPlantsByWardId.mockImplementation((wardId: number) => {
+            if (wardId === 10) {
+                return of([
+                    { id: 'plant-2', name: 'Appartamento 2' },
+                    { id: 'plant-3', name: 'Appartamento 3' },
+                ]);
+            }
+
+            return of([
+                { id: 'plant-3', name: 'Appartamento 3' },
+                { id: 'plant-4', name: 'Appartamento 4' },
+            ]);
+        });
+
+        setInputs('create', null);
+
+        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(2);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3', 'plant-4']);
+        expect(component.plantsLoadError()).toBeNull();
+    });
+
+    it('se il recupero reparti fallisce usa solo gli impianti disponibili', () => {
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(
+            of([
+                { id: 'plant-7', name: 'Appartamento 7' },
+                { id: 'plant-8', name: 'Appartamento 8' },
+            ])
+        );
+        wardApiStub.getWards.mockReturnValueOnce(throwError(() => new Error('wards down')));
+
+        setInputs('create', null);
+
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-7', 'plant-8']);
+        expect(component.plantsLoadError()).toBeNull();
+        expect(wardApiStub.getPlantsByWardId).not.toHaveBeenCalled();
+    });
+
+    it('se il plant viene deselezionato resetta opzioni dispositivo e blocca il campo sensore', () => {
+        setInputs('create', null);
+
+        component.form.controls.plantId.setValue('plant-1');
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+        expect(component.form.controls.sensorId.enabled).toBe(true);
+
+        component.form.controls.plantId.setValue('');
+
+        expect(component.deviceOptions()).toEqual([]);
+        expect(component.form.controls.sensorId.value).toBe('');
+        expect(component.form.controls.sensorId.disabled).toBe(true);
     });
 
     it('in edit mode non consente di modificare il dispositivo associato', () => {

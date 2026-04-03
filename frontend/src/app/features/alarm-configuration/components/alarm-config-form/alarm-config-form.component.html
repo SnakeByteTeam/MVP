@@ -96,7 +96,7 @@
     }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
-        <label for="thresholdOperator" class="font-semibold text-slate-700">Attiva se il valore e:</label>
+        <label for="thresholdOperator" class="font-semibold text-slate-700">Attiva se il valore è:</label>
         <div class="flex items-center gap-2">
             <select id="thresholdOperator" formControlName="thresholdOperator"
                 class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
@@ -107,9 +107,6 @@
                 }
             </select>
 
-            <input id="threshold" type="number" formControlName="threshold"
-                class="h-8 w-24 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
-                [attr.aria-invalid]="form.controls.threshold.invalid && form.controls.threshold.touched" />
         </div>
     </div>
 
@@ -117,9 +114,24 @@
     <p role="alert" class="text-xs font-medium text-rose-700">L'operatore di soglia e obbligatorio.</p>
     }
 
-    @if (form.controls.threshold.invalid && form.controls.threshold.touched) {
-    <p role="alert" class="text-xs font-medium text-rose-700">La soglia e obbligatoria.</p>
-    }
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="thresholdValue" class="font-semibold text-slate-700">Valore soglia:</label>
+        <div>
+            <input id="thresholdValue" type="text" inputmode="decimal" formControlName="thresholdValue"
+                list="thresholdBooleanHints"
+                class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
+                [attr.aria-invalid]="form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched" />
+            <datalist id="thresholdBooleanHints">
+                <option value="ON"></option>
+                <option value="OFF"></option>
+            </datalist>
+            <p class="mt-1 text-xs text-slate-600">Per soglie booleane usa ON o OFF (esempio: = ON).</p>
+
+            @if (form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">La soglia e obbligatoria.</p>
+            }
+        </div>
+    </div>
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
         <label for="armingTime" class="font-semibold text-slate-700">Orario attivazione:</label>

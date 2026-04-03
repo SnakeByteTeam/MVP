@@ -9,9 +9,15 @@ import { AnalyticsStrategy } from '../analytics.strategy';
 import { DatapointValue } from '../../../domain/datapoint-value.model';
 import { Series } from 'src/analytics/domain/series.model';
 
+<<<<<<< HEAD
+const FALL_SFE_TYPE = 'SFE_State_Fall';
+const FALL = 'Fall';
+const NO_FALL = 'NoFall';
+=======
 const FALL_SFE_TYPE = 'SFE_State_ManDown';
 const FALL = 'True';
 const NO_FALL = 'False';
+>>>>>>> prova_integrazione
 const DAYS_RANGE = 30;
 const METRIC = 'ward-falls';
 const TITLE = 'Frequenza delle cadute rilevate nel reparto';

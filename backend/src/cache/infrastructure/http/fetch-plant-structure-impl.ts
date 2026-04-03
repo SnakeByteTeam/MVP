@@ -2,8 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom, retry } from 'rxjs';
 
-import { DeviceDto } from 'src/device/infrastructure/http/dtos/device.dto';
-import { DatapointDto } from 'src/device/infrastructure/http/dtos/datapoint.dto';
+import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
+import { DatapointDto } from 'src/device/infrastructure/http/dtos/out/datapoint.dto';
 import { plainToInstance } from 'class-transformer';
 import { ApiRoomDto, ApiPlantResponseDto } from './dtos/in/api-plant.dto';
 import { DeviceResponseDto, ApiDeviceDto } from './dtos/in/api-device.dto';
@@ -31,9 +31,7 @@ export class FetchStructureCacheImpl
         this.httpService
           .get(`${this.API_DOMAIN}/${plantId}/locations`, {
             headers: { Authorization: `Bearer ${validToken}` },
-            timeout: 30000,
           })
-          .pipe(retry({ count: 3, delay: 2000 })),
       );
 
       if (!response.data) return null;
@@ -90,9 +88,7 @@ export class FetchStructureCacheImpl
       this.httpService
         .get(`${this.API_DOMAIN}/${plantId}/locations/${room.id}/functions`, {
           headers: { Authorization: `Bearer ${validToken}` },
-          timeout: 30000,
         })
-        .pipe(retry({ count: 3, delay: 2000 })),
     );
 
     if (!response.data)
@@ -130,10 +126,8 @@ export class FetchStructureCacheImpl
           `${this.API_DOMAIN}/${plantId}/functions/${device.id}/datapoints`,
           {
             headers: { Authorization: `Bearer ${validToken}` },
-            timeout: 30000,
           },
         )
-        .pipe(retry({ count: 3, delay: 2000 })),
     );
 
     if (!response.data)

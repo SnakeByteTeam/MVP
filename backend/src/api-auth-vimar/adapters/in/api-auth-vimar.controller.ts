@@ -1,11 +1,29 @@
-import { BadRequestException, Controller, Get, Inject, InternalServerErrorException, Logger, Query, Redirect } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+  Query,
+  Redirect,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiQuery,
+} from '@nestjs/swagger';
 import {
   APIAUTHUSECASE,
   type ApiAuthUseCase,
 } from 'src/api-auth-vimar/application/ports/in/api-auth.usecase';
-import { type GetTokensCallbackUseCase, GETTOKENSCALLBACKUSECASE } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
+import {
+  type GetTokensCallbackUseCase,
+  GETTOKENSCALLBACKUSECASE,
+} from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
 
+@ApiTags('auth')
 @Controller('my-vimar')
 export class ApiAuthVimarController {
   private readonly logger = new Logger(ApiAuthVimarController.name);
@@ -17,12 +35,21 @@ export class ApiAuthVimarController {
     private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase,
   ) {}
 
-  private readonly redirect_url: string;
-
   @Get('auth')
   @Redirect()
+  @ApiOperation({
+    summary: 'Login with Vimar API',
+    description: 'Initiates authentication flow by redirecting to Vimar login.',
+  })
+  @ApiQuery({
+    name: 'redirect_url',
+    required: true,
+    type: String,
+    description: 'URL to redirect after login',
+    example: 'http://localhost:4200/dashboard',
+  })
   login(@Query() payload: PlantAuthDto): { url: string; statusCode: number } {
-    if(!payload?.redirect_url) throw new BadRequestException;
+    if (!payload?.redirect_url) throw new BadRequestException();
 
     const state = Buffer.from(payload.redirect_url).toString('base64');
     this.logger.log(`Redirecting with state: ${state}`);
@@ -35,14 +62,34 @@ export class ApiAuthVimarController {
 
   @Get('callback')
   @Redirect()
-  async saveTokens(@Query('code') code: string, @Query('state') state: string): Promise<{ url: string, statusCode: number }> {
+  @ApiOperation({
+    summary: 'OAuth callback',
+    description: 'Handles OAuth callback from Vimar authentication.',
+  })
+  @ApiQuery({
+    name: 'code',
+    required: true,
+    type: String,
+    description: 'Authorization code',
+  })
+  @ApiQuery({
+    name: 'state',
+    required: false,
+    type: String,
+    description: 'Encoded redirect URL',
+  })
+  async saveTokens(
+    @Query('code') code: string,
+    @Query('state') state: string,
+  ): Promise<{ url: string; statusCode: number }> {
     if (!code) {
       throw new BadRequestException('Code is required');
     }
     try {
       this.logger.log(`Callback received with code: ${code}`);
-      
-      let redirectUrl = this.redirect_url;
+
+      let redirectUrl;
+
       if (state) {
         try {
           redirectUrl = Buffer.from(state, 'base64').toString('utf-8');

@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+
 DROP TABLE IF EXISTS token_cache;
 DROP TABLE IF EXISTS plant;
 DROP TABLE IF EXISTS datapoint_history;
@@ -210,121 +212,6 @@ CREATE TABLE plant (
     data JSONB NOT NULL,
     ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL
 );
-
-INSERT INTO plant (cached_at, id, data, ward_id)
-SELECT
-    NOW() - (gs * INTERVAL '1 minute') AS cached_at,
-    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS id,
-    jsonb_build_object(
-        'name', CONCAT('App. ', LPAD(gs::text, 3, '0')),
-        'rooms', jsonb_build_array(
-            jsonb_build_object(
-                'id', CONCAT('apt-', LPAD(gs::text, 3, '0'), '-r1'),
-                'name', 'Ingresso',
-                'devices', jsonb_build_array()
-            ),
-            jsonb_build_object(
-                'id', CONCAT('apt-', LPAD(gs::text, 3, '0'), '-r2'),
-                'name', 'Camera principale',
-                'devices', jsonb_build_array()
-            )
-        )
-    ) AS data,
-    wr.ward_id
-FROM generate_series(1, 80) AS gs
-LEFT JOIN (
-    SELECT w.id AS ward_id, ws.start_idx, ws.end_idx
-    FROM ward_seed ws
-    JOIN ward w ON w.name = ws.name
-) AS wr ON gs BETWEEN wr.start_idx AND wr.end_idx
-ON CONFLICT (id) DO UPDATE
-SET
-    cached_at = EXCLUDED.cached_at,
-    data = EXCLUDED.data,
-    ward_id = EXCLUDED.ward_id;
-
-
--- Override apt-001 with full device/datapoint metadata for analytics
-UPDATE plant SET data = jsonb_build_object(
-    'name', 'App. 001',
-    'rooms', jsonb_build_array(
-        jsonb_build_object(
-            'id', 'apt-001-r1', 'name', 'Camera principale',
-            'devices', jsonb_build_array(
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000001', 'type', 'SF_Light',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',
-                                           'name', 'Luce Camera', 'sfeType', 'SFE_State_OnOff')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000002', 'type', 'SF_Thermostat',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000002-SFE_State_Temperature',
-                                           'name', 'Temperatura Camera', 'sfeType', 'SFE_State_Temperature'),
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000002-SFE_State_HVACMode',
-                                           'name', 'Modalità HVAC', 'sfeType', 'SFE_State_HVACMode')
-                    )
-                )
-            )
-        ),
-        jsonb_build_object(
-            'id', 'apt-001-r2', 'name', 'Bagno',
-            'devices', jsonb_build_array(
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000003', 'type', 'SF_Access',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000003-SFE_State_Presence',
-                                           'name', 'Presenza Bagno', 'sfeType', 'SFE_State_Presence')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000004', 'type', 'SF_Access',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000004-SFE_State_Presence',
-                                           'name', 'Presenza Letto', 'sfeType', 'SFE_State_Presence')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000005', 'type', 'SF_FallDetector',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000005-SFE_State_Fall',
-                                           'name', 'Caduta Bagno', 'sfeType', 'SFE_State_Fall')
-                    )
-                )
-            )
-        )
-    )
-) WHERE id = 'apt-001';
-
--- Override apt-002 with full device/datapoint metadata for analytics
-UPDATE plant SET data = jsonb_build_object(
-    'name', 'App. 002',
-    'rooms', jsonb_build_array(
-        jsonb_build_object(
-            'id', 'apt-002-r1', 'name', 'Camera principale',
-            'devices', jsonb_build_array(
-                jsonb_build_object(
-                    'id', 'fct-BB0022CC0022-2000000001', 'type', 'SF_Light',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-BB0022CC0022-2000000001-SFE_State_OnOff',
-                                           'name', 'Luce Camera', 'sfeType', 'SFE_State_OnOff')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-BB0022CC0022-2000000002', 'type', 'SF_Thermostat',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',
-                                           'name', 'Temperatura Camera', 'sfeType', 'SFE_State_Temperature'),
-                        jsonb_build_object('id', 'dp-BB0022CC0022-2000000002-SFE_State_HVACMode',
-                                           'name', 'Modalità HVAC', 'sfeType', 'SFE_State_HVACMode')
-                    )
-                )
-            )
-        )
-    )
-) WHERE id = 'apt-002';
 
 CREATE TABLE IF NOT EXISTS alarm_rule (
     id                  VARCHAR(255) PRIMARY KEY,

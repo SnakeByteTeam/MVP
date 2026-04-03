@@ -1,26 +1,41 @@
+import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  HttpCode,
-  Inject,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+  ApiOperation,
+  ApiTags,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   UPDATE_CACHE_USE_CASE,
   type UpdateCacheUseCase,
 } from 'src/cache/application/ports/in/update-cache.usecase';
 import { SubNotificationPayloadDto } from 'src/cache/infrastructure/http/dtos/in/subNotification.dto';
 
+@ApiTags('cache')
 @Controller('cache')
 export class HttpCacheController {
   constructor(
     @Inject(UPDATE_CACHE_USE_CASE)
     private readonly updateCacheUseCase: UpdateCacheUseCase,
+    private readonly emitter: EventEmitter2,
   ) {}
 
   @Post('update')
   @HttpCode(202)
+  @ApiOperation({
+    summary: 'Update plant cache',
+    description: 'Processes cache updates from webhook notifications.',
+  })
+  @ApiOkResponse({
+    description: 'Cache update accepted. Processing in background.',
+    schema: {
+      example: {
+        success: true,
+        statusCode: 202,
+        message: 'Webhook accepted. Processing update for 2 plant(s)',
+      },
+    },
+  })
   async updateCache(@Body() payload: SubNotificationPayloadDto) {
     const plantIds = payload.data
       .filter((item: any) => item.type === 'service')
@@ -48,6 +63,7 @@ export class HttpCacheController {
             err.message,
           );
         }
+        this.emitter.emit('cache.updated', { plantId: plantId });
       }
     });
 

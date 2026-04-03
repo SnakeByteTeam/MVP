@@ -36,31 +36,22 @@ export class PlantController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get plant structure by plant id',
-    description:
-      'Expected query parameter: plantid. Returned payload: one PlantDto.',
+    summary: 'Get plant structure',
+    description: 'Retrieves the complete structure of a plant including rooms and devices.',
   })
   @ApiQuery({
     name: 'plantid',
     required: true,
     type: String,
-    description: 'Unique identifier of the plant.',
+    description: 'Plant ID',
     example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
   })
   @ApiOkResponse({
-    description: 'Plant found and returned.',
+    description: 'Plant structure successfully retrieved.',
     type: PlantDto,
   })
   @ApiInternalServerErrorResponse({
-    description:
-      'Unexpected error while reading/synchronizing plant structure.',
-    schema: {
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-        error: 'Internal Server Error',
-      },
-    },
+    description: 'Internal server error.',
   })
   async findById(@Query('plantid') plantId: string) {
     try {
@@ -76,6 +67,15 @@ export class PlantController {
   }
 
   @Get('available')
+  @ApiOperation({
+    summary: 'Get available plants',
+    description: 'Retrieves all plants available to the current user.',
+  })
+  @ApiOkResponse({
+    description: 'Available plants successfully retrieved.',
+    type: PlantDto,
+    isArray: true,
+  })
   async getAllAvailablePlants() {
     try {
       const plants: Plant[] =

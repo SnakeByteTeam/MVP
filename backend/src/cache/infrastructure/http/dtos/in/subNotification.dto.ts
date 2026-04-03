@@ -3,6 +3,8 @@ export interface NotificationLinkDto {
 }
 
 export interface NotificationAttributesDto {
+  value?: string | number;
+  timestamp?: string;
   lastModified: string;
 }
 

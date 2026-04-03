@@ -8,13 +8,17 @@ import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { DatapointValue } from '../../../domain/datapoint-value.model';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
-const PRESENCE_SFE_TYPE = 'SFE_State_Presence';
 const DETECTED = 'Detected';
 const NOT_DETECTED = 'NotDetected';
 const DAYS_RANGE = 30;
-const TITLE = 'Rilevamento di presenza';
-const METRIC = 'sensor-presence';
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+  sfeType: PRESENCE_SFE_TYPE,
+} = AnalyticsMetric.SENSOR_PRESENCE;
 
 interface SensorState {
   name: string;
@@ -39,7 +43,7 @@ export class SensorPresence implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot(TITLE, METRIC, 'events', [], []);
+      return new Plot(TITLE, METRIC, UNIT, [], []);
     }
 
     const snapshots: [string, DatapointValue[]][] = Array.from(
@@ -87,7 +91,7 @@ export class SensorPresence implements AnalyticsStrategy {
       },
     );
 
-    return new Plot(TITLE, METRIC, 'events', labels, series);
+    return new Plot(TITLE, METRIC, UNIT, labels, series);
   }
 
   private getOrCreateSensorState(

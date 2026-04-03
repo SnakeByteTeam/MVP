@@ -3,6 +3,7 @@ import { GetAnalyticsCmd } from '../../application/commands/get-analytics.cmd';
 import { GetAnalyticsUseCase } from '../../application/ports/in/get-analytics.usecase';
 import { GetAnalyticsDto } from '../../infrastructure/dtos/get-analytics.dto';
 import { PlotDto } from '../../infrastructure/dtos/plot.dto';
+import { ApiOkResponse } from '@nestjs/swagger';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -11,6 +12,7 @@ export class AnalyticsController {
     private readonly getAnalyticsUseCase: GetAnalyticsUseCase,
   ) {}
 
+  @ApiOkResponse({ type: GetAnalyticsDto })
   @Get()
   async getAnalyticsByPlantId(
     @Query() dto: GetAnalyticsDto,

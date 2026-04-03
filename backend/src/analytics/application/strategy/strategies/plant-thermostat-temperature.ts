@@ -4,9 +4,14 @@ import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { Plot } from '../../../domain/plot.model';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
-const TITLE = 'Variazione e cambio di temperatura di impianto';
-const METRIC = 'thermostat-temperature';
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+  sfeType: SFE_TYPE,
+} = AnalyticsMetric.THERMOSTAT_TEMPERATURE;
 
 @Injectable()
 export class PlantThermostatTemperature implements AnalyticsStrategy {
@@ -33,12 +38,16 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     );
 
     const tempByDay = new Map<string, { sum: number; count: number }>();
+    const lastSeenValue = new Map<string, string>();
 
     for (const [timestamp, datapoints] of snapshots) {
       const day = timestamp.slice(0, 10);
 
       for (const dp of datapoints) {
-        if (dp.sfeType !== 'SFE_State_Temperature') continue;
+        if (dp.sfeType !== SFE_TYPE) continue;
+
+        if (lastSeenValue.get(dp.datapointId) === dp.value) continue;
+        lastSeenValue.set(dp.datapointId, dp.value);
 
         const temp = Number.parseFloat(dp.value ?? '');
         if (Number.isNaN(temp)) continue;
@@ -58,6 +67,6 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     const labels = sorted.map(([day]) => day);
     const values = sorted.map(([, { sum, count }]) => sum / count);
 
-    return new Plot(TITLE, METRIC, '°C', labels, [new Series('', '', values)]);
+    return new Plot(TITLE, METRIC, UNIT, labels, [new Series('', '', values)]);
   }
 }

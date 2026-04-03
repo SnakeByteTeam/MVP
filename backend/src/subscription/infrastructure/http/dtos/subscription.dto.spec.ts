@@ -9,6 +9,37 @@ import {
 } from './subscription.dto';
 
 describe('SubscriptionDtos', () => {
+  it('should instantiate dto classes at runtime', () => {
+    const attributes = new SubscriptionAttributesDto();
+    attributes.lifetime = 0;
+    attributes.url = 'https://callback.example.com';
+    attributes.secret = 'secret';
+
+    const relation = new SubscriptionDataRelationDto();
+    relation.type = 'service';
+    relation.id = 'plant-1';
+
+    const relationships = new SubscriptionRelationshipsDto();
+    relationships.subscriptionNode = { data: relation };
+
+    const data = new SubscriptionDataDto();
+    data.type = 'subscription';
+    data.attributes = attributes;
+    data.relationships = relationships;
+
+    const create = new SubscriptionCreateDto();
+    create.data = data;
+
+    const response = new SubscriptionResponseDto();
+    response.data = { id: 'sub-1', type: 'subscription' };
+
+    const collection = new SubscriptionsCollectionDto();
+    collection.data = [response.data];
+
+    expect(create.data.relationships.subscriptionNode?.data.id).toBe('plant-1');
+    expect(collection.data[0].id).toBe('sub-1');
+  });
+
   describe('SubscriptionAttributesDto', () => {
     it('should create valid subscription attributes', () => {
       const attributes: SubscriptionAttributesDto = {

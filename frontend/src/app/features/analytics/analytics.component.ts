@@ -10,8 +10,10 @@ import { PlantAnomaliesChartComponent } from './components/plant-anomalies-chart
 import { PresenceDetectionChartComponent } from './components/presence-detection-chart/presence-detection-chart.component';
 import { ProlongedPresenceChartComponent } from './components/prolonged-presence-chart/prolonged-presence-chart.component';
 import { TemperatureVariationsChartComponent } from './components/temperature-variations-chart/temperature-variations-chart.component';
-import { Observable } from 'rxjs';
+import { Observable,  switchMap, filter, BehaviorSubject } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { Apartment } from '../apartment-monitor/models/apartment.model';
+
 
 @Component({ 
     selector: 'app-analytics', 
@@ -29,14 +31,40 @@ import { CommonModule } from '@angular/common';
     ],
     templateUrl: './analytics.component.html' })
 export class AnalyticsComponent {
-    private analyticsApiService : AnalyticsApiService = inject(AnalyticsApiService);
+    
+    private analyticsApiService = inject(AnalyticsApiService);
+    
+    private selectedApartmentId$ = new BehaviorSubject<string | null>(null);
+    
+    public apartments$: Observable<Apartment[]> | null = null;
     public analytics: Observable<AnalyticsDto> | null = null;
 
-    public ngOnInit(): void{
-        this.analytics = this.analyticsApiService.getAnalytics("mockID");
+    public ngOnInit(): void {
+        this.apartments$ = this.analyticsApiService.getAllApartments();
+        //default seleziona il primo appartamento
+        this.apartments$.subscribe(apartments => {
+            if (apartments.length > 0 && !this.selectedApartmentId$.value) {
+                this.selectedApartmentId$.next(apartments[0].id);
+            }
+        });
+
+        //reazione ai cambi di appartamento
+        this.analytics = this.selectedApartmentId$.pipe(
+            filter(id => id !== null), 
+            switchMap(id => this.analyticsApiService.getAnalytics(id!))
+        );
+    }
+
+    public onApartmentChange(event: Event): void {
+        const selectElement = event.target as HTMLSelectElement;
+        this.selectedApartmentId$.next(selectElement.value);
     }
 
     public getChartByMetric(data: AnalyticsDto | null, metric: string): ChartInfoDto | undefined {
         return data?.analyticsInfo?.find(chart => chart.metric === metric);
     }
+   
 }
+
+
+

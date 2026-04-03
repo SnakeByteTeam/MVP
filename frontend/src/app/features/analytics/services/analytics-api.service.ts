@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { AnalyticsDto } from '../models/analytics.model';
 import { Observable, map, of } from 'rxjs';
+import { Apartment } from '../../apartment-monitor/models/apartment.model';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {
@@ -10,6 +11,25 @@ export class AnalyticsApiService {
     private readonly baseUrl: string = inject(API_BASE_URL);
 
     private readonly analyticsEndpoint = `${this.baseUrl}/`;
+    private readonly apartmentsEndpoint = `${this.baseUrl}/`;
+
+    public getAllApartments():Observable<Apartment[]>{
+       //return this.http.get<any[]>(analyticsEndpoint).pipe(
+
+       const mock: Apartment[] = [
+        { id: "id10000000000000000-006957895768", name: "Bianchi", isEnabled: true, rooms: [] },
+        { id: "id10000000000sf34000-006957895768", name: "Neri", isEnabled: true, rooms: [] }
+      ];
+       
+       return of(mock).pipe(
+        map(response => response.map(item => ({
+          id: item.id,
+          name: item.name,
+          isEnabled: item.isEnabled,
+          rooms: item.rooms
+        } as Apartment)))
+      );
+    }
 
     public getAnalytics(apartmentId: string): Observable<AnalyticsDto>{
 

@@ -1,15 +1,18 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
 import { ResolveAlarmEventRepository } from '../../application/repository/resolve-alarm-event-repository.interface';
 import { AlarmEventEntity } from '../entities/alarm-event-entity';
 import { GetAllAlarmEventsRepository } from '../../application/repository/get-all-alarm-events-repository.interface';
 import { GetAllAlarmEventsByUserIdRepository } from '../../application/repository/get-all-alarm-events-by-user-id-repository.interface';
+import { CreateAlarmEventRepository } from '../../application/repository/create-alarm-event-repository.interface';
 
 export class AlarmEventsRepositoryImpl
   implements
     ResolveAlarmEventRepository,
     GetAllAlarmEventsRepository,
-    GetAllAlarmEventsByUserIdRepository
+    GetAllAlarmEventsByUserIdRepository,
+    CreateAlarmEventRepository
 {
   constructor(@Inject(PG_POOL) private readonly pool) {}
 
@@ -57,6 +60,16 @@ export class AlarmEventsRepositoryImpl
       `UPDATE alarm_event SET resolution_time = NOW(), user_id = $2 
       WHERE id = $1`,
       [alarmId, userId],
+    );
+  }
+
+  async createAlarmEvent(
+    alarmRuleId: string,
+    activationTime: Date,
+  ): Promise<void> {
+    return await this.pool.query(
+      `INSERT INTO alarm_event (id, alarm_rule_id, activation_time) VALUES ($1,$2,$3)`,
+      [uuidv4(), alarmRuleId, activationTime],
     );
   }
 }

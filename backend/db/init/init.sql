@@ -113,197 +113,6 @@ CREATE TABLE plant (
     ward_id   INTEGER      REFERENCES ward(id) ON DELETE SET NULL
 );
 
-<<<<<<< HEAD
-INSERT INTO plant (cached_at, id, data, ward_id)
-SELECT
-    NOW() - (gs * INTERVAL '1 minute') AS cached_at,
-    CONCAT('apt-', LPAD(gs::text, 3, '0')) AS id,
-    jsonb_build_object(
-        'name', CONCAT('App. ', LPAD(gs::text, 3, '0')),
-        'rooms', jsonb_build_array(
-            jsonb_build_object(
-                'id', CONCAT('apt-', LPAD(gs::text, 3, '0'), '-r1'),
-                'name', 'Ingresso',
-                'devices', jsonb_build_array()
-            ),
-            jsonb_build_object(
-                'id', CONCAT('apt-', LPAD(gs::text, 3, '0'), '-r2'),
-                'name', 'Camera principale',
-                'devices', jsonb_build_array()
-            )
-        )
-    ) AS data,
-    wr.ward_id
-FROM generate_series(1, 80) AS gs
-LEFT JOIN (
-    SELECT w.id AS ward_id, ws.start_idx, ws.end_idx
-    FROM ward_seed ws
-    JOIN ward w ON w.name = ws.name
-) AS wr ON gs BETWEEN wr.start_idx AND wr.end_idx
-ON CONFLICT (id) DO UPDATE
-SET
-    cached_at = EXCLUDED.cached_at,
-    data = EXCLUDED.data,
-    ward_id = EXCLUDED.ward_id;
-
-
-
-
-
-CREATE TABLE alarm_rule (
-    id VARCHAR(255) PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    device_id VARCHAR(255) NOT NULL,
-    priority INT NOT NULL CHECK (priority IN (1, 2, 3, 4)),
-    threshold_operator VARCHAR(2) NOT NULL CHECK (threshold_operator IN ('>', '<', '=', '>=', '<=')),
-    threshold_value VARCHAR(255) NOT NULL,
-    arming_time TIME NOT NULL,
-    dearming_time TIME NOT NULL,
-    is_armed BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-INSERT INTO alarm_rule (
-    id,
-    name,
-    device_id,
-    priority,
-    threshold_operator,
-    threshold_value,
-    arming_time,
-    dearming_time,
-    is_armed
-) VALUES
-('ALM001', 'Temperatura alta', 'DEV001', 1, '>', '75.50', '08:00:00', '18:00:00', TRUE),
-('ALM002', 'Pressione bassa', 'DEV002', 2, '<', '30.00', '00:00:00', '23:59:59', TRUE),
-('ALM003', 'Livello serbatoio', 'DEV003', 3, '>', '60.25', '06:00:00', '20:00:00', FALSE),
-('ALM004', 'Vibrazione motore', 'DEV004', 1, '>', '5.75', '07:30:00', '19:30:00', TRUE),
-('ALM005', 'UmiditÃ  ambiente', 'DEV005', 4, '>', '85.00', '09:00:00', '17:00:00', FALSE),
-('ALM006', 'Corrente alta', 'DEV006', 2, '>', '15.80', '00:00:00', '23:59:59', TRUE),
-('ALM007', 'Gas rilevato', 'DEV007', 1, '>', '10.00', '00:00:00', '23:59:59', TRUE),
-('ALM008', 'Porta aperta', 'DEV008', 3, '=', 'ON', '18:00:00', '06:00:00', TRUE);
-
-CREATE TABLE alarm_event (
-    id VARCHAR(255) PRIMARY KEY,
-    alarm_rule_id VARCHAR(255),
-    activation_time TIMESTAMP NOT NULL,
-    resolution_time TIMESTAMP,
-    user_id INTEGER,
-    FOREIGN KEY (alarm_rule_id)
-        REFERENCES alarm_rule(id)
-        ON DELETE SET NULL,
-    FOREIGN KEY (user_id)
-        REFERENCES "user"(id)
-);
-
-INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
-VALUES
--- Eventi per ALM001 (Temperatura alta)
-('EVT001', 'ALM001', '2026-03-30 09:15:00', '2026-03-30 10:00:00', 1),
-('EVT010', 'ALM001', '2026-03-30 09:15:00', NULL, NULL),
-('EVT002', 'ALM001', '2026-03-31 11:20:00', NULL, NULL),
-
--- Eventi per ALM002 (Pressione bassa)
-('EVT003', 'ALM002', '2026-03-29 14:05:00', '2026-03-29 14:45:00', 1),
-
--- Eventi per ALM004 (Vibrazione motore)
-('EVT004', 'ALM004', '2026-03-28 08:00:00', '2026-03-28 08:30:00', 1),
-('EVT005', 'ALM004', '2026-03-31 16:10:00', NULL, NULL),
-
--- Eventi per ALM006 (Corrente alta)
-('EVT006', 'ALM006', '2026-03-30 22:00:00', '2026-03-30 22:20:00', 2),
-
--- Eventi per ALM007 (Gas rilevato)
-('EVT007', 'ALM007', '2026-03-31 02:15:00', '2026-03-31 02:50:00', 2),
-('EVT008', 'ALM007', '2026-04-01 01:10:00', NULL, NULL),
-
--- Eventi per ALM008 (Porta aperta, fascia notturna)
-('EVT009', 'ALM008', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);
-
--- Override apt-001 with full device/datapoint metadata for analytics
-UPDATE plant SET data = jsonb_build_object(
-    'name', 'App. 001',
-    'rooms', jsonb_build_array(
-        jsonb_build_object(
-            'id', 'apt-001-r1', 'name', 'Camera principale',
-            'devices', jsonb_build_array(
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000001', 'type', 'SF_Light',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',
-                                           'name', 'Luce Camera', 'sfeType', 'SFE_State_OnOff')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000002', 'type', 'SF_Thermostat',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000002-SFE_State_Temperature',
-                                           'name', 'Temperatura Camera', 'sfeType', 'SFE_State_Temperature'),
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000002-SFE_State_HVACMode',
-                                           'name', 'Modalità HVAC', 'sfeType', 'SFE_State_HVACMode')
-                    )
-                )
-            )
-        ),
-        jsonb_build_object(
-            'id', 'apt-001-r2', 'name', 'Bagno',
-            'devices', jsonb_build_array(
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000003', 'type', 'SF_Access',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000003-SFE_State_Presence',
-                                           'name', 'Presenza Bagno', 'sfeType', 'SFE_State_Presence')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000004', 'type', 'SF_Access',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000004-SFE_State_Presence',
-                                           'name', 'Presenza Letto', 'sfeType', 'SFE_State_Presence')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-AA0011BB0011-1000000005', 'type', 'SF_FallDetector',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-AA0011BB0011-1000000005-SFE_State_Fall',
-                                           'name', 'Caduta Bagno', 'sfeType', 'SFE_State_Fall')
-                    )
-                )
-            )
-        )
-    )
-) WHERE id = 'apt-001';
-
--- Override apt-002 with full device/datapoint metadata for analytics
-UPDATE plant SET data = jsonb_build_object(
-    'name', 'App. 002',
-    'rooms', jsonb_build_array(
-        jsonb_build_object(
-            'id', 'apt-002-r1', 'name', 'Camera principale',
-            'devices', jsonb_build_array(
-                jsonb_build_object(
-                    'id', 'fct-BB0022CC0022-2000000001', 'type', 'SF_Light',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-BB0022CC0022-2000000001-SFE_State_OnOff',
-                                           'name', 'Luce Camera', 'sfeType', 'SFE_State_OnOff')
-                    )
-                ),
-                jsonb_build_object(
-                    'id', 'fct-BB0022CC0022-2000000002', 'type', 'SF_Thermostat',
-                    'datapoints', jsonb_build_array(
-                        jsonb_build_object('id', 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',
-                                           'name', 'Temperatura Camera', 'sfeType', 'SFE_State_Temperature'),
-                        jsonb_build_object('id', 'dp-BB0022CC0022-2000000002-SFE_State_HVACMode',
-                                           'name', 'Modalità HVAC', 'sfeType', 'SFE_State_HVACMode')
-                    )
-                )
-            )
-        )
-    )
-) WHERE id = 'apt-002';
-
-
 INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
   NOW(),
   'AA0011BB0011',
@@ -424,7 +233,7 @@ INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
         ]
       }
     ],
-    "wardId": null
+    "wardId": 1
   }',
   (SELECT id FROM ward WHERE name = 'test-ward')
 );
@@ -826,28 +635,75 @@ INSERT INTO datapoint_history (timestamp, datapoint_id, value) VALUES
 ('2026-04-02 07:00:00+00', 'dp-BB0022CC0022-2000000005-SFE_State_ManDown', 'False')
 ON CONFLICT DO NOTHING;
 
+CREATE TABLE IF NOT EXISTS status (
+    id   SERIAL PRIMARY KEY,
+    name VARCHAR(30) NOT NULL
+);
 
--- CREATE TABLE IF NOT EXISTS alarm_rule (
---     id                 VARCHAR(255) PRIMARY KEY,
---     name               VARCHAR(255) NOT NULL,
---     threshold_operator CHAR(2)      NOT NULL,
---     threshold_value    VARCHAR(20)  NOT NULL,
---     priority           INTEGER      NOT NULL,
---     arming_time        TIME,
---     dearming_time      TIME,
---     is_armed           BOOLEAN      NOT NULL DEFAULT TRUE,
---     device_id          VARCHAR(255) NOT NULL,
---     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
---     CONSTRAINT chk_armed_arming CHECK (
---         NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
---              CURRENT_TIME BETWEEN arming_time AND dearming_time)
---     )
--- );
+INSERT INTO status (name) VALUES
+('Attivo'),
+('Risolto'),
+('In gestione');
 
--- INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
--- ('rule-001', 'Temperatura critica',    '> ', '30',    1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
--- ('rule-002', 'Luce accesa di notte',   '= ', 'On',    3, '22:00', '06:00', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
--- ('rule-003', 'Caduta rilevata',        '= ', 'True',  1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
--- ('rule-004', 'Temperatura alta',       '> ', '25',    2, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
--- ('rule-005', 'Caduta rilevata',        '= ', 'True',  1, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000005-SFE_State_ManDown',      'BB0022CC0022');
+CREATE TABLE IF NOT EXISTS alarm_rule (
+    id                 VARCHAR(255) PRIMARY KEY,
+    name               VARCHAR(255) NOT NULL,
+    threshold_operator CHAR(2)      NOT NULL,
+    threshold_value    VARCHAR(20)  NOT NULL,
+    priority           INTEGER      NOT NULL,
+    arming_time        TIME,
+    dearming_time      TIME,
+    is_armed           BOOLEAN      NOT NULL DEFAULT TRUE,
+    device_id          VARCHAR(255) NOT NULL,
+    plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_armed_arming CHECK (
+        NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
+             CURRENT_TIME BETWEEN arming_time AND dearming_time)
+    )
 
+);
+
+INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
+('rule-001', 'Temperatura critica',    '>', '30',    1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
+('rule-002', 'Luce accesa di notte',   '=', 'On',    3, '22:00', '06:00', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
+('rule-003', 'Caduta rilevata',        '=', 'True',  1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
+('rule-004', 'Temperatura alta',       '>', '25',    2, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
+('rule-005', 'Caduta rilevata',        '=', 'True',  1, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000005-SFE_State_ManDown',      'BB0022CC0022');
+
+
+CREATE TABLE alarm_event (
+    id VARCHAR(255) PRIMARY KEY,
+    alarm_rule_id VARCHAR(255),
+    activation_time TIMESTAMP NOT NULL,
+    resolution_time TIMESTAMP,
+    user_id INTEGER,
+    FOREIGN KEY (alarm_rule_id)
+        REFERENCES alarm_rule(id)
+        ON DELETE SET NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES "user"(id)
+);
+
+INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
+VALUES
+-- Eventi per rule-001 (Temperatura critica)
+('EVT001', 'rule-001', '2026-03-30 09:15:00', '2026-03-30 10:00:00', 1),
+('EVT010', 'rule-001', '2026-03-30 09:15:00', NULL, NULL),
+('EVT002', 'rule-001', '2026-03-31 11:20:00', NULL, NULL),
+('EVT003', 'rule-001', '2026-03-29 14:05:00', '2026-03-29 14:45:00', 1),
+
+-- Eventi per rule-003 (Caduta rilevata)
+('EVT004', 'rule-003', '2026-03-28 08:00:00', '2026-03-28 08:30:00', 1),
+('EVT005', 'rule-003', '2026-03-31 16:10:00', NULL, NULL),
+
+-- Eventi per rule-004 (Temperatura alta)
+('EVT006', 'rule-004', '2026-03-30 22:00:00', '2026-03-30 22:20:00', 2),
+
+-- Eventi per rule-005 (Caduta rilevata)
+('EVT007', 'rule-005', '2026-03-31 02:15:00', '2026-03-31 02:50:00', 2),
+('EVT008', 'rule-005', '2026-04-01 01:10:00', NULL, NULL),
+
+-- Eventi per rule-002 (Luce accesa di notte)
+('EVT009', 'rule-002', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);

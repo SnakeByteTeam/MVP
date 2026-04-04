@@ -45,4 +45,29 @@ describe('EventCacheController', () => {
 
     expect(useCase.updateAllCache).toHaveBeenCalledTimes(1);
   });
+
+  it('should skip duplicate fetched.tokens while a sync is already running', async () => {
+    let resolveUpdate: (() => void) | undefined;
+    useCase.updateAllCache.mockImplementation(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolveUpdate = () => resolve(true);
+        }),
+    );
+
+    const firstEmit = emitter.emitAsync('fetched.tokens');
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const secondEmit = emitter.emitAsync('fetched.tokens');
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(useCase.updateAllCache).toHaveBeenCalledTimes(1);
+
+    resolveUpdate?.();
+
+    await firstEmit;
+    await secondEmit;
+  });
 });

@@ -39,7 +39,7 @@ export class WardsController {
     private readonly updateWardUseCase: UpdateWardUseCase,
     @Inject(DELETE_WARD_USE_CASE)
     private readonly deleteWardUseCase: DeleteWardUseCase,
-  ) { }
+  ) {}
 
   @Post()
   async createWard(@Body() req: CreateWardReqDto): Promise<CreateWardResDto> {

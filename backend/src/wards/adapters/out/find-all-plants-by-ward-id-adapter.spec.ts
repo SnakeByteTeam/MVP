@@ -1,5 +1,5 @@
+import { Plant } from 'src/plant/domain/models/plant.model';
 import { FindAllPlantsByWardIdCmd } from '../../application/commands/find-all-plants-by-ward-id-cmd';
-import { Plant } from '../../domain/plant';
 import { FindAllPlantsByWardIdAdapter } from './find-all-plants-by-ward-id-adapter';
 
 describe('FindAllPlantsByWardIdAdapter', () => {

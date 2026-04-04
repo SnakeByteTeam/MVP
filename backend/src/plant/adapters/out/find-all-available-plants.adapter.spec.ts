@@ -1,5 +1,5 @@
 import { FindAllAvailablePlantsAdapter } from './find-all-available-plants.adapter';
-import { FindAllAvailablePlantsRepoPort } from 'src/plant/application/repository/find-all-plants.repository';
+import { FindAllAvailablePlantsRepoPort } from 'src/plant/application/repository/find-all-available-plants.repository';
 import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant.entity';
 import { Plant } from 'src/plant/domain/models/plant.model';
 

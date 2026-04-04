@@ -1,6 +1,6 @@
 services: 
   database:
-    image: timescale/timescaledb:latest-pg15
+    image: timescale/timescaledb:latest-pg18
     container_name: postgres-timescale
     restart: unless-stopped
     environment: 
@@ -25,7 +25,7 @@ services:
     volumes: 
       - ./backend:/app
       - /app/node_modules
-    command: npm run start:dev
+    command: npm run start
     depends_on:
       - database
     env_file: 
@@ -40,6 +40,17 @@ services:
       - 4200:4200
     volumes:
       - ./frontend/src:/app/src
+    depends_on:
+      - server
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - server
 

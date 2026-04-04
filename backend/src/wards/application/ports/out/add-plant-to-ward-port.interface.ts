@@ -1,4 +1,4 @@
-import { Plant } from '../../../domain/plant';
+import { Plant } from 'src/plant/domain/models/plant.model';
 import { AddPlantToWardCmd } from '../../commands/add-plant-to-ward-cmd';
 
 export interface AddPlantToWardPort {

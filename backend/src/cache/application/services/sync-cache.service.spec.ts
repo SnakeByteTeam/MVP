@@ -3,12 +3,14 @@ import { FetchNewCachePort } from '../ports/out/fetch-new-cache.port';
 import { WriteCachePort } from '../ports/out/write-cache.port';
 import { GetAllPlantIdsPort } from '../ports/out/get-all-plantids.port';
 import { SyncCacheService } from './sync-cache.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('SyncCacheService', () => {
   let service: SyncCacheService;
   let fetchPort: jest.Mocked<FetchNewCachePort>;
   let writePort: jest.Mocked<WriteCachePort>;
   let getAllPlantIdsPort: jest.Mocked<GetAllPlantIdsPort>;
+  let emitter: jest.Mocked<EventEmitter2>;
   let consoleLogSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
 
@@ -28,7 +30,17 @@ describe('SyncCacheService', () => {
       getAllPlantIds: jest.fn(),
     };
 
-    service = new SyncCacheService(fetchPort, writePort, getAllPlantIdsPort);
+    emitter = {
+      emit: jest.fn(),
+      emitAsync: jest.fn().mockResolvedValue([]),
+    } as any;
+
+    service = new SyncCacheService(
+      fetchPort,
+      writePort,
+      getAllPlantIdsPort,
+      emitter,
+    );
   });
 
   afterEach(() => {
@@ -54,6 +66,9 @@ describe('SyncCacheService', () => {
     expect(fetchPort.fetch).toHaveBeenCalledTimes(1);
     expect(writePort.writeStructure).toHaveBeenCalledWith(fetchedPlant);
     expect(writePort.writeStructure).toHaveBeenCalledTimes(1);
+    expect(emitter.emit).toHaveBeenCalledWith('cache.updated', {
+      plantId: 'plant-1',
+    });
   });
 
   it('should throw error when write cache fails', async () => {
@@ -97,6 +112,7 @@ describe('SyncCacheService', () => {
       expect(getAllPlantIdsPort.getAllPlantIds).toHaveBeenCalledTimes(1);
       expect(fetchPort.fetch).toHaveBeenCalledTimes(2);
       expect(writePort.writeStructure).toHaveBeenCalledTimes(2);
+      expect(emitter.emit).toHaveBeenCalledWith('cache.all.updated');
     });
 
     it('should continue with next plant when fetch fails for one plant', async () => {
@@ -113,12 +129,13 @@ describe('SyncCacheService', () => {
 
       const result = await service.updateAllCache();
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error updating cache for plantId: plant-1'),
       );
       expect(writePort.writeStructure).toHaveBeenCalledTimes(1);
       expect(writePort.writeStructure).toHaveBeenCalledWith(plant2);
+      expect(emitter.emit).toHaveBeenCalledWith('cache.all.updated');
     });
 
     it('should continue with next plant when write fails for one plant', async () => {
@@ -138,10 +155,11 @@ describe('SyncCacheService', () => {
 
       const result = await service.updateAllCache();
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error updating cache for plantId: plant-1'),
       );
+      expect(emitter.emit).toHaveBeenCalledWith('cache.all.updated');
     });
 
     it('should log success message when cache is updated for a plant', async () => {

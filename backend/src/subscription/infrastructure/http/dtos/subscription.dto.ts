@@ -4,14 +4,21 @@ export class SubscriptionAttributesDto {
   secret: string;
 }
 
-export class SubscriptionNodeRelationDto {
+export class SubscriptionDataRelationDto {
   type: string;
   id: string;
+  meta?: {
+    expand: boolean;
+  };
 }
 
 export class SubscriptionRelationshipsDto {
-  subscriptionNode: {
-    data: SubscriptionNodeRelationDto;
+  subscriptionNode?: {
+    data: SubscriptionDataRelationDto;
+  };
+
+  subscriptionDatapoints?: {
+    data: SubscriptionDataRelationDto[];
   };
 }
 

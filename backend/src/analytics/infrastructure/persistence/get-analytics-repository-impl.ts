@@ -62,7 +62,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
              dp->>'id'      AS datapoint_id,
              dp->>'name'    AS name,
              dp->>'sfeType' AS sfe_type,
-             dev->>'type'   AS device_type
+             dev->>'subType'   AS device_type
            FROM latest_cache
            JOIN LATERAL jsonb_array_elements(data->'rooms')     AS room ON TRUE
            JOIN LATERAL jsonb_array_elements(room->'devices')   AS dev  ON TRUE
@@ -104,7 +104,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
              dp->>'id'      AS datapoint_id,
              dp->>'name'    AS name,
              dp->>'sfeType' AS sfe_type,
-             dev->>'type'   AS device_type
+             dev->>'subType'   AS device_type
            FROM latest_cache
            JOIN LATERAL jsonb_array_elements(data->'rooms')     AS room ON TRUE
            JOIN LATERAL jsonb_array_elements(room->'devices')   AS dev  ON TRUE
@@ -146,7 +146,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
              dp->>'id'      AS datapoint_id,
              dp->>'name'    AS name,
              dp->>'sfeType' AS sfe_type,
-             dev->>'type'   AS device_type
+             dev->>'subType'   AS device_type
            FROM latest_cache
            JOIN LATERAL jsonb_array_elements(data->'rooms')     AS room ON TRUE
            JOIN LATERAL jsonb_array_elements(room->'devices')   AS dev  ON TRUE

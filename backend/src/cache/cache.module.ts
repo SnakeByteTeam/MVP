@@ -20,7 +20,6 @@ import { UPDATE_CACHE_ALL_PLANTS_USECASE } from './application/ports/in/update-c
 import { GET_ALL_PLANTIDS_PORT } from './application/ports/out/get-all-plantids.port';
 import { GET_ALL_PLANTIDS_REPO_PORT } from './application/repository/get-all-plantids.repository';
 
-
 @Module({
   imports: [ApiAuthVimarModule, HttpModule],
   controllers: [HttpCacheController, EventCacheController],

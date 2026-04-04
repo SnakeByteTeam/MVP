@@ -24,13 +24,18 @@ describe('RefreshTokensAdapter', () => {
   it('should return refreshed tokens given by API', async () => {
     refreshTokensFromApi.refresh.mockResolvedValue(apiTokens);
 
+    const startTime = Date.now();
     const returnedTokens =
       await refreshTokenAdapter.refreshTokens('my-refresh-token');
-    const date = new Date(Date.now() + 600 * 1000);
+    const expectedExpiresTime = startTime + 600 * 1000;
 
     expect(returnedTokens?.getAccessToken()).toBe(apiTokens.accessToken);
     expect(returnedTokens?.getRefreshToken()).toBe(apiTokens.refreshToken);
-    expect(returnedTokens?.getExpiresAt()).toEqual(date);
+    // Allow 100ms tolerance for execution time
+    expect(returnedTokens?.getExpiresAt().getTime()).toBeCloseTo(
+      expectedExpiresTime,
+      -2,
+    );
     expect(refreshTokensFromApi.refresh).toHaveBeenCalledTimes(1);
     expect(refreshTokensFromApi.refresh).toHaveBeenCalledWith(
       'my-refresh-token',

@@ -3,31 +3,16 @@ import { ApiAuthUseCase } from '../ports/in/api-auth.usecase';
 
 @Injectable()
 export class ApiAuthVimarService implements ApiAuthUseCase {
-  private readonly authorizeHost = process.env.HOST1 || process.env.OAUTH_AUTHORIZE_URL || '';
-  private readonly redirectUri = process.env.REDIRECT_URI || process.env.OAUTH_REDIRECT_URI || '';
-  private readonly clientId = process.env.CLIENTID || process.env.CLIENT_ID || '';
+  private readonly REDIRECT_URI: string = process.env.REDIRECT_URI || '';
 
   getLoginUrl(state?: string): string {
-    const missingKeys: string[] = [];
-    if (!this.authorizeHost) {
-      missingKeys.push('HOST1');
-    }
-    if (!this.redirectUri) {
-      missingKeys.push('REDIRECT_URI');
-    }
-    if (!this.clientId) {
-      missingKeys.push('CLIENTID');
-    }
-
-    if (missingKeys.length > 0) {
-      throw new Error(`MyVimar OAuth configuration is missing: ${missingKeys.join(', ')}`);
-    }
+    if (!this.REDIRECT_URI) throw new Error('There is no redirect_url setted');
 
     const options: Record<string, string> = {
       response_type: 'code',
-      client_id: this.clientId,
+      client_id: process.env.CLIENTID || '',
       scope: 'read write manage',
-      redirect_uri: this.redirectUri,
+      redirect_uri: this.REDIRECT_URI,
     };
 
     if (state) {
@@ -36,6 +21,6 @@ export class ApiAuthVimarService implements ApiAuthUseCase {
 
     const params = new URLSearchParams(options);
 
-    return `${this.authorizeHost}?${params.toString()}`;
+    return `${process.env.HOST1}?${params.toString()}`;
   }
 }

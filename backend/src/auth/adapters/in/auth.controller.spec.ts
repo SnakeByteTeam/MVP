@@ -103,9 +103,7 @@ describe('AuthController', () => {
 
   it('refresh: should throw UnauthorizedException when refresh cookie is missing', async () => {
     const mockReq: any = {};
-    expect(() => controller.refresh(mockReq)).toThrow(
-      UnauthorizedException,
-    );
+    expect(() => controller.refresh(mockReq)).toThrow(UnauthorizedException);
   });
 
   it('logout: should clear cookie', () => {

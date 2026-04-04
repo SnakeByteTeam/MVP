@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { GetTokensFromApiImpl } from './get-tokens-from-api.impl';
 import { Logger } from '@nestjs/common';
+import { GetTokensFromApiImpl } from './get-tokens-from-api.impl';
 import { Observable, of } from 'rxjs';
 import { TokensDto } from '../dto/tokens.dto';
 
@@ -29,11 +29,12 @@ describe('GetTokensFromApiImpl', () => {
       ),
     };
 
-    apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
-  });
+    process.env.CLIENTID = 'my-client-id';
+    process.env.CLIENTSECRET = 'my-client-secret';
+    process.env.HOST2 = 'https://auth.example.com/token';
+    process.env.REDIRECT_URI = 'http://localhost:3000/callback';
 
-  afterEach(() => {
-    jest.restoreAllMocks();
+    apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
   });
 
   describe('getTokensWithCode', () => {
@@ -75,8 +76,11 @@ describe('GetTokensFromApiImpl', () => {
     });
 
     it('should fallback to empty token and redirect urls when config values are missing', async () => {
+      delete process.env.CLIENTID;
+      delete process.env.CLIENTSECRET;
       delete process.env.HOST2;
       delete process.env.REDIRECT_URI;
+
       const apiWithEmptyConfig = new GetTokensFromApiImpl(
         httpService as unknown as HttpService,
       );

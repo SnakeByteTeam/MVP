@@ -12,14 +12,14 @@ export class GetTokensFromApiImpl
 {
   private readonly logger = new Logger(GetTokensFromApiImpl.name);
 
-  constructor(
-    private readonly httpService: HttpService,
-  ) {}
+  constructor(private readonly httpService: HttpService) {}
 
   private readonly clientId = process.env.CLIENTID || process.env.CLIENT_ID;
-  private readonly clientSecret = process.env.CLIENTSECRET || process.env.CLIENT_SECRET;
+  private readonly clientSecret =
+    process.env.CLIENTSECRET || process.env.CLIENT_SECRET;
   private readonly tokenUrl = process.env.HOST2 || process.env.OAUTH_TOKEN_URL;
-  private readonly redirectUrl = process.env.REDIRECT_URI || process.env.OAUTH_REDIRECT_URI;
+  private readonly redirectUrl =
+    process.env.REDIRECT_URI || process.env.OAUTH_REDIRECT_URI;
 
   async getTokensWithCode(code: string): Promise<TokensDto | null> {
     this.logger.log(`Getting tokens with code: ${code}`);

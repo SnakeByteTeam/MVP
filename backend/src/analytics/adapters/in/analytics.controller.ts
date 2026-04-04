@@ -1,9 +1,14 @@
-import { Controller, Inject, Get, Query } from '@nestjs/common';
+import { Controller, Inject, Get, Query, Param } from '@nestjs/common';
 import { GetAnalyticsCmd } from '../../application/commands/get-analytics.cmd';
 import { GetAnalyticsUseCase } from '../../application/ports/in/get-analytics.usecase';
 import { GetAnalyticsDto } from '../../infrastructure/dtos/get-analytics.dto';
 import { PlotDto } from '../../infrastructure/dtos/plot.dto';
-import { ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+} from '@nestjs/swagger';
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -12,10 +17,28 @@ export class AnalyticsController {
     private readonly getAnalyticsUseCase: GetAnalyticsUseCase,
   ) {}
 
-  @ApiOkResponse({ type: GetAnalyticsDto })
-  @Get()
+  @Get('/:plantId')
+  @ApiOperation({
+    summary: 'Get all analytics by Plant ID',
+    description:
+      'Retrieves all types of analytics with related suggestions (if necessary) based on the given plant id.',
+  })
+  @ApiParam({
+    name: 'plantId',
+    required: true,
+    type: String,
+    description: 'Plant ID',
+    example: 'AA0011BB0011',
+  })
+  @ApiOkResponse({
+    description: 'Analytics successfully retrieved.',
+    type: GetAnalyticsDto,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal server error.',
+  })
   async getAnalyticsByPlantId(
-    @Query() dto: GetAnalyticsDto,
+    @Param() dto: GetAnalyticsDto,
   ): Promise<PlotDto[]> {
     const cmd = new GetAnalyticsCmd(dto.plantId);
     const plots = await this.getAnalyticsUseCase.getAnalyticsByPlantId(cmd);

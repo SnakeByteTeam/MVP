@@ -1,10 +1,15 @@
+import { AlarmPriority } from './alarm-priority.enum';
+
 export class AlarmEvent {
   constructor(
     public readonly id: string,
-    public readonly alarmId: string,
+    public readonly position: string,
+    public readonly alarmRuleId: string,
     public readonly alarmName: string,
-    public readonly dangerSignal: string,
-    public readonly triggeredAt: Date,
-    public readonly resolvedAt: Date | null,
+    public readonly priority: AlarmPriority,
+    public readonly activationTime: Date,
+    public readonly resolutionTime: Date | null,
+    public readonly userId: number | null,
+    public readonly userUsername: string | null,
   ) {}
 }

@@ -12,6 +12,8 @@ import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
 import { AlarmsModule } from './alarms/alarms.module';
+import { ValidationModule } from './validation/validation.module';
+import { GuardModule } from './guard/guard.module';
 
 @Module({
   imports: [
@@ -30,7 +32,9 @@ import { AlarmsModule } from './alarms/alarms.module';
     AnalyticsModule,
     EventEmitterModule.forRoot(),
     UsersModule,
-    AlarmsModule
+    AlarmsModule, 
+    ValidationModule, 
+    GuardModule
   ],
 })
 export class AppModule {}

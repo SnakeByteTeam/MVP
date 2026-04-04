@@ -20,8 +20,8 @@ export class CreateAlarmRuleAdapter implements CreateAlarmRulePort {
       cmd.deviceId,
       cmd.thresholdOperator,
       cmd.thresholdValue,
-      cmd.activationTime,
-      cmd.deactivationTime,
+      cmd.armingTime,
+      cmd.dearmingTime,
     );
 
     return new AlarmRule(

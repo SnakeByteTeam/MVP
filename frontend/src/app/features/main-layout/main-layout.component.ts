@@ -112,7 +112,7 @@ export class MainLayoutComponent implements OnInit {
         });
     }
 
-    private canOpenProfilePanel(): boolean {
+    public canOpenProfilePanel(): boolean {
         const role = this.internalAuthService.getRole() ?? this.currentUser.role;
         return role === UserRole.AMMINISTRATORE;
     }

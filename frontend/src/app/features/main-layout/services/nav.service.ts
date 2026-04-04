@@ -9,44 +9,44 @@ export class NavService {
         const NavItemList : NavItem[] = [
             {
                 label: "Dashboard",
-                icon: "",
+                icon: "dashboard.png",
                 route: "dashboard"
             },
             {
                 label: "Dispositivi",
-                icon: "",
+                icon: "device.png",
                 route: "apartment-monitor"
             },
             {
                 label: "Allarmi attivi",
-                icon: "",
+                icon: "alarm-management.png",
                 route: "alarms/alarm-management"
             },
             {
                 label: "Storico allarmi",
-                icon: "",
+                icon: "alarm-history.png",
                 route: "alarms/alarm-history"
             },
             {
                 label: "Gestione allarmi",
-                icon: "",
+                icon: "alarm-configuration.png",
                 route: "alarms/alarm-configuration",
                 requiredRole: UserRole.AMMINISTRATORE
             },
             {
                 label: "Analytics",
-                icon: "",
+                icon: "analytics.png",
                 route: "analytics"
             },
             {
                 label: "Gestione Reparti",
-                icon: "",
+                icon: "ward-management.png",
                 route: "ward-management",
                 requiredRole: UserRole.AMMINISTRATORE
             },
             {
                 label: "Gestione Utenti",
-                icon: "",
+                icon: "user-management.png",
                 route: "user-management",
                 requiredRole: UserRole.AMMINISTRATORE
             },

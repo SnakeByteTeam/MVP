@@ -16,12 +16,17 @@
 
 .apartment-monitor__content {
   display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
 .apartment-monitor__panel {
   min-height: 100%;
+}
+
+.apartment-monitor__panel--highlight {
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 12px 24px -22px rgba(245, 158, 11, 0.55);
 }
 
 @media (max-width: 960px) {

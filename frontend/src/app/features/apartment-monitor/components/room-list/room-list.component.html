@@ -7,7 +7,10 @@
       @for (room of rooms(); track room.id) {
         <li>
           <button type="button" class="room-list__item" (click)="onRoomSelect(room.id)">
-            <span>{{ room.name }}</span>
+            <span class="room-list__item-main">
+              <span class="room-list__item-icon" aria-hidden="true">•</span>
+              <span class="room-list__item-label">{{ room.name }}</span>
+            </span>
             @if (room.hasActiveAlarm) {
               <span class="room-list__alarm">Allarme attivo</span>
             }

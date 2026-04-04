@@ -33,7 +33,6 @@ describe('SubscriptionRepoImpl', () => {
     delete process.env.DATAPOINT_SUB_CALLBACK;
     delete process.env.NODE_SUB_CALLBACK;
     delete process.env.SECRET_FOR_SUB;
-    jest.restoreAllMocks();
   });
 
   describe('refreshSub', () => {
@@ -77,7 +76,7 @@ describe('SubscriptionRepoImpl', () => {
           }),
         }),
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         'New subscription created for plant plant-1',
       );
     });
@@ -90,7 +89,7 @@ describe('SubscriptionRepoImpl', () => {
       const result = await repo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to create subscription for plant plant-1',
       );
     });
@@ -102,7 +101,7 @@ describe('SubscriptionRepoImpl', () => {
       const result = await newRepo.refreshSub('valid-token', 'plant-1');
 
       expect(result).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Failed to create subscription for plant plant-1',
       );
     });
@@ -110,7 +109,6 @@ describe('SubscriptionRepoImpl', () => {
     it('should throw error when NODE_SUB_CALLBACK is missing', async () => {
       delete process.env.NODE_SUB_CALLBACK;
       const newRepo = new SubscriptionRepoImpl(httpService);
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await newRepo.refreshSub('valid-token', 'plant-1');
 
@@ -258,7 +256,6 @@ describe('SubscriptionRepoImpl', () => {
       (httpService.get as jest.Mock).mockReturnValue(
         of(emptyLocationsResponse),
       );
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await repo.refreshDatapointSub('valid-token', 'plant-1');
 
@@ -268,7 +265,6 @@ describe('SubscriptionRepoImpl', () => {
     it('should throw error when DATAPOINT_SUB_CALLBACK is missing', async () => {
       delete process.env.DATAPOINT_SUB_CALLBACK;
       const newRepo = new SubscriptionRepoImpl(httpService);
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const result = await newRepo.refreshDatapointSub(
         'valid-token',

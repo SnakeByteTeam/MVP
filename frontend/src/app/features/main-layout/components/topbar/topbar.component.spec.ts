@@ -36,7 +36,7 @@ describe('TopbarComponent', () => {
 
     const buttons = fixture.nativeElement.querySelectorAll('button');
     const logoutButton = Array.from(buttons).find(
-      (btn: any) => btn.textContent.toLowerCase().trim() === 'logout'
+      (btn: any) => btn.textContent.toLowerCase().trim() === 'esci'
     ) as HTMLButtonElement;
 
     logoutButton.click();

@@ -17,7 +17,6 @@ import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service'
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../core/services/internal-auth.service';
-import { UserSession } from '../../user-auth/models/user-session.model';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +26,6 @@ export class AlarmManagementService {
     private readonly authService = inject(InternalAuthService);
     private readonly pageLimit = 6;
 
-    private readonly locallyManagedAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
     private readonly resolvingId$ = new BehaviorSubject<string | null>(null);
     private readonly resolveError$ = new BehaviorSubject<string | null>(null);
     private readonly pageOffset$ = new BehaviorSubject<number>(0);
@@ -36,19 +34,14 @@ export class AlarmManagementService {
 
     public readonly vm$ = combineLatest([
         this.alarmStateService.getActiveAlarms$(),
-        this.locallyManagedAlarms$.asObservable(),
-        this.authService.getCurrentUser$(),
         this.resolvingId$.asObservable(),
         this.resolveError$.asObservable(),
         this.pageOffset$.asObservable(),
         this.canGoNext$.asObservable(),
     ]).pipe(
-        map(([alarms, locallyManagedAlarms, session, resolvingId, resolveError, pageOffset, canGoNext]): AlarmListVm => {
-            const visibleActiveAlarms = this.filterAlarmsBySession(alarms, session);
-            const visibleLocallyManagedAlarms = this.filterAlarmsBySession(locallyManagedAlarms, session);
-
+        map(([alarms, resolvingId, resolveError, pageOffset, canGoNext]): AlarmListVm => {
             return {
-                alarms: this.mergeAlarmsForView(visibleActiveAlarms, visibleLocallyManagedAlarms),
+                alarms,
                 currentPage: Math.floor(pageOffset / this.pageLimit) + 1,
                 pageLimit: this.pageLimit,
                 pageOffset,
@@ -63,7 +56,6 @@ export class AlarmManagementService {
     );
 
     public initialize(): void {
-        this.locallyManagedAlarms$.next([]);
         this.pageOffset$.next(0);
         this.canGoNext$.next(false);
         this.loadPage(0);
@@ -103,11 +95,11 @@ export class AlarmManagementService {
                         throw new TypeError('Utente corrente non valido per risolvere l\'allarme.');
                     }
 
-                    return this.resolveAlarmRequest$(activeAlarmId, numericUserId);
+                    return this.alarmApiService.resolveAlarm(activeAlarmId, numericUserId);
                 }),
-                tap(({ numericUserId, sourceAlarm }) => {
-                    this.addLocallyManagedAlarm(activeAlarmId, numericUserId, sourceAlarm);
+                tap(() => {
                     this.alarmStateService.onAlarmResolved(activeAlarmId);
+                    this.loadPage(this.pageOffset$.getValue(), true);
                 }),
                 catchError((error: unknown) => {
                     this.resolveError$.next(this.mapResolveError(error));
@@ -129,25 +121,27 @@ export class AlarmManagementService {
             take(1),
             switchMap((session) => {
                 if (session?.role === UserRole.OPERATORE_SANITARIO) {
-                    return this.alarmApiService
-                        .getActiveAlarmsOfOperator(session.userId, this.pageLimit, offset)
-                        .pipe(map((alarms) => this.filterAlarmsBySession(alarms, session)));
+                    return this.alarmApiService.getActiveAlarmsOfOperator(session.userId, this.pageLimit, offset);
                 }
 
-                return this.alarmApiService.getActiveAlarms(this.pageLimit, offset).pipe(
-                    map((alarms) => this.filterAlarmsBySession(alarms, session))
-                );
+                return this.alarmApiService.getActiveAlarms(this.pageLimit, offset);
             })
         );
     }
 
-    private loadPage(offset: number): void {
+    private loadPage(offset: number, fallbackToPreviousIfEmpty = false): void {
         this.resolveError$.next(null);
 
         this.getInitialActiveAlarms$(offset)
             .pipe(
                 take(1),
                 tap((alarms) => {
+                    if (fallbackToPreviousIfEmpty && offset > 0 && alarms.length === 0) {
+                        const previousOffset = Math.max(0, offset - this.pageLimit);
+                        this.loadPage(previousOffset);
+                        return;
+                    }
+
                     this.alarmStateService.setActiveAlarms(alarms, 'replace');
                     this.pageOffset$.next(offset);
                     this.canGoNext$.next(alarms.length === this.pageLimit);
@@ -158,66 +152,6 @@ export class AlarmManagementService {
                 })
             )
             .subscribe();
-    }
-
-    private filterAlarmsBySession(alarms: ActiveAlarm[], session: UserSession | null): ActiveAlarm[] {
-
-        void session;
-        return alarms;
-    }
-
-    private mergeAlarmsForView(activeAlarms: ActiveAlarm[], locallyManagedAlarms: ActiveAlarm[]): ActiveAlarm[] {
-        const activeAlarmIds = new Set(activeAlarms.map((alarm) => alarm.id));
-        const managedOnly = locallyManagedAlarms.filter((alarm) => !activeAlarmIds.has(alarm.id));
-
-        return [...activeAlarms, ...managedOnly];
-    }
-
-    private resolveAlarmRequest$(
-        activeAlarmId: string,
-        numericUserId: number
-    ): Observable<{ numericUserId: number; sourceAlarm: ActiveAlarm | null }> {
-        return this.alarmStateService.getActiveAlarms$().pipe(
-            take(1),
-            map((alarms) => this.findSourceAlarm(activeAlarmId, alarms)),
-            switchMap((sourceAlarm) =>
-                this.alarmApiService.resolveAlarm(activeAlarmId, numericUserId).pipe(
-                    map(() => ({
-                        numericUserId,
-                        sourceAlarm,
-                    }))
-                )
-            )
-        );
-    }
-
-    private findSourceAlarm(activeAlarmId: string, activeAlarms: ActiveAlarm[]): ActiveAlarm | null {
-        const fromActiveAlarms = activeAlarms.find((alarm) => alarm.id === activeAlarmId);
-        if (fromActiveAlarms) {
-            return fromActiveAlarms;
-        }
-
-        return this.locallyManagedAlarms$.getValue().find((alarm) => alarm.id === activeAlarmId) ?? null;
-    }
-
-    private addLocallyManagedAlarm(
-        activeAlarmId: string,
-        managerUserId: number,
-        sourceAlarm: ActiveAlarm | null
-    ): void {
-        if (sourceAlarm === null) {
-            return;
-        }
-
-        const managedAlarm: ActiveAlarm = {
-            ...sourceAlarm,
-            resolutionTime: sourceAlarm.resolutionTime ?? new Date().toISOString(),
-            userId: managerUserId,
-        };
-
-        const currentManagedAlarms = this.locallyManagedAlarms$.getValue();
-        const deduplicatedManagedAlarms = currentManagedAlarms.filter((alarm) => alarm.id !== activeAlarmId);
-        this.locallyManagedAlarms$.next([managedAlarm, ...deduplicatedManagedAlarms]);
     }
 
     private mapResolveError(error: unknown): string {

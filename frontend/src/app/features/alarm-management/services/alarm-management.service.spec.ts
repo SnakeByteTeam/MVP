@@ -206,7 +206,7 @@ describe('AlarmManagementService', () => {
         subscription.unsubscribe();
     });
 
-    it('mantiene localmente l allarme gestito anche quando lo stato globale lo rimuove', async () => {
+    it('dopo resolve non mantiene righe locali e riallinea lo stato allo snapshot backend', async () => {
         service = createService();
         activeAlarmsSubject.next([alarmA, alarmB]);
         alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
@@ -214,48 +214,66 @@ describe('AlarmManagementService', () => {
         service.resolveAlarm(alarmA.id);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
-        const managedAlarm = vm.alarms.find((alarm) => alarm.id === alarmA.id);
 
-        expect(managedAlarm).toBeDefined();
-        expect(managedAlarm?.resolutionTime).not.toBeNull();
-        expect(managedAlarm?.userId).toBe(99);
-        expect(vm.alarms.map((alarm) => alarm.id)).toContain(alarmB.id);
+        expect(vm.alarms).toEqual([]);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([], 'replace');
     });
 
-    it('se lo stesso id torna aperto nel globale, prevale la versione aperta', async () => {
+    it('dopo resolve ricarica la pagina corrente dal backend', async () => {
         service = createService();
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([alarmA]));
         activeAlarmsSubject.next([alarmA]);
         alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
 
         service.resolveAlarm(alarmA.id);
-
-        const reopenedAlarm: ActiveAlarm = {
-            ...alarmA,
-            alarmName: 'Antipanico riattivato',
-            resolutionTime: null,
-        };
-        activeAlarmsSubject.next([reopenedAlarm]);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
 
         expect(vm.alarms.length).toBe(1);
         expect(vm.alarms[0].id).toBe(alarmA.id);
-        expect(vm.alarms[0].resolutionTime).toBeNull();
-        expect(vm.alarms[0].alarmName).toBe('Antipanico riattivato');
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA], 'replace');
     });
 
-    it('initialize resetta la cache locale dei gestiti', async () => {
-        service = createService();
-        activeAlarmsSubject.next([alarmA]);
+    it('dopo resolve su pagina non iniziale vuota torna automaticamente alla pagina precedente', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+        const secondPage: ActiveAlarm[] = [{ ...alarmA, id: 'active-7' }];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of([]))
+            .mockReturnValueOnce(of(firstPage));
         alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
 
-        service.resolveAlarm(alarmA.id);
-
-        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([]));
+        service = createService();
         service.initialize();
+        service.nextPage();
+        service.resolveAlarm('active-7');
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(vm.alarms).toEqual([]);
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 0);
+        expect(vm.currentPage).toBe(1);
+        expect(vm.pageOffset).toBe(0);
+        expect(vm.alarms.map((alarm) => alarm.id)).toEqual([
+            'active-1',
+            'active-2',
+            'active-3',
+            'active-4',
+            'active-5',
+            'active-6',
+        ]);
     });
 
     it('nextPage usa limit 6 e incrementa offset quando la pagina corrente e piena', async () => {

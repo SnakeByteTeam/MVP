@@ -10,6 +10,7 @@ describe('AlarmEventsRepositoryImpl', () => {
     expect(query).toHaveBeenCalledTimes(1);
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('WHERE ae.resolution_time IS NULL');
+    expect(sql).toContain('AND ae.alarm_rule_id IS NOT NULL');
     expect(params).toEqual([6, 0]);
   });
 
@@ -23,6 +24,7 @@ describe('AlarmEventsRepositoryImpl', () => {
     const [sql, params] = query.mock.calls[0];
     expect(sql).toContain('WHERE u.id = $1');
     expect(sql).toContain('AND ae.resolution_time IS NULL');
+    expect(sql).toContain('AND ae.alarm_rule_id IS NOT NULL');
     expect(params).toEqual([7, 6, 12]);
   });
 });

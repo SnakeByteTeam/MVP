@@ -9,11 +9,12 @@ import { CreateAlarmEventRepository } from '../../application/repository/create-
 
 export class AlarmEventsRepositoryImpl
   implements
-  ResolveAlarmEventRepository,
-  GetAllAlarmEventsRepository,
-  GetAllAlarmEventsByUserIdRepository,
-  CreateAlarmEventRepository {
-  constructor(@Inject(PG_POOL) private readonly pool) { }
+    ResolveAlarmEventRepository,
+    GetAllAlarmEventsRepository,
+    GetAllAlarmEventsByUserIdRepository,
+    CreateAlarmEventRepository
+{
+  constructor(@Inject(PG_POOL) private readonly pool) {}
 
   async getAllAlarmEvents(
     limit: number = 5,
@@ -34,7 +35,8 @@ export class AlarmEventsRepositoryImpl
        FROM alarm_event ae
        LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
        LEFT JOIN "user" u ON u.id = ae.user_id
-        WHERE ae.resolution_time IS NULL
+       WHERE ae.resolution_time IS NULL
+          AND ae.alarm_rule_id IS NOT NULL
        ORDER BY ae.resolution_time IS NOT NULL,
        ar.priority DESC,
        ae.activation_time DESC
@@ -67,7 +69,8 @@ export class AlarmEventsRepositoryImpl
        LEFT JOIN ward_user wu ON wu.ward_id = p.ward_id
        LEFT JOIN "user" u ON u.id = wu.user_id
        WHERE u.id = $1
-        AND ae.resolution_time IS NULL
+         AND ae.resolution_time IS NULL
+        AND ae.alarm_rule_id IS NOT NULL
        ORDER BY ae.resolution_time IS NOT NULL,
        ar.priority DESC,
        ae.activation_time DESC

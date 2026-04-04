@@ -33,12 +33,14 @@ describe('AlarmApiService', () => {
     const activeAlarm: ActiveAlarm = {
         id: 'active-1',
         alarmRuleId: 'alarm-1',
+        deviceId: 'dev-1',
         alarmName: 'Temperatura alta',
         priority: AlarmPriority.RED,
         activationTime: '2026-03-24T10:00:00.000Z',
         resolutionTime: null,
         position: 'Camera 101',
         userId: 7,
+        userUsername: 'oss_7',
     };
 
     beforeEach(() => {
@@ -159,11 +161,13 @@ describe('AlarmApiService', () => {
         const activeAlarmByUserDto = {
             id: 'active-1',
             alarmRuleId: 'alarm-1',
+            deviceId: 'dev-1',
             alarmName: 'Temperatura alta',
             priority: AlarmPriority.RED,
             activationTime: '2026-03-24T10:00:00.000Z',
             resolutionTime: null,
             position: 'Camera 101',
+            userUsername: 'oss_7',
         };
 
         service.getActiveAlarmsOfOperator('operator-7', 6, 12).subscribe((result) => {

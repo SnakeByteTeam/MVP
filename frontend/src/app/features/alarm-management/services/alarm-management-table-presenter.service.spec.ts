@@ -10,12 +10,14 @@ describe('AlarmManagementTablePresenterService', () => {
     const baseAlarm: ActiveAlarm = {
         id: 'active-1',
         alarmRuleId: 'rule-1',
+        deviceId: 'device-1',
         alarmName: 'Allarme antipanico',
         priority: AlarmPriority.RED,
         activationTime: '2026-03-24T10:00:00.000Z',
         resolutionTime: null,
         position: '  Camera 101  ',
         userId: 9,
+        userUsername: 'operator-9',
     };
 
     beforeEach(() => {
@@ -37,7 +39,8 @@ describe('AlarmManagementTablePresenterService', () => {
         expect(row.actionLabel).toBe('GESTISCI');
         expect(row.actionAriaLabel).toBe('Gestisci allarme Allarme antipanico');
         expect(row.location).toBe('Camera 101');
-        expect(row.manager).toBe('9');
+        expect(row.device).toBe('device-1');
+        expect(row.manager).toBe('operator-9');
         expect(row.closedAt).toBe('-');
         expect(row.openedAt).toMatch(/^\d{2}:\d{2}$/);
     });
@@ -47,6 +50,7 @@ describe('AlarmManagementTablePresenterService', () => {
             ...baseAlarm,
             resolutionTime: '2026-03-24T10:05:00.000Z',
             userId: 77,
+            userUsername: 'operator-77',
         };
 
         const row = service.toRows([managedAlarm], null)[0];
@@ -57,7 +61,7 @@ describe('AlarmManagementTablePresenterService', () => {
         expect(row.actionLabel).toBe('GESTITO');
         expect(row.actionAriaLabel).toBe('Allarme gia gestito Allarme antipanico');
         expect(row.closedAt).toMatch(/^\d{2}:\d{2}$/);
-        expect(row.manager).toBe('77');
+        expect(row.manager).toBe('operator-77');
     });
 
     it('quando l allarme e in risoluzione mostra stato e label specifici', () => {
@@ -76,11 +80,14 @@ describe('AlarmManagementTablePresenterService', () => {
             resolutionTime: 'not-a-date',
             position: '   ',
             userId: null,
+            userUsername: null,
+            deviceId: undefined,
         };
 
         const row = service.toRows([invalidAlarm], null)[0];
 
         expect(row.location).toBe('-');
+        expect(row.device).toBe('-');
         expect(row.manager).toBe('-');
         expect(row.openedAt).toBe('abcde');
         expect(row.closedAt).toBe('not-a');

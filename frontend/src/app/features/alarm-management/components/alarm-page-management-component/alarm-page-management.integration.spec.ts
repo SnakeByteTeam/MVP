@@ -3,6 +3,9 @@ import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.model';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
+import { UserRole } from '../../../../core/models/user-role.enum';
+import { InternalAuthService } from '../../../../core/services/internal-auth.service';
+import type { UserSession } from '../../../user-auth/models/user-session.model';
 import type { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
 import { AlarmPageManagementComponent } from './alarm-page-management-component';
@@ -10,27 +13,32 @@ import { AlarmPageManagementComponent } from './alarm-page-management-component'
 describe('AlarmManagement feature integration', () => {
     let fixture: ComponentFixture<AlarmPageManagementComponent>;
     let vmSubject: BehaviorSubject<AlarmListVm>;
+    let userSessionSubject: BehaviorSubject<UserSession | null>;
 
     const alarm1: ActiveAlarm = {
         id: 'active-1',
         alarmRuleId: 'rule-1',
+        deviceId: 'device-1',
         alarmName: 'Antipanico',
         priority: AlarmPriority.RED,
         activationTime: '2026-03-24T10:00:00.000Z',
         resolutionTime: null,
         position: 'Camera 201',
         userId: 1,
+        userUsername: 'oss_1',
     };
 
     const alarm2: ActiveAlarm = {
         id: 'active-2',
         alarmRuleId: 'rule-2',
+        deviceId: 'device-2',
         alarmName: 'Porta aperta',
         priority: AlarmPriority.ORANGE,
         activationTime: '2026-03-24T10:01:00.000Z',
         resolutionTime: null,
         position: 'Corridoio Nord',
         userId: 2,
+        userUsername: 'oss_2',
     };
 
     const alarmManagementStub = {
@@ -39,6 +47,10 @@ describe('AlarmManagement feature integration', () => {
         resolveAlarm: vi.fn(),
         nextPage: vi.fn(),
         previousPage: vi.fn(),
+    };
+
+    const authServiceStub = {
+        getCurrentUser$: vi.fn(),
     };
 
     beforeEach(async () => {
@@ -57,10 +69,21 @@ describe('AlarmManagement feature integration', () => {
         });
 
         alarmManagementStub.vm$ = vmSubject.asObservable();
+        userSessionSubject = new BehaviorSubject<UserSession | null>({
+            userId: '1',
+            username: 'admin',
+            role: UserRole.AMMINISTRATORE,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+        authServiceStub.getCurrentUser$.mockReturnValue(userSessionSubject.asObservable());
 
         await TestBed.configureTestingModule({
             imports: [AlarmPageManagementComponent],
-            providers: [{ provide: AlarmManagementService, useValue: alarmManagementStub }],
+            providers: [
+                { provide: AlarmManagementService, useValue: alarmManagementStub },
+                { provide: InternalAuthService, useValue: authServiceStub },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(AlarmPageManagementComponent);

@@ -36,12 +36,14 @@ export class AlarmStateService {
 		const nextAlarm: ActiveAlarm = {
 			id: event.id,
 			alarmRuleId: event.alarmRuleId,
+			deviceId: '-',
 			alarmName: event.alarmName,
 			priority: event.priority,
 			activationTime: event.activationTime,
 			resolutionTime: event.resolutionTime,
 			position: 'posizione sconosciuta',
 			userId: null,
+			userUsername: null,
 		};
 
 		const existingIndex = current.findIndex((alarm) => alarm.id === event.id);

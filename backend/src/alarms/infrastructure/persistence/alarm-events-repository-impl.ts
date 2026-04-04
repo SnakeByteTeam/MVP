@@ -9,12 +9,11 @@ import { CreateAlarmEventRepository } from '../../application/repository/create-
 
 export class AlarmEventsRepositoryImpl
   implements
-    ResolveAlarmEventRepository,
-    GetAllAlarmEventsRepository,
-    GetAllAlarmEventsByUserIdRepository,
-    CreateAlarmEventRepository
-{
-  constructor(@Inject(PG_POOL) private readonly pool) {}
+  ResolveAlarmEventRepository,
+  GetAllAlarmEventsRepository,
+  GetAllAlarmEventsByUserIdRepository,
+  CreateAlarmEventRepository {
+  constructor(@Inject(PG_POOL) private readonly pool) { }
 
   async getAllAlarmEvents(
     limit: number = 5,
@@ -25,6 +24,7 @@ export class AlarmEventsRepositoryImpl
          ae.id,
          '' AS room_name,
          ar.device_id AS device_name,
+        ar.device_id AS device_id,
          ae.alarm_rule_id,
          ar.name AS alarm_name,
          ar.priority,
@@ -56,18 +56,20 @@ export class AlarmEventsRepositoryImpl
         ae.id,
         '' AS room_name,
         ar.device_id AS device_name,
+        ar.device_id AS device_id,
         ae.alarm_rule_id,
         ar.name AS alarm_name,
         ar.priority,
         ae.activation_time,
         ae.resolution_time,
         ae.user_id,
-        '' as user_username
+        resolver.username as user_username
        FROM alarm_event ae
        LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
        LEFT JOIN plant p ON p.id = ar.plant_id
        LEFT JOIN ward_user wu ON wu.ward_id = p.ward_id
        LEFT JOIN "user" u ON u.id = wu.user_id
+       LEFT JOIN "user" resolver ON resolver.id = ae.user_id
        WHERE u.id = $1
          AND ae.resolution_time IS NULL
         AND ae.alarm_rule_id IS NOT NULL

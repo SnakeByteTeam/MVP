@@ -11,7 +11,7 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
   constructor(
     @Inject(GET_ALL_ALARM_EVENTS_REPOSITORY)
     private readonly getAllAlarmEventsRepository: GetAllAlarmEventsRepository,
-  ) {}
+  ) { }
 
   async getAllAlarmEvents(req: GetAllAlarmEventsCmd): Promise<AlarmEvent[]> {
     const alarmEvents =
@@ -24,6 +24,7 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
         new AlarmEvent(
           alarmEvent.id,
           alarmEvent.room_name + ' ' + alarmEvent.device_name,
+          alarmEvent.device_id,
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,

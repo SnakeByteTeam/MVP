@@ -15,18 +15,36 @@ export class AlarmManagementTablePresenterService {
                 id: alarm.id,
                 priority: alarm.priority,
                 name: alarm.alarmName,
-                device: alarm.alarmRuleId,
+                device: this.getSafeDevice(alarm.deviceId),
                 location: this.getSafeLocation(alarm.position),
                 status: isOpen ? 'Da gestire' : 'Non da gestire',
                 openedAt: this.toShortTime(alarm.activationTime),
                 closedAt: this.toShortTime(alarm.resolutionTime),
-                manager: alarm.userId === null ? '-' : String(alarm.userId),
+                manager: this.getSafeManager(alarm.userUsername),
                 isResolving,
                 isActionDisabled: isManaged || isResolving,
                 actionLabel: this.getActionLabel(isResolving, isManaged),
                 actionAriaLabel: this.getActionAriaLabel(alarm.alarmName, isManaged),
             };
         });
+    }
+
+    private getSafeDevice(deviceId: string | undefined): string {
+        const normalizedDeviceId = (deviceId ?? '').trim();
+        if (normalizedDeviceId.length > 0) {
+            return normalizedDeviceId;
+        }
+
+        return '-';
+    }
+
+    private getSafeManager(userUsername: string | null | undefined): string {
+        const normalizedUsername = (userUsername ?? '').trim();
+        if (normalizedUsername.length > 0) {
+            return normalizedUsername;
+        }
+
+        return '-';
     }
 
     private getActionLabel(isResolving: boolean, isManaged: boolean): string {

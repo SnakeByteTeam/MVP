@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   Inject,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { CreateAlarmRuleCmd } from '../../application/commands/create-alarm-rule.cmd';
@@ -40,6 +41,8 @@ import {
 } from '../../application/ports/in/update-alarm-rule.use-case';
 import { GetAllAlarmRulesResDto } from '../../infrastructure/dtos/out/get-all-alarm-rules-res-dto';
 import { GetAlarmRuleByIdResDto } from '../../infrastructure/dtos/out/get-alarm-rule-res-dto';
+import { UserGuard } from '../../../guard/user/user.guard';
+import { AdminGuard } from '../../../guard/admin/admin.guard';
 
 @Controller('alarm-rules')
 export class AlarmRulesController {
@@ -57,6 +60,7 @@ export class AlarmRulesController {
   ) { }
 
   @ApiOkResponse({ type: CreateAlarmRuleResDto })
+  @UseGuards(UserGuard, AdminGuard)
   @Post()
   async createAlarmRule(
     @Body() req: CreateAlarmRuleReqDto,
@@ -76,6 +80,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmRulesResDto, isArray: true })
+  @UseGuards(UserGuard, AdminGuard)
   @Get()
   async getAllAlarmRules(): Promise<GetAllAlarmRulesResDto[]> {
     const alarms = await this.getAllAlarmRulesUseCase.getAllAlarmRules();
@@ -83,6 +88,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: GetAlarmRuleByIdResDto })
+  @UseGuards(UserGuard, AdminGuard)
   @Get(':id')
   async getAlarmRuleById(
     @Param('id') id: string,
@@ -94,6 +100,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: UpdateAlarmRuleResDto })
+  @UseGuards(UserGuard, AdminGuard)
   @Put(':id')
   async updateAlarmRule(
     @Param('id') id: string,
@@ -115,6 +122,7 @@ export class AlarmRulesController {
   }
 
   @Delete(':id')
+  @UseGuards(UserGuard, AdminGuard)
   async deleteAlarmRule(@Param('id') id: string): Promise<void> {
     return this.deleteAlarmRuleUseCase.deleteAlarmRule(
       new DeleteAlarmRuleCmd(id),

@@ -13,6 +13,7 @@ import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
 import { ValidationModule } from './validation/validation.module';
+import { GuardModule } from './guard/guard.module';
 
 
 @Module({
@@ -31,10 +32,9 @@ import { ValidationModule } from './validation/validation.module';
     SubscriptionModule,
     AnalyticsModule,
     EventEmitterModule.forRoot(),
-    UsersModule,
+    UsersModule, GuardModule, ValidationModule,
   ],
-
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

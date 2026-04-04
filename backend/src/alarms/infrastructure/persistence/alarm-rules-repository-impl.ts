@@ -8,6 +8,8 @@ import { AlarmRuleEntity } from '../entities/alarm-rule-entity';
 import { CreateAlarmRuleRepository } from '../../application/repository/create-alarm-rule-repository.interface';
 import { UpdateAlarmRuleRepository } from '../../application/repository/update-alarm-rule-repository.interface';
 import { GetAlarmRuleByIdRepository } from '../../application/repository/get-alarm-rule-by-id-repository.interface';
+import { CheckAlarmRuleRepository } from '../../application/repository/check-alarm-rule-repository.interface';
+import { CheckAlarmEntity } from '../entities/check-alarm-entity';
 
 export class AlarmRulesRepositoryImpl
   implements
@@ -15,7 +17,8 @@ export class AlarmRulesRepositoryImpl
     GetAlarmRuleByIdRepository,
     GetAllAlarmRulesRepository,
     DeleteAlarmRuleRepository,
-    UpdateAlarmRuleRepository
+    UpdateAlarmRuleRepository,
+    CheckAlarmRuleRepository
 {
   constructor(@Inject(PG_POOL) private readonly pool) {}
 
@@ -102,6 +105,43 @@ export class AlarmRulesRepositoryImpl
         isArmed,
       ],
     );
+    return result.rows[0];
+  }
+
+  async checkAlarmRule(
+    deviceId: string,
+    value: string,
+    activationTime: string,
+  ): Promise<CheckAlarmEntity | null> {
+    const result = await this.pool.query(
+      `SELECT * FROM alarm_rule 
+      WHERE arming_time <= $1 
+        AND dearming_time >= $1
+        AND device_id = $2
+        AND is_armed = true
+        AND (
+          (
+            threshold_value IN ('on','off') 
+            AND $3 IN ('on','off')
+            AND threshold_operator = '='
+            AND threshold_value = $3
+          )
+          OR
+          (
+            threshold_value NOT IN ('on','off')
+            AND $3 NOT IN ('on','off')
+            AND (
+              (threshold_operator = '>'  AND $3::numeric > threshold_value::numeric) OR
+              (threshold_operator = '<'  AND $3::numeric < threshold_value::numeric) OR
+              (threshold_operator = '='  AND $3::numeric = threshold_value::numeric) OR
+              (threshold_operator = '>=' AND $3::numeric >= threshold_value::numeric) OR
+              (threshold_operator = '<=' AND $3::numeric <= threshold_value::numeric)
+            )
+          )
+        )`,
+      [activationTime, deviceId, value],
+    );
+
     return result.rows[0];
   }
 }

@@ -10,5 +10,6 @@ export class AlarmEvent {
     public readonly activationTime: Date,
     public readonly resolutionTime: Date | null,
     public readonly userId: number | null,
+    public readonly userUsername: string | null,
   ) {}
 }

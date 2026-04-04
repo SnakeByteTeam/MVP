@@ -6,6 +6,7 @@ import {
   Body,
   ParseIntPipe,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
@@ -27,6 +28,8 @@ import {
 import { GetAllAlarmEventsResDto } from '../../infrastructure/dtos/out/get-all-alarm-events-res-dto';
 import { ResolveAlarmEventReqDto } from '../../infrastructure/dtos/in/resolve-alarm-event-req-dto';
 import { GetAllAlarmEventsCmd } from '../../application/commands/get-all-alarm-events-cmd';
+import { UserGuard } from '../../../guard/user/user.guard';
+import { AdminGuard } from '../../../guard/admin/admin.guard';
 
 @Controller('alarm-events')
 export class AlarmEventsController {
@@ -40,6 +43,7 @@ export class AlarmEventsController {
   ) {}
 
   @ApiOkResponse({ type: GetAllAlarmEventsByUserIdResDto, isArray: true })
+  @UseGuards(UserGuard)
   @Get('/:userId/:limit/:offset')
   async getAllAlarmEventsByUserId(
     @Param('userId', ParseIntPipe) userId: number,
@@ -54,6 +58,7 @@ export class AlarmEventsController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/:limit/:offset')
   async getAllAlarmEvents(
     @Param('limit', ParseIntPipe) limit: number,
@@ -66,6 +71,7 @@ export class AlarmEventsController {
   }
 
   @Patch('/resolve')
+  @UseGuards(UserGuard)
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {
     return this.resolveAlarmEventUseCase.resolveAlarmEvent(
       new ResolveAlarmEventCmd(req.alarmId, req.userId),

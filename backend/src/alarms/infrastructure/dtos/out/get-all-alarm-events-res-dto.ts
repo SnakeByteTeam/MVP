@@ -25,4 +25,7 @@ export class GetAllAlarmEventsResDto {
 
   @ApiProperty()
   userId!: number | null;
+
+  @ApiProperty()
+  userUsername!: string | null;
 }

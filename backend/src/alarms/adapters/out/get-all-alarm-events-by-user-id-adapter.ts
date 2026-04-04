@@ -34,6 +34,7 @@ export class GetAllAlarmEventsByUserIdAdapter implements GetAllAlarmEventsByUser
           alarmEvent.activation_time,
           alarmEvent.resolution_time,
           alarmEvent.user_id,
+          alarmEvent.user_username
         ),
     );
   }

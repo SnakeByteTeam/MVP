@@ -1,9 +1,5 @@
 .device-card {
-  border: 1px solid #d8dee3;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  display: grid;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
 .device-card h3,
@@ -11,48 +7,94 @@
   margin: 0;
 }
 
+.device-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.device-card h3 {
+  font-size: 1rem;
+  font-family: var(--care-font-display);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f172a;
+}
+
+.device-card__meta {
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.device-card__status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.device-card__status--online {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.device-card__status--offline {
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #9f1239;
+}
+
 .device-card__writes {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .device-card__write-row {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.45rem;
+  padding: 0.7rem;
+}
+
+.device-card__write-row label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
 }
 
 .device-card__write-controls {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
   align-items: center;
 }
 
 .device-card__write-controls select,
 .device-card__write-controls button {
-  min-height: 2rem;
-}
-
-.device-card__write-controls button {
-  cursor: pointer;
-}
-
-.device-card__write-controls button:disabled,
-.device-card__write-controls select:disabled {
-  cursor: not-allowed;
+  flex: 1 1 8rem;
 }
 
 .device-card__error {
   margin: 0;
-  color: #a40000;
-  font-size: 0.85rem;
+  border: 1px solid #fecdd3;
+  border-radius: 0.65rem;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 0.82rem;
+  padding: 0.52rem 0.64rem;
 }
 
 .device-card__no-write {
-  color: #5f6b73;
-  font-size: 0.85rem;
+  color: #475569;
+  font-size: 0.84rem;
 }
 
 .device-card__id {
   font-size: 0.8rem;
-  color: #5f6b73;
+  color: #64748b;
 }

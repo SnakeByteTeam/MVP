@@ -1,3 +1,208 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 @import 'tailwindcss';
+
+:root {
+	--care-font-display: 'Syne', sans-serif;
+	--care-font-body: 'DM Sans', sans-serif;
+	--care-bg-soft: #f8fafc;
+	--care-bg-panel: rgba(255, 255, 255, 0.88);
+	--care-border: #dbe3ec;
+	--care-ink: #0f172a;
+	--care-muted: #64748b;
+	--care-primary: #0f766e;
+	--care-primary-strong: #115e59;
+	--care-danger-bg: #fff1f2;
+	--care-danger-border: #fecdd3;
+	--care-danger-text: #be123c;
+}
+
+body {
+	font-family: var(--care-font-body);
+	color: var(--care-ink);
+}
+
+.font-display {
+	font-family: var(--care-font-display);
+}
+
+.care-page {
+	display: grid;
+	gap: 1rem;
+	border: 1px solid var(--care-border);
+	border-radius: 1.1rem;
+	padding: 1rem;
+	background-color: var(--care-bg-soft);
+	box-shadow: 0 16px 38px -32px rgba(15, 23, 42, 0.55);
+}
+
+.care-dot-grid {
+	background-image: radial-gradient(circle, #d7dee7 1px, transparent 1px);
+	background-size: 22px 22px;
+}
+
+.care-page__hero {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+	border: 1px solid var(--care-border);
+	border-radius: 1rem;
+	padding: 1rem;
+	background:
+		linear-gradient(140deg, rgba(15, 118, 110, 0.07), rgba(249, 250, 251, 0.9) 55%),
+		var(--care-bg-panel);
+	backdrop-filter: blur(5px);
+}
+
+.care-eyebrow {
+	margin: 0;
+	font-size: 0.73rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--care-muted);
+}
+
+.care-title {
+	margin: 0.2rem 0 0;
+	font-size: clamp(1.3rem, 2.1vw, 1.8rem);
+	line-height: 1.2;
+	font-family: var(--care-font-display);
+	font-weight: 700;
+	letter-spacing: -0.015em;
+	color: var(--care-ink);
+}
+
+.care-subtitle {
+	margin: 0.4rem 0 0;
+	font-size: 0.92rem;
+	color: var(--care-muted);
+}
+
+.care-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	margin: 0;
+	border: 1px solid #cde7e5;
+	border-radius: 999px;
+	background: rgba(240, 253, 250, 0.95);
+	color: var(--care-primary-strong);
+	padding: 0.4rem 0.75rem;
+	font-size: 0.78rem;
+	font-weight: 600;
+}
+
+.care-chip__dot {
+	width: 0.46rem;
+	height: 0.46rem;
+	border-radius: 999px;
+	background: #10b981;
+}
+
+.care-field {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.care-field label {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: #334155;
+}
+
+.care-select {
+	min-height: 2.35rem;
+	width: 100%;
+	border: 1px solid #cbd5e1;
+	border-radius: 0.62rem;
+	padding: 0 0.65rem;
+	background: #fff;
+	color: #0f172a;
+	font-size: 0.9rem;
+}
+
+.care-select:focus-visible {
+	outline: 2px solid #2dd4bf;
+	outline-offset: 1px;
+}
+
+.care-button {
+	min-height: 2.35rem;
+	border: 1px solid #99f6e4;
+	border-radius: 0.62rem;
+	background: linear-gradient(180deg, #5eead4, #2dd4bf);
+	color: #134e4a;
+	font-size: 0.83rem;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	padding: 0 0.8rem;
+	cursor: pointer;
+	transition: transform 120ms ease, filter 120ms ease;
+}
+
+.care-button:hover {
+	filter: brightness(0.98);
+}
+
+.care-button:active {
+	transform: scale(0.98);
+}
+
+.care-button:disabled,
+.care-select:disabled {
+	cursor: not-allowed;
+	opacity: 0.65;
+}
+
+.care-link {
+	color: #0f766e;
+	font-size: 0.84rem;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.care-link:hover {
+	text-decoration: underline;
+}
+
+.care-panel {
+	border: 1px solid var(--care-border);
+	border-radius: 0.92rem;
+	padding: 0.95rem;
+	background: var(--care-bg-panel);
+	box-shadow: 0 10px 28px -26px rgba(15, 23, 42, 0.7);
+}
+
+.care-alert {
+	margin: 0;
+	border: 1px solid var(--care-danger-border);
+	border-radius: 0.72rem;
+	background: var(--care-danger-bg);
+	color: var(--care-danger-text);
+	padding: 0.62rem 0.78rem;
+	font-size: 0.88rem;
+}
+
+.care-loading {
+	margin: 0;
+	border: 1px dashed #bfdbfe;
+	border-radius: 0.72rem;
+	background: #f8fbff;
+	color: #1e40af;
+	font-size: 0.88rem;
+	padding: 0.65rem 0.78rem;
+}
+
+@media (max-width: 960px) {
+	.care-page {
+		padding: 0.8rem;
+	}
+
+	.care-page__hero {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}

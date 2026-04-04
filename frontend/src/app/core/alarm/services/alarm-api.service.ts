@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { AlarmRule } from '../models/alarm-rule.model';
 import { CreateAlarmRuleRequestDto } from '../models/dto/create-alarm-rule-request.model.dto';
 import { UpdateAlarmRuleRequestDto } from '../models/dto/update-alarm-rule-request.model.dto';
 import { ActiveAlarm } from '../models/active-alarm.model';
+import { GetActiveAlarmsByUserResponseDto } from '../models/dto/get-active-alarms-by-user-response.model.dto';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 
 @Injectable({ providedIn: 'root' })
@@ -41,9 +42,18 @@ export class AlarmApiService {
     }
 
     public getActiveAlarmsOfOperator(operatorId: string, limit = 6, offset = 0): Observable<ActiveAlarm[]> {
-        return this.http.get<ActiveAlarm[]>(
-            `${this.alarmEventsBaseUrl}/${encodeURIComponent(operatorId)}/${encodeURIComponent(String(limit))}/${encodeURIComponent(String(offset))}`
-        );
+        return this.http
+            .get<GetActiveAlarmsByUserResponseDto[]>(
+                `${this.alarmEventsBaseUrl}/${encodeURIComponent(operatorId)}/${encodeURIComponent(String(limit))}/${encodeURIComponent(String(offset))}`
+            )
+            .pipe(
+                map((alarms) =>
+                    alarms.map((alarm) => ({
+                        ...alarm,
+                        userId: null,
+                    }))
+                )
+            );
     }
 
     public resolveAlarm(alarmId: string, userId: number): Observable<void> {

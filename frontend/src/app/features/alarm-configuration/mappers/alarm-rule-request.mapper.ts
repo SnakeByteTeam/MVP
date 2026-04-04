@@ -58,8 +58,14 @@ export class AlarmRuleRequestMapper {
         if (requiredOperator === ThresholdOperator.GREATER_THAN) {
             return '>';
         }
+        if (requiredOperator === ThresholdOperator.GREATER_THAN_OR_EQUAL) {
+            return '>=';
+        }
         if (requiredOperator === ThresholdOperator.LESS_THAN) {
             return '<';
+        }
+        if (requiredOperator === ThresholdOperator.LESS_THAN_OR_EQUAL) {
+            return '<=';
         }
 
         return '=';

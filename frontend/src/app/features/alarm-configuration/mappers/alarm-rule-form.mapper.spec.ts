@@ -94,7 +94,7 @@ describe('AlarmRuleFormMapper', () => {
         });
     });
 
-    it('mappa operatore >= come GREATER_THAN', () => {
+    it('mappa operatore >= come GREATER_THAN_OR_EQUAL', () => {
         const rule: AlarmRule = {
             id: 'rule-4',
             name: 'Temperatura minima',
@@ -107,10 +107,10 @@ describe('AlarmRuleFormMapper', () => {
             deviceId: 'device-4',
         };
 
-        expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.GREATER_THAN);
+        expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.GREATER_THAN_OR_EQUAL);
     });
 
-    it('mappa operatore <= come LESS_THAN', () => {
+    it('mappa operatore <= come LESS_THAN_OR_EQUAL', () => {
         const rule: AlarmRule = {
             id: 'rule-5',
             name: 'Temperatura massima',
@@ -123,7 +123,7 @@ describe('AlarmRuleFormMapper', () => {
             deviceId: 'device-5',
         };
 
-        expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.LESS_THAN);
+        expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.LESS_THAN_OR_EQUAL);
     });
 
     it('mappa operatori sconosciuti su EQUAL_TO come fallback', () => {

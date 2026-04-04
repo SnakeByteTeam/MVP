@@ -44,6 +44,40 @@ describe('AlarmRuleRequestMapper', () => {
         });
     });
 
+    it('toUpdateRequest serializza operatore >= senza degradarlo', () => {
+        const formValue: AlarmConfigFormValue = {
+            name: 'Soglia minima',
+            plantId: 'plant-1',
+            sensorId: 'dev-77',
+            priority: AlarmPriority.GREEN,
+            thresholdOperator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
+            thresholdValue: '18',
+            armingTime: '06:00',
+            dearmingTime: '22:00',
+            enabled: true,
+        };
+
+        const result = mapper.toUpdateRequest(formValue);
+        expect(result.thresholdOperator).toBe('>=');
+    });
+
+    it('toCreateRequest serializza operatore <= senza degradarlo', () => {
+        const formValue: AlarmConfigFormValue = {
+            name: 'Soglia massima',
+            plantId: 'plant-1',
+            sensorId: 'dev-88',
+            priority: AlarmPriority.ORANGE,
+            thresholdOperator: ThresholdOperator.LESS_THAN_OR_EQUAL,
+            thresholdValue: '26',
+            armingTime: '06:00',
+            dearmingTime: '22:00',
+            enabled: true,
+        };
+
+        const result = mapper.toCreateRequest(formValue);
+        expect(result.thresholdOperator).toBe('<=');
+    });
+
     it('toCreateRequest supporta soglia booleana con operatore uguale', () => {
         const onFormValue: AlarmConfigFormValue = {
             name: 'Allarme acceso',
@@ -134,7 +168,7 @@ describe('AlarmRuleRequestMapper', () => {
             name: 'Allarme umidita',
             deviceId: 'DEV002',
             priority: AlarmPriority.GREEN,
-            thresholdOperator: '>',
+            thresholdOperator: '>=',
             thresholdValue: '60',
             armingTime: '08:00:00',
             dearmingTime: '18:30:00',
@@ -147,7 +181,7 @@ describe('AlarmRuleRequestMapper', () => {
             name: 'Allarme umidita',
             deviceId: 'DEV002',
             priority: AlarmPriority.GREEN,
-            thresholdOperator: '>',
+            thresholdOperator: '>=',
             thresholdValue: '60',
             armingTime: '08:00',
             dearmingTime: '18:30',

@@ -23,11 +23,17 @@ export class AlarmRuleFormMapper {
     }
 
     private toFormThresholdOperator(operator: string): ThresholdOperator {
-        if (operator === '>' || operator === '>=') {
+        if (operator === '>') {
             return ThresholdOperator.GREATER_THAN;
         }
-        if (operator === '<' || operator === '<=') {
+        if (operator === '>=') {
+            return ThresholdOperator.GREATER_THAN_OR_EQUAL;
+        }
+        if (operator === '<') {
             return ThresholdOperator.LESS_THAN;
+        }
+        if (operator === '<=') {
+            return ThresholdOperator.LESS_THAN_OR_EQUAL;
         }
 
         return ThresholdOperator.EQUAL_TO;

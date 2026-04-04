@@ -156,14 +156,29 @@ describe('AlarmApiService', () => {
     });
 
     it('getActiveAlarmsOfOperator chiama GET /alarm-events/:userId/:limit/:offset', () => {
+        const activeAlarmByUserDto = {
+            id: 'active-1',
+            alarmRuleId: 'alarm-1',
+            alarmName: 'Temperatura alta',
+            priority: AlarmPriority.RED,
+            activationTime: '2026-03-24T10:00:00.000Z',
+            resolutionTime: null,
+            position: 'Camera 101',
+        };
+
         service.getActiveAlarmsOfOperator('operator-7', 6, 12).subscribe((result) => {
-            expect(result).toEqual([activeAlarm]);
+            expect(result).toEqual([
+                {
+                    ...activeAlarmByUserDto,
+                    userId: null,
+                },
+            ]);
             expect(result).toHaveLength(1);
         });
 
         const request = httpController.expectOne(`${alarmEventsBaseUrl}/operator-7/6/12`);
         expect(request.request.method).toBe('GET');
-        request.flush([activeAlarm]);
+        request.flush([activeAlarmByUserDto]);
     });
 
     it('resolveAlarm chiama PATCH /alarm-events/resolve', () => {

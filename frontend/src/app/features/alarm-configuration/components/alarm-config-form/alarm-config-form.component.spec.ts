@@ -261,7 +261,9 @@ describe('AlarmConfigFormComponent', () => {
         ]);
         expect(component.thresholdOperatorOptions).toEqual([
             ThresholdOperator.GREATER_THAN,
+            ThresholdOperator.GREATER_THAN_OR_EQUAL,
             ThresholdOperator.LESS_THAN,
+            ThresholdOperator.LESS_THAN_OR_EQUAL,
             ThresholdOperator.EQUAL_TO,
         ]);
     });

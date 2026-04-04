@@ -17,5 +17,5 @@ export class SidebarComponent {
     @Input() activeAlarmCount!: number;
     @Input() isProfileMode = false;
     @Output() collapsed = new EventEmitter<void>();
-    @Output() navItemSelected = new EventEmitter<void>();
+    @Output() navItemSelected = new EventEmitter<string>();
 }

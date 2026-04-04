@@ -34,6 +34,7 @@ export class AlarmEventsRepositoryImpl
        FROM alarm_event ae
        LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
        LEFT JOIN "user" u ON u.id = ae.user_id
+        WHERE ae.resolution_time IS NULL
        ORDER BY ae.resolution_time IS NOT NULL,
        ar.priority DESC,
        ae.activation_time DESC
@@ -66,6 +67,7 @@ export class AlarmEventsRepositoryImpl
        LEFT JOIN ward_user wu ON wu.ward_id = p.ward_id
        LEFT JOIN "user" u ON u.id = wu.user_id
        WHERE u.id = $1
+        AND ae.resolution_time IS NULL
        ORDER BY ae.resolution_time IS NOT NULL,
        ar.priority DESC,
        ae.activation_time DESC

@@ -15,6 +15,7 @@ import { UserInfo } from '../../core/models/user-info.model';
 import { NotificationBadgeComponent } from '../notification/components/notification-badge-component/notification-badge-component';
 import { MyVimarAccount } from '../my-vimar-integration/models/my-vimar-account.model';
 import { IVimarCloudApiService, VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
+import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
 
 @Component({ 
     selector: 'app-main-layout', 
@@ -40,6 +41,7 @@ export class MainLayoutComponent implements OnInit {
     private readonly navService = inject(NavService);
     private readonly internalAuthService = inject(InternalAuthService);
     private readonly alarmStateService = inject(AlarmStateService);
+    private readonly alarmManagementRefreshService = inject(AlarmManagementRefreshService);
     private readonly router = inject(Router);
     private readonly myVimarService = inject(VIMAR_CLOUD_API_SERVICE, { optional: true }) as IVimarCloudApiService | null;
 
@@ -100,6 +102,20 @@ export class MainLayoutComponent implements OnInit {
 
     public closeProfilePanel(): void {
         this.isProfilePanelOpen = false;
+    }
+
+    public onNavItemSelected(route: string): void {
+        this.closeProfilePanel();
+
+        if (route !== 'alarms/alarm-management') {
+            return;
+        }
+
+        if (!this.router.url.includes('/alarms/alarm-management')) {
+            return;
+        }
+
+        this.alarmManagementRefreshService.requestRefresh();
     }
 
     public goToVimarLink(): void {

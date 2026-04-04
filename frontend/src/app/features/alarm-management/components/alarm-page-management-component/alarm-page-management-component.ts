@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, OnInit, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
 import { AlarmManagementTablePresenterService } from '../../services/alarm-management-table-presenter.service';
+import { AlarmManagementRefreshService } from '../../../../core/alarm/services/alarm-management-refresh.service';
 import { AlarmTableShellComponent } from '../../../../shared/components/alarm-table/alarm-table-shell.component';
 import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
 import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
@@ -18,6 +19,8 @@ import { AlarmTableColumn } from '../../../../shared/models/alarm-table.model';
 export class AlarmPageManagementComponent implements OnInit {
   private readonly alarmManagementService = inject(AlarmManagementService);
   private readonly tablePresenter = inject(AlarmManagementTablePresenterService);
+  private readonly alarmManagementRefreshService = inject(AlarmManagementRefreshService);
+  private readonly destroyRef = inject(DestroyRef);
 
   public readonly columns: readonly AlarmTableColumn[] = [
     { id: 'priority', label: 'Priorita' },
@@ -50,6 +53,13 @@ export class AlarmPageManagementComponent implements OnInit {
 
   public ngOnInit(): void {
     this.alarmManagementService.initialize();
+
+    this.alarmManagementRefreshService
+      .getRefreshRequested$()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.alarmManagementService.initialize();
+      });
   }
 
   public onResolve(activeAlarmId: string): void {

@@ -35,7 +35,9 @@ export class AlarmEventsRepositoryImpl
        FROM alarm_event ae
        LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
        LEFT JOIN "user" u ON u.id = ae.user_id
-       ORDER BY ae.activation_time DESC
+       ORDER BY ae.resolution_time IS NOT NULL,
+       ar.priority DESC,
+       ae.activation_time DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset],
     );
@@ -48,9 +50,27 @@ export class AlarmEventsRepositoryImpl
     offset: number = 0,
   ): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
-      `SELECT * FROM alarm_event 
-      WHERE id = $1 
-      ORDER BY activation_time DESC LIMIT $2 OFFSET $3`,
+      `SELECT 
+        ae.id,
+        '' AS room_name,
+        ar.device_id AS device_name,
+        ae.alarm_rule_id,
+        ar.name AS alarm_name,
+        ar.priority,
+        ae.activation_time,
+        ae.resolution_time,
+        ae.user_id,
+        '' as user_username
+       FROM alarm_event ae
+       LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+       LEFT JOIN plant p ON p.id = ar.plant_id
+       LEFT JOIN ward_user wu ON wu.ward_id = p.ward_id
+       LEFT JOIN "user" u ON u.id = wu.user_id
+       WHERE u.id = $1
+       ORDER BY ae.resolution_time IS NOT NULL,
+       ar.priority DESC,
+       ae.activation_time DESC
+       LIMIT $2 OFFSET $3`,
       [id, limit, offset],
     );
 

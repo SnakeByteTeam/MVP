@@ -26,7 +26,7 @@ export class CreateAlarmRuleReqDto {
   @IsString()
   @MinLength(1)
   @MaxLength(2)
-  @IsIn(['>', '<', '>=', '<='])
+  @IsIn(['>', '<', '>=', '<=', '='])
   thresholdOperator!: string;
 
   @ApiProperty()

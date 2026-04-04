@@ -17,11 +17,8 @@ import {
 import { LoginUseCase } from '../../application/ports/in/login-use-case.interface';
 import { LoginCmd } from '../../application/commands/login-cmd';
 import { RefreshUseCase } from '../../application/ports/in/refresh-use-case.interface';
-// import { LogoutUseCase } from '../../application/ports/in/logout-use-case.interface';
 import { RefreshCmd } from '../../application/commands/refresh-cmd';
-// import { LogoutCmd } from '../../application/commands/logout-cmd';
 import { LoginResDto } from '../../infrastructure/dtos/out/login-res-dto';
-import { RefreshReqDto } from '../../infrastructure/dtos/in/refresh-req-dto';
 import { Tokens } from '../../domain/tokens';
 import { plainToInstance } from 'class-transformer';
 import { RefreshResDto } from '../../infrastructure/dtos/out/refresh-res-dto';
@@ -108,7 +105,7 @@ export class AuthController {
 
   @ApiOkResponse({ type: LogoutResDto })
   @Post('/logout')
-  logout(@Res({ passthrough: true }) res: Response) {
+  logout(@Res({ passthrough: true }) res: Response): LogoutResDto {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: true,

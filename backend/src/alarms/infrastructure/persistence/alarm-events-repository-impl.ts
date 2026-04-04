@@ -30,9 +30,11 @@ export class AlarmEventsRepositoryImpl
          ar.priority,
          ae.activation_time,
          ae.resolution_time,
-         ae.user_id
+         ae.user_id,
+         u.username as user_username
        FROM alarm_event ae
        LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+       LEFT JOIN "user" u ON u.id = ae.user_id
        ORDER BY ae.activation_time DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset],

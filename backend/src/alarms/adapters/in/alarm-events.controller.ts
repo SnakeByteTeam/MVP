@@ -40,7 +40,7 @@ export class AlarmEventsController {
     private readonly getAllAlarmEventsByUserIdUseCase: GetAllAlarmEventsByUserIdUseCase,
     @Inject(RESOLVE_ALARM_EVENT_USE_CASE)
     private readonly resolveAlarmEventUseCase: ResolveAlarmEventUseCase,
-  ) {}
+  ) { }
 
   @ApiOkResponse({ type: GetAllAlarmEventsByUserIdResDto, isArray: true })
   //@UseGuards(UserGuard)
@@ -71,7 +71,7 @@ export class AlarmEventsController {
   }
 
   @Patch('/resolve')
-  @UseGuards(UserGuard)
+  //@UseGuards(UserGuard)
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {
     return this.resolveAlarmEventUseCase.resolveAlarmEvent(
       new ResolveAlarmEventCmd(req.alarmId, req.userId),

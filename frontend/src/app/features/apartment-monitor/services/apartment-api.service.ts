@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { DeviceType } from '../../device-interaction/models/device-type.enum';
 import { Apartment } from '../models/apartment.model';
@@ -20,8 +20,10 @@ const DEVICE_TYPE_RULES: ReadonlyArray<{ token: string; type: DeviceType }> = [
 export class ApartmentApiService {
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl: string = inject(API_BASE_URL);
-	private readonly plantEndpoint = `${this.baseUrl}/api/plant`;
-	private readonly apartmentsEndpoint = `${this.baseUrl}/api/apartments`;
+	private readonly plantEndpoint = `${this.baseUrl}/plant`;
+	private readonly legacyPlantEndpoint = `${this.baseUrl}/api/plant`;
+	private readonly apartmentsEndpoint = `${this.baseUrl}/apartments`;
+	private readonly legacyApartmentsEndpoint = `${this.baseUrl}/api/apartments`;
 
 	public getCurrentApartment(): Observable<Apartment> {
 		// TO_DO(back-end): sostituire con fonte ufficiale del plant attivo (claim JWT o endpoint dedicato).
@@ -31,23 +33,49 @@ export class ApartmentApiService {
 	}
 
 	public getApartmentByPlantId(plantId: string): Observable<Apartment> {
-		return this.http.get<PlantDto>(`${this.plantEndpoint}?plantid=${encodeURIComponent(plantId)}`).pipe(
-			map((plant) => this.mapPlantToApartment(plant)),
-		);
+		const query = `?plantid=${encodeURIComponent(plantId)}`;
+
+		return this.http
+			.get<PlantDto>(`${this.plantEndpoint}${query}`)
+			.pipe(
+				catchError(() => this.http.get<PlantDto>(`${this.legacyPlantEndpoint}${query}`)),
+				map((plant) => this.mapPlantToApartment(plant)),
+			);
+	}
+
+	public getAllPlants(): Observable<PlantDto[]> {
+		return this.http
+			.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.plantEndpoint}/all`)
+			.pipe(
+				catchError(() =>
+					this.http.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.legacyPlantEndpoint}/all`),
+				),
+				map((response) => (Array.isArray(response) ? response : [])),
+			);
 	}
 
 	public enableApartment(apartmentId: string): Observable<void> {
-		return this.http.patch<void>(
-			`${this.apartmentsEndpoint}/${encodeURIComponent(apartmentId)}/enable`,
-			{},
-		);
+		const encodedApartmentId = encodeURIComponent(apartmentId);
+
+		return this.http
+			.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/enable`, {})
+			.pipe(
+				catchError(() =>
+					this.http.patch<void>(`${this.legacyApartmentsEndpoint}/${encodedApartmentId}/enable`, {}),
+				),
+			);
 	}
 
 	public disableApartment(apartmentId: string): Observable<void> {
-		return this.http.patch<void>(
-			`${this.apartmentsEndpoint}/${encodeURIComponent(apartmentId)}/disable`,
-			{},
-		);
+		const encodedApartmentId = encodeURIComponent(apartmentId);
+
+		return this.http
+			.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/disable`, {})
+			.pipe(
+				catchError(() =>
+					this.http.patch<void>(`${this.legacyApartmentsEndpoint}/${encodedApartmentId}/disable`, {}),
+				),
+			);
 	}
 
 	private getActivePlantId(): string {

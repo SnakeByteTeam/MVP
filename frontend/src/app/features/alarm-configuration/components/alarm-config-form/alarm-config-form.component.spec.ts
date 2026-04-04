@@ -6,6 +6,7 @@ import { ThresholdOperator } from '../../../../core/alarm/models/threshold-opera
 import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
 import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
+import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 import { AlarmConfigFormComponent } from './alarm-config-form.component';
 
 describe('AlarmConfigFormComponent', () => {
@@ -20,6 +21,10 @@ describe('AlarmConfigFormComponent', () => {
 
     const apartmentApiStub = {
         getApartmentByPlantId: vi.fn(),
+    };
+
+    const deviceCatalogStub = {
+        registerApartment: vi.fn(),
     };
 
     const existingRule: AlarmRule = {
@@ -92,6 +97,7 @@ describe('AlarmConfigFormComponent', () => {
             providers: [
                 { provide: WardApiService, useValue: wardApiStub },
                 { provide: ApartmentApiService, useValue: apartmentApiStub },
+                { provide: AlarmDeviceCatalogService, useValue: deviceCatalogStub },
             ],
         }).compileComponents();
 
@@ -179,6 +185,7 @@ describe('AlarmConfigFormComponent', () => {
         component.form.controls.plantId.setValue('plant-1');
 
         expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
+        expect(deviceCatalogStub.registerApartment).toHaveBeenCalledTimes(1);
         expect(component.form.controls.sensorId.enabled).toBe(true);
         expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
     });

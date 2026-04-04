@@ -7,6 +7,7 @@ import { ApartmentApiService } from '../../../apartment-monitor/services/apartme
 import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
+import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 import { AlarmConfigPageComponent } from './alarm-config-page.component';
 
 describe('AlarmConfigPageComponent', () => {
@@ -34,6 +35,12 @@ describe('AlarmConfigPageComponent', () => {
 
     const apartmentApiStub = {
         getApartmentByPlantId: vi.fn(() => of({ id: 'plant-1', name: 'Plant', isEnabled: true, rooms: [] })),
+    };
+
+    const deviceCatalogStub = {
+        ensureLoaded: vi.fn(() => of(void 0)),
+        revision: vi.fn(() => 0),
+        getApartmentNameByDeviceId: vi.fn(() => null),
     };
 
     const alarmRule: AlarmRule = {
@@ -71,6 +78,7 @@ describe('AlarmConfigPageComponent', () => {
                 { provide: AlarmConfigStateService, useValue: stateServiceStub },
                 { provide: WardApiService, useValue: wardApiStub },
                 { provide: ApartmentApiService, useValue: apartmentApiStub },
+                { provide: AlarmDeviceCatalogService, useValue: deviceCatalogStub },
             ],
         }).compileComponents();
 
@@ -85,6 +93,7 @@ describe('AlarmConfigPageComponent', () => {
 
     it('ngOnInit carica gli allarmi e aggiorna le righe tabellari', () => {
         expect(stateServiceStub.loadAlarmRules).toHaveBeenCalledTimes(1);
+        expect(deviceCatalogStub.ensureLoaded).toHaveBeenCalledTimes(1);
 
         alarmsSubject.next([alarmRule]);
         errorSubject.next('Errore test');

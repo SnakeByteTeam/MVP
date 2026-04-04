@@ -1,7 +1,13 @@
+export interface PlantDatapointDto {
+	id: string;
+	name: string;
+}
+
 export interface PlantDeviceDto {
 	id: string;
 	name: string;
 	type?: string;
+	datapoints?: PlantDatapointDto[];
 }
 
 export interface PlantRoomDto {

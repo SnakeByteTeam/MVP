@@ -43,14 +43,14 @@
   @if (apartment$ | async; as apartment) {
     @if (activeAlarms$ | async; as activeAlarms) {
       <div class="apartment-monitor__content">
-        <section class="care-panel apartment-monitor__panel">
+        <section class="care-panel apartment-monitor__panel apartment-monitor__panel--highlight">
           <app-alarm-map [rooms]="apartment.rooms" [activeAlarms]="activeAlarms" />
         </section>
-
-        <section class="care-panel apartment-monitor__panel">
-          <app-room-list [rooms]="apartment.rooms" (roomSelected)="onRoomSelected($event)" />
-        </section>
       </div>
+
+      <section class="care-panel apartment-monitor__panel apartment-monitor__panel--highlight">
+        <app-endpoint-table />
+      </section>
     }
   } @else {
     @if (!error) {

@@ -1,46 +1,21 @@
-<section class="room-detail care-page care-dot-grid" aria-label="Dettaglio stanza">
+<section class="room-detail care-page care-dot-grid" aria-label="Dispositivi con endpoint">
   <header class="care-page__hero">
     <div>
-      <a class="care-link" routerLink="/apartment-monitor">Torna al monitor appartamento</a>
-      @if (room$ | async; as room) {
-        <h1 class="care-title">{{ room.name }}</h1>
-        <p class="care-subtitle">{{ room.devices.length }} dispositivi disponibili</p>
-      } @else {
-        <h1 class="care-title">Dettaglio stanza</h1>
-      }
+      <a class="room-detail__back-button" routerLink="/apartment-monitor">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Torna al monitor appartamento
+      </a>
+      <h1 class="care-title">Panoramica allarmi e dispositivi</h1>
+      <p class="care-subtitle">Tutti i dispositivi con endpoint scrivibili, organizzati per stanza.</p>
     </div>
 
     <p class="care-chip">
       <span class="care-chip__dot" aria-hidden="true"></span>
-      Controllo dispositivi
+      Controllo centralizzato
     </p>
   </header>
 
-  @if (loadError) {
-    <p class="care-alert" role="alert">{{ loadError }}</p>
-  }
-
-  @if (writeError) {
-    <p class="care-alert" role="alert">{{ writeError }}</p>
-  }
-
-  @if (isExecuting) {
-    <p class="care-loading">Invio comando in corso...</p>
-  }
-
-  @if (room$ | async; as room) {
-    <div class="room-detail__grid">
-      @for (device of room.devices; track device.id) {
-        <app-device-card
-          [roomId]="room.id"
-          [device]="device"
-          [isExecuting]="isExecuting"
-          [error]="writeError"
-          (datapointWriteRequested)="onDatapointWriteRequested($event)"
-        />
-      }
-    </div>
-  } @else {
-    <p class="care-loading">Caricamento stanza...</p>
-  }
+  <app-endpoint-table />
 </section>

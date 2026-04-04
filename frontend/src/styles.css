@@ -30,6 +30,7 @@ body {
 .care-page {
 	display: grid;
 	gap: 1rem;
+	font-size: 1.02rem;
 	border: 1px solid var(--care-border);
 	border-radius: 1.1rem;
 	padding: 1rem;
@@ -58,7 +59,7 @@ body {
 
 .care-eyebrow {
 	margin: 0;
-	font-size: 0.73rem;
+	font-size: 0.78rem;
 	font-weight: 700;
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
@@ -67,7 +68,7 @@ body {
 
 .care-title {
 	margin: 0.2rem 0 0;
-	font-size: clamp(1.3rem, 2.1vw, 1.8rem);
+	font-size: clamp(1.4rem, 2.2vw, 1.95rem);
 	line-height: 1.2;
 	font-family: var(--care-font-display);
 	font-weight: 700;
@@ -77,7 +78,7 @@ body {
 
 .care-subtitle {
 	margin: 0.4rem 0 0;
-	font-size: 0.92rem;
+	font-size: 1rem;
 	color: var(--care-muted);
 }
 
@@ -91,7 +92,7 @@ body {
 	background: rgba(240, 253, 250, 0.95);
 	color: var(--care-primary-strong);
 	padding: 0.4rem 0.75rem;
-	font-size: 0.78rem;
+	font-size: 0.84rem;
 	font-weight: 600;
 }
 
@@ -108,7 +109,7 @@ body {
 }
 
 .care-field label {
-	font-size: 0.8rem;
+	font-size: 0.86rem;
 	font-weight: 600;
 	color: #334155;
 }
@@ -121,7 +122,7 @@ body {
 	padding: 0 0.65rem;
 	background: #fff;
 	color: #0f172a;
-	font-size: 0.9rem;
+	font-size: 0.96rem;
 }
 
 .care-select:focus-visible {
@@ -135,7 +136,7 @@ body {
 	border-radius: 0.62rem;
 	background: linear-gradient(180deg, #5eead4, #2dd4bf);
 	color: #134e4a;
-	font-size: 0.83rem;
+	font-size: 0.9rem;
 	font-weight: 700;
 	letter-spacing: 0.01em;
 	padding: 0 0.8rem;
@@ -159,7 +160,7 @@ body {
 
 .care-link {
 	color: #0f766e;
-	font-size: 0.84rem;
+	font-size: 0.9rem;
 	font-weight: 600;
 	text-decoration: none;
 }
@@ -183,7 +184,7 @@ body {
 	background: var(--care-danger-bg);
 	color: var(--care-danger-text);
 	padding: 0.62rem 0.78rem;
-	font-size: 0.88rem;
+	font-size: 0.94rem;
 }
 
 .care-loading {
@@ -192,7 +193,7 @@ body {
 	border-radius: 0.72rem;
 	background: #f8fbff;
 	color: #1e40af;
-	font-size: 0.88rem;
+	font-size: 0.94rem;
 	padding: 0.65rem 0.78rem;
 }
 

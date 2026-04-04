@@ -25,7 +25,6 @@ import { plainToInstance } from 'class-transformer';
 import { AddPlantToWardResDto } from '../../infrastructure/dtos/out/add-plant-to-ward-res-dto';
 import { Plant } from 'src/plant/domain/models/plant.model';
 
-
 @Controller('wards-plants-relationships')
 export class WardsPlantsRelationshipsController {
   constructor(

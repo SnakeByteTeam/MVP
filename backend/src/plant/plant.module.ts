@@ -35,7 +35,7 @@ import { FIND_ALL_PLANTS_REPO_PORT } from './application/repository/find-all-pla
     },
     { provide: FIND_ALL_PLANTS_USECASE, useClass: PlantService },
     { provide: FIND_ALL_PLANTS_PORT, useClass: FindAllPlantsAdapter },
-    { provide: FIND_ALL_PLANTS_REPO_PORT, useClass: PlantRepositoryImpl }
+    { provide: FIND_ALL_PLANTS_REPO_PORT, useClass: PlantRepositoryImpl },
   ],
 })
 export class PlantModule {}

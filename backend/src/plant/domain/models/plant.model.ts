@@ -9,7 +9,7 @@ export class Plant {
   constructor(id: string, name: string, rooms?: Room[], wardId?: number) {
     this.id = id;
     this.name = name;
-    if(rooms) this.rooms = [...rooms];
+    if (rooms) this.rooms = [...rooms];
     this.wardId = wardId;
   }
 
@@ -22,12 +22,12 @@ export class Plant {
   }
 
   getRooms(): Room[] | null {
-    if(this.rooms) return [...this.rooms];
-    return null
+    if (this.rooms) return [...this.rooms];
+    return null;
   }
 
   getWardId(): number | null {
-    if(this.wardId) return this.wardId;
+    if (this.wardId) return this.wardId;
     return null;
   }
 }

@@ -17,7 +17,10 @@ import {
   FIND_ALL_AVAILABLE_PLANTS_USECASE,
   type FindAllAvailablePlantsUseCase,
 } from 'src/plant/application/ports/in/find-all-available-plants.usecase';
-import { FIND_ALL_PLANTS_USECASE, type FindAllPlantsUseCase } from 'src/plant/application/ports/in/find-all-plants.usecase';
+import {
+  FIND_ALL_PLANTS_USECASE,
+  type FindAllPlantsUseCase,
+} from 'src/plant/application/ports/in/find-all-plants.usecase';
 import {
   FIND_PLANT_BY_ID_USECASE,
   type FindPlantByIdUseCase,
@@ -34,7 +37,7 @@ export class PlantController {
     @Inject(FIND_ALL_AVAILABLE_PLANTS_USECASE)
     private readonly findAllAvailablePlants: FindAllAvailablePlantsUseCase,
     @Inject(FIND_ALL_PLANTS_USECASE)
-    private readonly findAllPlants: FindAllPlantsUseCase
+    private readonly findAllPlants: FindAllPlantsUseCase,
   ) {}
 
   @Get()
@@ -105,7 +108,7 @@ export class PlantController {
 
       return plantsDto;
     } catch {
-      return { message: 'No plants found', statusCode: 202}
+      return { message: 'No plants found', statusCode: 202 };
     }
   }
 }

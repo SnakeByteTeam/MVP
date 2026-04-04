@@ -14,6 +14,7 @@ import { UsersModule } from './users/users.module';
 import { AlarmsModule } from './alarms/alarms.module';
 import { ValidationModule } from './validation/validation.module';
 import { GuardModule } from './guard/guard.module';
+import { NotificationModule } from './notifications/notification.module';
 
 @Module({
   imports: [
@@ -32,9 +33,10 @@ import { GuardModule } from './guard/guard.module';
     AnalyticsModule,
     EventEmitterModule.forRoot(),
     UsersModule,
-    AlarmsModule, 
-    ValidationModule, 
-    GuardModule
+    AlarmsModule,
+    NotificationModule,
+    ValidationModule,
+    GuardModule,
   ],
 })
 export class AppModule {}

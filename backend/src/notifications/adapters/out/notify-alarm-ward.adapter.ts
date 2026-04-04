@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { CheckAlarmRuleResDto } from 'src/alarms/infrastructure/dtos/out/check-alarm-rule-res-dto';
 import { NotifyAlarmWardCmd } from 'src/notifications/application/commands/notify-alarm-ward.command';
 import { NotifyAlarmWardPort } from 'src/notifications/application/ports/out/notify-alarm-ward.port';
 import {
@@ -14,9 +15,13 @@ export class NotifyAlarmWardAdapter implements NotifyAlarmWardPort {
   ) {}
 
   notifyAlarmWard(cmd: NotifyAlarmWardCmd): Promise<void> {
-    if (!cmd?.alarm || !cmd.wardId)
+    if (!cmd?.alarm)
       throw new Error('Cannot notify alarm ward without informations');
 
-    return this.notifyRepo.notifyAlarmWard(cmd.wardId, cmd.alarm);
+    const checkAlarmDto: CheckAlarmRuleResDto = CheckAlarmRuleResDto.fromDomain(
+      cmd.alarm,
+    );
+
+    return this.notifyRepo.notifyAlarmWard(cmd.alarm.ward_id, checkAlarmDto);
   }
 }

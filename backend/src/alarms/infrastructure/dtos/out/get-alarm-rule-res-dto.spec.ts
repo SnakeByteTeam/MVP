@@ -1,7 +1,7 @@
-import { GetAlarmRuleResDto } from './get-alarm-rule-res-dto';
+import { GetAlarmRuleByIdResDto } from './get-alarm-rule-res-dto';
 
-describe('GetAlarmRuleResDto', () => {
+describe('GetAlarmRuleByIdResDto', () => {
   it('should be defined', () => {
-    expect(new GetAlarmRuleResDto()).toBeDefined();
+    expect(new GetAlarmRuleByIdResDto()).toBeDefined();
   });
 });

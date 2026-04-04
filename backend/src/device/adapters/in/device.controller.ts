@@ -17,6 +17,11 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { CheckAlarmRuleCmd } from 'src/alarms/application/commands/check-alarm-rule-cmd';
+import {
+  CHECK_ALARM_RULE_USECASE,
+  type CheckAlarmRuleUseCase,
+} from 'src/alarms/application/ports/in/check-alarm-rule-use-case.interface';
 import {
   NotificationDataDto,
   SubNotificationPayloadDto,
@@ -25,6 +30,10 @@ import { FindDeviceByIdCmd } from 'src/device/application/commands/find-device-b
 import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-device-by-plantid.command';
 import { IngestTimeseriesCmd } from 'src/device/application/commands/ingest-timeseries.command';
 import { WriteDatapointValueCmd } from 'src/device/application/commands/write-datapoint-value.command';
+import {
+  FIND_DEVICE_BY_DATAPOINTID_USECASE,
+  type FindDeviceByDatapointIdUsecase,
+} from 'src/device/application/ports/in/find-device-by-datapointId.usecase';
 import {
   type FindDeviceByIdUseCase,
   FIND_DEVICE_BY_ID_USECASE,
@@ -35,7 +44,7 @@ import {
 } from 'src/device/application/ports/in/find-device-by-plantid.usecase';
 import {
   GET_DEVICE_VALUE_USECASE,
-  GetDeviceValueUseCase,
+  type GetDeviceValueUseCase,
 } from 'src/device/application/ports/in/get-device-value.usecase';
 import {
   INGEST_TIMESERIES_USE_CASE,
@@ -43,7 +52,7 @@ import {
 } from 'src/device/application/ports/in/ingest-timeseris.usecase';
 import {
   WRITE_DATAPOINT_VALUE_USECASE,
-  WriteDatapointValueUseCase,
+  type WriteDatapointValueUseCase,
 } from 'src/device/application/ports/in/write-datapoint-value.usecase';
 import { DeviceValue } from 'src/device/domain/models/device-value.model';
 import { Device } from 'src/device/domain/models/device.model';
@@ -65,6 +74,10 @@ export class DeviceController {
     private readonly getDeviceValueUseCase: GetDeviceValueUseCase,
     @Inject(WRITE_DATAPOINT_VALUE_USECASE)
     private readonly writeDatapointUseCase: WriteDatapointValueUseCase,
+    @Inject(CHECK_ALARM_RULE_USECASE)
+    private readonly checkAlarmUseCase: CheckAlarmRuleUseCase,
+    @Inject(FIND_DEVICE_BY_DATAPOINTID_USECASE)
+    private readonly findByDatapointIdUseCase: FindDeviceByDatapointIdUsecase,
   ) {}
 
   @Get('/:id')
@@ -201,6 +214,23 @@ export class DeviceController {
             `[DeviceController] Error ingesting for ${cmd.datapointId}:`,
             err.message,
           );
+        }
+
+        try {
+          const device: Device =
+            await this.findByDatapointIdUseCase.findByDatapointId({
+              datapointId: cmd.datapointId,
+            });
+
+          await this.checkAlarmUseCase.checkAlarmRule(
+            new CheckAlarmRuleCmd(
+              device.getId(),
+              cmd.value,
+              new Date(cmd.timestamp),
+            ),
+          );
+        } catch {
+          console.log('Errore nelle notifiche');
         }
       }
     });

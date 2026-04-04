@@ -1,5 +1,7 @@
+import { WriteNotificationCmd } from '../../commands/write-notification.command';
+
 export interface WriteNotificationPort {
-  writeNotification(): Promise<boolean>;
+  writeNotification(cmd: WriteNotificationCmd): Promise<boolean>;
 }
 
 export const WRITE_NOTIFICATION_PORT = Symbol('WriteNotificationPort');

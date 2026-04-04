@@ -8,13 +8,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { NotifyAlarmWardRepoPort } from 'src/notifications/application/repository/notify-alarm-ward.repository';
-import { NotificationDto } from '../dtos/notification.dto';
-
-type PushEventDto = {
-  eventType: 'ALARM_TRIGGERED';
-  payload: unknown;
-  timestamp: string;
-};
+import { CheckAlarmRuleResDto } from 'src/alarms/infrastructure/dtos/out/check-alarm-rule-res-dto';
 
 @WebSocketGateway({
   namespace: '/ws',
@@ -24,11 +18,14 @@ type PushEventDto = {
 export class NotificationsGateway implements NotifyAlarmWardRepoPort {
   constructor() {}
 
-  @WebSocketServer() private server: Server;
+  @WebSocketServer() private server!: Server;
   private readonly logger = new Logger(NotificationsGateway.name);
 
   @SubscribeMessage('join-ward')
-  async handleJoin(@ConnectedSocket() client: Socket, @MessageBody() wardId: string) {
+  async handleJoin(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() wardId: number,
+  ) {
     try {
       if (!wardId) {
         client.disconnect();
@@ -44,7 +41,10 @@ export class NotificationsGateway implements NotifyAlarmWardRepoPort {
   }
 
   @SubscribeMessage('leave-ward')
-  async handleLeave(@ConnectedSocket() client: Socket, @MessageBody() wardId: string) {
+  async handleLeave(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() wardId: number,
+  ) {
     try {
       if (!wardId) {
         client.disconnect();
@@ -59,9 +59,15 @@ export class NotificationsGateway implements NotifyAlarmWardRepoPort {
     }
   }
 
-  notifyAlarmWard(wardId: string, alarm: NotificationDto): Promise<void> {
-    this.server.to(`ward:${wardId}`).emit('push-event', alarm);
+  async notifyAlarmWard(
+    wardId: number,
+    alarm: CheckAlarmRuleResDto,
+  ): Promise<void> {
+    if (!this.server) {
+      this.logger.error('WebSocket server not initialized');
+      return;
+    }
 
-    return Promise.resolve();
+    this.server.to(`ward:${wardId}`).emit('push-event', alarm);
   }
 }

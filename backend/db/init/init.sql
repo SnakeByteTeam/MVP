@@ -213,25 +213,6 @@ CREATE TABLE plant (
     ward_id INTEGER REFERENCES ward(id) ON DELETE SET NULL
 );
 
-CREATE TABLE "user" (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) UNIQUE,
-    surname VARCHAR(255),
-    name VARCHAR(255),
-    password VARCHAR(255),
-    temp_password VARCHAR(255),
-    roleId INTEGER,
-    FOREIGN KEY (roleId) REFERENCES role(id)
-);
-
-INSERT INTO "user" (username, surname, name, password, temp_password, roleId)
-VALUES
-        ('mrossi', 'Rossi', 'Mario', 'test', 'test', 1),
-        ('gbianchi', 'Bianchi', 'Gioia', 'test', 'test', 1),
-        ('lverdi', 'Verdi', 'Luca', 'test', 'test', 1),
-        ('asala', 'Sala', 'Anna', 'test', 'test', 1),
-        ('fneri', 'Neri', 'Franco', 'test', 'test', 1)
-ON CONFLICT (username) DO NOTHING;
 
 CREATE TABLE alarm_rule (
     id VARCHAR(255) PRIMARY KEY,
@@ -282,14 +263,6 @@ CREATE TABLE alarm_event (
 
 INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
 VALUES
-('ALM001', 'Temperatura alta', 'PLANT01', 'DEV001', 1, 75.50, '08:00:00', '18:00:00', TRUE),
-('ALM002', 'Pressione bassa', 'PLANT01', 'DEV002', 2, 30.00, '00:00:00', '23:59:59', TRUE),
-('ALM003', 'Livello serbatoio', 'PLANT02', 'DEV003', 3, 60.25, '06:00:00', '20:00:00', FALSE),
-('ALM004', 'Vibrazione motore', 'PLANT02', 'DEV004', 1, 5.75, '07:30:00', '19:30:00', TRUE),
-('ALM005', 'Umidità ambiente', 'PLANT03', 'DEV005', 4, 85.00, '09:00:00', '17:00:00', FALSE),
-('ALM006', 'Corrente alta', 'PLANT01', 'DEV006', 2, 15.80, '00:00:00', '23:59:59', TRUE),
-('ALM007', 'Gas rilevato', 'PLANT04', 'DEV007', 1, 10.00, '00:00:00', '23:59:59', TRUE),
-('ALM008', 'Porta aperta', 'PLANT03', 'DEV008', 3, 1.00, '18:00:00', '06:00:00', TRUE);
 
 -- Eventi per ALM001 (Temperatura alta)
 ('EVT001', 'ALM001', '2026-03-30 09:15:00', '2026-03-30 10:00:00', 1),
@@ -312,4 +285,11 @@ VALUES
 
 -- Eventi per ALM008 (Porta aperta, fascia notturna)
 ('EVT009', 'ALM008', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);
+
+CREATE TABLE notification (
+    id SERIAL PRIMARY KEY, 
+    ward_id INTEGER REFERENCES ward(id) ON DELETE CASCADE,
+    alarm_event_id VARCHAR(255) REFERENCES alarm_event(id) ON DELETE CASCADE,
+    timestamp TIMESTAMPTZ NOT NULL
+);
 

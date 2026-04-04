@@ -44,6 +44,7 @@ import { CREATE_ALARM_EVENT_REPOSITORY } from './application/repository/create-a
 import { CreateAlarmEventAdapter } from './adapters/out/create-alarm-event-adapter';
 import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-event-port.interface';
 import { GuardModule } from '../guard/guard.module';
+import { CHECK_ALARM_RULE_USECASE } from './application/ports/in/check-alarm-rule-use-case.interface';
 
 @Module({
   imports: [GuardModule],
@@ -140,6 +141,11 @@ import { GuardModule } from '../guard/guard.module';
       provide: CREATE_ALARM_EVENT_PORT,
       useClass: CreateAlarmEventAdapter,
     },
+    {
+      provide: CHECK_ALARM_RULE_USECASE,
+      useClass: AlarmRuleService,
+    },
   ],
+  exports: [CHECK_ALARM_RULE_USECASE],
 })
 export class AlarmsModule {}

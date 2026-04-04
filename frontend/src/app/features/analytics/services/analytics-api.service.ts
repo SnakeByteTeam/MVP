@@ -10,30 +10,40 @@ export class AnalyticsApiService {
     private readonly http: HttpClient = inject(HttpClient);
     private readonly baseUrl: string = inject(API_BASE_URL);
 
-    private readonly analyticsEndpoint = `${this.baseUrl}/`;
-    private readonly apartmentsEndpoint = `${this.baseUrl}/`;
+    private analyticsEndpoint ="";
+    private readonly apartmentsEndpoint = `${this.baseUrl}/plant/all`;
 
-    public getAllApartments():Observable<Apartment[]>{
-       //return this.http.get<any[]>(analyticsEndpoint).pipe(
-
-       const mock: Apartment[] = [
-        { id: "id10000000000000000-006957895768", name: "Bianchi", isEnabled: true, rooms: [] },
-        { id: "id10000000000sf34000-006957895768", name: "Neri", isEnabled: true, rooms: [] }
+    public getAllApartments():Observable<any[]>{
+       
+      /*
+      const mock: any[] = [
+        { id: "id10000000000000000-006957895768", name: "Bianchi", rooms: [], wardId:1 },
+        { id: "id10000000000sf34000-006957895768", name: "Neri",  rooms: [], wardId:2 }
       ];
        
        return of(mock).pipe(
         map(response => response.map(item => ({
           id: item.id,
           name: item.name,
-          isEnabled: item.isEnabled,
-          rooms: item.rooms
-        } as Apartment)))
+          rooms: item.rooms,
+          wardId: item.wardId
+        })))
+      );
+      */
+      
+
+      return this.http.get<any[]>(this.apartmentsEndpoint).pipe(
+        map(response => response.map(item => ({
+          id: item.id,
+          name: item.name,
+        } )))
       );
     }
 
     public getAnalytics(apartmentId: string): Observable<AnalyticsDto>{
 
-        const mock =  [
+
+        /*const mock =  [
           {
             title: "Analisi Consumi Impianto",
             metric: "plant-consumption",
@@ -208,9 +218,38 @@ export class AnalyticsApiService {
               }
           }
         ];
-        //return this.http.get<any[]>(analyticsEndpoint).pipe(
-
+        
         return of(mock).pipe(
+            map((response: any[]) => {
+            
+            const analyticsInfo: any[] = response.map(item => ({
+                title: item.title,
+                metric: item.metric,
+                unit: item.unit,
+                labels: item.labels,
+                datasets: item.series.map((s: any) => ({
+                    id: s.id,
+                    name: s.name,
+                    data: s.data
+                })),
+                suggestions: {
+                  messages: item.suggestion.message,
+                  isSuggestion: item.suggestion.isSuggestion
+                }
+            }));
+
+            const result: AnalyticsDto = {
+                apartmentId: apartmentId,
+                analyticsInfo: analyticsInfo,
+            };
+
+            return result;
+            })
+        );
+        */
+       this.analyticsEndpoint= `${this.baseUrl}/analytics?plantId=${apartmentId}`;
+
+        return this.http.get<any[]>(this.analyticsEndpoint).pipe(
             map((response: any[]) => {
             
             const analyticsInfo: any[] = response.map(item => ({

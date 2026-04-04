@@ -2,6 +2,7 @@ import { ChartInfoDto } from "../models/chart-info.model";
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { SimpleChanges, Directive, Input } from "@angular/core";
 
+
 @Directive()
 export abstract class ChartComponent {
 
@@ -29,7 +30,9 @@ export abstract class ChartComponent {
 
 
     ngOnChanges(changes: SimpleChanges): void {
+        console.log("i grafici stanno cambiando, dati ricevuti:");
         if (changes['chartInfo'] && this.chartInfo) {
+            console.log("Contenuto chartInfo JSON:", JSON.stringify(this.chartInfo, null, 2));
             this.updateChart(this.chartInfo);
         }
     }

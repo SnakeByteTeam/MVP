@@ -10,10 +10,9 @@ import { PlantAnomaliesChartComponent } from './components/plant-anomalies-chart
 import { PresenceDetectionChartComponent } from './components/presence-detection-chart/presence-detection-chart.component';
 import { ProlongedPresenceChartComponent } from './components/prolonged-presence-chart/prolonged-presence-chart.component';
 import { TemperatureVariationsChartComponent } from './components/temperature-variations-chart/temperature-variations-chart.component';
-import { Observable,  switchMap, filter, BehaviorSubject } from 'rxjs';
+import { Observable,  switchMap, filter, BehaviorSubject, startWith } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { Apartment } from '../apartment-monitor/models/apartment.model';
-
+import { tap } from 'rxjs';
 
 @Component({ 
     selector: 'app-analytics', 
@@ -34,10 +33,10 @@ export class AnalyticsComponent {
     
     private analyticsApiService = inject(AnalyticsApiService);
     
-    private selectedApartmentId$ = new BehaviorSubject<string | null>(null);
+    public selectedApartmentId$ = new BehaviorSubject<string | null>(null);
     
-    public apartments$: Observable<Apartment[]> | null = null;
-    public analytics: Observable<AnalyticsDto> | null = null;
+    public apartments$: Observable<any[]> | null = null;
+    public analytics: Observable<AnalyticsDto | null> | null = null;
 
     public ngOnInit(): void {
         this.apartments$ = this.analyticsApiService.getAllApartments();
@@ -49,9 +48,10 @@ export class AnalyticsComponent {
         });
 
         //reazione ai cambi di appartamento
+
         this.analytics = this.selectedApartmentId$.pipe(
             filter(id => id !== null), 
-            switchMap(id => this.analyticsApiService.getAnalytics(id!))
+            switchMap(id => this.analyticsApiService.getAnalytics(id!).pipe(startWith(null)))
         );
     }
 

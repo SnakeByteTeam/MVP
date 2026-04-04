@@ -24,8 +24,10 @@
         Appartamento Monitorato
     </label>
     
-    <div class="relative group">
+    
+    <div class="relative group" *ngIf="selectedApartmentId$ | async as selectedId">
         <select 
+            [value]="selectedId"
             id="apartment-select" 
             (change)="onApartmentChange($event)"
             class="block w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white/70 px-4 py-3 font-body text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm transition-all focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/20 group-hover:border-slate-300">

@@ -60,7 +60,7 @@ export class AlarmRulesController {
   ) {}
 
   @ApiOkResponse({ type: CreateAlarmRuleResDto })
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard, AdminGuard)
   @Post()
   async createAlarmRule(
     @Body() req: CreateAlarmRuleReqDto,
@@ -81,7 +81,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmRulesResDto, isArray: true })
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard, AdminGuard)
   @Get()
   async getAllAlarmRules(): Promise<GetAllAlarmRulesResDto[]> {
     const alarms = await this.getAllAlarmRulesUseCase.getAllAlarmRules();
@@ -101,7 +101,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: UpdateAlarmRuleResDto })
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard, AdminGuard)
   @Put(':id')
   async updateAlarmRule(
     @Param('id') id: string,
@@ -123,7 +123,7 @@ export class AlarmRulesController {
   }
 
   @Delete(':id')
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard, AdminGuard)
   async deleteAlarmRule(@Param('id') id: string): Promise<void> {
     return this.deleteAlarmRuleUseCase.deleteAlarmRule(
       new DeleteAlarmRuleCmd(id),

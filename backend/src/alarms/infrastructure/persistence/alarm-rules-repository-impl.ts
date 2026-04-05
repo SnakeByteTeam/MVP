@@ -65,7 +65,7 @@ export class AlarmRulesRepositoryImpl
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
       `SELECT * FROM alarm_rule 
-       ORDER BY created_at ASC`,
+       ORDER BY updated_at DESC, created_at DESC`,
     );
     return result.rows;
   }

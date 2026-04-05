@@ -1,6 +1,20 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { EMPTY, Observable, Subject, catchError, finalize, map, of, startWith, switchMap, tap } from 'rxjs';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+	EMPTY,
+	Observable,
+	Subject,
+	Subscription,
+	catchError,
+	filter,
+	finalize,
+	fromEvent,
+	map,
+	of,
+	startWith,
+	switchMap,
+	tap,
+} from 'rxjs';
 import { DeviceType } from '../../models/device-type.enum';
 import { EndpointRoomGroup } from '../../models/endpoint-room-group.model';
 import { RowFeedback } from '../../models/row-feedback.model';
@@ -14,13 +28,14 @@ import { DeviceApiService } from '../../services/device-api.service';
 	templateUrl: './endpoint-table.component.html',
 	styleUrl: './endpoint-table.component.css',
 })
-export class EndpointTableComponent {
+export class EndpointTableComponent implements OnInit, OnDestroy {
 	private readonly deviceApi = inject(DeviceApiService);
 	private readonly refresh$ = new Subject<void>();
 	private readonly selectedValuesByRow = new Map<string, string>();
 	private readonly executingRows = new Set<string>();
 	private readonly feedbackByRow = new Map<string, RowFeedback>();
 	private readonly feedbackTimerByRow = new Map<string, ReturnType<typeof setTimeout>>();
+	private activePlantChangeSubscription: Subscription | null = null;
 
 	public readonly roomGroups$: Observable<EndpointRoomGroup[]> = this.refresh$.pipe(
 		startWith(void 0),
@@ -37,6 +52,15 @@ export class EndpointTableComponent {
 	);
 
 	public loadError = '';
+
+	public ngOnInit(): void {
+		this.subscribeToActivePlantChanges();
+	}
+
+	public ngOnDestroy(): void {
+		this.activePlantChangeSubscription?.unsubscribe();
+		this.clearAllRowFeedback();
+	}
 
 	public trackByGroup(_: number, group: EndpointRoomGroup): string {
 		return group.roomId;
@@ -161,5 +185,38 @@ export class EndpointTableComponent {
 		}, 5000);
 
 		this.feedbackTimerByRow.set(rowKey, timer);
+	}
+
+	private subscribeToActivePlantChanges(): void {
+		if (typeof globalThis.addEventListener !== 'function') {
+			return;
+		}
+
+		this.activePlantChangeSubscription = fromEvent<CustomEvent<{ plantId?: string }>>(
+			globalThis,
+			'active-plant-changed',
+		).pipe(
+			map((event) => event.detail?.plantId ?? ''),
+			filter((plantId) => plantId.length > 0),
+		).subscribe(() => {
+			this.resetTransientState();
+			this.refresh$.next();
+		});
+	}
+
+	private resetTransientState(): void {
+		this.selectedValuesByRow.clear();
+		this.executingRows.clear();
+		this.clearAllRowFeedback();
+		this.loadError = '';
+	}
+
+	private clearAllRowFeedback(): void {
+		for (const timer of this.feedbackTimerByRow.values()) {
+			clearTimeout(timer);
+		}
+
+		this.feedbackTimerByRow.clear();
+		this.feedbackByRow.clear();
 	}
 }

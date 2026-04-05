@@ -72,11 +72,33 @@ export class ApartmentApiService {
 	}
 
 	public setActivePlantId(plantId: string): void {
-		const storage = globalThis.localStorage as { setItem?: (key: string, value: string) => void } | undefined;
+		const storage = globalThis.localStorage as {
+			getItem?: (key: string) => string | null;
+			setItem?: (key: string, value: string) => void;
+		} | undefined;
+		const previousPlantId =
+			storage && typeof storage.getItem === 'function'
+				? storage.getItem('activePlantId')
+				: null;
 
 		if (storage && typeof storage.setItem === 'function') {
 			storage.setItem('activePlantId', plantId);
 		}
+
+		if (previousPlantId === plantId || typeof globalThis.dispatchEvent !== 'function') {
+			return;
+		}
+
+		if (typeof CustomEvent === 'function') {
+			globalThis.dispatchEvent(
+				new CustomEvent('active-plant-changed', {
+					detail: { plantId },
+				}),
+			);
+			return;
+		}
+
+		globalThis.dispatchEvent(new Event('active-plant-changed'));
 	}
 
 	private getActivePlantId(): string | null {

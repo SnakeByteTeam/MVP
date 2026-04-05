@@ -675,7 +675,7 @@ CREATE TABLE IF NOT EXISTS alarm_event (
     activation_time TIMESTAMP    NOT NULL,
     resolution_time TIMESTAMP,
     status          INTEGER      NOT NULL REFERENCES status(id),
-    alarm_id        VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
+    alarm_rule_id        VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
     user_id         INTEGER      REFERENCES "user"(id),
     CONSTRAINT chk_resolved CHECK (
         (resolution_time IS NULL     AND user_id IS NULL     AND status = 1) OR

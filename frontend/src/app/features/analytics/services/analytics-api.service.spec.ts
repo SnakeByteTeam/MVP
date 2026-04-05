@@ -80,7 +80,7 @@ describe('AnalyticsApiService', () => {
         expect(info.datasets[0].name).toBe('Series 1');
       });
 
-      const req = httpMock.expectOne(`${mockBaseUrl}/analytics?plantId=${apartmentId}`);
+      const req = httpMock.expectOne(`${mockBaseUrl}/analytics/${apartmentId}`);
       expect(req.request.method).toBe('GET');
       req.flush(mockRawResponse);
     });

@@ -1,70 +1,76 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-4 text-sm text-slate-900">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-3 text-sm text-slate-900">
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="name" class="font-semibold text-slate-700">Nome:</label>
+        <div>
+            <input id="name" type="text" formControlName="name"
+                class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500" />
 
-    <div class="space-y-1">
-        <label for="name" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Nome regola <span class="text-rose-500">*</span>
-        </label>
-        <input id="name" type="text" formControlName="name"
-            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500" />
-        @if (isEditMode()) {
-        <p class="text-[11px] text-slate-400">Il nome è definito in creazione e non può essere modificato.</p>
-        }
+            @if (isEditMode()) {
+            <p class="mt-1 text-xs text-slate-600">Il nome della regola e definito in creazione e non puo essere
+                modificato.</p>
+            }
+        </div>
     </div>
 
     @if (isPlantSelectionVisible()) {
-    <div class="space-y-1">
-        <label for="plantId"
-            class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Impianto <span class="text-rose-500">*</span>
-        </label>
-        <select id="plantId" formControlName="plantId"
-            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100"
-            [attr.aria-invalid]="form.controls.plantId.invalid && form.controls.plantId.touched">
-            <option value="">Seleziona impianto</option>
-            @for (plant of plants(); track plant.id) {
-            <option [value]="plant.id">{{ plant.name }}</option>
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="plantId" class="font-semibold text-slate-700">Impianto:</label>
+        <div>
+            <select id="plantId" formControlName="plantId"
+                class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
+                [attr.aria-invalid]="form.controls.plantId.invalid && form.controls.plantId.touched">
+                <option value="">Seleziona impianto</option>
+                @for (plant of plants(); track plant.id) {
+                <option [value]="plant.id">{{ plant.name }}</option>
+                }
+            </select>
+
+            @if (plantsLoadError(); as plantsError) {
+            @if (plantsError) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">{{ plantsError }}</p>
             }
-        </select>
-        @if (plantsLoadError(); as plantsError) {
-        @if (plantsError) {
-        <p role="alert" class="text-[11px] font-medium text-rose-600">{{ plantsError }}</p>
-        }
-        }
-        @if (form.controls.plantId.invalid && form.controls.plantId.touched) {
-        <p role="alert" class="text-[11px] font-medium text-rose-600">L'impianto è obbligatorio.</p>
-        }
+            }
+
+            @if (form.controls.plantId.invalid && form.controls.plantId.touched) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">L'impianto e obbligatorio.</p>
+            }
+        </div>
     </div>
     }
 
-    <div class="space-y-1">
-        <label for="sensorId"
-            class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            Dispositivo <span class="text-rose-500">*</span>
-        </label>
-        <select id="sensorId" formControlName="sensorId"
-            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
-            [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched">
-            @if (!isEditMode()) {
-            <option value="">Seleziona dispositivo</option>
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="sensorId" class="font-semibold text-slate-700">Dispositivo:</label>
+        <div>
+            <select id="sensorId" formControlName="sensorId"
+                class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched">
+                @if (!isEditMode()) {
+                <option value="">Seleziona dispositivo</option>
+                }
+                @for (device of deviceOptions(); track device.id) {
+                <option [value]="device.id">{{ device.label }}</option>
+                }
+            </select>
+
+            @if (!isEditMode() && form.controls.plantId.value.length === 0) {
+            <p class="mt-1 text-xs text-slate-600">Seleziona prima l'impianto per visualizzare i dispositivi
+                disponibili.</p>
             }
-            @for (device of deviceOptions(); track device.id) {
-            <option [value]="device.id">{{ device.label }}</option>
+
+            @if (isDevicesLoading()) {
+            <p class="mt-1 text-xs text-slate-600">Caricamento dispositivi...</p>
             }
-        </select>
-        @if (!isEditMode() && form.controls.plantId.value.length === 0) {
-        <p class="text-[11px] text-slate-400">Seleziona prima l'impianto per visualizzare i dispositivi disponibili.</p>
-        }
-        @if (isDevicesLoading()) {
-        <p class="text-[11px] text-slate-400">Caricamento dispositivi...</p>
-        }
-        @if (devicesLoadError(); as devicesError) {
-        @if (devicesError) {
-        <p role="alert" class="text-[11px] font-medium text-rose-600">{{ devicesError }}</p>
-        }
-        }
-        @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
-        <p role="alert" class="text-[11px] font-medium text-rose-600">Il dispositivo è obbligatorio.</p>
-        }
+
+            @if (devicesLoadError(); as devicesError) {
+            @if (devicesError) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">{{ devicesError }}</p>
+            }
+            }
+
+            @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">Il dispositivo e obbligatorio.</p>
+            }
+        </div>
     </div>
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
@@ -77,10 +83,12 @@
                 @for (priority of priorityOptions; track priority) {
                 <option [ngValue]="priority">{{ priority }}</option>
                 }
+            </select>
+
+            @if (form.controls.priority.value; as selectedPriority) {
+            <app-alarm-priority-indicator [priority]="selectedPriority" />
+            }
         </div>
-        @if (form.controls.priority.invalid && form.controls.priority.touched) {
-        <p role="alert" class="text-[11px] font-medium text-rose-600">La priorità è obbligatoria.</p>
-        }
     </div>
 
     @if (form.controls.priority.invalid && form.controls.priority.touched) {
@@ -91,7 +99,7 @@
         <label for="thresholdOperator" class="font-semibold text-slate-700">Attiva se il valore è:</label>
         <div class="flex items-center gap-2">
             <select id="thresholdOperator" formControlName="thresholdOperator"
-                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100"
+                class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched">
                 <option [ngValue]="null">Operatore</option>
                 @for (operator of thresholdOperatorOptions; track operator) {
@@ -160,10 +168,9 @@
             (toggled)="onEnabledToggled($event)" />
     </div> -->
 
-    <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+    <div class="mt-4 flex items-center justify-end gap-2 border-t border-slate-300 pt-3">
         <app-alarm-action-button label="ANNULLA" tone="neutral" (pressed)="onCancel()" />
         <app-alarm-action-button [label]="isEditMode() ? 'APPLICA MODIFICHE' : 'CREA ALLARME'" tone="primary"
             (pressed)="onSubmit()" />
     </div>
-
 </form>

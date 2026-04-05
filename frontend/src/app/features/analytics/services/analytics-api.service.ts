@@ -42,6 +42,35 @@ export class AnalyticsApiService {
 
     public getAnalytics(apartmentId: string): Observable<AnalyticsDto>{
 
+      this.analyticsEndpoint= `${this.baseUrl}/analytics?plantId=${apartmentId}`;
+
+        return this.http.get<any[]>(this.analyticsEndpoint).pipe(
+            map((response: any[]) => {
+            
+            const analyticsInfo: any[] = response.map(item => ({
+                title: item.title,
+                metric: item.metric,
+                unit: item.unit,
+                labels: item.labels,
+                datasets: item.series.map((s: any) => ({
+                    id: s.id,
+                    name: s.name,
+                    data: s.data
+                })),
+                suggestions: {
+                  messages: item.suggestion.message,
+                  isSuggestion: item.suggestion.isSuggestion
+                }
+            }));
+
+            const result: AnalyticsDto = {
+                apartmentId: apartmentId,
+                analyticsInfo: analyticsInfo,
+            };
+
+            return result;
+            })
+        );
 
         /*const mock =  [
           {
@@ -247,35 +276,7 @@ export class AnalyticsApiService {
             })
         );
         */
-       this.analyticsEndpoint= `${this.baseUrl}/analytics?plantId=${apartmentId}`;
-
-        return this.http.get<any[]>(this.analyticsEndpoint).pipe(
-            map((response: any[]) => {
-            
-            const analyticsInfo: any[] = response.map(item => ({
-                title: item.title,
-                metric: item.metric,
-                unit: item.unit,
-                labels: item.labels,
-                datasets: item.series.map((s: any) => ({
-                    id: s.id,
-                    name: s.name,
-                    data: s.data
-                })),
-                suggestions: {
-                  messages: item.suggestion.message,
-                  isSuggestion: item.suggestion.isSuggestion
-                }
-            }));
-
-            const result: AnalyticsDto = {
-                apartmentId: apartmentId,
-                analyticsInfo: analyticsInfo,
-            };
-
-            return result;
-            })
-        );
+       
         }
 }
 

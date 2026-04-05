@@ -29,12 +29,11 @@ describe('GetTokensFromApiImpl', () => {
       ),
     };
 
-    process.env.CLIENTID = 'my-client-id';
-    process.env.CLIENTSECRET = 'my-client-secret';
-    process.env.HOST2 = 'https://auth.example.com/token';
-    process.env.REDIRECT_URI = 'http://localhost:3000/callback';
-
     apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('getTokensWithCode', () => {
@@ -76,11 +75,8 @@ describe('GetTokensFromApiImpl', () => {
     });
 
     it('should fallback to empty token and redirect urls when config values are missing', async () => {
-      delete process.env.CLIENTID;
-      delete process.env.CLIENTSECRET;
       delete process.env.HOST2;
       delete process.env.REDIRECT_URI;
-
       const apiWithEmptyConfig = new GetTokensFromApiImpl(
         httpService as unknown as HttpService,
       );

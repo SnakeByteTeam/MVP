@@ -1,7 +1,18 @@
+export interface PlantDatapointDto {
+	id: string;
+	name: string;
+	readable: boolean;
+	writable: boolean;
+	valueType: string;
+	enum?: string[];
+	sfeType: string;
+}
+
 export interface PlantDeviceDto {
 	id: string;
 	name: string;
 	type?: string;
+	datapoints?: PlantDatapointDto[];
 }
 
 export interface PlantRoomDto {

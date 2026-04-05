@@ -27,11 +27,16 @@ import { CreateUserWithTempPasswordCmd } from '../commands/create-user-with-temp
 import { FindAllAvailableUsersUseCase } from '../ports/in/find-all-available-users-use-case.interface';
 import { FIND_ALL_AVAILABLE_USERS_PORT } from '../../adapters/out/find-all-available-users-adapter';
 import { FindAllAvailableUsersPort } from '../ports/out/find-all-available-users-port.interface';
+import { FindUserByIdUseCase } from '../ports/in/find-user-by-id-use-case.interface';
+import { FindUserByIdCmd } from '../commands/find-user-by-id-cmd';
+import { FIND_USER_BY_ID_PORT } from '../../adapters/out/find-user-by-id-adapter';
+import { FindUserByIdPort } from '../ports/out/find-user-by-id-port.interface';
 
 @Injectable()
 export class UsersService
   implements
     FindAllUsersUseCase,
+    FindUserByIdUseCase,
     FindAllAvailableUsersUseCase,
     UpdateUserUseCase,
     CreateUserUseCase,
@@ -40,6 +45,8 @@ export class UsersService
   constructor(
     @Inject(FIND_ALL_USERS_PORT)
     private readonly findAllUsersPort: FindAllUsersPort,
+    @Inject(FIND_USER_BY_ID_PORT)
+    private readonly findUserByIdPort: FindUserByIdPort,
     @Inject(FIND_ALL_AVAILABLE_USERS_PORT)
     private readonly findAllAvailableUsersPort: FindAllAvailableUsersPort,
     @Inject(UPDATE_USER_PORT) private readonly updateUserPort: UpdateUserPort,
@@ -55,6 +62,10 @@ export class UsersService
 
   async findAllUsers(): Promise<User[]> {
     return await this.findAllUsersPort.findAllUsers();
+  }
+
+  async findUserById(req: FindUserByIdCmd): Promise<User | null> {
+    return await this.findUserByIdPort.findUserById(req);
   }
 
   async findAllAvailableUsers(): Promise<User[]> {
@@ -93,6 +104,7 @@ export class UsersService
 }
 
 export const FIND_ALL_USERS_USE_CASE = 'FIND_ALL_USERS_USE_CASE';
+export const FIND_USER_BY_ID_USE_CASE = 'FIND_USER_BY_ID_USE_CASE';
 export const FIND_ALL_AVAILABLE_USERS_USE_CASE =
   'FIND_ALL_AVAILABLE_USERS_USE_CASE';
 export const UPDATE_USER_USE_CASE = 'UPDATE_USER_USE_CASE';

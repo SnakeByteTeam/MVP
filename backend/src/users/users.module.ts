@@ -5,6 +5,7 @@ import {
   DELETE_USER_USE_CASE,
   FIND_ALL_AVAILABLE_USERS_USE_CASE,
   FIND_ALL_USERS_USE_CASE,
+  FIND_USER_BY_ID_USE_CASE,
   UPDATE_USER_USE_CASE,
   UsersService,
 } from './application/services/users.service';
@@ -46,6 +47,8 @@ import {
   FindAllAvailableUsersAdapter,
 } from './adapters/out/find-all-available-users-adapter';
 import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/find-all-available-users-repository.interface';
+import { FIND_USER_BY_ID_PORT, FindUserByIdAdapter } from './adapters/out/find-user-by-id-adapter';
+import { FIND_USER_BY_ID_REPOSITORY } from './application/repository/find-user-by-id-repository.interface';
 
 @Module({
   controllers: [UsersController],
@@ -56,6 +59,10 @@ import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/fi
     },
     {
       provide: FIND_ALL_AVAILABLE_USERS_USE_CASE,
+      useClass: UsersService,
+    },
+    {
+      provide: FIND_USER_BY_ID_USE_CASE,
       useClass: UsersService,
     },
     {
@@ -79,6 +86,10 @@ import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/fi
       useClass: UsersRepositoryImpl,
     },
     {
+      provide: FIND_USER_BY_ID_REPOSITORY,
+      useClass: UsersRepositoryImpl
+    },
+    {
       provide: FIND_ALL_AVAILABLE_USERS_REPOSITORY,
       useClass: UsersRepositoryImpl,
     },
@@ -97,6 +108,10 @@ import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/fi
     {
       provide: FIND_ALL_USERS_PORT,
       useClass: FindAllUsersAdapter,
+    },
+    {
+      provide: FIND_USER_BY_ID_PORT,
+      useClass: FindUserByIdAdapter
     },
     {
       provide: FIND_ALL_AVAILABLE_USERS_PORT,

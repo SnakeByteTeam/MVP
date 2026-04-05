@@ -6,10 +6,12 @@ import { FindAllUsersRepository } from '../../application/repository/find-all-us
 import { UpdateUserRepository } from '../../application/repository/update-user-repository.interface';
 import { UserEntity } from '../entities/user-entity';
 import { FindAllAvailableUsersRepository } from '../../application/repository/find-all-available-users-repository.interface';
+import { FindUserByIdRepository } from '../../application/repository/find-user-by-id-repository.interface';
 
 export class UsersRepositoryImpl
   implements
     FindAllUsersRepository,
+    FindUserByIdRepository,
     FindAllAvailableUsersRepository,
     UpdateUserRepository,
     CreateUserRepository,
@@ -23,6 +25,14 @@ export class UsersRepositoryImpl
     );
 
     return result.rows;
+  }
+
+  async findUserById(id: number): Promise<UserEntity | null> {
+    const result = await this.conn.query(
+      ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id WHERE u.id = $1;',
+      [id]
+    );
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
   async findAllAvailableUsers(): Promise<UserEntity[]> {

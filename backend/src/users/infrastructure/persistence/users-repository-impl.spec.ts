@@ -32,9 +32,8 @@ describe('UsersRepositoryImpl', () => {
     await repo.createUser('username', 'surname', 'name', 'tempPassword');
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      ` WITH operator_role AS ( SELECT id FROM role WHERE name = 'Operatore sanitario' LIMIT 1 ), ` +
-        ` created_user AS ( INSERT INTO "user" (username, surname, name, password, temp_password, roleId) SELECT $1, $2, $3, $4, $4, id FROM operator_role RETURNING * ) ` +
-        ` SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;`,
+      ' WITH created_user AS ( INSERT INTO "user" (username, surname, name, temp_password) VALUES ($1, $2, $3, $4) RETURNING * ) ' +
+        ' SELECT u.id, u.username, u.surname, u.name, r.title AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;',
       ['username', 'surname', 'name', 'tempPassword'],
     );
   });
@@ -65,7 +64,7 @@ describe('UsersRepositoryImpl', () => {
 
     expect(mockConn.query).toHaveBeenCalledWith(
       ' WITH updated_user AS ( UPDATE "user" SET username = $1, surname = $2, name = $3 WHERE id = $4 RETURNING * )' +
-        ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.name AS role ' +
+        ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.title AS role ' +
         ' FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;',
       ['username', 'surname', 'name', 1],
     );

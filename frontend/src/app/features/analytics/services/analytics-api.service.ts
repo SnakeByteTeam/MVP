@@ -3,8 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { AnalyticsDto } from '../models/analytics.model';
 import { Observable, map, of } from 'rxjs';
-import { Apartment } from '../../apartment-monitor/models/apartment.model';
-
+import { PlantDto } from '../../apartment-monitor/models/plant-response.model';
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {
     private readonly http: HttpClient = inject(HttpClient);
@@ -20,7 +19,7 @@ export class AnalyticsApiService {
         map(response => response.map(item => ({
           id: item.id,
           name: item.name,
-        } )))
+        } as PlantDto)))
       );
     }
 

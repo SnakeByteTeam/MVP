@@ -8,6 +8,9 @@ export abstract class ChartComponent {
 
     @Input() chartInfo!: ChartInfoDto;
     abstract chartType: ChartType;
+    abstract description: string;
+    @Input() showSuggestions!: boolean;
+    protected fillArea: boolean = false;
     
     renderedChartData: ChartData = {
         labels: [],
@@ -26,7 +29,6 @@ export abstract class ChartComponent {
         { bg: 'rgba(34, 197, 94, 0.5)', border: 'rgb(34, 197, 94)' }
     ];
 
-    showSuggestions: boolean = true;
 
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -48,11 +50,49 @@ export abstract class ChartComponent {
                 label: ds.name, 
                 backgroundColor: color.bg, 
                 borderColor: color.border,
-                borderWidth: 1,
+                borderWidth: 1, 
+                fill: this.fillArea, 
+                tension: 0.2
             };
             })
         };
-    }
 
-    public showHideSugg(){this.showSuggestions = !this.showSuggestions;}
+        // 2. Aggiorna le opzioni per includere l'unità di misura (unit)
+    this.chartOptions = {
+            ...this.chartOptions,
+            scales: {
+                ...this.chartOptions?.scales,
+                y: {
+                    ...this.chartOptions?.scales?.['y'],
+                    beginAtZero: true,
+                    // RIMUOVIAMO il callback dai ticks se non vuoi l'unità su ogni numero
+                    ticks: {
+                        ...this.chartOptions?.scales?.['y']?.ticks,
+                    },
+                    // AGGIUNGIAMO il titolo dell'asse
+                    title: {
+                        display: true,
+                        text: data.unit, // Mostra l'unità (es. "kWh") in cima o a lato
+                        color: '#64748b', // Colore slate-500 per coerenza con Tailwind
+                        font: {
+                            size: 12,
+                            weight: 'bold'
+                        },
+                        padding: { bottom: 10 }
+                    }
+                }
+            },
+            plugins: {
+                ...this.chartOptions?.plugins,
+                tooltip: {
+                    callbacks: {
+                        // Ti consiglio di LASCIRE l'unità nel tooltip, perché lì è molto utile
+                        label: (context) => `${context.dataset.label}: ${context.parsed.y} ${data.unit}`
+                    }
+                }
+            }
+        };
+
+
+    }
 }

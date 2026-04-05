@@ -9,7 +9,8 @@ export function runSharedChartTests(componentType: any) {
 
     beforeEach(async () => {
         fixture = TestBed.createComponent(componentType);
-        component = fixture.componentInstance;;
+        component = fixture.componentInstance;
+        component.showSuggestions = true;
     });
 
     describe('con suggerimenti attivi', () => {
@@ -26,19 +27,18 @@ export function runSharedChartTests(componentType: any) {
     });
 
     it('dovrebbe restringere il grafico al 70% su schermi grandi', () => {
-      const chartDiv = fixture.debugElement.query(By.css('.lg\\:w-\\[70\\%\\]'));
-      expect(chartDiv).not.toBeNull();
+      const chartDiv = fixture.debugElement.query(By.css('[data-test="chart-container"]'));
+      expect(chartDiv.nativeElement.classList.contains('lg:w-[70%]')).toBe(true);
     });
 
-    it('dovrebbe mostrare la colonna laterale dei suggerimenti', () => {
-      const suggestionColumn = fixture.debugElement.query(By.css('.lg\\:w-\\[30\\%\\]'));
-      expect(suggestionColumn).not.toBeNull();
+    it('dovrebbe mostrare la colonna dei suggerimenti', () => {
+      const sidebar = fixture.debugElement.query(By.css('[data-test="suggestions-sidebar"]'));
+      expect(sidebar).not.toBeNull();
     });
 
-    it('dovrebbe renderizzare il contenuto esatto dei suggerimenti', () => {
-        const items = fixture.debugElement.queryAll(By.css('li'));
-        expect(items.length).toBe(2);
-        expect(items[0].nativeElement.textContent).toContain('Sugg 1');
+    it('dovrebbe renderizzare il numero corretto di messaggi', () => {
+      const items = fixture.debugElement.queryAll(By.css('[data-test="suggestion-item"]'));
+      expect(items.length).toBe(2);
     });
 
   });

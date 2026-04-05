@@ -9,10 +9,12 @@ import { CommonModule } from '@angular/common';
     selector: 'app-temperature-variations-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../shared/device-chart-analytics.html'})
+    templateUrl: '../shared/chart-analytics.html'})
 export class TemperatureVariationsChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'line';
+
+    override description: string = "Dati rilevati dai sensori di temperatura all'interno dell'appartamento.";
 
     override chartColors = [
         { bg: 'rgba(239, 97, 68, 0.5)', border: 'rgb(239, 97, 68)'}

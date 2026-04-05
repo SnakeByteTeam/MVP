@@ -9,7 +9,20 @@
         <img src="logo.png" alt="" class="topbar-logo">
         <div>
             <h1 class="topbar-title">View4Life</h1>
-            <nav class="topbar-breadcrumb">Breadcrumb?</nav>
+            <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+                <ol class="flex items-center gap-1 text-sm">
+                    @for (crumb of breadcrumbs$ | async; track crumb.url; let last = $last) {
+                    <li class="flex items-center gap-1">
+                        @if (!last) {
+                        <a [routerLink]="crumb.url" class="hover:text-amber-600">{{ crumb.label }}</a>
+                        <span class="opacity-40">/</span>
+                        } @else {
+                        <span class="font-semibold">{{ crumb.label }}</span>
+                        }
+                    </li>
+                    }
+                </ol>
+            </nav>
         </div>
     </div>
 

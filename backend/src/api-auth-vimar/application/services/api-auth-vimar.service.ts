@@ -27,7 +27,7 @@ export class ApiAuthVimarService implements ApiAuthUseCase {
       response_type: 'code',
       client_id: process.env.CLIENTID || '',
       scope: 'read write manage',
-      redirect_uri: this.REDIRECT_URI,
+      redirect_uri: this.redirectUri,
     };
 
     if (state) {

@@ -36,6 +36,7 @@
   cursor: pointer;
   transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease, box-shadow 140ms ease;
   box-shadow: 0 8px 14px rgba(245, 158, 11, 0.24);
+  min-width: 0;
 }
 
 .room-list__item:hover {
@@ -68,6 +69,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .room-list__alarm {

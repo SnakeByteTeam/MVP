@@ -137,7 +137,7 @@ export class AlarmManagementService {
         );
     }
 
-    private loadPage(offset: number, fallbackToPreviousIfEmpty = false): void {
+    private loadPage(offset: number, fallbackToPreviousIfEmpty = false, fallbackApplied = false): void {
         this.resolveError$.next(null);
 
         this.getInitialActiveAlarms$(offset)
@@ -146,13 +146,13 @@ export class AlarmManagementService {
                 tap((alarms) => {
                     if (fallbackToPreviousIfEmpty && offset > 0 && alarms.length === 0) {
                         const previousOffset = Math.max(0, offset - this.pageLimit);
-                        this.loadPage(previousOffset);
+                        this.loadPage(previousOffset, fallbackToPreviousIfEmpty, true);
                         return;
                     }
 
                     this.alarmStateService.setActiveAlarms(alarms, 'replace');
                     this.pageOffset$.next(offset);
-                    this.canGoNext$.next(alarms.length === this.pageLimit);
+                    this.canGoNext$.next(fallbackApplied ? false : alarms.length === this.pageLimit);
                 }),
                 catchError((error: unknown) => {
                     this.resolveError$.next(

@@ -85,7 +85,7 @@
             aria-label="Pagina precedente allarmi attivi">
             Precedente
         </button>
-        <span class="alarm-pagination__status" aria-live="polite">Pagina {{ currentPage() }}</span>
+        <span class="alarm-pagination__status" aria-live="polite">Pagina {{ currentPage() }} </span>
         <button type="button" class="alarm-pagination__button" [disabled]="!canGoNext()" (click)="onNextPage()"
             aria-label="Pagina successiva allarmi attivi">
             Successiva

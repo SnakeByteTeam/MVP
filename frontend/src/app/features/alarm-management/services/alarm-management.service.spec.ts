@@ -266,6 +266,7 @@ describe('AlarmManagementService', () => {
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 0);
         expect(vm.currentPage).toBe(1);
         expect(vm.pageOffset).toBe(0);
+        expect(vm.canGoNext).toBe(false);
         expect(vm.alarms.map((alarm) => alarm.id)).toEqual([
             'active-1',
             'active-2',

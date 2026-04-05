@@ -12,5 +12,5 @@ import { ChartType } from 'chart.js';
     templateUrl: '../shared/ward-chart-analytics.html'})
 export class AlarmsSentResolvedChartComponent extends ChartComponent {
 
-    override chartType: ChartType = 'line';
+    override chartType: ChartType = 'bar';
 }

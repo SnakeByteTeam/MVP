@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
     imports: [BaseChartDirective, CommonModule],
     templateUrl: '../shared/ward-chart-analytics.html'})
 export class AlarmFrequencyChartComponent extends ChartComponent {
-    override chartType: ChartType = 'line';
+    override chartType: ChartType = 'bar';
 }
 
 

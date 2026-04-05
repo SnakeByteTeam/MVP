@@ -12,23 +12,21 @@ describe('AlarmStateService', () => {
   let subscriptions: Subscription[];
 
   const alarmEventA: AlarmEvent = {
-    activeAlarmId: 'active-alarm-1',
+    id: 'active-alarm-1',
     alarmRuleId: 'alarm-rule-1',
     alarmName: 'Pulsante antipanico',
     priority: AlarmPriority.RED,
-    triggeredAt: '2026-03-19T10:00:00.000Z',
-    resolvedAt: null,
-    user_id: 'user-1',
+    activationTime: '2026-03-19T10:00:00.000Z',
+    resolutionTime: null,
   };
 
   const alarmEventB: AlarmEvent = {
-    activeAlarmId: 'active-alarm-2',
+    id: 'active-alarm-2',
     alarmRuleId: 'alarm-rule-2',
     alarmName: 'Sensore porta',
     priority: AlarmPriority.ORANGE,
-    triggeredAt: '2026-03-19T10:01:00.000Z',
-    resolvedAt: null,
-    user_id: null,
+    activationTime: '2026-03-19T10:01:00.000Z',
+    resolutionTime: null,
   };
 
   const notificationA: NotificationEvent = {
@@ -90,12 +88,11 @@ describe('AlarmStateService', () => {
     }
 
     expect(latestAlarms.length).toBe(1);
-    expect(latestAlarms[0].id).toBe(alarmEventA.activeAlarmId);
+    expect(latestAlarms[0].id).toBe(alarmEventA.id);
     expect(latestAlarms[0].alarmRuleId).toBe(alarmEventA.alarmRuleId);
     expect(latestAlarms[0].alarmName).toBe(alarmEventA.alarmName);
     expect(latestAlarms[0].priority).toBe(alarmEventA.priority);
-    expect(latestAlarms[0].resolvedAt).toBe(alarmEventA.resolvedAt);
-    expect(latestAlarms[0].user_id).toBe(alarmEventA.user_id);
+    expect(latestAlarms[0].resolutionTime).toBe(alarmEventA.resolutionTime);
   });
 
   it("aggiorna un allarme esistente senza duplicarlo per id istanza", () => {
@@ -117,11 +114,10 @@ describe('AlarmStateService', () => {
     service.onAlarmTriggered(updatedEvent);
 
     expect(latestAlarms.length).toBe(1);
-    expect(latestAlarms[0].id).toBe(alarmEventA.activeAlarmId);
+    expect(latestAlarms[0].id).toBe(alarmEventA.id);
     expect(latestAlarms[0].alarmName).toBe('Nome allarme aggiornato');
     expect(latestAlarms[0].priority).toBe(AlarmPriority.WHITE);
-    expect(latestAlarms[0].resolvedAt).toBe(updatedEvent.resolvedAt);
-    expect(latestAlarms[0].user_id).toBe(updatedEvent.user_id);
+    expect(latestAlarms[0].resolutionTime).toBe(updatedEvent.resolutionTime);
   });
 
   it('rimuove solo l allarme target quando viene chiamato onAlarmResolved', () => {
@@ -136,9 +132,9 @@ describe('AlarmStateService', () => {
     service.onAlarmTriggered(alarmEventA);
     service.onAlarmTriggered(alarmEventB);
 
-    service.onAlarmResolved(alarmEventA.activeAlarmId);
+    service.onAlarmResolved(alarmEventA.id);
 
-    expect(latestActiveAlarmIds).toEqual([alarmEventB.activeAlarmId]);
+    expect(latestActiveAlarmIds).toEqual([alarmEventB.id]);
   });
 
   it('antepone le notifiche in modo che la piu recente sia la prima', () => {
@@ -165,9 +161,10 @@ describe('AlarmStateService', () => {
         alarmRuleId: 'rule-1',
         alarmName: 'Snapshot allarme',
         priority: AlarmPriority.RED,
-        triggeredAt: '2026-03-19T10:00:00.000Z',
-        resolvedAt: null,
-        user_id: null,
+        activationTime: '2026-03-19T10:00:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 102',
+        userId: 3,
       },
     ];
 
@@ -191,9 +188,10 @@ describe('AlarmStateService', () => {
         alarmRuleId: 'rule-1',
         alarmName: 'Snapshot allarme',
         priority: AlarmPriority.RED,
-        triggeredAt: '2026-03-19T10:00:00.000Z',
-        resolvedAt: null,
-        user_id: null,
+        activationTime: '2026-03-19T10:00:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 103',
+        userId: 4,
       },
     ];
 
@@ -204,9 +202,9 @@ describe('AlarmStateService', () => {
     );
 
     service.onAlarmTriggered(alarmEventA);
-    service.setActiveAlarms(snapshot);
+    service.setActiveAlarms(snapshot, 'merge');
 
-    expect(latestActiveAlarmIds).toEqual(['snapshot-1', alarmEventA.activeAlarmId]);
+    expect(latestActiveAlarmIds).toEqual(['snapshot-1', alarmEventA.id]);
   });
 
   it('setActiveAlarms non reintroduce allarmi gia risolti localmente', () => {
@@ -214,13 +212,14 @@ describe('AlarmStateService', () => {
 
     const staleSnapshot: ActiveAlarm[] = [
       {
-        id: alarmEventA.activeAlarmId,
+        id: alarmEventA.id,
         alarmRuleId: alarmEventA.alarmRuleId,
         alarmName: alarmEventA.alarmName,
         priority: alarmEventA.priority,
-        triggeredAt: alarmEventA.triggeredAt,
-        resolvedAt: null,
-        user_id: alarmEventA.user_id,
+        activationTime: alarmEventA.activationTime,
+        resolutionTime: null,
+        position: 'Camera 104',
+        userId: 5,
       },
     ];
 
@@ -231,10 +230,61 @@ describe('AlarmStateService', () => {
     );
 
     service.onAlarmTriggered(alarmEventA);
-    service.onAlarmResolved(alarmEventA.activeAlarmId);
-    service.setActiveAlarms(staleSnapshot);
+    service.onAlarmResolved(alarmEventA.id);
+    service.setActiveAlarms(staleSnapshot, 'merge');
 
     expect(latestActiveAlarmIds).toEqual([]);
+  });
+
+  it('setActiveAlarms in replace sostituisce la pagina corrente senza mantenere elementi precedenti', () => {
+    let latestActiveAlarmIds: string[] = [];
+
+    const firstPage: ActiveAlarm[] = [
+      {
+        id: 'page-1-a',
+        alarmRuleId: 'rule-a',
+        alarmName: 'Allarme pagina 1',
+        priority: AlarmPriority.RED,
+        activationTime: '2026-03-19T10:00:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 201',
+        userId: 1,
+      },
+      {
+        id: 'page-1-b',
+        alarmRuleId: 'rule-b',
+        alarmName: 'Allarme pagina 1 bis',
+        priority: AlarmPriority.ORANGE,
+        activationTime: '2026-03-19T10:01:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 202',
+        userId: 2,
+      },
+    ];
+
+    const secondPage: ActiveAlarm[] = [
+      {
+        id: 'page-2-a',
+        alarmRuleId: 'rule-c',
+        alarmName: 'Allarme pagina 2',
+        priority: AlarmPriority.GREEN,
+        activationTime: '2026-03-19T10:02:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 203',
+        userId: 3,
+      },
+    ];
+
+    subscriptions.push(
+      service.getActiveAlarms$().subscribe((alarms) => {
+        latestActiveAlarmIds = alarms.map((alarm) => alarm.id);
+      })
+    );
+
+    service.setActiveAlarms(firstPage, 'replace');
+    service.setActiveAlarms(secondPage, 'replace');
+
+    expect(latestActiveAlarmIds).toEqual(['page-2-a']);
   });
 
   it('emette conteggi derivati corretti per allarmi e notifiche non lette', () => {
@@ -257,7 +307,7 @@ describe('AlarmStateService', () => {
     expect(activeAlarmsCount).toBe(2);
     expect(unreadNotificationsCount).toBe(1);
 
-    service.onAlarmResolved(alarmEventA.activeAlarmId);
+    service.onAlarmResolved(alarmEventA.id);
     service.onNotificationReceived(notificationB);
 
     expect(activeAlarmsCount).toBe(1);
@@ -271,26 +321,29 @@ function createAlarmCollector(
     alarmRuleId: string;
     alarmName: string;
     priority: AlarmPriority;
-    triggeredAt: string;
-    resolvedAt: string | null;
-    user_id: string | null;
+    activationTime: string;
+    resolutionTime: string | null;
+    position: string;
+    userId: number | null;
   }>
 ): Array<{
   id: string;
   alarmRuleId: string;
   alarmName: string;
   priority: AlarmPriority;
-  triggeredAt: string;
-  resolvedAt: string | null;
-  user_id: string | null;
+  activationTime: string;
+  resolutionTime: string | null;
+  position: string;
+  userId: number | null;
 }> {
   return alarms.map((alarm) => ({
     id: alarm.id,
     alarmRuleId: alarm.alarmRuleId,
     alarmName: alarm.alarmName,
     priority: alarm.priority,
-    triggeredAt: alarm.triggeredAt,
-    resolvedAt: alarm.resolvedAt,
-    user_id: alarm.user_id,
+    activationTime: alarm.activationTime,
+    resolutionTime: alarm.resolutionTime,
+    position: alarm.position,
+    userId: alarm.userId,
   }));
 }

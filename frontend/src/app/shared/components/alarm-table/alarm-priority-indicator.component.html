@@ -1,0 +1,8 @@
+<span class="inline-flex items-center gap-1.5" [attr.aria-label]="'Priorita ' + ui().label">
+    <span
+        class="inline-flex h-5 min-w-5 items-center justify-center rounded-full border bg-white px-1 text-[11px] font-bold"
+        [class]="ui().bubbleClass">
+        {{ priority() }}
+    </span>
+    <span class="text-sm font-bold leading-none" [class]="ui().symbolClass" aria-hidden="true">{{ ui().symbol }}</span>
+</span>

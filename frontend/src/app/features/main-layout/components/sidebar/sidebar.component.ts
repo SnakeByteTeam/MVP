@@ -21,5 +21,5 @@ export class SidebarComponent {
     @Input() canOpenProfile = false;
     @Output() profileClicked = new EventEmitter<void>();
     @Output() collapsed = new EventEmitter<void>();
-    @Output() navItemSelected = new EventEmitter<void>();
+    @Output() navItemSelected = new EventEmitter<string>();
 }

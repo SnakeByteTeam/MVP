@@ -1,49 +1,32 @@
-.alarm-management {
-    max-width: 70rem;
-    margin: 0 auto;
-    padding: 1rem;
+.alarm-management-page {
+    background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
+    background-size: 22px 22px;
 }
 
-.alarm-management__header h1 {
-    margin: 0;
-}
-
-.alarm-management__header p {
-    margin-top: 0.5rem;
-    color: #3a3a3a;
-}
-
-.alarm-management__error {
-    margin: 1rem 0;
-    padding: 0.75rem 1rem;
-    border: 1px solid #c62828;
-    border-radius: 0.5rem;
-    background: #fdecea;
-    color: #7f1d1d;
-}
-
-.alarm-management__status {
-    margin: 1rem 0;
-    color: #1f4b99;
-    font-weight: 600;
-}
-
+.alarm-management__status,
+.alarm-management__error,
 .alarm-management__empty {
-    margin: 1rem 0;
-    color: #4d4d4d;
+    margin-top: 0.75rem;
 }
 
-.alarm-management__list {
-    list-style: none;
-    margin: 1rem 0 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    gap: 0.75rem;
+.alarm-pagination__button {
+    border: 1px solid #94a3b8;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    color: #0f172a;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: 0.35rem 0.75rem;
 }
 
-@media (max-width: 48rem) {
-    .alarm-management {
-        padding: 0.75rem;
-    }
+.alarm-pagination__button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.alarm-pagination__status {
+    color: #334155;
+    font-size: 0.875rem;
+    font-weight: 600;
 }

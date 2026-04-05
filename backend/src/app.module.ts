@@ -8,9 +8,13 @@ import { ApiAuthVimarModule } from './api-auth-vimar/api-auth-vimar.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { DeviceModule } from './device/device.module';
 import { PlantModule } from './plant/plant.module';
+import { AlarmsModule } from './alarms/alarms.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
+import { ValidationModule } from './validation/validation.module';
+import { GuardModule } from './guard/guard.module';
+
 
 @Module({
   imports: [
@@ -23,12 +27,14 @@ import { UsersModule } from './users/users.module';
     DeviceModule,
     PlantModule,
     AuthModule,
-    WardsModule,
+    WardsModule, AlarmsModule,
     CacheModule,
     SubscriptionModule,
     AnalyticsModule,
     EventEmitterModule.forRoot(),
-    UsersModule,
+    UsersModule, GuardModule, ValidationModule,
   ],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule { }

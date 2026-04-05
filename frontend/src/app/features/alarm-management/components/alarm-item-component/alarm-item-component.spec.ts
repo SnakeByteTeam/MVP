@@ -22,9 +22,10 @@ describe('AlarmItemComponent', () => {
     alarmRuleId: 'rule-1',
     alarmName: 'Allarme antipanico',
     priority: AlarmPriority.RED,
-    triggeredAt: '2026-03-24T10:00:00.000Z',
-    resolvedAt: null,
-    user_id: null,
+    activationTime: '2026-03-24T10:00:00.000Z',
+    resolutionTime: null,
+    position: 'Camera 101',
+    userId: 10,
   };
 
   const setInputs = (alarm: ActiveAlarm, isResolving = false): void => {
@@ -58,30 +59,16 @@ describe('AlarmItemComponent', () => {
 
   it('priorityUi mappa correttamente label per tutti i livelli', () => {
     setInputs({ ...baseAlarm, priority: AlarmPriority.RED });
-    expect(component.priorityUi().label).toBe('Alta');
+    expect(component.vm().priorityLabel).toBe('Alta');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.ORANGE });
-    expect(component.priorityUi().label).toBe('Media');
+    expect(component.vm().priorityLabel).toBe('Media');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.GREEN });
-    expect(component.priorityUi().label).toBe('Bassa');
+    expect(component.vm().priorityLabel).toBe('Bassa');
 
     setInputs({ ...baseAlarm, priority: AlarmPriority.WHITE });
-    expect(component.priorityUi().label).toBe('Informativa');
-  });
-
-  it('priorityUi mappa correttamente className per tutti i livelli', () => {
-    setInputs({ ...baseAlarm, priority: AlarmPriority.RED });
-    expect(component.priorityUi().className).toBe('priority-red');
-
-    setInputs({ ...baseAlarm, priority: AlarmPriority.ORANGE });
-    expect(component.priorityUi().className).toBe('priority-orange');
-
-    setInputs({ ...baseAlarm, priority: AlarmPriority.GREEN });
-    expect(component.priorityUi().className).toBe('priority-green');
-
-    setInputs({ ...baseAlarm, priority: AlarmPriority.WHITE });
-    expect(component.priorityUi().className).toBe('priority-white');
+    expect(component.vm().priorityLabel).toBe('Informativa');
   });
 
   it('onResolveClick emette alarm.id', () => {
@@ -98,10 +85,12 @@ describe('AlarmItemComponent', () => {
     setInputs(baseAlarm);
     const nativeElement = fixture.nativeElement as HTMLElement;
     const metaValues = nativeElement.querySelectorAll('.alarm-item__meta dd');
+    const resolveButton = nativeElement.querySelector('button');
 
-    expect(nativeElement.querySelector('.alarm-item__title')?.textContent).toContain('Allarme antipanico');
+    expect(nativeElement.querySelector('.alarm-item__title')?.textContent).toContain('Allarme antipanico in "Camera 101"');
     expect(nativeElement.querySelector('.alarm-item__priority')?.textContent).toContain('Alta');
     expect(metaValues.item(1)?.textContent).toContain('mock-elapsed:2026-03-24T10:00:00.000Z');
+    expect(resolveButton?.getAttribute('aria-label')).toContain('Risolvi allarme Allarme antipanico');
   });
 
   it('quando isResolving e true disabilita il bottone e mostra lo stato di avanzamento', () => {
@@ -135,5 +124,38 @@ describe('AlarmItemComponent', () => {
 
     expect(emitSpy).toHaveBeenCalledWith('active-1');
     expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('usa fallback per nome e posizione quando i campi sono vuoti o solo spazi', () => {
+    setInputs({
+      ...baseAlarm,
+      alarmName: '   ',
+      position: '   ',
+    });
+
+    expect(component.vm().alarmTitle).toBe('senza nome in "posizione sconosciuta"');
+    expect(component.vm().articleAriaLabel).toBe('Allarme senza nome');
+    expect(component.vm().resolveButtonAriaLabel).toBe('Risolvi allarme senza nome');
+  });
+
+  it('quando e in resolving aggiorna aria-label del bottone in modo specifico', () => {
+    setInputs(baseAlarm, true);
+
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button');
+
+    expect(component.vm().resolveButtonText).toBe('Risoluzione...');
+    expect(button?.getAttribute('aria-label')).toContain('Risoluzione in corso per Allarme antipanico');
+  });
+
+  it('renderizza nomi con caratteri speciali come testo senza errori runtime', () => {
+    setInputs({
+      ...baseAlarm,
+      alarmName: '<script>alert("xss")</script>',
+      position: 'Sala monitoraggio',
+    });
+
+    const title = (fixture.nativeElement as HTMLElement).querySelector('.alarm-item__title')?.textContent ?? '';
+
+    expect(title).toContain('<script>alert("xss")</script> in "Sala monitoraggio"');
   });
 });

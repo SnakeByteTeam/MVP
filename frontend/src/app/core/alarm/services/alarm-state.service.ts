@@ -4,14 +4,22 @@ import { ActiveAlarm } from '../models/active-alarm.model';
 import { AlarmEvent } from '../models/alarm-event.model';
 import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 
+type ActiveAlarmsSnapshotMode = 'merge' | 'replace';
+
 @Injectable({ providedIn: 'root' })
 export class AlarmStateService {
 	private readonly activeAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
 	private readonly notifications$ = new BehaviorSubject<NotificationEvent[]>([]);
 	private readonly locallyResolvedActiveAlarmIds = new Set<string>();
 
-	public setActiveAlarms(alarms: ActiveAlarm[]): void {
+	public setActiveAlarms(alarms: ActiveAlarm[], mode: ActiveAlarmsSnapshotMode = 'merge'): void {
 		const filteredIncoming = alarms.filter((alarm) => !this.locallyResolvedActiveAlarmIds.has(alarm.id));
+
+		if (mode === 'replace') {
+			this.activeAlarms$.next(filteredIncoming);
+			return;
+		}
+
 		const current = this.activeAlarms$.getValue();
 		const incomingIds = new Set(filteredIncoming.map((alarm) => alarm.id));
 		const currentOnly = current.filter(
@@ -22,20 +30,23 @@ export class AlarmStateService {
 	}
 
 	public onAlarmTriggered(event: AlarmEvent): void {
-		this.locallyResolvedActiveAlarmIds.delete(event.activeAlarmId);
+		this.locallyResolvedActiveAlarmIds.delete(event.id);
 
 		const current = this.activeAlarms$.getValue();
 		const nextAlarm: ActiveAlarm = {
-			id: event.activeAlarmId,
+			id: event.id,
 			alarmRuleId: event.alarmRuleId,
+			deviceId: '-',
 			alarmName: event.alarmName,
 			priority: event.priority,
-			triggeredAt: event.triggeredAt,
-			resolvedAt: event.resolvedAt,
-			user_id: event.user_id,
+			activationTime: event.activationTime,
+			resolutionTime: event.resolutionTime,
+			position: 'posizione sconosciuta',
+			userId: null,
+			userUsername: null,
 		};
 
-		const existingIndex = current.findIndex((alarm) => alarm.id === event.activeAlarmId);
+		const existingIndex = current.findIndex((alarm) => alarm.id === event.id);
 		if (existingIndex >= 0) {
 			const updated = [...current];
 			updated[existingIndex] = nextAlarm;

@@ -10,5 +10,5 @@ import { PlantDto } from '../../../apartment-monitor/models/plant-response.model
     ],
     templateUrl: './plant-overview.component.html' })
 export class plantOverviewComponent{
-    @Input() apartment!: PlantDto;
+    @Input() apartment!: PlantDto | null ;
 }    

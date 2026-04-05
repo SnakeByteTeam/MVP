@@ -39,6 +39,7 @@ export class AlarmEventsRepositoryImpl
       LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
       LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
       WHERE dp->>'id' = ar.device_id
+      AND ae.resolution_time IS NULL
       ORDER BY 
         ae.resolution_time IS NOT NULL,
         ar.priority DESC,

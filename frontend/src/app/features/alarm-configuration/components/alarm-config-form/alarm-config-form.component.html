@@ -74,7 +74,7 @@
     </div>
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
-        <label for="priority" class="font-semibold text-slate-700">Priorita:</label>
+        <label for="priority" class="font-semibold text-slate-700">Priorità:</label>
         <div class="flex items-center gap-2">
             <select id="priority" formControlName="priority"
                 class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
@@ -92,7 +92,7 @@
     </div>
 
     @if (form.controls.priority.invalid && form.controls.priority.touched) {
-    <p role="alert" class="text-xs font-medium text-rose-700">La priorita e obbligatoria.</p>
+    <p role="alert" class="text-xs font-medium text-rose-700">La priorità è obbligatoria.</p>
     }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
@@ -111,7 +111,7 @@
     </div>
 
     @if (form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched) {
-    <p role="alert" class="text-xs font-medium text-rose-700">L'operatore di soglia e obbligatorio.</p>
+    <p role="alert" class="text-xs font-medium text-rose-700">L'operatore di soglia è obbligatorio.</p>
     }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
@@ -130,7 +130,7 @@
             </p>
 
             @if (form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched) {
-            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">La soglia e obbligatoria.</p>
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">La soglia è obbligatoria.</p>
             }
         </div>
     </div>
@@ -143,7 +143,7 @@
                 [attr.aria-invalid]="form.controls.armingTime.invalid && form.controls.armingTime.touched" />
 
             @if (form.controls.armingTime.invalid && form.controls.armingTime.touched) {
-            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">L'orario di attivazione e obbligatorio.</p>
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">L'orario di attivazione è obbligatorio.</p>
             }
         </div>
     </div>
@@ -156,17 +156,17 @@
                 [attr.aria-invalid]="form.controls.dearmingTime.invalid && form.controls.dearmingTime.touched" />
 
             @if (form.controls.dearmingTime.invalid && form.controls.dearmingTime.touched) {
-            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">L'orario di disattivazione e obbligatorio.
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">L'orario di disattivazione è obbligatorio.
             </p>
             }
         </div>
     </div>
 
-    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+    <!-- <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
         <span class="font-semibold text-slate-700">Abilita:</span>
         <app-alarm-toggle-switch [checked]="form.controls.enabled.value" [ariaLabel]="'Abilita regola allarme'"
             (toggled)="onEnabledToggled($event)" />
-    </div>
+    </div> -->
 
     <div class="mt-4 flex items-center justify-end gap-2 border-t border-slate-300 pt-3">
         <app-alarm-action-button label="ANNULLA" tone="neutral" (pressed)="onCancel()" />

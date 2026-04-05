@@ -9,10 +9,13 @@ import { CommonModule } from '@angular/common';
     selector: 'app-fall-frequency-chart',
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../shared/ward-chart-analytics.html'})
+    templateUrl: '../shared/chart-analytics.html'})
 export class FallFrequencyChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'bar';
+
+    override description: string = "Dati relativi alle cadute del reparto.";
+
 
     
 }

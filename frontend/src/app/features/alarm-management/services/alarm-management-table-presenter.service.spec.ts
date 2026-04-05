@@ -42,7 +42,7 @@ describe('AlarmManagementTablePresenterService', () => {
         expect(row.device).toBe('device-1');
         expect(row.manager).toBe('operator-9');
         expect(row.closedAt).toBe('-');
-        expect(row.openedAt).toMatch(/^\d{2}:\d{2}$/);
+        expect(row.openedAt).toBe('2026-03-24T10:00:00.000Z');
     });
 
     it('mappa un allarme gia gestito come non azionabile', () => {
@@ -62,6 +62,7 @@ describe('AlarmManagementTablePresenterService', () => {
         expect(row.actionAriaLabel).toBe('Allarme gia gestito Allarme antipanico');
         expect(row.closedAt).toMatch(/^\d{2}:\d{2}$/);
         expect(row.manager).toBe('operator-77');
+        expect(row.openedAt).toBe('2026-03-24T10:00:00.000Z');
     });
 
     it('quando l allarme e in risoluzione mostra stato e label specifici', () => {
@@ -89,7 +90,7 @@ describe('AlarmManagementTablePresenterService', () => {
         expect(row.location).toBe('-');
         expect(row.device).toBe('-');
         expect(row.manager).toBe('-');
-        expect(row.openedAt).toBe('abcde');
+        expect(row.openedAt).toBe('abcde12345');
         expect(row.closedAt).toBe('not-a');
     });
 });

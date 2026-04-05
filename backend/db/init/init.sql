@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS ward;
 DROP TABLE IF EXISTS role;
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
+SET TIME ZONE 'UTC';
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -692,8 +693,8 @@ INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority,
 CREATE TABLE alarm_event (
     id VARCHAR(255) PRIMARY KEY,
     alarm_rule_id VARCHAR(255),
-    activation_time TIMESTAMP NOT NULL,
-    resolution_time TIMESTAMP,
+    activation_time TIMESTAMPTZ NOT NULL,
+    resolution_time TIMESTAMPTZ,
     user_id INTEGER,
     FOREIGN KEY (alarm_rule_id)
         REFERENCES alarm_rule(id)
@@ -705,7 +706,7 @@ CREATE TABLE alarm_event (
 INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
 VALUES
 -- Eventi per rule-001 (Temperatura critica)
-('EVT001', 'rule-001', '2026-03-30 09:15:00', '2026-03-30 10:00:00', 1),
+('EVT001', 'rule-001', '2026-04-04 20:15:00', NULL, 1),
 ('EVT010', 'rule-001', '2026-03-30 09:15:00', NULL, NULL),
 ('EVT002', 'rule-001', '2026-03-31 11:20:00', NULL, NULL),
 ('EVT003', 'rule-001', '2026-03-29 14:05:00', '2026-03-29 14:45:00', 1),
@@ -741,4 +742,16 @@ VALUES
 ('EVT112', 'rule-007', '2026-04-02 11:10:00', '2026-04-02 11:40:00', 2),
 ('EVT113', 'rule-010', '2026-04-02 12:30:00', '2026-04-02 12:55:00', 2),
 ('EVT199', 'rule-orphan-temp', '2026-04-03 12:00:00', NULL, NULL);
+
+-- Eventi aggiuntivi per verificare la visualizzazione del tempo trascorso
+-- nella UI: tutti nel passato, alcuni meno di un giorno e altri oltre un giorno.
+INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
+VALUES
+('EVT200', 'rule-007', '2026-04-04 10:40:00', NULL, NULL),
+('EVT201', 'rule-006', '2026-04-04 08:20:00', NULL, NULL),
+('EVT202', 'rule-010', '2026-04-04 19:15:00', NULL, NULL),
+('EVT203', 'rule-005', '2026-04-03 14:00:00', NULL, NULL),
+('EVT204', 'rule-003', '2026-04-02 09:30:00', '2026-04-02 10:05:00', 1),
+('EVT205', 'rule-001', '2026-04-01 06:45:00', NULL, NULL)
+ON CONFLICT DO NOTHING;
 

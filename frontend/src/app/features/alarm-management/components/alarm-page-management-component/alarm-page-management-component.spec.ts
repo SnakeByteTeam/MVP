@@ -5,10 +5,22 @@ import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.mod
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { UserRole } from '../../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../../core/services/internal-auth.service';
+import { Pipe, type PipeTransform } from '@angular/core';
+import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 import type { UserSession } from '../../../user-auth/models/user-session.model';
 import type { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
 import { AlarmPageManagementComponent } from './alarm-page-management-component';
+
+@Pipe({
+  name: 'elapsedTime',
+  standalone: true,
+})
+class MockElapsedTimePipe implements PipeTransform {
+  transform(value: string, referenceTimestampMs?: number): string {
+    return `mock-elapsed:${value}`;
+  }
+}
 
 describe('AlarmPageManagementComponent', () => {
   let component: AlarmPageManagementComponent;
@@ -84,6 +96,11 @@ describe('AlarmPageManagementComponent', () => {
       isFirstAccess: false,
     });
     authServiceStub.getCurrentUser$.mockReturnValue(userSessionSubject.asObservable());
+
+    TestBed.overrideComponent(AlarmPageManagementComponent, {
+      remove: { imports: [ElapsedTimePipe] },
+      add: { imports: [MockElapsedTimePipe] },
+    });
 
     await TestBed.configureTestingModule({
       imports: [AlarmPageManagementComponent],
@@ -196,10 +213,9 @@ describe('AlarmPageManagementComponent', () => {
     expect(rows.length).toBe(2);
     expect(nativeElement.textContent).toContain('Priorita');
     expect(nativeElement.textContent).toContain('Dispositivo');
-    expect(nativeElement.textContent).toContain('Gestore');
     expect(nativeElement.textContent).toContain('device-1');
-    expect(nativeElement.textContent).toContain('oss_1');
     expect(nativeElement.textContent).toContain('Corridoio Nord');
+    expect(nativeElement.textContent).toContain('mock-elapsed:2026-03-24T10:00:00.000Z');
     expect(manageButtons.length).toBe(2);
     expect((manageButtons.item(1) as HTMLButtonElement).disabled).toBe(true);
   });

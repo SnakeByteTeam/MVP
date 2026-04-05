@@ -18,7 +18,7 @@ export class AlarmManagementTablePresenterService {
                 device: this.getSafeDevice(alarm.deviceId),
                 location: this.getSafeLocation(alarm.position),
                 status: isOpen ? 'Da gestire' : 'Non da gestire',
-                openedAt: this.toShortTime(alarm.activationTime),
+                openedAt: alarm.activationTime,
                 closedAt: this.toShortTime(alarm.resolutionTime),
                 manager: this.getSafeManager(alarm.userUsername),
                 isResolving,

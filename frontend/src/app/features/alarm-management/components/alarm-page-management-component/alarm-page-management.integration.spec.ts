@@ -5,10 +5,22 @@ import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.mod
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { UserRole } from '../../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../../core/services/internal-auth.service';
+import { Pipe, type PipeTransform } from '@angular/core';
+import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 import type { UserSession } from '../../../user-auth/models/user-session.model';
 import type { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
 import { AlarmPageManagementComponent } from './alarm-page-management-component';
+
+@Pipe({
+    name: 'elapsedTime',
+    standalone: true,
+})
+class MockElapsedTimePipe implements PipeTransform {
+    transform(value: string, referenceTimestampMs?: number): string {
+        return `mock-elapsed:${value}`;
+    }
+}
 
 describe('AlarmManagement feature integration', () => {
     let fixture: ComponentFixture<AlarmPageManagementComponent>;
@@ -78,6 +90,11 @@ describe('AlarmManagement feature integration', () => {
         });
         authServiceStub.getCurrentUser$.mockReturnValue(userSessionSubject.asObservable());
 
+        TestBed.overrideComponent(AlarmPageManagementComponent, {
+            remove: { imports: [ElapsedTimePipe] },
+            add: { imports: [MockElapsedTimePipe] },
+        });
+
         await TestBed.configureTestingModule({
             imports: [AlarmPageManagementComponent],
             providers: [
@@ -99,6 +116,7 @@ describe('AlarmManagement feature integration', () => {
 
         expect(resolveButtons.length).toBe(2);
         expect(nativeElement.textContent).toContain('Allarmi attivi');
+        expect(nativeElement.textContent).toContain('mock-elapsed:2026-03-24T10:00:00.000Z');
 
         resolveButtons[0].dispatchEvent(new MouseEvent('click'));
         expect(alarmManagementStub.resolveAlarm).toHaveBeenCalledWith('active-1');

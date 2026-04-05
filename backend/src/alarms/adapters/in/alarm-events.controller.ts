@@ -71,7 +71,7 @@ export class AlarmEventsController {
   }
 
   @Patch('/resolve')
-  //@UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard)
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {
     return this.resolveAlarmEventUseCase.resolveAlarmEvent(
       new ResolveAlarmEventCmd(req.alarmId, req.userId),

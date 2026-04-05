@@ -43,7 +43,7 @@ export class AlarmEventsController {
   ) { }
 
   @ApiOkResponse({ type: GetAllAlarmEventsByUserIdResDto, isArray: true })
-  @UseGuards(UserGuard)
+  //@UseGuards(UserGuard)
   @Get('/:userId/:limit/:offset')
   async getAllAlarmEventsByUserId(
     @Param('userId', ParseIntPipe) userId: number,
@@ -58,7 +58,7 @@ export class AlarmEventsController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard, AdminGuard)
   @Get('/:limit/:offset')
   async getAllAlarmEvents(
     @Param('limit', ParseIntPipe) limit: number,
@@ -71,7 +71,7 @@ export class AlarmEventsController {
   }
 
   @Patch('/resolve')
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard)
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {
     return this.resolveAlarmEventUseCase.resolveAlarmEvent(
       new ResolveAlarmEventCmd(req.alarmId, req.userId),

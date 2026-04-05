@@ -35,6 +35,7 @@ export class AlarmRulesRepositoryImpl
     name: string,
     priority: AlarmPriority,
     deviceId: string,
+    plantId: string,
     thresholdOperator: string,
     thresholdValue: string,
     armingTime: string,
@@ -42,8 +43,8 @@ export class AlarmRulesRepositoryImpl
   ): Promise<AlarmRuleEntity> {
     const result = await this.pool.query(
       `INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, 
-       arming_time, dearming_time, is_armed, device_id)
-       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9)
+       arming_time, dearming_time, is_armed, device_id, plant_id)
+       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10)
        RETURNING *`,
       [
         randomUUID(),
@@ -55,6 +56,7 @@ export class AlarmRulesRepositoryImpl
         dearmingTime,
         true,
         deviceId,
+        plantId
       ],
     );
     return result.rows[0];
@@ -63,7 +65,7 @@ export class AlarmRulesRepositoryImpl
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
       `SELECT * FROM alarm_rule 
-       ORDER BY created_at ASC`,
+       ORDER BY updated_at DESC, created_at DESC`,
     );
     return result.rows;
   }

@@ -30,7 +30,7 @@ export class AlarmPageManagementComponent implements OnInit {
   private readonly baseColumns: readonly AlarmTableColumn[] = [
     { id: 'priority', label: 'Priorità' },
     { id: 'name', label: 'Nome' },
-    { id: 'device', label: 'Dispositivo' },
+    // { id: 'device', label: 'Dispositivo' },
     { id: 'location', label: 'Luogo' },
     { id: 'status', label: 'Stato' },
     { id: 'openedAt', label: 'Scattato' },
@@ -41,7 +41,7 @@ export class AlarmPageManagementComponent implements OnInit {
   private readonly adminColumns: readonly AlarmTableColumn[] = [
     { id: 'priority', label: 'Priorità' },
     { id: 'name', label: 'Nome' },
-    { id: 'device', label: 'Dispositivo' },
+    // { id: 'device', label: 'Dispositivo' },
     { id: 'location', label: 'Luogo' },
     { id: 'status', label: 'Stato' },
     { id: 'openedAt', label: 'Scattato' },

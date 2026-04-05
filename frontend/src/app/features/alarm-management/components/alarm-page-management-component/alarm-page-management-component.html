@@ -70,8 +70,7 @@
                     {{ row.status }}
                 </span>
             </td>
-            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.openedAt | elapsedTime: nowEpochMs() }}
-            </td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.openedAt | elapsedTime }}</td>
             <td class="px-5 py-3.5 align-middle">
                 <app-alarm-action-button [label]="row.actionLabel" [tone]="row.isManaged ? 'neutral' : 'primary'"
                     [disabled]="row.isActionDisabled" [ariaLabel]="row.actionAriaLabel" (pressed)="onResolve(row.id)" />

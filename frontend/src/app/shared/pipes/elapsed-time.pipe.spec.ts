@@ -23,20 +23,23 @@ describe('ElapsedTimePipe', () => {
     });
 
     it('mostra secondi compatti per intervalli inferiori a 60 secondi', () => {
-        expect(pipe.transform('2026-03-24T11:59:30.000Z')).toBe('00:00');
-        expect(pipe.transform('2026-03-24T11:59:01.000Z')).toBe('00:00');
+        expect(pipe.transform('2026-03-24T11:59:30.000Z')).toBe('30s fa');
+        expect(pipe.transform('2026-03-24T11:59:01.000Z')).toBe('59s fa');
     });
 
-    it('mostra ore e minuti in formato HH:mm per intervalli inferiori a 1 giorno', () => {
-        expect(pipe.transform('2026-03-24T11:59:00.000Z')).toBe('00:01');
-        expect(pipe.transform('2026-03-24T11:45:00.000Z')).toBe('00:15');
-        expect(pipe.transform('2026-03-24T11:00:00.000Z')).toBe('01:00');
-        expect(pipe.transform('2026-03-24T10:48:00.000Z')).toBe('01:12');
-        expect(pipe.transform('2026-03-24T09:00:00.000Z')).toBe('03:00');
+    it('mostra minuti compatti da 60 secondi a meno di 1 ora', () => {
+        expect(pipe.transform('2026-03-24T11:59:00.000Z')).toBe('1m fa');
+        expect(pipe.transform('2026-03-24T11:45:00.000Z')).toBe('15m fa');
+    });
+
+    it('mostra ore e minuti compatti per intervalli inferiori a 1 giorno', () => {
+        expect(pipe.transform('2026-03-24T11:00:00.000Z')).toBe('1h fa');
+        expect(pipe.transform('2026-03-24T10:48:00.000Z')).toBe('1h 12m fa');
+        expect(pipe.transform('2026-03-24T09:00:00.000Z')).toBe('3h fa');
     });
 
     it('mostra giorni compatti per intervalli pari o superiori a 1 giorno', () => {
-        expect(pipe.transform('2026-03-23T12:00:00.000Z')).toBe('1 giorno fa');
-        expect(pipe.transform('2026-03-19T12:00:00.000Z')).toBe('5 giorni fa');
+        expect(pipe.transform('2026-03-23T12:00:00.000Z')).toBe('1g fa');
+        expect(pipe.transform('2026-03-19T12:00:00.000Z')).toBe('5g fa');
     });
 });

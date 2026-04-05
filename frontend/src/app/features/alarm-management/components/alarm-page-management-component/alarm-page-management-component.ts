@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { map, timer } from 'rxjs';
 import { AlarmListVm } from '../../models/alarm-list-vm.model';
 import { AlarmManagementService } from '../../services/alarm-management.service';
 import { AlarmManagementTablePresenterService } from '../../services/alarm-management-table-presenter.service';
@@ -55,9 +54,6 @@ export class AlarmPageManagementComponent implements OnInit {
     initialValue: null,
   });
   public readonly currentUser = toSignal(this.authService.getCurrentUser$(), { initialValue: null });
-  public readonly nowEpochMs = toSignal(timer(0, 60_000).pipe(map(() => Date.now())), {
-    initialValue: Date.now(),
-  });
   public readonly showManagerColumn = computed(
     () => this.currentUser()?.role === UserRole.AMMINISTRATORE,
   );

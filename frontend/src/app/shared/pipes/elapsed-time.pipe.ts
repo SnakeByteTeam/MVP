@@ -1,49 +1,45 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-const MILLISECONDS_PER_MINUTE = 60_000;
+const SECONDS_PER_MINUTE = 60;
 const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;
-const MILLISECONDS_PER_HOUR = MILLISECONDS_PER_MINUTE * MINUTES_PER_HOUR;
-const MILLISECONDS_PER_DAY = MILLISECONDS_PER_HOUR * HOURS_PER_DAY;
+const SECONDS_PER_HOUR = SECONDS_PER_MINUTE * MINUTES_PER_HOUR;
+const SECONDS_PER_DAY = SECONDS_PER_HOUR * HOURS_PER_DAY;
 
 @Pipe({ name: 'elapsedTime', standalone: true, pure: true })
 export class ElapsedTimePipe implements PipeTransform {
-  transform(sentAt: string, referenceTimestampMs: number = Date.now()): string {
+  transform(sentAt: string): string {
     const parsedTimestamp = Date.parse(sentAt);
     if (Number.isNaN(parsedTimestamp)) {
       return sentAt;
     }
 
-    const deltaMs = referenceTimestampMs - parsedTimestamp;
+    const deltaMs = Date.now() - parsedTimestamp;
     if (deltaMs < 0) {
       return 'tra poco';
     }
 
-    if (deltaMs < MILLISECONDS_PER_DAY) {
-      return this.toElapsedHoursAndMinutes(deltaMs);
+    const deltaSeconds = Math.floor(deltaMs / 1000);
+    if (deltaSeconds < SECONDS_PER_MINUTE) {
+      return `${deltaSeconds}s fa`;
     }
 
-    return this.toElapsedDays(deltaMs);
-  }
-
-  private toElapsedHoursAndMinutes(deltaMs: number): string {
-    const elapsedHours = Math.floor(deltaMs / MILLISECONDS_PER_HOUR);
-    const elapsedMinutes = Math.floor((deltaMs % MILLISECONDS_PER_HOUR) / MILLISECONDS_PER_MINUTE);
-
-    return `${this.padTwoDigits(elapsedHours)}:${this.padTwoDigits(elapsedMinutes)}`;
-  }
-
-  private toElapsedDays(deltaMs: number): string {
-    const elapsedDays = Math.floor(deltaMs / MILLISECONDS_PER_DAY);
-
-    if (elapsedDays === 1) {
-      return '1 giorno fa';
+    const deltaMinutes = Math.floor(deltaSeconds / SECONDS_PER_MINUTE);
+    if (deltaSeconds < SECONDS_PER_HOUR) {
+      return `${deltaMinutes}m fa`;
     }
 
-    return `${elapsedDays} giorni fa`;
-  }
+    const deltaHours = Math.floor(deltaSeconds / SECONDS_PER_HOUR);
+    if (deltaSeconds < SECONDS_PER_DAY) {
+      const remainingMinutes = deltaMinutes % MINUTES_PER_HOUR;
+      if (remainingMinutes > 0) {
+        return `${deltaHours}h ${remainingMinutes}m fa`;
+      }
 
-  private padTwoDigits(value: number): string {
-    return value.toString().padStart(2, '0');
+      return `${deltaHours}h fa`;
+    }
+
+    const deltaDays = Math.floor(deltaSeconds / SECONDS_PER_DAY);
+    return `${deltaDays}g fa`;
   }
 }

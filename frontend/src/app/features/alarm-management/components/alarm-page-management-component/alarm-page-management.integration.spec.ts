@@ -17,7 +17,7 @@ import { AlarmPageManagementComponent } from './alarm-page-management-component'
     standalone: true,
 })
 class MockElapsedTimePipe implements PipeTransform {
-    transform(value: string, referenceTimestampMs?: number): string {
+    transform(value: string): string {
         return `mock-elapsed:${value}`;
     }
 }

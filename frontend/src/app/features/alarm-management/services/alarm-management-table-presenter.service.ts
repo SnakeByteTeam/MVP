@@ -19,8 +19,8 @@ export class AlarmManagementTablePresenterService {
                 location: this.getSafeLocation(alarm.position),
                 status: isOpen ? 'Da gestire' : 'Non da gestire',
                 openedAt: alarm.activationTime,
-                closedAt: this.toShortTime(alarm.resolutionTime),
-                manager: this.getSafeManager(alarm.userUsername),
+                // closedAt: this.toShortTime(alarm.resolutionTime),
+                // manager: this.getSafeManager(alarm.userUsername),
                 isResolving,
                 isActionDisabled: isManaged || isResolving,
                 actionLabel: this.getActionLabel(isResolving, isManaged),
@@ -38,14 +38,14 @@ export class AlarmManagementTablePresenterService {
         return '-';
     }
 
-    private getSafeManager(userUsername: string | null | undefined): string {
-        const normalizedUsername = (userUsername ?? '').trim();
-        if (normalizedUsername.length > 0) {
-            return normalizedUsername;
-        }
+    // private getSafeManager(userUsername: string | null | undefined): string {
+    //     const normalizedUsername = (userUsername ?? '').trim();
+    //     if (normalizedUsername.length > 0) {
+    //         return normalizedUsername;
+    //     }
 
-        return '-';
-    }
+    //     return '-';
+    // }
 
     private getActionLabel(isResolving: boolean, isManaged: boolean): string {
         if (isResolving) {
@@ -76,20 +76,20 @@ export class AlarmManagementTablePresenterService {
         return '-';
     }
 
-    private toShortTime(dateTime: string | null): string {
-        if (dateTime === null) {
-            return '-';
-        }
+    // private toShortTime(dateTime: string | null): string {
+    //     if (dateTime === null) {
+    //         return '-';
+    //     }
 
-        const parsed = Date.parse(dateTime);
-        if (Number.isNaN(parsed)) {
-            return dateTime.slice(0, 5);
-        }
+    //     const parsed = Date.parse(dateTime);
+    //     if (Number.isNaN(parsed)) {
+    //         return dateTime.slice(0, 5);
+    //     }
 
-        return new Date(parsed).toLocaleTimeString('it-IT', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-        });
-    }
+    //     return new Date(parsed).toLocaleTimeString('it-IT', {
+    //         hour: '2-digit',
+    //         minute: '2-digit',
+    //         hour12: false,
+    //     });
+    // }
 }

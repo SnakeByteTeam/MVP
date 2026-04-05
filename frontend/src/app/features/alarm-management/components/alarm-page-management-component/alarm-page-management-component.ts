@@ -28,23 +28,23 @@ export class AlarmPageManagementComponent implements OnInit {
 
   //per OSS no gestore
   private readonly baseColumns: readonly AlarmTableColumn[] = [
-    { id: 'priority', label: 'Priorita' },
+    { id: 'priority', label: 'Priorità' },
     { id: 'name', label: 'Nome' },
     { id: 'device', label: 'Dispositivo' },
     { id: 'location', label: 'Luogo' },
     { id: 'status', label: 'Stato' },
-    { id: 'openedAt', label: 'Scattato da' },
+    { id: 'openedAt', label: 'Scattato' },
     // { id: 'closedAt', label: 'Orario chiusura' },
     { id: 'actions', label: 'Azioni' },
   ];
 
   private readonly adminColumns: readonly AlarmTableColumn[] = [
-    { id: 'priority', label: 'Priorita' },
+    { id: 'priority', label: 'Priorità' },
     { id: 'name', label: 'Nome' },
     { id: 'device', label: 'Dispositivo' },
     { id: 'location', label: 'Luogo' },
     { id: 'status', label: 'Stato' },
-    { id: 'openedAt', label: 'Scattato da' },
+    { id: 'openedAt', label: 'Scattato' },
     // { id: 'closedAt', label: 'Orario chiusura' },
     // { id: 'manager', label: 'Gestore' },
     { id: 'actions', label: 'Azioni' },

@@ -124,8 +124,12 @@
             <datalist id="thresholdBooleanHints">
                 <option value="ON"></option>
                 <option value="OFF"></option>
+                <option value="TRUE"></option>
+                <option value="FALSE"></option>
             </datalist>
-            <p class="mt-1 text-xs text-slate-600">Per soglie booleane usa ON o OFF (esempio: = ON).</p>
+            <p class="mt-1 text-xs text-slate-600">Per sensori di presenza e caduta usa TRUE o FALSE, per le luci usa ON
+                o OFF (esempio: = TRUE, = ON).
+            </p>
 
             @if (form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched) {
             <p role="alert" class="mt-1 text-xs font-medium text-rose-700">La soglia e obbligatoria.</p>

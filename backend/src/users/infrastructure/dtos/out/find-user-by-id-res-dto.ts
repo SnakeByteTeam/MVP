@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateUserResDto {
+export class FindUserByIdResDto {
   @ApiProperty()
   id!: number;
 

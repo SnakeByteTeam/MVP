@@ -3,7 +3,7 @@ import { UsersRepositoryImpl } from './users-repository-impl';
 describe('UsersRepositoryImpl', () => {
   let repo: UsersRepositoryImpl;
   let mockConn: any;
-  
+
   beforeEach(() => {
     mockConn = {
       query: jest.fn(),
@@ -18,56 +18,64 @@ describe('UsersRepositoryImpl', () => {
   it('should call query with correct parameters when creating a user', async () => {
     mockConn.query.mockResolvedValue({
       rowCount: 1,
-      rows: [{
-        id: 1,
-        username: 'username',
-        surname: 'surname',
-        name: 'name',
-        role: 'user',
-      }],
+      rows: [
+        {
+          id: 1,
+          username: 'username',
+          surname: 'surname',
+          name: 'name',
+          role: 'user',
+        },
+      ],
     });
-    
+
     await repo.createUser('username', 'surname', 'name', 'tempPassword');
 
     expect(mockConn.query).toHaveBeenCalledWith(
       ' WITH created_user AS ( INSERT INTO "user" (username, surname, name, temp_password) VALUES ($1, $2, $3, $4) RETURNING * ) ' +
-      ' SELECT u.id, u.username, u.surname, u.name, r.title AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;',
-      ['username', 'surname', 'name', 'tempPassword']
+        ' SELECT u.id, u.username, u.surname, u.name, r.title AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;',
+      ['username', 'surname', 'name', 'tempPassword'],
     );
   });
 
   it('should throw an error if createUser does not return a row', async () => {
     mockConn.query.mockResolvedValue({ rowCount: 0, rows: [] });
 
-    await expect(repo.createUser('username', 'surname', 'name', 'tempPassword')).rejects.toThrow('Create user not found');
+    await expect(
+      repo.createUser('username', 'surname', 'name', 'tempPassword'),
+    ).rejects.toThrow('Create user not found');
   });
 
   it('should call query with correct parameters when updating a user', async () => {
     mockConn.query.mockResolvedValue({
       rowCount: 1,
-      rows: [{
-        id: 1,
-        username: 'username',
-        surname: 'surname',
-        name: 'name',
-        role: 'user',
-      }],
+      rows: [
+        {
+          id: 1,
+          username: 'username',
+          surname: 'surname',
+          name: 'name',
+          role: 'user',
+        },
+      ],
     });
-    
+
     await repo.updateUser(1, 'username', 'surname', 'name');
 
     expect(mockConn.query).toHaveBeenCalledWith(
       ' WITH updated_user AS ( UPDATE "user" SET username = $1, surname = $2, name = $3 WHERE id = $4 RETURNING * )' +
-      ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.title AS role ' +
-      ' FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;',
-      ['username', 'surname', 'name', 1]
+        ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.title AS role ' +
+        ' FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;',
+      ['username', 'surname', 'name', 1],
     );
   });
 
   it('should throw an error if updateUser does not return a row', async () => {
     mockConn.query.mockResolvedValue({ rowCount: 0, rows: [] });
 
-    await expect(repo.updateUser(1, 'username', 'surname', 'name')).rejects.toThrow('Update user not found');
+    await expect(
+      repo.updateUser(1, 'username', 'surname', 'name'),
+    ).rejects.toThrow('Update user not found');
   });
 
   it('should call query with correct parameters when deleting a user', async () => {
@@ -75,7 +83,7 @@ describe('UsersRepositoryImpl', () => {
 
     expect(mockConn.query).toHaveBeenCalledWith(
       'DELETE FROM "user" WHERE id = $1;',
-      [1]
+      [1],
     );
   });
 
@@ -94,7 +102,7 @@ describe('UsersRepositoryImpl', () => {
 
     expect(mockConn.query).toHaveBeenCalledWith(
       ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id ' +
-      'WHERE u.id NOT IN (SELECT user_id FROM ward_user) ',
+        'WHERE u.id NOT IN (SELECT user_id FROM ward_user) ',
     );
   });
 });

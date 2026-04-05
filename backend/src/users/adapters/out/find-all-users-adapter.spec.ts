@@ -5,13 +5,13 @@ describe('FindAllUsersAdapter', () => {
 
   const mockRepo = {
     findAllUsers: jest.fn(),
-  }
+  };
 
   beforeEach(() => {
     mockRepo.findAllUsers.mockReset();
     adapter = new FindAllUsersAdapter(mockRepo);
   });
-  
+
   it('should be defined', () => {
     expect(adapter).toBeDefined();
   });
@@ -30,9 +30,9 @@ describe('FindAllUsersAdapter', () => {
       { id: 2, username: 'user2', surname: 'surname2', name: 'name2' },
     ]);
   });
-  
+
   it('should propagate repository errors', async () => {
-    const error = new Error("Repository error");
+    const error = new Error('Repository error');
     mockRepo.findAllUsers.mockRejectedValue(error);
     await expect(adapter.findAllUsers()).rejects.toThrow(error);
   });

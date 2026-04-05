@@ -14,15 +14,15 @@ describe('UsersService', () => {
 
   const mockCreateUser = {
     createUser: jest.fn(),
-  }
+  };
 
   const mockFindAllUsers = {
     findAllUsers: jest.fn(),
-  }
-  
+  };
+
   const mockFindAllAvailableUsers = {
     findAllAvailableUsers: jest.fn(),
-  }
+  };
 
   const mockUpdateUser = {
     updateUser: jest.fn(),
@@ -50,7 +50,10 @@ describe('UsersService', () => {
         UsersService,
         { provide: CREATE_USER_PORT, useValue: mockCreateUser },
         { provide: FIND_ALL_USERS_PORT, useValue: mockFindAllUsers },
-        { provide: FIND_ALL_AVAILABLE_USERS_PORT, useValue: mockFindAllAvailableUsers },
+        {
+          provide: FIND_ALL_AVAILABLE_USERS_PORT,
+          useValue: mockFindAllAvailableUsers,
+        },
         { provide: UPDATE_USER_PORT, useValue: mockUpdateUser },
         { provide: DELETE_USER_PORT, useValue: mockDeleteUser },
         { provide: GENERATE_PASSWORD_PORT, useValue: mockGeneratePassword },
@@ -68,7 +71,7 @@ describe('UsersService', () => {
   });
 
   it('should call createUserPort.createUser with correct args', async () => {
-    const cmd = { username: "username", surname: "surname", name: "name" };
+    const cmd = { username: 'username', surname: 'surname', name: 'name' };
     mockGeneratePassword.generatePassword.mockReturnValue('tempPassword');
     mockHashPassword.hashPassword.mockReturnValue('hashedTempPassword');
     mockCreateUser.createUser.mockResolvedValue({
@@ -101,7 +104,12 @@ describe('UsersService', () => {
   });
 
   it('should call updateUserPort.updateUser with correct args', async () => {
-    const cmd = { id: 1, username: "username", surname: "surname", name: "name" };
+    const cmd = {
+      id: 1,
+      username: 'username',
+      surname: 'surname',
+      name: 'name',
+    };
     await service.updateUser(cmd);
     expect(mockUpdateUser.updateUser).toHaveBeenCalledWith(cmd);
   });

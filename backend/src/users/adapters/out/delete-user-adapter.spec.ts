@@ -12,7 +12,7 @@ describe('DeleteUserAdapter', () => {
     mockRepo.deleteUser.mockReset();
     adapter = new DeleteUserAdapter(mockRepo);
   });
-  
+
   it('should be defined', () => {
     expect(adapter).toBeDefined();
   });
@@ -20,15 +20,15 @@ describe('DeleteUserAdapter', () => {
   it('should call repository.deleteUser with correct args', async () => {
     const cmd = new DeleteUserCmd(1);
     mockRepo.deleteUser.mockResolvedValue(undefined);
-    
+
     await adapter.deleteUser(cmd);
-    
+
     expect(mockRepo.deleteUser).toHaveBeenCalledWith(1);
   });
 
   it('should propagate repository errors', async () => {
     const cmd = new DeleteUserCmd(1);
-    const error = new Error("Repository error");
+    const error = new Error('Repository error');
     mockRepo.deleteUser.mockRejectedValue(error);
 
     await expect(adapter.deleteUser(cmd)).rejects.toThrow(error);

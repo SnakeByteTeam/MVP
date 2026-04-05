@@ -9,7 +9,7 @@
 <div class="flex h-[87vh] overflow-hidden">
 
     <app-sidebar class="block h-full" [navItems]="navItems" [isCollapsed]="isCollapsed"
-        [isProfileMode]="isProfilePanelOpen" [isLogoutMode]="isLogoutPanelOpen" [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
+        [isProfileMode]="isProfilePanelOpen" [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
         (collapsed)="toggleSidebar()" (navItemSelected)="closeProfilePanel(); isCollapsed = true"
         [canOpenProfile]="canOpenProfilePanel()" (profileClicked)="toggleProfilePanel()" 
         (logoutClicked)="logout()"
@@ -47,12 +47,18 @@
                     </p>
                     }
                 </div>
-
-                <button type="button"
-                    class="rounded-md border border-amber-300 bg-amber-300 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-amber-200"
-                    (click)="goToVimarLink()">
-                    Vai a MyVimar
-                </button>
+                <div class="flex flex-col gap-2">
+                    <button type="button"
+                        class="rounded-md border border-amber-300 bg-amber-300 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-amber-200"
+                        (click)="goToVimarLink()">
+                        Vai a MyVimar
+                    </button>
+                    <button type="button" aria-label="Esci dal profilo" (click)="logout()"
+                        class="flex items-center gap-3 rounded-md border border-red-100 bg-red-50 text-red-400 transition hover:border-red-200 hover:bg-red-100 hover:text-red-600 px-3 py-2 text-m font-medium">
+                        <img src="logout.png" alt="" class="topbar-logo" class="topbar-logo w-6 h-6">
+                        Esci
+                    </button>
+                </div>
             </div>
         </section>
         }

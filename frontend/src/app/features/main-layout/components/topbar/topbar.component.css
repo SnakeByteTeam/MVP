@@ -75,21 +75,9 @@
 	border-color: rgba(251, 191, 36, 0.85);
 }
 
-.topbar-button-logout {
-	color: #1f2937;
-	background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
-	border-color: rgba(217, 119, 6, 0.65);
-	box-shadow: 0 8px 14px rgba(245, 158, 11, 0.18);
-}
-
-.topbar-button-logout:hover {
-	background: linear-gradient(120deg, #fde68a 0%, #fcd34d 100%);
-}
-
 .topbar-profile {
 	display: flex;
 	align-items: center;
-	gap: 0.68rem;
 	border: 1px solid rgba(217, 119, 6, 0.55);
 	border-radius: 0.92rem;
 	background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
@@ -136,7 +124,6 @@
 	width: 2.25rem;
 	height: 2.25rem;
 	border-radius: 9999px;
-	border: 1px solid rgba(217, 119, 6, 0.72);
 	object-fit: cover;
 }
 
@@ -194,10 +181,6 @@
 	}
 
 	.topbar-profile--desktop {
-		display: none;
-	}
-
-	.topbar-button-logout {
 		display: none;
 	}
 }

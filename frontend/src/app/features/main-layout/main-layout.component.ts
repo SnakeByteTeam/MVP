@@ -33,7 +33,6 @@ export class MainLayoutComponent implements OnInit {
     public isCollapsed: boolean = true;
     public navItems!: NavItem[];
     public isProfilePanelOpen = false;
-    public isLogoutPanelOpen = false;
     public isVimarStatusLoading = false;
     public vimarStatusError = '';
     public vimarAccount: MyVimarAccount | null = null;

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { MainLayoutComponent } from './main-layout.component';
 import { InternalAuthService } from '../../core/services/internal-auth.service';
 import { NavService } from './services/nav.service';
@@ -10,6 +11,9 @@ import { provideRouter, Router } from '@angular/router';
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
 
+@Component({ template: '', standalone: true })
+class DummyRouteComponent {}
+
 
 describe('MainLayoutComponent', () => {
     let component: MainLayoutComponent;
@@ -17,6 +21,15 @@ describe('MainLayoutComponent', () => {
 
     const mockAuthService = {
         getRole: vi.fn(),
+        getCurrentUser$: vi.fn().mockReturnValue(
+            of({
+                userId: '1',
+                username: 'admin',
+                role: UserRole.AMMINISTRATORE,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        ),
         logout: vi.fn(),
         logoutFromBackend: vi.fn().mockReturnValue(of(void 0)),
     };
@@ -47,7 +60,10 @@ describe('MainLayoutComponent', () => {
             { provide: AlarmStateService, useValue: mockAlarmService },
             { provide: VIMAR_CLOUD_API_SERVICE, useValue: mockMyVimarService },
             { provide: AlarmManagementRefreshService, useValue: mockAlarmManagementRefreshService },
-            provideRouter([])
+            provideRouter([
+                { path: 'auth/login', component: DummyRouteComponent },
+                { path: 'vimar-link', component: DummyRouteComponent },
+            ])
         ]
         }).compileComponents();
 
@@ -56,10 +72,29 @@ describe('MainLayoutComponent', () => {
     });
 
     it('carica i NavItem con il ruolo corretto', () => {
-        mockAuthService.getRole.mockReturnValue(UserRole.OPERATORE_SANITARIO);
+        mockAuthService.getCurrentUser$.mockReturnValue(
+            of({
+                userId: '2',
+                username: 'operator',
+                role: UserRole.OPERATORE_SANITARIO,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        );
         component.ngOnInit();
         expect(mockNavService.getNavItems).toHaveBeenCalledWith(UserRole.OPERATORE_SANITARIO);
         expect(component.navItems.length).toBeGreaterThan(0);
+    });
+
+    it('reindirizza al login quando non esiste sessione utente', () => {
+        mockAuthService.getCurrentUser$.mockReturnValue(of(null));
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+        component.ngOnInit();
+
+        expect(component.navItems).toEqual([]);
+        expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
     });
 
     it('inverte correttamente isCollapsed con il segnale ricevuto', () => {

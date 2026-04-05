@@ -34,6 +34,7 @@ export class MainLayoutComponent implements OnInit {
     public isCollapsed: boolean = true;
     public navItems!: NavItem[];
     public isProfilePanelOpen = false;
+    public isAdmin = false;
     public isVimarStatusLoading = false;
     public vimarStatusError = '';
     public vimarAccount: MyVimarAccount | null = null;
@@ -45,6 +46,7 @@ export class MainLayoutComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly myVimarService = inject(VIMAR_CLOUD_API_SERVICE, { optional: true }) as IVimarCloudApiService | null;
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
+    private readonly cdr = inject(ChangeDetectorRef);
 
     //public currentUser$ : Observable<UserSession | null> = this.internalAuthService.getCurrentUser$();
 
@@ -87,9 +89,10 @@ export class MainLayoutComponent implements OnInit {
     }
 
     public toggleProfilePanel(): void {
-        if (!this.canOpenProfilePanel()) {
-            this.isProfilePanelOpen = false;
-            return;
+        if (this.canOpenProfilePanel()) {
+            this.isAdmin = true;
+        } else {
+            this.isAdmin = false;
         }
 
         this.isProfilePanelOpen = !this.isProfilePanelOpen;
@@ -137,21 +140,25 @@ export class MainLayoutComponent implements OnInit {
             this.vimarAccount = { email: '', isLinked: false };
             this.vimarStatusError = 'Servizio MyVimar non disponibile in questa sezione.';
             this.isVimarStatusLoading = false;
+            this.cdr.markForCheck();
             return;
         }
 
         this.isVimarStatusLoading = true;
         this.vimarStatusError = '';
+        this.cdr.markForCheck();
 
         this.myVimarService.getLinkedAccount().subscribe({
             next: (account) => {
                 this.vimarAccount = account;
                 this.isVimarStatusLoading = false;
+                this.cdr.markForCheck();
             },
             error: () => {
                 this.vimarAccount = { email: '', isLinked: false };
                 this.vimarStatusError = 'Impossibile recuperare lo stato del collegamento MyVimar.';
                 this.isVimarStatusLoading = false;
+                this.cdr.markForCheck();
             }
         });
     }

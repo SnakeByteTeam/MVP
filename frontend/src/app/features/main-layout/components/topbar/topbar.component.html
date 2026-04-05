@@ -27,7 +27,8 @@
     </div>
 
     <div class="topbar-actions">
-        <button type="button" class="topbar-button topbar-button-neutral notification-btn" aria-label="Visualizza notifiche">
+        <button type="button" class="topbar-button topbar-button-neutral notification-btn" aria-label="Visualizza notifiche"
+            (click)="onNotificationClick()" [class.notification-active]="isNotificationActive">
             <img src="notification.png" class="topbar-avatar" alt="">
         </button>
 
@@ -35,12 +36,9 @@
             type="button"
             aria-label="Apri profilo"
             (click)="onProfileClick()"
-            [disabled]="!canOpenProfile"
-            [attr.title]="canOpenProfile ? 'Apri pannello profilo' : 'Solo amministratore'"
             class="topbar-profile topbar-profile--desktop"
-            [class.profile-active]="isProfileActive && canOpenProfile"
-            [class.bg-amber-300]="isProfileActive && canOpenProfile"
-            [class.profile-disabled]="!canOpenProfile"
+            [class.profile-active]="isProfileActive"
+            [class.bg-amber-300]="isProfileActive"
         >
             <img src="user-avatar.png" class="topbar-avatar" alt="">
             <div class="topbar-user-meta">

@@ -1,4 +1,4 @@
-export class GetAllAlarmEventsByUserIdCmd {
+export class GetAllUnmanagedAlarmEventsByUserIdCmd {
   constructor(
     public readonly id: number,
     public limit: number = 5,

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AlarmPriority } from '../../../domain/models/alarm-priority.enum';
 
-export class GetAllAlarmEventsByUserIdResDto {
+export class GetAllManagedAlarmEventsByUserIdResDto {
   @ApiProperty()
   id!: string;
 

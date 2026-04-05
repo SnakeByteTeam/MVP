@@ -30,7 +30,7 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
           alarmEvent.activation_time,
           alarmEvent.resolution_time,
           alarmEvent.user_id,
-          alarmEvent.user_username
+          alarmEvent.user_username,
         ),
     );
   }

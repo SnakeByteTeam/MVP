@@ -1,0 +1,79 @@
+@if (loadError) {
+  <p class="care-alert" role="alert">{{ loadError }}</p>
+}
+
+@if (roomGroups$ | async; as roomGroups) {
+  @if (roomGroups.length === 0) {
+    <p class="care-loading">Nessun endpoint scrivibile disponibile per l'appartamento selezionato.</p>
+  } @else {
+    <div class="endpoint-table__groups">
+      @for (group of roomGroups; track trackByGroup($index, group)) {
+        <section class="endpoint-table__group care-panel">
+          <header class="endpoint-table__room-header">
+            <p class="endpoint-table__room-eyebrow">Stanza</p>
+            <h3>{{ group.roomName }}</h3>
+          </header>
+
+          <div class="endpoint-table__wrapper">
+            <table class="endpoint-table__table" aria-label="Tabella endpoint {{ group.roomName }}">
+              <thead>
+                <tr>
+                  <th scope="col">Dispositivo</th>
+                  <th scope="col">Tipo</th>
+                  <th scope="col">Endpoint</th>
+                  <th scope="col">Valore</th>
+                  <th scope="col">Azione</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of group.rows; track trackByRow($index, row)) {
+                  <tr>
+                    <td>{{ row.deviceName }}</td>
+                    <td>{{ getTypeLabel(row.deviceType) }}</td>
+                    <td>{{ row.datapointName }}</td>
+                    <td>
+                      <select
+                        class="care-select endpoint-table__select"
+                        [value]="getSelectedValue(row)"
+                        [disabled]="isRowExecuting(row)"
+                        (change)="onSelectionChange(row, $any($event.target).value)"
+                      >
+                        @for (enumValue of row.enumValues; track enumValue) {
+                          <option [value]="enumValue">{{ enumValue }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td>
+                      <div class="endpoint-table__action-wrap">
+                        <button
+                          type="button"
+                          class="endpoint-table__write-button"
+                          [disabled]="isRowExecuting(row)"
+                          (click)="onWriteRow(row)"
+                        >
+                          Scrivi
+                        </button>
+
+                        @if (getRowFeedback(row); as feedback) {
+                          <span
+                            class="endpoint-table__feedback-overlay"
+                            [class.endpoint-table__feedback-overlay--success]="feedback.type === 'success'"
+                            [class.endpoint-table__feedback-overlay--error]="feedback.type === 'error'"
+                          >
+                            {{ feedback.message }}
+                          </span>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    </div>
+  }
+} @else {
+  <p class="care-loading">Caricamento endpoint...</p>
+}

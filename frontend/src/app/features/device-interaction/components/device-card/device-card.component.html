@@ -1,7 +1,52 @@
-<article class="device-card">
-  <header>
-    <h3>{{ device().name }}</h3>
-    <p>{{ getTypeLabel(device().type) }} · {{ device().status }}</p>
+<article class="device-card care-panel">
+  <header class="device-card__header">
+    <div>
+      <h3>{{ device().name }}</h3>
+      <p class="device-card__meta">{{ getTypeLabel(device().type) }}</p>
+    </div>
+    <span
+      class="device-card__status"
+      [class.device-card__status--online]="device().status === 'ONLINE'"
+      [class.device-card__status--offline]="device().status !== 'ONLINE'"
+    >
+      {{ device().status }}
+    </span>
   </header>
-  <p class="device-card__id">ID stanza: {{ roomId() }} · ID device: {{ device().id }}</p>
+
+  @if (error()) {
+    <p class="device-card__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (hasWritableDatapoints()) {
+    <div class="device-card__writes">
+      @for (datapoint of getWritableEnumDatapoints(); track datapoint.id) {
+        <div class="device-card__write-row care-panel">
+          <label [for]="'dp-' + device().id + '-' + datapoint.id">{{ datapoint.name }}</label>
+          <div class="device-card__write-controls">
+            <select
+              [id]="'dp-' + device().id + '-' + datapoint.id"
+              class="care-select"
+              [disabled]="isExecuting()"
+              [value]="getSelectedValue(datapoint.id, datapoint.enum)"
+              (change)="onSelectionChange(datapoint.id, $any($event.target).value)"
+            >
+              @for (enumValue of datapoint.enum; track enumValue) {
+                <option [value]="enumValue">{{ enumValue }}</option>
+              }
+            </select>
+            <button
+              type="button"
+              class="care-button"
+              [disabled]="isExecuting()"
+              (click)="onWriteDatapoint(datapoint.id, datapoint.enum)"
+            >
+              Scrivi
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="device-card__no-write">Nessun datapoint scrivibile su questo dispositivo.</p>
+  }
 </article>

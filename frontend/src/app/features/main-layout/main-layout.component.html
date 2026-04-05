@@ -1,81 +1,65 @@
 <!-- temporaneo per far visualizzare la topbar anche senza utente vero 
  TO DELETE-->
-<app-topbar
-    class=" block h-[13vh]"
-    [user]="currentUser"
-    [isProfileActive]="isProfilePanelOpen"
-    (profileClicked)="toggleProfilePanel()"
-    (logoutClicked)="logout()">
+<app-topbar class="block h-[13vh] relative z-60" [user]="currentUser" [isProfileActive]="isProfilePanelOpen"
+    (hamburgerClicked)="toggleSidebar()" (profileClicked)="toggleProfilePanel()" (logoutClicked)="logout()">
 </app-topbar>
 
 <app-notification-badge-component [count]="(unreadNotificationsCount$ | async) ?? 0"></app-notification-badge-component>
 
-<!--
-CORRETTO
-
-<app-topbar
-  *ngIf="currentUser$ | async as user"
-  [user]="user"
-  (logoutClicked)="logout()">
-</app-topbar>
--->
-
 <div class="flex h-[87vh] overflow-hidden">
-    
-    <app-sidebar
-        class=" block h-full"
-        [navItems]="navItems"
-        [isCollapsed]="isCollapsed"
-        [isProfileMode]="isProfilePanelOpen"
-        [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
-        (collapsed)="toggleSidebar()"
-        (navItemSelected)="closeProfilePanel()">
+
+    <app-sidebar class="block h-full" [navItems]="navItems" [isCollapsed]="isCollapsed"
+        [isProfileMode]="isProfilePanelOpen" [isLogoutMode]="isLogoutPanelOpen" [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
+        (collapsed)="toggleSidebar()" (navItemSelected)="closeProfilePanel(); isCollapsed = true"
+        [canOpenProfile]="canOpenProfilePanel()" (profileClicked)="toggleProfilePanel()" 
+        (logoutClicked)="logout()"
+        (navItemSelected)="closeProfilePanel(); isCollapsed = true">
     </app-sidebar>
 
-    <main class="flex-1 overflow-y-auto p-6 bg-slate-50" (click)="closeProfilePanel()">
+    <main class="flex-1 min-w-0 max-w-full overflow-y-auto p-6 bg-slate-50" (click)="closeProfilePanel()" (keydown.escape)="closeProfilePanel()">
         @if (isProfilePanelOpen) {
-            <section class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm" (click)="$event.stopPropagation()">
-                <div class="flex items-start justify-between gap-4">
-                    <div>
-                        <h2 class="text-base font-semibold text-slate-800">Profilo {{ currentUser.firstName }} {{ currentUser.lastName }}</h2>
-                        <p class="mt-1 text-sm text-slate-600">Username: {{ currentUser.username }}</p>
-                        <p class="mt-3 text-sm font-medium text-slate-700">Stato collegamento MyVimar</p>
+        <section class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm"
+            (click)="$event.stopPropagation()" (keydown.escape)="$event.stopPropagation()">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-800">Profilo {{ currentUser.firstName }} {{
+                        currentUser.lastName }}</h2>
+                    <p class="mt-1 text-sm text-slate-600">Username: {{ currentUser.username }}</p>
+                    <p class="mt-3 text-sm font-medium text-slate-700">Stato collegamento MyVimar</p>
 
-                        @if (isVimarStatusLoading) {
-                            <p class="mt-1 text-sm text-slate-500">Caricamento stato account...</p>
-                        }
+                    @if (isVimarStatusLoading) {
+                    <p class="mt-1 text-sm text-slate-500">Caricamento stato account...</p>
+                    }
 
-                        @if (!isVimarStatusLoading && vimarStatusError) {
-                            <p class="mt-1 text-sm text-red-600">{{ vimarStatusError }}</p>
-                        }
+                    @if (!isVimarStatusLoading && vimarStatusError) {
+                    <p class="mt-1 text-sm text-red-600">{{ vimarStatusError }}</p>
+                    }
 
-                        @if (!isVimarStatusLoading && !vimarStatusError && vimarAccount?.isLinked) {
-                            <p class="mt-1 text-sm text-emerald-700">
-                                Account collegato{{ vimarAccount?.email ? ': ' + vimarAccount?.email : '' }}
-                            </p>
-                        }
+                    @if (!isVimarStatusLoading && !vimarStatusError && vimarAccount?.isLinked) {
+                    <p class="mt-1 text-sm text-emerald-700">
+                        Account collegato{{ vimarAccount?.email ? ': ' + vimarAccount?.email : '' }}
+                    </p>
+                    }
 
-                        @if (!isVimarStatusLoading && !vimarStatusError && !vimarAccount?.isLinked) {
-                            <p class="mt-1 text-sm text-amber-700">
-                                Account non ancora collegato.
-                            </p>
-                        }
-                    </div>
-
-                    <button
-                        type="button"
-                        class="rounded-md border border-amber-300 bg-amber-300 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-amber-200"
-                        (click)="goToVimarLink()"
-                    >
-                        Vai a MyVimar
-                    </button>
+                    @if (!isVimarStatusLoading && !vimarStatusError && !vimarAccount?.isLinked) {
+                    <p class="mt-1 text-sm text-amber-700">
+                        Account non ancora collegato.
+                    </p>
+                    }
                 </div>
-            </section>
+
+                <button type="button"
+                    class="rounded-md border border-amber-300 bg-amber-300 px-3 py-2 text-sm font-medium text-slate-900 hover:bg-amber-200"
+                    (click)="goToVimarLink()">
+                    Vai a MyVimar
+                </button>
+            </div>
+        </section>
         }
 
         @if (!isProfilePanelOpen) {
-            <router-outlet></router-outlet>
+        <router-outlet></router-outlet>
         }
     </main>
-    
+
 </div>

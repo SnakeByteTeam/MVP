@@ -1,6 +1,12 @@
 <section class="topbar-shell">
     <div class="topbar-brand">
-        <img src="logo.png" alt="Logo" class="topbar-logo">
+        <button
+            type="button"
+            class="hamburger-btn"
+            aria-label="Apri menu"
+            (click)="hamburgerClicked.emit()"
+        >☰</button>
+        <img src="logo.png" alt="" class="topbar-logo">
         <div>
             <h1 class="topbar-title">View4Life</h1>
             <nav class="topbar-breadcrumb">Breadcrumb?</nav>
@@ -8,8 +14,8 @@
     </div>
 
     <div class="topbar-actions">
-        <button type="button" class="topbar-button topbar-button-neutral">
-            Notifiche
+        <button type="button" class="topbar-button topbar-button-neutral notification-btn" aria-label="Visualizza notifiche">
+            <img src="notification.png" class="topbar-avatar" alt="">
         </button>
 
         <button
@@ -18,12 +24,12 @@
             (click)="onProfileClick()"
             [disabled]="!canOpenProfile"
             [attr.title]="canOpenProfile ? 'Apri pannello profilo' : 'Solo amministratore'"
-            class="topbar-profile"
+            class="topbar-profile topbar-profile--desktop"
             [class.profile-active]="isProfileActive && canOpenProfile"
             [class.bg-amber-300]="isProfileActive && canOpenProfile"
             [class.profile-disabled]="!canOpenProfile"
         >
-            <img src="user-avatar.png" class="topbar-avatar" alt="Avatar utente">
+            <img src="user-avatar.png" class="topbar-avatar" alt="">
             <div class="topbar-user-meta">
                 <p>{{user.firstName}}</p>
                 <p>{{user.lastName}}</p>
@@ -32,10 +38,11 @@
 
         <button
             type="button"
+            aria-label="Esci dal profilo"
             (click)="logoutClicked.emit()"
             class="topbar-button topbar-button-logout"
         >
-            Logout
+            Esci
         </button>
     </div>
 </section>

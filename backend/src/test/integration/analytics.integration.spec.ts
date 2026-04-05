@@ -76,7 +76,12 @@ describe('Analytics Integration Test', () => {
     }).compile();
 
     app = module.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
   });
 
@@ -86,8 +91,7 @@ describe('Analytics Integration Test', () => {
 
   it('should retrieve all analytics given the plantId', async () => {
     const response = await request(app.getHttpServer() as http.Server)
-      .get('/analytics')
-      .query({ plantId: PLANT_ID })
+      .get(`/analytics/${PLANT_ID}`)
       .expect(200);
 
     expect(mockStrategy.execute).toHaveBeenCalledWith(
@@ -136,8 +140,7 @@ describe('Analytics Integration Test', () => {
     await app.init();
 
     const response = await request(app.getHttpServer() as http.Server)
-      .get('/analytics')
-      .query({ plantId: PLANT_ID })
+      .get(`/analytics/${PLANT_ID}`)
       .expect(200);
 
     expect(response.body).toHaveLength(2);
@@ -169,14 +172,13 @@ describe('Analytics Integration Test', () => {
     await app.init();
 
     await request(app.getHttpServer() as http.Server)
-      .get('/analytics')
-      .query({ plantId: PLANT_ID })
+      .get(`/analytics/${PLANT_ID}`)
       .expect(500);
   });
 
-  it('should return 400 when plantId query param is missing', async () => {
+  it('should return 404 when plantId query param is missing', async () => {
     await request(app.getHttpServer() as http.Server)
       .get('/analytics')
-      .expect(400);
+      .expect(404);
   });
 });

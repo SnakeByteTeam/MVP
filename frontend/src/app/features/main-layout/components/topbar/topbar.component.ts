@@ -12,6 +12,7 @@ export class TopbarComponent {
     @Input() isProfileActive = false;
     @Output() profileClicked = new EventEmitter<void>();
     @Output() logoutClicked = new EventEmitter<void>();
+    @Output() hamburgerClicked = new EventEmitter<void>();
 
     public onProfileClick(): void {
         if (!this.canOpenProfile) {

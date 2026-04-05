@@ -14,14 +14,14 @@ services:
       - ./backend/db/init:/docker-entrypoint-initdb.d
     env_file: 
       - .env
+    networks:
+      - backend-net
 
   server: 
     build: 
       context: ./backend
       dockerfile: Dockerfile
     image: backend
-    ports: 
-      - 3000:3000
     volumes: 
       - ./backend:/app
       - /app/node_modules
@@ -30,18 +30,9 @@ services:
       - database
     env_file: 
       - .env
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: frontend
-    ports:
-      - 4200:4200
-    volumes:
-      - ./frontend/src:/app/src
-    depends_on:
-      - server
+    networks:
+      - backend-net
+      - frontend-net
   
   nginx:
     image: nginx:latest
@@ -51,8 +42,15 @@ services:
       - 80:80
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./frontend/dist/frontend/browser:/usr/share/nginx/html
     depends_on:
       - server
+    networks:
+      - frontend-net
+
+networks:
+  backend-net:
+  frontend-net:
 
 volumes: 
   postgres_data:

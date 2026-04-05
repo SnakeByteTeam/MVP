@@ -1,11 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-describe('Shared Chart Tests Loader', () => {
-  it('should be correctly imported', () => {
-    expect(true).toBe(true);
-  });
-});
 
 export function runSharedChartTests(componentType: any) {
     let component: any;

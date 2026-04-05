@@ -51,6 +51,16 @@ describe('MainLayoutComponent', () => {
     beforeEach(async () => {
         vi.clearAllMocks();
         mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
+        mockAuthService.getCurrentUser$.mockReturnValue(
+            of({
+                userId: '1',
+                username: 'admin',
+                role: UserRole.AMMINISTRATORE,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        );
+        mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: '', isLinked: false }));
 
         await TestBed.configureTestingModule({
         imports: [MainLayoutComponent],
@@ -95,6 +105,23 @@ describe('MainLayoutComponent', () => {
 
         expect(component.navItems).toEqual([]);
         expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
+    });
+
+    it('mostra avviso topbar per admin senza account MyVimar collegato', () => {
+        mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: '', isLinked: false }));
+
+        component.ngOnInit();
+
+        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalledTimes(1);
+        expect(component.showVimarAssociationWarning).toBe(true);
+    });
+
+    it('non mostra avviso topbar quando account MyVimar risulta collegato', () => {
+        mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: 'admin@test.it', isLinked: true }));
+
+        component.ngOnInit();
+
+        expect(component.showVimarAssociationWarning).toBe(false);
     });
 
     it('inverte correttamente isCollapsed con il segnale ricevuto', () => {

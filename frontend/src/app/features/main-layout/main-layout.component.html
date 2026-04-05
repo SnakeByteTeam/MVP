@@ -1,6 +1,7 @@
 <!-- temporaneo per far visualizzare la topbar anche senza utente vero 
  TO DELETE-->
 <app-topbar class="block h-[13vh] relative z-60" [user]="currentUser" [isProfileActive]="isProfilePanelOpen"
+    [showVimarWarning]="showVimarAssociationWarning"
     (hamburgerClicked)="toggleSidebar()" (profileClicked)="toggleProfilePanel()" (logoutClicked)="logout()">
 </app-topbar>
 

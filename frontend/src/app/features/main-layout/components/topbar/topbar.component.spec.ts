@@ -85,4 +85,13 @@ describe('TopbarComponent', () => {
     const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
     expect(profileButton.classList.contains('bg-amber-300')).toBe(true);
   });
+
+  it('mostra avviso MyVimar quando richiesto', () => {
+    fixture.componentRef.setInput('showVimarWarning', true);
+    fixture.detectChanges();
+
+    const warning = fixture.nativeElement.querySelector('.topbar-vimar-warning') as HTMLElement;
+    expect(warning).toBeTruthy();
+    expect(warning.textContent?.toLowerCase()).toContain('account da associare a myvimar');
+  });
 });

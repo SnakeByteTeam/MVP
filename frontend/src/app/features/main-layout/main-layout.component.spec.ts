@@ -4,11 +4,11 @@ import { InternalAuthService } from '../../core/services/internal-auth.service';
 import { NavService } from './services/nav.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../core/models/user-role.enum';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { firstValueFrom } from 'rxjs'; 
 import { provideRouter, Router } from '@angular/router'; 
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
+import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
 
 
 describe('MainLayoutComponent', () => {
@@ -30,6 +30,10 @@ describe('MainLayoutComponent', () => {
     const mockMyVimarService = {
         getLinkedAccount: vi.fn().mockReturnValue(of({ email: '', isLinked: false })),
     };
+    const mockAlarmManagementRefreshService = {
+        requestRefresh: vi.fn(),
+        getRefreshRequested$: vi.fn(),
+    };
     
     beforeEach(async () => {
         vi.clearAllMocks();
@@ -42,6 +46,7 @@ describe('MainLayoutComponent', () => {
             { provide: NavService, useValue: mockNavService },
             { provide: AlarmStateService, useValue: mockAlarmService },
             { provide: VIMAR_CLOUD_API_SERVICE, useValue: mockMyVimarService },
+            { provide: AlarmManagementRefreshService, useValue: mockAlarmManagementRefreshService },
             provideRouter([])
         ]
         }).compileComponents();
@@ -58,13 +63,13 @@ describe('MainLayoutComponent', () => {
     });
 
     it('inverte correttamente isCollapsed con il segnale ricevuto', () => {
-        expect(component.isCollapsed).toBe(false);
-        
-        component.toggleSidebar();
         expect(component.isCollapsed).toBe(true);
         
         component.toggleSidebar();
         expect(component.isCollapsed).toBe(false);
+        
+        component.toggleSidebar();
+        expect(component.isCollapsed).toBe(true);
     });
 
     it('invoca correttamente logout', () => {
@@ -101,6 +106,15 @@ describe('MainLayoutComponent', () => {
         component.goToVimarLink();
 
         expect(navigateSpy).toHaveBeenCalledWith(['/vimar-link']);
+    });
+
+    it('richiede refresh allarmi attivi quando si clicca la stessa voce menu della pagina corrente', () => {
+        const router = TestBed.inject(Router);
+        vi.spyOn(router, 'url', 'get').mockReturnValue('/alarms/alarm-management');
+
+        component.onNavItemSelected('alarms/alarm-management');
+
+        expect(mockAlarmManagementRefreshService.requestRefresh).toHaveBeenCalledTimes(1);
     });
 
 

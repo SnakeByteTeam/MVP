@@ -51,12 +51,13 @@ describe('SidebarComponent', () => {
 
   it('emette navItemSelected quando si clicca una voce menu', () => {
     const spy = vi.spyOn(component.navItemSelected, 'emit');
-    component.navItems = [{ label: 'test', route: 'path', icon: '' }];
+    component.navItems = [{ label: 'test', route: 'alarms/alarm-management', icon: '' }];
     fixture.detectChanges();
 
     const link = fixture.nativeElement.querySelector('a') as HTMLAnchorElement;
     link.dispatchEvent(new MouseEvent('click', { button: 1, bubbles: true }));
 
     expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith('alarms/alarm-management');
   });
 });

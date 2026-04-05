@@ -1,5 +1,4 @@
 .endpoint-table__groups {
-  display: grid;
   gap: 0.9rem;
 }
 
@@ -41,11 +40,12 @@
 .endpoint-table__wrapper {
   overflow-x: auto;
   padding-top: 0.35rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 .endpoint-table__table {
   width: 100%;
-  min-width: 50rem;
+  min-width: 30rem;
   border-collapse: collapse;
 }
 
@@ -132,7 +132,7 @@
 }
 
 @media (max-width: 960px) {
-  .endpoint-table__table {
-    min-width: 42rem;
-  }
+    .endpoint-table__table {
+        min-width: 32rem;
+    }
 }

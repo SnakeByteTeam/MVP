@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS ward;
 DROP TABLE IF EXISTS role;
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
+SET TIME ZONE 'UTC';
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -79,6 +80,13 @@ SELECT w.id, u.id FROM (VALUES
 ) AS a(username, ward_name)
 JOIN ward w ON w.name = a.ward_name
 JOIN "user" u ON u.username = a.username;
+
+-- Assegnazioni aggiuntive per test allarmi su test-ward (endpoint by-user).
+INSERT INTO ward_user (ward_id, user_id)
+SELECT w.id, u.id
+FROM ward w
+JOIN "user" u ON u.username IN ('test', 'mrossi')
+WHERE w.name = 'test-ward';
 
 CREATE UNLOGGED TABLE token_cache (
     access_token  TEXT        NOT NULL,
@@ -233,7 +241,7 @@ INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
         ]
       }
     ],
-    "wardId": null
+    "wardId": 1
   }',
   (SELECT id FROM ward WHERE name = 'test-ward')
 );
@@ -656,42 +664,94 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     is_armed           BOOLEAN      NOT NULL DEFAULT TRUE,
     device_id          VARCHAR(255) NOT NULL,
     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT chk_armed_arming CHECK (
         NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
              CURRENT_TIME BETWEEN arming_time AND dearming_time)
     )
+
 );
 
 INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-('rule-001', 'Temperatura critica',    '> ', '30',    1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-002', 'Luce accesa di notte',   '= ', 'On',    3, '22:00', '06:00', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
-('rule-003', 'Caduta rilevata',        '= ', 'True',  1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
-('rule-004', 'Temperatura alta',       '> ', '25',    2, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
-('rule-005', 'Caduta rilevata',        '= ', 'True',  1, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000005-SFE_State_ManDown',      'BB0022CC0022');
+('rule-001', 'Temperatura critica',    '>', '30',    1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
+('rule-002', 'Luce accesa di notte',   '=', 'On',    3, '22:00', '06:00', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
+('rule-003', 'Caduta rilevata',        '=', 'True',  1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
+('rule-004', 'Temperatura alta',       '>', '25',    2, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
+('rule-005', 'Caduta rilevata',        '=', 'True',  1, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000005-SFE_State_ManDown',      'BB0022CC0022');
+
+-- Regole aggiuntive per test UI/paginazione/stati su allarmi attivi.
+INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
+('rule-006', 'Temp soggiorno warning',      '>',  '28',   3, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
+('rule-007', 'Temp soggiorno critica',      '>=', '31',   4, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
+('rule-008', 'Luce soggiorno sempre accesa','=',  'On',   2, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
+('rule-009', 'Caduta bagno test-ward',      '=',  'True', 4, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
+('rule-010', 'Temp ingresso alta',          '>',  '21',   3, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
+('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
 
 
-CREATE TABLE IF NOT EXISTS alarm_event (
-    id              SERIAL       PRIMARY KEY,
-    activation_time TIMESTAMP    NOT NULL,
-    resolution_time TIMESTAMP,
-    status          INTEGER      NOT NULL REFERENCES status(id),
-    alarm_rule_id        VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
-    user_id         INTEGER      REFERENCES "user"(id),
-    CONSTRAINT chk_resolved CHECK (
-        (resolution_time IS NULL     AND user_id IS NULL     AND status = 1) OR
-        (resolution_time IS NOT NULL AND user_id IS NOT NULL AND status = 2) OR
-        (resolution_time IS NULL     AND user_id IS NOT NULL AND status = 3)
-    )
+CREATE TABLE alarm_event (
+    id VARCHAR(255) PRIMARY KEY,
+    alarm_rule_id VARCHAR(255),
+    activation_time TIMESTAMPTZ NOT NULL,
+    resolution_time TIMESTAMPTZ,
+    user_id INTEGER,
+    FOREIGN KEY (alarm_rule_id)
+        REFERENCES alarm_rule(id)
+        ON DELETE SET NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES "user"(id)
 );
 
-INSERT INTO alarm_event (activation_time, resolution_time, status, alarm_id, user_id) VALUES
-('2026-03-24 09:00:00', NULL,                  1, 'rule-001', NULL),
-('2026-03-25 09:00:00', NULL,                  3, 'rule-001', (SELECT id FROM "user" WHERE username = 'mrossi')),
-('2026-03-26 09:00:00', '2026-03-26 10:00:00', 2, 'rule-001', (SELECT id FROM "user" WHERE username = 'gbianchi')),
-('2026-03-27 09:00:00', '2026-03-27 10:00:00', 2, 'rule-001', (SELECT id FROM "user" WHERE username = 'mrossi')),
-('2026-03-27 11:00:00', '2026-03-27 11:45:00', 2, 'rule-003', (SELECT id FROM "user" WHERE username = 'mrossi')),
-('2026-03-30 15:00:00', NULL,                  3, 'rule-003', (SELECT id FROM "user" WHERE username = 'gbianchi')),
-('2026-04-01 09:00:00', NULL,                  1, 'rule-003', NULL),
-('2026-03-29 14:00:00', '2026-03-29 14:30:00', 2, 'rule-005', (SELECT id FROM "user" WHERE username = 'lverdi')),
-('2026-03-31 23:00:00', NULL,                  1, 'rule-002', NULL),
-('2026-04-02 03:00:00', NULL,                  1, 'rule-002', NULL);
+INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
+VALUES
+-- Eventi per rule-001 (Temperatura critica)
+('EVT001', 'rule-001', '2026-04-04 20:15:00', NULL, 1),
+('EVT010', 'rule-001', '2026-03-30 09:15:00', NULL, NULL),
+('EVT002', 'rule-001', '2026-03-31 11:20:00', NULL, NULL),
+('EVT003', 'rule-001', '2026-03-29 14:05:00', '2026-03-29 14:45:00', 1),
+
+-- Eventi per rule-003 (Caduta rilevata)
+('EVT004', 'rule-003', '2026-03-28 08:00:00', '2026-03-28 08:30:00', 1),
+('EVT005', 'rule-003', '2026-03-31 16:10:00', NULL, NULL),
+
+-- Eventi per rule-004 (Temperatura alta)
+('EVT006', 'rule-004', '2026-03-30 22:00:00', '2026-03-30 22:20:00', 2),
+
+-- Eventi per rule-005 (Caduta rilevata)
+('EVT007', 'rule-005', '2026-03-31 02:15:00', '2026-03-31 02:50:00', 2),
+('EVT008', 'rule-005', '2026-04-01 01:10:00', NULL, NULL),
+
+-- Eventi per rule-002 (Luce accesa di notte)
+('EVT009', 'rule-002', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);
+
+-- Eventi aggiuntivi per test paginazione/stato attivo/gestito.
+INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
+VALUES
+('EVT101', 'rule-006', '2026-04-03 07:10:00', NULL, NULL),
+('EVT102', 'rule-007', '2026-04-03 07:25:00', NULL, NULL),
+('EVT103', 'rule-008', '2026-04-03 08:05:00', NULL, NULL),
+('EVT104', 'rule-009', '2026-04-03 08:30:00', NULL, NULL),
+('EVT105', 'rule-001', '2026-04-03 09:00:00', NULL, NULL),
+('EVT106', 'rule-003', '2026-04-03 09:20:00', NULL, NULL),
+('EVT107', 'rule-006', '2026-04-03 09:35:00', NULL, NULL),
+('EVT108', 'rule-008', '2026-04-03 09:50:00', NULL, NULL),
+('EVT109', 'rule-010', '2026-04-03 10:10:00', NULL, NULL),
+('EVT110', 'rule-005', '2026-04-03 10:40:00', NULL, NULL),
+('EVT111', 'rule-006', '2026-04-02 09:40:00', '2026-04-02 10:05:00', 1),
+('EVT112', 'rule-007', '2026-04-02 11:10:00', '2026-04-02 11:40:00', 2),
+('EVT113', 'rule-010', '2026-04-02 12:30:00', '2026-04-02 12:55:00', 2),
+('EVT199', 'rule-orphan-temp', '2026-04-03 12:00:00', NULL, NULL);
+
+-- Eventi aggiuntivi per verificare la visualizzazione del tempo trascorso
+-- nella UI: tutti nel passato, alcuni meno di un giorno e altri oltre un giorno.
+INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
+VALUES
+('EVT200', 'rule-007', '2026-04-04 10:40:00', NULL, NULL),
+('EVT201', 'rule-006', '2026-04-04 08:20:00', NULL, NULL),
+('EVT202', 'rule-010', '2026-04-04 19:15:00', NULL, NULL),
+('EVT203', 'rule-005', '2026-04-03 14:00:00', NULL, NULL),
+('EVT204', 'rule-003', '2026-04-02 09:30:00', '2026-04-02 10:05:00', 1),
+('EVT205', 'rule-001', '2026-04-01 06:45:00', NULL, NULL)
+ON CONFLICT DO NOTHING;
+

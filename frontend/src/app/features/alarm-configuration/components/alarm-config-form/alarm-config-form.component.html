@@ -1,85 +1,159 @@
-<section aria-labelledby="alarm-config-form-title">
-    <h1 id="alarm-config-form-title">
-        {{ isEditMode ? 'Modifica regola allarme' : 'Nuova regola allarme' }}
-    </h1>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-4 text-sm text-slate-900">
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-        <div>
-            <label for="name">Nome regola</label>
-            <input id="name" type="text" formControlName="name" />
-        </div>
+    <div class="space-y-1">
+        <label for="name" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Nome regola <span class="text-rose-500">*</span>
+        </label>
+        <input id="name" type="text" formControlName="name"
+            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500" />
+        @if (isEditMode()) {
+            <p class="text-[11px] text-slate-400">Il nome è definito in creazione e non può essere modificato.</p>
+        }
+    </div>
 
-        <div>
-            <label for="apartmentId">Appartamento</label>
-            <input id="apartmentId" type="text" formControlName="apartmentId" />
-        </div>
-
-        <div>
-            <label for="sensorId">Sensore</label>
-            <input id="sensorId" type="text" formControlName="sensorId"
-                [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched" />
-            @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
-            <p role="alert">Il sensore e obbligatorio.</p>
+    @if (isPlantSelectionVisible()) {
+    <div class="space-y-1">
+        <label for="plantId" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Impianto <span class="text-rose-500">*</span>
+        </label>
+        <select id="plantId" formControlName="plantId"
+            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100"
+            [attr.aria-invalid]="form.controls.plantId.invalid && form.controls.plantId.touched">
+            <option value="">Seleziona impianto</option>
+            @for (plant of plants(); track plant.id) {
+                <option [value]="plant.id">{{ plant.name }}</option>
             }
-        </div>
+        </select>
+        @if (plantsLoadError(); as plantsError) {
+            @if (plantsError) {
+                <p role="alert" class="text-[11px] font-medium text-rose-600">{{ plantsError }}</p>
+            }
+        }
+        @if (form.controls.plantId.invalid && form.controls.plantId.touched) {
+            <p role="alert" class="text-[11px] font-medium text-rose-600">L'impianto è obbligatorio.</p>
+        }
+    </div>
+    }
 
-        <div>
-            <label for="priority">Priorita</label>
-            <select id="priority" formControlName="priority"
-                [attr.aria-invalid]="form.controls.priority.invalid && form.controls.priority.touched">
-                <option [ngValue]="null">Seleziona priorita</option>
-                @for (priority of priorityOptions; track priority) {
-                <option [ngValue]="priority">{{ priority }}</option>
+    <div class="space-y-1">
+        <label for="sensorId" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Dispositivo <span class="text-rose-500">*</span>
+        </label>
+        <select id="sensorId" formControlName="sensorId"
+            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+            [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched">
+            @if (!isEditMode()) {
+                <option value="">Seleziona dispositivo</option>
+            }
+            @for (device of deviceOptions(); track device.id) {
+                <option [value]="device.id">{{ device.label }}</option>
+            }
+        </select>
+        @if (!isEditMode() && form.controls.plantId.value.length === 0) {
+            <p class="text-[11px] text-slate-400">Seleziona prima l'impianto per visualizzare i dispositivi disponibili.</p>
+        }
+        @if (isDevicesLoading()) {
+            <p class="text-[11px] text-slate-400">Caricamento dispositivi...</p>
+        }
+        @if (devicesLoadError(); as devicesError) {
+            @if (devicesError) {
+                <p role="alert" class="text-[11px] font-medium text-rose-600">{{ devicesError }}</p>
+            }
+        }
+        @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
+            <p role="alert" class="text-[11px] font-medium text-rose-600">Il dispositivo è obbligatorio.</p>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+        <div class="space-y-1">
+            <label for="priority" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Priorità <span class="text-rose-500">*</span>
+            </label>
+            <div class="flex items-center gap-2">
+                <select id="priority" formControlName="priority"
+                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100"
+                    [attr.aria-invalid]="form.controls.priority.invalid && form.controls.priority.touched">
+                    <option [ngValue]="null">Seleziona</option>
+                    @for (priority of priorityOptions; track priority) {
+                        <option [ngValue]="priority">{{ priority }}</option>
+                    }
+                </select>
+                @if (form.controls.priority.value; as selectedPriority) {
+                    <app-alarm-priority-indicator [priority]="selectedPriority" />
                 }
-            </select>
+            </div>
             @if (form.controls.priority.invalid && form.controls.priority.touched) {
-            <p role="alert">La priorita e obbligatoria.</p>
+                <p role="alert" class="text-[11px] font-medium text-rose-600">La priorità è obbligatoria.</p>
             }
         </div>
 
-        <div>
-            <label for="thresholdOperator">Operatore soglia</label>
+        <div class="space-y-1">
+            <label for="thresholdOperator" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Attiva se il valore è <span class="text-rose-500">*</span>
+            </label>
             <select id="thresholdOperator" formControlName="thresholdOperator"
+                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100"
                 [attr.aria-invalid]="form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched">
-                <option [ngValue]="null">Seleziona operatore</option>
+                <option [ngValue]="null">Operatore</option>
                 @for (operator of thresholdOperatorOptions; track operator) {
-                <option [ngValue]="operator">{{ operator }}</option>
+                    <option [ngValue]="operator">{{ operator }}</option>
                 }
             </select>
             @if (form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched) {
-            <p role="alert">L'operatore di soglia e obbligatorio.</p>
+                <p role="alert" class="text-[11px] font-medium text-rose-600">L'operatore è obbligatorio.</p>
             }
         </div>
+    </div>
 
-        <div>
-            <label for="threshold">Soglia</label>
-            <input id="threshold" type="number" formControlName="threshold"
-                [attr.aria-invalid]="form.controls.threshold.invalid && form.controls.threshold.touched" />
-            @if (form.controls.threshold.invalid && form.controls.threshold.touched) {
-            <p role="alert">La soglia e obbligatoria.</p>
-            }
-        </div>
+    <div class="space-y-1">
+        <label for="thresholdValue" class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Valore soglia <span class="text-rose-500">*</span>
+        </label>
+        <input id="thresholdValue" type="text" inputmode="decimal" formControlName="thresholdValue"
+            list="thresholdBooleanHints"
+            class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100"
+            [attr.aria-invalid]="form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched" />
+        <datalist id="thresholdBooleanHints">
+            <option value="ON"></option>
+            <option value="OFF"></option>
+            <option value="TRUE"></option>
+            <option value="FALSE"></option>
+        </datalist>
+        <p class="text-[11px] text-slate-400">Per presenza e caduta usa TRUE/FALSE, per le luci usa ON/OFF.</p>
+        @if (form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched) {
+            <p role="alert" class="text-[11px] font-medium text-rose-600">La soglia è obbligatoria.</p>
+        }
+    </div>
 
-        <div>
-            <label for="activationTime">Ora attivazione</label>
-            <input id="activationTime" type="time" formControlName="activationTime" />
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="space-y-1">
+            <label for="armingTime" class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Orario attivazione
+            </label>
+            <input id="armingTime" type="time" formControlName="armingTime"
+                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100" />
         </div>
+        <div class="space-y-1">
+            <label for="dearmingTime" class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Orario disattivazione
+            </label>
+            <input id="dearmingTime" type="time" formControlName="dearmingTime"
+                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100" />
+        </div>
+    </div>
 
-        <div>
-            <label for="deactivationTime">Ora disattivazione</label>
-            <input id="deactivationTime" type="time" formControlName="deactivationTime" />
-        </div>
+    <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+        <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Abilita regola</span>
+        <app-alarm-toggle-switch [checked]="form.controls.enabled.value" [ariaLabel]="'Abilita regola allarme'"
+            (toggled)="onEnabledToggled($event)" />
+    </div>
 
-        <div>
-            <label for="enabled">Abilitato</label>
-            <input id="enabled" type="checkbox" formControlName="enabled" />
-        </div>
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
+        <app-alarm-action-button label="ANNULLA" tone="neutral" (pressed)="onCancel()" />
+        <app-alarm-action-button [label]="isEditMode() ? 'APPLICA MODIFICHE' : 'CREA ALLARME'" tone="primary"
+            (pressed)="onSubmit()" />
+    </div>
 
-        <div>
-            <button type="submit">
-                {{ isEditMode ? 'Salva modifiche' : 'Crea regola' }}
-            </button>
-            <button type="button" (click)="onCancel()">Annulla</button>
-        </div>
-    </form>
-</section>
+</form>

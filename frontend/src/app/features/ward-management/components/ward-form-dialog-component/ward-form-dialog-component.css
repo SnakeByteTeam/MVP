@@ -1,0 +1,7 @@
+@media (min-width: 767px) {
+    dialog {
+        left: calc(50% + 80px);
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+}

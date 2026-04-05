@@ -1,0 +1,4 @@
+<button type="button" (click)="onPressed()" [disabled]="disabled()" [attr.aria-label]="ariaLabel() ?? label()"
+    [class]="buttonClass()">
+    {{ label() }}
+</button>

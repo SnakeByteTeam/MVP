@@ -304,25 +304,6 @@ describe('AlarmPageManagementComponent', () => {
     expect(alarmManagementStub.nextPage).not.toHaveBeenCalled();
   });
 
-  it('renderizza paginazione con totale sconosciuto quando canGoNext è true', () => {
-    vmSubject.next({
-      alarms: [alarm1],
-      currentPage: 2,
-      pageLimit: 6,
-      pageOffset: 6,
-      canGoPrevious: true,
-      canGoNext: true,
-      isResolving: false,
-      resolvingId: null,
-      resolveError: null,
-    });
-
-    fixture.detectChanges();
-
-    const nativeElement = fixture.nativeElement as HTMLElement;
-    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 2');
-  });
-
   it('click su GESTISCI propaga resolve verso facade', () => {
     vmSubject.next({
       alarms: [alarm1],

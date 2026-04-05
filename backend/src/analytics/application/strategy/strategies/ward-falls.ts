@@ -71,7 +71,7 @@ export class WardFalls implements AnalyticsStrategy {
     const data: number[] = labels.map(
       (day: string): number => fallsByDay.get(day) ?? 0,
     );
-    const series: Series[] = [new Series('', '', data)];
+    const series: Series[] = [new Series(METRIC, TITLE, data)];
 
     return new Plot(TITLE, METRIC, UNIT, labels, series);
   }

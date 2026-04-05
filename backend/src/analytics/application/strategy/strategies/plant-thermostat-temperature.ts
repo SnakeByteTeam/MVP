@@ -30,7 +30,7 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     );
 
     if (snapshotsMap.size === 0) {
-      return new Plot(TITLE, METRIC, '', [], []);
+      return new Plot(TITLE, METRIC, '°C', [], []);
     }
 
     const snapshots = Array.from(snapshotsMap.entries()).sort(([a], [b]) =>
@@ -67,6 +67,8 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     const labels = sorted.map(([day]) => day);
     const values = sorted.map(([, { sum, count }]) => sum / count);
 
-    return new Plot(TITLE, METRIC, UNIT, labels, [new Series('', '', values)]);
+    return new Plot(TITLE, METRIC, UNIT, labels, [
+      new Series(METRIC, TITLE, values),
+    ]);
   }
 }

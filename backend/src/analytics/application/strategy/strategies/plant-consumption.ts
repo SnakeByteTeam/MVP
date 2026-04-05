@@ -67,6 +67,8 @@ export class PlantConsumption implements AnalyticsStrategy {
     const labels = sorted.map(([day]) => day);
     const values = sorted.map(([, wh]) => wh);
 
-    return new Plot(TITLE, METRIC, UNIT, labels, [new Series('', '', values)]);
+    return new Plot(TITLE, METRIC, UNIT, labels, [
+      new Series(METRIC, TITLE, values),
+    ]);
   }
 }

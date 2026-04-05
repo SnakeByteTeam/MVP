@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { AnalyticsApiService } from './services/analytics-api.service';
 import { AnalyticsDto } from './models/analytics.model';
 import { ChartInfoDto } from './models/chart-info.model';
@@ -10,12 +10,12 @@ import { PlantAnomaliesChartComponent } from './components/plant-anomalies-chart
 import { PresenceDetectionChartComponent } from './components/presence-detection-chart/presence-detection-chart.component';
 import { ProlongedPresenceChartComponent } from './components/prolonged-presence-chart/prolonged-presence-chart.component';
 import { TemperatureVariationsChartComponent } from './components/temperature-variations-chart/temperature-variations-chart.component';
-import { Observable,  switchMap, filter, BehaviorSubject, startWith } from 'rxjs';
+import { Observable, switchMap, filter, BehaviorSubject, startWith, combineLatest } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
-@Component({ 
-    selector: 'app-analytics', 
-    standalone: true, 
+@Component({
+    selector: 'app-analytics',
+    standalone: true,
     imports: [
         CommonModule,
         AlarmFrequencyChartComponent,
@@ -27,42 +27,54 @@ import { CommonModule } from '@angular/common';
         ProlongedPresenceChartComponent,
         TemperatureVariationsChartComponent
     ],
-    templateUrl: './analytics.component.html' })
-export class AnalyticsComponent {
-    
-    private analyticsApiService = inject(AnalyticsApiService);
-    
+    templateUrl: './analytics.component.html'
+})
+export class AnalyticsComponent implements OnInit {
+    private readonly refreshTrigger$ = new BehaviorSubject<boolean>(false);
+
+    private readonly analyticsApiService = inject(AnalyticsApiService);
+    private readonly loadTrigger$ = new BehaviorSubject<{ id: string; refresh: boolean } | null>(null);
+
     public selectedApartmentId$ = new BehaviorSubject<string | null>(null);
-    
+
     public apartments$: Observable<any[]> | null = null;
     public analytics: Observable<AnalyticsDto | null> | null = null;
 
     public ngOnInit(): void {
         this.apartments$ = this.analyticsApiService.getAllApartments();
-        //default seleziona il primo appartamento
         this.apartments$.subscribe(apartments => {
-            if (apartments.length > 0 && !this.selectedApartmentId$.value) {
+            if (apartments.length > 0) {
                 this.selectedApartmentId$.next(apartments[0].id);
+                this.loadTrigger$.next({ id: apartments[0].id, refresh: false });
             }
         });
 
-        //reazione ai cambi di appartamento
-
-        this.analytics = this.selectedApartmentId$.pipe(
-            filter(id => id !== null), 
-            switchMap(id => this.analyticsApiService.getAnalytics(id!).pipe(startWith(null)))
+        this.analytics = this.loadTrigger$.pipe(
+            filter(trigger => trigger !== null),
+            switchMap(trigger =>
+                this.analyticsApiService
+                    .getAnalytics(trigger.id, trigger.refresh)
+                    .pipe(startWith(null))
+            )
         );
-    }
-
-    public onApartmentChange(event: Event): void {
-        const selectElement = event.target as HTMLSelectElement;
-        this.selectedApartmentId$.next(selectElement.value);
     }
 
     public getChartByMetric(data: AnalyticsDto | null, metric: string): ChartInfoDto | undefined {
         return data?.analyticsInfo?.find(chart => chart.metric === metric);
     }
-   
+
+    public onApartmentChange(event: Event): void {
+        const id = (event.target as HTMLSelectElement).value;
+        this.selectedApartmentId$.next(id);
+        this.loadTrigger$.next({ id, refresh: false });
+    }
+
+    public onRefresh(): void {
+        const currentId = this.selectedApartmentId$.value;
+        if (!currentId) return;
+        this.loadTrigger$.next({ id: currentId, refresh: true });
+    }
+
 }
 
 

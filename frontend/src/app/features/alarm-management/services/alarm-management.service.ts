@@ -19,6 +19,7 @@ import { UserRole } from '../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../core/services/internal-auth.service';
 import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
+import type { UserSession } from '../../user-auth/models/user-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class AlarmManagementService {
@@ -123,36 +124,18 @@ export class AlarmManagementService {
             .subscribe();
     }
 
-    // OSS: endpoint reparto; Admin: endpoint globale
-    private getInitialActiveAlarms$(offset: number): Observable<ActiveAlarm[]> {
-        return this.authService.getCurrentUser$().pipe(
-            take(1),
-            switchMap((session) => {
-                if (session?.role === UserRole.OPERATORE_SANITARIO) {
-                    return this.alarmApiService.getActiveAlarmsOfOperator(session.userId, this.pageLimit, offset);
-                }
-
-                return this.alarmApiService.getActiveAlarms(this.pageLimit, offset);
-            })
-        );
-    }
-
     private loadPage(offset: number, fallbackToPreviousIfEmpty = false): void {
         this.resolveError$.next(null);
 
-        this.getInitialActiveAlarms$(offset)
+        this.authService
+            .getCurrentUser$()
             .pipe(
                 take(1),
-                tap((alarms) => {
-                    if (fallbackToPreviousIfEmpty && offset > 0 && alarms.length === 0) {
-                        const previousOffset = Math.max(0, offset - this.pageLimit);
-                        this.loadPage(previousOffset);
-                        return;
-                    }
-
+                switchMap((session) => this.loadPageState$(session, offset, fallbackToPreviousIfEmpty)),
+                tap(({ alarms, pageOffset, canGoNext }) => {
                     this.alarmStateService.setActiveAlarms(alarms, 'replace');
-                    this.pageOffset$.next(offset);
-                    this.canGoNext$.next(alarms.length === this.pageLimit);
+                    this.pageOffset$.next(pageOffset);
+                    this.canGoNext$.next(canGoNext);
                 }),
                 catchError((error: unknown) => {
                     this.resolveError$.next(
@@ -166,5 +149,52 @@ export class AlarmManagementService {
                 })
             )
             .subscribe();
+    }
+
+    // OSS: endpoint reparto; Admin: endpoint globale
+    private getActiveAlarmsForSession$(session: UserSession | null, offset: number): Observable<ActiveAlarm[]> {
+        if (session?.role === UserRole.OPERATORE_SANITARIO) {
+            return this.alarmApiService.getActiveAlarmsOfOperator(session.userId, this.pageLimit, offset);
+        }
+
+        return this.alarmApiService.getActiveAlarms(this.pageLimit, offset);
+    }
+
+    private loadPageState$(
+        session: UserSession | null,
+        offset: number,
+        fallbackToPreviousIfEmpty = false,
+    ): Observable<{ alarms: ActiveAlarm[]; pageOffset: number; canGoNext: boolean }> {
+        return this.getActiveAlarmsForSession$(session, offset).pipe(
+            take(1),
+            switchMap((alarms) => {
+                if (fallbackToPreviousIfEmpty && offset > 0 && alarms.length === 0) {
+                    const previousOffset = Math.max(0, offset - this.pageLimit);
+
+                    return this.getActiveAlarmsForSession$(session, previousOffset).pipe(
+                        take(1),
+                        switchMap((previousAlarms) =>
+                            this.getActiveAlarmsForSession$(session, previousOffset + this.pageLimit).pipe(
+                                take(1),
+                                map((nextAlarms) => ({
+                                    alarms: previousAlarms,
+                                    pageOffset: previousOffset,
+                                    canGoNext: nextAlarms.length > 0,
+                                })),
+                            ),
+                        ),
+                    );
+                }
+
+                return this.getActiveAlarmsForSession$(session, offset + this.pageLimit).pipe(
+                    take(1),
+                    map((nextAlarms) => ({
+                        alarms,
+                        pageOffset: offset,
+                        canGoNext: nextAlarms.length > 0,
+                    })),
+                );
+            }),
+        );
     }
 }

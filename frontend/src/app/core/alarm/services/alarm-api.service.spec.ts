@@ -97,6 +97,7 @@ describe('AlarmApiService', () => {
         const payload: CreateAlarmRuleRequestDto = {
             name: 'Nuovo allarme',
             deviceId: 'device-7',
+            plantId: 'plant-4',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
@@ -117,7 +118,6 @@ describe('AlarmApiService', () => {
     it('updateAlarmRule chiama PUT /alarm-rules/:id con payload corretto', () => {
         const payload: UpdateAlarmRuleRequestDto = {
             name: 'Allarme soglia',
-            deviceId: 'device-2',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: '<',
             thresholdValue: '15',

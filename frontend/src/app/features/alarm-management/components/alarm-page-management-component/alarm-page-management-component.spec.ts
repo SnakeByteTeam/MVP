@@ -212,8 +212,6 @@ describe('AlarmPageManagementComponent', () => {
 
     expect(rows.length).toBe(2);
     expect(nativeElement.textContent).toContain('Priorità');
-    expect(nativeElement.textContent).toContain('Dispositivo');
-    expect(nativeElement.textContent).toContain('device-1');
     expect(nativeElement.textContent).toContain('Corridoio Nord');
     expect(nativeElement.textContent).toContain('mock-elapsed:2026-03-24T10:00:00.000Z');
     expect(manageButtons.length).toBe(2);
@@ -304,6 +302,25 @@ describe('AlarmPageManagementComponent', () => {
 
     expect(alarmManagementStub.previousPage).toHaveBeenCalledTimes(1);
     expect(alarmManagementStub.nextPage).not.toHaveBeenCalled();
+  });
+
+  it('renderizza paginazione con totale sconosciuto quando canGoNext è true', () => {
+    vmSubject.next({
+      alarms: [alarm1],
+      currentPage: 2,
+      pageLimit: 6,
+      pageOffset: 6,
+      canGoPrevious: true,
+      canGoNext: true,
+      isResolving: false,
+      resolvingId: null,
+      resolveError: null,
+    });
+
+    fixture.detectChanges();
+
+    const nativeElement = fixture.nativeElement as HTMLElement;
+    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 2');
   });
 
   it('click su GESTISCI propaga resolve verso facade', () => {

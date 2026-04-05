@@ -47,7 +47,7 @@ export class AdminGuard implements CanActivate {
       throw new UnauthorizedException(
         'You must be an administrator to access this resource',
       );
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Invalid token');
     }
   }

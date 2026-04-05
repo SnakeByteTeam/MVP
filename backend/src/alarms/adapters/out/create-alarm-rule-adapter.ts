@@ -18,6 +18,7 @@ export class CreateAlarmRuleAdapter implements CreateAlarmRulePort {
       cmd.name,
       cmd.priority,
       cmd.deviceId,
+      cmd.plantId,
       cmd.thresholdOperator,
       cmd.thresholdValue,
       cmd.armingTime,

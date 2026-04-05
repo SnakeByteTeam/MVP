@@ -10,28 +10,29 @@ import { AlarmTimeMapper } from './alarm-time.mapper';
 @Injectable({ providedIn: 'root' })
 export class AlarmRuleRequestMapper {
     private readonly alarmTimeMapper = inject(AlarmTimeMapper);
+    private readonly hourMinutePattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
     public toCreateRequest(formValue: AlarmConfigFormValue): CreateAlarmRuleRequestDto {
         return {
             name: this.requireNonEmptyString(formValue.name, 'name'),
             deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
+            plantId: this.requireNonEmptyString(formValue.plantId, 'plantId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            thresholdValue: this.requireNonEmptyString(formValue.thresholdValue, 'thresholdValue'),
-            armingTime: formValue.armingTime,
-            dearmingTime: formValue.dearmingTime,
+            thresholdValue: this.toRequestThresholdValue(formValue.thresholdValue, 'thresholdValue'),
+            armingTime: this.requireHourMinuteString(formValue.armingTime, 'armingTime'),
+            dearmingTime: this.requireHourMinuteString(formValue.dearmingTime, 'dearmingTime'),
         };
     }
 
     public toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto {
         return {
             name: this.requireNonEmptyString(formValue.name, 'name'),
-            deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
-            thresholdValue: this.requireNonEmptyString(formValue.thresholdValue, 'thresholdValue'),
-            armingTime: formValue.armingTime,
-            dearmingTime: formValue.dearmingTime,
+            thresholdValue: this.toRequestThresholdValue(formValue.thresholdValue, 'thresholdValue'),
+            armingTime: this.requireHourMinuteString(formValue.armingTime, 'armingTime'),
+            dearmingTime: this.requireHourMinuteString(formValue.dearmingTime, 'dearmingTime'),
             isArmed: formValue.enabled,
         };
     }
@@ -39,12 +40,11 @@ export class AlarmRuleRequestMapper {
     public toToggleRequest(rule: AlarmRule, isArmed: boolean): UpdateAlarmRuleRequestDto {
         return {
             name: this.requireNonEmptyString(rule.name, 'name'),
-            deviceId: this.requireNonEmptyString(rule.deviceId, 'deviceId'),
             priority: rule.priority,
-            thresholdOperator: rule.thresholdOperator,
-            thresholdValue: rule.thresholdValue,
-            armingTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
-            dearmingTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
+            thresholdOperator: this.requireThresholdOperator(rule.thresholdOperator),
+            thresholdValue: this.toRequestThresholdValue(rule.thresholdValue, 'thresholdValue'),
+            armingTime: this.requireHourMinuteString(this.alarmTimeMapper.toFormTime(rule.armingTime), 'armingTime'),
+            dearmingTime: this.requireHourMinuteString(this.alarmTimeMapper.toFormTime(rule.dearmingTime), 'dearmingTime'),
             isArmed,
         };
     }
@@ -86,5 +86,36 @@ export class AlarmRuleRequestMapper {
         }
 
         return trimmed;
+    }
+
+    private requireHourMinuteString(value: string, fieldName: string): string {
+        const required = this.requireNonEmptyString(value, fieldName);
+        if (!this.hourMinutePattern.test(required)) {
+            throw new Error(`Formato non valido per ${fieldName}`);
+        }
+
+        return required;
+    }
+
+    private requireThresholdOperator(operator: string): string {
+        const required = this.requireNonEmptyString(operator, 'thresholdOperator');
+        if (required === '>' || required === '<' || required === '>=' || required === '<=' || required === '=') {
+            return required;
+        }
+
+        throw new Error('Campo obbligatorio mancante: thresholdOperator');
+    }
+
+    private toRequestThresholdValue(value: string, fieldName: string): string {
+        const required = this.requireNonEmptyString(value, fieldName);
+        const normalized = required.toLowerCase();
+        if (normalized === 'on' || normalized === 'true') {
+            return 'on';
+        }
+        if (normalized === 'off' || normalized === 'false') {
+            return 'off';
+        }
+
+        return required;
     }
 }

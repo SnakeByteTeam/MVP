@@ -38,7 +38,7 @@ export class UserGuard implements CanActivate {
       throw new UnauthorizedException(
         'You are not allowed to access this resource',
       );
-    } catch (err) {
+    } catch {
       throw new UnauthorizedException('Invalid token');
     }
   }

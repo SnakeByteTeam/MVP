@@ -21,26 +21,30 @@ export class AlarmEventsRepositoryImpl
   ): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
       `SELECT 
-         ae.id,
-         '' AS room_name,
-         ar.device_id AS device_name,
-        ar.device_id AS device_id,
-         ae.alarm_rule_id,
-         ar.name AS alarm_name,
-         ar.priority,
-         ae.activation_time,
-         ae.resolution_time,
-         ae.user_id,
-         u.username as user_username
-       FROM alarm_event ae
-       LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
-       LEFT JOIN "user" u ON u.id = ae.user_id
-       WHERE ae.resolution_time IS NULL
-          AND ae.alarm_rule_id IS NOT NULL
-       ORDER BY ae.resolution_time IS NOT NULL,
-       ar.priority DESC,
-       ae.activation_time DESC
-       LIMIT $1 OFFSET $2`,
+        ae.id,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        ae.alarm_rule_id,
+        ar.name AS alarm_name,
+        ar.priority,
+        ae.activation_time,
+        ae.resolution_time,
+        ae.user_id,
+        u.username as user_username
+      FROM alarm_event ae
+      LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+      LEFT JOIN "user" u ON u.id = ae.user_id
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
+      WHERE dp->>'id' = ar.device_id
+      AND ae.resolution_time IS NULL
+      ORDER BY 
+        ae.resolution_time IS NOT NULL,
+        ar.priority DESC,
+        ae.activation_time DESC
+      LIMIT $1 OFFSET $2;`,
       [limit, offset],
     );
     return result.rows;
@@ -54,29 +58,31 @@ export class AlarmEventsRepositoryImpl
     const result = await this.pool.query(
       `SELECT 
         ae.id,
-        '' AS room_name,
-        ar.device_id AS device_name,
-        ar.device_id AS device_id,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
         ae.alarm_rule_id,
         ar.name AS alarm_name,
         ar.priority,
         ae.activation_time,
         ae.resolution_time,
-        ae.user_id,
-        resolver.username as user_username
-       FROM alarm_event ae
-       LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
-       LEFT JOIN plant p ON p.id = ar.plant_id
-       LEFT JOIN ward_user wu ON wu.ward_id = p.ward_id
-       LEFT JOIN "user" u ON u.id = wu.user_id
-       LEFT JOIN "user" resolver ON resolver.id = ae.user_id
-       WHERE u.id = $1
-         AND ae.resolution_time IS NULL
-        AND ae.alarm_rule_id IS NOT NULL
-       ORDER BY ae.resolution_time IS NOT NULL,
-       ar.priority DESC,
-       ae.activation_time DESC
-       LIMIT $2 OFFSET $3`,
+        0 as user_id,
+        '' as user_username
+      FROM alarm_event ae
+      LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      INNER JOIN ward_user wu ON wu.ward_id = p.ward_id AND wu.user_id = $1
+      LEFT JOIN "user" u ON u.id = wu.user_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
+      WHERE dp->>'id' = ar.device_id
+            AND ae.resolution_time IS NULL
+
+      ORDER BY 
+        ae.resolution_time IS NOT NULL,
+        ar.priority DESC,
+        ae.activation_time ASC
+      LIMIT $2 OFFSET $3`,
       [id, limit, offset],
     );
 

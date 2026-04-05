@@ -24,7 +24,7 @@ type DeviceOption = {
 	selector: 'app-alarm-config-form',
 	templateUrl: './alarm-config-form.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmToggleSwitchComponent, AlarmActionButtonComponent],
+	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmActionButtonComponent],
 })
 export class AlarmConfigFormComponent {
 	public readonly mode = input<'create' | 'edit'>('create');
@@ -91,8 +91,8 @@ export class AlarmConfigFormComponent {
 			priority: [null as AlarmPriority | null, [Validators.required]],
 			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
 			thresholdValue: ['', [Validators.required]],
-			armingTime: [''],
-			dearmingTime: [''],
+			armingTime: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)]],
+			dearmingTime: ['', [Validators.required, Validators.pattern(/^([01]\d|2[0-3]):([0-5]\d)$/)]],
 			enabled: [true],
 		});
 	}

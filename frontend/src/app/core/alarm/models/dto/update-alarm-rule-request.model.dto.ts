@@ -2,7 +2,6 @@
 
 export interface UpdateAlarmRuleRequestDto {
     name: string;
-    deviceId: string;
     priority: number;
     thresholdOperator: string;
     thresholdValue: string;

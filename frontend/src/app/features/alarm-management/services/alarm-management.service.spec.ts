@@ -107,8 +107,9 @@ describe('AlarmManagementService', () => {
         service = createService();
         service.initialize();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
         expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
         expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
@@ -129,8 +130,9 @@ describe('AlarmManagementService', () => {
         service.initialize();
 
         expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
-        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledTimes(1);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledTimes(2);
         expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7', 6, 0);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenNthCalledWith(2, '7', 6, 6);
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
@@ -231,7 +233,8 @@ describe('AlarmManagementService', () => {
 
         expect(vm.alarms.length).toBe(1);
         expect(vm.alarms[0].id).toBe(alarmA.id);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA], 'replace');
     });
 
@@ -249,8 +252,11 @@ describe('AlarmManagementService', () => {
         alarmApiStub.getActiveAlarms
             .mockReturnValueOnce(of(firstPage))
             .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of(secondPage))
             .mockReturnValueOnce(of([]))
-            .mockReturnValueOnce(of(firstPage));
+            .mockReturnValueOnce(of([]))
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of([]));
         alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
 
         service = createService();
@@ -263,7 +269,10 @@ describe('AlarmManagementService', () => {
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(7, 6, 6);
         expect(vm.currentPage).toBe(1);
         expect(vm.pageOffset).toBe(0);
         expect(vm.canGoNext).toBe(false);
@@ -290,7 +299,9 @@ describe('AlarmManagementService', () => {
 
         alarmApiStub.getActiveAlarms
             .mockReturnValueOnce(of(firstPage))
-            .mockReturnValueOnce(of(secondPage));
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of([]));
 
         service = createService();
         service.initialize();
@@ -298,6 +309,8 @@ describe('AlarmManagementService', () => {
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.currentPage).toBe(2);
@@ -313,8 +326,9 @@ describe('AlarmManagementService', () => {
         service.initialize();
         service.nextPage();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.currentPage).toBe(1);
@@ -334,7 +348,9 @@ describe('AlarmManagementService', () => {
 
         alarmApiStub.getActiveAlarms
             .mockReturnValueOnce(of(firstPage))
-            .mockReturnValueOnce(of([{ ...alarmA, id: 'active-7' }, { ...alarmA, id: 'active-8' }]));
+            .mockReturnValueOnce(of([{ ...alarmA, id: 'active-7' }, { ...alarmA, id: 'active-8' }]))
+            .mockReturnValueOnce(of([{ ...alarmA, id: 'active-7' }, { ...alarmA, id: 'active-8' }]))
+            .mockReturnValueOnce(of([]));
 
         service = createService();
         service.initialize();
@@ -360,7 +376,10 @@ describe('AlarmManagementService', () => {
         alarmApiStub.getActiveAlarms
             .mockReturnValueOnce(of(firstPage))
             .mockReturnValueOnce(of(secondPage))
-            .mockReturnValueOnce(of(firstPage));
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of([]))
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage));
 
         service = createService();
         service.initialize();
@@ -369,7 +388,10 @@ describe('AlarmManagementService', () => {
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
         expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 6, 6);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.currentPage).toBe(1);
@@ -384,8 +406,9 @@ describe('AlarmManagementService', () => {
         service.initialize();
         service.previousPage();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
     });
 
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {

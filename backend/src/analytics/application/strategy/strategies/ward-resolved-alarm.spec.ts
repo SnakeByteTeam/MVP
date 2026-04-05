@@ -43,10 +43,10 @@ describe('WardResolvedAlarm', () => {
 
     expect(result.getLabels()).toContain(yesterday);
 
-    const totalSeries = result.getSeries().find((s) => s.getId() === 'total');
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'totali');
     const resolvedSeries = result
       .getSeries()
-      .find((s) => s.getId() === 'resolved');
+      .find((s) => s.getId() === 'risolti');
 
     expect(totalSeries?.getData()[0]).toBe(3);
     expect(resolvedSeries?.getData()[0]).toBe(2);
@@ -60,10 +60,10 @@ describe('WardResolvedAlarm', () => {
 
     expect(result.getLabels()).toContain(yesterday);
 
-    const totalSeries = result.getSeries().find((s) => s.getId() === 'total');
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'totali');
     const resolvedSeries = result
       .getSeries()
-      .find((s) => s.getId() === 'resolved');
+      .find((s) => s.getId() === 'risolti');
 
     expect(totalSeries?.getData()[0]).toBe(5);
     expect(resolvedSeries?.getData()[0]).toBe(0);
@@ -92,10 +92,10 @@ describe('WardResolvedAlarm', () => {
     expect(result.getLabels()[1]).toBe(twoDaysAgo);
     expect(result.getLabels()[2]).toBe(yesterday);
 
-    const totalSeries = result.getSeries().find((s) => s.getId() === 'total')!;
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'totali')!;
     const resolvedSeries = result
       .getSeries()
-      .find((s) => s.getId() === 'resolved')!;
+      .find((s) => s.getId() === 'risolti')!;
 
     expect(totalSeries.getData()[0]).toBe(2);
     expect(totalSeries.getData()[1]).toBe(4);
@@ -130,10 +130,10 @@ describe('WardResolvedAlarm', () => {
 
     const result = await strategy.execute(new GetAnalyticsCmd('1'));
 
-    const totalSeries = result.getSeries().find((s) => s.getId() === 'total')!;
+    const totalSeries = result.getSeries().find((s) => s.getId() === 'totali')!;
     const resolvedSeries = result
       .getSeries()
-      .find((s) => s.getId() === 'resolved')!;
+      .find((s) => s.getId() === 'risolti')!;
 
     expect(resolvedSeries.getData()[0]).toBeLessThanOrEqual(
       totalSeries.getData()[0],

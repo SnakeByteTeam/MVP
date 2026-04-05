@@ -70,7 +70,7 @@ describe('AnalyticsComponent', () => {
 
     expect(mockAnalyticsService.getAllApartments).toHaveBeenCalled();
 
-    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalledWith('1');
+    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalledWith('1', expect.anything());
   });
 
   it('aggiorna grafici al cambio appartamento', () => {
@@ -79,7 +79,7 @@ describe('AnalyticsComponent', () => {
     const mockEvent = { target: { value: '2' } } as unknown as Event;
     component.onApartmentChange(mockEvent);
 
-    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalledWith('2');
+    expect(mockAnalyticsService.getAnalytics).toHaveBeenCalledWith('2', expect.anything());
   });
 
   it('should return undefined if metric is not found', () => {

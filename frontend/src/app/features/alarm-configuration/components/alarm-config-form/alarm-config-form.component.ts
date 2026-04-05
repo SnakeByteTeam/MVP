@@ -24,7 +24,7 @@ type DeviceOption = {
 	selector: 'app-alarm-config-form',
 	templateUrl: './alarm-config-form.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmToggleSwitchComponent, AlarmActionButtonComponent],
+	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmActionButtonComponent],
 })
 export class AlarmConfigFormComponent {
 	public readonly mode = input<'create' | 'edit'>('create');

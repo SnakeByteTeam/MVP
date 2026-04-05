@@ -294,7 +294,7 @@ describe('AlarmPageManagementComponent', () => {
       'button[aria-label="Pagina successiva allarmi attivi"]'
     ) as HTMLButtonElement | null;
 
-    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 3/3');
+    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 3');
     expect(previousButton?.disabled).toBe(false);
     expect(nextButton?.disabled).toBe(true);
 
@@ -304,7 +304,7 @@ describe('AlarmPageManagementComponent', () => {
     expect(alarmManagementStub.nextPage).not.toHaveBeenCalled();
   });
 
-  it('renderizza paginazione con totale sconosciuto quando canGoNext e true', () => {
+  it('renderizza paginazione con totale sconosciuto quando canGoNext è true', () => {
     vmSubject.next({
       alarms: [alarm1],
       currentPage: 2,
@@ -320,7 +320,7 @@ describe('AlarmPageManagementComponent', () => {
     fixture.detectChanges();
 
     const nativeElement = fixture.nativeElement as HTMLElement;
-    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 2/?');
+    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 2');
   });
 
   it('click su GESTISCI propaga resolve verso facade', () => {

@@ -58,13 +58,13 @@ describe('MainLayoutComponent', () => {
     });
 
     it('inverte correttamente isCollapsed con il segnale ricevuto', () => {
-        expect(component.isCollapsed).toBe(false);
-        
-        component.toggleSidebar();
         expect(component.isCollapsed).toBe(true);
         
         component.toggleSidebar();
         expect(component.isCollapsed).toBe(false);
+        
+        component.toggleSidebar();
+        expect(component.isCollapsed).toBe(true);
     });
 
     it('invoca correttamente logout', () => {

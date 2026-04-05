@@ -53,8 +53,8 @@ export class WardResolvedAlarm implements AnalyticsStrategy {
     );
 
     const series: Series[] = [
-      new Series('total', 'Total Alarms', totalData),
-      new Series('resolved', 'Resolved Alarms', resolvedData),
+      new Series('totali', 'Allarmi totali', totalData),
+      new Series('risolti', 'Allarmi risolti', resolvedData),
     ];
 
     return new Plot(TITLE, METRIC, UNIT, labels, series);

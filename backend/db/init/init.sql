@@ -12,7 +12,6 @@ DROP TABLE IF EXISTS ward;
 DROP TABLE IF EXISTS role;
 
 CREATE EXTENSION IF NOT EXISTS timescaledb;
-SET TIME ZONE 'UTC';
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -80,13 +79,6 @@ SELECT w.id, u.id FROM (VALUES
 ) AS a(username, ward_name)
 JOIN ward w ON w.name = a.ward_name
 JOIN "user" u ON u.username = a.username;
-
--- Assegnazioni aggiuntive per test allarmi su test-ward (endpoint by-user).
-INSERT INTO ward_user (ward_id, user_id)
-SELECT w.id, u.id
-FROM ward w
-JOIN "user" u ON u.username IN ('test', 'mrossi')
-WHERE w.name = 'test-ward';
 
 CREATE UNLOGGED TABLE token_cache (
     access_token  TEXT        NOT NULL,
@@ -685,17 +677,12 @@ INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority,
 ('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
 
 
-CREATE TABLE alarm_event (
-    id VARCHAR(255) PRIMARY KEY,
-    alarm_rule_id VARCHAR(255),
-    activation_time TIMESTAMPTZ NOT NULL,
-    resolution_time TIMESTAMPTZ,
-    user_id INTEGER,
-    FOREIGN KEY (alarm_rule_id)
-        REFERENCES alarm_rule(id)
-        ON DELETE SET NULL,
-    FOREIGN KEY (user_id)
-        REFERENCES "user"(id)
+CREATE TABLE IF NOT EXISTS alarm_event (
+    id              SERIAL       PRIMARY KEY,
+    activation_time TIMESTAMP    NOT NULL,
+    resolution_time TIMESTAMP,
+    alarm_rule_id        VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
+    user_id         INTEGER      REFERENCES "user"(id)
 );
 
 INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)

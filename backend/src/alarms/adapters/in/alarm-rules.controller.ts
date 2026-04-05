@@ -69,6 +69,7 @@ export class AlarmRulesController {
       new CreateAlarmRuleCmd(
         req.name,
         req.deviceId,
+        req.plantId,
         req.priority,
         req.thresholdOperator,
         req.thresholdValue,

@@ -19,6 +19,10 @@ export class CreateAlarmRuleReqDto {
   @IsString()
   deviceId!: string;
 
+  @ApiProperty()
+  @IsString()
+  plantId!: string;
+
   @ApiProperty({ enum: AlarmPriority })
   priority!: AlarmPriority;
 

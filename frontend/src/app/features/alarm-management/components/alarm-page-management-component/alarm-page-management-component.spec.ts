@@ -211,7 +211,7 @@ describe('AlarmPageManagementComponent', () => {
     const manageButtons = nativeElement.querySelectorAll('button[aria-label^="Gestisci allarme"]');
 
     expect(rows.length).toBe(2);
-    expect(nativeElement.textContent).toContain('Priorita');
+    expect(nativeElement.textContent).toContain('Priorità');
     expect(nativeElement.textContent).toContain('Dispositivo');
     expect(nativeElement.textContent).toContain('device-1');
     expect(nativeElement.textContent).toContain('Corridoio Nord');

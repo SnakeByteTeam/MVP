@@ -32,6 +32,14 @@ export class TopbarComponent {
     }
 
     public onProfileClick(): void {
+        if (!this.canOpenProfile) {
+            return;
+        }
+
         this.profileClicked.emit();
+    }
+
+    public get canOpenProfile(): boolean {
+        return this.user?.role === UserRole.AMMINISTRATORE;
     }
 }

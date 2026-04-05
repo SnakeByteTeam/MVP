@@ -93,6 +93,8 @@ export class MainLayoutComponent implements OnInit {
             this.isAdmin = true;
         } else {
             this.isAdmin = false;
+            this.isProfilePanelOpen = false;
+            return;
         }
 
         this.isProfilePanelOpen = !this.isProfilePanelOpen;

@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TopbarComponent } from './topbar.component';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { UserRole } from '../../../../core/models/user-role.enum';
+import { BreadcrumbService } from '../../../../core/services/breadcrumb.service';
+import { of } from 'rxjs';
 
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
@@ -16,7 +18,15 @@ describe('TopbarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TopbarComponent]
+      imports: [TopbarComponent],
+      providers: [
+        {
+          provide: BreadcrumbService,
+          useValue: {
+            breadcrumbs$: of([]),
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TopbarComponent);

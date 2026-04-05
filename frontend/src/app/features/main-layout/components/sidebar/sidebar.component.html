@@ -14,7 +14,7 @@
               (click)="navItemSelected.emit()"
             >
               <span class="sidebar-link-icon">
-                <img *ngIf="item.icon; else fallback" [src]="item.icon" alt="icon">
+                <img *ngIf="item.icon; else fallback" [src]="item.icon" alt="">
                 <ng-template #fallback>•</ng-template>
               </span>
               <span class="sidebar-link-label">{{ item.label }}</span>
@@ -30,9 +30,17 @@
               [class.is-active]="isProfileMode"
               (click)="navItemSelected.emit(); profileClicked.emit()">
               <span class="sidebar-link-icon">
-                <img src="user-avatar.png" alt="icon">
+                <img src="user-avatar.png" alt="">
               </span>
               <span class="sidebar-link-label">Profilo</span>
+            </a>
+          </li>
+          <li class="sidebar-logout-mobile">
+            <a class="sidebar-link" [class.is-active]="isLogoutMode" (click)="navItemSelected.emit(); logoutClicked.emit()">
+              <span class="sidebar-link-icon">
+                <img src="logout.png" alt="">
+              </span>
+              <span class="sidebar-link-label">Esci</span>
             </a>
           </li>
           }

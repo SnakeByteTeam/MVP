@@ -18,17 +18,17 @@ export class NavService {
                 route: "apartment-monitor"
             },
             {
-                label: "Allarmi attivi",
+                label: "Gestione Allarmi",
                 icon: "alarm-management.png",
                 route: "alarms/alarm-management"
             },
             {
-                label: "Storico allarmi",
+                label: "Storico Allarmi",
                 icon: "alarm-history.png",
                 route: "alarms/alarm-history"
             },
             {
-                label: "Gestione allarmi",
+                label: "Configurazione Allarmi",
                 icon: "alarm-configuration.png",
                 route: "alarms/alarm-configuration",
                 requiredRole: UserRole.AMMINISTRATORE

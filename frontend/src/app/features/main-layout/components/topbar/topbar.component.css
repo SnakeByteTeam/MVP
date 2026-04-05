@@ -168,7 +168,7 @@
 }
 
 @media (max-width: 767px) {
-    .hamburger-btn {
+	.hamburger-btn {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -180,9 +180,7 @@
         padding: 0.4rem 0.6rem;
         cursor: pointer;
     }
-}
 
-@media (max-width: 820px) {
 	.topbar-shell {
 		padding-inline: 0.9rem;
 	}
@@ -191,17 +189,15 @@
 		display: none;
 	}
 
-	.topbar-button-neutral {
-		display: none;
-	}
-
 	.topbar-user-meta {
 		display: none;
 	}
-}
 
-@media (max-width: 767px) {
-  .topbar-profile--desktop {
-    display: none;
-  }
+	.topbar-profile--desktop {
+		display: none;
+	}
+
+	.topbar-button-logout {
+		display: none;
+	}
 }

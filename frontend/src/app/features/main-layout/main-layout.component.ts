@@ -1,5 +1,5 @@
 
-import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NavItem } from '../../core/models/nav-item.model';
 import { Observable } from 'rxjs';
 import { NavService } from './services/nav.service';
@@ -30,9 +30,10 @@ import { IVimarCloudApiService, VIMAR_CLOUD_API_SERVICE } from '../../core/servi
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css'})
 export class MainLayoutComponent implements OnInit {
-    public isCollapsed: boolean = false;
+    public isCollapsed: boolean = true;
     public navItems!: NavItem[];
     public isProfilePanelOpen = false;
+    public isLogoutPanelOpen = false;
     public isVimarStatusLoading = false;
     public vimarStatusError = '';
     public vimarAccount: MyVimarAccount | null = null;
@@ -42,7 +43,6 @@ export class MainLayoutComponent implements OnInit {
     private readonly alarmStateService = inject(AlarmStateService);
     private readonly router = inject(Router);
     private readonly myVimarService = inject(VIMAR_CLOUD_API_SERVICE, { optional: true }) as IVimarCloudApiService | null;
-
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
 
     //public currentUser$ : Observable<UserSession | null> = this.internalAuthService.getCurrentUser$();

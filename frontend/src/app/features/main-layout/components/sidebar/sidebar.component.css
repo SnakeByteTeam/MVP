@@ -111,6 +111,7 @@ li:hover {
 		inset: 0;
 		pointer-events: none;
 		width: 100%;
+		padding: 0;
 	}
 
 	.sidebar-overlay {
@@ -123,15 +124,17 @@ li:hover {
 	}
 
 	.sidebar-inner {
-		position: absolute;
-		top: 0;
+		position: fixed;
+		top: 13vh;
 		left: 0;
-		height: 100%;
+		height: calc(100vh - 13vh);
 		width: 240px;
 		background: white;
 		transform: translateX(-100%);
 		transition: transform 0.25s ease;
-		padding: 6em 1em 0 1em;
+		padding: 1em 1em 0 1em;
+		overflow-y: auto;
+		box-sizing: border-box;
 	}
 
 	.sidebar-shell.is-open {
@@ -146,7 +149,7 @@ li:hover {
 		transform: translateX(0);
 	}
 
-	.sidebar-profile-mobile {
+	.sidebar-profile-mobile, .sidebar-logout-mobile {
 		display: flex;
 		align-items: center;
 		gap: 0.7rem;

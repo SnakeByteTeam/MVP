@@ -8,10 +8,11 @@
 
 <div class="flex h-[87vh] overflow-hidden">
 
-    <app-sidebar class=" block h-full" [navItems]="navItems" [isCollapsed]="isCollapsed"
-        [isProfileMode]="isProfilePanelOpen" [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
+    <app-sidebar class="block h-full" [navItems]="navItems" [isCollapsed]="isCollapsed"
+        [isProfileMode]="isProfilePanelOpen" [isLogoutMode]="isLogoutPanelOpen" [activeAlarmCount]="(activeAlarmCount$ | async) ?? 0"
         (collapsed)="toggleSidebar()" (navItemSelected)="closeProfilePanel(); isCollapsed = true"
-        [canOpenProfile]="canOpenProfilePanel()" (profileClicked)="toggleProfilePanel()"
+        [canOpenProfile]="canOpenProfilePanel()" (profileClicked)="toggleProfilePanel()" 
+        (logoutClicked)="logout()"
         (navItemSelected)="closeProfilePanel(); isCollapsed = true">
     </app-sidebar>
 

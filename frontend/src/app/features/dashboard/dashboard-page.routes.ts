@@ -5,6 +5,6 @@ export const DASHBOARD_ROUTES : Routes = [
     {
     path: '',
     //canActivate: [authGuard],
-    loadComponent: () => import('./components/dashboard-page.component').then((m) => m.dashboardComponent)
+    loadComponent: () => import('./components/dashboard-page/dashboard-page.component').then((m) => m.dashboardComponent)
     },
 ];

@@ -12,7 +12,6 @@ import { ProlongedPresenceChartComponent } from './components/prolonged-presence
 import { TemperatureVariationsChartComponent } from './components/temperature-variations-chart/temperature-variations-chart.component';
 import { Observable,  switchMap, filter, BehaviorSubject, startWith } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { tap } from 'rxjs';
 
 @Component({ 
     selector: 'app-analytics', 

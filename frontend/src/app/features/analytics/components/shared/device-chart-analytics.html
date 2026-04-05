@@ -1,6 +1,6 @@
 <div class="flex flex-col lg:flex-row border border-slate-200 bg-white shadow-sm overflow-y-auto rounded-3xl 
 
-           [&::-webkit-scrollbar]:w-[8px] 
+           [&::-webkit-scrollbar]:w-2 
            [&::-webkit-scrollbar-track]:my-5
            [&::-webkit-scrollbar-thumb]:bg-[rgb(210,210,210)]
            [&::-webkit-scrollbar-thumb]:rounded-full">
@@ -9,7 +9,7 @@
           'w-full': !chartInfo.suggestions.isSuggestion,
           'lg:w-[70%]': chartInfo.suggestions.isSuggestion
        }"
-       class="block h-full p-4 bg-white p-4  rounded-tl-3xl rounded-bl-3xl sticky top-0 border-r border-slate-200">
+       class="block h-full p-4 bg-white  rounded-tl-3xl rounded-bl-3xl border-r border-slate-200">
   <div class="border-b border-slate-200 pb-1 mb-5">
     <h1 class="font-bold text-slate-700">{{chartInfo.title}}</h1>
     <h2>Dispositivi - {{chartInfo.unit}}</h2>

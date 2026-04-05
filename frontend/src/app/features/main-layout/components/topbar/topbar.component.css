@@ -1,5 +1,7 @@
 :host {
     display: block;
+    position: relative;
+    z-index: 50;
 }
 
 .topbar-shell {
@@ -203,10 +205,6 @@
 
     .topbar-shell {
         padding-inline: 0.9rem;
-    }
-
-    .topbar-breadcrumb {
-        display: none;
     }
 
     .topbar-user-meta {

@@ -1,0 +1,40 @@
+<div class="flex flex-col lg:flex-row border border-slate-200 bg-white shadow-sm overflow-y-auto rounded-3xl 
+
+           [&::-webkit-scrollbar]:w-2 
+           [&::-webkit-scrollbar-track]:my-5
+           [&::-webkit-scrollbar-thumb]:bg-[rgb(210,210,210)]
+           [&::-webkit-scrollbar-thumb]:rounded-full">
+
+<div [ngClass]="{
+          'w-full': !chartInfo.suggestions.isSuggestion,
+          'lg:w-[70%]': chartInfo.suggestions.isSuggestion
+       }"
+       class="block h-full p-4 bg-white  rounded-tl-3xl rounded-bl-3xl border-r border-slate-200">
+  <div class="border-b border-slate-200 pb-1 mb-5">
+    <h1 class="font-bold text-slate-700">{{chartInfo.title}}</h1>
+    <h2>Dispositivi - {{chartInfo.unit}}</h2>
+  </div>
+
+  <canvas baseChart
+    [data]="renderedChartData"
+    [options]="chartOptions"
+    [type]="chartType">
+  </canvas>
+
+
+</div>
+
+<div *ngIf="chartInfo.suggestions.isSuggestion" class="lg:h-0 lg:w-[30%] p-3 ">
+  <h1 class="font-bold p-2 text-slate-700">Suggerimenti Risparmio Energetico</h1>
+  <ul class="flex flex-col gap-3">
+    @for(sugg of chartInfo.suggestions.messages; track sugg){
+    <li class="p-4 rounded-2xl border border-[rgb(255,212,0)] bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
+      <p class="font-bold text-amber-500 ">SUGGERIMENTO</p>
+      <p>{{sugg}}</p>
+    </li>
+  }
+  </ul>
+</div>
+
+</div>
+

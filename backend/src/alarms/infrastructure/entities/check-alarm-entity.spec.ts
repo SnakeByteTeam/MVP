@@ -2,6 +2,6 @@ import { CheckAlarmEntity } from './check-alarm-entity';
 
 describe('CheckAlarmEntity', () => {
   it('should be defined', () => {
-    expect(new CheckAlarmEntity()).toBeDefined();
+    expect(new CheckAlarmEntity('rule-1', 1)).toBeDefined();
   });
 });

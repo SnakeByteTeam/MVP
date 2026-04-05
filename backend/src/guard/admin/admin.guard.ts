@@ -11,6 +11,11 @@ import { Observable } from 'rxjs';
 export class AdminGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
 
+  private static readonly ADMIN_ROLES = new Set([
+    'AMMINISTRATORE',
+    'Amministratore',
+  ]);
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -32,7 +37,10 @@ export class AdminGuard implements CanActivate {
         secret: process.env.ACCESS_SECRET,
       });
       if (payload) {
-        if (payload.role === 'Amministratore') {
+        const role =
+          typeof payload.role === 'string' ? payload.role.trim() : '';
+
+        if (AdminGuard.ADMIN_ROLES.has(role)) {
           return true;
         }
       }

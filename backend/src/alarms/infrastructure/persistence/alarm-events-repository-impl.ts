@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
 import { ResolveAlarmEventRepository } from '../../application/repository/resolve-alarm-event-repository.interface';
@@ -103,7 +103,7 @@ export class AlarmEventsRepositoryImpl
   ): Promise<void> {
     return await this.pool.query(
       `INSERT INTO alarm_event (id, alarm_rule_id, activation_time) VALUES ($1,$2,$3)`,
-      [uuidv4(), alarmRuleId, activationTime],
+      [randomUUID(), alarmRuleId, activationTime],
     );
   }
 }

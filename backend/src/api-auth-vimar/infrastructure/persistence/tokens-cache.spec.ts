@@ -96,4 +96,27 @@ describe('TokenCacheImpl', () => {
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
+
+  it('should delete tokens and return true when query succeeds', async () => {
+    queryMock.mockResolvedValue({ rows: [] });
+
+    const result = await cacheImpl.deleteTokens();
+
+    expect(result).toBe(true);
+    expect(pool.connect).toHaveBeenCalledTimes(1);
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(queryMock).toHaveBeenCalledWith('DELETE FROM token_cache');
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return false when delete query throws', async () => {
+    queryMock.mockRejectedValue(new Error('db delete error'));
+
+    const result = await cacheImpl.deleteTokens();
+
+    expect(result).toBe(false);
+    expect(pool.connect).toHaveBeenCalledTimes(1);
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+  });
 });

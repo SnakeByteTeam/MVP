@@ -1,20 +1,45 @@
-<aside class="sidebar-shell">
-  <ul class="sidebar-nav">
-    @for (item of navItems; track item.label) {
-    <li>
-      <a [routerLink]="item.route" routerLinkActive #rla="routerLinkActive"
-        [class.is-active]="!isProfileMode && rla.isActive" class="sidebar-link"
-        (click)="navItemSelected.emit(item.route)">
-        <span class="sidebar-link-icon">{{ item.icon || '•' }}</span>
-        <span class="sidebar-link-label">{{ item.label }}</span>
-      </a>
-    </li>
-    } @empty {
-    <li class="sidebar-empty">Menu di navigazione vuoto!</li>
-    }
-  </ul>
+<aside class="sidebar-shell" [class.is-open]="!isCollapsed">
+
+  <div class="sidebar-overlay" (click)="collapsed.emit()"></div>
+    <div class="sidebar-inner">
+      <ul class="sidebar-nav">
+        @for (item of navItems; track item.label) {
+          <li>
+            <a
+              [routerLink]="item.route"
+              routerLinkActive
+              #rla="routerLinkActive"
+              [class.is-active]="!isProfileMode && rla.isActive"
+              class="sidebar-link"
+              (click)="navItemSelected.emit(item.route)"
+            >
+              <span class="sidebar-link-icon">
+                <img *ngIf="item.icon; else fallback" [src]="item.icon" alt="">
+                <ng-template #fallback>•</ng-template>
+              </span>
+              <span class="sidebar-link-label">{{ item.label }}</span>
+            </a>
+          </li>
+        } @empty {
+          <li class="sidebar-empty">Menu di navigazione vuoto!</li>
+        }
+        @if (canOpenProfile) {
+          <li class="sidebar-profile-mobile">
+            <a 
+              class="sidebar-link"
+              [class.is-active]="isProfileMode"
+              (click)="navItemSelected.emit(); profileClicked.emit()">
+              <span class="sidebar-link-icon">
+                <img src="user-avatar.png" alt="">
+              </span>
+              <span class="sidebar-link-label">Profilo</span>
+            </a>
+          </li>
+        }
+      </ul>
 
   @if (activeAlarmCount > 0) {
   <p class="sidebar-alert">Allarmi attivi: {{ activeAlarmCount }}</p>
   }
+  </div>
 </aside>

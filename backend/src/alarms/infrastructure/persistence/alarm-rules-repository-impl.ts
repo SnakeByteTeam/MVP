@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { DeleteAlarmRuleRepository } from '../../application/repository/delete-alarm-rule-repository.interface';
 import { GetAllAlarmRulesRepository } from '../../application/repository/get-all-alarm-rules-repository.interface';
 import { AlarmPriority } from '../../domain/models/alarm-priority.enum';
@@ -47,7 +47,7 @@ export class AlarmRulesRepositoryImpl
        VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10)
        RETURNING *`,
       [
-        uuidv4(),
+        randomUUID(),
         name,
         thresholdOperator,
         thresholdValue,

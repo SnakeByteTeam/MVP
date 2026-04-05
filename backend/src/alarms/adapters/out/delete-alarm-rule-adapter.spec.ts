@@ -1,7 +1,7 @@
-import { DeleteAlarmAdapter } from './delete-alarm-rule-adapter';
+import { DeleteAlarmRuleAdapter } from './delete-alarm-rule-adapter';
 
-describe('DeleteAlarmAdapter', () => {
+describe('DeleteAlarmRuleAdapter', () => {
   it('should be defined', () => {
-    expect(new DeleteAlarmAdapter()).toBeDefined();
+    expect(new DeleteAlarmRuleAdapter({} as any)).toBeDefined();
   });
 });

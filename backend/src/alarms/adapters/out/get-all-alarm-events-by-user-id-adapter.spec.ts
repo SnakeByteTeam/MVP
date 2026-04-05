@@ -2,6 +2,6 @@ import { GetAllAlarmEventsByUserIdAdapter } from './get-all-alarm-events-by-user
 
 describe('GetAllAlarmEventsByUserIdAdapter', () => {
   it('should be defined', () => {
-    expect(new GetAllAlarmEventsByUserIdAdapter()).toBeDefined();
+    expect(new GetAllAlarmEventsByUserIdAdapter({} as any)).toBeDefined();
   });
 });

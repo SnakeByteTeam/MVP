@@ -89,6 +89,7 @@ describe('AlarmDeviceCatalogService', () => {
                             type: DeviceType.LIGHT,
                             status: 'ONLINE',
                             actions: [],
+                            datapoints: [],
                         },
                     ],
                 },

@@ -4,11 +4,12 @@ import { Pool } from 'pg';
 import { WriteTokensCachePort } from 'src/api-auth-vimar/application/repository/write-tokens-cache.port';
 import { PG_POOL } from 'src/database/database.module';
 import { ReadTokensCachePort } from 'src/api-auth-vimar/application/repository/read-tokens-cache.port';
+import { DeleteTokensCachePort } from 'src/api-auth-vimar/application/repository/delete-tokens-cache.port';
 import { TokenEntity } from './entities/tokens.entity';
 
 @Injectable()
 export class TokenCacheImpl
-  implements WriteTokensCachePort, ReadTokensCachePort
+  implements WriteTokensCachePort, ReadTokensCachePort, DeleteTokensCachePort
 {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
@@ -56,6 +57,19 @@ export class TokenCacheImpl
       };
 
       return tokens;
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteTokens(): Promise<boolean> {
+    const client = await this.pool.connect();
+
+    try {
+      await client.query('DELETE FROM token_cache');
+      return true;
+    } catch {
+      return false;
     } finally {
       client.release();
     }

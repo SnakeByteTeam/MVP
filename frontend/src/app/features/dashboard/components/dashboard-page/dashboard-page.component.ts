@@ -6,6 +6,9 @@ import { AlarmsSentResolvedChartComponent } from '../../../analytics/components/
 import { EnergyConsumptionChartComponent } from '../../../analytics/components/energy-consumption-chart/energy-consumption-chart.component';
 import { Observable,  switchMap, filter, BehaviorSubject, startWith } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { PlantDto } from '../../../apartment-monitor/models/plant-response.model';
+import { combineLatest, map } from 'rxjs';
+import { plantOverviewComponent } from '../plant-overview/plant-overview.component';
 
 @Component({ 
     selector: 'app-dashboard', 
@@ -14,14 +17,16 @@ import { CommonModule } from '@angular/common';
         CommonModule,
         AlarmsSentResolvedChartComponent,
         EnergyConsumptionChartComponent,
+        plantOverviewComponent
     ],
     templateUrl: './dashboard-page.component.html' })
 export class dashboardComponent{    
     private analyticsApiService = inject(AnalyticsApiService);
     
     public selectedApartmentId$ = new BehaviorSubject<string | null>(null);
+    public selectedApartment$: Observable<PlantDto | undefined> | null = null;
     
-    public apartments$: Observable<any[]> | null = null;
+    public apartments$: Observable<PlantDto[]> | null = null;
     public analytics: Observable<AnalyticsDto | null> | null = null;
 
     public ngOnInit(): void {
@@ -32,6 +37,13 @@ export class dashboardComponent{
                 this.selectedApartmentId$.next(apartments[0].id);
             }
         });
+
+        this.selectedApartment$ = combineLatest([
+            this.apartments$,
+            this.selectedApartmentId$
+        ]).pipe(
+            map(([apartments, id]) => apartments.find(a => a.id === id))
+        );
 
         this.analytics = this.selectedApartmentId$.pipe(
             filter(id => id !== null), 

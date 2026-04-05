@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { AnalyticsDto } from '../models/analytics.model';
 import { Observable, map, of } from 'rxjs';
+import { PlantDto } from '../../apartment-monitor/models/plant-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {
@@ -19,7 +20,7 @@ export class AnalyticsApiService {
           id: item.id,
           name: item.name,
           rooms: item.rooms,
-        })))
+        } as PlantDto)))
       );
     }
 

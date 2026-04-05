@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { AnalyticsDto } from '../models/analytics.model';
 import { Observable, map, of } from 'rxjs';
-import { Apartment } from '../../apartment-monitor/models/apartment.model';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {
@@ -14,13 +13,13 @@ export class AnalyticsApiService {
     private readonly apartmentsEndpoint = `${this.baseUrl}/plant/all`;
 
     public getAllApartments():Observable<any[]>{
-      
-
+  
       return this.http.get<any[]>(this.apartmentsEndpoint).pipe(
         map(response => response.map(item => ({
           id: item.id,
           name: item.name,
-        } )))
+          rooms: item.rooms,
+        })))
       );
     }
 

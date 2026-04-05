@@ -22,7 +22,7 @@
     WIDGET ALLARMI MANNAGGIA
 </div>
 
-<div class="p-4 border border-[rgb(255,212,0)] bg-white rounded-3xl">
+<div class="p-4 border border-[rgb(255,212,0)] bg-white rounded-3xl xl:w-[60%]">
     
 <div class="max-w-md p-4">
     <label for="apartment-select" 
@@ -57,14 +57,14 @@ class="grid grid-cols-6 gap-4 w-full bg-transparent gap-10 p-4">
 
     <app-energy-consumption-chart 
         *ngIf="getChartByMetric(data, 'plant-consumption') as info"
-        class="col-span-6 xl:col-span-3 2xl:col-span-2"
+        class="col-span-6 2xl:col-span-3"
         [chartInfo]="info"
         [showSuggestions]="false">
     </app-energy-consumption-chart>
 
     <app-alarms-sent-resolved-chart 
         *ngIf="getChartByMetric(data, 'ward-resolved-alarm') as info"
-        class="col-span-6 xl:col-span-3 2xl:col-span-2"
+        class="col-span-6 2xl:col-span-3"
         [chartInfo]="info"
         [showSuggestions]="false">
     </app-alarms-sent-resolved-chart>

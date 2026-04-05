@@ -8,7 +8,7 @@ import { Observable,  switchMap, filter, BehaviorSubject, startWith } from 'rxjs
 import { CommonModule } from '@angular/common';
 
 @Component({ 
-    selector: 'app-analytics', 
+    selector: 'app-dashboard', 
     standalone: true, 
     imports: [
         CommonModule,
@@ -32,8 +32,6 @@ export class dashboardComponent{
                 this.selectedApartmentId$.next(apartments[0].id);
             }
         });
-
-        //reazione ai cambi di appartamento
 
         this.analytics = this.selectedApartmentId$.pipe(
             filter(id => id !== null), 

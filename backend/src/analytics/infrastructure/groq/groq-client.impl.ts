@@ -53,6 +53,11 @@ export class GroqClientImpl implements GroqClient {
     current: GetSuggestionCmd,
     baseline: GetSuggestionCmd,
   ): Promise<GroqSuggestionResultDto> {
+    const SUPPORTED_METRICS = Object.keys(METRIC_LABELS);
+
+    if (!SUPPORTED_METRICS.includes(current.metric)) {
+      return EMPTY_SUGGESTION;
+    }
     const hasSeries = current.series.some((s) => s.getData().length > 0);
 
     if (!hasSeries) {

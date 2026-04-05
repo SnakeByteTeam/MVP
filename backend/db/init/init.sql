@@ -678,7 +678,7 @@ INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority,
 
 
 CREATE TABLE IF NOT EXISTS alarm_event (
-    id              SERIAL       PRIMARY KEY,
+    id              VARCHAR(255)       PRIMARY KEY,
     activation_time TIMESTAMP    NOT NULL,
     resolution_time TIMESTAMP,
     alarm_rule_id        VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),

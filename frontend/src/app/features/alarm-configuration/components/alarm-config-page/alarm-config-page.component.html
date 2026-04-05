@@ -21,7 +21,11 @@
         @if (rows().length === 0) {
         <tr>
             <td [attr.colspan]="columns.length" class="px-5 py-14 text-center text-sm text-slate-600">
+                @if (error()) {
+                Impossibile caricare le regole di allarme. Verifica la sessione o riprova tra poco.
+                } @else {
                 Nessuna regola configurata.
+                }
             </td>
         </tr>
         } @else {

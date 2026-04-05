@@ -422,14 +422,14 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.onAlarmResolved).not.toHaveBeenCalled();
     });
 
-    it('initialize con errore non strutturato usa messaggio fallback', async () => {
+    it('initialize con errore non strutturato usa fallback di caricamento', async () => {
         alarmApiStub.getActiveAlarms.mockReturnValueOnce(throwError(() => ({ cause: 'unknown' })));
 
         service = createService();
         service.initialize();
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(vm.resolveError).toBe("Errore durante la risoluzione dell'allarme.");
+        expect(vm.resolveError).toBe('Errore durante il caricamento degli allarmi attivi.');
     });
 
     it('initialize OSS con userId non numerico non applica filtri frontend alla lista', async () => {

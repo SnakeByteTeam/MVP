@@ -35,7 +35,7 @@
     </div>
     }
 
-    @if (rows().length === 0) {
+    @if (rows().length === 0 && !vmState.resolveError) {
     <div
         class="alarm-management__empty mt-3 flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white/70 p-14 text-center shadow-sm backdrop-blur-sm">
         <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">

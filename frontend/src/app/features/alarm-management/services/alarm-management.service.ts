@@ -17,6 +17,7 @@ import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service'
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
 
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,7 @@ export class AlarmManagementService {
     private readonly alarmStateService = inject(AlarmStateService);
     private readonly alarmApiService = inject(AlarmApiService);
     private readonly authService = inject(InternalAuthService);
+    private readonly apiErrorDisplayService = inject(ApiErrorDisplayService);
     private readonly pageLimit = 6;
 
     private readonly resolvingId$ = new BehaviorSubject<string | null>(null);
@@ -102,7 +104,13 @@ export class AlarmManagementService {
                     this.loadPage(this.pageOffset$.getValue(), true);
                 }),
                 catchError((error: unknown) => {
-                    this.resolveError$.next(this.mapResolveError(error));
+                    this.resolveError$.next(
+                        this.apiErrorDisplayService.toMessage(error, {
+                            actionLabel: "completare la risoluzione dell'allarme",
+                            fallbackMessage: "Errore durante la risoluzione dell'allarme.",
+                            nonHttpStrategy: 'message',
+                        }),
+                    );
                     return EMPTY;
                 }),
                 finalize(() => {
@@ -147,28 +155,16 @@ export class AlarmManagementService {
                     this.canGoNext$.next(alarms.length === this.pageLimit);
                 }),
                 catchError((error: unknown) => {
-                    this.resolveError$.next(this.mapResolveError(error));
+                    this.resolveError$.next(
+                        this.apiErrorDisplayService.toMessage(error, {
+                            actionLabel: 'caricare gli allarmi attivi',
+                            fallbackMessage: 'Errore durante il caricamento degli allarmi attivi.',
+                            nonHttpStrategy: 'message',
+                        }),
+                    );
                     return EMPTY;
                 })
             )
             .subscribe();
-    }
-
-    private mapResolveError(error: unknown): string {
-        if (error instanceof Error && error.message.trim().length > 0) {
-            return error.message;
-        }
-
-        if (
-            typeof error === 'object' &&
-            error !== null &&
-            'message' in error &&
-            typeof error.message === 'string' &&
-            error.message.trim().length > 0
-        ) {
-            return error.message;
-        }
-
-        return 'Errore durante la risoluzione dell\'allarme.';
     }
 }

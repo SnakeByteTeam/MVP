@@ -15,6 +15,7 @@ import { RouterModule } from '@angular/router';
 export class TopbarComponent {
     @Input() user!: UserInfo;
     @Input() isProfileActive = false;
+    @Input() showVimarWarning = false;
     @Output() profileClicked = new EventEmitter<void>();
     @Output() logoutClicked = new EventEmitter<void>();
     @Output() hamburgerClicked = new EventEmitter<void>();
@@ -32,6 +33,14 @@ export class TopbarComponent {
     }
 
     public onProfileClick(): void {
+        if (!this.canOpenProfile) {
+            return;
+        }
+
         this.profileClicked.emit();
+    }
+
+    public get canOpenProfile(): boolean {
+        return this.user?.role === UserRole.AMMINISTRATORE;
     }
 }

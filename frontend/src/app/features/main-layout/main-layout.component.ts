@@ -1,11 +1,10 @@
 
 import { Component, inject, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NavItem } from '../../core/models/nav-item.model';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { NavService } from './services/nav.service';
 import { InternalAuthService } from '../../core/services/internal-auth.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
-import { UserSession } from '../user-auth/models/user-session.model';
 import { TopbarComponent } from './components/topbar/topbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
@@ -38,6 +37,7 @@ export class MainLayoutComponent implements OnInit {
     public isVimarStatusLoading = false;
     public vimarStatusError = '';
     public vimarAccount: MyVimarAccount | null = null;
+    public showVimarAssociationWarning = false;
 
     private readonly navService = inject(NavService);
     private readonly internalAuthService = inject(InternalAuthService);
@@ -48,40 +48,42 @@ export class MainLayoutComponent implements OnInit {
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
     private readonly cdr = inject(ChangeDetectorRef);
 
-    //public currentUser$ : Observable<UserSession | null> = this.internalAuthService.getCurrentUser$();
-
-    //temp mocks.... TO REMOVE
-    //PROBLEMA: UserSession non permette di ricostruitre il nome e il cognome
-    public userS : UserSession = {
-        userId: "1",
-        username: "username",
-        role: UserRole.AMMINISTRATORE,
-        accessToken: "aa",
-        isFirstAccess: false
-    };
-
     public currentUser : UserInfo = {
-        username: "usern",
-        firstName: "pippo",
-        lastName: "pluto",
-        role: UserRole.AMMINISTRATORE
+        username: '',
+        firstName: '',
+        lastName: '',
+        role: UserRole.OPERATORE_SANITARIO
     };
-    //....
 
     public activeAlarmCount$ : Observable<number> = this.alarmStateService.getActiveAlarmsCount$();
 
     public ngOnInit(): void{
-        const role = this.internalAuthService.getRole();
-        if(role) {
-            this.currentUser = {
-                ...this.currentUser,
-                role,
-            };
-            this.navItems = this.navService.getNavItems(role);
-        } else {
-            this.navItems = [];
-            this.navItems = this.navService.getNavItems(UserRole.AMMINISTRATORE);//solo di prova
-        }
+        this.internalAuthService
+            .getCurrentUser$()
+            .pipe(take(1))
+            .subscribe((session) => {
+                if (!session) {
+                    this.navItems = [];
+                    void this.router.navigate(['/auth/login']);
+                    return;
+                }
+
+                this.currentUser = {
+                    username: session.username,
+                    // The backend token does not include first/last name claims yet.
+                    firstName: session.username,
+                    lastName: '',
+                    role: session.role,
+                };
+                this.isAdmin = session.role === UserRole.AMMINISTRATORE;
+                this.navItems = this.navService.getNavItems(session.role);
+
+                if (this.isAdmin) {
+                    this.loadVimarStatus();
+                }
+
+                this.cdr.markForCheck();
+            });
     }
 
     public toggleSidebar(): void{
@@ -93,6 +95,8 @@ export class MainLayoutComponent implements OnInit {
             this.isAdmin = true;
         } else {
             this.isAdmin = false;
+            this.isProfilePanelOpen = false;
+            return;
         }
 
         this.isProfilePanelOpen = !this.isProfilePanelOpen;
@@ -140,6 +144,7 @@ export class MainLayoutComponent implements OnInit {
             this.vimarAccount = { email: '', isLinked: false };
             this.vimarStatusError = 'Servizio MyVimar non disponibile in questa sezione.';
             this.isVimarStatusLoading = false;
+            this.showVimarAssociationWarning = false;
             this.cdr.markForCheck();
             return;
         }
@@ -152,12 +157,14 @@ export class MainLayoutComponent implements OnInit {
             next: (account) => {
                 this.vimarAccount = account;
                 this.isVimarStatusLoading = false;
+                this.showVimarAssociationWarning = this.canOpenProfilePanel() && !account.isLinked;
                 this.cdr.markForCheck();
             },
             error: () => {
                 this.vimarAccount = { email: '', isLinked: false };
                 this.vimarStatusError = 'Impossibile recuperare lo stato del collegamento MyVimar.';
                 this.isVimarStatusLoading = false;
+                this.showVimarAssociationWarning = false;
                 this.cdr.markForCheck();
             }
         });

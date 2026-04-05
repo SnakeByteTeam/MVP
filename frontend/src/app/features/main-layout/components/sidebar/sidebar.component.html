@@ -11,7 +11,7 @@
               #rla="routerLinkActive"
               [class.is-active]="!isProfileMode && rla.isActive"
               class="sidebar-link"
-              (click)="navItemSelected.emit()"
+              (click)="navItemSelected.emit(item.route)"
             >
               <span class="sidebar-link-icon">
                 <img *ngIf="item.icon; else fallback" [src]="item.icon" alt="">
@@ -23,6 +23,7 @@
         } @empty {
           <li class="sidebar-empty">Menu di navigazione vuoto!</li>
         }
+        @if (canOpenProfile) {
           <li class="sidebar-profile-mobile">
             <a 
               class="sidebar-link"
@@ -34,6 +35,7 @@
               <span class="sidebar-link-label">Profilo</span>
             </a>
           </li>
+        }
       </ul>
 
   @if (activeAlarmCount > 0) {

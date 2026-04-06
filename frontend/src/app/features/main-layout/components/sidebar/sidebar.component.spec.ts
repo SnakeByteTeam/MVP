@@ -24,7 +24,7 @@ describe('SidebarComponent', () => {
       { label: 'test2', route: 'path2', icon: '' }
     ];
     fixture.detectChanges();
-    
+
     const links = fixture.nativeElement.querySelectorAll('a');
     expect(links.length).toBe(2);
     expect(links[0].textContent).toContain('test1');
@@ -36,7 +36,7 @@ describe('SidebarComponent', () => {
   it('mostra messaggio se navItems è vuoto', () => {
     component.navItems = [];
     fixture.detectChanges();
-    
+
     const content = fixture.nativeElement.textContent;
     expect(content).toContain('Menu di navigazione vuoto!');
   });

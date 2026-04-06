@@ -7,7 +7,11 @@ import { ANOMALY_THRESHOLD_WH } from './consumption-config';
 import { Series } from 'src/analytics/domain/series.model';
 import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
-const { title: TITLE, metric: METRIC } = AnalyticsMetric.PLANT_ANOMALIES;
+const {
+  title: TITLE,
+  metric: METRIC,
+  desc: DESC,
+} = AnalyticsMetric.PLANT_ANOMALIES;
 
 @Injectable()
 export class PlantAnomalies implements AnalyticsStrategy {
@@ -28,7 +32,7 @@ export class PlantAnomalies implements AnalyticsStrategy {
     );
 
     return new Plot(TITLE, METRIC, 'anomalie', labels, [
-      new Series(METRIC, TITLE, anomalyData),
+      new Series(METRIC, DESC, anomalyData),
     ]);
   }
 }

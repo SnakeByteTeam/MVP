@@ -4,8 +4,10 @@ import { InternalAuthService } from "../../../core/services/internal-auth.servic
 import { ApiErrorDisplayService } from "../../../core/services/api-error-display.service";
 import {
     BehaviorSubject,
+    catchError,
     combineLatest,
     map,
+    of,
     shareReplay,
     switchMap,
     take,
@@ -70,7 +72,8 @@ export class AlarmHistoryService {
                     this.pageLimit + 1,
                     offset
                 );
-            })
+            }),
+            catchError(() => of([]))
         ).subscribe({
             next: (alarms: ActiveAlarm[]) => {
                 const hasNext = alarms.length > this.pageLimit;

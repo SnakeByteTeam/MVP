@@ -7,6 +7,7 @@ import { AuthErrorType } from '../../models/auth-error-type.enum';
 	selector: 'app-first-access',
 	imports: [ReactiveFormsModule],
 	templateUrl: './first-access.component.html',
+	styleUrls: ['./first-access.component.css'],
 })
 export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 	private readonly fb = inject(FormBuilder);

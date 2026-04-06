@@ -146,12 +146,12 @@ export class EventSubscriptionService implements OnDestroy {
 
 	private dispatchAlarmEvent(event: PushEvent): void {
 		if (event.eventType === PushEventType.ALARM_RESOLVED) {
-			const activeAlarmId = this.extractActiveAlarmId(event.payload);
-			if (!activeAlarmId) {
+			const alarmId = this.extractAlarmId(event.payload);
+			if (!alarmId) {
 				return;
 			}
 
-			this.alarmStateService.onAlarmResolved(activeAlarmId);
+			this.alarmStateService.onAlarmResolved(alarmId);
 			return;
 		}
 
@@ -177,34 +177,31 @@ export class EventSubscriptionService implements OnDestroy {
 			return null;
 		}
 
-		const activeAlarmId = payload['activeAlarmId'];
+		const id = payload['id'];
 		const alarmRuleId = payload['alarmRuleId'];
 		const alarmName = payload['alarmName'];
 		const priority = payload['priority'];
-		const triggeredAt = payload['triggeredAt'];
-		const resolvedAt = payload['resolvedAt'];
-		const userId = payload['user_id'];
+		const activationTime = payload['activationTime'];
+		const resolutionTime = payload['resolutionTime'];
 
 		if (
-			typeof activeAlarmId !== 'string' ||
+			typeof id !== 'string' ||
 			typeof alarmRuleId !== 'string' ||
 			typeof alarmName !== 'string' ||
 			!this.isAlarmPriority(priority) ||
-			typeof triggeredAt !== 'string' ||
-			!(typeof resolvedAt === 'string' || resolvedAt === null) ||
-			!(typeof userId === 'string' || userId === null)
+			typeof activationTime !== 'string' ||
+			!(typeof resolutionTime === 'string' || resolutionTime === null)
 		) {
 			return null;
 		}
 
 		return {
-			activeAlarmId,
+			id,
 			alarmRuleId,
 			alarmName,
 			priority,
-			triggeredAt,
-			resolvedAt,
-			user_id: userId,
+			activationTime,
+			resolutionTime,
 		};
 	}
 
@@ -232,13 +229,13 @@ export class EventSubscriptionService implements OnDestroy {
 		};
 	}
 
-	private extractActiveAlarmId(payload: unknown): string | null {
+	private extractAlarmId(payload: unknown): string | null {
 		if (!this.isObject(payload)) {
 			return null;
 		}
 
-		const activeAlarmId = payload['activeAlarmId'];
-		return typeof activeAlarmId === 'string' ? activeAlarmId : null;
+		const id = payload['id'];
+		return typeof id === 'string' ? id : null;
 	}
 
 	private rejoinAllRooms(): void {

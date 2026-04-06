@@ -18,10 +18,8 @@ export class SidebarComponent {
     @Input() isCollapsed!: boolean;
     @Input() activeAlarmCount!: number;
     @Input() isProfileMode = false;
-    @Input() isLogoutMode = false;
     @Input() canOpenProfile = false;
     @Output() profileClicked = new EventEmitter<void>();
-    @Output() logoutClicked = new EventEmitter<void>();
     @Output() collapsed = new EventEmitter<void>();
-    @Output() navItemSelected = new EventEmitter<void>();
+    @Output() navItemSelected = new EventEmitter<string>();
 }

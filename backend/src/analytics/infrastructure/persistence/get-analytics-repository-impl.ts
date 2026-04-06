@@ -30,7 +30,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
            DATE(ae.activation_time) AS day,
            COUNT(*) AS alarm_count
          FROM alarm_event ae
-         JOIN alarm_rule ar ON ar.id = ae.alarm_id
+         JOIN alarm_rule ar ON ar.id = ae.alarm_rule_id
          JOIN plant p        ON p.id  = ar.plant_id
          WHERE p.id = $1
            AND ae.activation_time >= $2

@@ -1,6 +1,7 @@
 :host {
 	display: block;
 	height: 100%;
+    z-index: 40;
 }
 
 .sidebar-shell {
@@ -106,10 +107,6 @@ li:hover {
 	display: none;
 }
 
-.sidebar-logout-mobile {
-	display: none;
-}
-
 @media (max-width: 767px) {
 	.sidebar-shell {
 		inset: 0;
@@ -153,7 +150,7 @@ li:hover {
 		transform: translateX(0);
 	}
 
-	.sidebar-profile-mobile, .sidebar-logout-mobile {
+	.sidebar-profile-mobile {
 		display: flex;
 		align-items: center;
 		gap: 0.7rem;

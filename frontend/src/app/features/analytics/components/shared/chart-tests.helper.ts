@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-
 export function runSharedChartTests(componentType: any) {
     let component: any;
     let fixture: ComponentFixture<any>;

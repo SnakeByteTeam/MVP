@@ -5,24 +5,18 @@ import { UserRole } from '../../core/models/user-role.enum';
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { MyVimarCloudApiFeatureService } from '../my-vimar-integration/services/my-vimar-cloud-api-feature.service';
 
-//guardie commentate solo per vedere il funzionamento
-
 export const MAIN_LAYOUT_ROUTES: Routes = [
     {
         path: '',
         providers: [
             MyVimarCloudApiFeatureService,
-            {
-                provide: VIMAR_CLOUD_API_SERVICE,
-                useExisting: MyVimarCloudApiFeatureService,
-            },
+            { provide: VIMAR_CLOUD_API_SERVICE, useExisting: MyVimarCloudApiFeatureService },
         ],
-        //canActivate: [authGuard],	// DA DECOMMENTARE
         loadComponent: () => import('./main-layout.component').then((m) => m.MainLayoutComponent),
         children: [
             {
                 path: 'dashboard',
-                //canActivate: [authGuard], // DA DECOMMENTARE
+                data: { breadcrumb: 'Dashboard' },
                 loadChildren: () => import('../dashboard/dashboard-page.routes').then((m) => m.DASHBOARD_ROUTES)
             },
             {
@@ -30,37 +24,35 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
                 children: [
                     {
                         path: 'alarm-management',
+                        data: { breadcrumb: 'Gestione allarmi' },
                         canActivate: [authGuard],
-                        loadChildren: () =>
-                            import('../alarm-management/alarm-management.routes').then((m) => m.ALARM_MANAGEMENT_ROUTES)
+                        loadChildren: () => import('../alarm-management/alarm-management.routes').then((m) => m.ALARM_MANAGEMENT_ROUTES)
                     },
                     {
                         path: 'alarm-history',
+                        data: { breadcrumb: 'Storico allarmi' },
                         canActivate: [authGuard],
-                        loadChildren: () =>
-                            import('../alarm-history/alarm-history.routes').then((m) => m.ALARM_HISTORY_ROUTES)
+                        loadChildren: () => import('../alarm-history/alarm-history.routes').then((m) => m.ALARM_HISTORY_ROUTES)
                     },
-
                     {
                         path: 'alarm-configuration',
                         canActivate: [authGuard, roleGuard],
-                        data: { requiredRole: UserRole.AMMINISTRATORE },
-                        loadChildren: () =>
-                            import('../alarm-configuration/alarm-configuration.routes').then((m) => m.ALARM_CONFIGURATION_ROUTES)
+                        data: { requiredRole: UserRole.AMMINISTRATORE, breadcrumb: 'Configurazione allarmi' },
+                        loadChildren: () => import('../alarm-configuration/alarm-configuration.routes').then((m) => m.ALARM_CONFIGURATION_ROUTES)
                     },
                 ]
             },
-
             {
                 path: 'analytics',
-                //canActivate: [authGuard],
+                data: { breadcrumb: 'Analytics' },
+                canActivate: [authGuard],
                 loadChildren: () => import('../analytics/analytics.routes').then((m) => m.ANALYTICS_ROUTES)
             },
             {
                 path: 'apartment-monitor',
+                data: { breadcrumb: 'Monitor appartamenti' },
                 canActivate: [authGuard],
-                loadChildren: () =>
-                    import('../apartment-monitor/apartment-monitor.routes').then((m) => m.APARTMENT_MONITOR_ROUTES)
+                loadChildren: () => import('../apartment-monitor/apartment-monitor.routes').then((m) => m.APARTMENT_MONITOR_ROUTES)
             },
             {
                 path: 'device-interaction',
@@ -70,31 +62,24 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
             },
             {
                 path: 'notifications',
+                data: { breadcrumb: 'Notifiche' },
                 canActivate: [authGuard],
                 loadChildren: () => import('../notification/notification.routes').then((m) => m.NOTIFICATION_ROUTES)
             },
             {
                 path: 'ward-management',
+                data: { requiredRole: UserRole.AMMINISTRATORE, breadcrumb: 'Gestione reparti' },
                 canActivate: [authGuard, roleGuard],
-                data: { requiredRole: UserRole.AMMINISTRATORE },
-                loadChildren: () =>
-                    import('../ward-management/ward-management.routes').then((m) => m.WARD_MANAGEMENT_ROUTES)
+                loadChildren: () => import('../ward-management/ward-management.routes').then((m) => m.WARD_MANAGEMENT_ROUTES)
             },
             {
                 path: 'user-management',
+                data: { requiredRole: UserRole.AMMINISTRATORE, breadcrumb: 'Gestione utenti' },
                 canActivate: [authGuard, roleGuard],
-                data: { requiredRole: UserRole.AMMINISTRATORE },
-                loadChildren: () =>
-                    import('../user-management/user-management.routes').then((m) => m.USER_MANAGEMENT_ROUTES)
+                loadChildren: () => import('../user-management/user-management.routes').then((m) => m.USER_MANAGEMENT_ROUTES)
             },
-            {
-                path: '**',
-                redirectTo: 'dashboard'
-            }
+            { path: '**', redirectTo: 'dashboard' }
         ]
     },
-    {
-        path: '**',
-        redirectTo: 'dashboard'
-    }
+    { path: '**', redirectTo: 'dashboard' }
 ];

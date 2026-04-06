@@ -11,7 +11,7 @@
               #rla="routerLinkActive"
               [class.is-active]="!isProfileMode && rla.isActive"
               class="sidebar-link"
-              (click)="navItemSelected.emit()"
+              (click)="navItemSelected.emit(item.route)"
             >
               <span class="sidebar-link-icon">
                 <img *ngIf="item.icon; else fallback" [src]="item.icon" alt="">
@@ -35,19 +35,11 @@
               <span class="sidebar-link-label">Profilo</span>
             </a>
           </li>
-          <li class="sidebar-logout-mobile">
-            <a class="sidebar-link" [class.is-active]="isLogoutMode" (click)="navItemSelected.emit(); logoutClicked.emit()">
-              <span class="sidebar-link-icon">
-                <img src="logout.png" alt="">
-              </span>
-              <span class="sidebar-link-label">Esci</span>
-            </a>
-          </li>
-          }
+        }
       </ul>
 
   @if (activeAlarmCount > 0) {
-    <p class="sidebar-alert">Allarmi attivi: {{ activeAlarmCount }}</p>
+  <p class="sidebar-alert">Allarmi attivi: {{ activeAlarmCount }}</p>
   }
   </div>
 </aside>

@@ -6,7 +6,7 @@
   display: grid;
   gap: 0.65rem;
   justify-items: end;
-  min-width: 17rem;
+  min-width: 0;
 }
 
 .apartment-monitor__selector {

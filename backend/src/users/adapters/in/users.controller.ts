@@ -16,6 +16,7 @@ import {
   DELETE_USER_USE_CASE,
   FIND_ALL_AVAILABLE_USERS_USE_CASE,
   FIND_ALL_USERS_USE_CASE,
+  FIND_USER_BY_ID_USE_CASE,
   UPDATE_USER_USE_CASE,
 } from '../../application/services/users.service';
 import { FindAllUsersUseCase } from '../../application/ports/in/find-all-users-use-case.interface';
@@ -32,12 +33,17 @@ import { FindAllUserResDto } from '../../infrastructure/dtos/out/find-all-user-r
 import { FindAllAvailableUsersUseCase } from '../../application/ports/in/find-all-available-users-use-case.interface';
 import { FindAllAvailableUsersResDto } from '../../infrastructure/dtos/out/find-all-available-users-res-dto';
 import { ApiOkResponse } from '@nestjs/swagger';
+import { FindUserByIdUseCase } from '../../application/ports/in/find-user-by-id-use-case.interface';
+import { FindUserByIdCmd } from '../../application/commands/find-user-by-id-cmd';
+import { FindUserByIdResDto } from '../../infrastructure/dtos/out/find-user-by-id-res-dto';
 
 @Controller('users')
 export class UsersController {
   constructor(
     @Inject(FIND_ALL_USERS_USE_CASE)
     private readonly findAllUsersUseCase: FindAllUsersUseCase,
+    @Inject(FIND_USER_BY_ID_USE_CASE)
+    private readonly findUserByIdUseCase: FindUserByIdUseCase,
     @Inject(FIND_ALL_AVAILABLE_USERS_USE_CASE)
     private readonly findAllAvailableUsersUseCase: FindAllAvailableUsersUseCase,
     @Inject(UPDATE_USER_USE_CASE)
@@ -50,17 +56,28 @@ export class UsersController {
 
   @ApiOkResponse({ type: FindAllUserResDto, isArray: true })
   @Get()
-  async findAll(): Promise<FindAllUserResDto[]> {
+  async findAllUsers(): Promise<FindAllUserResDto[]> {
     const users = await this.findAllUsersUseCase.findAllUsers();
     return plainToInstance(FindAllUserResDto, users);
   }
 
   @ApiOkResponse({ type: FindAllAvailableUsersResDto, isArray: true })
   @Get('/available')
-  async findAllAvailable(): Promise<FindAllAvailableUsersResDto[]> {
+  async findAllAvailableUsers(): Promise<FindAllAvailableUsersResDto[]> {
     const users =
       await this.findAllAvailableUsersUseCase.findAllAvailableUsers();
     return plainToInstance(FindAllAvailableUsersResDto, users);
+  }
+
+  @ApiOkResponse({ type: FindUserByIdResDto })
+  @Get('/:id')
+  async findUserById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<FindUserByIdResDto> {
+    const user = await this.findUserByIdUseCase.findUserById(
+      new FindUserByIdCmd(id),
+    );
+    return plainToInstance(FindUserByIdResDto, user);
   }
 
   @ApiOkResponse({ type: UpdateUserResDto })

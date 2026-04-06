@@ -5,30 +5,11 @@ import {
   DELETE_USER_USE_CASE,
   FIND_ALL_AVAILABLE_USERS_USE_CASE,
   FIND_ALL_USERS_USE_CASE,
+  FIND_USER_BY_ID_USE_CASE,
   UPDATE_USER_USE_CASE,
   UsersService,
 } from './application/services/users.service';
 import { UsersRepositoryImpl } from './infrastructure/persistence/users-repository-impl';
-import { CREATE_USER_REPOSITORY } from './application/repository/create-user-repository.interface';
-import { DELETE_USER_REPOSITORY } from './application/repository/delete-user-repository.interface';
-import { FIND_ALL_USERS_REPOSITORY } from './application/repository/find-all-users-repository.interface';
-import { UPDATE_USER_REPOSITORY } from './application/repository/update-user-repository.interface';
-import {
-  CREATE_USER_PORT,
-  CreateUserAdapter,
-} from './adapters/out/create-user-adapter';
-import {
-  FIND_ALL_USERS_PORT,
-  FindAllUsersAdapter,
-} from './adapters/out/find-all-users-adapter';
-import {
-  UPDATE_USER_PORT,
-  UpdateUserAdapter,
-} from './adapters/out/update-user-adapter';
-import {
-  DELETE_USER_PORT,
-  DeleteUserAdapter,
-} from './adapters/out/delete-user-adapter';
 import {
   GENERATE_PASSWORD_PORT,
   GeneratePasswordImpl,
@@ -41,11 +22,14 @@ import {
   CONVERT_BASE_64_PORT,
   ConvertBase64Impl,
 } from './infrastructure/convert-base-64-impl/convert-base-64-impl';
-import {
-  FIND_ALL_AVAILABLE_USERS_PORT,
-  FindAllAvailableUsersAdapter,
-} from './adapters/out/find-all-available-users-adapter';
-import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/find-all-available-users-repository.interface';
+import { USER_REPOSITORY } from './application/repository/user-repository.interface';
+import { UserPersistenceAdapter } from './adapters/out/user-persistence-adapter';
+import { CREATE_USER_PORT } from './application/ports/out/create-user-port.interface';
+import { DELETE_USER_PORT } from './application/ports/out/delete-user-port.interface';
+import { FIND_ALL_AVAILABLE_USERS_PORT } from './application/ports/out/find-all-available-users-port.interface';
+import { FIND_ALL_USERS_PORT } from './application/ports/out/find-all-users-port.interface';
+import { FIND_USER_BY_ID_PORT } from './application/ports/out/find-user-by-id-port.interface';
+import { UPDATE_USER_PORT } from './application/ports/out/update-user-port.interface';
 
 @Module({
   controllers: [UsersController],
@@ -56,6 +40,10 @@ import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/fi
     },
     {
       provide: FIND_ALL_AVAILABLE_USERS_USE_CASE,
+      useClass: UsersService,
+    },
+    {
+      provide: FIND_USER_BY_ID_USE_CASE,
       useClass: UsersService,
     },
     {
@@ -71,44 +59,32 @@ import { FIND_ALL_AVAILABLE_USERS_REPOSITORY } from './application/repository/fi
       useClass: UsersService,
     },
     {
-      provide: CREATE_USER_REPOSITORY,
-      useClass: UsersRepositoryImpl,
-    },
-    {
-      provide: FIND_ALL_USERS_REPOSITORY,
-      useClass: UsersRepositoryImpl,
-    },
-    {
-      provide: FIND_ALL_AVAILABLE_USERS_REPOSITORY,
-      useClass: UsersRepositoryImpl,
-    },
-    {
-      provide: UPDATE_USER_REPOSITORY,
-      useClass: UsersRepositoryImpl,
-    },
-    {
-      provide: DELETE_USER_REPOSITORY,
+      provide: USER_REPOSITORY,
       useClass: UsersRepositoryImpl,
     },
     {
       provide: CREATE_USER_PORT,
-      useClass: CreateUserAdapter,
+      useClass: UserPersistenceAdapter,
     },
     {
       provide: FIND_ALL_USERS_PORT,
-      useClass: FindAllUsersAdapter,
+      useClass: UserPersistenceAdapter,
+    },
+    {
+      provide: FIND_USER_BY_ID_PORT,
+      useClass: UserPersistenceAdapter,
     },
     {
       provide: FIND_ALL_AVAILABLE_USERS_PORT,
-      useClass: FindAllAvailableUsersAdapter,
+      useClass: UserPersistenceAdapter,
     },
     {
       provide: UPDATE_USER_PORT,
-      useClass: UpdateUserAdapter,
+      useClass: UserPersistenceAdapter,
     },
     {
       provide: DELETE_USER_PORT,
-      useClass: DeleteUserAdapter,
+      useClass: UserPersistenceAdapter,
     },
     {
       provide: GENERATE_PASSWORD_PORT,

@@ -27,7 +27,7 @@ export class GetAllManagedAlarmEventsByUserIdAdapter implements GetAllManagedAla
       (managedAlarmEvent) =>
         new AlarmEvent(
           managedAlarmEvent.id,
-          managedAlarmEvent.room_name + ' ' + managedAlarmEvent.device_name,
+          managedAlarmEvent.room_name + ' - ' + managedAlarmEvent.device_name,
           managedAlarmEvent.alarm_rule_id,
           managedAlarmEvent.alarm_name,
           managedAlarmEvent.priority,

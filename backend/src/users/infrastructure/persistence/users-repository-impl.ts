@@ -60,12 +60,26 @@ export class UsersRepositoryImpl implements UserRepository {
     name: string,
     tempPassword: string,
   ): Promise<UserEntity> {
+    const roleRes = await this.conn.query(
+      `SELECT id FROM role WHERE name = $1 LIMIT 1;`,
+      ['Operatore sanitario'],
+    );
+
+    let roleId: number = 1;
+    if (roleRes.rows.length) {
+      roleId = roleRes.rows[0].id;
+    }
+
     const result = await this.conn.query(
-      `WITH created_user AS ( INSERT INTO "user" (username, surname, name, temp_password) VALUES ($1, $2, $3, $4) RETURNING * ) 
-      SELECT u.id, u.username, u.surname, u.name, r.name AS role 
-      FROM created_user u 
-      LEFT JOIN role r ON u.roleId = r.id;`,
-      [username, surname, name, tempPassword],
+      `WITH created_user AS (
+         INSERT INTO "user" (username, surname, name, temp_password, roleId)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING *
+       )
+       SELECT u.id, u.username, u.surname, u.name, r.name AS role
+       FROM created_user u
+       LEFT JOIN role r ON u.roleId = r.id;`,
+      [username, surname, name, tempPassword, roleId],
     );
 
     if (result.rowCount === 0) {

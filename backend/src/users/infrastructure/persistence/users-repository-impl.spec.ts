@@ -16,27 +16,43 @@ describe('UsersRepositoryImpl', () => {
   });
 
   it('should call query with correct parameters when creating a user', async () => {
-    mockConn.query.mockResolvedValue({
-      rowCount: 1,
-      rows: [
-        {
-          id: 1,
-          username: 'username',
-          surname: 'surname',
-          name: 'name',
-          role: 'user',
-        },
-      ],
-    });
+    mockConn.query
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [{ id: 2 }],
+      })
+      .mockResolvedValueOnce({
+        rowCount: 1,
+        rows: [
+          {
+            id: 1,
+            username: 'username',
+            surname: 'surname',
+            name: 'name',
+            role: 'user',
+          },
+        ],
+      });
 
     await repo.createUser('username', 'surname', 'name', 'tempPassword');
 
-    expect(mockConn.query).toHaveBeenCalledWith(
-      `WITH created_user AS ( INSERT INTO "user" (username, surname, name, temp_password) VALUES ($1, $2, $3, $4) RETURNING * ) 
-      SELECT u.id, u.username, u.surname, u.name, r.name AS role 
-      FROM created_user u 
-      LEFT JOIN role r ON u.roleId = r.id;`,
-      ['username', 'surname', 'name', 'tempPassword'],
+    expect(mockConn.query).toHaveBeenNthCalledWith(
+      1,
+      `SELECT id FROM role WHERE name = $1 LIMIT 1;`,
+      ['Operatore sanitario'],
+    );
+
+    expect(mockConn.query).toHaveBeenNthCalledWith(
+      2,
+      `WITH created_user AS (
+         INSERT INTO "user" (username, surname, name, temp_password, roleId)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING *
+       )
+       SELECT u.id, u.username, u.surname, u.name, r.name AS role
+       FROM created_user u
+       LEFT JOIN role r ON u.roleId = r.id;`,
+      ['username', 'surname', 'name', 'tempPassword', 2],
     );
   });
 

@@ -34,11 +34,12 @@ import {
   type DeleteTokensFromRepoPort,
 } from 'src/api-auth-vimar/application/ports/out/delete-tokens-from-repo.port';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
 import {
   MyVimarAccountStatusDto,
   MyVimarDisconnectResDto,
 } from 'src/api-auth-vimar/infrastructure/dto/my-vimar-account-status.dto';
-import { AdminGuard } from 'src/guard/admin/admin.guard';
 
 @ApiTags('auth')
 @Controller('my-vimar')
@@ -109,6 +110,7 @@ export class ApiAuthVimarController {
 
   @Get('auth')
   @Redirect()
+  @UseGuards(UserGuard, AdminGuard)
   @ApiOperation({
     summary: 'Login with Vimar API',
     description: 'Initiates authentication flow by redirecting to Vimar login.',

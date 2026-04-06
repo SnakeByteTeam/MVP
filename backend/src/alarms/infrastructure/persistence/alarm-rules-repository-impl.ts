@@ -1,5 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
+import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
 import { DeleteAlarmRuleRepository } from '../../application/repository/delete-alarm-rule-repository.interface';
 import { GetAllAlarmRulesRepository } from '../../application/repository/get-all-alarm-rules-repository.interface';
@@ -14,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class AlarmRulesRepositoryImpl
   implements
+<<<<<<< HEAD
   CreateAlarmRuleRepository,
   GetAlarmRuleByIdRepository,
   GetAllAlarmRulesRepository,
@@ -21,6 +23,16 @@ export class AlarmRulesRepositoryImpl
   UpdateAlarmRuleRepository,
   CheckAlarmRuleRepository {
   constructor(@Inject(PG_POOL) private readonly pool) { }
+=======
+    CreateAlarmRuleRepository,
+    GetAlarmRuleByIdRepository,
+    GetAllAlarmRulesRepository,
+    DeleteAlarmRuleRepository,
+    UpdateAlarmRuleRepository,
+    CheckAlarmRuleRepository
+{
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+>>>>>>> backend
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {
     const result = await this.pool.query(
@@ -214,32 +226,61 @@ export class AlarmRulesRepositoryImpl
     value: string,
     activationTime: string,
   ): Promise<CheckAlarmEntity | null> {
-    const result = await this.pool.query(
-      `SELECT * FROM alarm_rule 
-      WHERE arming_time <= $1 
-        AND dearming_time >= $1
-        AND device_id = $2
-        AND is_armed = true
+    const result = await this.pool.query<CheckAlarmEntity>(
+      `SELECT
+        ar.id AS alarm_rule_id,
+        ward_match.ward_id,
+        NULL::varchar AS alarm_event_id
+      FROM alarm_rule ar
+      LEFT JOIN LATERAL (
+        SELECT p.ward_id
+        FROM plant p
+        JOIN LATERAL jsonb_array_elements(COALESCE(p.data->'rooms', '[]'::jsonb)) room ON TRUE
+        JOIN LATERAL jsonb_array_elements(COALESCE(room->'devices', '[]'::jsonb)) dev ON TRUE
+        WHERE dev->>'id' = ar.device_id
+        ORDER BY p.cached_at DESC
+        LIMIT 1
+      ) ward_match ON TRUE
+      WHERE ar.device_id = $2
+        AND ar.is_armed = true
         AND (
           (
-            threshold_value IN ('on','off') 
-            AND $3 IN ('on','off')
-            AND threshold_operator = '='
-            AND threshold_value = $3
+            ar.arming_time <= ar.dearming_time
+            AND $1::time >= ar.arming_time
+            AND $1::time <= ar.dearming_time
           )
           OR
           (
-            threshold_value NOT IN ('on','off')
-            AND $3 NOT IN ('on','off')
+            ar.arming_time > ar.dearming_time
             AND (
-              (threshold_operator = '>'  AND $3::numeric > threshold_value::numeric) OR
-              (threshold_operator = '<'  AND $3::numeric < threshold_value::numeric) OR
-              (threshold_operator = '='  AND $3::numeric = threshold_value::numeric) OR
-              (threshold_operator = '>=' AND $3::numeric >= threshold_value::numeric) OR
-              (threshold_operator = '<=' AND $3::numeric <= threshold_value::numeric)
+              $1::time >= ar.arming_time
+              OR $1::time <= ar.dearming_time
             )
           )
-        )`,
+        )
+        AND (
+          (
+            lower(ar.threshold_value) IN ('on','off')
+            AND lower($3) IN ('on','off')
+            AND ar.threshold_operator = '='
+            AND lower(ar.threshold_value) = lower($3)
+          )
+          OR
+          (
+            lower(ar.threshold_value) NOT IN ('on','off')
+            AND lower($3) NOT IN ('on','off')
+            AND ar.threshold_value ~ '^[+-]?[0-9]+([.][0-9]+)?$'
+            AND $3 ~ '^[+-]?[0-9]+([.][0-9]+)?$'
+            AND (
+              (ar.threshold_operator = '>'  AND $3::numeric > ar.threshold_value::numeric) OR
+              (ar.threshold_operator = '<'  AND $3::numeric < ar.threshold_value::numeric) OR
+              (ar.threshold_operator = '='  AND $3::numeric = ar.threshold_value::numeric) OR
+              (ar.threshold_operator = '>=' AND $3::numeric >= ar.threshold_value::numeric) OR
+              (ar.threshold_operator = '<=' AND $3::numeric <= ar.threshold_value::numeric)
+            )
+          )
+        )
+      LIMIT 1`,
       [activationTime, deviceId, value],
     );
 

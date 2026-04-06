@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DeviceController } from './adapters/in/device.controller';
 import { HttpModule } from '@nestjs/axios';
 import { ApiAuthVimarModule } from 'src/api-auth-vimar/api-auth-vimar.module';
+import { AlarmsModule } from 'src/alarms/alarms.module';
 
 import { FIND_DEVICE_BY_ID_USECASE } from './application/ports/in/find-device-by-id.usecase';
 import { FIND_DEVICE_BY_PLANTID_USECASE } from './application/ports/in/find-device-by-plantid.usecase';
@@ -30,9 +31,10 @@ import { GetDeviceValueAdapter } from './adapters/out/get-device-value.adapter';
 import { DeviceApiImpl } from './infrastructure/http/device-api-impl';
 import { WriteDatapointValueAdapter } from './adapters/out/write-datapoint-value.adapter';
 import { FindDeviceByDatapointIdAdapter } from './adapters/out/find-device-by-datapointId.adapter';
+import { FIND_DEVICE_BY_DATAPOINTID_USECASE } from './application/ports/in/find-device-by-datapointId.usecase';
 
 @Module({
-  imports: [HttpModule, ApiAuthVimarModule],
+  imports: [HttpModule, ApiAuthVimarModule, AlarmsModule],
   controllers: [DeviceController],
   providers: [
     { provide: FIND_DEVICE_BY_ID_USECASE, useClass: DeviceService },
@@ -66,6 +68,10 @@ import { FindDeviceByDatapointIdAdapter } from './adapters/out/find-device-by-da
     {
       provide: FIND_DEVICE_BY_DATAPOINTID_REPO_PORT,
       useClass: DeviceRepositoryImpl,
+    },
+    {
+      provide: FIND_DEVICE_BY_DATAPOINTID_USECASE,
+      useClass: DeviceService,
     },
   ],
 })

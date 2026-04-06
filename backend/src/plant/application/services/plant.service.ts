@@ -12,11 +12,17 @@ import {
   type FindAllAvailablePlantsPort,
 } from '../ports/out/find-all-available-plants.port';
 import { FindAllPlantsUseCase } from '../ports/in/find-all-plants.usecase';
-import { FIND_ALL_PLANTS_PORT, type FindAllPlantsPort } from '../ports/out/find-all-plants.port';
+import {
+  FIND_ALL_PLANTS_PORT,
+  type FindAllPlantsPort,
+} from '../ports/out/find-all-plants.port';
 
 @Injectable()
 export class PlantService
-  implements FindPlantByIdUseCase, FindAllAvailablePlantsUseCase, FindAllPlantsUseCase
+  implements
+    FindPlantByIdUseCase,
+    FindAllAvailablePlantsUseCase,
+    FindAllPlantsUseCase
 {
   constructor(
     @Inject(FIND_PLANT_BY_ID_PORT)
@@ -24,7 +30,7 @@ export class PlantService
     @Inject(FIND_ALL_AVAILABLE_PLANTS_PORT)
     private readonly findAllAvailablePlantsPort: FindAllAvailablePlantsPort,
     @Inject(FIND_ALL_PLANTS_PORT)
-    private readonly findAllPlantsPort: FindAllPlantsPort
+    private readonly findAllPlantsPort: FindAllPlantsPort,
   ) {}
 
   async findById(cmd: FindPlantByIdCmd): Promise<Plant> {
@@ -47,7 +53,7 @@ export class PlantService
 
   async findAllPlants(): Promise<Plant[]> {
     const plant: Plant[] | null = await this.findAllPlantsPort.findAllPlants();
-    if(!plant) throw new Error(`No plants found`);
+    if (!plant) throw new Error(`No plants found`);
 
     return plant;
   }

@@ -14,6 +14,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
 import { ValidationModule } from './validation/validation.module';
 import { GuardModule } from './guard/guard.module';
+import { NotificationModule } from './notifications/notification.module';
 
 
 @Module({
@@ -32,7 +33,11 @@ import { GuardModule } from './guard/guard.module';
     SubscriptionModule,
     AnalyticsModule,
     EventEmitterModule.forRoot(),
-    UsersModule, GuardModule, ValidationModule,
+    UsersModule,
+    AlarmsModule,
+    NotificationModule,
+    ValidationModule,
+    GuardModule,
   ],
   controllers: [],
   providers: [],

@@ -14,7 +14,9 @@ export class PlantEntity {
   ward_id!: number | null;
 
   static toDomain(entity: PlantEntity): Plant {
-    const rooms = (entity.data.rooms ?? []).map((room) => RoomEntity.toDomain(room));
+    const rooms = (entity.data.rooms ?? []).map((room) =>
+      RoomEntity.toDomain(room),
+    );
     const wardId = entity.ward_id ?? undefined;
 
     return new Plant(entity.id, entity.data.name, rooms, wardId);

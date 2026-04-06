@@ -6,6 +6,7 @@ import {
   CheckAlarmRuleRepository,
 } from '../../application/repository/check-alarm-rule-repository.interface';
 import { CheckAlarm } from '../../domain/models/check-alarm';
+import { CheckAlarmEntity } from 'src/alarms/infrastructure/entities/check-alarm-entity';
 
 export class CheckAlarmRuleAdapter implements CheckAlarmRulePort {
   constructor(
@@ -36,6 +37,6 @@ export class CheckAlarmRuleAdapter implements CheckAlarmRulePort {
       return null;
     }
 
-    return new CheckAlarm(alarmRule.id, alarmRule.ward_id);
+    return CheckAlarmEntity.toDomain(alarmRule);
   }
 }

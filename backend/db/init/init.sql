@@ -1,5 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 
+DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS alarm_event;
 DROP TABLE IF EXISTS alarm_rule;
 DROP TABLE IF EXISTS status;
@@ -11,7 +12,6 @@ DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS ward;
 DROP TABLE IF EXISTS role;
 
-CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -749,4 +749,20 @@ VALUES
 ('EVT204', 'rule-003', '2026-04-02 09:30:00', '2026-04-02 10:05:00', 1),
 ('EVT205', 'rule-001', '2026-04-01 06:45:00', NULL, NULL)
 ON CONFLICT DO NOTHING;
+
+
+CREATE TABLE IF NOT EXISTS alarm_event (
+    id              VARCHAR(255) PRIMARY KEY,
+    activation_time TIMESTAMP    NOT NULL,
+    resolution_time TIMESTAMP,
+    alarm_rule_id   VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
+    user_id         INTEGER      REFERENCES "user"(id)
+);
+
+CREATE TABLE IF NOT EXISTS notification (
+    id SERIAL PRIMARY KEY, 
+    ward_id INTEGER REFERENCES ward(id) ON DELETE CASCADE,
+    alarm_event_id VARCHAR(255) REFERENCES alarm_event(id) ON DELETE CASCADE,
+    timestamp TIMESTAMPTZ NOT NULL
+);
 

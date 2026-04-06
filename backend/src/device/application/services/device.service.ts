@@ -36,6 +36,8 @@ import {
   FIND_DEVICE_BY_DATAPOINTID_PORT,
   type FindDeviceByDatapointIdPort,
 } from '../ports/out/find-device-by-datapointId';
+import { FindDeviceByDatapointIdUsecase } from '../ports/in/find-device-by-datapointId.usecase';
+import { FindDeviceByDatapointIdCmd } from '../commands/find-device-by-datapointId.command';
 
 @Injectable()
 export class DeviceService
@@ -44,6 +46,7 @@ export class DeviceService
     FindDeviceByPlantIdUseCase,
     IngestTimeseriesUseCase,
     GetDeviceValueUseCase,
+    FindDeviceByDatapointIdUsecase,
     WriteDatapointValueUseCase
 {
   constructor(
@@ -96,5 +99,12 @@ export class DeviceService
 
     cmd.plantId = plantId;
     await this.writeDatapointPort.writeDatapointValue(cmd);
+  }
+
+  async findByDatapointId(cmd: FindDeviceByDatapointIdCmd): Promise<Device> {
+    if (!cmd.datapointId)
+      throw new Error('[Device Controller] DatapointId is missing');
+
+    return await this.findByDatapointIdPort.findByDatapointId(cmd);
   }
 }

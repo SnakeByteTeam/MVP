@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 
 export const PG_POOL = Symbol('PG_POOL');
 
-@Global()
+@Global() //rende il modulo disponibile globalmente, una volta importato nell'AppModule non serve reimportarlo in altri moduli
 @Module({
   providers: [
     {

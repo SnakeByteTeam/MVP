@@ -17,6 +17,7 @@ import {
   type DeleteTokensFromRepoPort,
 } from 'src/api-auth-vimar/application/ports/out/delete-tokens-from-repo.port';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
+import { GuardModule } from 'src/guard/guard.module';
 import { AdminGuard } from 'src/guard/admin/admin.guard';
 import { JwtService } from '@nestjs/jwt';
 
@@ -48,6 +49,7 @@ describe('ApiAuthVimarController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [GuardModule],
       controllers: [ApiAuthVimarController],
       providers: [
         {

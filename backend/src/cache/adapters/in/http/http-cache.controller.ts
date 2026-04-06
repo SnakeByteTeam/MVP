@@ -69,7 +69,10 @@ export class HttpCacheController {
         .catch((err) => {
           const errorMessage = err instanceof Error ? err.message : String(err);
 
-          console.error('[CacheController] Error in webhook processing queue:', errorMessage);
+          console.error(
+            '[CacheController] Error in webhook processing queue:',
+            errorMessage,
+          );
         });
     });
 

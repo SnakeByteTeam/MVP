@@ -11,13 +11,14 @@ export class CreateAlarmRuleAdapter implements CreateAlarmRulePort {
   constructor(
     @Inject(CREATE_ALARM_RULE_REPOSITORY)
     private readonly createAlarmRuleRepository: CreateAlarmRuleRepository,
-  ) {}
+  ) { }
 
   async createAlarmRule(cmd: CreateAlarmRuleCmd): Promise<AlarmRule> {
     const alarmRule = await this.createAlarmRuleRepository.createAlarmRule(
       cmd.name,
       cmd.priority,
       cmd.deviceId,
+      cmd.plantId,
       cmd.thresholdOperator,
       cmd.thresholdValue,
       cmd.armingTime,

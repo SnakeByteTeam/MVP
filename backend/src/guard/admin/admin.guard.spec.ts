@@ -2,6 +2,6 @@ import { AdminGuard } from './admin.guard';
 
 describe('AdminGuard', () => {
   it('should be defined', () => {
-    expect(AdminGuard).toBeDefined();
+    expect(new AdminGuard({ verify: jest.fn() } as any)).toBeDefined();
   });
 });

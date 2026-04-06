@@ -1,69 +1,103 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { EMPTY, of, throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
+import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
+import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
-import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
+import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 import { AlarmConfigFormComponent } from './alarm-config-form.component';
 
 describe('AlarmConfigFormComponent', () => {
     let component: AlarmConfigFormComponent;
     let fixture: ComponentFixture<AlarmConfigFormComponent>;
 
-    const routeStub = {
-        snapshot: {
-            paramMap: convertToParamMap({}),
-        },
+    const wardApiStub = {
+        getAvailablePlants: vi.fn(),
+        getWards: vi.fn(),
+        getPlantsByWardId: vi.fn(),
     };
 
-    const routerStub = {
-        navigate: vi.fn().mockResolvedValue(true),
+    const apartmentApiStub = {
+        getApartmentByPlantId: vi.fn(),
     };
 
-    const stateServiceStub = {
-        getAlarmById: vi.fn(),
-        createAlarm: vi.fn(() => of({} as AlarmRule)),
-        updateAlarm: vi.fn(() => of({} as AlarmRule)),
+    const deviceCatalogStub = {
+        registerApartment: vi.fn(),
     };
 
     const existingRule: AlarmRule = {
         id: 'alarm-42',
         name: 'Porta aperta',
-        apartmentId: 'apt-9',
-        deviceId: 'sensor-9',
+        thresholdOperator: '=',
+        thresholdValue: '5',
         priority: AlarmPriority.ORANGE,
-        thresholdOperator: ThresholdOperator.EQUAL_TO,
-        threshold: 5,
-        activationTime: '07:00',
-        deactivationTime: '19:00',
-        enabled: true,
+        armingTime: '07:00:00',
+        dearmingTime: '19:00:00',
+        isArmed: true,
+        deviceId: 'sensor-9',
     };
 
     const validFormValue = {
         name: 'Nuova regola',
-        apartmentId: 'apt-1',
+        plantId: 'plant-1',
         sensorId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
-        threshold: 12,
-        activationTime: '08:00',
-        deactivationTime: '18:00',
+        thresholdValue: '12',
+        armingTime: '08:00',
+        dearmingTime: '18:00',
         enabled: true,
     };
 
     beforeEach(async () => {
         vi.clearAllMocks();
-        routeStub.snapshot.paramMap = convertToParamMap({});
-        stateServiceStub.getAlarmById.mockReturnValue(of(existingRule));
+        wardApiStub.getAvailablePlants.mockReturnValue(
+            of([
+                { id: 'plant-1', name: 'Appartamento 1' },
+                { id: 'plant-3', name: 'Appartamento 3' },
+            ])
+        );
+        wardApiStub.getWards.mockReturnValue(
+            of([{ id: 10, name: 'Reparto A' }])
+        );
+        wardApiStub.getPlantsByWardId.mockReturnValue(
+            of([
+                { id: 'plant-1', name: 'Appartamento 1' },
+                { id: 'plant-2', name: 'Appartamento 2' },
+            ])
+        );
+        apartmentApiStub.getApartmentByPlantId.mockReturnValue(
+            of({
+                id: 'plant-1',
+                name: 'Appartamento 1',
+                isEnabled: true,
+                rooms: [
+                    {
+                        id: 'room-1',
+                        name: 'Soggiorno',
+                        hasActiveAlarm: false,
+                        devices: [
+                            {
+                                id: 'sensor-1',
+                                name: 'Sensore porta',
+                                status: 'ONLINE',
+                                type: 'LIGHT',
+                                actions: [],
+                            },
+                        ],
+                    },
+                ],
+            })
+        );
 
         await TestBed.configureTestingModule({
             imports: [AlarmConfigFormComponent],
             providers: [
-                { provide: AlarmConfigStateService, useValue: stateServiceStub },
-                { provide: Router, useValue: routerStub },
-                { provide: ActivatedRoute, useValue: routeStub },
+                { provide: WardApiService, useValue: wardApiStub },
+                { provide: ApartmentApiService, useValue: apartmentApiStub },
+                { provide: AlarmDeviceCatalogService, useValue: deviceCatalogStub },
             ],
         }).compileComponents();
 
@@ -71,155 +105,160 @@ describe('AlarmConfigFormComponent', () => {
         component = fixture.componentInstance;
     });
 
-    it('crea il componente', () => {
+    const setInputs = (mode: 'create' | 'edit', initialRule: AlarmRule | null): void => {
+        fixture.componentRef.setInput('mode', mode);
+        fixture.componentRef.setInput('initialRule', initialRule);
         fixture.detectChanges();
+    };
+
+    it('crea il componente', () => {
+        setInputs('create', null);
 
         expect(component).toBeTruthy();
     });
 
-    it('inizializza in create mode se id non e presente', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({});
+    it('inizializza in create mode con form vuoto', () => {
+        setInputs('create', null);
 
-        fixture.detectChanges();
-
-        expect(component.isEditMode).toBe(false);
-        expect(stateServiceStub.getAlarmById).not.toHaveBeenCalled();
-    });
-
-    it('inizializza in edit mode se id e presente e precompila il form', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-
-        fixture.detectChanges();
-
-        expect(component.isEditMode).toBe(true);
-        expect(stateServiceStub.getAlarmById).toHaveBeenCalledWith('alarm-42');
+        expect(component.isEditMode()).toBe(false);
         expect(component.form.getRawValue()).toEqual({
-            name: 'Porta aperta',
-            apartmentId: 'apt-9',
-            sensorId: 'sensor-9',
-            priority: AlarmPriority.ORANGE,
-            thresholdOperator: ThresholdOperator.EQUAL_TO,
-            threshold: 5,
-            activationTime: '07:00',
-            deactivationTime: '19:00',
-            enabled: true,
-        });
-    });
-
-    it('in edit mode naviga indietro se il caricamento regola fallisce', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.getAlarmById.mockReturnValue(throwError(() => new Error('boom')));
-
-        fixture.detectChanges();
-
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
-    });
-
-    it('in edit mode naviga indietro se getAlarmById completa senza emissioni', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.getAlarmById.mockReturnValue(EMPTY);
-
-        fixture.detectChanges();
-
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
-    });
-
-    it('buildForm applica i validatori required ai campi richiesti', () => {
-        fixture.detectChanges();
-
-        component.form.patchValue({
+            name: '',
+            plantId: '',
             sensorId: '',
             priority: null,
             thresholdOperator: null,
-            threshold: null,
+            thresholdValue: '',
+            armingTime: '',
+            dearmingTime: '',
+            enabled: true,
         });
+        expect(component.form.controls.name.disabled).toBe(false);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3']);
+    });
+
+    it('inizializza in edit mode con prefill da initialRule', () => {
+        setInputs('edit', existingRule);
+
+        expect(component.isEditMode()).toBe(true);
+        expect(component.form.getRawValue()).toEqual({
+            name: 'Porta aperta',
+            plantId: '',
+            sensorId: 'sensor-9',
+            priority: AlarmPriority.ORANGE,
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: '5',
+            armingTime: '07:00',
+            dearmingTime: '19:00',
+            enabled: true,
+        });
+
+        expect(component.form.controls.name.disabled).toBe(true);
+        expect(component.form.controls.sensorId.disabled).toBe(true);
+    });
+
+    it('buildForm applica i validatori required ai campi richiesti', () => {
+        setInputs('create', null);
+
+        component.form.patchValue({
+            plantId: '',
+            priority: null,
+            thresholdOperator: null,
+            thresholdValue: '',
+        });
+
+        expect(component.form.controls.plantId.invalid).toBe(true);
+
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.sensorId.setValue('');
 
         expect(component.form.controls.sensorId.invalid).toBe(true);
         expect(component.form.controls.priority.invalid).toBe(true);
         expect(component.form.controls.thresholdOperator.invalid).toBe(true);
-        expect(component.form.controls.threshold.invalid).toBe(true);
+        expect(component.form.controls.thresholdValue.invalid).toBe(true);
     });
 
-    it('onSubmit in create mode invoca createAlarm e naviga alla lista', () => {
-        fixture.detectChanges();
+    it('in create mode mantiene il dispositivo bloccato finche non viene selezionato un plant', () => {
+        setInputs('create', null);
+
+        expect(component.form.controls.sensorId.disabled).toBe(true);
+
+        component.form.controls.plantId.setValue('plant-1');
+
+        expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
+        expect(deviceCatalogStub.registerApartment).toHaveBeenCalledTimes(1);
+        expect(component.form.controls.sensorId.enabled).toBe(true);
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+    });
+
+    it('onSubmit emette submittedForm in create mode con form valido', () => {
+        setInputs('create', null);
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
+
+        component.form.controls.plantId.setValue('plant-1');
         component.form.setValue(validFormValue);
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarm).toHaveBeenCalledWith(validFormValue);
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
+        expect(emitSpy).toHaveBeenCalledWith(validFormValue);
+        expect(emitSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('onSubmit in create mode non naviga se createAlarm non emette (errore gestito)', () => {
-        stateServiceStub.createAlarm.mockReturnValueOnce(EMPTY);
-        fixture.detectChanges();
-        component.form.setValue(validFormValue);
-
-        component.onSubmit();
-
-        expect(stateServiceStub.createAlarm).toHaveBeenCalledWith(validFormValue);
-        expect(routerStub.navigate).not.toHaveBeenCalled();
-    });
-
-    it('onSubmit in edit mode invoca updateAlarm con id route e naviga alla lista', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        fixture.detectChanges();
-        component.form.setValue(validFormValue);
-
-        component.onSubmit();
-
-        expect(stateServiceStub.updateAlarm).toHaveBeenCalledWith('alarm-42', validFormValue);
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
-    });
-
-    it('onSubmit in edit mode non naviga se updateAlarm non emette (errore gestito)', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({ id: 'alarm-42' });
-        stateServiceStub.updateAlarm.mockReturnValueOnce(EMPTY);
-        fixture.detectChanges();
-        component.form.setValue(validFormValue);
-
-        component.onSubmit();
-
-        expect(stateServiceStub.updateAlarm).toHaveBeenCalledWith('alarm-42', validFormValue);
-        expect(routerStub.navigate).not.toHaveBeenCalled();
-    });
-
-    it('onSubmit non invia se il form e invalido', () => {
-        fixture.detectChanges();
-        component.form.patchValue({
-            sensorId: '',
-            priority: null,
-            thresholdOperator: null,
-            threshold: null,
+    it('onSubmit in edit mode emette submittedForm con form valido', () => {
+        setInputs('edit', existingRule);
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
+        component.form.setValue({
+            ...validFormValue,
+            name: 'Nome modificato manualmente',
+            plantId: '',
+            sensorId: 'sensor-9',
         });
 
         component.onSubmit();
 
-        expect(stateServiceStub.createAlarm).not.toHaveBeenCalled();
-        expect(stateServiceStub.updateAlarm).not.toHaveBeenCalled();
+        expect(emitSpy).toHaveBeenCalledWith({
+            ...validFormValue,
+            name: 'Porta aperta',
+            plantId: '',
+            sensorId: 'sensor-9',
+        });
+        expect(emitSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('onSubmit in edit mode senza id non invia update', () => {
-        routeStub.snapshot.paramMap = convertToParamMap({});
-        fixture.detectChanges();
-        component.isEditMode = true;
-        component.form.setValue(validFormValue);
+    it('onSubmit non invia se il form e invalido', () => {
+        setInputs('create', null);
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
+        component.form.patchValue({
+            plantId: '',
+            sensorId: '',
+            priority: null,
+            thresholdOperator: null,
+            thresholdValue: '',
+        });
 
         component.onSubmit();
 
-        expect(stateServiceStub.updateAlarm).not.toHaveBeenCalled();
+        expect(emitSpy).not.toHaveBeenCalled();
     });
 
-    it('onCancel naviga verso ../', () => {
-        fixture.detectChanges();
+    it('onCancel emette evento cancelled', () => {
+        setInputs('create', null);
+        const emitSpy = vi.spyOn(component.cancelled, 'emit');
 
         component.onCancel();
 
-        expect(routerStub.navigate).toHaveBeenCalledWith(['../'], { relativeTo: routeStub });
+        expect(emitSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('onEnabledToggled aggiorna il controllo enabled', () => {
+        setInputs('create', null);
+
+        component.onEnabledToggled(false);
+
+        expect(component.form.controls.enabled.value).toBe(false);
     });
 
     it('espone opzioni enum per priorita e operatore', () => {
-        fixture.detectChanges();
+        setInputs('create', null);
 
         expect(component.priorityOptions).toEqual([
             AlarmPriority.WHITE,
@@ -229,8 +268,98 @@ describe('AlarmConfigFormComponent', () => {
         ]);
         expect(component.thresholdOperatorOptions).toEqual([
             ThresholdOperator.GREATER_THAN,
+            ThresholdOperator.GREATER_THAN_OR_EQUAL,
             ThresholdOperator.LESS_THAN,
+            ThresholdOperator.LESS_THAN_OR_EQUAL,
             ThresholdOperator.EQUAL_TO,
         ]);
+    });
+
+    it('accetta valore soglia booleano quando operatore e uguale', () => {
+        setInputs('create', null);
+
+        component.form.controls.thresholdOperator.setValue(ThresholdOperator.EQUAL_TO);
+        component.form.controls.thresholdValue.setValue('ON');
+
+        expect(component.form.controls.thresholdOperator.valid).toBe(true);
+        expect(component.form.controls.thresholdValue.valid).toBe(true);
+    });
+
+    it('carica impianti da piu reparti deduplicando per id', () => {
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(
+            of([{ id: 'plant-1', name: 'Appartamento 1' }])
+        );
+        wardApiStub.getWards.mockReturnValueOnce(
+            of([
+                { id: 10, name: 'Reparto A' },
+                { id: 20, name: 'Reparto B' },
+            ])
+        );
+        wardApiStub.getPlantsByWardId.mockImplementation((wardId: number) => {
+            if (wardId === 10) {
+                return of([
+                    { id: 'plant-2', name: 'Appartamento 2' },
+                    { id: 'plant-3', name: 'Appartamento 3' },
+                ]);
+            }
+
+            return of([
+                { id: 'plant-3', name: 'Appartamento 3' },
+                { id: 'plant-4', name: 'Appartamento 4' },
+            ]);
+        });
+
+        setInputs('create', null);
+
+        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(2);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3', 'plant-4']);
+        expect(component.plantsLoadError()).toBeNull();
+    });
+
+    it('se il recupero reparti fallisce usa solo gli impianti disponibili', () => {
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(
+            of([
+                { id: 'plant-7', name: 'Appartamento 7' },
+                { id: 'plant-8', name: 'Appartamento 8' },
+            ])
+        );
+        wardApiStub.getWards.mockReturnValueOnce(throwError(() => new Error('wards down')));
+
+        setInputs('create', null);
+
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-7', 'plant-8']);
+        expect(component.plantsLoadError()).toBeNull();
+        expect(wardApiStub.getPlantsByWardId).not.toHaveBeenCalled();
+    });
+
+    it('se il plant viene deselezionato resetta opzioni dispositivo e blocca il campo sensore', () => {
+        setInputs('create', null);
+
+        component.form.controls.plantId.setValue('plant-1');
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+        expect(component.form.controls.sensorId.enabled).toBe(true);
+
+        component.form.controls.plantId.setValue('');
+
+        expect(component.deviceOptions()).toEqual([]);
+        expect(component.form.controls.sensorId.value).toBe('');
+        expect(component.form.controls.sensorId.disabled).toBe(true);
+    });
+
+    it('in edit mode non consente di modificare il dispositivo associato', () => {
+        setInputs('edit', existingRule);
+
+        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-9', label: 'sensor-9' }]);
+    });
+
+    it('imposta errore quando il caricamento dispositivi fallisce', () => {
+        apartmentApiStub.getApartmentByPlantId.mockReturnValueOnce(throwError(() => new Error('network')));
+        setInputs('create', null);
+
+        component.form.controls.plantId.setValue('plant-1');
+
+        expect(component.devicesLoadError()).toBe('Errore durante il caricamento dei dispositivi.');
+        expect(component.form.controls.sensorId.disabled).toBe(true);
     });
 });

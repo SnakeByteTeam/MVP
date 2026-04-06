@@ -8,13 +8,18 @@ import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { Plot } from '../../../domain/plot.model';
 import { DatapointValue } from '../../../domain/datapoint-value.model';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const LONG_PRESENCE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minuti
-const PRESENCE_SFE_TYPE = 'SFE_State_Presence';
 const DETECTED = 'Detected';
+const NOT_DETECTED = 'NotDetected';
 const DAYS_RANGE = 30;
-const TITLE = 'Rilevamento di presenza prolungata';
-const METRIC = 'sensor-long-presence';
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+  sfeType: PRESENCE_SFE_TYPE,
+} = AnalyticsMetric.SENSOR_LONG_PRESENCE;
 
 interface SensorState {
   name: string;
@@ -60,7 +65,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
   }
 
   private emptyPlot(): Plot {
-    return new Plot(TITLE, METRIC, 'events', [], []);
+    return new Plot(TITLE, METRIC, UNIT, [], []);
   }
 
   private sortSnapshots(
@@ -89,7 +94,7 @@ export class SensorLongPresence implements AnalyticsStrategy {
           sensorId,
           dp.name ?? sensorId, // fallback all'id se name è undefined
         );
-        const value = dp.value ?? 'NotDetected';
+        const value = dp.value ?? NOT_DETECTED;
 
         if (value === DETECTED) {
           const updated = this.handleDetected(
@@ -186,6 +191,6 @@ export class SensorLongPresence implements AnalyticsStrategy {
       },
     );
 
-    return new Plot(TITLE, METRIC, 'events', labels, series);
+    return new Plot(TITLE, METRIC, UNIT, labels, series);
   }
 }

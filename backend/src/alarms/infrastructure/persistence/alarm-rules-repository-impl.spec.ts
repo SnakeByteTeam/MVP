@@ -6,6 +6,10 @@ import { AlarmRulesRepositoryImpl } from './alarm-rules-repository-impl';
 
 describe('AlarmRulesRepositoryImpl', () => {
   it('should be defined', () => {
-    expect(AlarmRulesRepositoryImpl).toBeDefined();
+    expect(
+      new AlarmRulesRepositoryImpl({
+        query: jest.fn(),
+      } as any),
+    ).toBeDefined();
   });
 });

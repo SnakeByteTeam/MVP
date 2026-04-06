@@ -1,14 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
 import { MainLayoutComponent } from './main-layout.component';
 import { InternalAuthService } from '../../core/services/internal-auth.service';
 import { NavService } from './services/nav.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../core/models/user-role.enum';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { firstValueFrom } from 'rxjs'; 
 import { provideRouter, Router } from '@angular/router'; 
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
+import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
+
+@Component({ template: '', standalone: true })
+class DummyRouteComponent {}
 
 
 describe('MainLayoutComponent', () => {
@@ -17,6 +21,15 @@ describe('MainLayoutComponent', () => {
 
     const mockAuthService = {
         getRole: vi.fn(),
+        getCurrentUser$: vi.fn().mockReturnValue(
+            of({
+                userId: '1',
+                username: 'admin',
+                role: UserRole.AMMINISTRATORE,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        ),
         logout: vi.fn(),
         logoutFromBackend: vi.fn().mockReturnValue(of(void 0)),
     };
@@ -30,10 +43,24 @@ describe('MainLayoutComponent', () => {
     const mockMyVimarService = {
         getLinkedAccount: vi.fn().mockReturnValue(of({ email: '', isLinked: false })),
     };
+    const mockAlarmManagementRefreshService = {
+        requestRefresh: vi.fn(),
+        getRefreshRequested$: vi.fn(),
+    };
     
     beforeEach(async () => {
         vi.clearAllMocks();
         mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
+        mockAuthService.getCurrentUser$.mockReturnValue(
+            of({
+                userId: '1',
+                username: 'admin',
+                role: UserRole.AMMINISTRATORE,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        );
+        mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: '', isLinked: false }));
 
         await TestBed.configureTestingModule({
         imports: [MainLayoutComponent],
@@ -42,7 +69,11 @@ describe('MainLayoutComponent', () => {
             { provide: NavService, useValue: mockNavService },
             { provide: AlarmStateService, useValue: mockAlarmService },
             { provide: VIMAR_CLOUD_API_SERVICE, useValue: mockMyVimarService },
-            provideRouter([])
+            { provide: AlarmManagementRefreshService, useValue: mockAlarmManagementRefreshService },
+            provideRouter([
+                { path: 'auth/login', component: DummyRouteComponent },
+                { path: 'vimar-link', component: DummyRouteComponent },
+            ])
         ]
         }).compileComponents();
 
@@ -51,20 +82,56 @@ describe('MainLayoutComponent', () => {
     });
 
     it('carica i NavItem con il ruolo corretto', () => {
-        mockAuthService.getRole.mockReturnValue(UserRole.OPERATORE_SANITARIO);
+        mockAuthService.getCurrentUser$.mockReturnValue(
+            of({
+                userId: '2',
+                username: 'operator',
+                role: UserRole.OPERATORE_SANITARIO,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        );
         component.ngOnInit();
         expect(mockNavService.getNavItems).toHaveBeenCalledWith(UserRole.OPERATORE_SANITARIO);
         expect(component.navItems.length).toBeGreaterThan(0);
     });
 
+    it('reindirizza al login quando non esiste sessione utente', () => {
+        mockAuthService.getCurrentUser$.mockReturnValue(of(null));
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+        component.ngOnInit();
+
+        expect(component.navItems).toEqual([]);
+        expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
+    });
+
+    it('mostra avviso topbar per admin senza account MyVimar collegato', () => {
+        mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: '', isLinked: false }));
+
+        component.ngOnInit();
+
+        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalledTimes(1);
+        expect(component.showVimarAssociationWarning).toBe(true);
+    });
+
+    it('non mostra avviso topbar quando account MyVimar risulta collegato', () => {
+        mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: 'admin@test.it', isLinked: true }));
+
+        component.ngOnInit();
+
+        expect(component.showVimarAssociationWarning).toBe(false);
+    });
+
     it('inverte correttamente isCollapsed con il segnale ricevuto', () => {
-        expect(component.isCollapsed).toBe(false);
-        
-        component.toggleSidebar();
         expect(component.isCollapsed).toBe(true);
         
         component.toggleSidebar();
         expect(component.isCollapsed).toBe(false);
+        
+        component.toggleSidebar();
+        expect(component.isCollapsed).toBe(true);
     });
 
     it('invoca correttamente logout', () => {
@@ -101,6 +168,15 @@ describe('MainLayoutComponent', () => {
         component.goToVimarLink();
 
         expect(navigateSpy).toHaveBeenCalledWith(['/vimar-link']);
+    });
+
+    it('richiede refresh allarmi attivi quando si clicca la stessa voce menu della pagina corrente', () => {
+        const router = TestBed.inject(Router);
+        vi.spyOn(router, 'url', 'get').mockReturnValue('/alarms/alarm-management');
+
+        component.onNavItemSelected('alarms/alarm-management');
+
+        expect(mockAlarmManagementRefreshService.requestRefresh).toHaveBeenCalledTimes(1);
     });
 
 

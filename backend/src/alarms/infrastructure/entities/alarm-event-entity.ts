@@ -5,6 +5,7 @@ export class AlarmEventEntity {
     public readonly id: string,
     public readonly room_name: string,
     public readonly device_name: string,
+    public readonly device_id: string,
     public readonly alarm_rule_id: string,
     public readonly alarm_name: string,
     public readonly priority: AlarmPriority,
@@ -12,5 +13,5 @@ export class AlarmEventEntity {
     public readonly resolution_time: Date | null,
     public readonly user_id: number | null,
     public readonly user_username: string | null,
-  ) {}
+  ) { }
 }

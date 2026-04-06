@@ -1,1 +1,4 @@
-export interface EnergySavingSuggestionDto {}
+export interface EnergySavingSuggestionDto {
+    messages: string[];
+    isSuggestion: boolean;
+}

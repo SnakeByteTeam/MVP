@@ -26,6 +26,7 @@ describe('App Routes', () => {
 	it('route "" carica il main layout', () => {
 		const route = routes.find(r => r.path === '');
 		expect(route).toBeDefined();
+		expect(route?.canActivate).toContain(authGuard);
 		expect(route?.loadChildren).toBeDefined();
 	});
 

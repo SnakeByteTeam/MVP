@@ -12,6 +12,9 @@ export class GetAllAlarmEventsByUserIdResDto {
   alarmRuleId!: string;
 
   @ApiProperty()
+  deviceId!: string;
+
+  @ApiProperty()
   alarmName!: string;
 
   @ApiProperty()

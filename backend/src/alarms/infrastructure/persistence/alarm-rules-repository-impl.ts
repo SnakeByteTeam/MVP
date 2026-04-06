@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
-import { v4 as uuidv4 } from 'uuid';
 import { Pool } from 'pg';
+import { randomUUID } from 'crypto';
 import { DeleteAlarmRuleRepository } from '../../application/repository/delete-alarm-rule-repository.interface';
 import { GetAllAlarmRulesRepository } from '../../application/repository/get-all-alarm-rules-repository.interface';
 import { AlarmPriority } from '../../domain/models/alarm-priority.enum';
@@ -36,6 +36,7 @@ export class AlarmRulesRepositoryImpl
     name: string,
     priority: AlarmPriority,
     deviceId: string,
+    plantId: string,
     thresholdOperator: string,
     thresholdValue: string,
     armingTime: string,
@@ -43,11 +44,11 @@ export class AlarmRulesRepositoryImpl
   ): Promise<AlarmRuleEntity> {
     const result = await this.pool.query(
       `INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, 
-       arming_time, dearming_time, is_armed, device_id)
-       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9)
+       arming_time, dearming_time, is_armed, device_id, plant_id)
+       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10)
        RETURNING *`,
       [
-        uuidv4(),
+        randomUUID(),
         name,
         thresholdOperator,
         thresholdValue,
@@ -56,6 +57,7 @@ export class AlarmRulesRepositoryImpl
         dearmingTime,
         true,
         deviceId,
+        plantId
       ],
     );
     return result.rows[0];
@@ -64,7 +66,7 @@ export class AlarmRulesRepositoryImpl
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
       `SELECT * FROM alarm_rule 
-       ORDER BY created_at ASC`,
+       ORDER BY updated_at DESC, created_at DESC`,
     );
     return result.rows;
   }

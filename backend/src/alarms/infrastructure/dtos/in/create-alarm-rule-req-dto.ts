@@ -19,6 +19,10 @@ export class CreateAlarmRuleReqDto {
   @IsString()
   deviceId!: string;
 
+  @ApiProperty()
+  @IsString()
+  plantId!: string;
+
   @ApiProperty({ enum: AlarmPriority })
   priority!: AlarmPriority;
 
@@ -26,7 +30,7 @@ export class CreateAlarmRuleReqDto {
   @IsString()
   @MinLength(1)
   @MaxLength(2)
-  @IsIn(['>', '<', '>=', '<='])
+  @IsIn(['>', '<', '>=', '<=', '='])
   thresholdOperator!: string;
 
   @ApiProperty()

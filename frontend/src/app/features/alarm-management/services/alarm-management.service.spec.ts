@@ -1,8 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject, Subject, firstValueFrom, of, take, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
 import type { ActiveAlarm } from '../../../core/alarm/models/active-alarm.model';
+import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
+import { UserRole } from '../../../core/models/user-role.enum';
+import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import type { UserSession } from '../../user-auth/models/user-session.model';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
 import { AlarmManagementService } from './alarm-management.service';
@@ -10,6 +13,7 @@ import { AlarmManagementService } from './alarm-management.service';
 describe('AlarmManagementService', () => {
     let service: AlarmManagementService;
     let activeAlarmsSubject: BehaviorSubject<ActiveAlarm[]>;
+    let sessionSubject: BehaviorSubject<UserSession | null>;
 
     const alarmStateStub = {
         getActiveAlarms$: vi.fn(),
@@ -19,7 +23,12 @@ describe('AlarmManagementService', () => {
 
     const alarmApiStub = {
         getActiveAlarms: vi.fn(),
+        getActiveAlarmsOfOperator: vi.fn(),
         resolveAlarm: vi.fn(),
+    };
+
+    const authServiceStub = {
+        getCurrentUser$: vi.fn(),
     };
 
     const alarmA: ActiveAlarm = {
@@ -27,9 +36,10 @@ describe('AlarmManagementService', () => {
         alarmRuleId: 'rule-1',
         alarmName: 'Antipanico',
         priority: AlarmPriority.RED,
-        triggeredAt: '2026-03-24T10:00:00.000Z',
-        resolvedAt: null,
-        user_id: null,
+        activationTime: '2026-03-24T10:00:00.000Z',
+        resolutionTime: null,
+        position: 'Camera 201',
+        userId: 99,
     };
 
     const alarmB: ActiveAlarm = {
@@ -37,23 +47,45 @@ describe('AlarmManagementService', () => {
         alarmRuleId: 'rule-2',
         alarmName: 'Porta aperta',
         priority: AlarmPriority.ORANGE,
-        triggeredAt: '2026-03-24T10:01:00.000Z',
-        resolvedAt: null,
-        user_id: null,
+        activationTime: '2026-03-24T10:01:00.000Z',
+        resolutionTime: null,
+        position: 'Corridoio Nord',
+        userId: 7,
     };
 
     beforeEach(() => {
         vi.clearAllMocks();
 
         activeAlarmsSubject = new BehaviorSubject<ActiveAlarm[]>([]);
+        sessionSubject = new BehaviorSubject<UserSession | null>({
+            userId: '99',
+            username: 'admin',
+            role: UserRole.AMMINISTRATORE,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
         alarmStateStub.getActiveAlarms$.mockReturnValue(activeAlarmsSubject.asObservable());
+        alarmStateStub.setActiveAlarms.mockImplementation((alarms: ActiveAlarm[]) => {
+            activeAlarmsSubject.next(alarms);
+        });
+        alarmStateStub.onAlarmResolved.mockImplementation((resolvedId: string) => {
+            const next = activeAlarmsSubject
+                .getValue()
+                .filter((alarm) => alarm.id !== resolvedId);
+
+            activeAlarmsSubject.next(next);
+        });
         alarmApiStub.getActiveAlarms.mockReturnValue(of([]));
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValue(of([]));
+        authServiceStub.getCurrentUser$.mockReturnValue(sessionSubject.asObservable());
 
         TestBed.configureTestingModule({
             providers: [
                 AlarmManagementService,
                 { provide: AlarmStateService, useValue: alarmStateStub },
                 { provide: AlarmApiService, useValue: alarmApiStub },
+                { provide: InternalAuthService, useValue: authServiceStub },
             ],
         });
     });
@@ -64,18 +96,44 @@ describe('AlarmManagementService', () => {
         service = createService();
 
         expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
+        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
         expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
     });
 
-    it('initialize carica gli allarmi attivi iniziali via API e idrata AlarmStateService', () => {
+    it('initialize per amministratore mostra tutti gli allarmi senza filtri frontend', () => {
         const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
         alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
 
         service = createService();
         service.initialize();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(1);
-        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
+    });
+
+    it('initialize per OSS mantiene tutti gli allarmi restituiti dall endpoint operatore', () => {
+        sessionSubject.next({
+            userId: '7',
+            username: 'oss',
+            role: UserRole.OPERATORE_SANITARIO,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
+        const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of(initialSnapshot));
+
+        service = createService();
+        service.initialize();
+
+        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7', 6, 0);
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenNthCalledWith(2, '7', 6, 6);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
     it('se initialize fallisce non propaga eccezioni e valorizza l errore nel vm', async () => {
@@ -90,12 +148,17 @@ describe('AlarmManagementService', () => {
         expect(vm.resolveError).toBe('bootstrap error');
     });
 
-    it('espone vm iniziale con lista vuota e nessuna risoluzione in corso', async () => {
+    it('espone vm iniziale senza campi scope e nessuna risoluzione in corso', async () => {
         service = createService();
-        const vm = await firstValueFrom(service.vm$);
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
 
         expect(vm).toEqual({
             alarms: [],
+            currentPage: 1,
+            pageLimit: 6,
+            pageOffset: 0,
+            canGoPrevious: false,
+            canGoNext: false,
             isResolving: false,
             resolvingId: null,
             resolveError: null,
@@ -108,41 +171,27 @@ describe('AlarmManagementService', () => {
         const resolveRequest$ = new Subject<void>();
         alarmApiStub.resolveAlarm.mockReturnValue(resolveRequest$.asObservable());
 
-        const emissions: Array<{
-            alarms: ActiveAlarm[];
-            isResolving: boolean;
-            resolvingId: string | null;
-            resolveError: string | null;
-        }> = [];
-
-        const subscription = service.vm$.subscribe((vm) => {
-            emissions.push(vm);
-        });
-
         service.resolveAlarm(alarmA.id);
 
-        const duringResolve = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(duringResolve.isResolving).toBe(true);
-        expect(duringResolve.resolvingId).toBe(alarmA.id);
-        expect(duringResolve.resolveError).toBeNull();
+        let vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.isResolving).toBe(true);
+        expect(vm.resolvingId).toBe(alarmA.id);
+        expect(vm.resolveError).toBeNull();
 
         resolveRequest$.next();
         resolveRequest$.complete();
 
-        const afterResolve = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(afterResolve.isResolving).toBe(false);
-        expect(afterResolve.resolvingId).toBeNull();
-        expect(afterResolve.resolveError).toBeNull();
+        vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.isResolving).toBe(false);
+        expect(vm.resolvingId).toBeNull();
+        expect(vm.resolveError).toBeNull();
 
-        expect(alarmApiStub.resolveAlarm).toHaveBeenCalledWith(alarmA.id);
+        expect(alarmApiStub.resolveAlarm).toHaveBeenCalledWith(alarmA.id, 99);
         expect(alarmStateStub.onAlarmResolved).toHaveBeenCalledWith(alarmA.id);
         expect(alarmStateStub.onAlarmResolved).toHaveBeenCalledTimes(1);
-        expect(emissions.length).toBeGreaterThanOrEqual(3);
-
-        subscription.unsubscribe();
     });
 
-    it('non mantiene copia locale degli allarmi: vm riflette solo AlarmStateService', async () => {
+    it('prima della resolve il vm riflette solo AlarmStateService', async () => {
         service = createService();
         const vmHistory: ActiveAlarm[][] = [];
         const subscription = service.vm$.subscribe((vm) => {
@@ -159,6 +208,209 @@ describe('AlarmManagementService', () => {
         subscription.unsubscribe();
     });
 
+    it('dopo resolve non mantiene righe locali e riallinea lo stato allo snapshot backend', async () => {
+        service = createService();
+        activeAlarmsSubject.next([alarmA, alarmB]);
+        alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
+
+        service.resolveAlarm(alarmA.id);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+
+        expect(vm.alarms).toEqual([]);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([], 'replace');
+    });
+
+    it('dopo resolve ricarica la pagina corrente dal backend', async () => {
+        service = createService();
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([alarmA]));
+        activeAlarmsSubject.next([alarmA]);
+        alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
+
+        service.resolveAlarm(alarmA.id);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+
+        expect(vm.alarms.length).toBe(1);
+        expect(vm.alarms[0].id).toBe(alarmA.id);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA], 'replace');
+    });
+
+    it('dopo resolve su pagina non iniziale vuota torna automaticamente alla pagina precedente', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+        const secondPage: ActiveAlarm[] = [{ ...alarmA, id: 'active-7' }];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of([]))
+            .mockReturnValueOnce(of([]))
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of([]));
+        alarmApiStub.resolveAlarm.mockReturnValueOnce(of(void 0));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+        service.resolveAlarm('active-7');
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(7, 6, 6);
+        expect(vm.currentPage).toBe(1);
+        expect(vm.pageOffset).toBe(0);
+        expect(vm.canGoNext).toBe(false);
+        expect(vm.alarms.map((alarm) => alarm.id)).toEqual([
+            'active-1',
+            'active-2',
+            'active-3',
+            'active-4',
+            'active-5',
+            'active-6',
+        ]);
+    });
+
+    it('nextPage usa limit 6 e incrementa offset quando la pagina corrente e piena', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+        const secondPage: ActiveAlarm[] = [{ ...alarmA, id: 'active-7' }];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of([]));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(2);
+        expect(vm.pageOffset).toBe(6);
+        expect(vm.canGoPrevious).toBe(true);
+        expect(vm.alarms.map((alarm) => alarm.id)).toEqual(['active-7']);
+    });
+
+    it('nextPage non fa nulla quando canGoNext e false', async () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([alarmA]));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(1);
+        expect(vm.pageOffset).toBe(0);
+        expect(vm.canGoNext).toBe(false);
+    });
+
+    it('la pagina successiva con meno di 6 elementi imposta canGoNext a false', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of([{ ...alarmA, id: 'active-7' }, { ...alarmA, id: 'active-8' }]))
+            .mockReturnValueOnce(of([{ ...alarmA, id: 'active-7' }, { ...alarmA, id: 'active-8' }]))
+            .mockReturnValueOnce(of([]));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(2);
+        expect(vm.canGoNext).toBe(false);
+        expect(vm.alarms.map((alarm) => alarm.id)).toEqual(['active-7', 'active-8']);
+    });
+
+    it('previousPage decrementa l offset fino a 0', async () => {
+        const firstPage: ActiveAlarm[] = [
+            alarmA,
+            alarmB,
+            { ...alarmA, id: 'active-3' },
+            { ...alarmA, id: 'active-4' },
+            { ...alarmA, id: 'active-5' },
+            { ...alarmA, id: 'active-6' },
+        ];
+        const secondPage: ActiveAlarm[] = [{ ...alarmA, id: 'active-7' }];
+
+        alarmApiStub.getActiveAlarms
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of(secondPage))
+            .mockReturnValueOnce(of([]))
+            .mockReturnValueOnce(of(firstPage))
+            .mockReturnValueOnce(of(secondPage));
+
+        service = createService();
+        service.initialize();
+        service.nextPage();
+        service.previousPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 6, 6);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.currentPage).toBe(1);
+        expect(vm.pageOffset).toBe(0);
+        expect(vm.canGoPrevious).toBe(false);
+    });
+
+    it('previousPage non fa nulla se l offset e gia a zero', () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of([alarmA]));
+
+        service = createService();
+        service.initialize();
+        service.previousPage();
+
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+    });
+
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {
         service = createService();
         alarmApiStub.resolveAlarm.mockReturnValue(throwError(() => new Error('timeout rete')));
@@ -172,7 +424,60 @@ describe('AlarmManagementService', () => {
         expect(alarmStateStub.onAlarmResolved).not.toHaveBeenCalled();
     });
 
-    it('consente richieste concorrenti e termina lo stato di resolving solo a completamento di tutte', async () => {
+    it('resolveAlarm con userId non numerico non chiama API e valorizza errore esplicito', async () => {
+        sessionSubject.next({
+            userId: 'abc',
+            username: 'admin',
+            role: UserRole.AMMINISTRATORE,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
+        service = createService();
+        activeAlarmsSubject.next([alarmA]);
+
+        service.resolveAlarm(alarmA.id);
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.isResolving).toBe(false);
+        expect(vm.resolvingId).toBeNull();
+        expect(vm.resolveError).toBe("Utente corrente non valido per risolvere l'allarme.");
+        expect(alarmApiStub.resolveAlarm).not.toHaveBeenCalled();
+        expect(alarmStateStub.onAlarmResolved).not.toHaveBeenCalled();
+    });
+
+    it('initialize con errore non strutturato usa fallback di caricamento', async () => {
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(throwError(() => ({ cause: 'unknown' })));
+
+        service = createService();
+        service.initialize();
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.resolveError).toBe('Errore durante il caricamento degli allarmi attivi.');
+    });
+
+    it('initialize OSS con userId non numerico non applica filtri frontend alla lista', async () => {
+        sessionSubject.next({
+            userId: 'abc',
+            username: 'oss',
+            role: UserRole.OPERATORE_SANITARIO,
+            accessToken: 'token',
+            isFirstAccess: false,
+        });
+
+        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of([alarmA, alarmB]));
+
+        service = createService();
+        service.initialize();
+
+        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('abc', 6, 0);
+        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA, alarmB], 'replace');
+
+        const vm = await firstValueFrom(service.vm$.pipe(take(1)));
+        expect(vm.alarms).toEqual([alarmA, alarmB]);
+    });
+
+    it('consente richieste concorrenti e termina resolving solo a completamento di tutte', async () => {
         service = createService();
         const reqA$ = new Subject<void>();
         const reqB$ = new Subject<void>();

@@ -1,27 +1,60 @@
-<section class="apartment-monitor" aria-label="Monitor appartamento">
-  <header class="apartment-monitor__header">
-    @if (apartment$ | async; as apartment) {
-      <div>
-        <h1>{{ apartment.name }}</h1>
-        <p>Monitoraggio stato appartamento e accesso rapido alle stanze.</p>
-      </div>
-    }
+<section class="apartment-monitor care-page care-dot-grid" aria-label="Monitor appartamento">
+  <header class="care-page__hero">
+    <div>
+      <p class="care-eyebrow">Monitor appartamento</p>
+      @if (apartment$ | async; as apartment) {
+        <h1 class="care-title">{{ apartment.name }}</h1>
+      } @else {
+        <h1 class="care-title">Panoramica casa connessa</h1>
+      }
+      <p class="care-subtitle">Monitoraggio stato appartamento e accesso rapido alle stanze.</p>
+    </div>
+
+    <div class="apartment-monitor__hero-side">
+      <p class="care-chip">
+        <span class="care-chip__dot" aria-hidden="true"></span>
+        Monitor live
+      </p>
+
+      @if (availableApartments$ | async; as apartments) {
+        @if (apartments.length > 0) {
+          <div class="care-field apartment-monitor__selector">
+            <label for="active-apartment">Appartamento attivo</label>
+            <select
+              id="active-apartment"
+              class="care-select"
+              [value]="activeApartmentId"
+              (change)="onApartmentSelected($any($event.target).value)"
+            >
+              @for (apartmentOption of apartments; track apartmentOption.id) {
+                <option [value]="apartmentOption.id">{{ apartmentOption.name }}</option>
+              }
+            </select>
+          </div>
+        }
+      }
+    </div>
   </header>
 
   @if (error) {
-    <p class="apartment-monitor__error" role="alert">{{ error }}</p>
+    <p class="care-alert" role="alert">{{ error }}</p>
   }
 
   @if (apartment$ | async; as apartment) {
     @if (activeAlarms$ | async; as activeAlarms) {
       <div class="apartment-monitor__content">
-        <app-alarm-map [rooms]="apartment.rooms" [activeAlarms]="activeAlarms" />
-        <app-room-list [rooms]="apartment.rooms" (roomSelected)="onRoomSelected($event)" />
+        <section class="care-panel apartment-monitor__panel apartment-monitor__panel--highlight">
+          <app-alarm-map [rooms]="apartment.rooms" [activeAlarms]="activeAlarms" />
+        </section>
       </div>
+
+      <section class="care-panel apartment-monitor__panel apartment-monitor__panel--highlight">
+        <app-endpoint-table />
+      </section>
     }
   } @else {
     @if (!error) {
-      <p>Caricamento appartamento...</p>
+      <p class="care-loading">Caricamento appartamento...</p>
     }
   }
 </section>

@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../../../database/database.module';
@@ -23,21 +23,30 @@ export class AlarmEventsRepositoryImpl
   ): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
       `SELECT 
-         ae.id,
-         '' AS room_name,
-         ar.device_id AS device_name,
-         ae.alarm_rule_id,
-         ar.name AS alarm_name,
-         ar.priority,
-         ae.activation_time,
-         ae.resolution_time,
-         ae.user_id,
-         u.username as user_username
-       FROM alarm_event ae
-       LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
-       LEFT JOIN "user" u ON u.id = ae.user_id
-       ORDER BY ae.activation_time DESC
-       LIMIT $1 OFFSET $2`,
+        ae.id,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        ae.alarm_rule_id,
+        ar.name AS alarm_name,
+        ar.priority,
+        ae.activation_time,
+        ae.resolution_time,
+        ae.user_id,
+        u.username as user_username
+      FROM alarm_event ae
+      LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+      LEFT JOIN "user" u ON u.id = ae.user_id
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
+      WHERE dp->>'id' = ar.device_id
+      AND ae.resolution_time IS NULL
+      ORDER BY 
+        ae.resolution_time IS NOT NULL,
+        ar.priority DESC,
+        ae.activation_time DESC
+      LIMIT $1 OFFSET $2;`,
       [limit, offset],
     );
     return result.rows;
@@ -49,9 +58,33 @@ export class AlarmEventsRepositoryImpl
     offset: number = 0,
   ): Promise<AlarmEventEntity[]> {
     const result = await this.pool.query(
-      `SELECT * FROM alarm_event 
-      WHERE id = $1 
-      ORDER BY activation_time DESC LIMIT $2 OFFSET $3`,
+      `SELECT 
+        ae.id,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        ae.alarm_rule_id,
+        ar.name AS alarm_name,
+        ar.priority,
+        ae.activation_time,
+        ae.resolution_time,
+        0 as user_id,
+        '' as user_username
+      FROM alarm_event ae
+      LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      INNER JOIN ward_user wu ON wu.ward_id = p.ward_id AND wu.user_id = $1
+      LEFT JOIN "user" u ON u.id = wu.user_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
+      WHERE dp->>'id' = ar.device_id
+            AND ae.resolution_time IS NULL
+
+      ORDER BY 
+        ae.resolution_time IS NOT NULL,
+        ar.priority DESC,
+        ae.activation_time ASC
+      LIMIT $2 OFFSET $3`,
       [id, limit, offset],
     );
 
@@ -70,14 +103,13 @@ export class AlarmEventsRepositoryImpl
     alarmRuleId: string,
     activationTime: Date,
   ): Promise<string> {
-    const eventId = uuidv4();
     const result = await this.pool.query<{ id: string }>(
       `INSERT INTO alarm_event (id, alarm_rule_id, activation_time)
        VALUES ($1, $2, $3)
        RETURNING id`,
-      [eventId, alarmRuleId, activationTime],
+      [randomUUID(), alarmRuleId, activationTime],
     );
 
-    return result.rows[0]?.id ?? eventId;
+    return result.rows[0]?.id ?? '';
   }
 }

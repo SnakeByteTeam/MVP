@@ -30,7 +30,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
            DATE(ae.activation_time) AS day,
            COUNT(*) AS alarm_count
          FROM alarm_event ae
-         JOIN alarm_rule ar ON ar.id = ae.alarm_id
+         JOIN alarm_rule ar ON ar.id = ae.alarm_rule_id
          JOIN plant p        ON p.id  = ar.plant_id
          WHERE p.id = $1
            AND ae.activation_time >= $2
@@ -62,7 +62,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
              dp->>'id'      AS datapoint_id,
              dp->>'name'    AS name,
              dp->>'sfeType' AS sfe_type,
-             dev->>'type'   AS device_type
+             dev->>'subType'   AS device_type
            FROM latest_cache
            JOIN LATERAL jsonb_array_elements(data->'rooms')     AS room ON TRUE
            JOIN LATERAL jsonb_array_elements(room->'devices')   AS dev  ON TRUE
@@ -104,7 +104,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
              dp->>'id'      AS datapoint_id,
              dp->>'name'    AS name,
              dp->>'sfeType' AS sfe_type,
-             dev->>'type'   AS device_type
+             dev->>'subType'   AS device_type
            FROM latest_cache
            JOIN LATERAL jsonb_array_elements(data->'rooms')     AS room ON TRUE
            JOIN LATERAL jsonb_array_elements(room->'devices')   AS dev  ON TRUE
@@ -146,7 +146,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
              dp->>'id'      AS datapoint_id,
              dp->>'name'    AS name,
              dp->>'sfeType' AS sfe_type,
-             dev->>'type'   AS device_type
+             dev->>'subType'   AS device_type
            FROM latest_cache
            JOIN LATERAL jsonb_array_elements(data->'rooms')     AS room ON TRUE
            JOIN LATERAL jsonb_array_elements(room->'devices')   AS dev  ON TRUE

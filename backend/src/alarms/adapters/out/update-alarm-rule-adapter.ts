@@ -10,7 +10,7 @@ export class UpdateAlarmRuleAdapter {
   constructor(
     @Inject(UPDATE_ALARM_RULE_REPOSITORY)
     private readonly updateAlarmRuleRepository: UpdateAlarmRuleRepository,
-  ) {}
+  ) { }
 
   async updateAlarmRule(req: UpdateAlarmRuleCmd): Promise<AlarmRule> {
     const alarmRule = await this.updateAlarmRuleRepository.updateAlarmRule(

@@ -5,9 +5,13 @@ import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { getDeviceWatt, isDeviceActive } from './consumption-config';
 import { Series } from 'src/analytics/domain/series.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
-const TITLE = 'Consumo energetico di impianto';
-const METRIC = 'plant-consumption';
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+} = AnalyticsMetric.PLANT_CONSUMPTION;
 
 @Injectable()
 export class PlantConsumption implements AnalyticsStrategy {
@@ -63,6 +67,8 @@ export class PlantConsumption implements AnalyticsStrategy {
     const labels = sorted.map(([day]) => day);
     const values = sorted.map(([, wh]) => wh);
 
-    return new Plot(TITLE, METRIC, 'Wh', labels, [new Series('', '', values)]);
+    return new Plot(TITLE, METRIC, UNIT, labels, [
+      new Series(METRIC, TITLE, values),
+    ]);
   }
 }

@@ -11,7 +11,7 @@ export class GetAllAlarmEventsByUserIdAdapter implements GetAllAlarmEventsByUser
   constructor(
     @Inject(GET_ALL_ALARM_EVENTS_BY_USER_ID_REPOSITORY)
     private readonly getAllAlarmEventsByUserIdRepository: GetAllAlarmEventsByUserIdRepository,
-  ) {}
+  ) { }
 
   async getAllAlarmEventsByUserId(
     req: GetAllAlarmEventsByUserIdCmd,
@@ -28,6 +28,7 @@ export class GetAllAlarmEventsByUserIdAdapter implements GetAllAlarmEventsByUser
         new AlarmEvent(
           alarmEvent.id,
           alarmEvent.room_name + ' ' + alarmEvent.device_name,
+          alarmEvent.device_id,
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,

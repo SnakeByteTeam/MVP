@@ -16,6 +16,10 @@ bazel-out/
 !frontend/src/app/features/user-management/models/out/
 !frontend/src/app/features/user-management/models/out/*.ts
 
+#backend out ports
+!backend/src/alarms/application/ports/out
+!backend/src/alarms/application/ports/out/*.ts
+
 # temporary files
 tmp/
 .temp/

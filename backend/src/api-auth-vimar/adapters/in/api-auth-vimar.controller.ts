@@ -1,16 +1,22 @@
 import {
   BadRequestException,
   Controller,
+  Delete,
   Get,
   Inject,
   InternalServerErrorException,
   Logger,
   Query,
   Redirect,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   APIAUTHUSECASE,
   type ApiAuthUseCase,
@@ -19,9 +25,21 @@ import {
   type GetTokensCallbackUseCase,
   GETTOKENSCALLBACKUSECASE,
 } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
+import {
+  GETVALIDTOKENPORT,
+  type GetValidTokenPort,
+} from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
+import {
+  DELETETOKENSFROMREPOPORT,
+  type DeleteTokensFromRepoPort,
+} from 'src/api-auth-vimar/application/ports/out/delete-tokens-from-repo.port';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
 import { AdminGuard } from 'src/guard/admin/admin.guard';
 import { UserGuard } from 'src/guard/user/user.guard';
+import {
+  MyVimarAccountStatusDto,
+  MyVimarDisconnectResDto,
+} from 'src/api-auth-vimar/infrastructure/dto/my-vimar-account-status.dto';
 
 @ApiTags('auth')
 @Controller('my-vimar')
@@ -33,7 +51,62 @@ export class ApiAuthVimarController {
     private readonly apiAuthVimarUseCase: ApiAuthUseCase,
     @Inject(GETTOKENSCALLBACKUSECASE)
     private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase,
+    @Inject(GETVALIDTOKENPORT)
+    private readonly getValidTokenPort: GetValidTokenPort,
+    @Inject(DELETETOKENSFROMREPOPORT)
+    private readonly deleteTokensFromRepo: DeleteTokensFromRepoPort,
   ) {}
+
+  @Get('account')
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'Get shared MyVimar account status',
+    description:
+      'Returns whether the shared MyVimar integration is currently linked.',
+  })
+  @ApiOkResponse({ type: MyVimarAccountStatusDto })
+  async getAccountStatus(): Promise<MyVimarAccountStatusDto> {
+    try {
+      const validToken = await this.getValidTokenPort.getValidToken();
+
+      return {
+        isLinked: !!validToken,
+        email: '',
+      };
+    } catch {
+      return {
+        isLinked: false,
+        email: '',
+      };
+    }
+  }
+
+  @Delete('account')
+  @UseGuards(AdminGuard)
+  @ApiBearerAuth('access-token')
+  @ApiOperation({
+    summary: 'Disconnect shared MyVimar account',
+    description:
+      'Clears shared MyVimar cached tokens. Operation is idempotent for callers.',
+  })
+  @ApiOkResponse({ type: MyVimarDisconnectResDto })
+  async disconnectAccount(): Promise<MyVimarDisconnectResDto> {
+    try {
+      const deleted = await this.deleteTokensFromRepo.deleteTokens();
+      if (!deleted) {
+        throw new Error('Unable to clear MyVimar tokens');
+      }
+
+      return { success: true };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Error while disconnecting shared MyVimar account: ${message}`,
+      );
+      throw new InternalServerErrorException('Internal server error');
+    }
+  }
 
   @Get('auth')
   @Redirect()
@@ -95,8 +168,9 @@ export class ApiAuthVimarController {
         try {
           redirectUrl = Buffer.from(state, 'base64').toString('utf-8');
           this.logger.log(`Decoded redirect URL from state: ${redirectUrl}`);
-        } catch (e) {
-          this.logger.error(`Failed to decode state: ${e.message}`);
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : 'Unknown error';
+          this.logger.error(`Failed to decode state: ${message}`);
         }
       }
 
@@ -105,8 +179,10 @@ export class ApiAuthVimarController {
         url: redirectUrl,
         statusCode: 302,
       };
-    } catch (error) {
-      this.logger.error(`Error in callback: ${error.message}`, error.stack);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Error in callback: ${message}`, stack);
       throw new InternalServerErrorException('Internal server error');
     }
   }

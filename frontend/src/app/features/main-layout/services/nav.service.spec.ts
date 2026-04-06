@@ -27,7 +27,7 @@ describe('NavService', () => {
         expect(items.some(i => i.label === "Dashboard")).toBe(true);
         expect(items.some(i => i.route.includes('dashboard'))).toBe(true);
 
-        expect(items.some(i => i.label === "Gestione allarmi")).toBe(true);
+        expect(items.some(i => i.label === "Configurazione Allarmi")).toBe(true);
         expect(items.some(i => i.route.includes('alarm-configuration'))).toBe(true);
 
     });

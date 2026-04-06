@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsIn,
   IsString,
   Matches,
   MaxLength,
@@ -19,7 +20,8 @@ export class UpdateAlarmRuleReqDto {
   @ApiProperty()
   @IsString()
   @MinLength(1)
-  @MaxLength(1)
+  @MaxLength(2)
+  @IsIn(['>', '<', '>=', '<=', '='])
   thresholdOperator!: string;
 
   @ApiProperty()

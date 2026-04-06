@@ -8,13 +8,25 @@ import {
   GETTOKENSCALLBACKUSECASE,
   type GetTokensCallbackUseCase,
 } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
+import {
+  GETVALIDTOKENPORT,
+  type GetValidTokenPort,
+} from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
+import {
+  DELETETOKENSFROMREPOPORT,
+  type DeleteTokensFromRepoPort,
+} from 'src/api-auth-vimar/application/ports/out/delete-tokens-from-repo.port';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
 import { GuardModule } from 'src/guard/guard.module';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { JwtService } from '@nestjs/jwt';
 
 describe('ApiAuthVimarController', () => {
   let controller: ApiAuthVimarController;
   let apiAuthUseCase: jest.Mocked<ApiAuthUseCase>;
   let getTokensCallbackUseCase: jest.Mocked<GetTokensCallbackUseCase>;
+  let getValidTokenPort: jest.Mocked<GetValidTokenPort>;
+  let deleteTokensFromRepo: jest.Mocked<DeleteTokensFromRepoPort>;
 
   beforeEach(async () => {
     apiAuthUseCase = {
@@ -22,6 +34,14 @@ describe('ApiAuthVimarController', () => {
     };
     getTokensCallbackUseCase = {
       getTokens: jest.fn(),
+    };
+
+    getValidTokenPort = {
+      getValidToken: jest.fn(),
+    };
+
+    deleteTokensFromRepo = {
+      deleteTokens: jest.fn(),
     };
 
     getTokensCallbackUseCase = {
@@ -39,6 +59,26 @@ describe('ApiAuthVimarController', () => {
         {
           provide: GETTOKENSCALLBACKUSECASE,
           useValue: getTokensCallbackUseCase,
+        },
+        {
+          provide: GETVALIDTOKENPORT,
+          useValue: getValidTokenPort,
+        },
+        {
+          provide: DELETETOKENSFROMREPOPORT,
+          useValue: deleteTokensFromRepo,
+        },
+        {
+          provide: AdminGuard,
+          useValue: {
+            canActivate: jest.fn().mockReturnValue(true),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -63,6 +103,54 @@ describe('ApiAuthVimarController', () => {
     expect(result).toEqual({
       url: 'url-login',
       statusCode: 302,
+    });
+  });
+
+  describe('getAccountStatus', () => {
+    it('should return linked=true when a valid token is available', async () => {
+      getValidTokenPort.getValidToken.mockResolvedValue('token-123');
+
+      const result = await controller.getAccountStatus();
+
+      expect(getValidTokenPort.getValidToken).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        isLinked: true,
+        email: '',
+      });
+    });
+
+    it('should return linked=false when token is not available', async () => {
+      getValidTokenPort.getValidToken.mockRejectedValue(
+        new Error('No tokens found in cache'),
+      );
+
+      const result = await controller.getAccountStatus();
+
+      expect(getValidTokenPort.getValidToken).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        isLinked: false,
+        email: '',
+      });
+    });
+  });
+
+  describe('disconnectAccount', () => {
+    it('should clear tokens and return success=true', async () => {
+      deleteTokensFromRepo.deleteTokens.mockResolvedValue(true);
+
+      const result = await controller.disconnectAccount();
+
+      expect(deleteTokensFromRepo.deleteTokens).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ success: true });
+    });
+
+    it('should throw InternalServerErrorException when clear fails', async () => {
+      deleteTokensFromRepo.deleteTokens.mockResolvedValue(false);
+
+      await expect(controller.disconnectAccount()).rejects.toThrow(
+        'Internal server error',
+      );
+      expect(deleteTokensFromRepo.deleteTokens).toHaveBeenCalledTimes(1);
     });
   });
 

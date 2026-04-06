@@ -11,7 +11,6 @@ import { WardApiService } from '../../../ward-management/services/ward-api.servi
 import { AlarmRuleFormMapper } from '../../mappers/alarm-rule-form.mapper';
 import { AlarmConfigFormValue } from '../../models/alarm-config-form-value.model';
 import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
-import { AlarmToggleSwitchComponent } from '../../../../shared/components/alarm-table/alarm-toggle-switch.component';
 import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
 import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 
@@ -24,7 +23,7 @@ type DeviceOption = {
 	selector: 'app-alarm-config-form',
 	templateUrl: './alarm-config-form.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmToggleSwitchComponent, AlarmActionButtonComponent],
+	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmActionButtonComponent],
 })
 export class AlarmConfigFormComponent {
 	public readonly mode = input<'create' | 'edit'>('create');

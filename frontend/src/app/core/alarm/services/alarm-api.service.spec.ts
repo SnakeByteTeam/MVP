@@ -146,43 +146,15 @@ describe('AlarmApiService', () => {
         request.flush(null);
     });
 
-    it('getActiveAlarms chiama GET /alarm-events/:limit/:offset e restituisce la lista', () => {
-        service.getActiveAlarms(6, 0).subscribe((result) => {
+    it('getActiveAlarms chiama GET /alarm-events/unmanaged/:userId/:limit/:offset e restituisce la lista', () => {
+        service.getActiveAlarms(7, 6, 0).subscribe((result) => {
             expect(result).toEqual([activeAlarm]);
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne(`${alarmEventsBaseUrl}/6/0`);
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/unmanaged/7/6/0`);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
-    });
-
-    it('getActiveAlarmsOfOperator chiama GET /alarm-events/:userId/:limit/:offset', () => {
-        const activeAlarmByUserDto = {
-            id: 'active-1',
-            alarmRuleId: 'alarm-1',
-            deviceId: 'dev-1',
-            alarmName: 'Temperatura alta',
-            priority: AlarmPriority.RED,
-            activationTime: '2026-03-24T10:00:00.000Z',
-            resolutionTime: null,
-            position: 'Camera 101',
-            userUsername: 'oss_7',
-        };
-
-        service.getActiveAlarmsOfOperator('operator-7', 6, 12).subscribe((result) => {
-            expect(result).toEqual([
-                {
-                    ...activeAlarmByUserDto,
-                    userId: null,
-                },
-            ]);
-            expect(result).toHaveLength(1);
-        });
-
-        const request = httpController.expectOne(`${alarmEventsBaseUrl}/operator-7/6/12`);
-        expect(request.request.method).toBe('GET');
-        request.flush([activeAlarmByUserDto]);
     });
 
     it('resolveAlarm chiama PATCH /alarm-events/resolve', () => {

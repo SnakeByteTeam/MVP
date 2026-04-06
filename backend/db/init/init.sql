@@ -71,6 +71,7 @@ CREATE TABLE ward_user (
 
 INSERT INTO ward_user (ward_id, user_id)
 SELECT w.id, u.id FROM (VALUES
+  ('test',     'Reparto autosufficienti'),
     ('mrossi',   'Reparto autosufficienti'),
     ('gbianchi', 'Reparto autosufficienti'),
     ('lverdi',   'Reparto cure livello 1'),
@@ -113,6 +114,7 @@ CREATE TABLE plant (
     ward_id   INTEGER      REFERENCES ward(id) ON DELETE SET NULL
 );
 
+-- AA0011BB0011: allarmi visibili a mrossi e gbianchi nel Reparto autosufficienti.
 INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
   NOW(),
   'AA0011BB0011',
@@ -233,11 +235,12 @@ INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
         ]
       }
     ],
-    "wardId": null
+    "wardId": 2
   }',
-  (SELECT id FROM ward WHERE name = 'test-ward')
+  (SELECT id FROM ward WHERE name = 'Reparto autosufficienti')
 );
 
+-- BB0022CC0022: allarmi visibili a lverdi nel Reparto cure livello 1.
 INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
   NOW(),
   'BB0022CC0022',
@@ -358,9 +361,9 @@ INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
         ]
       }
     ],
-    "wardId": null
+    "wardId": 3
   }',
-  NULL
+  (SELECT id FROM ward WHERE name = 'Reparto cure livello 1')
 );
 
 INSERT INTO datapoint_history (timestamp, datapoint_id, value) VALUES
@@ -635,6 +638,9 @@ INSERT INTO datapoint_history (timestamp, datapoint_id, value) VALUES
 ('2026-04-02 07:00:00+00', 'dp-BB0022CC0022-2000000005-SFE_State_ManDown', 'False')
 ON CONFLICT DO NOTHING;
 
+-- Mantiene i timestamp del seed in UTC per evitare derive locali sui TIMESTAMPTZ.
+SET TIME ZONE 'UTC';
+
 CREATE TABLE IF NOT EXISTS status (
     id   SERIAL PRIMARY KEY,
     name VARCHAR(30) NOT NULL
@@ -656,13 +662,9 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     is_armed           BOOLEAN      NOT NULL DEFAULT TRUE,
     device_id          VARCHAR(255) NOT NULL,
     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    -- CONSTRAINT chk_armed_arming CHECK (
-    --     NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
-    --          CURRENT_TIME BETWEEN arming_time AND dearming_time)
-    -- )
-
+    created_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    updated_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    is_changed_when_used BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
@@ -674,12 +676,12 @@ INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority,
 
 -- Regole aggiuntive per test UI/paginazione/stati su allarmi attivi.
 INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-('rule-006', 'Temp soggiorno warning',      '>',  '28',   3, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-007', 'Temp soggiorno critica',      '>=', '31',   4, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-008', 'Luce soggiorno sempre accesa','=',  'On',   2, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
-('rule-009', 'Caduta bagno test-ward',      '=',  'True', 4, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
-('rule-010', 'Temp ingresso alta',          '>',  '21',   3, NULL,    NULL,    TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
-('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, NULL,    NULL,    TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
+('rule-006', 'Temp soggiorno warning autosufficienti',      '>',  '28',   3, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
+('rule-007', 'Temp soggiorno critica autosufficienti',      '>=', '31',   4, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
+('rule-008', 'Luce soggiorno sempre accesa autosufficienti','=',  'on',   2, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
+('rule-009', 'Caduta bagno autosufficienti',      '=',  'on',   4, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
+('rule-010', 'Temp ingresso alta cure livello 1',          '>',  '21',   3, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
+('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
 
 
 CREATE TABLE alarm_event (
@@ -717,7 +719,8 @@ VALUES
 -- Eventi per rule-002 (Luce accesa di notte)
 ('EVT009', 'rule-002', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);
 
--- Eventi aggiuntivi per test paginazione/stato attivo/gestito.
+-- Eventi attivi e gestiti dei due reparti assegnati: servono per verificare
+-- che gli utenti normali vedano solo gli allarmi del proprio reparto e che l'admin veda tutto.
 INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
 VALUES
 ('EVT101', 'rule-006', '2026-04-03 07:10:00', NULL, NULL),

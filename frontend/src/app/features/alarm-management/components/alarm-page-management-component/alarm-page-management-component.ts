@@ -9,8 +9,6 @@ import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/a
 import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
 import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 import { AlarmTableColumn } from '../../../../shared/models/alarm-table.model';
-import { InternalAuthService } from '../../../../core/services/internal-auth.service';
-import { UserRole } from '../../../../core/models/user-role.enum';
 
 @Component({
   selector: 'app-alarm-page-management-component',
@@ -23,43 +21,20 @@ export class AlarmPageManagementComponent implements OnInit {
   private readonly alarmManagementService = inject(AlarmManagementService);
   private readonly tablePresenter = inject(AlarmManagementTablePresenterService);
   private readonly alarmManagementRefreshService = inject(AlarmManagementRefreshService);
-  private readonly authService = inject(InternalAuthService);
   private readonly destroyRef = inject(DestroyRef);
 
-  //per OSS no gestore
-  private readonly baseColumns: readonly AlarmTableColumn[] = [
+  public readonly columns: readonly AlarmTableColumn[] = [
     { id: 'priority', label: 'Priorità' },
     { id: 'name', label: 'Nome' },
-    // { id: 'device', label: 'Dispositivo' },
     { id: 'location', label: 'Luogo' },
     { id: 'status', label: 'Stato' },
     { id: 'openedAt', label: 'Scattato' },
-    // { id: 'closedAt', label: 'Orario chiusura' },
-    { id: 'actions', label: 'Azioni' },
-  ];
-
-  private readonly adminColumns: readonly AlarmTableColumn[] = [
-    { id: 'priority', label: 'Priorità' },
-    { id: 'name', label: 'Nome' },
-    // { id: 'device', label: 'Dispositivo' },
-    { id: 'location', label: 'Luogo' },
-    { id: 'status', label: 'Stato' },
-    { id: 'openedAt', label: 'Scattato' },
-    // { id: 'closedAt', label: 'Orario chiusura' },
-    // { id: 'manager', label: 'Gestore' },
     { id: 'actions', label: 'Azioni' },
   ];
 
   public readonly vm = toSignal<AlarmListVm | null>(this.alarmManagementService.vm$, {
     initialValue: null,
   });
-  public readonly currentUser = toSignal(this.authService.getCurrentUser$(), { initialValue: null });
-  public readonly showManagerColumn = computed(
-    () => this.currentUser()?.role === UserRole.AMMINISTRATORE,
-  );
-  public readonly columns = computed<readonly AlarmTableColumn[]>(() =>
-    this.showManagerColumn() ? this.adminColumns : this.baseColumns,
-  );
 
   public readonly rows = computed(() => {
     const vmState = this.vm();

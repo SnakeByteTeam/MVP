@@ -5,8 +5,8 @@ import {
   RESOLVE_ALARM_EVENT_PORT,
   ResolveAlarmEventPort,
 } from '../ports/out/resolve-alarm-event-port.interface';
-import { GetAllAlarmEventsByUserIdUseCase } from '../ports/in/get-all-alarms-events-by-user-id-use-case.interface';
-import { GetAllAlarmEventsByUserIdCmd } from '../commands/get-all-alarm-events-by-user-id-cmd';
+import { GetAllManagedAlarmEventsByUserIdUseCase } from '../ports/in/get-all-managed-alarm-events-by-user-id-use-case.interface';
+import { GetAllManagedAlarmEventsByUserIdCmd } from '../commands/get-all-managed-alarm-events-by-user-id-cmd';
 import { GetAllAlarmEventsUseCase } from '../ports/in/get-all-alarm-events-use-case.interface';
 import { AlarmEvent } from '../../domain/models/alarm-event.model';
 import {
@@ -14,21 +14,31 @@ import {
   GetAllAlarmEventsPort,
 } from '../ports/out/get-all-alarm-events.port';
 import {
-  GET_ALL_ALARM_EVENTS_BY_USER_ID_PORT,
-  GetAllAlarmEventsByUserIdPort,
-} from '../ports/out/get-all-alarms-events-by-user-id-port.interface';
+  GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
+  GetAllManagedAlarmEventsByUserIdPort,
+} from '../ports/out/get-all-managed-alarm-events-by-user-id-port.interface';
 import { GetAllAlarmEventsCmd } from '../commands/get-all-alarm-events-cmd';
+import { GetAllUnmanagedAlarmEventsByUserIdUseCase } from '../ports/in/get-all-unmanaged-alarm-events-by-user-id-use-case.interface';
+import { GetAllUnmanagedAlarmEventsByUserIdCmd } from '../commands/get-all-unmanaged-alarm-events-by-user-id-cmd';
+import {
+  GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
+  GetAllUnmanagedAlarmEventsByUserIdPort,
+} from '../ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
 
 @Injectable()
 export class AlarmEventsService
   implements
     GetAllAlarmEventsUseCase,
-    GetAllAlarmEventsByUserIdUseCase,
+    GetAllManagedAlarmEventsByUserIdUseCase,
+    GetAllUnmanagedAlarmEventsByUserIdUseCase,
     ResolveAlarmEventUseCase
 {
   constructor(
-    @Inject(GET_ALL_ALARM_EVENTS_BY_USER_ID_PORT)
-    private readonly getAllAlarmEventsByUserIdPort: GetAllAlarmEventsByUserIdPort,
+    @Inject(GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT)
+    private readonly getAllManagedAlarmEventsByUserIdPort: GetAllManagedAlarmEventsByUserIdPort,
+
+    @Inject(GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT)
+    private readonly getAllUnmanagedAlarmEventsByUserIdPort: GetAllUnmanagedAlarmEventsByUserIdPort,
 
     @Inject(GET_ALL_ALARM_EVENTS_PORT)
     private readonly getAllAlarmEventsPort: GetAllAlarmEventsPort,
@@ -41,10 +51,18 @@ export class AlarmEventsService
     return await this.getAllAlarmEventsPort.getAllAlarmEvents(req);
   }
 
-  async getAllAlarmEventsByUserId(
-    req: GetAllAlarmEventsByUserIdCmd,
+  async getAllManagedAlarmEventsByUserId(
+    req: GetAllManagedAlarmEventsByUserIdCmd,
   ): Promise<AlarmEvent[]> {
-    return await this.getAllAlarmEventsByUserIdPort.getAllAlarmEventsByUserId(
+    return await this.getAllManagedAlarmEventsByUserIdPort.getAllManagedAlarmEventsByUserId(
+      req,
+    );
+  }
+
+  async getAllUnmanagedAlarmEventsByUserId(
+    req: GetAllUnmanagedAlarmEventsByUserIdCmd,
+  ): Promise<AlarmEvent[]> {
+    return await this.getAllUnmanagedAlarmEventsByUserIdPort.getAllUnmanagedAlarmEventsByUserId(
       req,
     );
   }

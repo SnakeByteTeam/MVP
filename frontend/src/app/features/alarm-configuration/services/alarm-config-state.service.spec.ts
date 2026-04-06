@@ -5,6 +5,7 @@ import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
 import type { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
 import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
+import { AlarmManagementRefreshService } from '../../../core/alarm/services/alarm-management-refresh.service';
 import type { AlarmConfigFormValue } from '../models/alarm-config-form-value.model';
 import { AlarmConfigStateService } from './alarm-config-state.service';
 
@@ -17,6 +18,10 @@ describe('AlarmConfigStateService', () => {
         createAlarmRule: vi.fn(),
         updateAlarmRule: vi.fn(),
         deleteAlarmRule: vi.fn(),
+    };
+
+    const refreshServiceStub = {
+        requestRefresh: vi.fn(),
     };
 
     const alarmA: AlarmRule = {
@@ -62,6 +67,7 @@ describe('AlarmConfigStateService', () => {
             providers: [
                 AlarmConfigStateService,
                 { provide: AlarmApiService, useValue: apiStub },
+                { provide: AlarmManagementRefreshService, useValue: refreshServiceStub },
             ],
         });
 
@@ -145,6 +151,7 @@ describe('AlarmConfigStateService', () => {
         });
         expect(created).toEqual(alarmB);
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
+        expect(refreshServiceStub.requestRefresh).toHaveBeenCalledTimes(1);
     });
 
     it('createAlarmRule con form invalido non chiama API e imposta errore di validazione', async () => {
@@ -179,6 +186,7 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(await firstValueFrom(service.error$)).toBe('Errore durante la creazione dell\'allarme.');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
+        expect(refreshServiceStub.requestRefresh).not.toHaveBeenCalled();
     });
 
     it('createAlarmRule pulisce l errore precedente quando una creazione successiva va a buon fine', async () => {
@@ -219,6 +227,7 @@ describe('AlarmConfigStateService', () => {
         });
 
         expect(await firstValueFrom(service.alarms$)).toEqual([updatedAlarm, alarmB]);
+        expect(refreshServiceStub.requestRefresh).toHaveBeenCalledTimes(1);
     });
 
     it('updateAlarmRule con form invalido non chiama API e imposta errore', async () => {
@@ -253,6 +262,7 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(await firstValueFrom(service.error$)).toBe('Errore durante l\'aggiornamento dell\'allarme.');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
+        expect(refreshServiceStub.requestRefresh).not.toHaveBeenCalled();
     });
 
     it('updateAlarmRule senza allarme locale usa il nome del form nel payload', async () => {
@@ -286,6 +296,26 @@ describe('AlarmConfigStateService', () => {
         });
     });
 
+    it('updateAlarmRule sostituisce la riga locale anche se il backend ritorna un nuovo id', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
+
+        const updatedWithNewId: AlarmRule = {
+            ...alarmA,
+            id: 'alarm-1-v2',
+            isArmed: false,
+        };
+        apiStub.updateAlarmRule.mockReturnValue(of(updatedWithNewId));
+
+        service.updateAlarmRule('alarm-1', validForm).subscribe();
+
+        const alarms = await firstValueFrom(service.alarms$);
+        expect(alarms).toEqual([updatedWithNewId, alarmB]);
+        expect(alarms.some((alarm) => alarm.id === 'alarm-1')).toBe(false);
+        expect(alarms.some((alarm) => alarm.id === 'alarm-1-v2')).toBe(true);
+        expect(refreshServiceStub.requestRefresh).toHaveBeenCalledTimes(1);
+    });
+
     it('toggleEnabled aggiorna enabled costruendo payload dai dati locali', async () => {
         apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
         service.loadAlarmRules();
@@ -306,6 +336,7 @@ describe('AlarmConfigStateService', () => {
         });
 
         expect(await firstValueFrom(service.alarms$)).toEqual([toggledAlarm]);
+        expect(refreshServiceStub.requestRefresh).toHaveBeenCalledTimes(1);
     });
 
     it('toggleEnabled su allarme assente non chiama API e imposta errore', async () => {
@@ -320,6 +351,7 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(apiStub.updateAlarmRule).not.toHaveBeenCalled();
         expect(await firstValueFrom(service.error$)).toBe('Allarme non trovato nello stato locale.');
+        expect(refreshServiceStub.requestRefresh).not.toHaveBeenCalled();
     });
 
     it('toggleEnabled in errore API imposta messaggio e mantiene lo stato invariato', async () => {
@@ -336,6 +368,26 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(await firstValueFrom(service.error$)).toBe('Errore durante la modifica dello stato dell\'allarme.');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA]);
+        expect(refreshServiceStub.requestRefresh).not.toHaveBeenCalled();
+    });
+
+    it('toggleEnabled aggiorna subito lo stato locale anche se il backend ritorna un nuovo id', async () => {
+        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        service.loadAlarmRules();
+
+        const toggledWithNewId: AlarmRule = {
+            ...alarmA,
+            id: 'alarm-1-v2',
+            isArmed: false,
+        };
+        apiStub.updateAlarmRule.mockReturnValue(of(toggledWithNewId));
+
+        service.toggleEnabled('alarm-1', false).subscribe();
+
+        const alarms = await firstValueFrom(service.alarms$);
+        expect(alarms).toEqual([toggledWithNewId, alarmB]);
+        expect(alarms.some((alarm) => alarm.id === 'alarm-1')).toBe(false);
+        expect(alarms.some((alarm) => alarm.id === 'alarm-1-v2')).toBe(true);
     });
 
     it('deleteAlarmRule rimuove l allarme locale quando API conferma', async () => {
@@ -352,6 +404,7 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(true);
         expect(apiStub.deleteAlarmRule).toHaveBeenCalledWith('alarm-1');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmB]);
+        expect(refreshServiceStub.requestRefresh).toHaveBeenCalledTimes(1);
     });
 
     it('deleteAlarmRule in errore API imposta messaggio e mantiene lo stato invariato', async () => {
@@ -368,6 +421,7 @@ describe('AlarmConfigStateService', () => {
         expect(emitted).toBe(false);
         expect(await firstValueFrom(service.error$)).toBe('Errore durante l\'eliminazione dell\'allarme.');
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmA, alarmB]);
+        expect(refreshServiceStub.requestRefresh).not.toHaveBeenCalled();
     });
 
     it('deleteAlarmRule pulisce errore precedente quando un delete successivo riesce', async () => {
@@ -383,5 +437,6 @@ describe('AlarmConfigStateService', () => {
 
         expect(await firstValueFrom(service.error$)).toBeNull();
         expect(await firstValueFrom(service.alarms$)).toEqual([alarmB]);
+        expect(refreshServiceStub.requestRefresh).toHaveBeenCalledTimes(1);
     });
 });

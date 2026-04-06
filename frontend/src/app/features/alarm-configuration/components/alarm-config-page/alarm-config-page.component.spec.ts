@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject, EMPTY, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, Subject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
@@ -177,6 +177,26 @@ describe('AlarmConfigPageComponent', () => {
         component.onToggleEnabled('alarm-1', false);
 
         expect(stateServiceStub.toggleEnabled).toHaveBeenCalledWith('alarm-1', false);
+    });
+
+    it('onToggleEnabled blocca i click ripetuti finché la richiesta è in corso', () => {
+        const toggleSubject = new Subject<AlarmRule>();
+        stateServiceStub.toggleEnabled.mockReturnValueOnce(toggleSubject.asObservable());
+
+        component.onToggleEnabled('alarm-1', false);
+        component.onToggleEnabled('alarm-1', true);
+
+        expect(component.pendingToggleRuleId()).toBe('alarm-1');
+        expect(stateServiceStub.toggleEnabled).toHaveBeenCalledTimes(1);
+
+        toggleSubject.next(alarmRule);
+        toggleSubject.complete();
+
+        expect(component.pendingToggleRuleId()).toBeNull();
+
+        component.onToggleEnabled('alarm-1', true);
+
+        expect(stateServiceStub.toggleEnabled).toHaveBeenCalledTimes(2);
     });
 
     it('onDelete apre la modale di conferma senza chiamare subito la delete', () => {

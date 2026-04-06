@@ -7,11 +7,11 @@ import { PlantDto } from '../../apartment-monitor/models/plant-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {
-    private readonly http: HttpClient = inject(HttpClient);
-    private readonly baseUrl: string = inject(API_BASE_URL);
+  private readonly http: HttpClient = inject(HttpClient);
+  private readonly baseUrl: string = inject(API_BASE_URL);
 
-    private analyticsEndpoint ="";
-    private readonly apartmentsEndpoint = `${this.baseUrl}/plant/all`;
+  private analyticsEndpoint = "";
+  private readonly apartmentsEndpoint = `${this.baseUrl}/plant/all`;
 
     public getAllApartments():Observable<any[]>{
   
@@ -24,37 +24,42 @@ export class AnalyticsApiService {
       );
     }
 
-    public getAnalytics(apartmentId: string): Observable<AnalyticsDto>{
-       this.analyticsEndpoint= `${this.baseUrl}/analytics/${apartmentId}`;
 
-        return this.http.get<any[]>(this.analyticsEndpoint).pipe(
-            map((response: any[]) => {
-            
-            const analyticsInfo: any[] = response.map(item => ({
-                title: item.title,
-                metric: item.metric,
-                unit: item.unit,
-                labels: item.labels,
-                datasets: item.series.map((s: any) => ({
-                    id: s.id,
-                    name: s.name,
-                    data: s.data
-                })),
-                suggestions: {
-                  messages: item.suggestion.message,
-                  isSuggestion: item.suggestion.isSuggestion
-                }
-            }));
+  public getAnalytics(apartmentId: string, refresh: boolean = false): Observable<AnalyticsDto> {
+    if(refresh){
+      this.analyticsEndpoint = `${this.baseUrl}/analytics/${apartmentId}?refresh=true`;
+    } else {
+      this.analyticsEndpoint = `${this.baseUrl}/analytics/${apartmentId}`;
+    }
 
-            const result: AnalyticsDto = {
-                apartmentId: apartmentId,
-                analyticsInfo: analyticsInfo,
-            };
+    return this.http.get<any[]>(this.analyticsEndpoint).pipe(
+      map((response: any[]) => {
 
-            return result;
-            })
-        );
-        }
+        const analyticsInfo: any[] = response.map(item => ({
+          title: item.title,
+          metric: item.metric,
+          unit: item.unit,
+          labels: item.labels,
+          datasets: item.series.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            data: s.data
+          })),
+          suggestions: {
+            messages: item.suggestion.message,
+            isSuggestion: item.suggestion.isSuggestion
+          }
+        }));
+
+        const result: AnalyticsDto = {
+          apartmentId: apartmentId,
+          analyticsInfo: analyticsInfo,
+        };
+
+        return result;
+      })
+    );
+  }
 }
 
 

@@ -49,18 +49,13 @@
         <p class="mt-1 text-xs text-slate-500">Quando verranno rilevati nuovi eventi, compariranno qui.</p>
     </div>
     } @else {
-    <app-alarm-table-shell [title]="'Allarmi attivi'" [caption]="'Tabella allarmi attivi'" [columns]="columns()">
+    <app-alarm-table-shell [title]="'Allarmi attivi'" [caption]="'Tabella allarmi attivi'" [columns]="columns">
         @for (row of rows(); track row.id) {
         <tr class="group transition-colors hover:bg-slate-50/80" [attr.data-testid]="'alarm-row-' + row.id">
             <td class="px-5 py-3.5 align-middle">
                 <app-alarm-priority-indicator [priority]="row.priority" />
             </td>
             <td class="px-5 py-3.5 align-middle text-sm font-semibold text-slate-900">{{ row.name }}</td>
-            <td class="px-5 py-3.5 align-middle">
-                <span
-                    class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-medium text-slate-700">{{
-                    row.device }}</span>
-            </td>
             <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.location }}</td>
             <td class="px-5 py-3.5 align-middle">
                 <span
@@ -85,7 +80,7 @@
             aria-label="Pagina precedente allarmi attivi">
             Precedente
         </button>
-        <span class="alarm-pagination__status" aria-live="polite">Pagina {{ currentPage() }}</span>
+        <span class="alarm-pagination__status" aria-live="polite">Pagina {{ currentPage() }} </span>
         <button type="button" class="alarm-pagination__button" [disabled]="!canGoNext()" (click)="onNextPage()"
             aria-label="Pagina successiva allarmi attivi">
             Successiva

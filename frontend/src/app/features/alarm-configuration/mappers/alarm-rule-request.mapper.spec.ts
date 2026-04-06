@@ -17,7 +17,7 @@ describe('AlarmRuleRequestMapper', () => {
         mapper = TestBed.inject(AlarmRuleRequestMapper);
     });
 
-    it('toUpdateRequest include name e deviceId nel payload', () => {
+    it('toUpdateRequest include i campi previsti dal contratto update', () => {
         const formValue: AlarmConfigFormValue = {
             name: '  Soglia temperatura  ',
             plantId: 'plant-1',
@@ -34,7 +34,6 @@ describe('AlarmRuleRequestMapper', () => {
 
         expect(result).toEqual({
             name: 'Soglia temperatura',
-            deviceId: 'DEV001',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: '<',
             thresholdValue: '12',
@@ -78,7 +77,7 @@ describe('AlarmRuleRequestMapper', () => {
         expect(result.thresholdOperator).toBe('<=');
     });
 
-    it('toCreateRequest supporta soglia booleana con operatore uguale', () => {
+    it('toCreateRequest normalizza soglia booleana in on/off', () => {
         const onFormValue: AlarmConfigFormValue = {
             name: 'Allarme acceso',
             plantId: 'plant-1',
@@ -98,12 +97,14 @@ describe('AlarmRuleRequestMapper', () => {
         };
 
         expect(mapper.toCreateRequest(onFormValue)).toMatchObject({
+            plantId: 'plant-1',
             thresholdOperator: '=',
-            thresholdValue: 'ON',
+            thresholdValue: 'on',
         });
         expect(mapper.toCreateRequest(offFormValue)).toMatchObject({
+            plantId: 'plant-1',
             thresholdOperator: '=',
-            thresholdValue: 'OFF',
+            thresholdValue: 'off',
         });
     });
 
@@ -125,8 +126,9 @@ describe('AlarmRuleRequestMapper', () => {
         expect(result).toMatchObject({
             name: 'Allarme trim',
             deviceId: 'dev-42',
+            plantId: 'plant-1',
             thresholdOperator: '=',
-            thresholdValue: 'ON',
+            thresholdValue: 'on',
         });
     });
 
@@ -162,7 +164,7 @@ describe('AlarmRuleRequestMapper', () => {
         expect(() => mapper.toCreateRequest(invalidFormValue)).toThrow('Campo obbligatorio mancante: thresholdOperator');
     });
 
-    it('toToggleRequest include name e deviceId nel payload', () => {
+    it('toToggleRequest include solo i campi previsti dal contratto update', () => {
         const rule: AlarmRule = {
             id: 'ALM001',
             name: 'Allarme umidita',
@@ -179,7 +181,6 @@ describe('AlarmRuleRequestMapper', () => {
 
         expect(result).toEqual({
             name: 'Allarme umidita',
-            deviceId: 'DEV002',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '>=',
             thresholdValue: '60',
@@ -203,5 +204,23 @@ describe('AlarmRuleRequestMapper', () => {
         };
 
         expect(() => mapper.toToggleRequest(invalidRule, true)).toThrow('Campo obbligatorio mancante: name');
+    });
+
+    it('toToggleRequest normalizza operatori con padding dal backend', () => {
+        const rule: AlarmRule = {
+            id: 'ALM003',
+            name: 'Allarme temperatura',
+            deviceId: 'DEV004',
+            priority: AlarmPriority.ORANGE,
+            thresholdOperator: '> ',
+            thresholdValue: '27',
+            armingTime: '05:00:00',
+            dearmingTime: '23:00:00',
+            isArmed: true,
+        };
+
+        const result = mapper.toToggleRequest(rule, false);
+
+        expect(result.thresholdOperator).toBe('>');
     });
 });

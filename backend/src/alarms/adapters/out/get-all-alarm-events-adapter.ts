@@ -24,14 +24,13 @@ export class GetAllAlarmEventsAdapter implements GetAllAlarmEventsPort {
         new AlarmEvent(
           alarmEvent.id,
           alarmEvent.room_name + ' ' + alarmEvent.device_name,
-          alarmEvent.device_id,
           alarmEvent.alarm_rule_id,
           alarmEvent.alarm_name,
           alarmEvent.priority,
           alarmEvent.activation_time,
           alarmEvent.resolution_time,
           alarmEvent.user_id,
-          alarmEvent.user_username
+          alarmEvent.user_username,
         ),
     );
   }

@@ -5,6 +5,7 @@ import { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
 import { CreateAlarmRuleRequestDto } from '../../../core/alarm/models/dto/create-alarm-rule-request.model.dto';
 import { UpdateAlarmRuleRequestDto } from '../../../core/alarm/models/dto/update-alarm-rule-request.model.dto';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
+import { AlarmManagementRefreshService } from '../../../core/alarm/services/alarm-management-refresh.service';
 import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { AlarmRuleRequestMapper } from '../mappers/alarm-rule-request.mapper';
 import { AlarmConfigFormValue } from '../models/alarm-config-form-value.model';
@@ -12,6 +13,7 @@ import { AlarmConfigFormValue } from '../models/alarm-config-form-value.model';
 @Injectable()
 export class AlarmConfigStateService {
     private readonly api = inject(AlarmApiService);
+    private readonly alarmManagementRefreshService = inject(AlarmManagementRefreshService);
     private readonly apiErrorDisplayService = inject(ApiErrorDisplayService);
     private readonly requestMapper = inject(AlarmRuleRequestMapper);
 
@@ -22,9 +24,9 @@ export class AlarmConfigStateService {
     public readonly error$ = this.errorSubject.asObservable();
 
 
-    private replaceAlarmInState(updatedAlarm: AlarmRule): void {
+    private replaceAlarmInState(sourceAlarmId: string, updatedAlarm: AlarmRule): void {
         const currentAlarms = this.alarmsSubject.getValue();
-        this.alarmsSubject.next(currentAlarms.map((alarm) => (alarm.id === updatedAlarm.id ? updatedAlarm : alarm)));
+        this.alarmsSubject.next(currentAlarms.map((alarm) => (alarm.id === sourceAlarmId ? updatedAlarm : alarm)));
     }
 
     private clearError(): void {
@@ -86,6 +88,7 @@ export class AlarmConfigStateService {
             tap((createdAlarm) => {
                 const currentAlarms = this.alarmsSubject.getValue();
                 this.alarmsSubject.next([...currentAlarms, createdAlarm]);
+                this.alarmManagementRefreshService.requestRefresh();
             }),
             catchError((error: unknown) =>
                 this.handleError<AlarmRule>(
@@ -113,7 +116,10 @@ export class AlarmConfigStateService {
         }
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
-            tap((updatedAlarm) => this.replaceAlarmInState(updatedAlarm)),
+            tap((updatedAlarm) => {
+                this.replaceAlarmInState(alarmId, updatedAlarm);
+                this.alarmManagementRefreshService.requestRefresh();
+            }),
             catchError((error: unknown) =>
                 this.handleError<AlarmRule>(
                     this.apiErrorDisplayService.toMessage(error, {
@@ -135,7 +141,10 @@ export class AlarmConfigStateService {
         const payload = this.requestMapper.toToggleRequest(currentAlarm, enabled);
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
-            tap((updatedAlarm) => this.replaceAlarmInState(updatedAlarm)),
+            tap((updatedAlarm) => {
+                this.replaceAlarmInState(alarmId, updatedAlarm);
+                this.alarmManagementRefreshService.requestRefresh();
+            }),
             catchError((error: unknown) =>
                 this.handleError<AlarmRule>(
                     this.apiErrorDisplayService.toMessage(error, {
@@ -154,6 +163,7 @@ export class AlarmConfigStateService {
             tap(() => {
                 const currentAlarms = this.alarmsSubject.getValue();
                 this.alarmsSubject.next(currentAlarms.filter((alarm) => alarm.id !== alarmId));
+                this.alarmManagementRefreshService.requestRefresh();
             }),
             catchError((error: unknown) =>
                 this.handleError<void>(

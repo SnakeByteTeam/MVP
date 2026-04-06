@@ -16,6 +16,12 @@ services:
       - .env
     networks:
       - backend-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DBUSER} -d ${DBNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   server: 
     build: 
@@ -27,7 +33,8 @@ services:
       - /app/node_modules
     command: npm run start:dev
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     env_file: 
       - .env
     networks:

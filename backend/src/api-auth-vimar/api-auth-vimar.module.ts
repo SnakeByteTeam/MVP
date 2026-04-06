@@ -3,6 +3,7 @@ import { ApiAuthVimarController } from './adapters/in/api-auth-vimar.controller'
 import { APIAUTHUSECASE } from './application/ports/in/api-auth.usecase';
 import { ApiAuthVimarService } from './application/services/api-auth-vimar.service';
 import { HttpModule } from '@nestjs/axios';
+import { GuardModule } from 'src/guard/guard.module';
 
 import { GETTOKENSCALLBACKUSECASE } from './application/ports/in/get-tokens.usecase';
 import { WRITETOKENSREPOPORT } from './application/ports/out/write-tokens-repo.port';
@@ -25,7 +26,7 @@ import { ReadTokensFromRepoAdapter } from './adapters/out/read-tokens-from-repo.
 import { RefreshTokensAdapter } from './adapters/out/refresh-tokens.adapter';
 
 @Module({
-  imports: [HttpModule],
+  imports: [HttpModule, GuardModule],
   controllers: [ApiAuthVimarController],
   providers: [
     {

@@ -11,6 +11,10 @@ import { PlantModule } from './plant/plant.module';
 import { CacheModule } from './cache/cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { UsersModule } from './users/users.module';
+import { AlarmsModule } from './alarms/alarms.module';
+import { ValidationModule } from './validation/validation.module';
+import { GuardModule } from './guard/guard.module';
+import { NotificationModule } from './notifications/notification.module';
 
 @Module({
   imports: [
@@ -29,6 +33,10 @@ import { UsersModule } from './users/users.module';
     AnalyticsModule,
     EventEmitterModule.forRoot(),
     UsersModule,
+    AlarmsModule,
+    NotificationModule,
+    ValidationModule,
+    GuardModule,
   ],
 })
 export class AppModule {}

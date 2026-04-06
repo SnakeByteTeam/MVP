@@ -9,6 +9,7 @@ import {
   type GetTokensCallbackUseCase,
 } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
+import { GuardModule } from 'src/guard/guard.module';
 
 describe('ApiAuthVimarController', () => {
   let controller: ApiAuthVimarController;
@@ -28,6 +29,7 @@ describe('ApiAuthVimarController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [GuardModule],
       controllers: [ApiAuthVimarController],
       providers: [
         {

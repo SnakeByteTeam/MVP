@@ -8,7 +8,10 @@ import { FindAllPlantsRepoPort } from 'src/plant/application/repository/find-all
 
 @Injectable()
 export class PlantRepositoryImpl
-  implements FindPlantByIdRepoPort, FindAllAvailablePlantsRepoPort, FindAllPlantsRepoPort
+  implements
+    FindPlantByIdRepoPort,
+    FindAllAvailablePlantsRepoPort,
+    FindAllPlantsRepoPort
 {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
@@ -59,7 +62,7 @@ export class PlantRepositoryImpl
   async findAllPlants(): Promise<PlantEntity[] | null> {
     const client = await this.pool.connect();
 
-    try{  
+    try {
       const { rows } = await client.query<PlantEntity>(
         `SELECT 
             id, 
@@ -68,11 +71,11 @@ export class PlantRepositoryImpl
             ward_id
             FROM plant`,
       );
-      if(rows.length === 0) return null;
+      if (rows.length === 0) return null;
 
       return rows;
     } finally {
-      client.release()
+      client.release();
     }
-  } 
+  }
 }

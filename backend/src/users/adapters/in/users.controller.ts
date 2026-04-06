@@ -61,6 +61,14 @@ export class UsersController {
     return plainToInstance(FindAllUserResDto, users);
   }
 
+  @ApiOkResponse({ type: FindAllAvailableUsersResDto, isArray: true })
+  @Get('/available')
+  async findAllAvailableUsers(): Promise<FindAllAvailableUsersResDto[]> {
+    const users =
+      await this.findAllAvailableUsersUseCase.findAllAvailableUsers();
+    return plainToInstance(FindAllAvailableUsersResDto, users);
+  }
+
   @ApiOkResponse({ type: FindUserByIdResDto })
   @Get('/:id')
   async findUserById(
@@ -70,14 +78,6 @@ export class UsersController {
       new FindUserByIdCmd(id),
     );
     return plainToInstance(FindUserByIdResDto, user);
-  }
-
-  @ApiOkResponse({ type: FindAllAvailableUsersResDto, isArray: true })
-  @Get('/available')
-  async findAllAvailableUsers(): Promise<FindAllAvailableUsersResDto[]> {
-    const users =
-      await this.findAllAvailableUsersUseCase.findAllAvailableUsers();
-    return plainToInstance(FindAllAvailableUsersResDto, users);
   }
 
   @ApiOkResponse({ type: UpdateUserResDto })

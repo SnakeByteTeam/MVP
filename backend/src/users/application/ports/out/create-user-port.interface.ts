@@ -4,3 +4,5 @@ import { CreateUserWithTempPasswordCmd } from '../../commands/create-user-with-t
 export interface CreateUserPort {
   createUser(req: CreateUserWithTempPasswordCmd): Promise<User>;
 }
+
+export const CREATE_USER_PORT = 'CREATE_USER_PORT';

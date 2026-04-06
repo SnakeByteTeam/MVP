@@ -5,6 +5,7 @@ import {
   DELETE_USER_USE_CASE,
   FIND_ALL_AVAILABLE_USERS_USE_CASE,
   FIND_ALL_USERS_USE_CASE,
+  FIND_USER_BY_ID_USE_CASE,
   UPDATE_USER_USE_CASE,
 } from '../../application/services/users.service';
 
@@ -17,6 +18,10 @@ describe('UsersController', () => {
 
   const mockFindAllAvailableUsersUseCase = {
     findAllAvailableUsers: jest.fn(),
+  };
+
+  const mockFindUserByIdUseCase = {
+    findUserById: jest.fn(),
   };
 
   const mockUpdateUserUseCase = {
@@ -43,6 +48,10 @@ describe('UsersController', () => {
           provide: FIND_ALL_AVAILABLE_USERS_USE_CASE,
           useValue: mockFindAllAvailableUsersUseCase,
         },
+        {
+          provide: FIND_USER_BY_ID_USE_CASE,
+          useValue: mockFindUserByIdUseCase,
+        },
         { provide: UPDATE_USER_USE_CASE, useValue: mockUpdateUserUseCase },
         { provide: CREATE_USER_USE_CASE, useValue: mockCreateUserUseCase },
         { provide: DELETE_USER_USE_CASE, useValue: mockDeleteUserUseCase },
@@ -57,12 +66,19 @@ describe('UsersController', () => {
   });
 
   it('should call findAllUsersUseCase.findAllUsers', async () => {
-    await controller.findAll();
+    await controller.findAllUsers();
     expect(mockFindAllUsersUseCase.findAllUsers).toHaveBeenCalled();
   });
 
   it('should call findAllAvailableUsersUseCase.findAllAvailableUsers', async () => {
-    await controller.findAllAvailable();
+    await controller.findAllAvailableUsers();
+    expect(
+      mockFindAllAvailableUsersUseCase.findAllAvailableUsers,
+    ).toHaveBeenCalled();
+  });
+
+  it('should call findUserByIdUseCase.findUserById', async () => {
+    await controller.findUserById(1);
     expect(
       mockFindAllAvailableUsersUseCase.findAllAvailableUsers,
     ).toHaveBeenCalled();

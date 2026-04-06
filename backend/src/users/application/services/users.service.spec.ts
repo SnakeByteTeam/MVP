@@ -1,35 +1,25 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from './users.service';
-import { CREATE_USER_PORT } from '../../adapters/out/create-user-adapter';
-import { FIND_ALL_USERS_PORT } from '../../adapters/out/find-all-users-adapter';
-import { FIND_ALL_AVAILABLE_USERS_PORT } from '../../adapters/out/find-all-available-users-adapter';
-import { DELETE_USER_PORT } from '../../adapters/out/delete-user-adapter';
-import { UPDATE_USER_PORT } from '../../adapters/out/update-user-adapter';
+import { TestingModule, Test } from '@nestjs/testing';
 import { CONVERT_BASE_64_PORT } from '../../infrastructure/convert-base-64-impl/convert-base-64-impl';
 import { HASH_PASSWORD_PORT } from '../../infrastructure/hash-password-impl/hash-password-impl';
 import { GENERATE_PASSWORD_PORT } from '../../infrastructure/password-generator/generate-password-impl';
+import { CREATE_USER_PORT } from '../ports/out/create-user-port.interface';
+import { DELETE_USER_PORT } from '../ports/out/delete-user-port.interface';
+import { FIND_ALL_AVAILABLE_USERS_PORT } from '../ports/out/find-all-available-users-port.interface';
+import { FIND_ALL_USERS_PORT } from '../ports/out/find-all-users-port.interface';
+import { UPDATE_USER_PORT } from '../ports/out/update-user-port.interface';
+import { UsersService } from './users.service';
+import { FIND_USER_BY_ID_PORT } from '../ports/out/find-user-by-id-port.interface';
 
 describe('UsersService', () => {
   let service: UsersService;
 
-  const mockCreateUser = {
+  const mockUserRepository = {
     createUser: jest.fn(),
-  };
-
-  const mockFindAllUsers = {
     findAllUsers: jest.fn(),
-  };
-
-  const mockFindAllAvailableUsers = {
     findAllAvailableUsers: jest.fn(),
-  };
-
-  const mockUpdateUser = {
     updateUser: jest.fn(),
-  };
-
-  const mockDeleteUser = {
     deleteUser: jest.fn(),
+    findUserById: jest.fn(),
   };
 
   const mockGeneratePassword = {
@@ -48,14 +38,15 @@ describe('UsersService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
-        { provide: CREATE_USER_PORT, useValue: mockCreateUser },
-        { provide: FIND_ALL_USERS_PORT, useValue: mockFindAllUsers },
+        { provide: CREATE_USER_PORT, useValue: mockUserRepository },
+        { provide: FIND_ALL_USERS_PORT, useValue: mockUserRepository },
+        { provide: FIND_USER_BY_ID_PORT, useValue: mockUserRepository },
         {
           provide: FIND_ALL_AVAILABLE_USERS_PORT,
-          useValue: mockFindAllAvailableUsers,
+          useValue: mockUserRepository,
         },
-        { provide: UPDATE_USER_PORT, useValue: mockUpdateUser },
-        { provide: DELETE_USER_PORT, useValue: mockDeleteUser },
+        { provide: UPDATE_USER_PORT, useValue: mockUserRepository },
+        { provide: DELETE_USER_PORT, useValue: mockUserRepository },
         { provide: GENERATE_PASSWORD_PORT, useValue: mockGeneratePassword },
         { provide: HASH_PASSWORD_PORT, useValue: mockHashPassword },
         { provide: CONVERT_BASE_64_PORT, useValue: mockConvertBase64 },
@@ -74,7 +65,7 @@ describe('UsersService', () => {
     const cmd = { username: 'username', surname: 'surname', name: 'name' };
     mockGeneratePassword.generatePassword.mockReturnValue('tempPassword');
     mockHashPassword.hashPassword.mockReturnValue('hashedTempPassword');
-    mockCreateUser.createUser.mockResolvedValue({
+    mockUserRepository.createUser.mockResolvedValue({
       id: 1,
       username: 'username',
       surname: 'surname',
@@ -85,7 +76,7 @@ describe('UsersService', () => {
 
     await service.createUser(cmd);
 
-    expect(mockCreateUser.createUser).toHaveBeenCalledWith({
+    expect(mockUserRepository.createUser).toHaveBeenCalledWith({
       username: 'username',
       surname: 'surname',
       name: 'name',
@@ -95,12 +86,20 @@ describe('UsersService', () => {
 
   it('should call findAllUsersPort.findAllUsers', async () => {
     await service.findAllUsers();
-    expect(mockFindAllUsers.findAllUsers).toHaveBeenCalled();
+    expect(mockUserRepository.findAllUsers).toHaveBeenCalled();
   });
 
   it('should call findAllAvailableUsersPort.findAllAvailableUsers', async () => {
     await service.findAllAvailableUsers();
-    expect(mockFindAllAvailableUsers.findAllAvailableUsers).toHaveBeenCalled();
+    expect(mockUserRepository.findAllAvailableUsers).toHaveBeenCalled();
+  });
+
+  it('should call findUserByIdPort.findUserById', async () => {
+    const cmd = {
+      id: 1,
+    };
+    await service.findUserById(cmd);
+    expect(mockUserRepository.findUserById).toHaveBeenCalled();
   });
 
   it('should call updateUserPort.updateUser with correct args', async () => {
@@ -111,12 +110,12 @@ describe('UsersService', () => {
       name: 'name',
     };
     await service.updateUser(cmd);
-    expect(mockUpdateUser.updateUser).toHaveBeenCalledWith(cmd);
+    expect(mockUserRepository.updateUser).toHaveBeenCalledWith(cmd);
   });
 
   it('should call deleteUserPort.deleteUser with correct args', async () => {
     const cmd = { id: 1 };
     await service.deleteUser(cmd);
-    expect(mockDeleteUser.deleteUser).toHaveBeenCalledWith(cmd);
+    expect(mockUserRepository.deleteUser).toHaveBeenCalledWith(cmd);
   });
 });

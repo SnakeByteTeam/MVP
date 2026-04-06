@@ -32,8 +32,10 @@ describe('UsersRepositoryImpl', () => {
     await repo.createUser('username', 'surname', 'name', 'tempPassword');
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      ' WITH created_user AS ( INSERT INTO "user" (username, surname, name, temp_password) VALUES ($1, $2, $3, $4) RETURNING * ) ' +
-        ' SELECT u.id, u.username, u.surname, u.name, r.title AS role FROM created_user u LEFT JOIN role r ON u.roleId = r.id;',
+      `WITH created_user AS ( INSERT INTO "user" (username, surname, name, temp_password) VALUES ($1, $2, $3, $4) RETURNING * ) 
+      SELECT u.id, u.username, u.surname, u.name, r.name AS role 
+      FROM created_user u 
+      LEFT JOIN role r ON u.roleId = r.id;`,
       ['username', 'surname', 'name', 'tempPassword'],
     );
   });
@@ -63,9 +65,9 @@ describe('UsersRepositoryImpl', () => {
     await repo.updateUser(1, 'username', 'surname', 'name');
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      ' WITH updated_user AS ( UPDATE "user" SET username = $1, surname = $2, name = $3 WHERE id = $4 RETURNING * )' +
-        ' SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.title AS role ' +
-        ' FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;',
+      `WITH updated_user AS ( UPDATE "user" SET username = $1, surname = $2, name = $3 WHERE id = $4 RETURNING * ) 
+      SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.name AS role 
+      FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;`,
       ['username', 'surname', 'name', 1],
     );
   });
@@ -82,7 +84,7 @@ describe('UsersRepositoryImpl', () => {
     await repo.deleteUser(1);
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      'DELETE FROM "user" WHERE id = $1;',
+      `DELETE FROM "user" WHERE id = $1;`,
       [1],
     );
   });
@@ -92,8 +94,65 @@ describe('UsersRepositoryImpl', () => {
     await repo.findAllUsers();
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id;',
+      `SELECT u.id, u.username, u.surname, u.name, r.name AS role 
+      FROM "user" u 
+      LEFT JOIN role r ON u.roleId = r.id;`,
     );
+  });
+
+  it('should call query with correct parameters when finding a user', async () => {
+    mockConn.query.mockResolvedValue({ rowCount: 0, rows: [] });
+    await repo.findUserById(1);
+
+    expect(mockConn.query).toHaveBeenCalledWith(
+      `SELECT u.id, u.username, u.surname, u.name, r.name AS role 
+      FROM "user" u LEFT JOIN role r ON u.roleId = r.id 
+      WHERE u.id = $1;`,
+      [1],
+    );
+  });
+
+  it('should return null when finding a user that does not exist', async () => {
+    mockConn.query.mockResolvedValue({ rowCount: 0, rows: [] });
+    const result = await repo.findUserById(1);
+    expect(mockConn.query).toHaveBeenCalledWith(
+      `SELECT u.id, u.username, u.surname, u.name, r.name AS role 
+      FROM "user" u LEFT JOIN role r ON u.roleId = r.id 
+      WHERE u.id = $1;`,
+      [1],
+    );
+    expect(result).toBeNull();
+  });
+
+  it('should return a user when finding an existing user', async () => {
+    mockConn.query.mockResolvedValue({
+      rowCount: 1,
+      rows: [
+        {
+          id: 1,
+          username: 'user1',
+          surname: 'surname1',
+          name: 'name1',
+          role: 'user',
+        },
+      ],
+    });
+
+    const result = await repo.findUserById(1);
+
+    expect(mockConn.query).toHaveBeenCalledWith(
+      `SELECT u.id, u.username, u.surname, u.name, r.name AS role 
+      FROM "user" u LEFT JOIN role r ON u.roleId = r.id 
+      WHERE u.id = $1;`,
+      [1],
+    );
+    expect(result).toEqual({
+      id: 1,
+      username: 'user1',
+      surname: 'surname1',
+      name: 'name1',
+      role: 'user',
+    });
   });
 
   it('should call query with correct parameters when finding all available users', async () => {
@@ -101,8 +160,9 @@ describe('UsersRepositoryImpl', () => {
     await repo.findAllAvailableUsers();
 
     expect(mockConn.query).toHaveBeenCalledWith(
-      ' SELECT u.id, u.username, u.surname, u.name, r.name AS role FROM "user" u LEFT JOIN role r ON u.roleId = r.id ' +
-        'WHERE u.id NOT IN (SELECT user_id FROM ward_user) ',
+      `SELECT u.id, u.username, u.surname, u.name, r.name AS role 
+      FROM "user" u LEFT JOIN role r ON u.roleId = r.id
+      WHERE u.id NOT IN (SELECT user_id FROM ward_user);`,
     );
   });
 });

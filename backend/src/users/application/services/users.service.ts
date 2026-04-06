@@ -7,14 +7,22 @@ import { User } from '../../domain/user';
 import { UpdateUserCmd } from '../commands/update-user-cmd';
 import { DeleteUserCmd } from '../commands/delete-user-cmd';
 import { CreateUserCmd } from '../commands/create-user-cmd';
-import { FIND_ALL_USERS_PORT } from '../../adapters/out/find-all-users-adapter';
-import { FindAllUsersPort } from '../ports/out/find-all-users-port.interface';
-import { UPDATE_USER_PORT } from '../../adapters/out/update-user-adapter';
-import { UpdateUserPort } from '../ports/out/update-user-port.interface';
-import { CREATE_USER_PORT } from '../../adapters/out/create-user-adapter';
-import { CreateUserPort } from '../ports/out/create-user-port.interface';
-import { DELETE_USER_PORT } from '../../adapters/out/delete-user-adapter';
-import { DeleteUserPort } from '../ports/out/delete-user-port.interface';
+import {
+  FIND_ALL_USERS_PORT,
+  FindAllUsersPort,
+} from '../ports/out/find-all-users-port.interface';
+import {
+  UPDATE_USER_PORT,
+  UpdateUserPort,
+} from '../ports/out/update-user-port.interface';
+import {
+  CREATE_USER_PORT,
+  CreateUserPort,
+} from '../ports/out/create-user-port.interface';
+import {
+  DELETE_USER_PORT,
+  DeleteUserPort,
+} from '../ports/out/delete-user-port.interface';
 import { GENERATE_PASSWORD_PORT } from '../../infrastructure/password-generator/generate-password-impl';
 import { GeneratePasswordPort } from '../ports/out/password-generator-port.interface';
 import { HASH_PASSWORD_PORT } from '../../infrastructure/hash-password-impl/hash-password-impl';
@@ -25,12 +33,16 @@ import { ConvertBase64Port } from '../ports/out/converte-base-64-port.interface'
 import { CreatedUser } from '../../domain/created-user';
 import { CreateUserWithTempPasswordCmd } from '../commands/create-user-with-temp-password-cmd';
 import { FindAllAvailableUsersUseCase } from '../ports/in/find-all-available-users-use-case.interface';
-import { FIND_ALL_AVAILABLE_USERS_PORT } from '../../adapters/out/find-all-available-users-adapter';
-import { FindAllAvailableUsersPort } from '../ports/out/find-all-available-users-port.interface';
+import {
+  FIND_ALL_AVAILABLE_USERS_PORT,
+  FindAllAvailableUsersPort,
+} from '../ports/out/find-all-available-users-port.interface';
 import { FindUserByIdUseCase } from '../ports/in/find-user-by-id-use-case.interface';
 import { FindUserByIdCmd } from '../commands/find-user-by-id-cmd';
-import { FIND_USER_BY_ID_PORT } from '../../adapters/out/find-user-by-id-adapter';
-import { FindUserByIdPort } from '../ports/out/find-user-by-id-port.interface';
+import {
+  FIND_USER_BY_ID_PORT,
+  FindUserByIdPort,
+} from '../ports/out/find-user-by-id-port.interface';
 
 @Injectable()
 export class UsersService

@@ -10,7 +10,7 @@ export class GetAllUnmanagedAlarmEventsByUserIdAdapter {
   constructor(
     @Inject(GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY)
     private readonly getAllUnmanagedAlarmEventsByUserIdRepository: GetAllUnmanagedAlarmEventsByUserIdRepository,
-  ) {}
+  ) { }
 
   async getAllUnmanagedAlarmEventsByUserId(
     req: GetAllUnmanagedAlarmEventsByUserIdCmd,

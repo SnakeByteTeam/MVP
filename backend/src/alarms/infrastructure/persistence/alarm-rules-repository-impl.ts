@@ -10,17 +10,17 @@ import { UpdateAlarmRuleRepository } from '../../application/repository/update-a
 import { GetAlarmRuleByIdRepository } from '../../application/repository/get-alarm-rule-by-id-repository.interface';
 import { CheckAlarmRuleRepository } from '../../application/repository/check-alarm-rule-repository.interface';
 import { CheckAlarmEntity } from '../entities/check-alarm-entity';
+import { v4 as uuidv4 } from 'uuid';
 
 export class AlarmRulesRepositoryImpl
   implements
-    CreateAlarmRuleRepository,
-    GetAlarmRuleByIdRepository,
-    GetAllAlarmRulesRepository,
-    DeleteAlarmRuleRepository,
-    UpdateAlarmRuleRepository,
-    CheckAlarmRuleRepository
-{
-  constructor(@Inject(PG_POOL) private readonly pool) {}
+  CreateAlarmRuleRepository,
+  GetAlarmRuleByIdRepository,
+  GetAllAlarmRulesRepository,
+  DeleteAlarmRuleRepository,
+  UpdateAlarmRuleRepository,
+  CheckAlarmRuleRepository {
+  constructor(@Inject(PG_POOL) private readonly pool) { }
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {
     const result = await this.pool.query(

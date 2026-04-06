@@ -11,7 +11,7 @@ export class GetAllManagedAlarmEventsByUserIdAdapter implements GetAllManagedAla
   constructor(
     @Inject(GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY)
     private readonly getAllManagedAlarmEventsByUserIdRepository: GetAllManagedAlarmEventsByUserIdRepository,
-  ) {}
+  ) { }
 
   async getAllManagedAlarmEventsByUserId(
     req: GetAllManagedAlarmEventsByUserIdCmd,

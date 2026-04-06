@@ -4,7 +4,6 @@ export class AlarmEvent {
   constructor(
     public readonly id: string,
     public readonly position: string,
-    public readonly deviceId: string,
     public readonly alarmRuleId: string,
     public readonly alarmName: string,
     public readonly priority: AlarmPriority,

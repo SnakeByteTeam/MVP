@@ -9,6 +9,6 @@ import { PlantDto } from '../../../apartment-monitor/models/plant-response.model
         CommonModule,
     ],
     templateUrl: './plant-overview.component.html' })
-export class plantOverviewComponent{
+export class PlantOverviewComponent{
     @Input() apartment!: PlantDto | null ;
 }    

@@ -1,10 +1,10 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { plantOverviewComponent } from './plant-overview.component';
+import { PlantOverviewComponent } from './plant-overview.component';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-describe('plantOverviewComponent', () => {
-  let component: plantOverviewComponent;
-  let fixture: ComponentFixture<plantOverviewComponent>;
+describe('PlantOverviewComponent', () => {
+  let component: PlantOverviewComponent;
+  let fixture: ComponentFixture<PlantOverviewComponent>;
 
   const mockData = {
     id: '1',
@@ -17,10 +17,10 @@ describe('plantOverviewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [plantOverviewComponent],
+      imports: [PlantOverviewComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(plantOverviewComponent);
+    fixture = TestBed.createComponent(PlantOverviewComponent);
     component = fixture.componentInstance;
   });
 

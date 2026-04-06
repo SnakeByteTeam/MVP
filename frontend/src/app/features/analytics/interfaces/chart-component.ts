@@ -32,9 +32,7 @@ export abstract class ChartComponent {
 
 
     ngOnChanges(changes: SimpleChanges): void {
-        console.log("i grafici stanno cambiando, dati ricevuti:");
         if (changes['chartInfo'] && this.chartInfo) {
-            console.log("Contenuto chartInfo JSON:", JSON.stringify(this.chartInfo, null, 2));
             this.updateChart(this.chartInfo);
         }
     }

@@ -33,6 +33,7 @@ export class UserGuard implements CanActivate {
       });
       if (payload) {
         req.user = payload;
+        return true;
       }
       throw new UnauthorizedException(
         'You are not allowed to access this resource',

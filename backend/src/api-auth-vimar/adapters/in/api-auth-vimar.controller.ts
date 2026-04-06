@@ -7,6 +7,8 @@ import {
   Logger,
   Query,
   Redirect,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 import {
@@ -18,6 +20,8 @@ import {
   GETTOKENSCALLBACKUSECASE,
 } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
 import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
 
 @ApiTags('auth')
 @Controller('my-vimar')
@@ -33,6 +37,7 @@ export class ApiAuthVimarController {
 
   @Get('auth')
   @Redirect()
+  @UseGuards(UserGuard, AdminGuard)
   @ApiOperation({
     summary: 'Login with Vimar API',
     description: 'Initiates authentication flow by redirecting to Vimar login.',

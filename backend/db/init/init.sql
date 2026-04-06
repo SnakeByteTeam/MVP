@@ -677,12 +677,17 @@ INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority,
 ('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
 
 
-CREATE TABLE IF NOT EXISTS alarm_event (
-    id              SERIAL       PRIMARY KEY,
-    activation_time TIMESTAMP    NOT NULL,
-    resolution_time TIMESTAMP,
-    alarm_rule_id        VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
-    user_id         INTEGER      REFERENCES "user"(id)
+CREATE TABLE alarm_event (
+    id VARCHAR(255) PRIMARY KEY,
+    alarm_rule_id VARCHAR(255),
+    activation_time TIMESTAMPTZ NOT NULL,
+    resolution_time TIMESTAMPTZ,
+    user_id INTEGER,
+    FOREIGN KEY (alarm_rule_id)
+        REFERENCES alarm_rule(id)
+        ON DELETE SET NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES "user"(id)
 );
 
 INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)

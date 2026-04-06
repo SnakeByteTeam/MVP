@@ -25,7 +25,9 @@ export class GetAllUnmanagedAlarmEventsByUserIdAdapter {
       (unmanagedAlarmEvent) =>
         new AlarmEvent(
           unmanagedAlarmEvent.id,
-          unmanagedAlarmEvent.room_name + ' ' + unmanagedAlarmEvent.device_name,
+          unmanagedAlarmEvent.room_name +
+            ' - ' +
+            unmanagedAlarmEvent.device_name,
           unmanagedAlarmEvent.alarm_rule_id,
           unmanagedAlarmEvent.alarm_name,
           unmanagedAlarmEvent.priority,

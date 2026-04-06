@@ -7,7 +7,7 @@ export const ALARM_HISTORY_ROUTES: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./components/alarm-history-page.component').then(
-        (m) => m.alarmHistoryComponent
+        (m) => m.AlarmHistoryPageComponent
       )
   }
 ];

@@ -61,7 +61,7 @@ export class AlarmEventsRepositoryImpl
     const result = await this.pool.query(
       `SELECT 
         ae.id,
-        room->>'name' AS room_name,
+        (p.data->>'name') || ' - ' || (room->>'name') AS room_name,
         device->>'name' AS device_name,
         ar.device_id,
         ae.alarm_rule_id,
@@ -105,7 +105,7 @@ export class AlarmEventsRepositoryImpl
     const result = await this.pool.query(
       `SELECT 
         ae.id,
-        room->>'name' AS room_name,
+        (p.data->>'name') || ' - ' || (room->>'name') AS room_name,
         device->>'name' AS device_name,
         ar.device_id,
         ae.alarm_rule_id,

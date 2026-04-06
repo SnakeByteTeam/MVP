@@ -128,8 +128,7 @@ export class AlarmRulesRepositoryImpl
             threshold_value = $5,
             arming_time = $6,
             dearming_time = $7,
-            is_armed = $8,
-            updated_at = NOW()
+            is_armed = $8
           WHERE id = $1
           RETURNING *
           `,
@@ -151,8 +150,7 @@ export class AlarmRulesRepositoryImpl
 
       await client.query(
         `UPDATE alarm_rule
-        SET is_changed_when_used = TRUE,
-          updated_at = NOW()
+        SET is_changed_when_used = TRUE
         WHERE id = $1
         `,
         [id],
@@ -171,7 +169,6 @@ export class AlarmRulesRepositoryImpl
           device_id,
           plant_id,
           created_at,
-          updated_at,
           is_changed_when_used
         )
         SELECT
@@ -179,7 +176,6 @@ export class AlarmRulesRepositoryImpl
           $3, $4, $5, $6, $7, $8, $9,
           device_id,
           plant_id,
-          NOW(),
           NOW(),
           FALSE
         FROM alarm_rule

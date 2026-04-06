@@ -1,23 +1,22 @@
-.notification-item {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    padding: 0.875rem 1rem;
+@keyframes notification-card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.notification-item__title {
-    color: #111827;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.4;
-    margin: 0;
+.notification-card {
+    animation: notification-card-enter 220ms ease-out both;
+    animation-delay: var(--notification-delay, 0ms);
 }
 
-.notification-item__meta {
-    margin: 0.35rem 0 0;
-}
-
-.notification-item__time {
-    color: #4b5563;
-    font-size: 0.875rem;
+@media (prefers-reduced-motion: reduce) {
+    .notification-card {
+        animation: none;
+    }
 }

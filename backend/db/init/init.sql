@@ -766,3 +766,8 @@ CREATE TABLE IF NOT EXISTS notification (
     timestamp TIMESTAMPTZ NOT NULL
 );
 
+INSERT INTO notification (ward_id, alarm_event_id, timestamp) VALUES
+  ((SELECT id FROM ward WHERE name = 'Reparto autosufficienti'), 'EVT201', '2026-04-04 08:21:00+00'),
+  ((SELECT id FROM ward WHERE name = 'Reparto autosufficienti'), 'EVT205', '2026-04-04 06:46:00+00'),
+  ((SELECT id FROM ward WHERE name = 'Reparto cure livello 1'), 'EVT109', '2026-04-03 10:11:00+00');
+

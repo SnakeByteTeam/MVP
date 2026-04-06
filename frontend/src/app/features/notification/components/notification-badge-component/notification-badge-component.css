@@ -1,14 +1,26 @@
+@keyframes notification-badge-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.94);
+    }
+
+    70% {
+        transform: translateY(0) scale(1.03);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 .notification-badge {
-    align-items: center;
-    background: #b91c1c;
-    border-radius: 999px;
-    color: #ffffff;
-    display: inline-flex;
-    font-size: 0.75rem;
-    font-weight: 700;
-    justify-content: center;
-    line-height: 1;
-    min-height: 1.5rem;
-    min-width: 1.5rem;
-    padding: 0.25rem 0.4rem;
+    animation: notification-badge-pop 180ms ease-out both;
+    transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notification-badge {
+        animation: none;
+    }
 }

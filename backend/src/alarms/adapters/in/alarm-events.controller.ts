@@ -15,12 +15,12 @@ import {
   RESOLVE_ALARM_EVENT_USE_CASE,
   ResolveAlarmEventUseCase,
 } from '../../application/ports/in/resolve-active-alarm.use-case';
-import { GetAllAlarmEventsByUserIdResDto } from '../../infrastructure/dtos/out/get-all-alarm-events-by-user-id-res-dto';
+import { GetAllManagedAlarmEventsByUserIdResDto } from '../../infrastructure/dtos/out/get-all-managed-alarm-events-by-user-id-res-dto';
 import {
-  GET_ALL_ALARM_EVENTS_BY_USER_ID_USE_CASE,
-  GetAllAlarmEventsByUserIdUseCase,
-} from '../../application/ports/in/get-all-alarms-events-by-user-id-use-case.interface';
-import { GetAllAlarmEventsByUserIdCmd } from '../../application/commands/get-all-alarm-events-by-user-id-cmd';
+  GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,
+  GetAllManagedAlarmEventsByUserIdUseCase,
+} from '../../application/ports/in/get-all-managed-alarm-events-by-user-id-use-case.interface';
+import { GetAllManagedAlarmEventsByUserIdCmd } from '../../application/commands/get-all-managed-alarm-events-by-user-id-cmd';
 import {
   GET_ALL_ALARM_EVENTS_USE_CASE,
   GetAllAlarmEventsUseCase,
@@ -30,31 +30,66 @@ import { ResolveAlarmEventReqDto } from '../../infrastructure/dtos/in/resolve-al
 import { GetAllAlarmEventsCmd } from '../../application/commands/get-all-alarm-events-cmd';
 import { UserGuard } from '../../../guard/user/user.guard';
 import { AdminGuard } from '../../../guard/admin/admin.guard';
+import { GetAllUnmanagedAlarmEventsByUserIdResDto } from '../../infrastructure/dtos/out/get-all-unmanaged-alarm-events-by-user-id-res-dto';
+import { GetAllUnmanagedAlarmEventsByUserIdCmd } from '../../application/commands/get-all-unmanaged-alarm-events-by-user-id-cmd';
+import {
+  GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,
+  GetAllUnmanagedAlarmEventsByUserIdUseCase,
+} from '../../application/ports/in/get-all-unmanaged-alarm-events-by-user-id-use-case.interface';
 
 @Controller('alarm-events')
 export class AlarmEventsController {
   constructor(
     @Inject(GET_ALL_ALARM_EVENTS_USE_CASE)
     private readonly getAllAlarmEventsUseCase: GetAllAlarmEventsUseCase,
-    @Inject(GET_ALL_ALARM_EVENTS_BY_USER_ID_USE_CASE)
-    private readonly getAllAlarmEventsByUserIdUseCase: GetAllAlarmEventsByUserIdUseCase,
+    @Inject(GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE)
+    private readonly getAllManagedAlarmEventsByUserIdUseCase: GetAllManagedAlarmEventsByUserIdUseCase,
+    @Inject(GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE)
+    private readonly getAllUnmanagedAlarmEventsByUserIdUseCase: GetAllUnmanagedAlarmEventsByUserIdUseCase,
     @Inject(RESOLVE_ALARM_EVENT_USE_CASE)
     private readonly resolveAlarmEventUseCase: ResolveAlarmEventUseCase,
   ) { }
 
-  @ApiOkResponse({ type: GetAllAlarmEventsByUserIdResDto, isArray: true })
+  @ApiOkResponse({
+    type: GetAllManagedAlarmEventsByUserIdResDto,
+    isArray: true,
+  })
   //@UseGuards(UserGuard)
-  @Get('/:userId/:limit/:offset')
-  async getAllAlarmEventsByUserId(
+  @Get('managed/:userId/:limit/:offset')
+  async getAllManagedAlarmEventsByUserId(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('limit', ParseIntPipe) limit: number,
     @Param('offset', ParseIntPipe) offset: number,
-  ): Promise<GetAllAlarmEventsByUserIdResDto[]> {
-    const alarmEvents =
-      await this.getAllAlarmEventsByUserIdUseCase.getAllAlarmEventsByUserId(
-        new GetAllAlarmEventsByUserIdCmd(userId, limit, offset),
+  ): Promise<GetAllManagedAlarmEventsByUserIdResDto[]> {
+    const managedAlarmEvents =
+      await this.getAllManagedAlarmEventsByUserIdUseCase.getAllManagedAlarmEventsByUserId(
+        new GetAllManagedAlarmEventsByUserIdCmd(userId, limit, offset),
       );
-    return plainToInstance(GetAllAlarmEventsByUserIdResDto, alarmEvents);
+    return plainToInstance(
+      GetAllManagedAlarmEventsByUserIdResDto,
+      managedAlarmEvents,
+    );
+  }
+
+  @ApiOkResponse({
+    type: GetAllUnmanagedAlarmEventsByUserIdResDto,
+    isArray: true,
+  })
+  //@UseGuards(UserGuard)
+  @Get('unmanaged/:userId/:limit/:offset')
+  async getAllUnmanagedAlarmEventsByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('limit', ParseIntPipe) limit: number,
+    @Param('offset', ParseIntPipe) offset: number,
+  ): Promise<GetAllUnmanagedAlarmEventsByUserIdResDto[]> {
+    const unmanagedAlarmEvents =
+      await this.getAllUnmanagedAlarmEventsByUserIdUseCase.getAllUnmanagedAlarmEventsByUserId(
+        new GetAllUnmanagedAlarmEventsByUserIdCmd(userId, limit, offset),
+      );
+    return plainToInstance(
+      GetAllUnmanagedAlarmEventsByUserIdResDto,
+      unmanagedAlarmEvents,
+    );
   }
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })

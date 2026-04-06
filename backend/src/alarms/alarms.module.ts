@@ -22,10 +22,10 @@ import { DeleteAlarmRuleAdapter } from './adapters/out/delete-alarm-rule-adapter
 import { CREATE_ALARM_RULE_PORT } from './application/ports/out/create-alarm-rule.port';
 import { CreateAlarmRuleAdapter } from './adapters/out/create-alarm-rule-adapter';
 import { AlarmEventsService } from './application/services/alarm-events.service';
-import { GET_ALL_ALARM_EVENTS_BY_USER_ID_USE_CASE } from './application/ports/in/get-all-alarms-events-by-user-id-use-case.interface';
-import { GET_ALL_ALARM_EVENTS_BY_USER_ID_REPOSITORY } from './application/repository/get-all-alarm-events-by-user-id-repository.interface';
-import { GET_ALL_ALARM_EVENTS_BY_USER_ID_PORT } from './application/ports/out/get-all-alarms-events-by-user-id-port.interface';
-import { GetAllAlarmEventsByUserIdAdapter } from './adapters/out/get-all-alarm-events-by-user-id-adapter';
+import { GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE } from './application/ports/in/get-all-managed-alarm-events-by-user-id-use-case.interface';
+import { GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY } from './application/repository/get-all-managed-alarm-events-by-user-id-repository.interface';
+import { GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from './application/ports/out/get-all-managed-alarm-events-by-user-id-port.interface';
+import { GetAllManagedAlarmEventsByUserIdAdapter } from './adapters/out/get-all-managed-alarm-events-by-user-id-adapter';
 import { GET_ALL_ALARM_EVENTS_USE_CASE } from './application/ports/in/get-all-alarm-events-use-case.interface';
 import { RESOLVE_ALARM_EVENT_PORT } from './application/ports/out/resolve-alarm-event-port.interface';
 import { DELETE_ALARM_RULE_PORT } from './application/ports/out/delete-alarm-rule.port';
@@ -44,6 +44,10 @@ import { CREATE_ALARM_EVENT_REPOSITORY } from './application/repository/create-a
 import { CreateAlarmEventAdapter } from './adapters/out/create-alarm-event-adapter';
 import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-event-port.interface';
 import { GuardModule } from '../guard/guard.module';
+import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE } from './application/ports/in/get-all-unmanaged-alarm-events-by-user-id-use-case.interface';
+import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY } from './application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
+import { GetAllUnmanagedAlarmEventsByUserIdAdapter } from './adapters/out/get-all-unmanaged-alarm-events-by-user-id-adapter';
+import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from './application/ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
 
 @Module({
   imports: [GuardModule],
@@ -101,15 +105,27 @@ import { GuardModule } from '../guard/guard.module';
       useClass: GetAllAlarmEventsAdapter,
     },
     {
-      provide: GET_ALL_ALARM_EVENTS_BY_USER_ID_USE_CASE,
+      provide: GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,
       useClass: AlarmEventsService,
     },
     {
-      provide: GET_ALL_ALARM_EVENTS_BY_USER_ID_PORT,
-      useClass: GetAllAlarmEventsByUserIdAdapter,
+      provide: GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,
+      useClass: AlarmEventsService,
     },
     {
-      provide: GET_ALL_ALARM_EVENTS_BY_USER_ID_REPOSITORY,
+      provide: GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
+      useClass: GetAllManagedAlarmEventsByUserIdAdapter,
+    },
+    {
+      provide: GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
+      useClass: GetAllUnmanagedAlarmEventsByUserIdAdapter,
+    },
+    {
+      provide: GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY,
+      useClass: AlarmEventsRepositoryImpl,
+    },
+    {
+      provide: GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY,
       useClass: AlarmEventsRepositoryImpl,
     },
     {

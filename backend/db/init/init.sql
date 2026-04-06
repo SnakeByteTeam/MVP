@@ -657,7 +657,8 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     device_id          VARCHAR(255) NOT NULL,
     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
     created_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    updated_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    is_changed_when_used BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES

@@ -157,6 +157,28 @@ describe('AlarmApiService', () => {
         request.flush([activeAlarm]);
     });
 
+    it('getResolvedAlarms chiama GET /alarm-events/managed/:userId/:limit/:offset e restituisce la lista', () => {
+        service.getResolvedAlarms(7, 12, 6).subscribe((result) => {
+            expect(result).toEqual([activeAlarm]);
+        });
+
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/managed/7/12/6`);
+        expect(request.request.method).toBe('GET');
+        request.flush([activeAlarm]);
+    });
+
+    it('getActiveAlarms valida userId, limit e offset interi', () => {
+        expect(() => service.getActiveAlarms(1.5)).toThrow('userId must be an integer.');
+        expect(() => service.getActiveAlarms(7, 2.5, 0)).toThrow('limit and offset must be integers.');
+        expect(() => service.getActiveAlarms(7, 2, 1.5)).toThrow('limit and offset must be integers.');
+    });
+
+    it('getResolvedAlarms valida userId, limit e offset interi', () => {
+        expect(() => service.getResolvedAlarms(1.5)).toThrow('userId must be an integer.');
+        expect(() => service.getResolvedAlarms(7, 2.5, 0)).toThrow('limit and offset must be integers.');
+        expect(() => service.getResolvedAlarms(7, 2, 1.5)).toThrow('limit and offset must be integers.');
+    });
+
     it('resolveAlarm chiama PATCH /alarm-events/resolve', () => {
         service.resolveAlarm('active-1', 7).subscribe((result) => {
             expect(result).toBeNull();
@@ -177,6 +199,16 @@ describe('AlarmApiService', () => {
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({ alarmId: 'active/1', userId: 9 });
         request.flush(null);
+    });
+
+    it('getAlarmRules restituisce lista vuota senza errori di parsing', () => {
+        service.getAlarmRules().subscribe((result) => {
+            expect(result).toEqual([]);
+        });
+
+        const request = httpController.expectOne(alarmRulesBaseUrl);
+        expect(request.request.method).toBe('GET');
+        request.flush([]);
     });
 
     it('propaga l errore HTTP al chiamante', () => {

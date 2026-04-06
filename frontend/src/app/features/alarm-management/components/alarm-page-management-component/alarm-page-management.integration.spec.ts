@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.model';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { UserRole } from '../../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../../core/services/internal-auth.service';
+import { AlarmManagementRefreshService } from '../../../../core/alarm/services/alarm-management-refresh.service';
 import { Pipe, type PipeTransform } from '@angular/core';
 import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 import type { UserSession } from '../../../user-auth/models/user-session.model';
@@ -26,6 +27,7 @@ describe('AlarmManagement feature integration', () => {
     let fixture: ComponentFixture<AlarmPageManagementComponent>;
     let vmSubject: BehaviorSubject<AlarmListVm>;
     let userSessionSubject: BehaviorSubject<UserSession | null>;
+    let refreshRequestedSubject: Subject<void>;
 
     const alarm1: ActiveAlarm = {
         id: 'active-1',
@@ -65,6 +67,10 @@ describe('AlarmManagement feature integration', () => {
         getCurrentUser$: vi.fn(),
     };
 
+    const refreshServiceStub = {
+        getRefreshRequested$: vi.fn(),
+    };
+
     beforeEach(async () => {
         vi.clearAllMocks();
 
@@ -81,6 +87,8 @@ describe('AlarmManagement feature integration', () => {
         });
 
         alarmManagementStub.vm$ = vmSubject.asObservable();
+        refreshRequestedSubject = new Subject<void>();
+        refreshServiceStub.getRefreshRequested$.mockReturnValue(refreshRequestedSubject.asObservable());
         userSessionSubject = new BehaviorSubject<UserSession | null>({
             userId: '1',
             username: 'admin',
@@ -100,6 +108,7 @@ describe('AlarmManagement feature integration', () => {
             providers: [
                 { provide: AlarmManagementService, useValue: alarmManagementStub },
                 { provide: InternalAuthService, useValue: authServiceStub },
+                { provide: AlarmManagementRefreshService, useValue: refreshServiceStub },
             ],
         }).compileComponents();
 
@@ -171,5 +180,14 @@ describe('AlarmManagement feature integration', () => {
         expect(managedButton).not.toBeNull();
         expect((managedButton as HTMLButtonElement).disabled).toBe(true);
         expect(nativeElement.textContent).toContain('Non da gestire');
+    });
+
+    it('riesegue initialize quando arriva una richiesta di refresh esterna', () => {
+        fixture.detectChanges();
+        expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
+
+        refreshRequestedSubject.next();
+
+        expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(2);
     });
 });

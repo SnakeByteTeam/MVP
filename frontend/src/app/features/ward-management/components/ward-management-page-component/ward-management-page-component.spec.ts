@@ -100,6 +100,32 @@ describe('WardManagementPageComponent', () => {
     expect(component.snackbarMessage()).toBe('Errore rete');
   });
 
+  it('quando wards diventa vuoto resetta selezioni e step mobile', () => {
+    component.selectedWardId.set(wardA.id);
+    component.selectedApartmentId.set('101');
+    component.mobileStep.set('operators');
+
+    fixture.detectChanges();
+    wardsSubject.next([wardA]);
+    wardsSubject.next([]);
+
+    expect(component.selectedWardId()).toBeNull();
+    expect(component.selectedApartmentId()).toBeNull();
+    expect(component.mobileStep()).toBe('wards');
+  });
+
+  it('selectedApartment si riallinea al ward selezionato', () => {
+    component.wardsSnapshot.set([wardA, wardB]);
+    component.selectedWardId.set(wardA.id);
+    component.selectedApartmentId.set('101');
+
+    expect(component.selectedApartment()).toEqual({ id: '101', name: 'App. 101' });
+
+    component.selectedWardId.set(wardB.id);
+
+    expect(component.selectedApartment()).toBeNull();
+  });
+
   it('ngOnDestroy dovrebbe interrompere aggiornamenti da stream', () => {
     fixture.detectChanges();
 
@@ -170,6 +196,34 @@ describe('WardManagementPageComponent', () => {
 
     expect(component.selectedWardId()).toBe(wardA.id);
     expect(component.wardDialogMode()).toBe('closed');
+  });
+
+  it('onCloseAssignOperatorDialog e onCloseAssignPlantDialog ripuliscono stato di caricamento e lookup', () => {
+    component.operatorWardId.set(wardA.id);
+    component.availableOperatorsFromFetch.set([
+      {
+        id: 1,
+        firstName: 'Mario',
+        lastName: 'Rossi',
+        username: 'mrossi',
+        role: UserRole.OPERATORE_SANITARIO,
+      },
+    ]);
+    component.isLoadingAvailableOperators.set(true);
+
+    component.plantWardId.set(wardB.id);
+    component.availablePlantsFromFetch.set([{ id: '101', name: 'App. 101' }]);
+    component.isLoadingAvailablePlants.set(true);
+
+    component.onCloseAssignOperatorDialog();
+    component.onCloseAssignPlantDialog();
+
+    expect(component.operatorWardId()).toBeNull();
+    expect(component.availableOperatorsFromFetch()).toBeNull();
+    expect(component.isLoadingAvailableOperators()).toBe(false);
+    expect(component.plantWardId()).toBeNull();
+    expect(component.availablePlantsFromFetch()).toBeNull();
+    expect(component.isLoadingAvailablePlants()).toBe(false);
   });
 
   it('selectWard dovrebbe aggiornare ward attivo e step mobile', () => {

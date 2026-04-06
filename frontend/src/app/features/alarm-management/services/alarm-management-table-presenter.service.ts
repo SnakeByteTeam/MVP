@@ -9,12 +9,13 @@ export class AlarmManagementTablePresenterService {
             const isOpen = alarm.resolutionTime === null;
             const isManaged = !isOpen;
             const isResolving = resolvingId === alarm.id;
+            const safeAlarmName = this.getSafeAlarmName(alarm.alarmName);
 
             return {
                 isManaged,
                 id: alarm.id,
                 priority: alarm.priority,
-                name: alarm.alarmName,
+                name: safeAlarmName,
                 device: this.getSafeDevice(alarm.deviceId),
                 location: this.getSafeLocation(alarm.position),
                 status: isOpen ? 'Da gestire' : 'Non da gestire',
@@ -22,7 +23,7 @@ export class AlarmManagementTablePresenterService {
                 isResolving,
                 isActionDisabled: isManaged || isResolving,
                 actionLabel: this.getActionLabel(isResolving, isManaged),
-                actionAriaLabel: this.getActionAriaLabel(alarm.alarmName, isManaged),
+                actionAriaLabel: this.getActionAriaLabel(safeAlarmName, isManaged),
             };
         });
     }
@@ -56,8 +57,17 @@ export class AlarmManagementTablePresenterService {
         return `Gestisci allarme ${alarmName}`;
     }
 
-    private getSafeLocation(position: string): string {
-        const normalizedPosition = position.trim();
+    private getSafeAlarmName(alarmName: string | null | undefined): string {
+        const normalizedAlarmName = (alarmName ?? '').trim();
+        if (normalizedAlarmName.length > 0) {
+            return normalizedAlarmName;
+        }
+
+        return 'senza nome';
+    }
+
+    private getSafeLocation(position: string | null | undefined): string {
+        const normalizedPosition = (position ?? '').trim();
         if (normalizedPosition.length > 0) {
             return normalizedPosition;
         }

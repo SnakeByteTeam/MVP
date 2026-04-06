@@ -657,11 +657,11 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     device_id          VARCHAR(255) NOT NULL,
     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_armed_arming CHECK (
-        NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
-             CURRENT_TIME BETWEEN arming_time AND dearming_time)
-    )
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -- CONSTRAINT chk_armed_arming CHECK (
+    --     NOT (is_armed = FALSE AND arming_time IS NOT NULL AND
+    --          CURRENT_TIME BETWEEN arming_time AND dearming_time)
+    -- )
 
 );
 

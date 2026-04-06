@@ -60,7 +60,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
          dp_meta AS (
            SELECT
              dp->>'id'      AS datapoint_id,
-             dp->>'name'    AS name,
+             room->>'name'  AS name,
              dp->>'sfeType' AS sfe_type,
              dev->>'subType'   AS device_type
            FROM latest_cache
@@ -102,7 +102,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
          dp_meta AS (
            SELECT
              dp->>'id'      AS datapoint_id,
-             dp->>'name'    AS name,
+             room->>'name'  AS name,
              dp->>'sfeType' AS sfe_type,
              dev->>'subType'   AS device_type
            FROM latest_cache
@@ -144,7 +144,7 @@ export class GetAnalyticsRepositoryImpl implements GetAnalyticsRepositoryPort {
          dp_meta AS (
            SELECT
              dp->>'id'      AS datapoint_id,
-             dp->>'name'    AS name,
+             room->>'name'  AS name,
              dp->>'sfeType' AS sfe_type,
              dev->>'subType'   AS device_type
            FROM latest_cache

@@ -11,6 +11,7 @@ const {
   title: TITLE,
   metric: METRIC,
   unit: UNIT,
+  desc: DESC,
 } = AnalyticsMetric.PLANT_CONSUMPTION;
 
 @Injectable()
@@ -68,7 +69,7 @@ export class PlantConsumption implements AnalyticsStrategy {
     const values = sorted.map(([, wh]) => wh);
 
     return new Plot(TITLE, METRIC, UNIT, labels, [
-      new Series(METRIC, TITLE, values),
+      new Series(METRIC, DESC, values),
     ]);
   }
 }

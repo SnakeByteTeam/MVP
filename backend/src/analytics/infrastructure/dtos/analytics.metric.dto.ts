@@ -3,6 +3,7 @@ export interface AnalyticsMetricConfig {
   metric: string;
   unit: string;
   sfeType?: string;
+  desc?: string;
 }
 
 export const AnalyticsMetric = {
@@ -11,12 +12,14 @@ export const AnalyticsMetric = {
     metric: 'plant-consumption',
     unit: 'Wh',
     sfeType: 'SFE_State_OnOff',
+    desc: 'Consumo totale in Wh',
   },
 
   PLANT_ANOMALIES: {
     title: 'Anomalie di impianto',
     metric: 'plant-anomalies',
     unit: 'anomalie',
+    desc: 'Numero di anomalie',
   },
 
   THERMOSTAT_TEMPERATURE: {
@@ -24,19 +27,20 @@ export const AnalyticsMetric = {
     metric: 'thermostat-temperature',
     unit: '°C',
     sfeType: 'SFE_State_Temperature',
+    desc: `Temperatura media (°C)`,
   },
 
   SENSOR_PRESENCE: {
     title: 'Rilevamento di presenza',
     metric: 'sensor-presence',
-    unit: 'events',
+    unit: 'eventi',
     sfeType: 'SFE_State_Presence',
   },
 
   SENSOR_LONG_PRESENCE: {
     title: 'Rilevamento di presenza prolungata',
     metric: 'sensor-long-presence',
-    unit: 'events',
+    unit: 'eventi',
     sfeType: 'SFE_State_Presence',
   },
 
@@ -44,6 +48,7 @@ export const AnalyticsMetric = {
     title: 'Frequenza degli allarmi rilevati nel reparto',
     metric: 'ward-alarms-frequency',
     unit: 'allarmi',
+    desc: 'Numero di allarmi rilevati',
   },
 
   WARD_FALLS: {
@@ -51,6 +56,7 @@ export const AnalyticsMetric = {
     metric: 'ward-falls',
     unit: 'allarmi',
     sfeType: 'SFE_State_ManDown',
+    desc: 'Numero di cadute rilevate',
   },
 
   WARD_RESOLVED_ALARM: {

@@ -14,7 +14,12 @@ const FALL_SFE_TYPE = 'SFE_State_ManDown';
 const FALL = 'True';
 const NO_FALL = 'False';
 const DAYS_RANGE = 30;
-const { title: TITLE, metric: METRIC, unit: UNIT } = AnalyticsMetric.WARD_FALLS;
+const {
+  title: TITLE,
+  metric: METRIC,
+  unit: UNIT,
+  desc: DESC,
+} = AnalyticsMetric.WARD_FALLS;
 
 @Injectable()
 export class WardFalls implements AnalyticsStrategy {
@@ -71,7 +76,7 @@ export class WardFalls implements AnalyticsStrategy {
     const data: number[] = labels.map(
       (day: string): number => fallsByDay.get(day) ?? 0,
     );
-    const series: Series[] = [new Series(METRIC, TITLE, data)];
+    const series: Series[] = [new Series(METRIC, DESC, data)];
 
     return new Plot(TITLE, METRIC, UNIT, labels, series);
   }

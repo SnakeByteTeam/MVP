@@ -14,6 +14,7 @@ const {
   title: TITLE,
   metric: METRIC,
   unit: UNIT,
+  desc: DESC,
 } = AnalyticsMetric.WARD_ALARMS_FREQUENCY;
 
 @Injectable()
@@ -44,7 +45,7 @@ export class WardAlarmsFrequency implements AnalyticsStrategy {
     const data: number[] = labels.map(
       (day: string): number => alarmsByDay.get(day) ?? 0,
     );
-    const series: Series[] = [new Series(METRIC, TITLE, data)];
+    const series: Series[] = [new Series(METRIC, DESC, data)];
 
     return new Plot(TITLE, METRIC, UNIT, labels, series);
   }

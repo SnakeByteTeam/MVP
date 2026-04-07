@@ -1,5 +1,15 @@
 import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, fromEvent, takeUntil } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import {
+	BehaviorSubject,
+	Observable,
+	Subject,
+	catchError,
+	finalize,
+	fromEvent,
+	of,
+	takeUntil,
+} from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
@@ -27,6 +37,7 @@ export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>('SOCKET_IO_FACTOR
 @Injectable({ providedIn: 'root' })
 export class EventSubscriptionService implements OnDestroy {
 	private readonly socketIoFactory = inject(SOCKET_IO_FACTORY);
+	private readonly http = inject(HttpClient, { optional: true });
 	private readonly alarmStateService = inject(AlarmStateService);
 	private readonly apiBaseUrl = inject(API_BASE_URL, { optional: true });
 	private readonly internalAuthService = inject(InternalAuthService, { optional: true });
@@ -40,6 +51,9 @@ export class EventSubscriptionService implements OnDestroy {
 	private readonly destroy$ = new Subject<void>();
 	private socket: Socket | null = null;
 	private authLifecycleInitialized = false;
+	private activeUserId: string | null = null;
+	private readonly wardBootstrapInFlightUserIds = new Set<string>();
+	private readonly wardBootstrapDoneUserIds = new Set<string>();
 
 	public initialize(wardIds: string[]): void {
 		this.connect();
@@ -139,13 +153,61 @@ export class EventSubscriptionService implements OnDestroy {
 			.pipe(takeUntil(this.destroy$))
 			.subscribe((session) => {
 				if (!session) {
+					const previousUserId = this.activeUserId;
+					if (previousUserId) {
+						this.wardBootstrapInFlightUserIds.delete(previousUserId);
+						this.wardBootstrapDoneUserIds.delete(previousUserId);
+					}
+
+					this.activeUserId = null;
 					this.emitLeaveMany(this.roomCoordinator.deactivateUser());
 					return;
 				}
 
-				const actions = this.roomCoordinator.activateUser(session.userId);
+				const normalizedUserId = session.userId.trim();
+				if (!normalizedUserId) {
+					return;
+				}
+
+				this.activeUserId = normalizedUserId;
+
+				const actions = this.roomCoordinator.activateUser(normalizedUserId);
 				this.emitLeaveMany(actions.roomsToLeave);
 				this.emitJoinMany(actions.roomsToJoin);
+				if (actions.roomsToJoin.length === 0) {
+					this.bootstrapWardRoomSubscription(normalizedUserId);
+				}
+			});
+	}
+
+	private bootstrapWardRoomSubscription(userId: string): void {
+		if (!this.http) {
+			return;
+		}
+
+		if (
+			this.wardBootstrapInFlightUserIds.has(userId) ||
+			this.wardBootstrapDoneUserIds.has(userId)
+		) {
+			return;
+		}
+
+		this.wardBootstrapInFlightUserIds.add(userId);
+
+		this.http
+			.get<unknown>(this.resolvePlantAllEndpoint())
+			.pipe(
+				catchError(() => of<unknown>([])),
+				takeUntil(this.destroy$),
+				finalize(() => {
+					this.wardBootstrapInFlightUserIds.delete(userId);
+					this.wardBootstrapDoneUserIds.add(userId);
+				})
+			)
+			.subscribe((response) => {
+				for (const wardId of this.extractWardIdsFromPlantResponse(response)) {
+					this.joinRoom(wardId);
+				}
 			});
 	}
 
@@ -206,10 +268,92 @@ export class EventSubscriptionService implements OnDestroy {
 	private resolveSocketUrl(): string {
 		const normalizedApiBaseUrl = this.apiBaseUrl?.trim();
 		if (normalizedApiBaseUrl) {
-			return normalizedApiBaseUrl;
+			return this.toWebsocketNamespaceUrl(normalizedApiBaseUrl);
 		}
 
-		return globalThis.location.origin;
+		return `${globalThis.location.origin}/ws`;
+	}
+
+	private toWebsocketNamespaceUrl(baseUrl: string): string {
+		const trimmedBaseUrl = baseUrl.replace(/\/+$/, '');
+
+		if (trimmedBaseUrl.endsWith('/api')) {
+			return `${trimmedBaseUrl.slice(0, -4)}/ws`;
+		}
+
+		return `${trimmedBaseUrl}/ws`;
+	}
+
+	private resolvePlantAllEndpoint(): string {
+		const normalizedApiBaseUrl = this.apiBaseUrl?.trim();
+		if (normalizedApiBaseUrl) {
+			return `${normalizedApiBaseUrl}/plant/all`;
+		}
+
+		return '/api/plant/all';
+	}
+
+	private extractWardIdsFromPlantResponse(response: unknown): string[] {
+		const plants = this.extractPlantArray(response);
+		const wardIds = new Set<string>();
+
+		for (const plant of plants) {
+			const wardId = this.normalizeWardId(plant.wardId);
+			if (!wardId) {
+				continue;
+			}
+
+			wardIds.add(wardId);
+		}
+
+		return Array.from(wardIds.values());
+	}
+
+	private extractPlantArray(response: unknown): Array<{ wardId?: unknown }> {
+		if (Array.isArray(response)) {
+			return response.filter(
+				(candidate): candidate is { wardId?: unknown } =>
+					typeof candidate === 'object' && candidate !== null
+			);
+		}
+
+		if (typeof response !== 'object' || response === null) {
+			return [];
+		}
+
+		const wrapped = response as { data?: unknown; plants?: unknown };
+		if (Array.isArray(wrapped.data)) {
+			return wrapped.data.filter(
+				(candidate): candidate is { wardId?: unknown } =>
+					typeof candidate === 'object' && candidate !== null
+			);
+		}
+
+		if (!Array.isArray(wrapped.plants)) {
+			return [];
+		}
+
+		return wrapped.plants.filter(
+			(candidate): candidate is { wardId?: unknown } =>
+				typeof candidate === 'object' && candidate !== null
+		);
+	}
+
+	private normalizeWardId(rawWardId: unknown): string | null {
+		if (typeof rawWardId === 'number' && Number.isInteger(rawWardId)) {
+			return String(rawWardId);
+		}
+
+		if (typeof rawWardId !== 'string') {
+			return null;
+		}
+
+		const trimmedWardId = rawWardId.trim();
+		if (!trimmedWardId) {
+			return null;
+		}
+
+		return trimmedWardId;
 	}
 
 }

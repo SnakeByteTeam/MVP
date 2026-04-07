@@ -232,8 +232,7 @@ INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
           }
         ]
       }
-    ],
-    "wardId": null
+    ]
   }',
   (SELECT id FROM ward WHERE name = 'test-ward')
 );
@@ -357,10 +356,9 @@ INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
           }
         ]
       }
-    ],
-    "wardId": null
+    ]
   }',
-  NULL
+  (SELECT id FROM ward WHERE name = 'test-ward')
 );
 
 INSERT INTO datapoint_history (timestamp, datapoint_id, value) VALUES
@@ -662,20 +660,20 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
 );
 
 INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-('rule-001', 'Temperatura critica',    '>',  '30',    1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-002', 'Luce accesa di notte',   '=',  'on',    3, '22:00', '06:00', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
-('rule-003', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
-('rule-004', 'Temperatura alta',       '>',  '25',    2, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
-('rule-005', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000005-SFE_State_ManDown',      'BB0022CC0022');
+('rule-001', 'Temperatura critica',    '>',  '30',    1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011'),
+('rule-002', 'Luce accesa di notte',   '=',  'on',    3, '22:00', '06:00', TRUE, 'fct-AA0011BB0011-1000000001',        'AA0011BB0011'),
+('rule-003', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',      'AA0011BB0011'),
+('rule-004', 'Temperatura alta',       '>',  '25',    2, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',  'BB0022CC0022'),
+('rule-005', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',      'BB0022CC0022');
 
 -- Regole aggiuntive per test UI/paginazione/stati su allarmi attivi.
 INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-('rule-006', 'Temp soggiorno warning',      '>',  '28',   3, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-007', 'Temp soggiorno critica',      '>=', '31',   4, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-008', 'Luce soggiorno sempre accesa','=',  'on',   2, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
-('rule-009', 'Caduta bagno test-ward',      '=',  'on',   4, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
-('rule-010', 'Temp ingresso alta',          '>',  '21',   3, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
-('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
+('rule-006', 'Temp soggiorno warning',      '>',  '28',   3, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011'),
+('rule-007', 'Temp soggiorno critica',      '>=', '31',   4, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011'),
+('rule-008', 'Luce soggiorno sempre accesa','=',  'on',   2, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',        'AA0011BB0011'),
+('rule-009', 'Caduta bagno test-ward',      '=',  'on',   4, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',      'AA0011BB0011'),
+('rule-010', 'Temp ingresso alta',          '>',  '21',   3, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',  'BB0022CC0022'),
+('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011');
 
 
 CREATE TABLE alarm_event (

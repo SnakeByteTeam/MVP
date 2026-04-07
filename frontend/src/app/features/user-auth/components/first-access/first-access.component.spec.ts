@@ -48,6 +48,15 @@ describe('FirstAccessComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('renderizza il contenuto informativo del primo accesso', () => {
+    const content = fixture.nativeElement.textContent as string;
+
+    expect(content).toContain('Primo accesso');
+    expect(content).toContain('Imposta la tua password personale');
+    expect(content).toContain('password temporanea');
+    expect(content).toContain('Conferma e continua');
+  });
+
   it('non invia la richiesta se nuova password uguale alla temporanea', () => {
     component.onUsernameChange('mrossi');
     component.onTempPasswordChange(temporaryCredential);

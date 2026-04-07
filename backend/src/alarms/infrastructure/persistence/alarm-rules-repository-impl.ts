@@ -45,7 +45,8 @@ export class AlarmRulesRepositoryImpl
         FROM jsonb_array_elements(room->'devices') AS device
         WHERE device->>'id' = ar.device_id
       ) d ON true
-      WHERE d.device IS NOT NULL
+      WHERE d.device IS NOT NULL 
+      AND ar.is_changed_when_used = FALSE
       AND ar.id = $1
       ORDER BY ar.created_at DESC;`,
       [id],
@@ -107,7 +108,8 @@ export class AlarmRulesRepositoryImpl
         FROM jsonb_array_elements(room->'devices') AS device
         WHERE device->>'id' = ar.device_id
       ) d ON true
-      WHERE d.device IS NOT NULL
+      WHERE d.device IS NOT NULL 
+      AND ar.is_changed_when_used = FALSE
       ORDER BY ar.created_at DESC;`,
     );
     return result.rows;

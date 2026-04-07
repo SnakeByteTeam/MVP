@@ -46,7 +46,7 @@ export class AlarmEventsController {
     @Inject(GET_ALL_ALARM_EVENTS_USE_CASE)
     private readonly getAllAlarmEventsUseCase: GetAllAlarmEventsUseCase,
     @Inject(GET_ALARM_EVENT_BY_ID_USE_CASE)
-    private readonly getAlarmEventByIdUseCase: GetAlarmEventByIdUseCase
+    private readonly getAlarmEventByIdUseCase: GetAlarmEventByIdUseCase,
     @Inject(GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE)
     private readonly getAllManagedAlarmEventsByUserIdUseCase: GetAllManagedAlarmEventsByUserIdUseCase,
     @Inject(GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE)

@@ -51,7 +51,7 @@ describe('AlarmConfigStateService', () => {
     const validForm: AlarmConfigFormValue = {
         name: '  Nuovo allarme  ',
         plantId: 'plant-1',
-        sensorId: 'dev-3',
+        deviceId: 'dev-3',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.EQUAL_TO,
         thresholdValue: '22',
@@ -279,7 +279,7 @@ describe('AlarmConfigStateService', () => {
             .updateAlarmRule('missing-id', {
                 ...validForm,
                 name: ' Nome dal form ',
-                sensorId: ' dev-10 ',
+                deviceId: ' dev-10 ',
                 thresholdOperator: ThresholdOperator.GREATER_THAN,
                 thresholdValue: '44',
             })

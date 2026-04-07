@@ -4,7 +4,7 @@ import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator
 export interface AlarmConfigFormValue {
     name: string;
     plantId: string;
-    sensorId: string;
+    deviceId: string;
     priority: AlarmPriority | null;
     thresholdOperator: ThresholdOperator | null;
     thresholdValue: string;

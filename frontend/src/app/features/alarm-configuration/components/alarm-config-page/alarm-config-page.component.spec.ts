@@ -58,7 +58,7 @@ describe('AlarmConfigPageComponent', () => {
     const formValue = {
         name: 'Nuova regola',
         plantId: 'plant-1',
-        sensorId: 'sensor-1',
+        deviceId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
         thresholdValue: '12',

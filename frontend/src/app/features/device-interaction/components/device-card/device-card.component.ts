@@ -4,6 +4,7 @@ import { Device } from '../../../apartment-monitor/models/device.model';
 import { IDeviceCard } from '../../interfaces/device-card.interface';
 import { DeviceType } from '../../models/device-type.enum';
 import { WriteDatapointRequest } from '../../models/write-datapoint-request.model';
+import { getDeviceTypeLabel, getEndpointLabel } from '../../../../shared/models/device-taxonomy';
 
 @Component({
 	selector: 'app-device-card',
@@ -21,17 +22,11 @@ export class DeviceCardComponent implements IDeviceCard {
 	private readonly selectedValues = new Map<string, string>();
 
 	public getTypeLabel(type: DeviceType): string {
-		const labels: Record<DeviceType, string> = {
-			[DeviceType.THERMOSTAT]: 'Termostato',
-			[DeviceType.FALL_SENSOR]: 'Sensore caduta',
-			[DeviceType.PRESENCE_SENSOR]: 'Sensore presenza',
-			[DeviceType.LIGHT]: 'Luce',
-			[DeviceType.ALARM_BUTTON]: 'Pulsante allarme',
-			[DeviceType.ENTRANCE_DOOR]: 'Porta ingresso',
-			[DeviceType.BLIND]: 'Tapparella',
-		};
+		return getDeviceTypeLabel(type);
+	}
 
-		return labels[type] ?? 'Dispositivo';
+	public getDatapointLabel(datapoint: Datapoint): string {
+		return getEndpointLabel(datapoint.sfeType);
 	}
 
 	public getWritableEnumDatapoints(): Datapoint[] {

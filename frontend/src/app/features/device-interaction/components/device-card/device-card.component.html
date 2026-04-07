@@ -21,7 +21,7 @@
     <div class="device-card__writes">
       @for (datapoint of getWritableEnumDatapoints(); track datapoint.id) {
         <div class="device-card__write-row care-panel">
-          <label [for]="'dp-' + device().id + '-' + datapoint.id">{{ datapoint.name }}</label>
+          <label [for]="'dp-' + device().id + '-' + datapoint.id" [attr.title]="datapoint.name">{{ getDatapointLabel(datapoint) }}</label>
           <div class="device-card__write-controls">
             <select
               [id]="'dp-' + device().id + '-' + datapoint.id"

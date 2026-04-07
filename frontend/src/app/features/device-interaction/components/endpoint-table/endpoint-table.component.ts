@@ -20,6 +20,7 @@ import { EndpointRoomGroup } from '../../models/endpoint-room-group.model';
 import { RowFeedback } from '../../models/row-feedback.model';
 import { WritableEndpointRow } from '../../models/writable-endpoint-row.model';
 import { DeviceApiService } from '../../services/device-api.service';
+import { getDeviceTypeLabel, getEndpointLabel as resolveEndpointLabel } from '../../../../shared/models/device-taxonomy';
 
 @Component({
 	selector: 'app-endpoint-table',
@@ -71,17 +72,11 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 	}
 
 	public getTypeLabel(type: DeviceType): string {
-		const labels: Record<DeviceType, string> = {
-			[DeviceType.THERMOSTAT]: 'Termostato',
-			[DeviceType.FALL_SENSOR]: 'Sensore caduta',
-			[DeviceType.PRESENCE_SENSOR]: 'Sensore presenza',
-			[DeviceType.LIGHT]: 'Luce',
-			[DeviceType.ALARM_BUTTON]: 'Pulsante allarme',
-			[DeviceType.ENTRANCE_DOOR]: 'Porta ingresso',
-			[DeviceType.BLIND]: 'Tapparella',
-		};
+		return getDeviceTypeLabel(type);
+	}
 
-		return labels[type] ?? 'Dispositivo';
+	public getEndpointLabel(row: WritableEndpointRow): string {
+		return resolveEndpointLabel(row.datapointSfeType);
 	}
 
 	public getSelectedValue(row: WritableEndpointRow): string {

@@ -30,7 +30,7 @@
                   <tr>
                     <td>{{ row.deviceName }}</td>
                     <td>{{ getTypeLabel(row.deviceType) }}</td>
-                    <td>{{ row.datapointName }}</td>
+                    <td [attr.title]="row.datapointName">{{ getEndpointLabel(row) }}</td>
                     <td>
                       <select
                         class="care-select endpoint-table__select"

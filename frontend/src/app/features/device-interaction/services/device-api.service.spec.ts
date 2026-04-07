@@ -98,4 +98,52 @@ describe('DeviceApiService', () => {
 
     await expect(writePromise).rejects.toBeTruthy();
   });
+
+  it('mappa le righe endpoint scrivibili includendo sfeType e tipo corretto', async () => {
+    const rowsPromise = firstValueFrom(service.getWritableEndpointRows());
+
+    const request = httpMock.expectOne('http://localhost:3000/plant?plantid=plant-1');
+    expect(request.request.method).toBe('GET');
+
+    request.flush({
+      id: 'plant-1',
+      name: 'Plant Demo',
+      rooms: [
+        {
+          id: 'room-1',
+          name: 'Soggiorno',
+          devices: [
+            {
+              id: 'device-thermo-like',
+              name: 'Dispositivo ambiguo',
+              type: 'SF_Light',
+              subType: 'SS_Unknown',
+              datapoints: [
+                {
+                  id: 'dp-mode-1',
+                  name: 'SFE_Cmd_ChangeOverMode',
+                  readable: true,
+                  writable: true,
+                  valueType: 'string',
+                  enum: ['Cool', 'Heat'],
+                  sfeType: 'SFE_Cmd_ChangeOverMode',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const rows = await rowsPromise;
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      roomId: 'room-1',
+      deviceId: 'device-thermo-like',
+      datapointId: 'dp-mode-1',
+      datapointSfeType: 'SFE_Cmd_ChangeOverMode',
+      deviceType: 'THERMOSTAT',
+    });
+  });
 });

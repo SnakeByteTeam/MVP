@@ -19,6 +19,7 @@ describe('RoomDetailComponent', () => {
     deviceType: DeviceType.LIGHT,
     datapointId: 'dp-1',
     datapointName: 'On/Off',
+    datapointSfeType: 'SFE_Cmd_OnOff',
     enumValues: ['Off', 'On'],
   };
 

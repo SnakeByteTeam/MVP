@@ -206,32 +206,6 @@ export class ApartmentApiService {
 			id: plant.id,
 			name: plant.name,
 			isEnabled: true,
-<<<<<<< HEAD
-			rooms: plant.rooms.map((room) => {
-				const visibleDevices = this.deduplicateRoomDevices(
-					room.devices.filter((device) => !this.isEnergyMeasureDevice(device.type, device.subType)),
-				);
-
-				return {
-					id: room.id,
-					name: room.name,
-					hasActiveAlarm: false,
-					devices: visibleDevices.map((device) => ({
-						type: resolveDeviceType({
-							rawType: device.type,
-							rawSubType: device.subType,
-							rawName: device.name,
-							sfeTypes: (device.datapoints ?? []).map((datapoint) => datapoint.sfeType),
-						}),
-						id: device.id,
-						name: device.name,
-						status: this.mapDeviceStatus(device.type),
-						actions: [],
-						datapoints: [],
-					})),
-				};
-			}),
-=======
 			rooms: plant.rooms.map((room) => ({
 				id: room.id,
 				name: room.name,
@@ -258,7 +232,6 @@ export class ApartmentApiService {
 					})),
 				})),
 			})),
->>>>>>> 6d72185 (refactor a datapoint id in AlarmRule)
 		};
 	}
 

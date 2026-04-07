@@ -29,7 +29,6 @@ export class AlarmRuleRequestMapper {
     public toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto {
         return {
             name: this.requireNonEmptyString(formValue.name, 'name'),
-            datapointId: this.normalizeOptionalString(formValue.datapointId),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
             thresholdValue: this.toRequestThresholdValue(formValue.thresholdValue, 'thresholdValue'),

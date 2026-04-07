@@ -1,7 +1,7 @@
 <article class="device-card">
   <header>
     <h3>{{ device().name }}</h3>
-    <p>Termostato · {{ device().status }}</p>
+    <p>{{ getTypeLabel(device().type) }} · {{ device().status }}</p>
   </header>
   @if (error()) {
     <p class="device-card__error">{{ error() }}</p>

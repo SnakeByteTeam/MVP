@@ -12,10 +12,10 @@ export class AlarmRuleFormMapper {
         return {
             name: rule.name,
             plantId: '',
-            sensorId: rule.deviceId,
+            deviceId: rule.deviceId,
             priority: rule.priority,
             thresholdOperator: this.toFormThresholdOperator(rule.thresholdOperator),
-            thresholdValue: this.toFormThresholdValue(rule.thresholdValue),
+            thresholdValue: rule.thresholdValue,
             armingTime: this.alarmTimeMapper.toFormTime(rule.armingTime),
             dearmingTime: this.alarmTimeMapper.toFormTime(rule.dearmingTime),
             enabled: rule.isArmed,
@@ -37,11 +37,10 @@ export class AlarmRuleFormMapper {
         if (normalizedOperator === '<=') {
             return ThresholdOperator.LESS_THAN_OR_EQUAL;
         }
+        if (normalizedOperator === '=') {
+            return ThresholdOperator.EQUAL_TO;
+        }
 
-        return ThresholdOperator.EQUAL_TO;
-    }
-
-    private toFormThresholdValue(value: string): string {
-        return value;
+        throw new Error(`Operatore soglia non supportato: ${operator}`);
     }
 }

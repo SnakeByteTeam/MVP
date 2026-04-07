@@ -42,7 +42,7 @@ describe('AlarmConfigFormComponent', () => {
     const validFormValue = {
         name: 'Nuova regola',
         plantId: 'plant-1',
-        sensorId: 'sensor-1',
+        deviceId: 'sensor-1',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
         thresholdValue: '12',
@@ -124,7 +124,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.getRawValue()).toEqual({
             name: '',
             plantId: '',
-            sensorId: '',
+            deviceId: '',
             priority: null,
             thresholdOperator: null,
             thresholdValue: '',
@@ -143,7 +143,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.getRawValue()).toEqual({
             name: 'Porta aperta',
             plantId: '',
-            sensorId: 'sensor-9',
+            deviceId: 'sensor-9',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: '5',
@@ -153,7 +153,7 @@ describe('AlarmConfigFormComponent', () => {
         });
 
         expect(component.form.controls.name.disabled).toBe(true);
-        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.form.controls.deviceId.disabled).toBe(true);
     });
 
     it('buildForm applica i validatori required ai campi richiesti', () => {
@@ -169,9 +169,9 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.plantId.invalid).toBe(true);
 
         component.form.controls.plantId.setValue('plant-1');
-        component.form.controls.sensorId.setValue('');
+        component.form.controls.deviceId.setValue('');
 
-        expect(component.form.controls.sensorId.invalid).toBe(true);
+        expect(component.form.controls.deviceId.invalid).toBe(true);
         expect(component.form.controls.priority.invalid).toBe(true);
         expect(component.form.controls.thresholdOperator.invalid).toBe(true);
         expect(component.form.controls.thresholdValue.invalid).toBe(true);
@@ -180,13 +180,13 @@ describe('AlarmConfigFormComponent', () => {
     it('in create mode mantiene il dispositivo bloccato finche non viene selezionato un plant', () => {
         setInputs('create', null);
 
-        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.form.controls.deviceId.disabled).toBe(true);
 
         component.form.controls.plantId.setValue('plant-1');
 
         expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
         expect(deviceCatalogStub.registerApartment).toHaveBeenCalledTimes(1);
-        expect(component.form.controls.sensorId.enabled).toBe(true);
+        expect(component.form.controls.deviceId.enabled).toBe(true);
         expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
     });
 
@@ -210,7 +210,7 @@ describe('AlarmConfigFormComponent', () => {
             ...validFormValue,
             name: 'Nome modificato manualmente',
             plantId: '',
-            sensorId: 'sensor-9',
+            deviceId: 'sensor-9',
         });
 
         component.onSubmit();
@@ -219,7 +219,7 @@ describe('AlarmConfigFormComponent', () => {
             ...validFormValue,
             name: 'Porta aperta',
             plantId: '',
-            sensorId: 'sensor-9',
+            deviceId: 'sensor-9',
         });
         expect(emitSpy).toHaveBeenCalledTimes(1);
     });
@@ -229,7 +229,7 @@ describe('AlarmConfigFormComponent', () => {
         const emitSpy = vi.spyOn(component.submittedForm, 'emit');
         component.form.patchValue({
             plantId: '',
-            sensorId: '',
+            deviceId: '',
             priority: null,
             thresholdOperator: null,
             thresholdValue: '',
@@ -247,14 +247,6 @@ describe('AlarmConfigFormComponent', () => {
         component.onCancel();
 
         expect(emitSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('onEnabledToggled aggiorna il controllo enabled', () => {
-        setInputs('create', null);
-
-        component.onEnabledToggled(false);
-
-        expect(component.form.controls.enabled.value).toBe(false);
     });
 
     it('espone opzioni enum per priorita e operatore', () => {
@@ -332,24 +324,24 @@ describe('AlarmConfigFormComponent', () => {
         expect(wardApiStub.getPlantsByWardId).not.toHaveBeenCalled();
     });
 
-    it('se il plant viene deselezionato resetta opzioni dispositivo e blocca il campo sensore', () => {
+    it('se il plant viene deselezionato resetta opzioni dispositivo e blocca il campo dispositivo', () => {
         setInputs('create', null);
 
         component.form.controls.plantId.setValue('plant-1');
         expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
-        expect(component.form.controls.sensorId.enabled).toBe(true);
+        expect(component.form.controls.deviceId.enabled).toBe(true);
 
         component.form.controls.plantId.setValue('');
 
         expect(component.deviceOptions()).toEqual([]);
-        expect(component.form.controls.sensorId.value).toBe('');
-        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.form.controls.deviceId.value).toBe('');
+        expect(component.form.controls.deviceId.disabled).toBe(true);
     });
 
     it('in edit mode non consente di modificare il dispositivo associato', () => {
         setInputs('edit', existingRule);
 
-        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.form.controls.deviceId.disabled).toBe(true);
         expect(component.deviceOptions()).toEqual([{ id: 'sensor-9', label: 'sensor-9' }]);
     });
 
@@ -360,6 +352,6 @@ describe('AlarmConfigFormComponent', () => {
         component.form.controls.plantId.setValue('plant-1');
 
         expect(component.devicesLoadError()).toBe('Errore durante il caricamento dei dispositivi.');
-        expect(component.form.controls.sensorId.disabled).toBe(true);
+        expect(component.form.controls.deviceId.disabled).toBe(true);
     });
 });

@@ -16,7 +16,7 @@
     </div>
 
     <button type="button" [disabled]="isLoading()" (click)="onUnlinkAccount()"
-      class="inline-flex w-fit items-center justify-center rounded-xl bg-gradient-to-r from-[#fcd34d] to-[#fcd34d] px-4 py-3 text-sm font-bold text-[#1f2933] transition hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
+      class="cursor-pointer inline-flex w-fit items-center justify-center rounded-xl bg-gradient-to-r from-[#fcd34d] to-[#fcd34d] px-4 py-3 text-sm font-bold text-[#1f2933] transition hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
       @if (isLoading()) {
       Rimozione in corso...
       } @else {
@@ -33,7 +33,7 @@
     </div>
 
     <button type="button" [disabled]="isLoading()" (click)="onLinkAccount()"
-      class="inline-flex w-fit items-center justify-center rounded-xl bg-gradient-to-r from-[#fcd34d] to-[#fcd34d] px-4 py-3 text-sm font-bold text-[#1f2933] transition hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
+      class="cursor-pointer inline-flex w-fit items-center justify-center rounded-xl bg-gradient-to-r from-[#fcd34d] to-[#fcd34d] px-4 py-3 text-sm font-bold text-[#1f2933] transition hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
       Collega account MyVimar
     </button>
   </div>

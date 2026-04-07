@@ -45,8 +45,8 @@ export class NotificationService {
                 unreadCount,
             };
         }),
-        // Keep a stable in-memory VM snapshot for late subscribers during
-        // component lifetime without reloading history on transient unsubscriptions.
+
+
         shareReplay({ bufferSize: 1, refCount: false })
     );
 

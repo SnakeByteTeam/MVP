@@ -8,5 +8,6 @@ export interface WritableEndpointRow {
 	deviceType: DeviceType;
 	datapointId: string;
 	datapointName: string;
+	datapointSfeType: string;
 	enumValues: string[];
 }

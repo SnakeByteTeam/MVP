@@ -12,6 +12,7 @@ export interface PlantDeviceDto {
 	id: string;
 	name: string;
 	type?: string;
+	subType?: string;
 	datapoints?: PlantDatapointDto[];
 }
 

@@ -2,24 +2,15 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, timer } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
-import { DeviceType } from '../../device-interaction/models/device-type.enum';
 import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
 import { PlantDto } from '../models/plant-response.model';
+import { resolveDeviceType } from '../../../shared/models/device-taxonomy';
 
 export interface ApartmentOption {
 	id: string;
 	name: string;
 }
-
-const DEVICE_TYPE_RULES: ReadonlyArray<{ token: string; type: DeviceType }> = [
-	{ token: 'THERMOSTAT', type: DeviceType.THERMOSTAT },
-	{ token: 'FALL', type: DeviceType.FALL_SENSOR },
-	{ token: 'PRESENCE', type: DeviceType.PRESENCE_SENSOR },
-	{ token: 'ALARM_BUTTON', type: DeviceType.ALARM_BUTTON },
-	{ token: 'DOOR', type: DeviceType.ENTRANCE_DOOR },
-	{ token: 'BLIND', type: DeviceType.BLIND },
-];
 
 @Injectable({ providedIn: 'root' })
 export class ApartmentApiService {
@@ -184,23 +175,19 @@ export class ApartmentApiService {
 				name: room.name,
 				hasActiveAlarm: false,
 				devices: room.devices.map((device) => ({
+					type: resolveDeviceType({
+						rawType: device.type,
+						rawSubType: device.subType,
+						sfeTypes: (device.datapoints ?? []).map((datapoint) => datapoint.sfeType),
+					}),
 					id: device.id,
 					name: device.name,
-					type: this.mapDeviceType(device.type),
 					status: this.mapDeviceStatus(device.type),
 					actions: [],
 					datapoints: [],
 				})),
 			})),
 		};
-	}
-
-	private mapDeviceType(rawType: string | undefined): DeviceType {
-		// TO_DO(back-end): allineare questa mappatura appena viene confermato l'elenco ufficiale dei type/subType.
-		const normalized = (rawType ?? '').toUpperCase();
-		const matchingRule = DEVICE_TYPE_RULES.find((rule) => normalized.includes(rule.token));
-
-		return matchingRule?.type ?? DeviceType.LIGHT;
 	}
 
 	private mapDeviceStatus(rawType: string | undefined): DeviceStatus {

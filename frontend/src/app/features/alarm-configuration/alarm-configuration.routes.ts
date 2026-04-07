@@ -13,16 +13,6 @@ export const ALARM_CONFIGURATION_ROUTES: Routes = [
         loadComponent: () =>
           import('./components/alarm-config-page/alarm-config-page.component').then((m) => m.AlarmConfigPageComponent),
       },
-      {
-        path: 'new',
-        loadComponent: () =>
-          import('./components/alarm-config-form/alarm-config-form.component').then((m) => m.AlarmConfigFormComponent),
-      },
-      {
-        path: ':id/edit',
-        loadComponent: () =>
-          import('./components/alarm-config-form/alarm-config-form.component').then((m) => m.AlarmConfigFormComponent),
-      },
     ],
   }
 ];

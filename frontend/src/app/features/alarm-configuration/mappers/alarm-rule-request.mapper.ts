@@ -15,7 +15,7 @@ export class AlarmRuleRequestMapper {
     public toCreateRequest(formValue: AlarmConfigFormValue): CreateAlarmRuleRequestDto {
         return {
             name: this.requireNonEmptyString(formValue.name, 'name'),
-            deviceId: this.requireNonEmptyString(formValue.sensorId, 'sensorId'),
+            deviceId: this.requireNonEmptyString(formValue.deviceId, 'deviceId'),
             plantId: this.requireNonEmptyString(formValue.plantId, 'plantId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
@@ -67,8 +67,11 @@ export class AlarmRuleRequestMapper {
         if (requiredOperator === ThresholdOperator.LESS_THAN_OR_EQUAL) {
             return '<=';
         }
+        if (requiredOperator === ThresholdOperator.EQUAL_TO) {
+            return '=';
+        }
 
-        return '=';
+        throw new Error(`Campo obbligatorio mancante: thresholdOperator`);
     }
 
     private requireField<T>(value: T | null, fieldName: string): T {

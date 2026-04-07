@@ -12,4 +12,5 @@ import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 export class NotificationItemComponent {
   public readonly notification = input.required<NotificationEvent>();
   public readonly sentAt = computed(() => this.notification().sentAt);
+  public readonly ariaLabel = computed(() => `Notifica: ${this.notification().title}`);
 }

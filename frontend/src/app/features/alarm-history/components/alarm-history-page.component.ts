@@ -62,7 +62,6 @@ export class AlarmHistoryPageComponent implements OnInit {
     }
 
     private toRow(alarm: ActiveAlarm): AlarmTableRow {
-        console.log('alarm:', alarm);
         return {
             id: alarm.id,
             priority: alarm.priority,

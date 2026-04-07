@@ -32,7 +32,7 @@ describe('AlarmRuleFormMapper', () => {
         expect(mapper.toFormValue(rule)).toEqual({
             name: 'Temperatura alta',
             plantId: '',
-            sensorId: 'device-1',
+            deviceId: 'device-1',
             priority: AlarmPriority.RED,
             thresholdOperator: ThresholdOperator.GREATER_THAN,
             thresholdValue: '30',
@@ -58,7 +58,7 @@ describe('AlarmRuleFormMapper', () => {
         expect(mapper.toFormValue(rule)).toEqual({
             name: 'Allarme acceso',
             plantId: '',
-            sensorId: 'device-2',
+            deviceId: 'device-2',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: 'ON',
@@ -84,7 +84,7 @@ describe('AlarmRuleFormMapper', () => {
         expect(mapper.toFormValue(rule)).toEqual({
             name: 'Allarme spento',
             plantId: '',
-            sensorId: 'device-3',
+            deviceId: 'device-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: 'OFF',
@@ -126,7 +126,7 @@ describe('AlarmRuleFormMapper', () => {
         expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.LESS_THAN_OR_EQUAL);
     });
 
-    it('mappa operatori sconosciuti su EQUAL_TO come fallback', () => {
+    it('fallisce su operatori sconosciuti', () => {
         const rule: AlarmRule = {
             id: 'rule-6',
             name: 'Operatore custom',
@@ -139,7 +139,6 @@ describe('AlarmRuleFormMapper', () => {
             deviceId: 'device-6',
         };
 
-        expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.EQUAL_TO);
-        expect(mapper.toFormValue(rule).thresholdValue).toBe('foo');
+        expect(() => mapper.toFormValue(rule)).toThrow('Operatore soglia non supportato: !=');
     });
 });

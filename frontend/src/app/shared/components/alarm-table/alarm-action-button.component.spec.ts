@@ -44,15 +44,15 @@ describe('AlarmActionButtonComponent', () => {
     it('applica la classe corretta per il tone primary', () => {
         setInputs({ tone: 'primary' });
 
-        expect(component.buttonClass()).toContain('border-amber-300');
-        expect(component.buttonClass()).toContain('bg-amber-300');
+        expect(component.buttonClass()).toContain('care-btn');
+        expect(component.buttonClass()).toContain('care-btn--primary');
     });
 
     it('applica la classe corretta per il tone danger', () => {
         setInputs({ tone: 'danger' });
 
-        expect(component.buttonClass()).toContain('border-red-600');
-        expect(component.buttonClass()).toContain('bg-red-600');
+        expect(component.buttonClass()).toContain('care-btn');
+        expect(component.buttonClass()).toContain('care-btn--danger');
     });
 
     it('non emette click quando disabilitato', () => {

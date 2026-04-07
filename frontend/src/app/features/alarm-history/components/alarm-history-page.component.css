@@ -1,33 +1,5 @@
-.alarm-management-page {
-    background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
-    background-size: 22px 22px;
-}
-
 .alarm-management__status,
 .alarm-management__error,
 .alarm-management__empty {
     margin-top: 0.75rem;
-}
-
-.alarm-pagination__button {
-    border: 1px solid #94a3b8;
-    border-radius: 0.5rem;
-    background-color: #ffffff;
-    color: #0f172a;
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.25rem;
-    padding: 0.35rem 0.75rem;
-    cursor: pointer;
-}
-
-.alarm-pagination__button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-}
-
-.alarm-pagination__status {
-    color: #334155;
-    font-size: 0.875rem;
-    font-weight: 600;
 }

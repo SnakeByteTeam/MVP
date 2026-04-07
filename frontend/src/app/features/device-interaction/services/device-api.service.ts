@@ -5,8 +5,8 @@ import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Datapoint } from '../../apartment-monitor/models/datapoint.model';
 import { PlantDatapointDto, PlantDto } from '../../apartment-monitor/models/plant-response.model';
 import { Room } from '../../apartment-monitor/models/room.model';
-import { DeviceType } from '../models/device-type.enum';
 import { WritableEndpointRow } from '../models/writable-endpoint-row.model';
+import { resolveDeviceType } from '../../../shared/models/device-taxonomy';
 
 export interface WriteDatapointDto {
 	datapointId: string;
@@ -83,14 +83,22 @@ export class DeviceApiService {
 			id: sourceRoom.id,
 			name: sourceRoom.name,
 			hasActiveAlarm: false,
-			devices: sourceRoom.devices.map((device) => ({
-				id: device.id,
-				name: device.name,
-				type: this.mapDeviceType(device.type),
-				status: device.type ? 'ONLINE' : 'UNKNOWN',
-				actions: [],
-				datapoints: this.mapDatapoints(device.datapoints),
-			})),
+			devices: sourceRoom.devices.map((device) => {
+				const mappedDatapoints = this.mapDatapoints(device.datapoints);
+
+				return {
+					id: device.id,
+					name: device.name,
+					type: resolveDeviceType({
+						rawType: device.type,
+						rawSubType: device.subType,
+						sfeTypes: mappedDatapoints.map((datapoint) => datapoint.sfeType),
+					}),
+					status: device.type ? 'ONLINE' : 'UNKNOWN',
+					actions: [],
+					datapoints: mappedDatapoints,
+				};
+			}),
 		};
 	}
 
@@ -102,7 +110,7 @@ export class DeviceApiService {
 			writable: datapoint.writable,
 			valueType: datapoint.valueType,
 			enum: Array.isArray(datapoint.enum) ? datapoint.enum : [],
-			sfeType: datapoint.sfeType,
+			sfeType: datapoint.sfeType ?? '',
 		}));
 	}
 
@@ -111,7 +119,14 @@ export class DeviceApiService {
 
 		for (const room of plant.rooms) {
 			for (const device of room.devices) {
-				const writableEnumDatapoints = this.mapDatapoints(device.datapoints).filter(
+				const mappedDatapoints = this.mapDatapoints(device.datapoints);
+				const resolvedDeviceType = resolveDeviceType({
+					rawType: device.type,
+					rawSubType: device.subType,
+					sfeTypes: mappedDatapoints.map((datapoint) => datapoint.sfeType),
+				});
+
+				const writableEnumDatapoints = mappedDatapoints.filter(
 					(datapoint) => datapoint.writable && datapoint.enum.length > 0,
 				);
 
@@ -121,9 +136,10 @@ export class DeviceApiService {
 						roomName: room.name,
 						deviceId: device.id,
 						deviceName: device.name,
-						deviceType: this.mapDeviceType(device.type),
+						deviceType: resolvedDeviceType,
 						datapointId: datapoint.id,
 						datapointName: datapoint.name,
+						datapointSfeType: datapoint.sfeType,
 						enumValues: datapoint.enum,
 					});
 				}
@@ -131,36 +147,6 @@ export class DeviceApiService {
 		}
 
 		return rows;
-	}
-
-	private mapDeviceType(rawType: string | undefined): DeviceType {
-		const normalized = (rawType ?? '').toUpperCase();
-
-		if (normalized.includes('THERMOSTAT')) {
-			return DeviceType.THERMOSTAT;
-		}
-
-		if (normalized.includes('FALL')) {
-			return DeviceType.FALL_SENSOR;
-		}
-
-		if (normalized.includes('PRESENCE')) {
-			return DeviceType.PRESENCE_SENSOR;
-		}
-
-		if (normalized.includes('ALARM_BUTTON')) {
-			return DeviceType.ALARM_BUTTON;
-		}
-
-		if (normalized.includes('DOOR')) {
-			return DeviceType.ENTRANCE_DOOR;
-		}
-
-		if (normalized.includes('BLIND')) {
-			return DeviceType.BLIND;
-		}
-
-		return DeviceType.LIGHT;
 	}
 
 	private getFallbackPlant(plantId: string): PlantDto {
@@ -177,6 +163,7 @@ export class DeviceApiService {
 							id: 'light-1',
 							name: 'Luce',
 							type: 'SF_Light',
+							subType: 'SS_Light_Switch',
 							datapoints: [
 								{
 									id: 'dp-light-1',
@@ -193,6 +180,7 @@ export class DeviceApiService {
 							id: 'blind-1',
 							name: 'Tapparella',
 							type: 'SF_Blind',
+							subType: 'SS_Blind',
 							datapoints: [
 								{
 									id: 'dp-blind-1',

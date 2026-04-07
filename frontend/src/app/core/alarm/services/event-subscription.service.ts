@@ -3,8 +3,6 @@ import { BehaviorSubject, Observable, Subject, fromEvent, takeUntil } from 'rxjs
 import { io, Socket } from 'socket.io-client';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
-import { PushEvent } from '../models/push-event.model';
-import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 import { InternalAuthService } from '../../services/internal-auth.service';
@@ -104,10 +102,6 @@ export class EventSubscriptionService implements OnDestroy {
 		fromEvent<unknown>(this.socket, 'push-event')
 			.pipe(takeUntil(this.destroy$))
 			.subscribe((rawEvent) => {
-				if (this.handleEnvelopeRawEvent(rawEvent)) {
-					return;
-				}
-
 				this.handleBackendTriggeredRawEvent(rawEvent);
 			});
 
@@ -155,39 +149,6 @@ export class EventSubscriptionService implements OnDestroy {
 			});
 	}
 
-	private handleEnvelopeRawEvent(raw: unknown): boolean {
-		const parsedEvent = this.eventNormalizer.tryParseEnvelope(raw);
-		if (!parsedEvent) {
-			return false;
-		}
-
-		switch (parsedEvent.eventType) {
-			case PushEventType.ALARM_TRIGGERED: {
-				const alarmEvent = this.eventNormalizer.parseAlarmEvent(parsedEvent.payload);
-				if (alarmEvent) {
-					this.alarmStateService.onAlarmTriggered(alarmEvent);
-					this.lifecycleNotifier.publish('triggered', alarmEvent.id, parsedEvent.timestamp);
-				}
-
-				return true;
-			}
-			case PushEventType.ALARM_RESOLVED: {
-				const alarmId = this.eventNormalizer.extractAlarmId(parsedEvent.payload);
-				if (alarmId) {
-					this.alarmStateService.onAlarmResolved(alarmId);
-					this.lifecycleNotifier.publish('resolved', alarmId, parsedEvent.timestamp);
-				}
-
-				return true;
-			}
-			case PushEventType.NOTIFICATION:
-				this.dispatchNotificationEvent(parsedEvent);
-				return true;
-			default:
-				return true;
-		}
-	}
-
 	private handleBackendTriggeredRawEvent(raw: unknown): void {
 		const payload = this.eventNormalizer.parseBackendTriggeredPayload(raw);
 		if (!payload) {
@@ -222,15 +183,6 @@ export class EventSubscriptionService implements OnDestroy {
 		this.alarmStateService.onAlarmResolved(payload.alarmEventId);
 		const timestamp = new Date().toISOString();
 		this.lifecycleNotifier.publish('resolved', payload.alarmEventId, timestamp);
-	}
-
-	private dispatchNotificationEvent(event: PushEvent): void {
-		const notificationEvent = this.eventNormalizer.parseNotificationEvent(event.payload);
-		if (!notificationEvent) {
-			return;
-		}
-
-		this.alarmStateService.onNotificationReceived(notificationEvent);
 	}
 
 	private rejoinAllRooms(): void {

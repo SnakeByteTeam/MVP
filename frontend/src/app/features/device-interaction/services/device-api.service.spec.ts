@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { DeviceApiService } from './device-api.service';
@@ -9,8 +9,31 @@ import { DeviceApiService } from './device-api.service';
 describe('DeviceApiService', () => {
   let service: DeviceApiService;
   let httpMock: HttpTestingController;
+  let storage: {
+    getItem: (key: string) => string | null;
+    setItem: (key: string, value: string) => void;
+    removeItem: (key: string) => void;
+  };
 
   beforeEach(() => {
+    const values = new Map<string, string>();
+    storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        values.set(key, value);
+      },
+      removeItem: (key: string) => {
+        values.delete(key);
+      },
+    };
+
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: storage,
+      configurable: true,
+    });
+
+    storage.setItem('activePlantId', 'plant-1');
+
     TestBed.configureTestingModule({
       providers: [
         DeviceApiService,
@@ -22,6 +45,11 @@ describe('DeviceApiService', () => {
 
     service = TestBed.inject(DeviceApiService);
     httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock?.verify();
+    storage?.removeItem('activePlantId');
   });
 
   it('mappa i datapoint dal payload plant nella stanza richiesta', async () => {
@@ -191,5 +219,33 @@ describe('DeviceApiService', () => {
       datapointSfeType: 'SFE_Cmd_OnOff',
       deviceType: 'ENTRANCE_DOOR',
     });
+  });
+
+  it('quando activePlantId manca, risolve il plant dall endpoint /plant/all', async () => {
+    storage.removeItem('activePlantId');
+
+    const rowsPromise = firstValueFrom(service.getWritableEndpointRows());
+
+    const allPlantsRequest = httpMock.expectOne('http://localhost:3000/plant/all');
+    expect(allPlantsRequest.request.method).toBe('GET');
+    allPlantsRequest.flush([
+      {
+        id: 'plant-2',
+        name: 'Plant 2',
+        rooms: [],
+      },
+    ]);
+
+    const plantByIdRequest = httpMock.expectOne('http://localhost:3000/plant?plantid=plant-2');
+    expect(plantByIdRequest.request.method).toBe('GET');
+    plantByIdRequest.flush({
+      id: 'plant-2',
+      name: 'Plant 2',
+      rooms: [],
+    });
+
+    const rows = await rowsPromise;
+    expect(rows).toEqual([]);
+    expect(storage.getItem('activePlantId')).toBe('plant-2');
   });
 });

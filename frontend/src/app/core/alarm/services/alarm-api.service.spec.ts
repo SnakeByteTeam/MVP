@@ -20,6 +20,7 @@ describe('AlarmApiService', () => {
 
     const alarm: AlarmRule = {
         id: 'alarm-1',
+        position: 'Camera 101',
         name: 'Temperatura alta',
         thresholdOperator: '>',
         thresholdValue: '30',

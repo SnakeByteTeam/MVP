@@ -3,9 +3,7 @@ import { Subscription } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Socket } from 'socket.io-client';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
-import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
-import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { EventSubscriptionService, SOCKET_IO_FACTORY } from './event-subscription.service';
 
@@ -141,66 +139,6 @@ describe('EventSubscriptionService', () => {
     expect(joinCallsAfterReconnect.at(-1)).toEqual(['join-ward', 'ward-a']);
   });
 
-  it('dispatcha gli eventi ALARM_TRIGGERED verso AlarmStateService', () => {
-    service.initialize([]);
-
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.ALARM_TRIGGERED,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        id: 'active-alarm-123',
-        alarmRuleId: 'alarm-rule-123',
-        alarmName: 'Caduta rilevata',
-        priority: AlarmPriority.RED,
-        activationTime: '2026-03-19T10:00:00.000Z',
-        resolutionTime: null,
-      },
-    });
-
-    expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith({
-      id: 'active-alarm-123',
-      alarmRuleId: 'alarm-rule-123',
-      alarmName: 'Caduta rilevata',
-      priority: AlarmPriority.RED,
-      activationTime: '2026-03-19T10:00:00.000Z',
-      resolutionTime: null,
-    });
-  });
-
-  it('dispatcha gli eventi ALARM_RESOLVED con activeAlarmId', () => {
-    service.initialize([]);
-
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.ALARM_RESOLVED,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        id: 'active-alarm-123',
-      },
-    });
-
-    expect(alarmStateSpy.onAlarmResolved).toHaveBeenCalledWith('active-alarm-123');
-  });
-
-  it('dispatcha gli eventi NOTIFICATION verso AlarmStateService', () => {
-    service.initialize([]);
-
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.NOTIFICATION,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        notificationId: 'notification-1',
-        title: 'Messaggio operatore',
-        sentAt: '2026-03-19T10:00:00.000Z',
-      },
-    });
-
-    expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith({
-      notificationId: 'notification-1',
-      title: 'Messaggio operatore',
-      sentAt: '2026-03-19T10:00:00.000Z',
-    });
-  });
-
   it('gestisce payload backend nativo su push-event per allarme attivato', () => {
     service.initialize([]);
 
@@ -246,24 +184,21 @@ describe('EventSubscriptionService', () => {
     expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '13');
   });
 
-  it('ignora eventi raw malformati e payload non validi', () => {
+  it('ignora eventi raw malformati e payload backend non validi', () => {
     service.initialize([]);
 
     fakeSocket.trigger('push-event', {
-      eventType: 'UNKNOWN_EVENT',
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {},
-    });
-
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.ALARM_TRIGGERED,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        id: 'active-alarm-123',
-      },
+      alarmRuleId: 'alarm-rule-backend-3',
+      wardId: 'not-a-number',
+      alarmEventId: 'active-alarm-backend-3',
     });
 
     fakeSocket.trigger('push-event', 'not-an-object');
+
+    fakeSocket.trigger('alarm-resolved', {
+      alarmEventId: 42,
+      wardId: 10,
+    });
 
     expect(alarmStateSpy.onAlarmTriggered).not.toHaveBeenCalled();
     expect(alarmStateSpy.onAlarmResolved).not.toHaveBeenCalled();

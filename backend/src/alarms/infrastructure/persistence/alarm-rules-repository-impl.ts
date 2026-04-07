@@ -1,27 +1,13 @@
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
-import { Pool } from 'pg';
-import { randomUUID } from 'crypto';
-import { DeleteAlarmRuleRepository } from '../../application/repository/delete-alarm-rule-repository.interface';
-import { GetAllAlarmRulesRepository } from '../../application/repository/get-all-alarm-rules-repository.interface';
+import { v4 as uuidv4 } from 'uuid';
 import { AlarmPriority } from '../../domain/models/alarm-priority.enum';
 import { AlarmRuleEntity } from '../entities/alarm-rule-entity';
-import { CreateAlarmRuleRepository } from '../../application/repository/create-alarm-rule-repository.interface';
-import { UpdateAlarmRuleRepository } from '../../application/repository/update-alarm-rule-repository.interface';
-import { GetAlarmRuleByIdRepository } from '../../application/repository/get-alarm-rule-by-id-repository.interface';
-import { CheckAlarmRuleRepository } from '../../application/repository/check-alarm-rule-repository.interface';
 import { CheckAlarmEntity } from '../entities/check-alarm-entity';
-import { v4 as uuidv4 } from 'uuid';
+import { AlarmRulesRepository } from '../../application/repository/alarm-rules-repository.interface';
+import { Pool } from 'pg';
 
-export class AlarmRulesRepositoryImpl
-  implements
-    CreateAlarmRuleRepository,
-    GetAlarmRuleByIdRepository,
-    GetAllAlarmRulesRepository,
-    DeleteAlarmRuleRepository,
-    UpdateAlarmRuleRepository,
-    CheckAlarmRuleRepository
-{
+export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {

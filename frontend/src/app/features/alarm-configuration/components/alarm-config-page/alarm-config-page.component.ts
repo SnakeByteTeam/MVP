@@ -13,7 +13,6 @@ import { AlarmConfigFormComponent } from '../alarm-config-form/alarm-config-form
 import { AlarmConfigFormValue } from '../../models/alarm-config-form-value.model';
 import { AlarmConfigStateService } from '../../services/alarm-config-state.service';
 import { AlarmConfigTablePresenterService } from '../../services/alarm-config-table-presenter.service';
-import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 
 @Component({
 	selector: 'app-alarm-config-page',
@@ -33,12 +32,10 @@ import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.s
 export class AlarmConfigPageComponent implements OnInit {
 	private readonly stateService = inject(AlarmConfigStateService);
 	private readonly tablePresenter = inject(AlarmConfigTablePresenterService);
-	private readonly deviceCatalog = inject(AlarmDeviceCatalogService);
 
 	public readonly columns: readonly AlarmTableColumn[] = [
 		{ id: 'name', label: 'Nome' },
-		{ id: 'apartment', label: 'Appartamento' },
-		{ id: 'device', label: 'Dispositivo' },
+		{ id: 'position', label: 'Posizione' },
 		{ id: 'priority', label: 'Priorita' },
 		{ id: 'threshold', label: 'Soglia' },
 		{ id: 'armingTime', label: 'Orario attivazione' },
@@ -53,14 +50,10 @@ export class AlarmConfigPageComponent implements OnInit {
 	public readonly pendingDelete = signal<{ id: string; name: string } | null>(null);
 	public readonly pendingToggleRuleId = signal<string | null>(null);
 
-	public readonly rows = computed(() => {
-		this.deviceCatalog.revision();
-		return this.tablePresenter.toRows(this.alarms());
-	});
+	public readonly rows = computed(() => this.tablePresenter.toRows(this.alarms()));
 
 	public ngOnInit(): void {
 		this.stateService.loadAlarmRules();
-		this.deviceCatalog.ensureLoaded().subscribe();
 	}
 
 	public onCreateNew(): void {

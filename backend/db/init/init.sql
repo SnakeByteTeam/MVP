@@ -140,7 +140,6 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     is_changed_when_used BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-
 CREATE TABLE IF NOT EXISTS alarm_event (
     id VARCHAR(255) PRIMARY KEY,
     alarm_rule_id VARCHAR(255),
@@ -153,6 +152,7 @@ CREATE TABLE IF NOT EXISTS alarm_event (
     FOREIGN KEY (user_id)
         REFERENCES "user"(id)
 );
+
 
 CREATE TABLE IF NOT EXISTS notification (
     id SERIAL PRIMARY KEY, 

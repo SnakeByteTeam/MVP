@@ -6,7 +6,6 @@ import { ThresholdOperator } from '../../../../core/alarm/models/threshold-opera
 import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
 import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import type { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
-import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 import { AlarmConfigFormComponent } from './alarm-config-form.component';
 
 describe('AlarmConfigFormComponent', () => {
@@ -23,10 +22,6 @@ describe('AlarmConfigFormComponent', () => {
         getApartmentByPlantId: vi.fn(),
     };
 
-    const deviceCatalogStub = {
-        registerApartment: vi.fn(),
-    };
-
     const existingRule: AlarmRule = {
         id: 'alarm-42',
         name: 'Porta aperta',
@@ -37,6 +32,7 @@ describe('AlarmConfigFormComponent', () => {
         dearmingTime: '19:00:00',
         isArmed: true,
         deviceId: 'sensor-9',
+        position: 'Appartamento 2 - Ingresso - Sensore porta',
     };
 
     const validFormValue = {
@@ -97,7 +93,6 @@ describe('AlarmConfigFormComponent', () => {
             providers: [
                 { provide: WardApiService, useValue: wardApiStub },
                 { provide: ApartmentApiService, useValue: apartmentApiStub },
-                { provide: AlarmDeviceCatalogService, useValue: deviceCatalogStub },
             ],
         }).compileComponents();
 
@@ -185,9 +180,23 @@ describe('AlarmConfigFormComponent', () => {
         component.form.controls.plantId.setValue('plant-1');
 
         expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
-        expect(deviceCatalogStub.registerApartment).toHaveBeenCalledTimes(1);
         expect(component.form.controls.deviceId.enabled).toBe(true);
         expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+    });
+
+    it('in create mode non mostra il campo posizione read-only', () => {
+        setInputs('create', null);
+
+        const positionInput = fixture.nativeElement.querySelector('#position');
+        expect(positionInput).toBeNull();
+    });
+
+    it('in edit mode mostra il campo posizione read-only valorizzato', () => {
+        setInputs('edit', existingRule);
+
+        const positionInput = fixture.nativeElement.querySelector('#position') as HTMLInputElement | null;
+        expect(positionInput).not.toBeNull();
+        expect(positionInput?.value).toBe('Appartamento 2 - Ingresso - Sensore porta');
     });
 
     it('onSubmit emette submittedForm in create mode con form valido', () => {

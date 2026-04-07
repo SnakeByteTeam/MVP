@@ -175,6 +175,7 @@ describe('AlarmRuleRequestMapper', () => {
             armingTime: '08:00:00',
             dearmingTime: '18:30:00',
             isArmed: true,
+            position: 'Appartamento 1 - Camera - Sensore umidita',
         };
 
         const result = mapper.toToggleRequest(rule, false);
@@ -201,6 +202,7 @@ describe('AlarmRuleRequestMapper', () => {
             armingTime: '00:00:00',
             dearmingTime: '23:59:00',
             isArmed: true,
+            position: 'Appartamento 2 - Soggiorno - Sensore temperatura',
         };
 
         expect(() => mapper.toToggleRequest(invalidRule, true)).toThrow('Campo obbligatorio mancante: name');
@@ -217,6 +219,7 @@ describe('AlarmRuleRequestMapper', () => {
             armingTime: '05:00:00',
             dearmingTime: '23:00:00',
             isArmed: true,
+            position: 'Appartamento 3 - Ingresso - Sensore temperatura',
         };
 
         const result = mapper.toToggleRequest(rule, false);

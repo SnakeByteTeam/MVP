@@ -27,6 +27,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '18:00:00',
             isArmed: true,
             deviceId: 'device-1',
+            position: 'Appartamento 1 - Soggiorno - Sensore temperatura',
         };
 
         expect(mapper.toFormValue(rule)).toEqual({
@@ -53,6 +54,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '23:59:00',
             isArmed: false,
             deviceId: 'device-2',
+            position: 'Appartamento 1 - Ingresso - Sensore porta',
         };
 
         expect(mapper.toFormValue(rule)).toEqual({
@@ -79,6 +81,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '19:30:00',
             isArmed: true,
             deviceId: 'device-3',
+            position: 'Appartamento 2 - Camera - Sensore finestra',
         };
 
         expect(mapper.toFormValue(rule)).toEqual({
@@ -105,6 +108,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '22:00:00',
             isArmed: true,
             deviceId: 'device-4',
+            position: 'Appartamento 3 - Cucina - Sensore temperatura',
         };
 
         expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.GREATER_THAN_OR_EQUAL);
@@ -121,6 +125,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '22:00:00',
             isArmed: false,
             deviceId: 'device-5',
+            position: 'Appartamento 3 - Camera - Sensore temperatura',
         };
 
         expect(mapper.toFormValue(rule).thresholdOperator).toBe(ThresholdOperator.LESS_THAN_OR_EQUAL);
@@ -137,6 +142,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '23:59:00',
             isArmed: true,
             deviceId: 'device-6',
+            position: 'Appartamento 4 - Bagno - Sensore custom',
         };
 
         expect(() => mapper.toFormValue(rule)).toThrow('Operatore soglia non supportato: !=');

@@ -35,12 +35,7 @@
             <td class="px-5 py-3.5 align-middle text-sm font-semibold text-slate-900">
                 {{ row.name }}
             </td>
-            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.apartment }}</td>
-            <td class="px-5 py-3.5 align-middle">
-                <span
-                    class="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-medium text-slate-700">{{
-                    row.device }}</span>
-            </td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.position }}</td>
             <td class="px-5 py-3.5 align-middle">
                 <app-alarm-priority-indicator [priority]="row.priority" />
             </td>

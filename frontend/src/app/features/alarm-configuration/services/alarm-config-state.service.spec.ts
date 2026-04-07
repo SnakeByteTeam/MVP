@@ -34,6 +34,7 @@ describe('AlarmConfigStateService', () => {
         dearmingTime: '20:00:00',
         isArmed: true,
         deviceId: 'dev-1',
+        position: 'Appartamento 1 - Soggiorno - Sensore temperatura',
     };
 
     const alarmB: AlarmRule = {
@@ -46,6 +47,7 @@ describe('AlarmConfigStateService', () => {
         dearmingTime: '23:59:00',
         isArmed: false,
         deviceId: 'dev-2',
+        position: 'Appartamento 2 - Camera - Sensore umidita',
     };
 
     const validForm: AlarmConfigFormValue = {
@@ -62,6 +64,7 @@ describe('AlarmConfigStateService', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        apiStub.getAlarmRules.mockReturnValue(of([]));
 
         TestBed.configureTestingModule({
             providers: [
@@ -129,9 +132,10 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('createAlarmRule mappa il payload, chiama API e aggiunge il nuovo allarme allo stato', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA]));
         service.loadAlarmRules();
 
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA, alarmB]));
         apiStub.createAlarmRule.mockReturnValue(of(alarmB));
 
         let created: AlarmRule | null = null;
@@ -200,6 +204,7 @@ describe('AlarmConfigStateService', () => {
             'Dati del form non validi per la creazione dell\'allarme.'
         );
 
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmB]));
         apiStub.createAlarmRule.mockReturnValueOnce(of(alarmB));
         service.createAlarmRule(validForm).subscribe();
 
@@ -208,10 +213,11 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('updateAlarmRule mantiene il nome originale nel payload update e sostituisce l allarme nello stato', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA, alarmB]));
         service.loadAlarmRules();
 
         const updatedAlarm: AlarmRule = { ...alarmA, name: 'Temperatura reparto', thresholdValue: '35' };
+        apiStub.getAlarmRules.mockReturnValueOnce(of([updatedAlarm, alarmB]));
         apiStub.updateAlarmRule.mockReturnValue(of(updatedAlarm));
 
         service.updateAlarmRule('alarm-1', validForm).subscribe();
@@ -249,7 +255,7 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('updateAlarmRule in errore API imposta messaggio e mantiene lo stato invariato', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA, alarmB]));
         service.loadAlarmRules();
 
         apiStub.updateAlarmRule.mockReturnValue(throwError(() => new Error('update failed')));
@@ -297,7 +303,7 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('updateAlarmRule sostituisce la riga locale anche se il backend ritorna un nuovo id', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA, alarmB]));
         service.loadAlarmRules();
 
         const updatedWithNewId: AlarmRule = {
@@ -305,6 +311,7 @@ describe('AlarmConfigStateService', () => {
             id: 'alarm-1-v2',
             isArmed: false,
         };
+        apiStub.getAlarmRules.mockReturnValueOnce(of([updatedWithNewId, alarmB]));
         apiStub.updateAlarmRule.mockReturnValue(of(updatedWithNewId));
 
         service.updateAlarmRule('alarm-1', validForm).subscribe();
@@ -317,10 +324,11 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('toggleEnabled aggiorna enabled costruendo payload dai dati locali', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA]));
         service.loadAlarmRules();
 
         const toggledAlarm: AlarmRule = { ...alarmA, isArmed: false };
+        apiStub.getAlarmRules.mockReturnValueOnce(of([toggledAlarm]));
         apiStub.updateAlarmRule.mockReturnValue(of(toggledAlarm));
 
         service.toggleEnabled('alarm-1', false).subscribe();
@@ -340,7 +348,7 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('toggleEnabled su allarme assente non chiama API e imposta errore', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA]));
         service.loadAlarmRules();
 
         let emitted = false;
@@ -355,7 +363,7 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('toggleEnabled in errore API imposta messaggio e mantiene lo stato invariato', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA]));
         service.loadAlarmRules();
 
         apiStub.updateAlarmRule.mockReturnValue(throwError(() => new Error('toggle failed')));
@@ -372,7 +380,7 @@ describe('AlarmConfigStateService', () => {
     });
 
     it('toggleEnabled aggiorna subito lo stato locale anche se il backend ritorna un nuovo id', async () => {
-        apiStub.getAlarmRules.mockReturnValue(of([alarmA, alarmB]));
+        apiStub.getAlarmRules.mockReturnValueOnce(of([alarmA, alarmB]));
         service.loadAlarmRules();
 
         const toggledWithNewId: AlarmRule = {
@@ -380,6 +388,7 @@ describe('AlarmConfigStateService', () => {
             id: 'alarm-1-v2',
             isArmed: false,
         };
+        apiStub.getAlarmRules.mockReturnValueOnce(of([toggledWithNewId, alarmB]));
         apiStub.updateAlarmRule.mockReturnValue(of(toggledWithNewId));
 
         service.toggleEnabled('alarm-1', false).subscribe();

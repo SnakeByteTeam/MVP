@@ -34,14 +34,34 @@ describe('device-taxonomy', () => {
 		expect(resolved).toBe(DeviceType.THERMOSTAT);
 	});
 
-	it('falls back to light for unknown device signatures', () => {
+	it('infers entrance door from italian device name when raw type is ambiguous', () => {
+		const resolved = resolveDeviceType({
+			rawType: 'SF_Light',
+			rawName: 'Porta di Ingresso',
+			sfeTypes: ['SFE_Cmd_OnOff'],
+		});
+
+		expect(resolved).toBe(DeviceType.ENTRANCE_DOOR);
+	});
+
+	it('infers scenario devices from name instead of falling back to light', () => {
+		const resolved = resolveDeviceType({
+			rawType: 'SF_Unknown',
+			rawName: 'Nome scenario Stella',
+			sfeTypes: ['SFE_Cmd_DownKey_ActiveScene'],
+		});
+
+		expect(resolved).toBe(DeviceType.ALARM_BUTTON);
+	});
+
+	it('falls back to unknown for unknown device signatures', () => {
 		const resolved = resolveDeviceType({
 			rawType: 'SF_Unknown',
 			rawSubType: 'SS_Unknown',
 			sfeTypes: ['SFE_Unknown'],
 		});
 
-		expect(resolved).toBe(DeviceType.LIGHT);
+		expect(resolved).toBe(DeviceType.UNKNOWN);
 	});
 
 	it('returns readable label for known endpoint code', () => {
@@ -71,8 +91,8 @@ describe('device-taxonomy', () => {
 	});
 
 	it('tracks unknown endpoint codes discovered at runtime', () => {
-		void getEndpointLabel('SFE_Cmd_FutureFeature');
-		void getEndpointLabel('SFE_Cmd_CompletelyNewOne');
+		getEndpointLabel('SFE_Cmd_FutureFeature');
+		getEndpointLabel('SFE_Cmd_CompletelyNewOne');
 
 		expect(getDiscoveredUnmappedSfeCodes()).toContain('SFE_Cmd_FutureFeature');
 		expect(getDiscoveredUnmappedSfeCodes()).toContain('SFE_Cmd_CompletelyNewOne');
@@ -80,5 +100,9 @@ describe('device-taxonomy', () => {
 
 	it('returns expected device type label', () => {
 		expect(getDeviceTypeLabel(DeviceType.PRESENCE_SENSOR)).toBe('Sensore presenza');
+	});
+
+	it('returns expected fallback label for unknown device type', () => {
+		expect(getDeviceTypeLabel(DeviceType.UNKNOWN)).toBe('Sconosciuto');
 	});
 });

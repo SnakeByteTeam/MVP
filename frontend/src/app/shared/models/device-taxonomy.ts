@@ -8,6 +8,7 @@ interface DeviceTypeRule {
 export interface DeviceTypeResolutionInput {
 	readonly rawType?: string;
 	readonly rawSubType?: string;
+	readonly rawName?: string;
 	readonly sfeTypes?: ReadonlyArray<string | null | undefined>;
 }
 
@@ -15,8 +16,8 @@ const PRIMARY_DEVICE_TYPE_RULES: ReadonlyArray<DeviceTypeRule> = [
 	{ deviceType: DeviceType.THERMOSTAT, tokens: ['THERMOSTAT', 'HVAC', 'CLIMATE'] },
 	{ deviceType: DeviceType.FALL_SENSOR, tokens: ['FALL', 'MANDOWN'] },
 	{ deviceType: DeviceType.PRESENCE_SENSOR, tokens: ['PRESENCE', 'MOTION'] },
-	{ deviceType: DeviceType.ALARM_BUTTON, tokens: ['ALARM_BUTTON', 'PANIC_BUTTON', 'SOS_BUTTON'] },
-	{ deviceType: DeviceType.ENTRANCE_DOOR, tokens: ['DOOR', 'LOCK', 'GATE'] },
+	{ deviceType: DeviceType.ALARM_BUTTON, tokens: ['ALARM_BUTTON', 'PANIC_BUTTON', 'SOS_BUTTON', 'SCENARIO', 'SCENE'] },
+	{ deviceType: DeviceType.ENTRANCE_DOOR, tokens: ['DOOR', 'LOCK', 'GATE', 'PORTA'] },
 	{ deviceType: DeviceType.BLIND, tokens: ['BLIND', 'SHUTTER'] },
 ];
 
@@ -42,12 +43,13 @@ const SFE_DEVICE_TYPE_RULES: ReadonlyArray<DeviceTypeRule> = [
 ];
 
 const DEVICE_TYPE_LABELS: Readonly<Record<DeviceType, string>> = {
+	[DeviceType.UNKNOWN]: 'Sconosciuto',
 	[DeviceType.THERMOSTAT]: 'Termostato',
 	[DeviceType.FALL_SENSOR]: 'Sensore caduta',
 	[DeviceType.PRESENCE_SENSOR]: 'Sensore presenza',
 	[DeviceType.LIGHT]: 'Luce',
 	[DeviceType.ALARM_BUTTON]: 'Pulsante allarme',
-	[DeviceType.ENTRANCE_DOOR]: 'Porta ingresso',
+	[DeviceType.ENTRANCE_DOOR]: 'Controllo accesso',
 	[DeviceType.BLIND]: 'Tapparella',
 };
 
@@ -74,7 +76,7 @@ const ENDPOINT_LABELS: Readonly<Record<string, string>> = {
 const discoveredUnmappedSfeCodes = new Set<string>();
 
 export function resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType {
-	const normalizedRawValues = [input.rawType, input.rawSubType]
+	const normalizedRawValues = [input.rawType, input.rawSubType, input.rawName]
 		.map((value) => normalize(value))
 		.filter((value) => value.length > 0);
 
@@ -97,7 +99,7 @@ export function resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType 
 		return lightMatch;
 	}
 
-	return DeviceType.LIGHT;
+	return DeviceType.UNKNOWN;
 }
 
 export function getDeviceTypeLabel(type: DeviceType): string {
@@ -150,12 +152,14 @@ function humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): stri
 		return rawValue;
 	}
 
-	const cmdMatch = rawValue.match(/^SFE_(?:Cmd|CMD)_(.+)$/);
+	const cmdPattern = /^SFE_(?:Cmd|CMD)_(.+)$/;
+	const cmdMatch = cmdPattern.exec(rawValue);
 	if (cmdMatch?.[1]) {
 		return `Comando ${humanizeSfeSuffix(cmdMatch[1])}`;
 	}
 
-	const stateMatch = rawValue.match(/^SFE_(?:State|STATE)_(.+)$/);
+	const statePattern = /^SFE_(?:State|STATE)_(.+)$/;
+	const stateMatch = statePattern.exec(rawValue);
 	if (stateMatch?.[1]) {
 		return `Stato ${humanizeSfeSuffix(stateMatch[1])}`;
 	}
@@ -174,8 +178,8 @@ function humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): stri
 function humanizeSfeSuffix(value: string): string {
 	return value
 		.replaceAll('_', ' ')
-		.replace(/([a-z])([A-Z])/g, '$1 $2')
-		.replace(/\s+/g, ' ')
+		.replaceAll(/([a-z])([A-Z])/g, '$1 $2')
+		.replaceAll(/\s+/g, ' ')
 		.trim()
 		.toLowerCase();
 }

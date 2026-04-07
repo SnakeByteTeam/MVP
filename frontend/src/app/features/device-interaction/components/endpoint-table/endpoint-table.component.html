@@ -30,7 +30,12 @@
               <tbody>
                 @for (row of group.rows; track trackByRow($index, row)) {
                   <tr>
-                    <td>{{ row.deviceName }}</td>
+                    <td>
+                      <div class="endpoint-table__device-cell">
+                        <span>{{ row.deviceName }}</span>
+                        <span class="endpoint-table__device-meta">ID {{ row.deviceId }}</span>
+                      </div>
+                    </td>
                     <td>{{ getTypeLabel(row.deviceType) }}</td>
                     <td [attr.title]="row.datapointName">{{ getEndpointLabel(row) }}</td>
                     <td>

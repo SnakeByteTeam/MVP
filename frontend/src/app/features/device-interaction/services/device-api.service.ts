@@ -92,6 +92,7 @@ export class DeviceApiService {
 					type: resolveDeviceType({
 						rawType: device.type,
 						rawSubType: device.subType,
+						rawName: device.name,
 						sfeTypes: mappedDatapoints.map((datapoint) => datapoint.sfeType),
 					}),
 					status: device.type ? 'ONLINE' : 'UNKNOWN',
@@ -123,6 +124,7 @@ export class DeviceApiService {
 				const resolvedDeviceType = resolveDeviceType({
 					rawType: device.type,
 					rawSubType: device.subType,
+					rawName: device.name,
 					sfeTypes: mappedDatapoints.map((datapoint) => datapoint.sfeType),
 				});
 

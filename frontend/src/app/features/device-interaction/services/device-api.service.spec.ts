@@ -146,4 +146,50 @@ describe('DeviceApiService', () => {
       deviceType: 'THERMOSTAT',
     });
   });
+
+  it('non mappa come luce una porta di ingresso con tipo ambiguo', async () => {
+    const rowsPromise = firstValueFrom(service.getWritableEndpointRows());
+
+    const request = httpMock.expectOne('http://localhost:3000/plant?plantid=plant-1');
+    expect(request.request.method).toBe('GET');
+
+    request.flush({
+      id: 'plant-1',
+      name: 'Plant Demo',
+      rooms: [
+        {
+          id: 'room-entry',
+          name: 'Ingresso',
+          devices: [
+            {
+              id: 'device-entry-door',
+              name: 'Porta di Ingresso',
+              type: 'SF_Light',
+              subType: 'SS_Unknown',
+              datapoints: [
+                {
+                  id: 'dp-entry-1',
+                  name: 'SFE_Cmd_OnOff',
+                  readable: true,
+                  writable: true,
+                  valueType: 'string',
+                  enum: ['Off', 'On'],
+                  sfeType: 'SFE_Cmd_OnOff',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const rows = await rowsPromise;
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      deviceId: 'device-entry-door',
+      datapointSfeType: 'SFE_Cmd_OnOff',
+      deviceType: 'ENTRANCE_DOOR',
+    });
+  });
 });

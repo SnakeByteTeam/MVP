@@ -75,6 +75,17 @@
   color: #0f172a;
 }
 
+.endpoint-table__device-cell {
+  display: grid;
+  gap: 0.14rem;
+}
+
+.endpoint-table__device-meta {
+  font-size: 0.76rem;
+  color: #64748b;
+  letter-spacing: 0.01em;
+}
+
 .endpoint-table__select {
   min-width: 10rem;
   font-size: 1rem;

@@ -178,6 +178,7 @@ export class ApartmentApiService {
 					type: resolveDeviceType({
 						rawType: device.type,
 						rawSubType: device.subType,
+						rawName: device.name,
 						sfeTypes: (device.datapoints ?? []).map((datapoint) => datapoint.sfeType),
 					}),
 					id: device.id,

@@ -38,8 +38,14 @@ export class AlarmRulesRepositoryImpl
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
-      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
-      WHERE id = $1`,
+      LEFT JOIN LATERAL (
+        SELECT device
+        FROM jsonb_array_elements(room->'devices') AS device
+        WHERE device->>'id' = ar.device_id
+      ) d ON true
+      WHERE d.device IS NOT NULL
+      AND id = $1
+      ORDER BY ar.created_at DESC;`,
       [id],
     );
     return result.rows.length > 0 ? result.rows[0] : null;
@@ -92,8 +98,13 @@ export class AlarmRulesRepositoryImpl
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
-      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
-      ORDER BY ar.created_at DESC`,
+      LEFT JOIN LATERAL (
+        SELECT device
+        FROM jsonb_array_elements(room->'devices') AS device
+        WHERE device->>'id' = ar.device_id
+      ) d ON true
+      WHERE d.device IS NOT NULL
+      ORDER BY ar.created_at DESC;`,
     );
     return result.rows;
   }

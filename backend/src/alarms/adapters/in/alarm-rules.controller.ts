@@ -89,7 +89,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: GetAlarmRuleByIdResDto })
-  @UseGuards(UserGuard, AdminGuard)
+  //@UseGuards(UserGuard, AdminGuard)
   @Get(':id')
   async getAlarmRuleById(
     @Param('id') id: string,

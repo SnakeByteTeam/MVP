@@ -178,6 +178,13 @@ export class AlarmConfigFormComponent {
 	}
 
 	private loadAllPlants(): Observable<WardPlantDto[]> {
+		return this.apartmentApi.getAllPlants().pipe(
+			map((plants) => this.toWardPlants(plants)),
+			catchError(() => this.loadAllPlantsFromWardRelationships()),
+		);
+	}
+
+	private loadAllPlantsFromWardRelationships(): Observable<WardPlantDto[]> {
 		return forkJoin({
 			availablePlants: this.wardApi.getAvailablePlants().pipe(catchError(() => of([] as WardPlantDto[]))),
 			wards: this.wardApi.getWards().pipe(catchError(() => of([]))),
@@ -198,6 +205,24 @@ export class AlarmConfigFormComponent {
 				);
 			})
 		);
+	}
+
+	private toWardPlants(plants: ReadonlyArray<{ id: string; name: string }>): WardPlantDto[] {
+		const uniquePlants = new Map<string, WardPlantDto>();
+
+		for (const plant of plants) {
+			if (typeof plant.id !== 'string' || !plant.id.trim()) {
+				continue;
+			}
+
+			const normalizedName = typeof plant.name === 'string' && plant.name.trim() ? plant.name : plant.id;
+			uniquePlants.set(plant.id, {
+				id: plant.id,
+				name: normalizedName,
+			});
+		}
+
+		return Array.from(uniquePlants.values()).sort((first, second) => first.name.localeCompare(second.name));
 	}
 
 	private mergePlants(availablePlants: WardPlantDto[], assignedPlants: WardPlantDto[]): WardPlantDto[] {

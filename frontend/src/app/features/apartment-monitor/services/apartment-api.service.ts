@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, switchMap, take, tap } from 'rxjs';
+import { Observable, map, switchMap, take, tap } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
@@ -21,9 +21,7 @@ export class ApartmentApiService {
 	private readonly authService = inject(InternalAuthService);
 	private readonly wardRealtimeCache = inject(WardRealtimeCacheService);
 	private readonly plantEndpoint = `${this.baseUrl}/plant`;
-	private readonly legacyPlantEndpoint = `${this.baseUrl}/api/plant`;
 	private readonly apartmentsEndpoint = `${this.baseUrl}/apartments`;
-	private readonly legacyApartmentsEndpoint = `${this.baseUrl}/api/apartments`;
 
 	public getCurrentApartment(): Observable<Apartment> {
 		return this.getAvailablePlants().pipe(
@@ -55,50 +53,30 @@ export class ApartmentApiService {
 	public getApartmentByPlantId(plantId: string): Observable<Apartment> {
 		const query = `?plantid=${encodeURIComponent(plantId)}`;
 
-		return this.http
-			.get<PlantDto>(`${this.plantEndpoint}${query}`)
-			.pipe(
-				catchError(() => this.http.get<PlantDto>(`${this.legacyPlantEndpoint}${query}`)),
-				map((plant) => this.mapPlantToApartment(plant)),
-			);
+		return this.http.get<PlantDto>(`${this.plantEndpoint}${query}`).pipe(
+			map((plant) => this.mapPlantToApartment(plant)),
+		);
 	}
 
 	public getAllPlants(): Observable<PlantDto[]> {
-		return this.http
-			.get<unknown>(`${this.plantEndpoint}/all`)
-			.pipe(
-				catchError(() =>
-					this.http.get<unknown>(`${this.legacyPlantEndpoint}/all`),
-				),
-				map((response) => this.extractPlants(response)),
-				tap((plants) => {
-					this.cacheWardIdsForCurrentUser(plants);
-				}),
-			);
+		return this.http.get<unknown>(`${this.plantEndpoint}/all`).pipe(
+			map((response) => this.extractPlants(response)),
+			tap((plants) => {
+				this.cacheWardIdsForCurrentUser(plants);
+			}),
+		);
 	}
 
 	public enableApartment(apartmentId: string): Observable<void> {
 		const encodedApartmentId = encodeURIComponent(apartmentId);
 
-		return this.http
-			.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/enable`, {})
-			.pipe(
-				catchError(() =>
-					this.http.patch<void>(`${this.legacyApartmentsEndpoint}/${encodedApartmentId}/enable`, {}),
-				),
-			);
+		return this.http.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/enable`, {});
 	}
 
 	public disableApartment(apartmentId: string): Observable<void> {
 		const encodedApartmentId = encodeURIComponent(apartmentId);
 
-		return this.http
-			.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/disable`, {})
-			.pipe(
-				catchError(() =>
-					this.http.patch<void>(`${this.legacyApartmentsEndpoint}/${encodedApartmentId}/disable`, {}),
-				),
-			);
+		return this.http.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/disable`, {});
 	}
 
 	public setActivePlantId(plantId: string): void {

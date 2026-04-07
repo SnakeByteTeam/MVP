@@ -1,18 +1,25 @@
 .endpoint-table__groups {
-  gap: 0.9rem;
+  display: grid;
+  gap: 1.35rem;
 }
 
 .endpoint-table__group {
-  border-color: rgba(245, 158, 11, 0.3);
-  box-shadow: 0 12px 24px -22px rgba(245, 158, 11, 0.55);
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
 .endpoint-table__room-header {
-  margin-bottom: 0.75rem;
-  border: 1px solid rgba(217, 119, 6, 0.36);
-  border-radius: 0.78rem;
-  background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
-  padding: 0.55rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fcd34d;
+  padding: 1rem 1.25rem;
 }
 
 .endpoint-table__room-header h3,
@@ -21,25 +28,25 @@
 }
 
 .endpoint-table__room-eyebrow {
-  font-size: 0.84rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #7c2d12;
+  color: #64748b;
 }
 
 .endpoint-table__room-header h3 {
-  margin-top: 0.15rem;
-  font-size: clamp(1.16rem, 1.55vw, 1.34rem);
-  font-family: var(--care-font-body);
+  margin-top: 0.1rem;
+  font-size: 0.95rem;
+  font-family: var(--care-font-display);
   font-weight: 700;
   line-height: 1.25;
-  color: #1f2937;
+  color: #0f172a;
 }
 
 .endpoint-table__wrapper {
   overflow-x: auto;
-  padding-top: 0.35rem;
+  padding: 0;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -51,19 +58,20 @@
 
 .endpoint-table__table thead th {
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.69rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #64748b;
-  padding: 0.65rem 0.7rem;
-  border-bottom: 1px solid #dbe3ec;
+  color: #94a3b8;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .endpoint-table__table tbody td {
-  padding: 0.72rem 0.7rem;
+  padding: 0.75rem 1.25rem;
   vertical-align: middle;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 1.01rem;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 0.94rem;
   color: #0f172a;
 }
 

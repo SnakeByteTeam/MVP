@@ -1,0 +1,21 @@
+.ward-management-page {
+	gap: 1.15rem;
+}
+
+.col-separator {
+	border-right: 1px solid #e2e8f0;
+}
+
+.col-scroll {
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+}
+
+.col-scroll::-webkit-scrollbar {
+	width: 4px;
+}
+
+.col-scroll::-webkit-scrollbar-thumb {
+	background: #cbd5e1;
+	border-radius: 999px;
+}

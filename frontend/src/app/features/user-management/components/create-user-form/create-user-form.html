@@ -22,7 +22,7 @@
 
             @if (!isOpen()) {
             <button type="button" (click)="requestOpen()"
-                class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-900 bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 active:scale-[0.98]">
+                class="care-btn care-btn--compact px-3.5 shadow-sm border-slate-900 bg-slate-900 text-white hover:border-slate-800 hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">
                 <svg class="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -31,7 +31,7 @@
             </button>
             } @else {
             <button type="button" (click)="requestClose()"
-                class="cursor-pointer rounded-lg border border-red-600 bg-red-500 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-600 hover:border-red-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 active:scale-[0.98]">
+                class="care-btn care-btn--danger care-btn--compact px-3.5 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
                 Chiudi
             </button>
             }
@@ -163,7 +163,7 @@
 
         <!-- Submit -->
         <button type="submit" [disabled]="form.invalid"
-            class="group flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-600 bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-500 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none">
+            class="care-btn care-btn--primary group flex w-full items-center justify-center gap-2 px-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
             <svg class="h-4 w-4 transition-transform group-hover:scale-110" fill="none"
                 viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round"

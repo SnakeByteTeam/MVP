@@ -303,7 +303,7 @@ describe('AlarmPageManagementComponent', () => {
       'button[aria-label="Pagina successiva allarmi attivi"]'
     ) as HTMLButtonElement | null;
 
-    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 3');
+    expect(nativeElement.querySelector('.care-pagination__status')?.textContent).toContain('Pagina 3');
     expect(previousButton?.disabled).toBe(false);
     expect(nextButton?.disabled).toBe(true);
 

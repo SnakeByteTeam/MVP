@@ -1,53 +1,7 @@
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
-    rel="stylesheet">
-
-<style>
-    :root {
-        --font-display: 'Syne', sans-serif;
-        --font-body: 'DM Sans', sans-serif;
-    }
-
-    * {
-        font-family: var(--font-body);
-    }
-
-    .font-display {
-        font-family: var(--font-display);
-    }
-
-    .dot-grid {
-        background-image: radial-gradient(circle, #cbd5e1 1px, transparent 1px);
-        background-size: 22px 22px;
-    }
-
-    /* Finder-style column separator */
-    .col-separator {
-        border-right: 1px solid #e2e8f0;
-    }
-
-    /* Scrollbar */
-    .col-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: #cbd5e1 transparent;
-    }
-
-    .col-scroll::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .col-scroll::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 999px;
-    }
-</style>
-
-<section aria-label="Gestione reparti" class="dot-grid flex min-h-screen flex-col gap-5 bg-slate-100 p-5 lg:p-8">
+<section aria-label="Gestione reparti" class="ward-management-page care-page care-dot-grid sidebar-page">
 
     <!-- Page Header -->
-    <header class="flex flex-wrap items-end justify-between gap-4">
+    <header class="care-page__hero">
         <div class="flex items-center gap-4">
             <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 shadow-lg">
                 <svg class="h-5 w-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
@@ -57,18 +11,18 @@
                 </svg>
             </div>
             <div>
-                <h1 class="font-display text-2xl font-bold tracking-tight text-slate-900">Gestione Reparti</h1>
-                <p class="mt-0.5 text-sm text-slate-500">Navigazione a colonne: Reparti → Appartamenti → Operatori.</p>
+                <p class="care-eyebrow">Organizzazione</p>
+                <h1 class="care-title">Gestione reparti</h1>
+                <p class="care-subtitle">Navigazione a colonne: Reparti → Appartamenti → Operatori.</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <div
-                class="flex items-center gap-2 rounded-full border border-slate-300 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
-                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            <div class="care-page__header-badge">
+                <span class="care-page__header-badge-dot"></span>
                 Sistema attivo
             </div>
             <button type="button" (click)="onCreateWard()"
-                class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-amber-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400 active:scale-[0.98]">
+                class="care-btn care-btn--primary px-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
@@ -173,7 +127,7 @@
                 class="flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3">
                 <span class="font-display text-xs font-bold uppercase tracking-widest text-slate-400">Reparti</span>
                 <button type="button" (click)="onCreateWard()" aria-label="Nuovo reparto"
-                    class="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-amber-300 text-slate-900 transition hover:bg-amber-200">
+                    class="care-btn care-btn--primary care-btn--icon care-btn--compact h-6 w-6">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
@@ -223,7 +177,7 @@
                     </div>
                     <div class="flex shrink-0 items-center gap-1.5">
                         <button type="button" (click)="onEditWard(activeWard)"
-                            class="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+                            class="care-btn care-btn--neutral care-btn--icon care-btn--compact h-7 w-7"
                             aria-label="Modifica reparto">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
@@ -233,7 +187,7 @@
                             <span class="sr-only">Modifica</span>
                         </button>
                         <button type="button" (click)="onDeleteWard(activeWard.id)"
-                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-400 transition hover:border-red-200 hover:bg-red-100 hover:text-red-600"
+                            class="care-btn care-btn--danger care-btn--icon care-btn--compact h-7 w-7"
                             aria-label="Elimina reparto">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
                                 stroke="currentColor">
@@ -243,7 +197,7 @@
                             <span class="sr-only">Elimina</span>
                         </button>
                         <button type="button" (click)="onAssignPlant(activeWard.id)"
-                            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-amber-300 text-slate-900 transition hover:bg-amber-200"
+                            class="care-btn care-btn--primary care-btn--icon care-btn--compact h-7 w-7"
                             aria-label="Assegna appartamento">
                             <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3"
                                 stroke="currentColor">
@@ -287,8 +241,8 @@
                                 (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
                                 aria-label="Rimuovi appartamento"
                                 [class]="selectedApartmentId() === apartment.id
-                            ? 'flex h-8 w-8 cursor-pointer shrink-0 items-center justify-center rounded-full border border-red-300 bg-red-100 text-red-700 transition hover:bg-red-200'
-                            : 'flex h-8 w-8 cursor-pointer shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-500 transition hover:bg-red-100 hover:text-red-700'">
+                            ? 'care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0 border-red-300 bg-red-600 text-white'
+                            : 'care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0'">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -328,7 +282,7 @@
                         <h2 class="mt-0.5 truncate text-sm font-semibold text-slate-800">{{ activeWard.name }}</h2>
                     </div>
                     <button type="button" (click)="onAssignOperator(activeWard.id)"
-                        class="flex h-7 w-7 cursor-pointer shrink-0 items-center justify-center rounded-lg bg-amber-300 text-slate-900 transition hover:bg-amber-200"
+                        class="care-btn care-btn--primary care-btn--icon care-btn--compact h-7 w-7"
                         aria-label="Aggiungi operatore">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -366,7 +320,7 @@
                             <button type="button"
                                 (click)="onRemoveOperator({ wardId: activeWard.id, userId: operator.id })"
                                 aria-label="Rimuovi operatore"
-                                class="flex h-8 w-8 cursor-pointer shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-50 text-red-500 transition hover:bg-red-100 hover:text-red-700">
+                                class="care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

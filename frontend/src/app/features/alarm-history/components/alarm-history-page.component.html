@@ -1,14 +1,14 @@
-<section class="alarm-management-page min-h-screen bg-slate-100 p-5 lg:p-8">
-    <header class="mb-5 flex flex-wrap items-end justify-between gap-4">
+<section class="alarm-management-page care-page care-dot-grid sidebar-page">
+    <header class="care-page__hero">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Storico allarmi</h1>
-            <p class="mt-0.5 text-sm text-slate-500">Visualizza le informazioni degli allarmi gestiti.</p>
+            <p class="care-eyebrow">Allarmi</p>
+            <h1 class="care-title">Storico allarmi</h1>
+            <p class="care-subtitle">Visualizza le informazioni degli allarmi gestiti.</p>
         </div>
 
         @if (rows().length > 0) {
-        <span
-            class="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+        <span class="care-page__header-badge">
+            <span class="care-page__header-badge-dot"></span>
             {{ rows().length }} in tabella
         </span>
         }
@@ -50,14 +50,13 @@
         }
     </app-alarm-table-shell>
 
-    <nav aria-label="Navigazione pagine storico allarmi"
-        class="alarm-pagination mt-4 flex items-center justify-end gap-3">
-        <button type="button" class="alarm-pagination__button" [disabled]="!canGoPrevious()" (click)="onPreviousPage()"
+    <nav aria-label="Navigazione pagine storico allarmi" class="care-pagination">
+        <button type="button" class="care-pagination__button" [disabled]="!canGoPrevious()" (click)="onPreviousPage()"
             aria-label="Pagina precedente storico allarmi">
             Precedente
         </button>
-        <span class="alarm-pagination__status" aria-live="polite">Pagina {{ currentPage() }} </span>
-        <button type="button" class="alarm-pagination__button" [disabled]="!canGoNext()" (click)="onNextPage()"
+        <span class="care-pagination__status" aria-live="polite">Pagina {{ currentPage() }} </span>
+        <button type="button" class="care-pagination__button" [disabled]="!canGoNext()" (click)="onNextPage()"
             aria-label="Pagina successiva storico allarmi">
             Successiva
         </button>

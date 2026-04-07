@@ -17,4 +17,5 @@ export class NotificationPageComponent {
   private readonly notificationService = inject(NotificationService);
 
   public readonly vm$: Observable<NotificationListVm> = this.notificationService.vm$;
+  public readonly skeletonRows = [0, 1, 2];
 }

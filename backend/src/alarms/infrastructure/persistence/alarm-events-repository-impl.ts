@@ -109,14 +109,15 @@ export class AlarmEventsRepositoryImpl
     const result = await this.pool.query(
       `SELECT 
         ae.id,
-        (p.data->>'name') || ' - ' || (room->>'name') AS room_name,
+        p.data->>'name' AS plant_name,
+        room->>'name' AS room_name,
         device->>'name' AS device_name,
         ar.device_id,
         ae.alarm_rule_id,
         ar.name AS alarm_name,
         ar.priority,
         ae.activation_time,
-        ae.resolution_time,
+        NULL as resolution_time,
         0 as user_id,
         '' as user_username
       FROM alarm_event ae
@@ -128,8 +129,7 @@ export class AlarmEventsRepositoryImpl
         ON wu.ward_id = p.ward_id AND wu.user_id = $1
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
       LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
-      LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
-      WHERE dp->>'id' = ar.device_id
+      WHERE device->>'id' = ar.device_id
       AND ae.resolution_time IS NULL
       AND (
         r.name = 'Amministratore' 

@@ -1,3 +1,27 @@
+@keyframes notification-preview-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notification-preview-item-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .notification-topbar-panel {
   position: fixed;
   top: 4.9rem;
@@ -11,6 +35,7 @@
   background: #ffffff;
   box-shadow: 0 24px 46px -30px rgba(15, 23, 42, 0.62);
   padding: 0.9rem;
+  animation: notification-preview-panel-enter 180ms ease-out both;
 }
 
 .notification-topbar-panel__header {
@@ -73,6 +98,31 @@
   border-radius: 0.75rem;
   padding: 0.55rem 0.65rem;
   background: #ffffff;
+  animation: notification-preview-item-enter 220ms ease-out both;
+}
+
+.notification-topbar-panel__item:nth-child(1) {
+  animation-delay: 24ms;
+}
+
+.notification-topbar-panel__item:nth-child(2) {
+  animation-delay: 48ms;
+}
+
+.notification-topbar-panel__item:nth-child(3) {
+  animation-delay: 72ms;
+}
+
+.notification-topbar-panel__item:nth-child(4) {
+  animation-delay: 96ms;
+}
+
+.notification-topbar-panel__item:nth-child(5) {
+  animation-delay: 120ms;
+}
+
+.notification-topbar-panel__item:nth-child(6) {
+  animation-delay: 144ms;
 }
 
 .notification-topbar-panel__item-header {
@@ -88,6 +138,13 @@
   font-weight: 600;
   color: #0f172a;
   line-height: 1.25;
+}
+
+.notification-topbar-panel__title-wrap {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .notification-topbar-panel__time {
@@ -124,5 +181,12 @@
 @media (max-width: 960px) {
   .notification-topbar-panel {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-topbar-panel,
+  .notification-topbar-panel__item {
+    animation: none;
   }
 }

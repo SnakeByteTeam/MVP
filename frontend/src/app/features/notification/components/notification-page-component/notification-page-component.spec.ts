@@ -85,6 +85,17 @@ describe('NotificationPageComponent', () => {
     expect(items[1].componentInstance.notification()).toEqual(notificationB);
   });
 
+  it('usa il singolare nel riepilogo quando unreadCount e 1', () => {
+    vmSubject.next({
+      notifications: [notificationA],
+      unreadCount: 1,
+    });
+    fixture.detectChanges();
+
+    const summary = fixture.nativeElement.querySelector('.notification-page__summary');
+    expect(summary.textContent).toContain('1 notifica non letta');
+  });
+
   it('aggiorna il DOM quando vm$ emette un nuovo snapshot coerente', () => {
     fixture.detectChanges();
 

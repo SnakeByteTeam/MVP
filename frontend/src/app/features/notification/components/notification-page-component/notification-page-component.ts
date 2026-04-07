@@ -26,4 +26,12 @@ export class NotificationPageComponent {
   public onClearAllNotifications(vm: NotificationListVm): void {
     this.notificationService.clearAllNotifications(vm.notifications);
   }
+
+  public unreadSummaryLabel(unreadCount: number): string {
+    if (unreadCount === 1) {
+      return '1 notifica non letta';
+    }
+
+    return `${unreadCount} notifiche non lette`;
+  }
 }

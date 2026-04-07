@@ -1,7 +1,7 @@
 
-import { Component, inject, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { NavItem } from '../../core/models/nav-item.model';
-import { Observable, take } from 'rxjs';
+import { Observable, Subject, take, takeUntil } from 'rxjs';
 import { NavService } from './services/nav.service';
 import { InternalAuthService } from '../../core/services/internal-auth.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
@@ -11,7 +11,8 @@ import { CommonModule } from '@angular/common';
 import { UserRole } from '../../core/models/user-role.enum';
 import { Router, RouterOutlet } from '@angular/router';
 import { UserInfo } from '../../core/models/user-info.model';
-import { NotificationBadgeComponent } from '../notification/components/notification-badge-component/notification-badge-component';
+import { NotificationEvent } from '../notification/models/notification-event.model';
+import { NotificationTopbarPanelComponent } from '../notification/components/notification-topbar-panel-component/notification-topbar-panel-component';
 import { MyVimarAccount } from '../my-vimar-integration/models/my-vimar-account.model';
 import { IVimarCloudApiService, VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
@@ -24,12 +25,12 @@ import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-m
         CommonModule,
         RouterOutlet,
         TopbarComponent,
-        NotificationBadgeComponent,
+        NotificationTopbarPanelComponent,
         SidebarComponent
     ],
     templateUrl: './main-layout.component.html',
     styleUrl: './main-layout.component.css'})
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
     public isCollapsed: boolean = true;
     public navItems!: NavItem[];
     public isProfilePanelOpen = false;
@@ -38,6 +39,9 @@ export class MainLayoutComponent implements OnInit {
     public vimarStatusError = '';
     public vimarAccount: MyVimarAccount | null = null;
     public showVimarAssociationWarning = false;
+    public isNotificationPanelOpen = false;
+    public realtimeToastMessage: string | null = null;
+    public realtimeToastKind: 'alert' | 'success' = 'alert';
 
     private readonly navService = inject(NavService);
     private readonly internalAuthService = inject(InternalAuthService);
@@ -46,7 +50,11 @@ export class MainLayoutComponent implements OnInit {
     private readonly router = inject(Router);
     private readonly myVimarService = inject(VIMAR_CLOUD_API_SERVICE, { optional: true }) as IVimarCloudApiService | null;
     public readonly unreadNotificationsCount$ = this.alarmStateService.getUnreadNotificationsCount$();
+    public readonly notifications$: Observable<NotificationEvent[]> = this.alarmStateService.getNotifications$();
     private readonly cdr = inject(ChangeDetectorRef);
+    private readonly destroy$ = new Subject<void>();
+    private toastTimer: ReturnType<typeof setTimeout> | null = null;
+    private latestRealtimeNotificationId: string | null = null;
 
     public currentUser : UserInfo = {
         username: '',
@@ -58,9 +66,11 @@ export class MainLayoutComponent implements OnInit {
     public activeAlarmCount$ : Observable<number> = this.alarmStateService.getActiveAlarmsCount$();
 
     public ngOnInit(): void{
+        this.bindRealtimeAlarmNotifications();
+
         this.internalAuthService
             .getCurrentUser$()
-            .pipe(take(1))
+            .pipe(take(1), takeUntil(this.destroy$))
             .subscribe((session) => {
                 if (!session) {
                     this.navItems = [];
@@ -86,11 +96,19 @@ export class MainLayoutComponent implements OnInit {
             });
     }
 
+    public ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+        this.clearToastTimer();
+    }
+
     public toggleSidebar(): void{
         this.isCollapsed = !this.isCollapsed;
     }
 
     public toggleProfilePanel(): void {
+        this.closeNotificationPanel();
+
         if (this.canOpenProfilePanel()) {
             this.isAdmin = true;
         } else {
@@ -112,6 +130,7 @@ export class MainLayoutComponent implements OnInit {
 
     public onNavItemSelected(route: string): void {
         this.closeProfilePanel();
+        this.closeNotificationPanel();
 
         if (route !== 'alarms/alarm-management') {
             return;
@@ -128,7 +147,22 @@ export class MainLayoutComponent implements OnInit {
         void this.router.navigate(['/vimar-link']);
     }
 
+    public toggleNotificationPanel(): void {
+        this.closeProfilePanel();
+        this.isNotificationPanelOpen = !this.isNotificationPanelOpen;
+    }
+
+    public closeNotificationPanel(): void {
+        this.isNotificationPanelOpen = false;
+    }
+
+    public openNotificationsArchive(): void {
+        this.closeNotificationPanel();
+        void this.router.navigate(['/notifications']);
+    }
+
     public logout(): void{
+        this.closeNotificationPanel();
         this.internalAuthService.logoutFromBackend().subscribe(() => {
             void this.router.navigate(['/auth/login']);
         });
@@ -137,6 +171,53 @@ export class MainLayoutComponent implements OnInit {
     public canOpenProfilePanel(): boolean {
         const role = this.internalAuthService.getRole() ?? this.currentUser.role;
         return role === UserRole.AMMINISTRATORE;
+    }
+
+    private bindRealtimeAlarmNotifications(): void {
+        this.alarmStateService
+            .getNotifications$()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe((notifications) => {
+                const latest = notifications[0];
+                if (!latest || latest.notificationId === this.latestRealtimeNotificationId) {
+                    return;
+                }
+
+                this.latestRealtimeNotificationId = latest.notificationId;
+
+                const normalizedTitle = latest.title.trim().toLowerCase();
+
+                if (normalizedTitle.includes('allarme in corso')) {
+                    this.showRealtimeToast("C'e un allarme in corso", 'alert');
+                    return;
+                }
+
+                if (normalizedTitle.includes('allarme risolto')) {
+                    this.showRealtimeToast('Allarme risolto', 'success');
+                }
+            });
+    }
+
+    private showRealtimeToast(message: string, kind: 'alert' | 'success'): void {
+        this.clearToastTimer();
+        this.realtimeToastMessage = message;
+        this.realtimeToastKind = kind;
+        this.cdr.markForCheck();
+
+        this.toastTimer = setTimeout(() => {
+            this.realtimeToastMessage = null;
+            this.cdr.markForCheck();
+            this.toastTimer = null;
+        }, 5000);
+    }
+
+    private clearToastTimer(): void {
+        if (!this.toastTimer) {
+            return;
+        }
+
+        clearTimeout(this.toastTimer);
+        this.toastTimer = null;
     }
 
     private loadVimarStatus(): void {

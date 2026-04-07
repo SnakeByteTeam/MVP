@@ -15,20 +15,20 @@ import { RouterModule } from '@angular/router';
 export class TopbarComponent {
     @Input() user!: UserInfo;
     @Input() isProfileActive = false;
+    @Input() isNotificationActive = false;
+    @Input() unreadNotificationsCount = 0;
     @Input() showVimarWarning = false;
     @Output() profileClicked = new EventEmitter<void>();
     @Output() logoutClicked = new EventEmitter<void>();
     @Output() hamburgerClicked = new EventEmitter<void>();
     @Output() notificationClicked = new EventEmitter<void>();
     breadcrumbs$: Observable<Breadcrumb[]>;
-    isNotificationActive = false;
 
     constructor(private readonly breadcrumbService: BreadcrumbService) {
         this.breadcrumbs$ = this.breadcrumbService.breadcrumbs$;
     }
 
     public onNotificationClick(): void {
-        this.isNotificationActive = !this.isNotificationActive;
         this.notificationClicked.emit();
     }
 

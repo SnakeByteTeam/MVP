@@ -12,6 +12,16 @@
         </div>
     </div>
 
+    @if (isEditMode()) {
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="position" class="font-semibold text-slate-700">Posizione:</label>
+        <div>
+            <input id="position" type="text" [value]="editPosition()" readonly
+                class="h-8 w-full rounded-md border border-slate-300 bg-slate-100 px-2 text-sm text-slate-700" />
+        </div>
+    </div>
+    }
+
     @if (isPlantSelectionVisible()) {
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
         <label for="plantId" class="font-semibold text-slate-700">Impianto:</label>
@@ -38,6 +48,7 @@
     </div>
     }
 
+    @if (!isEditMode()) {
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
         <label for="deviceId" class="font-semibold text-slate-700">Dispositivo:</label>
         <div>
@@ -72,6 +83,7 @@
             }
         </div>
     </div>
+    }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
         <label for="priority" class="font-semibold text-slate-700">Priorità:</label>

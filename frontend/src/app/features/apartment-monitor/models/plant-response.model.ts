@@ -25,5 +25,6 @@ export interface PlantRoomDto {
 export interface PlantDto {
 	id: string;
 	name: string;
+	wardId?: number;
 	rooms: PlantRoomDto[];
 }

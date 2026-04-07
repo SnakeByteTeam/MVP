@@ -10,4 +10,5 @@ export interface AlarmRule {
   dearmingTime: Date | string;
   isArmed: boolean;
   deviceId: string;
+  position: string;
 }

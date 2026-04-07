@@ -26,6 +26,9 @@ import {
 } from '../ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GET_WARD_ALARM_EVENT_PORT, type GetWardAlarmEventPort } from '../ports/out/get-ward-alarm-event.port';
+import { GetAlarmEventByIdUseCase } from '../ports/in/get-alarm-event-by-id-use-case.interface';
+import { GetAlarmEventByIdCmd } from '../commands/get-alarm-event-by-id-cmd';
+import { GET_ALARM_EVENT_BY_ID_PORT, GetAlarmEventByIdPort } from '../ports/out/get-alarm-event-by-id-port.interface';
 
 @Injectable()
 export class AlarmEventsService
@@ -33,6 +36,7 @@ export class AlarmEventsService
     GetAllAlarmEventsUseCase,
     GetAllManagedAlarmEventsByUserIdUseCase,
     GetAllUnmanagedAlarmEventsByUserIdUseCase,
+    GetAlarmEventByIdUseCase,
     ResolveAlarmEventUseCase
 {
   constructor(
@@ -41,6 +45,9 @@ export class AlarmEventsService
 
     @Inject(GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT)
     private readonly getAllUnmanagedAlarmEventsByUserIdPort: GetAllUnmanagedAlarmEventsByUserIdPort,
+
+    @Inject(GET_ALARM_EVENT_BY_ID_PORT)
+    private readonly getAlarmEventByIdPort: GetAlarmEventByIdPort,
 
     @Inject(GET_ALL_ALARM_EVENTS_PORT)
     private readonly getAllAlarmEventsPort: GetAllAlarmEventsPort,
@@ -53,6 +60,10 @@ export class AlarmEventsService
 
     private readonly emitter: EventEmitter2,
   ) {}
+
+  getAlarmEventById(req: GetAlarmEventByIdCmd): Promise<AlarmEvent | null> {
+    return this.getAlarmEventByIdPort.getAlarmEventById(req);
+  }
 
   async getAllAlarmEvents(req: GetAllAlarmEventsCmd): Promise<AlarmEvent[]> {
     return await this.getAllAlarmEventsPort.getAllAlarmEvents(req);

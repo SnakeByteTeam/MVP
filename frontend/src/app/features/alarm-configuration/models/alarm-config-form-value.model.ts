@@ -5,6 +5,7 @@ export interface AlarmConfigFormValue {
     name: string;
     plantId: string;
     deviceId: string;
+    datapointId?: string;
     priority: AlarmPriority | null;
     thresholdOperator: ThresholdOperator | null;
     thresholdValue: string;

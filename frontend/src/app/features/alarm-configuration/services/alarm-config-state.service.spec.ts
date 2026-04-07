@@ -54,6 +54,7 @@ describe('AlarmConfigStateService', () => {
         name: '  Nuovo allarme  ',
         plantId: 'plant-1',
         deviceId: 'dev-3',
+        datapointId: 'dp-3',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.EQUAL_TO,
         thresholdValue: '22',
@@ -146,6 +147,7 @@ describe('AlarmConfigStateService', () => {
         expect(apiStub.createAlarmRule).toHaveBeenCalledWith({
             name: 'Nuovo allarme',
             deviceId: 'dev-3',
+            datapointId: 'dp-3',
             plantId: 'plant-1',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
@@ -224,6 +226,7 @@ describe('AlarmConfigStateService', () => {
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
             name: 'Temperatura stanza',
+            datapointId: 'dp-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
@@ -293,6 +296,7 @@ describe('AlarmConfigStateService', () => {
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('missing-id', {
             name: 'Nome dal form',
+            datapointId: 'dp-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '>',
             thresholdValue: '44',
@@ -335,6 +339,7 @@ describe('AlarmConfigStateService', () => {
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
             name: alarmA.name,
+            datapointId: alarmA.datapointId,
             priority: alarmA.priority,
             thresholdOperator: alarmA.thresholdOperator,
             thresholdValue: alarmA.thresholdValue,

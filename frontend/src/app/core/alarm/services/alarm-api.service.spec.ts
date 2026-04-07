@@ -28,6 +28,7 @@ describe('AlarmApiService', () => {
         dearmingTime: '20:00:00',
         isArmed: true,
         deviceId: 'device-1',
+        position: 'Camera 101 - Sensore temperatura',
     };
 
     const activeAlarm: ActiveAlarm = {

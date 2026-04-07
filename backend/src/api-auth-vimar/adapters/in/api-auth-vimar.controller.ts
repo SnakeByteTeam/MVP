@@ -41,7 +41,10 @@ import {
   MyVimarAccountStatusDto,
   MyVimarDisconnectResDto,
 } from 'src/api-auth-vimar/infrastructure/dto/my-vimar-account-status.dto';
-import { GET_ACCOUNT_STATUS_USECASE, type GetAccountStatusUseCase } from 'src/api-auth-vimar/application/ports/in/get-account-status.usecase';
+import {
+  GET_ACCOUNT_STATUS_USECASE,
+  type GetAccountStatusUseCase,
+} from 'src/api-auth-vimar/application/ports/in/get-account-status.usecase';
 
 @ApiTags('auth')
 @Controller('my-vimar')
@@ -182,7 +185,7 @@ export class ApiAuthVimarController {
 
       await this.getTokensCallbackUseCase.getTokens(
         code,
-        Number(parsedState.userId)
+        Number(parsedState.userId),
       );
 
       return {
@@ -201,7 +204,10 @@ export class ApiAuthVimarController {
     }
   }
 
-  private parseState(state: string): { redirectUrl: string; userId: string | number } {
+  private parseState(state: string): {
+    redirectUrl: string;
+    userId: string | number;
+  } {
     let decodedState: string;
 
     try {

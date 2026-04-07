@@ -45,8 +45,12 @@ describe('NotificationsGateway', () => {
       .mockImplementation();
     (gateway as any).server = undefined;
 
-    await expect(gateway.notifyAlarmWard(1, {} as CheckAlarmRuleResDto)).resolves.toBeUndefined();
-    await expect(gateway.notifyAlarmResolution('event-1', 1)).resolves.toBeUndefined();
+    await expect(
+      gateway.notifyAlarmWard(1, {} as CheckAlarmRuleResDto),
+    ).resolves.toBeUndefined();
+    await expect(
+      gateway.notifyAlarmResolution('event-1', 1),
+    ).resolves.toBeUndefined();
 
     expect(loggerErrorSpy).toHaveBeenCalledTimes(2);
   });

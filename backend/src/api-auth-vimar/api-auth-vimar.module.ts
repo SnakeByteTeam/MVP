@@ -28,7 +28,6 @@ import { GET_ACCOUNT_STATUS_USECASE } from './application/ports/in/get-account-s
 import { READ_STATUS_PORT } from './application/ports/out/read-status.port';
 import { READ_STATUS_REPO_PORT } from './application/repository/read-status.repository';
 
-
 import { ApiAuthTokensService } from './application/services/api-auth-tokens.service';
 import { OAuthTicketService } from './application/services/oauth-ticket.service';
 import { TokenCacheImpl } from './infrastructure/persistence/tokens-cache.impl';
@@ -43,7 +42,6 @@ import { DeleteTokensFromRepoAdapter } from './adapters/out/delete-tokens-from-r
 import { OAuthTicketAdapter } from './adapters/out/oauth-ticket.adapter';
 import { JwtModule } from '@nestjs/jwt';
 import { ReadStatusAdapter } from './adapters/out/read-status.adapter';
-
 
 @Module({
   imports: [HttpModule, GuardModule, JwtModule],
@@ -70,11 +68,13 @@ import { ReadStatusAdapter } from './adapters/out/read-status.adapter';
     { provide: GETVALIDTOKENPORT, useClass: TokenService },
     { provide: READTOKENSFROMREPOPORT, useClass: ReadTokensFromRepoAdapter },
     { provide: REFRESHTOKENSPORT, useClass: RefreshTokensAdapter },
-    { provide: DELETETOKENSFROMREPOPORT, useClass: DeleteTokensFromRepoAdapter },
+    {
+      provide: DELETETOKENSFROMREPOPORT,
+      useClass: DeleteTokensFromRepoAdapter,
+    },
     { provide: GET_ACCOUNT_STATUS_USECASE, useClass: TokenService },
     { provide: READ_STATUS_PORT, useClass: ReadStatusAdapter },
-    { provide: READ_STATUS_REPO_PORT, useClass: TokenCacheImpl }
-
+    { provide: READ_STATUS_REPO_PORT, useClass: TokenCacheImpl },
   ],
   exports: [GETVALIDTOKENPORT],
 })

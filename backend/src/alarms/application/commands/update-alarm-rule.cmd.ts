@@ -10,5 +10,5 @@ export class UpdateAlarmRuleCmd {
     public readonly armingTime: string,
     public readonly dearmingTime: string,
     public readonly isArmed: boolean,
-  ) { }
+  ) {}
 }

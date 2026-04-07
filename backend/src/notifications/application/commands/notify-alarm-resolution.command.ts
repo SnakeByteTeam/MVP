@@ -1,4 +1,4 @@
 export interface NotifyAlarmResolutionCmd {
-    alarmId: string;
-    wardId: number;
+  alarmId: string;
+  wardId: number;
 }

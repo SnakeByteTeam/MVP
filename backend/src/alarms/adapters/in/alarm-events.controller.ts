@@ -56,7 +56,7 @@ export class AlarmEventsController {
     private readonly getAllUnmanagedAlarmEventsByUserIdUseCase: GetAllUnmanagedAlarmEventsByUserIdUseCase,
     @Inject(RESOLVE_ALARM_EVENT_USE_CASE)
     private readonly resolveAlarmEventUseCase: ResolveAlarmEventUseCase,
-  ) { }
+  ) {}
 
   @ApiOkResponse({ type: GetAlarmEventByIdResDto })
   //@UseGuards(UserGuard, AdminGuard)

@@ -219,7 +219,6 @@ export class DeviceController {
         }
 
         try {
-
           await this.checkAlarmUseCase.checkAlarmRule(
             new CheckAlarmRuleCmd(
               cmd.datapointId,

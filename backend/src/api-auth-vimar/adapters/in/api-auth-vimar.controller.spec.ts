@@ -171,10 +171,7 @@ describe('ApiAuthVimarController', () => {
 
       const result = await controller.saveTokens(code, state);
 
-      expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith(
-        code,
-        7,
-      );
+      expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith(code, 7);
       expect(result).toEqual({
         url: redirectUrl,
         statusCode: 302,
@@ -232,9 +229,9 @@ describe('ApiAuthVimarController', () => {
         'base64',
       );
 
-      await expect(controller.saveTokens('auth_code_123', state)).rejects.toThrow(
-        'State must contain redirectUrl as string',
-      );
+      await expect(
+        controller.saveTokens('auth_code_123', state),
+      ).rejects.toThrow('State must contain redirectUrl as string');
       expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledTimes(0);
     });
 
@@ -243,9 +240,9 @@ describe('ApiAuthVimarController', () => {
         JSON.stringify({ redirectUrl: 'http://localhost:4200/dashboard' }),
       ).toString('base64');
 
-      await expect(controller.saveTokens('auth_code_123', state)).rejects.toThrow(
-        'State must contain userId as string or number',
-      );
+      await expect(
+        controller.saveTokens('auth_code_123', state),
+      ).rejects.toThrow('State must contain userId as string or number');
       expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledTimes(0);
     });
 

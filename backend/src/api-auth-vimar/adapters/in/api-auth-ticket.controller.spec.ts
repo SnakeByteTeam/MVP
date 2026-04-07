@@ -104,7 +104,9 @@ describe('ApiAuthTicketController', () => {
   describe('authorize', () => {
     it('should consume ticket and redirect to provider login URL', async () => {
       authorizeOAuthUseCase.authorizeOAuth.mockResolvedValue(77);
-      apiAuthUseCase.getLoginUrl.mockReturnValue('https://oauth.provider/authorize');
+      apiAuthUseCase.getLoginUrl.mockReturnValue(
+        'https://oauth.provider/authorize',
+      );
 
       const result = await controller.authorize(
         'ticket-123',
@@ -137,7 +139,10 @@ describe('ApiAuthTicketController', () => {
       authorizeOAuthUseCase.authorizeOAuth.mockResolvedValue(null);
 
       await expect(
-        controller.authorize('invalid-ticket', 'http://localhost:4200/vimar-link'),
+        controller.authorize(
+          'invalid-ticket',
+          'http://localhost:4200/vimar-link',
+        ),
       ).rejects.toThrow(UnauthorizedException);
 
       expect(apiAuthUseCase.getLoginUrl).toHaveBeenCalledTimes(0);

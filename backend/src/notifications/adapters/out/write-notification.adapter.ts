@@ -17,12 +17,15 @@ export class WriteNotificationAdapter implements WriteNotificationPort {
     if (!cmd?.alarm_event_id || !cmd?.timestamp || cmd?.ward_id == null)
       throw new Error("Can' write notification without parameteres");
 
-    if (!await this.writeNotificationRepoPort.writeNotification(
+    if (
+      !(await this.writeNotificationRepoPort.writeNotification(
         cmd.ward_id,
         cmd.alarm_event_id,
         cmd.timestamp,
-      )) return false;
-      
+      ))
+    )
+      return false;
+
     return true;
   }
 }

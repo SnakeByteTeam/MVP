@@ -67,7 +67,9 @@ describe('OAuthTicketAdapter', () => {
     expect(result).toBe(22);
     expect(readOAuthTicketCachePort.readValidTicket).toHaveBeenCalledTimes(1);
     expect(deleteOAuthTicketCachePort.deleteTicket).toHaveBeenCalledTimes(1);
-    expect(deleteOAuthTicketCachePort.deleteTicket).toHaveBeenCalledWith('ticket-1');
+    expect(deleteOAuthTicketCachePort.deleteTicket).toHaveBeenCalledWith(
+      'ticket-1',
+    );
   });
 
   it('should throw when ticket deletion fails after a valid read', async () => {

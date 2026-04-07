@@ -11,5 +11,5 @@ export class CreateAlarmRuleCmd {
     public readonly thresholdValue: string,
     public readonly armingTime: string,
     public readonly dearmingTime: string,
-  ) { }
+  ) {}
 }

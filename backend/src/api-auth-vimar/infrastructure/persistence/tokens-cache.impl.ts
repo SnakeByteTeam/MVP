@@ -11,7 +11,11 @@ import { ReadStatusRepoPort } from 'src/api-auth-vimar/application/repository/re
 
 @Injectable()
 export class TokenCacheImpl
-  implements WriteTokensCachePort, ReadTokensCachePort, DeleteTokensCachePort, ReadStatusRepoPort
+  implements
+    WriteTokensCachePort,
+    ReadTokensCachePort,
+    DeleteTokensCachePort,
+    ReadStatusRepoPort
 {
   private readonly logger = new Logger(TokenCacheImpl.name);
 
@@ -71,7 +75,6 @@ export class TokenCacheImpl
         userId: row.user_id,
         email: row.email,
       };
-
     } finally {
       client.release();
     }
@@ -92,14 +95,13 @@ export class TokenCacheImpl
 
   async readStatus(userId: number): Promise<string | null> {
     const client = await this.pool.connect();
-    
+
     try {
       const result = await client.query(
         `SELECT email FROM token_cache WHERE user_id = $1`,
         [userId],
       );
       return result.rows[0]?.email || null;
-
     } finally {
       client.release();
     }

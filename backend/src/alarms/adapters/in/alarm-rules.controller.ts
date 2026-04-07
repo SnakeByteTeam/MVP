@@ -57,7 +57,7 @@ export class AlarmRulesController {
     private readonly getAllAlarmRulesUseCase: GetAllAlarmRulesUseCase,
     @Inject(UPDATE_ALARM_RULE_USE_CASE)
     private readonly updateAlarmRuleUseCase: UpdateAlarmRuleUseCase,
-  ) { }
+  ) {}
 
   @ApiOkResponse({ type: CreateAlarmRuleResDto })
   //@UseGuards(UserGuard, AdminGuard)

@@ -18,6 +18,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
         ar.priority,
         ar.threshold_operator,
         ar.threshold_value,
+        d.datapoint->>'name' AS datapoint_name,
         room->>'name' AS room_name,
         device->>'name' AS device_name,
         p.data->>'name' AS plant_name,
@@ -28,15 +29,16 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
-      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device
+        ON device->>'id' = ar.device_id
       LEFT JOIN LATERAL (
         SELECT datapoint
         FROM jsonb_array_elements(device->'datapoints') AS datapoint
         WHERE datapoint->>'id' = ar.datapoint_id
       ) d ON true
       WHERE d.datapoint IS NOT NULL 
-      AND ar.is_changed_when_used = FALSE
-      AND ar.id = $1
+        AND ar.is_changed_when_used = FALSE
+        AND ar.id = $1
       ORDER BY ar.created_at DESC;`,
       [id],
     );
@@ -55,10 +57,42 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
     dearmingTime: string,
   ): Promise<AlarmRuleEntity> {
     const result = await this.pool.query(
-      `INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, 
-       arming_time, dearming_time, is_armed, device_id, plant_id, datapoint_id)
-       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10, $11)
-       RETURNING *`,
+      `WITH inserted AS (
+      INSERT INTO alarm_rule (
+        id,
+        name,
+        threshold_operator,
+        threshold_value,
+        priority,
+        arming_time,
+        dearming_time,
+        is_armed,
+        device_id,
+        plant_id,
+        datapoint_id
+      )
+      VALUES (
+        $1, $2, $3, $4, $5,
+        $6::time, $7::time, $8,
+        $9, $10, $11
+      )
+      RETURNING *
+      )
+      SELECT
+        i.*,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        p.data->>'name' AS plant_name,
+        datapoint->>'name' AS datapoint_name
+      FROM inserted i
+      LEFT JOIN plant p ON p.id = i.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      JOIN LATERAL (
+        SELECT datapoint
+        FROM jsonb_array_elements(device->'datapoints') AS datapoint
+        WHERE datapoint->>'id' = i.datapoint_id
+      ) d ON true;`,
       [
         uuidv4(),
         name,
@@ -70,7 +104,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
         true,
         deviceId,
         plantId,
-        datapointId
+        datapointId,
       ],
     );
     return result.rows[0];
@@ -84,6 +118,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
         ar.priority,
         ar.threshold_operator,
         ar.threshold_value,
+        d.datapoint->>'name' AS datapoint_name,
         room->>'name' AS room_name,
         device->>'name' AS device_name,
         p.data->>'name' AS plant_name,
@@ -94,14 +129,15 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
-      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device
+        ON device->>'id' = ar.device_id
       LEFT JOIN LATERAL (
         SELECT datapoint
         FROM jsonb_array_elements(device->'datapoints') AS datapoint
         WHERE datapoint->>'id' = ar.datapoint_id
       ) d ON true
       WHERE d.datapoint IS NOT NULL 
-      AND ar.is_changed_when_used = FALSE
+        AND ar.is_changed_when_used = FALSE
       ORDER BY ar.created_at DESC;`,
     );
     return result.rows;
@@ -157,7 +193,9 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
 
       if (!isUsed) {
         const result = await client.query(
-          `UPDATE alarm_rule SET
+          `WITH updated AS (
+          UPDATE alarm_rule
+          SET
             name = $2,
             priority = $3,
             threshold_operator = $4,
@@ -167,7 +205,22 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
             is_armed = $8
           WHERE id = $1
           RETURNING *
-          `,
+          )
+          SELECT
+            u.*,
+            room->>'name' AS room_name,
+            device->>'name' AS device_name,
+            p.data->>'name' AS plant_name,
+            datapoint->>'name' AS datapoint_name
+          FROM updated u
+          LEFT JOIN plant p ON p.id = u.plant_id
+          LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+          LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+          JOIN LATERAL (
+            SELECT datapoint
+            FROM jsonb_array_elements(device->'datapoints') AS datapoint
+            WHERE datapoint->>'id' = u.datapoint_id
+          ) d ON true;`,
           [
             id,
             name,
@@ -187,13 +240,13 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
       await client.query(
         `UPDATE alarm_rule
         SET is_changed_when_used = TRUE
-        WHERE id = $1
-        `,
+        WHERE id = $1`,
         [id],
       );
 
       const insertResult = await client.query(
-        `INSERT INTO alarm_rule (
+        `WITH inserted AS (
+        INSERT INTO alarm_rule (
           id,
           name,
           threshold_operator,
@@ -209,17 +262,32 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
           is_changed_when_used
         )
         SELECT
-          $2,                -- new id
-          $3, $4, $5, $6, $7, $8, $9,
-          device_id,
-          datapoint_id,
-          plant_id,
-          NOW(),
-          FALSE
-        FROM alarm_rule
-        WHERE id = $1
-        RETURNING *
-        `,
+            $2,
+            $3, $4, $5, $6, $7, $8, $9,
+            device_id,
+            datapoint_id,
+            plant_id,
+            NOW(),
+            FALSE
+          FROM alarm_rule
+          WHERE id = $1
+          RETURNING *
+        )
+        SELECT
+          i.*,
+          room->>'name' AS room_name,
+          device->>'name' AS device_name,
+          p.data->>'name' AS plant_name,
+          datapoint->>'name' AS datapoint_name
+        FROM inserted i
+        LEFT JOIN plant p ON p.id = i.plant_id
+        LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+        LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+        JOIN LATERAL (
+          SELECT datapoint
+          FROM jsonb_array_elements(device->'datapoints') AS datapoint
+          WHERE datapoint->>'id' = i.datapoint_id
+        ) d ON true;`,
         [
           id,
           uuidv4(),

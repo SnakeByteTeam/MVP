@@ -152,6 +152,22 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     is_changed_when_used BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
+('rule-001', 'Temperatura critica',    '>',  '30',    1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011'),
+('rule-002', 'Luce accesa di notte',   '=',  'on',    3, '22:00', '06:00', TRUE, 'fct-AA0011BB0011-1000000001',        'AA0011BB0011'),
+('rule-003', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',      'AA0011BB0011'),
+('rule-004', 'Temperatura alta',       '>',  '25',    2, '00:00', '23:59', TRUE, 'fct-BB0022CC0022-2000000002',  'BB0022CC0022'),
+('rule-005', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'fct-BB0022CC0022-2000000002',      'BB0022CC0022');
+
+-- Regole aggiuntive per test UI/paginazione/stati su allarmi attivi.
+INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
+('rule-006', 'Temp soggiorno warning',      '>',  '28',   3, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011'),
+('rule-007', 'Temp soggiorno critica',      '>=', '31',   4, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011'),
+('rule-008', 'Luce soggiorno sempre accesa','=',  'on',   2, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',        'AA0011BB0011'),
+('rule-009', 'Caduta bagno test-ward',      '=',  'on',   4, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001',      'AA0011BB0011'),
+('rule-010', 'Temp ingresso alta',          '>',  '21',   3, '00:00', '23:59', TRUE, 'fct-BB0022CC0022-2000000002',  'BB0022CC0022'),
+('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'fct-AA0011BB0011-1000000001', 'AA0011BB0011');
+
 
 CREATE TABLE IF NOT EXISTS alarm_event (
     id VARCHAR(255) PRIMARY KEY,
@@ -165,6 +181,15 @@ CREATE TABLE IF NOT EXISTS alarm_event (
     FOREIGN KEY (user_id)
         REFERENCES "user"(id)
 );
+--seed piccolo per provare alarm_event
+INSERT INTO alarm_event (id, alarm_rule_id, activation_time, user_id) VALUES
+('event-001', 'rule-001', '2023-10-01 10:00:00+00', 1),
+('event-002', 'rule-002', '2023-10-01 22:30:00+00', 1),
+('event-003', 'rule-003', '2023-10-02 14:15:00+00', 1),
+('event-004', 'rule-004', '2023-10-03 09:45:00+00', 1),
+('event-005', 'rule-005', '2023-10-04 18:20:00+00', 1);
+
+
 
 CREATE TABLE IF NOT EXISTS notification (
     id SERIAL PRIMARY KEY, 

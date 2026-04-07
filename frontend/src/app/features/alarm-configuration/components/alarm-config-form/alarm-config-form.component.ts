@@ -12,7 +12,6 @@ import { AlarmRuleFormMapper } from '../../mappers/alarm-rule-form.mapper';
 import { AlarmConfigFormValue } from '../../models/alarm-config-form-value.model';
 import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
 import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
-import { AlarmDeviceCatalogService } from '../../services/alarm-device-catalog.service';
 
 type DeviceOption = {
 	id: string;
@@ -36,7 +35,6 @@ export class AlarmConfigFormComponent {
 	private readonly formMapper = inject(AlarmRuleFormMapper);
 	private readonly wardApi = inject(WardApiService);
 	private readonly apartmentApi = inject(ApartmentApiService);
-	private readonly deviceCatalog = inject(AlarmDeviceCatalogService);
 	private readonly destroyRef = inject(DestroyRef);
 	private hasRequestedPlants = false;
 
@@ -47,8 +45,15 @@ export class AlarmConfigFormComponent {
 	public readonly plantsLoadError = signal<string | null>(null);
 	public readonly devicesLoadError = signal<string | null>(null);
 	public readonly isDevicesLoading = signal(false);
-	public readonly isDeviceSelectionLocked = computed(() => this.isEditMode() || this.form.controls.deviceId.disabled);
 	public readonly isPlantSelectionVisible = computed(() => !this.isEditMode());
+	public readonly editPosition = computed(() => {
+		if (!this.isEditMode()) {
+			return '-';
+		}
+
+		const position = this.initialRule()?.position ?? '';
+		return this.toPositionLabel(position);
+	});
 
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
 		(value): value is AlarmPriority => typeof value === 'number'
@@ -223,7 +228,6 @@ export class AlarmConfigFormComponent {
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe({
 				next: (apartment) => {
-					this.deviceCatalog.registerApartment(apartment);
 					const options = apartment.rooms.flatMap((room) =>
 						room.devices.map((device) => ({ id: device.id, label: `${room.name} - ${device.name}` }))
 					);
@@ -239,6 +243,15 @@ export class AlarmConfigFormComponent {
 					this.isDevicesLoading.set(false);
 				},
 			});
+	}
+
+	private toPositionLabel(position: string): string {
+		const normalized = position.replaceAll(/\s*-\s*/g, ' - ').trim();
+		if (normalized.length === 0) {
+			return '-';
+		}
+
+		return normalized;
 	}
 
 	public onCancel(): void {

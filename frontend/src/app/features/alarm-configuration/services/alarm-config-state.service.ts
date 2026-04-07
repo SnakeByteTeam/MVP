@@ -24,11 +24,6 @@ export class AlarmConfigStateService {
     public readonly error$ = this.errorSubject.asObservable();
 
 
-    private replaceAlarmInState(sourceAlarmId: string, updatedAlarm: AlarmRule): void {
-        const currentAlarms = this.alarmsSubject.getValue();
-        this.alarmsSubject.next(currentAlarms.map((alarm) => (alarm.id === sourceAlarmId ? updatedAlarm : alarm)));
-    }
-
     private clearError(): void {
         if (this.errorSubject.getValue() !== null) {
             this.errorSubject.next(null);
@@ -85,9 +80,8 @@ export class AlarmConfigStateService {
         }
 
         return this.api.createAlarmRule(payload).pipe(
-            tap((createdAlarm) => {
-                const currentAlarms = this.alarmsSubject.getValue();
-                this.alarmsSubject.next([...currentAlarms, createdAlarm]);
+            tap(() => {
+                this.loadAlarmRules();
                 this.alarmManagementRefreshService.requestRefresh();
             }),
             catchError((error: unknown) =>
@@ -116,8 +110,8 @@ export class AlarmConfigStateService {
         }
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
-            tap((updatedAlarm) => {
-                this.replaceAlarmInState(alarmId, updatedAlarm);
+            tap(() => {
+                this.loadAlarmRules();
                 this.alarmManagementRefreshService.requestRefresh();
             }),
             catchError((error: unknown) =>
@@ -141,8 +135,8 @@ export class AlarmConfigStateService {
         const payload = this.requestMapper.toToggleRequest(currentAlarm, enabled);
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
-            tap((updatedAlarm) => {
-                this.replaceAlarmInState(alarmId, updatedAlarm);
+            tap(() => {
+                this.loadAlarmRules();
                 this.alarmManagementRefreshService.requestRefresh();
             }),
             catchError((error: unknown) =>

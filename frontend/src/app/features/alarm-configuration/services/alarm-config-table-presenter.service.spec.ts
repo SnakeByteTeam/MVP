@@ -2,12 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { AlarmPriority } from '../../../core/alarm/models/alarm-priority.enum';
 import type { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
-import { AlarmDeviceCatalogService } from './alarm-device-catalog.service';
 import { AlarmConfigTablePresenterService } from './alarm-config-table-presenter.service';
 
 describe('AlarmConfigTablePresenterService', () => {
     let service: AlarmConfigTablePresenterService;
-    let deviceCatalogStub: { getApartmentNameByDeviceId: (deviceId: string) => string | null };
 
     const baseRule: AlarmRule = {
         id: 'rule-1',
@@ -19,28 +17,12 @@ describe('AlarmConfigTablePresenterService', () => {
         dearmingTime: '20:15:00',
         isArmed: true,
         deviceId: 'apt001-devA',
+        position: 'Appartamento 1 - Soggiorno - Sensore A',
     };
 
     beforeEach(() => {
-        deviceCatalogStub = {
-            getApartmentNameByDeviceId: (deviceId: string) => {
-                if (deviceId === 'apt001-devA') {
-                    return 'Appartamento 1';
-                }
-
-                if (deviceId === 'ward_12/sensor-A') {
-                    return 'Appartamento Reparto 12';
-                }
-
-                return null;
-            },
-        };
-
         TestBed.configureTestingModule({
-            providers: [
-                AlarmConfigTablePresenterService,
-                { provide: AlarmDeviceCatalogService, useValue: deviceCatalogStub },
-            ],
+            providers: [AlarmConfigTablePresenterService],
         });
 
         service = TestBed.inject(AlarmConfigTablePresenterService);
@@ -52,8 +34,7 @@ describe('AlarmConfigTablePresenterService', () => {
         expect(row).toEqual({
             id: 'rule-1',
             name: 'Temperatura alta',
-            apartment: 'Appartamento 1',
-            device: 'apt001-devA',
+            position: 'Appartamento 1 - Soggiorno - Sensore A',
             priority: AlarmPriority.RED,
             threshold: '> 30',
             armingTime: '08:00',
@@ -62,40 +43,26 @@ describe('AlarmConfigTablePresenterService', () => {
         });
     });
 
-    it('usa il catalog per valorizzare apartment quando il device e indicizzato', () => {
+    it('normalizza gli spazi intorno ai separatori della posizione', () => {
         const row = service.toRows([
             {
                 ...baseRule,
-                deviceId: 'ward_12/sensor-A',
+                position: 'Appartamento 2-  Cucina -Sensore fumo',
             },
         ])[0];
 
-        expect(row.apartment).toBe('Appartamento Reparto 12');
-        expect(row.device).toBe('ward_12/sensor-A');
+        expect(row.position).toBe('Appartamento 2 - Cucina - Sensore fumo');
     });
 
-    it('applica fallback su apartment quando il device non e presente nel catalog', () => {
+    it('applica fallback su posizione quando e vuota', () => {
         const row = service.toRows([
             {
                 ...baseRule,
-                deviceId: 'unknown-device',
+                position: '   ',
             },
         ])[0];
 
-        expect(row.apartment).toBe('-');
-        expect(row.device).toBe('unknown-device');
-    });
-
-    it('applica fallback su apartment e device quando deviceId e vuoto', () => {
-        const row = service.toRows([
-            {
-                ...baseRule,
-                deviceId: '   ',
-            },
-        ])[0];
-
-        expect(row.apartment).toBe('-');
-        expect(row.device).toBe('-');
+        expect(row.position).toBe('-');
     });
 
     it('mantiene fallback orario quando il valore non e ISO/HH:mm:ss', () => {

@@ -16,6 +16,7 @@ export class AlarmRuleRequestMapper {
         return {
             name: this.requireNonEmptyString(formValue.name, 'name'),
             deviceId: this.requireNonEmptyString(formValue.deviceId, 'deviceId'),
+            datapointId: this.normalizeOptionalString(formValue.datapointId),
             plantId: this.requireNonEmptyString(formValue.plantId, 'plantId'),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
@@ -28,6 +29,7 @@ export class AlarmRuleRequestMapper {
     public toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto {
         return {
             name: this.requireNonEmptyString(formValue.name, 'name'),
+            datapointId: this.normalizeOptionalString(formValue.datapointId),
             priority: this.toPriorityNumber(formValue.priority),
             thresholdOperator: this.toThresholdOperatorCode(formValue.thresholdOperator),
             thresholdValue: this.toRequestThresholdValue(formValue.thresholdValue, 'thresholdValue'),
@@ -89,6 +91,11 @@ export class AlarmRuleRequestMapper {
         }
 
         return trimmed;
+    }
+
+    private normalizeOptionalString(value?: string): string | undefined {
+        const trimmed = String(value ?? '').trim();
+        return trimmed.length > 0 ? trimmed : undefined;
     }
 
     private requireHourMinuteString(value: string, fieldName: string): string {

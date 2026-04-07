@@ -20,6 +20,14 @@
                 class="h-8 w-full rounded-md border border-slate-300 bg-slate-100 px-2 text-sm text-slate-700" />
         </div>
     </div>
+
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="datapoint" class="font-semibold text-slate-700">Datapoint:</label>
+        <div>
+            <input id="datapoint" type="text" [value]="editDatapoint()" readonly
+                class="h-8 w-full rounded-md border border-slate-300 bg-slate-100 px-2 text-sm text-slate-700" />
+        </div>
+    </div>
     }
 
     @if (isPlantSelectionVisible()) {
@@ -83,6 +91,34 @@
             }
         </div>
     </div>
+
+    <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
+        <label for="datapointId" class="font-semibold text-slate-700">Datapoint:</label>
+        <div>
+            <select id="datapointId" formControlName="datapointId"
+                class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                [attr.aria-invalid]="form.controls.datapointId.invalid && form.controls.datapointId.touched">
+                <option value="">Seleziona datapoint</option>
+                @for (datapoint of datapointOptions(); track datapoint.id) {
+                <option [value]="datapoint.id">{{ datapoint.name }}</option>
+                }
+            </select>
+
+            @if (form.controls.deviceId.value.length === 0) {
+            <p class="mt-1 text-xs text-slate-600">Seleziona prima un dispositivo per visualizzare i datapoint
+                leggibili.</p>
+            }
+
+            @if (form.controls.deviceId.value.length > 0 && datapointOptions().length === 0) {
+            <p class="mt-1 text-xs font-medium text-amber-700">Nessun datapoint leggibile disponibile per questo
+                dispositivo.</p>
+            }
+
+            @if (form.controls.datapointId.invalid && form.controls.datapointId.touched) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">Il datapoint è obbligatorio.</p>
+            }
+        </div>
+    </div>
     }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
@@ -114,7 +150,7 @@
                 class="h-8 rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched">
                 <option [ngValue]="null">Operatore</option>
-                @for (operator of thresholdOperatorOptions; track operator) {
+                @for (operator of thresholdOperatorOptions(); track operator) {
                 <option [ngValue]="operator">{{ operator }}</option>
                 }
             </select>
@@ -122,27 +158,41 @@
         </div>
     </div>
 
-    @if (form.controls.thresholdOperator.invalid && form.controls.thresholdOperator.touched) {
+    @if (form.controls.thresholdOperator.hasError('required') && form.controls.thresholdOperator.touched) {
     <p role="alert" class="text-xs font-medium text-rose-700">L'operatore di soglia è obbligatorio.</p>
+    }
+
+    @if (form.controls.thresholdOperator.hasError('unsupportedOperator') && form.controls.thresholdOperator.touched) {
+    <p role="alert" class="text-xs font-medium text-rose-700">Operatore non valido per il datapoint selezionato.</p>
     }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
         <label for="thresholdValue" class="font-semibold text-slate-700">Valore soglia:</label>
         <div>
             <input id="thresholdValue" type="text" inputmode="decimal" formControlName="thresholdValue"
-                list="thresholdBooleanHints"
+                [attr.list]="thresholdValueEnumHints().length > 0 ? 'thresholdEnumHints' : null"
                 class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600"
                 [attr.aria-invalid]="form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched" />
-            <datalist id="thresholdBooleanHints">
-                <option value="ON"></option>
-                <option value="OFF"></option>
+            <datalist id="thresholdEnumHints">
+                @for (hint of thresholdValueEnumHints(); track hint) {
+                <option [value]="hint"></option>
+                }
             </datalist>
-            <p class="mt-1 text-xs text-slate-600">Per soglie booleane usa ON oppure OFF, altrimenti inserisci un valore
-                numerico.
-            </p>
 
-            @if (form.controls.thresholdValue.invalid && form.controls.thresholdValue.touched) {
+            <p class="mt-1 text-xs text-slate-600">{{ thresholdValueHelpText() }}</p>
+
+            @if (form.controls.thresholdValue.hasError('required') && form.controls.thresholdValue.touched) {
             <p role="alert" class="mt-1 text-xs font-medium text-rose-700">La soglia è obbligatoria.</p>
+            }
+
+            @if (form.controls.thresholdValue.hasError('invalidEnumThreshold') && form.controls.thresholdValue.touched)
+            {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">Valore non previsto dall'enum del datapoint
+                selezionato.</p>
+            }
+
+            @if (form.controls.thresholdValue.hasError('pattern') && form.controls.thresholdValue.touched) {
+            <p role="alert" class="mt-1 text-xs font-medium text-rose-700">Inserisci un valore numerico valido.</p>
             }
         </div>
     </div>

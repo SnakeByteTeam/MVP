@@ -1,0 +1,21 @@
+<section class="notification-topbar-panel" aria-label="Notifiche recenti">
+  <header class="notification-topbar-panel__header">
+    <h2>Notifiche</h2>
+    <button type="button" (click)="viewAllClicked.emit()">Vedi tutte</button>
+  </header>
+
+  @if (visibleNotifications.length === 0) {
+  <p class="notification-topbar-panel__empty">Nessuna notifica disponibile.</p>
+  } @else {
+  <ul class="notification-topbar-panel__list">
+    @for (notification of visibleNotifications; track notification.notificationId) {
+    <li class="notification-topbar-panel__item">
+      <p class="notification-topbar-panel__title">{{ notification.title }}</p>
+      <time class="notification-topbar-panel__time" [attr.datetime]="notification.sentAt">
+        {{ notification.sentAt | date: 'dd/MM/yyyy HH:mm:ss' }}
+      </time>
+    </li>
+    }
+  </ul>
+  }
+</section>

@@ -1,0 +1,89 @@
+.notification-topbar-panel {
+  position: fixed;
+  top: 4.9rem;
+  right: 1rem;
+  z-index: 75;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: 24rem;
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.95rem;
+  background: #ffffff;
+  box-shadow: 0 24px 46px -30px rgba(15, 23, 42, 0.62);
+  padding: 0.9rem;
+}
+
+.notification-topbar-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.notification-topbar-panel__header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.notification-topbar-panel__header button {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 0.65rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.notification-topbar-panel__header button:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.notification-topbar-panel__empty {
+  margin: 0;
+  padding: 0.4rem 0.2rem;
+  color: #475569;
+  font-size: 0.88rem;
+}
+
+.notification-topbar-panel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notification-topbar-panel__item {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  background: #f8fafc;
+}
+
+.notification-topbar-panel__title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.notification-topbar-panel__time {
+  display: inline-block;
+  margin-top: 0.22rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+@media (max-width: 960px) {
+  .notification-topbar-panel {
+    display: none;
+  }
+}

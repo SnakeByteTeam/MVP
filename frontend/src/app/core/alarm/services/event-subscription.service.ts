@@ -1,14 +1,25 @@
 import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, fromEvent, takeUntil } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { AlarmEvent } from '../models/alarm-event.model';
 import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
-import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { PushEvent } from '../models/push-event.model';
 import { PushEventType } from '../models/push-event-type.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
+import { InternalAuthService } from '../../services/internal-auth.service';
+import {
+	REALTIME_ALARM_EVENT_NORMALIZER,
+	type RealtimeAlarmEventNormalizerPort,
+} from './realtime-alarm-event-normalizer.service';
+import {
+	ALARM_LIFECYCLE_NOTIFIER,
+	type AlarmLifecycleNotifierPort,
+} from './alarm-lifecycle-notifier.service';
+import {
+	WARD_SOCKET_ROOM_COORDINATOR,
+	type WardSocketRoomCoordinatorPort,
+} from './ward-socket-room-coordinator.service';
 
 export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>('SOCKET_IO_FACTORY', {
 	providedIn: 'root',
@@ -20,16 +31,21 @@ export class EventSubscriptionService implements OnDestroy {
 	private readonly socketIoFactory = inject(SOCKET_IO_FACTORY);
 	private readonly alarmStateService = inject(AlarmStateService);
 	private readonly apiBaseUrl = inject(API_BASE_URL, { optional: true });
+	private readonly internalAuthService = inject(InternalAuthService, { optional: true });
+	private readonly eventNormalizer: RealtimeAlarmEventNormalizerPort = inject(REALTIME_ALARM_EVENT_NORMALIZER);
+	private readonly lifecycleNotifier: AlarmLifecycleNotifierPort = inject(ALARM_LIFECYCLE_NOTIFIER);
+	private readonly roomCoordinator: WardSocketRoomCoordinatorPort = inject(WARD_SOCKET_ROOM_COORDINATOR);
 
 	private readonly connectionStatus$ = new BehaviorSubject<ConnectionStatus>(
 		ConnectionStatus.DISCONNECTED
 	);
-	private readonly joinedRooms = new Set<string>();
 	private readonly destroy$ = new Subject<void>();
 	private socket: Socket | null = null;
+	private authLifecycleInitialized = false;
 
 	public initialize(wardIds: string[]): void {
 		this.connect();
+		this.ensureAuthLifecycleSubscription();
 
 		for (const wardId of wardIds) {
 			this.joinRoom(wardId);
@@ -41,22 +57,20 @@ export class EventSubscriptionService implements OnDestroy {
 	}
 
 	public joinRoom(wardId: string): void {
-		const normalizedWardId = wardId.trim();
-		if (!normalizedWardId || this.joinedRooms.has(normalizedWardId)) {
+		const normalizedWardId = this.roomCoordinator.requestJoinRoom(wardId);
+		if (!normalizedWardId) {
 			return;
 		}
 
-		this.joinedRooms.add(normalizedWardId);
 		this.socket?.emit('join-ward', normalizedWardId);
 	}
 
 	public leaveRoom(wardId: string): void {
-		const normalizedWardId = wardId.trim();
-		if (!normalizedWardId || !this.joinedRooms.has(normalizedWardId)) {
+		const normalizedWardId = this.roomCoordinator.requestLeaveRoom(wardId);
+		if (!normalizedWardId) {
 			return;
 		}
 
-		this.joinedRooms.delete(normalizedWardId);
 		this.socket?.emit('leave-ward', normalizedWardId);
 	}
 
@@ -90,22 +104,17 @@ export class EventSubscriptionService implements OnDestroy {
 		fromEvent<unknown>(this.socket, 'push-event')
 			.pipe(takeUntil(this.destroy$))
 			.subscribe((rawEvent) => {
-				const parsedEvent = this.parseRawEvent(rawEvent);
-				if (!parsedEvent) {
+				if (this.handleEnvelopeRawEvent(rawEvent)) {
 					return;
 				}
 
-				switch (parsedEvent.eventType) {
-					case PushEventType.ALARM_TRIGGERED:
-					case PushEventType.ALARM_RESOLVED:
-						this.dispatchAlarmEvent(parsedEvent);
-						break;
-					case PushEventType.NOTIFICATION:
-						this.dispatchNotificationEvent(parsedEvent);
-						break;
-					default:
-						break;
-				}
+				this.handleBackendTriggeredRawEvent(rawEvent);
+			});
+
+		fromEvent<unknown>(this.socket, 'alarm-resolved')
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((rawEvent) => {
+				this.handleBackendResolvedRawEvent(rawEvent);
 			});
 	}
 
@@ -117,54 +126,106 @@ export class EventSubscriptionService implements OnDestroy {
 		this.socket.removeAllListeners();
 		this.socket.disconnect();
 		this.socket = null;
-		this.joinedRooms.clear();
+		this.roomCoordinator.resetRuntimeState();
 		this.connectionStatus$.next(ConnectionStatus.DISCONNECTED);
 
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
 
-	private parseRawEvent(raw: unknown): PushEvent | null {
-		if (!this.isObject(raw)) {
-			return null;
+	private ensureAuthLifecycleSubscription(): void {
+		if (this.authLifecycleInitialized || !this.internalAuthService) {
+			return;
 		}
 
-		const eventType = raw['eventType'];
-		const payload = raw['payload'];
-		const timestamp = raw['timestamp'];
+		this.authLifecycleInitialized = true;
 
-		if (!this.isPushEventType(eventType) || typeof timestamp !== 'string') {
-			return null;
-		}
+		this.internalAuthService
+			.getCurrentUser$()
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((session) => {
+				if (!session) {
+					this.emitLeaveMany(this.roomCoordinator.deactivateUser());
+					return;
+				}
 
-		return {
-			eventType,
-			payload,
-			timestamp,
-		};
+				const actions = this.roomCoordinator.activateUser(session.userId);
+				this.emitLeaveMany(actions.roomsToLeave);
+				this.emitJoinMany(actions.roomsToJoin);
+			});
 	}
 
-	private dispatchAlarmEvent(event: PushEvent): void {
-		if (event.eventType === PushEventType.ALARM_RESOLVED) {
-			const alarmId = this.extractAlarmId(event.payload);
-			if (!alarmId) {
-				return;
+	private handleEnvelopeRawEvent(raw: unknown): boolean {
+		const parsedEvent = this.eventNormalizer.tryParseEnvelope(raw);
+		if (!parsedEvent) {
+			return false;
+		}
+
+		switch (parsedEvent.eventType) {
+			case PushEventType.ALARM_TRIGGERED: {
+				const alarmEvent = this.eventNormalizer.parseAlarmEvent(parsedEvent.payload);
+				if (alarmEvent) {
+					this.alarmStateService.onAlarmTriggered(alarmEvent);
+					this.lifecycleNotifier.publish('triggered', alarmEvent.id, parsedEvent.timestamp);
+				}
+
+				return true;
 			}
+			case PushEventType.ALARM_RESOLVED: {
+				const alarmId = this.eventNormalizer.extractAlarmId(parsedEvent.payload);
+				if (alarmId) {
+					this.alarmStateService.onAlarmResolved(alarmId);
+					this.lifecycleNotifier.publish('resolved', alarmId, parsedEvent.timestamp);
+				}
 
-			this.alarmStateService.onAlarmResolved(alarmId);
+				return true;
+			}
+			case PushEventType.NOTIFICATION:
+				this.dispatchNotificationEvent(parsedEvent);
+				return true;
+			default:
+				return true;
+		}
+	}
+
+	private handleBackendTriggeredRawEvent(raw: unknown): void {
+		const payload = this.eventNormalizer.parseBackendTriggeredPayload(raw);
+		if (!payload) {
 			return;
 		}
 
-		const alarmEvent = this.parseAlarmEvent(event.payload);
-		if (!alarmEvent) {
+		this.joinRoom(String(payload.wardId));
+
+		const timestamp = new Date().toISOString();
+		this.alarmStateService.onAlarmTriggered({
+			id: payload.alarmEventId,
+			alarmRuleId: payload.alarmRuleId,
+			alarmName: 'Allarme in corso',
+			priority: AlarmPriority.ORANGE,
+			activationTime: timestamp,
+			resolutionTime: null,
+		});
+
+		this.lifecycleNotifier.publish('triggered', payload.alarmEventId, timestamp);
+	}
+
+	private handleBackendResolvedRawEvent(raw: unknown): void {
+		const payload = this.eventNormalizer.parseBackendResolvedPayload(raw);
+		if (!payload) {
 			return;
 		}
 
-		this.alarmStateService.onAlarmTriggered(alarmEvent);
+		if (typeof payload.wardId === 'number') {
+			this.joinRoom(String(payload.wardId));
+		}
+
+		this.alarmStateService.onAlarmResolved(payload.alarmEventId);
+		const timestamp = new Date().toISOString();
+		this.lifecycleNotifier.publish('resolved', payload.alarmEventId, timestamp);
 	}
 
 	private dispatchNotificationEvent(event: PushEvent): void {
-		const notificationEvent = this.parseNotificationEvent(event.payload);
+		const notificationEvent = this.eventNormalizer.parseNotificationEvent(event.payload);
 		if (!notificationEvent) {
 			return;
 		}
@@ -172,75 +233,21 @@ export class EventSubscriptionService implements OnDestroy {
 		this.alarmStateService.onNotificationReceived(notificationEvent);
 	}
 
-	private parseAlarmEvent(payload: unknown): AlarmEvent | null {
-		if (!this.isObject(payload)) {
-			return null;
-		}
-
-		const id = payload['id'];
-		const alarmRuleId = payload['alarmRuleId'];
-		const alarmName = payload['alarmName'];
-		const priority = payload['priority'];
-		const activationTime = payload['activationTime'];
-		const resolutionTime = payload['resolutionTime'];
-
-		if (
-			typeof id !== 'string' ||
-			typeof alarmRuleId !== 'string' ||
-			typeof alarmName !== 'string' ||
-			!this.isAlarmPriority(priority) ||
-			typeof activationTime !== 'string' ||
-			!(typeof resolutionTime === 'string' || resolutionTime === null)
-		) {
-			return null;
-		}
-
-		return {
-			id,
-			alarmRuleId,
-			alarmName,
-			priority,
-			activationTime,
-			resolutionTime,
-		};
-	}
-
-	private parseNotificationEvent(payload: unknown): NotificationEvent | null {
-		if (!this.isObject(payload)) {
-			return null;
-		}
-
-		const notificationId = payload['notificationId'];
-		const title = payload['title'];
-		const sentAt = payload['sentAt'];
-
-		if (
-			typeof notificationId !== 'string' ||
-			typeof title !== 'string' ||
-			typeof sentAt !== 'string'
-		) {
-			return null;
-		}
-
-		return {
-			notificationId,
-			title,
-			sentAt,
-		};
-	}
-
-	private extractAlarmId(payload: unknown): string | null {
-		if (!this.isObject(payload)) {
-			return null;
-		}
-
-		const id = payload['id'];
-		return typeof id === 'string' ? id : null;
-	}
-
 	private rejoinAllRooms(): void {
-		for (const wardId of this.joinedRooms) {
+		for (const wardId of this.roomCoordinator.getJoinedRooms()) {
 			this.socket?.emit('join-ward', wardId);
+		}
+	}
+
+	private emitJoinMany(wardIds: ReadonlyArray<string>): void {
+		for (const wardId of wardIds) {
+			this.socket?.emit('join-ward', wardId);
+		}
+	}
+
+	private emitLeaveMany(wardIds: ReadonlyArray<string>): void {
+		for (const wardId of wardIds) {
+			this.socket?.emit('leave-ward', wardId);
 		}
 	}
 
@@ -253,23 +260,4 @@ export class EventSubscriptionService implements OnDestroy {
 		return globalThis.location.origin;
 	}
 
-	private isPushEventType(value: unknown): value is PushEventType {
-		return typeof value === 'string' && Object.values(PushEventType).includes(value as PushEventType);
-	}
-
-	private isAlarmPriority(value: unknown): value is AlarmPriority {
-		if (typeof value !== 'number') {
-			return false;
-		}
-
-		const numericPriorities = Object.values(AlarmPriority).filter(
-			(enumValue): enumValue is number => typeof enumValue === 'number'
-		);
-
-		return numericPriorities.includes(value);
-	}
-
-	private isObject(value: unknown): value is Record<string, unknown> {
-		return typeof value === 'object' && value !== null;
-	}
 }

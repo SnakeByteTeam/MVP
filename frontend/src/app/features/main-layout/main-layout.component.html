@@ -1,11 +1,22 @@
 <!-- temporaneo per far visualizzare la topbar anche senza utente vero 
  TO DELETE-->
 <app-topbar class="block h-[13vh] relative z-60" [user]="currentUser" [isProfileActive]="isProfilePanelOpen"
+    [isNotificationActive]="isNotificationPanelOpen"
+    [unreadNotificationsCount]="(unreadNotificationsCount$ | async) ?? 0"
     [showVimarWarning]="showVimarAssociationWarning" (hamburgerClicked)="toggleSidebar()"
-    (profileClicked)="toggleProfilePanel()" (logoutClicked)="logout()">
+    (profileClicked)="toggleProfilePanel()" (notificationClicked)="toggleNotificationPanel()" (logoutClicked)="logout()">
 </app-topbar>
 
-<app-notification-badge-component [count]="(unreadNotificationsCount$ | async) ?? 0"></app-notification-badge-component>
+@if (isNotificationPanelOpen) {
+<app-notification-topbar-panel-component [notifications]="(notifications$ | async) ?? []"
+    (viewAllClicked)="openNotificationsArchive()"></app-notification-topbar-panel-component>
+}
+
+@if (realtimeToastMessage) {
+<div class="main-layout__realtime-toast" [class.main-layout__realtime-toast--success]="realtimeToastKind === 'success'">
+    <p>{{ realtimeToastMessage }}</p>
+</div>
+}
 
 <div class="flex h-[87vh] overflow-hidden">
 

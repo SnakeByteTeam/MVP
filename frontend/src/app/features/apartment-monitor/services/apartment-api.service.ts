@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, timer } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, take, tap, timer } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
 import { PlantDto } from '../models/plant-response.model';
 import { resolveDeviceType } from '../../../shared/models/device-taxonomy';
+import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import { WardRealtimeCacheService } from '../../../core/alarm/services/ward-realtime-cache.service';
 
 export interface ApartmentOption {
 	id: string;
@@ -19,6 +21,8 @@ export class ApartmentApiService {
 
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl: string = inject(API_BASE_URL);
+	private readonly authService = inject(InternalAuthService);
+	private readonly wardRealtimeCache = inject(WardRealtimeCacheService);
 	private readonly plantEndpoint = `${this.baseUrl}/plant`;
 	private readonly legacyPlantEndpoint = `${this.baseUrl}/api/plant`;
 	private readonly apartmentsEndpoint = `${this.baseUrl}/apartments`;
@@ -66,6 +70,9 @@ export class ApartmentApiService {
 					this.http.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.legacyPlantEndpoint}/all`),
 				),
 				map((response) => (Array.isArray(response) ? response : [])),
+				tap((plants) => {
+					this.cacheWardIdsForCurrentUser(plants);
+				}),
 			);
 	}
 
@@ -161,8 +168,37 @@ export class ApartmentApiService {
 					),
 				),
 				map((response) => (Array.isArray(response) ? response : [])),
+				tap((plants) => {
+					this.cacheWardIdsForCurrentUser(plants);
+				}),
 				switchMap((plants) => (plants.length > 0 ? of(plants) : this.getAllPlants())),
 			);
+	}
+
+	private cacheWardIdsForCurrentUser(plants: ReadonlyArray<PlantDto>): void {
+		const wardIds = Array.from(
+			new Set(
+				plants
+					.map((plant) => plant.wardId)
+					.filter((wardId): wardId is number => Number.isInteger(wardId))
+					.map(String)
+			)
+		);
+
+		if (wardIds.length === 0) {
+			return;
+		}
+
+		this.authService
+			.getCurrentUser$()
+			.pipe(take(1))
+			.subscribe((session) => {
+				if (!session) {
+					return;
+				}
+
+				this.wardRealtimeCache.mergeWardIds(session.userId, wardIds);
+			});
 	}
 
 	private mapPlantToApartment(plant: PlantDto): Apartment {

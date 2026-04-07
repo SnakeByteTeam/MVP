@@ -27,9 +27,9 @@
     </div>
 
     @if (showVimarWarning) {
-    <p class="topbar-vimar-warning" role="status" aria-live="polite">
+    <output class="topbar-vimar-warning" aria-live="polite" aria-atomic="true">
         Account da associare a MyVimar
-    </p>
+    </output>
     }
 
     <div class="topbar-actions">
@@ -43,6 +43,11 @@
         <button type="button" class="topbar-button topbar-button-neutral notification-btn" aria-label="Visualizza notifiche"
             (click)="onNotificationClick()" [class.notification-active]="isNotificationActive">
             <img src="notification.png" class="topbar-avatar" alt="">
+            @if (unreadNotificationsCount > 0) {
+            <span class="topbar-notification-count" aria-live="polite" aria-atomic="true">
+                {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
+            </span>
+            }
         </button>
 
         <button

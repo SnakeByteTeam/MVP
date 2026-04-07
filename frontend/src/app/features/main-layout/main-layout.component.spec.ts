@@ -38,7 +38,8 @@ describe('MainLayoutComponent', () => {
     };
     const mockAlarmService = {
         getActiveAlarmsCount$: vi.fn().mockReturnValue(of(0)),
-        getUnreadNotificationsCount$: vi.fn().mockReturnValue(of(0))
+        getUnreadNotificationsCount$: vi.fn().mockReturnValue(of(0)),
+        getNotifications$: vi.fn().mockReturnValue(of([])),
     };
     const mockMyVimarService = {
         getLinkedAccount: vi.fn().mockReturnValue(of({ email: '', isLinked: false })),

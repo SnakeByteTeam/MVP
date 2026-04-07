@@ -201,6 +201,51 @@ describe('EventSubscriptionService', () => {
     });
   });
 
+  it('gestisce payload backend nativo su push-event per allarme attivato', () => {
+    service.initialize([]);
+
+    fakeSocket.trigger('push-event', {
+      alarmRuleId: 'alarm-rule-backend-1',
+      wardId: 12,
+      alarmEventId: 'active-alarm-backend-1',
+    });
+
+    expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'active-alarm-backend-1',
+        alarmRuleId: 'alarm-rule-backend-1',
+        alarmName: 'Allarme in corso',
+      }),
+    );
+
+    expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationId: 'alarm-triggered-active-alarm-backend-1',
+        title: "C'e un allarme in corso",
+      }),
+    );
+
+    expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '12');
+  });
+
+  it('gestisce canale backend alarm-resolved e aggiorna stato/notifiche', () => {
+    service.initialize([]);
+
+    fakeSocket.trigger('alarm-resolved', {
+      alarmEventId: 'active-alarm-backend-2',
+      wardId: 13,
+    });
+
+    expect(alarmStateSpy.onAlarmResolved).toHaveBeenCalledWith('active-alarm-backend-2');
+    expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationId: 'alarm-resolved-active-alarm-backend-2',
+        title: 'Allarme risolto',
+      }),
+    );
+    expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '13');
+  });
+
   it('ignora eventi raw malformati e payload non validi', () => {
     service.initialize([]);
 

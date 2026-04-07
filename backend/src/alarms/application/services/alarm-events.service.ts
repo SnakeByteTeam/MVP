@@ -24,6 +24,8 @@ import {
   GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
   GetAllUnmanagedAlarmEventsByUserIdPort,
 } from '../ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GET_WARD_ALARM_EVENT_PORT, type GetWardAlarmEventPort } from '../ports/out/get-ward-alarm-event.port';
 
 @Injectable()
 export class AlarmEventsService
@@ -45,6 +47,11 @@ export class AlarmEventsService
 
     @Inject(RESOLVE_ALARM_EVENT_PORT)
     private readonly resolveAlarmEventPort: ResolveAlarmEventPort,
+
+    @Inject(GET_WARD_ALARM_EVENT_PORT)
+    private readonly getWardAlarmEventPort: GetWardAlarmEventPort,
+
+    private readonly emitter: EventEmitter2,
   ) {}
 
   async getAllAlarmEvents(req: GetAllAlarmEventsCmd): Promise<AlarmEvent[]> {
@@ -68,6 +75,14 @@ export class AlarmEventsService
   }
 
   async resolveAlarmEvent(req: ResolveAlarmEventCmd): Promise<void> {
-    return await this.resolveAlarmEventPort.resolveAlarmEvent(req);
+    await this.resolveAlarmEventPort.resolveAlarmEvent(req);
+
+    const wardId: number = await this.getWardAlarmEventPort.getWardAlarmEvent({ alarmId: req.alarmId });
+
+    this.emitter.emit('alarm.resolved', {
+      alarmEventId: req.alarmId,
+      wardId: wardId
+    });
+
   }
 }

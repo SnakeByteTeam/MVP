@@ -10,12 +10,17 @@ import {
   type WriteNotificationPort,
 } from '../ports/out/write-notification.port';
 import { timestamp } from 'rxjs';
+import { NotifyAlarmResolutionUseCase } from '../ports/in/notify-alarm-resolution.usecase';
+import { NotifyAlarmResolutionCmd } from '../commands/notify-alarm-resolution.command';
+import { NOTIFY_ALARM_RESOLUTION_PORT, type NotifyAlarmResolutionPort } from '../ports/out/notify-alarm-resolution.port';
 
 @Injectable()
-export class NotificationsService implements NotifyAlarmWardUseCase {
+export class NotificationsService implements NotifyAlarmWardUseCase, NotifyAlarmResolutionUseCase {
   constructor(
     @Inject(NOTIFY_ALARM_WARD_PORT)
     private readonly notifyPort: NotifyAlarmWardPort,
+    @Inject(NOTIFY_ALARM_RESOLUTION_PORT)
+    private readonly notifyResolutionPort: NotifyAlarmResolutionPort,
     @Inject(WRITE_NOTIFICATION_PORT)
     private readonly writeNotificationPort: WriteNotificationPort,
   ) {}
@@ -32,5 +37,19 @@ export class NotificationsService implements NotifyAlarmWardUseCase {
       timestamp: timeNow,
       ward_id: cmd.alarm.ward_id,
     });
+  }
+
+  async notifyAlarmResolution(cmd: NotifyAlarmResolutionCmd): Promise<void> {
+      await this.notifyResolutionPort.notifyAlarmResolution(cmd);
+
+      if(!cmd.alarmId || !cmd.wardId) throw new Error('Can\'t write notification without parameters');
+
+      const timeNow: string = new Date(Date.now()).toISOString();
+
+      await this.writeNotificationPort.writeNotification({
+        alarm_event_id: cmd.alarmId,
+        timestamp: timeNow,
+        ward_id: cmd.wardId,
+      });
   }
 }

@@ -78,8 +78,21 @@ describe('InternalAuthService', () => {
       password: nextCredential,
     });
 
-    request.flush(null);
-    await callPromise;
+    const accessToken = createAccessToken({
+      userId: 'user-1',
+      username: 'mrossi',
+      role: UserRole.OPERATORE_SANITARIO,
+      isFirstAccess: false,
+    });
+
+    request.flush({ accessToken });
+
+    const session = await callPromise;
+    expect(session.username).toBe('mrossi');
+    expect(session.isFirstAccess).toBe(false);
+    expect(service.getToken()).toBe(accessToken);
+    expect(service.getRole()).toBe(UserRole.OPERATORE_SANITARIO);
+    expect(service.isAuthenticated()).toBe(true);
   });
 
   it('chiama refresh, aggiorna il token e restituisce il nuovo accessToken', async () => {

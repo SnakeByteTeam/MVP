@@ -67,8 +67,16 @@ describe('FirstAccessComponent', () => {
     expect(component.errorType).toBe(AuthErrorType.NEW_PASSWORD_EQUALS_TEMP);
   });
 
-  it('invia setFirstAccessPassword e naviga su login in caso di successo', () => {
-    authServiceMock.setFirstAccessPassword.mockReturnValue(of(undefined));
+  it('invia setFirstAccessPassword e naviga su dashboard in caso di successo', () => {
+    authServiceMock.setFirstAccessPassword.mockReturnValue(
+      of({
+        userId: 'u1',
+        username: 'mrossi',
+        role: 'OPERATORE_SANITARIO',
+        accessToken: 'jwt-token',
+        isFirstAccess: false,
+      })
+    );
 
     component.onUsernameChange('mrossi');
     component.onTempPasswordChange(temporaryCredential);
@@ -80,7 +88,7 @@ describe('FirstAccessComponent', () => {
       temporaryCredential,
       nextCredential
     );
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/auth/login']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard']);
     expect(component.isLoading).toBe(false);
   });
 

@@ -31,7 +31,7 @@ export abstract class AuthBaseComponent {
 			return;
 		}
 
-		void this.router.navigate(['/apartment-monitor']);
+		void this.router.navigate(['/dashboard']);
 	}
 
 	protected handleError(error: unknown): void {

@@ -65,7 +65,7 @@ export class InternalAuthService {
 			`${this.baseUrl}/auth/first-login`,
 			{
 				username,
-				tempPassword: this.decodeTempPassword(temporaryPassword),
+				tempPassword: temporaryPassword,
 				password: newPassword,
 			},
 			{ withCredentials: true }
@@ -184,12 +184,5 @@ export class InternalAuthService {
 		return role === UserRole.AMMINISTRATORE || role === UserRole.OPERATORE_SANITARIO;
 	}
 
-	private decodeTempPassword(tempPassword: string): string {
-		try {
-			// atob() decodifica una stringa base64 in una stringa ASCII
-			return atob(tempPassword);
-		} catch (e) {
-			console.error('Errore durante la decodifica della password temporanea:', e);
-			return tempPassword; // Ritorna l'originale se non è un base64 valido
-		}
-	}
+
+}

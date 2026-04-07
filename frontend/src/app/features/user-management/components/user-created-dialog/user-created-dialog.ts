@@ -17,4 +17,5 @@ export class UserCreatedDialogComponent {
   closeDialog(): void {
     this.closed.emit();
   }
+
 }

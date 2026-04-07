@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS alarm_rule;
 DROP TABLE IF EXISTS status;
 DROP TABLE IF EXISTS plant;
 DROP TABLE IF EXISTS token_cache;
+DROP TABLE IF EXISTS oauth_ticket_cache;
 DROP TABLE IF EXISTS datapoint_history;
 DROP TABLE IF EXISTS ward_user;
 DROP TABLE IF EXISTS "user";
@@ -84,10 +85,21 @@ CREATE UNLOGGED TABLE token_cache (
     access_token  TEXT        NOT NULL,
     refresh_token TEXT        NOT NULL,
     expires_at    TIMESTAMPTZ NOT NULL,
+    user_id       INTEGER     NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    email         VARCHAR(255) NOT NULL,
     lock          BOOLEAN     NOT NULL DEFAULT TRUE,
     CONSTRAINT single_row    UNIQUE (lock),
     CONSTRAINT lock_always_true CHECK (lock = TRUE)
 );
+
+CREATE UNLOGGED TABLE oauth_ticket_cache (
+    ticket     UUID        PRIMARY KEY,
+    user_id    INTEGER     NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX idx_oauth_ticket_cache_expires_at
+    ON oauth_ticket_cache (expires_at);
 
 CREATE TABLE datapoint_history (
     timestamp    TIMESTAMPTZ NOT NULL,

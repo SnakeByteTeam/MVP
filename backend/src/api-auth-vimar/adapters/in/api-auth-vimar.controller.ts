@@ -8,6 +8,7 @@ import {
   Logger,
   Query,
   Redirect,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -40,6 +41,7 @@ import {
   MyVimarAccountStatusDto,
   MyVimarDisconnectResDto,
 } from 'src/api-auth-vimar/infrastructure/dto/my-vimar-account-status.dto';
+import { GET_ACCOUNT_STATUS_USECASE, type GetAccountStatusUseCase } from 'src/api-auth-vimar/application/ports/in/get-account-status.usecase';
 
 @ApiTags('auth')
 @Controller('my-vimar')
@@ -51,14 +53,14 @@ export class ApiAuthVimarController {
     private readonly apiAuthVimarUseCase: ApiAuthUseCase,
     @Inject(GETTOKENSCALLBACKUSECASE)
     private readonly getTokensCallbackUseCase: GetTokensCallbackUseCase,
-    @Inject(GETVALIDTOKENPORT)
-    private readonly getValidTokenPort: GetValidTokenPort,
+    @Inject(GET_ACCOUNT_STATUS_USECASE)
+    private readonly getAccountStatusUseCase: GetAccountStatusUseCase,
     @Inject(DELETETOKENSFROMREPOPORT)
     private readonly deleteTokensFromRepo: DeleteTokensFromRepoPort,
   ) {}
 
   @Get('account')
-  @UseGuards(AdminGuard)
+  @UseGuards(UserGuard, AdminGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Get shared MyVimar account status',
@@ -66,13 +68,16 @@ export class ApiAuthVimarController {
       'Returns whether the shared MyVimar integration is currently linked.',
   })
   @ApiOkResponse({ type: MyVimarAccountStatusDto })
-  async getAccountStatus(): Promise<MyVimarAccountStatusDto> {
+  async getAccountStatus(@Req() req): Promise<MyVimarAccountStatusDto> {
     try {
-      const validToken = await this.getValidTokenPort.getValidToken();
+      const { isLinked, email } =
+        await this.getAccountStatusUseCase.getAccountStatus(req.user.id);
+
+      console.log(`Account status for user ${req.user.id}: ${isLinked}`);
 
       return {
-        isLinked: !!validToken,
-        email: '',
+        isLinked: isLinked,
+        email: email,
       };
     } catch {
       return {
@@ -83,7 +88,7 @@ export class ApiAuthVimarController {
   }
 
   @Delete('account')
-  @UseGuards(AdminGuard)
+  @UseGuards(UserGuard, AdminGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({
     summary: 'Disconnect shared MyVimar account',
@@ -159,31 +164,79 @@ export class ApiAuthVimarController {
     if (!code) {
       throw new BadRequestException('Code is required');
     }
+
+    if (!state) {
+      throw new BadRequestException('State is required');
+    }
+
     try {
       this.logger.log(`Callback received with code: ${code}`);
 
-      let redirectUrl;
+      const parsedState = this.parseState(state);
+      this.logger.log(
+        `Decoded redirect URL from JSON state: ${parsedState.redirectUrl}`,
+      );
+      this.logger.log(
+        `OAuth callback received for user: ${Number(parsedState.userId)}`,
+      );
 
-      if (state) {
-        try {
-          redirectUrl = Buffer.from(state, 'base64').toString('utf-8');
-          this.logger.log(`Decoded redirect URL from state: ${redirectUrl}`);
-        } catch (e: unknown) {
-          const message = e instanceof Error ? e.message : 'Unknown error';
-          this.logger.error(`Failed to decode state: ${message}`);
-        }
-      }
+      await this.getTokensCallbackUseCase.getTokens(
+        code,
+        Number(parsedState.userId)
+      );
 
-      await this.getTokensCallbackUseCase.getTokens(code);
       return {
-        url: redirectUrl,
+        url: parsedState.redirectUrl,
         statusCode: 302,
       };
     } catch (error: unknown) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
       const message = error instanceof Error ? error.message : 'Unknown error';
       const stack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`Error in callback: ${message}`, stack);
       throw new InternalServerErrorException('Internal server error');
     }
+  }
+
+  private parseState(state: string): { redirectUrl: string; userId: string | number } {
+    let decodedState: string;
+
+    try {
+      decodedState = Buffer.from(state, 'base64').toString('utf-8');
+    } catch {
+      throw new BadRequestException('Invalid state format');
+    }
+
+    let parsedState: unknown;
+
+    try {
+      parsedState = JSON.parse(decodedState);
+    } catch {
+      throw new BadRequestException('Invalid state format');
+    }
+
+    if (!parsedState || typeof parsedState !== 'object') {
+      throw new BadRequestException('Invalid state payload');
+    }
+
+    const { redirectUrl, userId } = parsedState as {
+      redirectUrl?: unknown;
+      userId?: unknown;
+    };
+
+    if (typeof redirectUrl !== 'string' || redirectUrl.trim().length === 0) {
+      throw new BadRequestException('State must contain redirectUrl as string');
+    }
+
+    if (typeof userId !== 'string' && typeof userId !== 'number') {
+      throw new BadRequestException(
+        'State must contain userId as string or number',
+      );
+    }
+
+    return { redirectUrl, userId };
   }
 }

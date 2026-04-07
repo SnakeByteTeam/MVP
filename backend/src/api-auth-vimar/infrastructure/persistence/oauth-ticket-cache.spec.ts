@@ -1,8 +1,8 @@
-import { TokenCacheImpl } from './tokens-cache.impl';
 import { Pool } from 'pg';
+import { OAuthTicketCacheImpl } from './oauth-ticket-cache.impl';
 
-describe('TokenCacheImpl', () => {
-  let cacheImpl: TokenCacheImpl;
+describe('OAuthTicketCacheImpl', () => {
+  let cacheImpl: OAuthTicketCacheImpl;
   let pool: jest.Mocked<Pick<Pool, 'connect'>>;
   let queryMock: jest.Mock;
   let releaseMock: jest.Mock;
@@ -18,40 +18,32 @@ describe('TokenCacheImpl', () => {
       }),
     };
 
-    cacheImpl = new TokenCacheImpl(pool as unknown as Pool);
+    cacheImpl = new OAuthTicketCacheImpl(pool as unknown as Pool);
   });
 
-  it('should write tokens in cache and return true when query succeeds', async () => {
+  it('should write ticket in cache and return true when query succeeds', async () => {
     queryMock.mockResolvedValue({ rows: [] });
 
     const expiresAt = new Date('2030-01-01T00:00:00.000Z');
-    const result = await cacheImpl.writeTokens(
-      'access-1',
-      'refresh-1',
-      expiresAt,
-      42,
-      'utente@example.com',
-    );
+    const result = await cacheImpl.writeTicket('ticket-1', 4, expiresAt);
 
     expect(result).toBe(true);
     expect(pool.connect).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO token_cache'),
-      ['access-1', 'refresh-1', expiresAt, 42, 'utente@example.com'],
+      expect.stringContaining('INSERT INTO oauth_ticket_cache'),
+      ['ticket-1', 4, expiresAt],
     );
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should return false when query throws an error', async () => {
-    queryMock.mockRejectedValue(new Error('db error'));
+  it('should return false when write query throws an error', async () => {
+    queryMock.mockRejectedValue(new Error('db write error'));
 
-    const result = await cacheImpl.writeTokens(
-      'access-1',
-      'refresh-1',
+    const result = await cacheImpl.writeTicket(
+      'ticket-1',
+      4,
       new Date('2030-01-01T00:00:00.000Z'),
-      42,
-      'utente@example.com',
     );
 
     expect(result).toBe(false);
@@ -60,37 +52,37 @@ describe('TokenCacheImpl', () => {
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should read tokens from cache and map row fields to token entity', async () => {
+  it('should read valid ticket and map row fields to entity', async () => {
     const expiresAt = new Date('2030-01-01T00:00:00.000Z');
     queryMock.mockResolvedValue({
       rows: [
         {
-          access_token: 'access-1',
-          refresh_token: 'refresh-1',
+          ticket: 'ticket-1',
+          user_id: 7,
           expires_at: expiresAt,
-          user_id: 42,
-          email: 'utente@example.com',
         },
       ],
     });
 
-    const result = await cacheImpl.readTokens();
+    const result = await cacheImpl.readValidTicket('ticket-1');
 
     expect(result).toEqual({
-      accessToken: 'access-1',
-      refreshToken: 'refresh-1',
+      ticket: 'ticket-1',
+      userId: 7,
       expiresAt,
-      userId: 42,
-      email: 'utente@example.com',
     });
-    expect(queryMock).toHaveBeenCalledWith('SELECT * FROM token_cache');
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(queryMock).toHaveBeenCalledWith(
+      expect.stringContaining('FROM oauth_ticket_cache'),
+      ['ticket-1'],
+    );
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should return null when cache has no tokens', async () => {
+  it('should return null when ticket is missing or expired', async () => {
     queryMock.mockResolvedValue({ rows: [] });
 
-    const result = await cacheImpl.readTokens();
+    const result = await cacheImpl.readValidTicket('ticket-1');
 
     expect(result).toBeNull();
     expect(queryMock).toHaveBeenCalledTimes(1);
@@ -100,30 +92,43 @@ describe('TokenCacheImpl', () => {
   it('should rethrow when read query fails', async () => {
     queryMock.mockRejectedValue(new Error('db read error'));
 
-    await expect(cacheImpl.readTokens()).rejects.toThrow('db read error');
+    await expect(cacheImpl.readValidTicket('ticket-1')).rejects.toThrow(
+      'db read error',
+    );
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should delete tokens and return true when query succeeds', async () => {
-    queryMock.mockResolvedValue({ rows: [] });
+  it('should delete ticket and return true when row is deleted', async () => {
+    queryMock.mockResolvedValue({ rowCount: 1 });
 
-    const result = await cacheImpl.deleteTokens();
+    const result = await cacheImpl.deleteTicket('ticket-1');
 
     expect(result).toBe(true);
-    expect(pool.connect).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledTimes(1);
-    expect(queryMock).toHaveBeenCalledWith('DELETE FROM token_cache');
+    expect(queryMock).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM oauth_ticket_cache'),
+      ['ticket-1'],
+    );
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should return false when no rows are deleted', async () => {
+    queryMock.mockResolvedValue({ rowCount: 0 });
+
+    const result = await cacheImpl.deleteTicket('ticket-1');
+
+    expect(result).toBe(false);
+    expect(queryMock).toHaveBeenCalledTimes(1);
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 
   it('should return false when delete query throws', async () => {
     queryMock.mockRejectedValue(new Error('db delete error'));
 
-    const result = await cacheImpl.deleteTokens();
+    const result = await cacheImpl.deleteTicket('ticket-1');
 
     expect(result).toBe(false);
-    expect(pool.connect).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });

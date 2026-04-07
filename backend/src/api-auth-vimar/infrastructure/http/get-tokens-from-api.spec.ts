@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { GetTokensFromApiImpl } from './get-tokens-from-api.impl';
 import { Observable, of } from 'rxjs';
 import { TokensDto } from '../dto/tokens.dto';
@@ -7,6 +8,7 @@ import { TokensDto } from '../dto/tokens.dto';
 describe('GetTokensFromApiImpl', () => {
   let apiImpl: GetTokensFromApiImpl;
   let httpService: jest.Mocked<Pick<HttpService, 'post'>>;
+  let jwtService: jest.Mocked<Pick<JwtService, 'decode'>>;
 
   beforeEach(() => {
     jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
@@ -29,7 +31,14 @@ describe('GetTokensFromApiImpl', () => {
       ),
     };
 
-    apiImpl = new GetTokensFromApiImpl(httpService as unknown as HttpService);
+    jwtService = {
+      decode: jest.fn().mockReturnValue({ email: 'oauth.user@example.com' }),
+    };
+
+    apiImpl = new GetTokensFromApiImpl(
+      httpService as unknown as HttpService,
+      jwtService as unknown as JwtService,
+    );
   });
 
   afterEach(() => {
@@ -42,6 +51,7 @@ describe('GetTokensFromApiImpl', () => {
         accessToken: 'access_token',
         refreshToken: 'refresh_token',
         expiresIn: 600,
+        email: 'oauth.user@example.com',
       };
 
       const result = await apiImpl.getTokensWithCode('my-code');
@@ -79,6 +89,7 @@ describe('GetTokensFromApiImpl', () => {
       delete process.env.REDIRECT_URI;
       const apiWithEmptyConfig = new GetTokensFromApiImpl(
         httpService as unknown as HttpService,
+        jwtService as unknown as JwtService,
       );
 
       await apiWithEmptyConfig.getTokensWithCode('my-code');
@@ -109,6 +120,7 @@ describe('GetTokensFromApiImpl', () => {
         accessToken: 'access_token',
         refreshToken: 'refresh_token',
         expiresIn: 600,
+        email: 'oauth.user@example.com',
       };
 
       const result = await apiImpl.refresh('my-refresh-token');
@@ -144,6 +156,7 @@ describe('GetTokensFromApiImpl', () => {
       delete process.env.HOST2;
       const apiWithMissingTokenUrl = new GetTokensFromApiImpl(
         httpService as unknown as HttpService,
+        jwtService as unknown as JwtService,
       );
 
       await apiWithMissingTokenUrl.refresh('my-refresh-token');

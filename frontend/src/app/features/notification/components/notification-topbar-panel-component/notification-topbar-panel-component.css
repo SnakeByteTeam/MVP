@@ -81,9 +81,3 @@
   font-size: 0.75rem;
   color: #64748b;
 }
-
-@media (max-width: 960px) {
-  .notification-topbar-panel {
-    display: none;
-  }
-}

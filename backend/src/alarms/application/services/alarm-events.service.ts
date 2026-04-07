@@ -26,7 +26,10 @@ import {
 } from '../ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
 import { GetAlarmEventByIdUseCase } from '../ports/in/get-alarm-event-by-id-use-case.interface';
 import { GetAlarmEventByIdCmd } from '../commands/get-alarm-event-by-id-cmd';
-import { GET_ALARM_EVENT_BY_ID_PORT, GetAlarmEventByIdPort } from '../ports/out/get-alarm-event-by-id-port.interface';
+import {
+  GET_ALARM_EVENT_BY_ID_PORT,
+  GetAlarmEventByIdPort,
+} from '../ports/out/get-alarm-event-by-id-port.interface';
 
 @Injectable()
 export class AlarmEventsService

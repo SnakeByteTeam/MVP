@@ -1,23 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
-import { ResolveAlarmEventRepository } from '../../application/repository/resolve-alarm-event-repository.interface';
 import { AlarmEventEntity } from '../entities/alarm-event-entity';
-import { GetAllAlarmEventsRepository } from '../../application/repository/get-all-alarm-events-repository.interface';
-import { GetAllManagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-managed-alarm-events-by-user-id-repository.interface';
-import { CreateAlarmEventRepository } from '../../application/repository/create-alarm-event-repository.interface';
-import { GetAllUnmanagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
-import { GetAlarmEventByIdRepository } from '../../application/repository/get-alarm-event-by-id-repository.interface';
+import { AlarmEventsRepository } from '../../application/repository/alarm-events-repository.interface';
 
-export class AlarmEventsRepositoryImpl
-  implements
-    ResolveAlarmEventRepository,
-    GetAllAlarmEventsRepository,
-    GetAllManagedAlarmEventsByUserIdRepository,
-    GetAllUnmanagedAlarmEventsByUserIdRepository,
-    GetAlarmEventByIdRepository,
-    CreateAlarmEventRepository
-{
+export class AlarmEventsRepositoryImpl implements AlarmEventsRepository {
   constructor(@Inject(PG_POOL) private readonly pool) {}
 
   async getAllAlarmEvents(

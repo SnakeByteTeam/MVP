@@ -4,7 +4,7 @@ import { Observable, catchError, map, of, switchMap, take, tap, timer } from 'rx
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
-import { PlantDto } from '../models/plant-response.model';
+import { PlantDeviceDto, PlantDto } from '../models/plant-response.model';
 import { resolveDeviceType } from '../../../shared/models/device-taxonomy';
 import { InternalAuthService } from '../../../core/services/internal-auth.service';
 import { WardRealtimeCacheService } from '../../../core/alarm/services/ward-realtime-cache.service';
@@ -206,25 +206,85 @@ export class ApartmentApiService {
 			id: plant.id,
 			name: plant.name,
 			isEnabled: true,
-			rooms: plant.rooms.map((room) => ({
-				id: room.id,
-				name: room.name,
-				hasActiveAlarm: false,
-				devices: room.devices.map((device) => ({
-					type: resolveDeviceType({
-						rawType: device.type,
-						rawSubType: device.subType,
-						rawName: device.name,
-						sfeTypes: (device.datapoints ?? []).map((datapoint) => datapoint.sfeType),
-					}),
-					id: device.id,
-					name: device.name,
-					status: this.mapDeviceStatus(device.type),
-					actions: [],
-					datapoints: [],
-				})),
-			})),
+			rooms: plant.rooms.map((room) => {
+				const visibleDevices = this.deduplicateRoomDevices(
+					room.devices.filter((device) => !this.isEnergyMeasureDevice(device.type, device.subType)),
+				);
+
+				return {
+					id: room.id,
+					name: room.name,
+					hasActiveAlarm: false,
+					devices: visibleDevices.map((device) => ({
+						type: resolveDeviceType({
+							rawType: device.type,
+							rawSubType: device.subType,
+							rawName: device.name,
+							sfeTypes: (device.datapoints ?? []).map((datapoint) => datapoint.sfeType),
+						}),
+						id: device.id,
+						name: device.name,
+						status: this.mapDeviceStatus(device.type),
+						actions: [],
+						datapoints: [],
+					})),
+				};
+			}),
 		};
+	}
+
+	private deduplicateRoomDevices(devices: ReadonlyArray<PlantDeviceDto>): PlantDeviceDto[] {
+		const byName = new Map<string, PlantDeviceDto>();
+
+		for (const device of devices) {
+			const key = this.normalizeDeviceName(device.name);
+			const current = byName.get(key);
+
+			if (!current || this.getDevicePriorityScore(device) > this.getDevicePriorityScore(current)) {
+				byName.set(key, device);
+			}
+		}
+
+		return Array.from(byName.values());
+	}
+
+	private normalizeDeviceName(name: string): string {
+		return name.trim().toLowerCase();
+	}
+
+	private getDevicePriorityScore(device: PlantDeviceDto): number {
+		const normalizedType = device.type?.toUpperCase() ?? '';
+		const normalizedSubType = device.subType?.toUpperCase() ?? '';
+
+		let score = 0;
+
+		if (normalizedType.includes('RADARDETECTOR')) {
+			score += 100;
+		}
+
+		if (normalizedSubType === 'SF_ACCESS') {
+			score += 60;
+		}
+
+		if (normalizedType === 'SS_AUTOMATION_ONOFF') {
+			score -= 20;
+		}
+
+		score += device.datapoints?.length ?? 0;
+		return score;
+	}
+
+	private isEnergyMeasureDevice(
+		rawType: string | undefined,
+		rawSubType: string | undefined,
+	): boolean {
+		const normalizedType = rawType?.toUpperCase() ?? '';
+		const normalizedSubType = rawSubType?.toUpperCase() ?? '';
+
+		return (
+			normalizedType.startsWith('SS_ENERGY_MEASURE') ||
+			normalizedSubType === 'SF_ENERGY'
+		);
 	}
 
 	private mapDeviceStatus(rawType: string | undefined): DeviceStatus {

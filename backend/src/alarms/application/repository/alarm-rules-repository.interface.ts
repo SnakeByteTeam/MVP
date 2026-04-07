@@ -4,7 +4,7 @@ import { CheckAlarmEntity } from '../../infrastructure/entities/check-alarm-enti
 
 export interface AlarmRulesRepository {
   checkAlarmRule(
-    deviceId: string,
+    datapointId: string,
     value: string,
     activationTime: string,
   ): Promise<CheckAlarmEntity | null>;

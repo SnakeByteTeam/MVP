@@ -2,6 +2,15 @@ import { AlarmRulesPersistenceAdapter } from './alarm-rules-persistence-adapter'
 
 describe('AlarmRulesPersistenceAdapter', () => {
   it('should be defined', () => {
-    expect(new AlarmRulesPersistenceAdapter()).toBeDefined();
+    const repositoryMock = {
+      createAlarmRule: jest.fn(),
+      deleteAlarmRule: jest.fn(),
+      getAlarmRuleById: jest.fn(),
+      getAllAlarmRules: jest.fn(),
+      updateAlarmRule: jest.fn(),
+      checkAlarmRule: jest.fn(),
+    };
+
+    expect(new AlarmRulesPersistenceAdapter(repositoryMock as any)).toBeDefined();
   });
 });

@@ -15,7 +15,6 @@ import {
 import { GetDeviceValueUseCase } from 'src/device/application/ports/in/get-device-value.usecase';
 import { WriteDatapointValueUseCase } from 'src/device/application/ports/in/write-datapoint-value.usecase';
 import { CheckAlarmRuleUseCase } from 'src/alarms/application/ports/in/check-alarm-rule-use-case.interface';
-import { FindDeviceByDatapointIdUsecase } from 'src/device/application/ports/in/find-device-by-datapointId.usecase';
 import {
   DeviceValue,
   DatapointValue,
@@ -29,7 +28,6 @@ describe('DeviceController', () => {
   let getDeviceValue: jest.Mocked<GetDeviceValueUseCase>;
   let writeDatapointUseCase: jest.Mocked<WriteDatapointValueUseCase>;
   let checkAlarmUseCase: jest.Mocked<CheckAlarmRuleUseCase>;
-  let findDeviceByDatapointId: jest.Mocked<FindDeviceByDatapointIdUsecase>;
 
   beforeEach(() => {
     findDeviceById = {
@@ -56,10 +54,6 @@ describe('DeviceController', () => {
       checkAlarmRule: jest.fn(),
     } as any;
 
-    findDeviceByDatapointId = {
-      findByDatapointId: jest.fn(),
-    } as any;
-
     controller = new DeviceController(
       findDeviceById,
       findDeviceByPlantId,
@@ -67,7 +61,6 @@ describe('DeviceController', () => {
       getDeviceValue,
       writeDatapointUseCase,
       checkAlarmUseCase,
-      findDeviceByDatapointId,
     );
   });
 

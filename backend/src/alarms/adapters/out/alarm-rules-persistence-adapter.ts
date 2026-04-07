@@ -151,7 +151,7 @@ export class AlarmRulesPersistenceAdapter
     const value = this.normalizeValue(req.value);
 
     const alarmRule = await this.alarmRulesRepository.checkAlarmRule(
-      req.deviceId,
+      req.datapointId,
       value,
       time,
     );

@@ -203,6 +203,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
           dearming_time,
           is_armed,
           device_id,
+          datapoint_id,
           plant_id,
           created_at,
           is_changed_when_used
@@ -211,6 +212,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
           $2,                -- new id
           $3, $4, $5, $6, $7, $8, $9,
           device_id,
+          datapoint_id,
           plant_id,
           NOW(),
           FALSE
@@ -242,7 +244,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
   }
 
   async checkAlarmRule(
-    deviceId: string,
+    datapointId: string,
     value: string,
     activationTime: string,
   ): Promise<CheckAlarmEntity | null> {
@@ -253,7 +255,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
         NULL::varchar AS alarm_event_id
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
-      WHERE ar.device_id = $2
+      WHERE ar.datapoint_id = $2
         AND ar.is_armed = TRUE
         AND ar.is_changed_when_used = FALSE
         AND (
@@ -294,7 +296,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
           )
         )
       LIMIT 1`,
-      [activationTime, deviceId, value],
+      [activationTime, datapointId, value],
     );
 
     return result.rows[0];

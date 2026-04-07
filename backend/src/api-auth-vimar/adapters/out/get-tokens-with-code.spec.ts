@@ -12,6 +12,7 @@ describe('GetTokensWithCodeAdapter', () => {
       accessToken: 'access_token_1',
       refreshToken: 'refresh_token_1',
       expiresIn: 600,
+      email: 'utente@example.com',
     };
 
     getTokensFromApiPort = {
@@ -30,10 +31,11 @@ describe('GetTokensWithCodeAdapter', () => {
     expect(getTokensFromApiPort.getTokensWithCode).toHaveBeenCalledWith(
       'my-code',
     );
-    expect(tokens.getAccessToken()).toBe('access_token_1');
-    expect(tokens.getRefreshToken()).toBe('refresh_token_1');
+    expect(tokens.tokenPair.getAccessToken()).toBe('access_token_1');
+    expect(tokens.tokenPair.getRefreshToken()).toBe('refresh_token_1');
+    expect(tokens.email).toBe('utente@example.com');
 
-    const expiresAt = tokens.getExpiresAt().getTime();
+    const expiresAt = tokens.tokenPair.getExpiresAt().getTime();
     const expected = now + 600 * 1000;
     expect(expiresAt).toBeGreaterThanOrEqual(expected - 1000);
     expect(expiresAt).toBeLessThanOrEqual(expected + 1000);

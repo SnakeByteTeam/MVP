@@ -9,22 +9,21 @@ export class AlarmManagementTablePresenterService {
             const isOpen = alarm.resolutionTime === null;
             const isManaged = !isOpen;
             const isResolving = resolvingId === alarm.id;
+            const safeAlarmName = this.getSafeAlarmName(alarm.alarmName);
 
             return {
                 isManaged,
                 id: alarm.id,
                 priority: alarm.priority,
-                name: alarm.alarmName,
+                name: safeAlarmName,
                 device: this.getSafeDevice(alarm.deviceId),
                 location: this.getSafeLocation(alarm.position),
                 status: isOpen ? 'Da gestire' : 'Non da gestire',
                 openedAt: alarm.activationTime,
-                // closedAt: this.toShortTime(alarm.resolutionTime),
-                // manager: this.getSafeManager(alarm.userUsername),
                 isResolving,
                 isActionDisabled: isManaged || isResolving,
                 actionLabel: this.getActionLabel(isResolving, isManaged),
-                actionAriaLabel: this.getActionAriaLabel(alarm.alarmName, isManaged),
+                actionAriaLabel: this.getActionAriaLabel(safeAlarmName, isManaged),
             };
         });
     }
@@ -37,15 +36,6 @@ export class AlarmManagementTablePresenterService {
 
         return '-';
     }
-
-    // private getSafeManager(userUsername: string | null | undefined): string {
-    //     const normalizedUsername = (userUsername ?? '').trim();
-    //     if (normalizedUsername.length > 0) {
-    //         return normalizedUsername;
-    //     }
-
-    //     return '-';
-    // }
 
     private getActionLabel(isResolving: boolean, isManaged: boolean): string {
         if (isResolving) {
@@ -67,29 +57,21 @@ export class AlarmManagementTablePresenterService {
         return `Gestisci allarme ${alarmName}`;
     }
 
-    private getSafeLocation(position: string): string {
-        const normalizedPosition = position.trim();
+    private getSafeAlarmName(alarmName: string | null | undefined): string {
+        const normalizedAlarmName = (alarmName ?? '').trim();
+        if (normalizedAlarmName.length > 0) {
+            return normalizedAlarmName;
+        }
+
+        return 'senza nome';
+    }
+
+    private getSafeLocation(position: string | null | undefined): string {
+        const normalizedPosition = (position ?? '').trim();
         if (normalizedPosition.length > 0) {
             return normalizedPosition;
         }
 
         return '-';
     }
-
-    // private toShortTime(dateTime: string | null): string {
-    //     if (dateTime === null) {
-    //         return '-';
-    //     }
-
-    //     const parsed = Date.parse(dateTime);
-    //     if (Number.isNaN(parsed)) {
-    //         return dateTime.slice(0, 5);
-    //     }
-
-    //     return new Date(parsed).toLocaleTimeString('it-IT', {
-    //         hour: '2-digit',
-    //         minute: '2-digit',
-    //         hour12: false,
-    //     });
-    // }
 }

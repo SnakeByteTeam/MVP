@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
 import { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { AlarmTableShellComponent } from '../../../../shared/components/alarm-table/alarm-table-shell.component';
 import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
@@ -50,6 +51,7 @@ export class AlarmConfigPageComponent implements OnInit {
 	public readonly isModalOpen = signal(false);
 	public readonly editingRule = signal<AlarmRule | null>(null);
 	public readonly pendingDelete = signal<{ id: string; name: string } | null>(null);
+	public readonly pendingToggleRuleId = signal<string | null>(null);
 
 	public readonly rows = computed(() => {
 		this.deviceCatalog.revision();
@@ -77,7 +79,22 @@ export class AlarmConfigPageComponent implements OnInit {
 	}
 
 	public onToggleEnabled(alarmRuleId: string, enabled: boolean): void {
-		this.stateService.toggleEnabled(alarmRuleId, enabled).subscribe();
+		if (this.pendingToggleRuleId() !== null) {
+			return;
+		}
+
+		this.pendingToggleRuleId.set(alarmRuleId);
+
+		this.stateService
+			.toggleEnabled(alarmRuleId, enabled)
+			.pipe(
+				finalize(() => {
+					if (this.pendingToggleRuleId() === alarmRuleId) {
+						this.pendingToggleRuleId.set(null);
+					}
+				}),
+			)
+			.subscribe();
 	}
 
 	public onDelete(id: string, name: string): void {

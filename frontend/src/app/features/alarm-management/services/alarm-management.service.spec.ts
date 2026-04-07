@@ -23,7 +23,6 @@ describe('AlarmManagementService', () => {
 
     const alarmApiStub = {
         getActiveAlarms: vi.fn(),
-        getActiveAlarmsOfOperator: vi.fn(),
         resolveAlarm: vi.fn(),
     };
 
@@ -77,7 +76,6 @@ describe('AlarmManagementService', () => {
             activeAlarmsSubject.next(next);
         });
         alarmApiStub.getActiveAlarms.mockReturnValue(of([]));
-        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValue(of([]));
         authServiceStub.getCurrentUser$.mockReturnValue(sessionSubject.asObservable());
 
         TestBed.configureTestingModule({
@@ -96,7 +94,6 @@ describe('AlarmManagementService', () => {
         service = createService();
 
         expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
-        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
         expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
     });
 
@@ -108,13 +105,12 @@ describe('AlarmManagementService', () => {
         service.initialize();
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
-        expect(alarmApiStub.getActiveAlarmsOfOperator).not.toHaveBeenCalled();
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
-    it('initialize per OSS mantiene tutti gli allarmi restituiti dall endpoint operatore', () => {
+    it('initialize per OSS usa endpoint unmanaged con userId numerico', () => {
         sessionSubject.next({
             userId: '7',
             username: 'oss',
@@ -124,15 +120,14 @@ describe('AlarmManagementService', () => {
         });
 
         const initialSnapshot: ActiveAlarm[] = [alarmA, alarmB];
-        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of(initialSnapshot));
+        alarmApiStub.getActiveAlarms.mockReturnValueOnce(of(initialSnapshot));
 
         service = createService();
         service.initialize();
 
-        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
-        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledTimes(2);
-        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('7', 6, 0);
-        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenNthCalledWith(2, '7', 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledWith(7, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 7, 6, 6);
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith(initialSnapshot, 'replace');
     });
 
@@ -233,8 +228,8 @@ describe('AlarmManagementService', () => {
 
         expect(vm.alarms.length).toBe(1);
         expect(vm.alarms[0].id).toBe(alarmA.id);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
         expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA], 'replace');
     });
 
@@ -266,13 +261,13 @@ describe('AlarmManagementService', () => {
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(7, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 99, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(7, 99, 6, 6);
         expect(vm.currentPage).toBe(1);
         expect(vm.pageOffset).toBe(0);
         expect(vm.canGoNext).toBe(false);
@@ -307,10 +302,10 @@ describe('AlarmManagementService', () => {
         service.initialize();
         service.nextPage();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 99, 6, 12);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.currentPage).toBe(2);
@@ -327,8 +322,8 @@ describe('AlarmManagementService', () => {
         service.nextPage();
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.currentPage).toBe(1);
@@ -386,12 +381,12 @@ describe('AlarmManagementService', () => {
         service.nextPage();
         service.previousPage();
 
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 6, 6);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 6, 12);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(3, 99, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(4, 99, 6, 12);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(5, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(6, 99, 6, 6);
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
         expect(vm.currentPage).toBe(1);
@@ -407,8 +402,8 @@ describe('AlarmManagementService', () => {
         service.previousPage();
 
         expect(alarmApiStub.getActiveAlarms).toHaveBeenCalledTimes(2);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 6, 0);
-        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 6, 6);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(1, 99, 6, 0);
+        expect(alarmApiStub.getActiveAlarms).toHaveBeenNthCalledWith(2, 99, 6, 6);
     });
 
     it('in errore resetta resolving e valorizza resolveError nel vm', async () => {
@@ -456,7 +451,7 @@ describe('AlarmManagementService', () => {
         expect(vm.resolveError).toBe('Errore durante il caricamento degli allarmi attivi.');
     });
 
-    it('initialize OSS con userId non numerico non applica filtri frontend alla lista', async () => {
+    it('initialize con userId non numerico non chiama API e valorizza errore esplicito', async () => {
         sessionSubject.next({
             userId: 'abc',
             username: 'oss',
@@ -465,16 +460,14 @@ describe('AlarmManagementService', () => {
             isFirstAccess: false,
         });
 
-        alarmApiStub.getActiveAlarmsOfOperator.mockReturnValueOnce(of([alarmA, alarmB]));
-
         service = createService();
         service.initialize();
 
-        expect(alarmApiStub.getActiveAlarmsOfOperator).toHaveBeenCalledWith('abc', 6, 0);
-        expect(alarmStateStub.setActiveAlarms).toHaveBeenCalledWith([alarmA, alarmB], 'replace');
+        expect(alarmApiStub.getActiveAlarms).not.toHaveBeenCalled();
+        expect(alarmStateStub.setActiveAlarms).not.toHaveBeenCalled();
 
         const vm = await firstValueFrom(service.vm$.pipe(take(1)));
-        expect(vm.alarms).toEqual([alarmA, alarmB]);
+        expect(vm.resolveError).toBe('Utente corrente non valido per caricare gli allarmi attivi.');
     });
 
     it('consente richieste concorrenti e termina resolving solo a completamento di tutte', async () => {

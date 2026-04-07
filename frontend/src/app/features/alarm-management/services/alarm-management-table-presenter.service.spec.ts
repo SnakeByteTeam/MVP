@@ -87,4 +87,27 @@ describe('AlarmManagementTablePresenterService', () => {
         expect(row.device).toBe('-');
         expect(row.openedAt).toBe('abcde12345');
     });
+
+    it('normalizza nome allarme vuoto per testo riga e aria label', () => {
+        const unnamedAlarm: ActiveAlarm = {
+            ...baseAlarm,
+            alarmName: '   ',
+        };
+
+        const row = service.toRows([unnamedAlarm], null)[0];
+
+        expect(row.name).toBe('senza nome');
+        expect(row.actionAriaLabel).toBe('Gestisci allarme senza nome');
+    });
+
+    it('gestisce posizione null senza eccezioni runtime', () => {
+        const invalidAlarm = {
+            ...baseAlarm,
+            position: null,
+        } as unknown as ActiveAlarm;
+
+        const row = service.toRows([invalidAlarm], null)[0];
+
+        expect(row.location).toBe('-');
+    });
 });

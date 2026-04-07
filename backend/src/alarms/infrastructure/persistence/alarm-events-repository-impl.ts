@@ -5,17 +5,18 @@ import { PG_POOL } from '../../../database/database.module';
 import { ResolveAlarmEventRepository } from '../../application/repository/resolve-alarm-event-repository.interface';
 import { AlarmEventEntity } from '../entities/alarm-event-entity';
 import { GetAllAlarmEventsRepository } from '../../application/repository/get-all-alarm-events-repository.interface';
-import { GetAllAlarmEventsByUserIdRepository } from '../../application/repository/get-all-alarm-events-by-user-id-repository.interface';
+import { GetAllManagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-managed-alarm-events-by-user-id-repository.interface';
 import { CreateAlarmEventRepository } from '../../application/repository/create-alarm-event-repository.interface';
+import { GetAllUnmanagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
 
 export class AlarmEventsRepositoryImpl
   implements
-    ResolveAlarmEventRepository,
-    GetAllAlarmEventsRepository,
-    GetAllAlarmEventsByUserIdRepository,
-    CreateAlarmEventRepository
-{
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  ResolveAlarmEventRepository,
+  GetAllAlarmEventsRepository,
+  GetAllManagedAlarmEventsByUserIdRepository,
+  GetAllUnmanagedAlarmEventsByUserIdRepository,
+  CreateAlarmEventRepository {
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async getAllAlarmEvents(
     limit: number = 5,
@@ -26,6 +27,7 @@ export class AlarmEventsRepositoryImpl
         ae.id,
         room->>'name' AS room_name,
         device->>'name' AS device_name,
+        ar.device_id,
         ae.alarm_rule_id,
         ar.name AS alarm_name,
         ar.priority,
@@ -52,7 +54,7 @@ export class AlarmEventsRepositoryImpl
     return result.rows;
   }
 
-  async getAllAlarmEventsByUserId(
+  async getAllManagedAlarmEventsByUserId(
     id: number,
     limit: number = 10,
     offset: number = 0,
@@ -60,8 +62,9 @@ export class AlarmEventsRepositoryImpl
     const result = await this.pool.query(
       `SELECT 
         ae.id,
-        room->>'name' AS room_name,
+        (p.data->>'name') || ' - ' || (room->>'name') AS room_name,
         device->>'name' AS device_name,
+        ar.device_id,
         ae.alarm_rule_id,
         ar.name AS alarm_name,
         ar.priority,
@@ -72,19 +75,67 @@ export class AlarmEventsRepositoryImpl
       FROM alarm_event ae
       LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
       LEFT JOIN plant p ON p.id = ar.plant_id
-      INNER JOIN ward_user wu ON wu.ward_id = p.ward_id AND wu.user_id = $1
-      LEFT JOIN "user" u ON u.id = wu.user_id
+      JOIN "user" u_req ON u_req.id = $1
+      JOIN role r ON r.id = u_req.roleId
+      LEFT JOIN ward_user wu 
+        ON wu.ward_id = p.ward_id AND wu.user_id = $1
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
       LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
       LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
       WHERE dp->>'id' = ar.device_id
-            AND ae.resolution_time IS NULL
-
-      ORDER BY 
-        ae.resolution_time IS NOT NULL,
+      AND ae.resolution_time IS NOT NULL
+      AND (
+        r.name = 'Amministratore'
+        OR wu.user_id IS NOT NULL
+      )
+      ORDER BY
         ar.priority DESC,
         ae.activation_time ASC
-      LIMIT $2 OFFSET $3`,
+      LIMIT $2 OFFSET $3;`,
+      [id, limit, offset],
+    );
+
+    return result.rows;
+  }
+
+  async getAllUnmanagedAlarmEventsByUserId(
+    id: number,
+    limit: number,
+    offset: number,
+  ): Promise<AlarmEventEntity[]> {
+    const result = await this.pool.query(
+      `SELECT 
+        ae.id,
+        (p.data->>'name') || ' - ' || (room->>'name') AS room_name,
+        device->>'name' AS device_name,
+        ar.device_id,
+        ae.alarm_rule_id,
+        ar.name AS alarm_name,
+        ar.priority,
+        ae.activation_time,
+        ae.resolution_time,
+        0 as user_id,
+        '' as user_username
+      FROM alarm_event ae
+      LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      JOIN "user" u_req ON u_req.id = $1
+      JOIN role r ON r.id = u_req.roleId
+      LEFT JOIN ward_user wu 
+        ON wu.ward_id = p.ward_id AND wu.user_id = $1
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      LEFT JOIN LATERAL jsonb_array_elements(device->'datapoints') AS dp ON true
+      WHERE dp->>'id' = ar.device_id
+      AND ae.resolution_time IS NULL
+      AND (
+        r.name = 'Amministratore' 
+        OR wu.user_id IS NOT NULL
+      )
+      ORDER BY
+        ar.priority DESC,
+        ae.activation_time ASC
+      LIMIT $2 OFFSET $3;`,
       [id, limit, offset],
     );
 

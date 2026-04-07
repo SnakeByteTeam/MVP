@@ -15,7 +15,6 @@ import {
 import { ActiveAlarm } from '../../../core/alarm/models/active-alarm.model';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
-import { UserRole } from '../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../core/services/internal-auth.service';
 import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
@@ -151,13 +150,13 @@ export class AlarmManagementService {
             .subscribe();
     }
 
-    // OSS: endpoint reparto; Admin: endpoint globale
     private getActiveAlarmsForSession$(session: UserSession | null, offset: number): Observable<ActiveAlarm[]> {
-        if (session?.role === UserRole.OPERATORE_SANITARIO) {
-            return this.alarmApiService.getActiveAlarmsOfOperator(session.userId, this.pageLimit, offset);
+        const numericUserId = Number(session?.userId);
+        if (!Number.isInteger(numericUserId)) {
+            throw new TypeError('Utente corrente non valido per caricare gli allarmi attivi.');
         }
 
-        return this.alarmApiService.getActiveAlarms(this.pageLimit, offset);
+        return this.alarmApiService.getActiveAlarms(numericUserId, this.pageLimit, offset);
     }
 
     private loadPageState$(

@@ -1,4 +1,4 @@
-import { GetAllAlarmEventsByUserIdCmd } from './get-all-alarm-events-by-user-id-cmd';
+import { GetAllAlarmEventsByUserIdCmd } from './get-all-managed-alarm-events-by-user-id-cmd';
 
 describe('GetAllAlarmEventsByUserIdCmd', () => {
   it('should be defined', () => {

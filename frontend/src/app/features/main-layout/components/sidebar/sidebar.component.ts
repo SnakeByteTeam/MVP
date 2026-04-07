@@ -7,9 +7,9 @@ import { CommonModule } from '@angular/common';
     selector: 'app-sidebar',
     standalone: true,
     imports: [
-    RouterLink,       
-    RouterLinkActive,
-    CommonModule,
+        RouterLink,
+        RouterLinkActive,
+        CommonModule,
     ],
     templateUrl: './sidebar.component.html',
     styleUrl: './sidebar.component.css'
@@ -17,7 +17,6 @@ import { CommonModule } from '@angular/common';
 export class SidebarComponent {
     @Input() navItems!: NavItem[];
     @Input() isCollapsed!: boolean;
-    @Input() activeAlarmCount!: number;
     @Input() isProfileMode = false;
     @Input() canOpenProfile = false;
     @Output() profileClicked = new EventEmitter<void>();

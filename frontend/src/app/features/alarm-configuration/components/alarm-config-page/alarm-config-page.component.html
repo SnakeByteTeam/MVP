@@ -52,8 +52,8 @@
                         (pressed)="onEdit(row.id)" />
                     <app-alarm-action-button label="ELIMINA" tone="danger" [ariaLabel]="'Elimina regola ' + row.name"
                         (pressed)="onDelete(row.id, row.name)" />
-                    <app-alarm-toggle-switch [checked]="row.isEnabled" [ariaLabel]="'Abilita regola ' + row.name"
-                        (toggled)="onToggleEnabled(row.id, $event)" />
+                    <app-alarm-toggle-switch [checked]="row.isEnabled" [disabled]="pendingToggleRuleId() === row.id"
+                        [ariaLabel]="'Abilita regola ' + row.name" (toggled)="onToggleEnabled(row.id, $event)" />
                 </div>
             </td>
         </tr>

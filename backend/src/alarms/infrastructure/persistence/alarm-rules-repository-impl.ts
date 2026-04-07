@@ -11,6 +11,7 @@ import { UpdateAlarmRuleRepository } from '../../application/repository/update-a
 import { GetAlarmRuleByIdRepository } from '../../application/repository/get-alarm-rule-by-id-repository.interface';
 import { CheckAlarmRuleRepository } from '../../application/repository/check-alarm-rule-repository.interface';
 import { CheckAlarmEntity } from '../entities/check-alarm-entity';
+import { v4 as uuidv4 } from 'uuid';
 
 export class AlarmRulesRepositoryImpl
   implements
@@ -57,7 +58,7 @@ export class AlarmRulesRepositoryImpl
         dearmingTime,
         true,
         deviceId,
-        plantId
+        plantId,
       ],
     );
     return result.rows[0];
@@ -66,13 +67,34 @@ export class AlarmRulesRepositoryImpl
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
       `SELECT * FROM alarm_rule 
-       ORDER BY updated_at DESC, created_at DESC`,
+       WHERE is_changed_when_used = FALSE
+       ORDER BY created_at DESC`,
     );
     return result.rows;
   }
 
   async deleteAlarmRule(id: string): Promise<void> {
-    await this.pool.query(`DELETE FROM alarm_rule WHERE id = $1`, [id]);
+    const deleteResult = await this.pool.query(
+      `DELETE FROM alarm_rule
+      WHERE id = $1
+      AND NOT EXISTS (
+        SELECT 1
+        FROM alarm_event
+        WHERE alarm_rule_id = $1
+      )
+      `,
+      [id],
+    );
+
+    if (deleteResult.rowCount === 0) {
+      await this.pool.query(
+        `UPDATE alarm_rule
+        SET is_changed_when_used = TRUE
+        WHERE id = $1
+        `,
+        [id],
+      );
+    }
   }
 
   async updateAlarmRule(
@@ -85,30 +107,108 @@ export class AlarmRulesRepositoryImpl
     dearmingTime: string,
     isArmed: boolean,
   ): Promise<AlarmRuleEntity> {
-    const result = await this.pool.query(
-      `UPDATE alarm_rule SET
-        name = $2,
-        priority = $3,
-        threshold_operator = $4,
-        threshold_value = $5,
-        arming_time = $6,
-        dearming_time = $7,
-        is_armed = $8,
-        updated_at = NOW()
+    const client = await this.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const usageCheck = await client.query(
+        `SELECT EXISTS (
+          SELECT 1 FROM alarm_event WHERE alarm_rule_id = $1
+        ) AS used
+        `,
+        [id],
+      );
+
+      const isUsed = usageCheck.rows[0].used;
+
+      if (!isUsed) {
+        const result = await client.query(
+          `UPDATE alarm_rule SET
+            name = $2,
+            priority = $3,
+            threshold_operator = $4,
+            threshold_value = $5,
+            arming_time = $6,
+            dearming_time = $7,
+            is_armed = $8,
+            updated_at = NOW()
+          WHERE id = $1
+          RETURNING *
+          `,
+          [
+            id,
+            name,
+            priority,
+            thresholdOperator,
+            thresholdValue,
+            armingTime,
+            dearmingTime,
+            isArmed,
+          ],
+        );
+
+        await client.query('COMMIT');
+        return result.rows[0];
+      }
+
+      await client.query(
+        `UPDATE alarm_rule
+        SET is_changed_when_used = TRUE,
+          updated_at = NOW()
         WHERE id = $1
-        RETURNING *`,
-      [
-        id,
-        name,
-        priority,
-        thresholdOperator,
-        thresholdValue,
-        armingTime,
-        dearmingTime,
-        isArmed,
-      ],
-    );
-    return result.rows[0];
+        `,
+        [id],
+      );
+
+      const insertResult = await client.query(
+        `INSERT INTO alarm_rule (
+          id,
+          name,
+          threshold_operator,
+          threshold_value,
+          priority,
+          arming_time,
+          dearming_time,
+          is_armed,
+          device_id,
+          plant_id,
+          created_at,
+          updated_at,
+          is_changed_when_used
+        )
+        SELECT
+          $2,                -- new id
+          $3, $4, $5, $6, $7, $8, $9,
+          device_id,
+          plant_id,
+          NOW(),
+          NOW(),
+          FALSE
+        FROM alarm_rule
+        WHERE id = $1
+        RETURNING *
+        `,
+        [
+          id,
+          uuidv4(),
+          name,
+          thresholdOperator,
+          thresholdValue,
+          priority,
+          armingTime,
+          dearmingTime,
+          isArmed,
+        ],
+      );
+
+      await client.query('COMMIT');
+      return insertResult.rows[0];
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async checkAlarmRule(
@@ -119,18 +219,10 @@ export class AlarmRulesRepositoryImpl
     const result = await this.pool.query<CheckAlarmEntity>(
       `SELECT
         ar.id AS alarm_rule_id,
-        ward_match.ward_id,
+        p.ward_id,
         NULL::varchar AS alarm_event_id
       FROM alarm_rule ar
-      LEFT JOIN LATERAL (
-        SELECT p.ward_id
-        FROM plant p
-        JOIN LATERAL jsonb_array_elements(COALESCE(p.data->'rooms', '[]'::jsonb)) room ON TRUE
-        JOIN LATERAL jsonb_array_elements(COALESCE(room->'devices', '[]'::jsonb)) dev ON TRUE
-        WHERE dev->>'id' = ar.device_id
-        ORDER BY p.cached_at DESC
-        LIMIT 1
-      ) ward_match ON TRUE
+      LEFT JOIN plant p ON p.id = ar.plant_id
       WHERE ar.device_id = $2
         AND ar.is_armed = true
         AND (

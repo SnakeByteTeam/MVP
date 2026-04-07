@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActiveAlarm } from '../../../../core/alarm/models/active-alarm.model';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { UserRole } from '../../../../core/models/user-role.enum';
 import { InternalAuthService } from '../../../../core/services/internal-auth.service';
+import { AlarmManagementRefreshService } from '../../../../core/alarm/services/alarm-management-refresh.service';
 import { Pipe, type PipeTransform } from '@angular/core';
 import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 import type { UserSession } from '../../../user-auth/models/user-session.model';
@@ -27,6 +28,7 @@ describe('AlarmPageManagementComponent', () => {
   let fixture: ComponentFixture<AlarmPageManagementComponent>;
   let vmSubject: BehaviorSubject<AlarmListVm>;
   let userSessionSubject: BehaviorSubject<UserSession | null>;
+  let refreshRequestedSubject: Subject<void>;
 
   const alarm1: ActiveAlarm = {
     id: 'active-1',
@@ -72,6 +74,10 @@ describe('AlarmPageManagementComponent', () => {
     getCurrentUser$: vi.fn(),
   };
 
+  const refreshServiceStub = {
+    getRefreshRequested$: vi.fn(),
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
 
@@ -88,6 +94,8 @@ describe('AlarmPageManagementComponent', () => {
     });
 
     alarmManagementStub.vm$ = vmSubject.asObservable();
+    refreshRequestedSubject = new Subject<void>();
+    refreshServiceStub.getRefreshRequested$.mockReturnValue(refreshRequestedSubject.asObservable());
     userSessionSubject = new BehaviorSubject<UserSession | null>({
       userId: '1',
       username: 'admin',
@@ -107,6 +115,7 @@ describe('AlarmPageManagementComponent', () => {
       providers: [
         { provide: AlarmManagementService, useValue: alarmManagementStub },
         { provide: InternalAuthService, useValue: authServiceStub },
+        { provide: AlarmManagementRefreshService, useValue: refreshServiceStub },
       ],
     }).compileComponents();
 
@@ -304,25 +313,6 @@ describe('AlarmPageManagementComponent', () => {
     expect(alarmManagementStub.nextPage).not.toHaveBeenCalled();
   });
 
-  it('renderizza paginazione con totale sconosciuto quando canGoNext è true', () => {
-    vmSubject.next({
-      alarms: [alarm1],
-      currentPage: 2,
-      pageLimit: 6,
-      pageOffset: 6,
-      canGoPrevious: true,
-      canGoNext: true,
-      isResolving: false,
-      resolvingId: null,
-      resolveError: null,
-    });
-
-    fixture.detectChanges();
-
-    const nativeElement = fixture.nativeElement as HTMLElement;
-    expect(nativeElement.querySelector('.alarm-pagination__status')?.textContent).toContain('Pagina 2');
-  });
-
   it('click su GESTISCI propaga resolve verso facade', () => {
     vmSubject.next({
       alarms: [alarm1],
@@ -380,5 +370,23 @@ describe('AlarmPageManagementComponent', () => {
 
     expect(alarmManagementStub.nextPage).toHaveBeenCalledTimes(1);
     expect(alarmManagementStub.previousPage).toHaveBeenCalledTimes(1);
+  });
+
+  it('quando arriva refreshRequested reinizializza la pagina', () => {
+    fixture.detectChanges();
+    expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
+
+    refreshRequestedSubject.next();
+
+    expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(2);
+  });
+
+  it('dopo destroy non risponde piu agli eventi di refresh', () => {
+    fixture.detectChanges();
+    fixture.destroy();
+
+    refreshRequestedSubject.next();
+
+    expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
   });
 });

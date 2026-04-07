@@ -11,6 +11,7 @@ const {
   metric: METRIC,
   unit: UNIT,
   sfeType: SFE_TYPE,
+  desc: DESC,
 } = AnalyticsMetric.THERMOSTAT_TEMPERATURE;
 
 @Injectable()
@@ -68,7 +69,7 @@ export class PlantThermostatTemperature implements AnalyticsStrategy {
     const values = sorted.map(([, { sum, count }]) => sum / count);
 
     return new Plot(TITLE, METRIC, UNIT, labels, [
-      new Series(METRIC, TITLE, values),
+      new Series(METRIC, DESC, values),
     ]);
   }
 }

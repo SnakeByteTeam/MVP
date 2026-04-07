@@ -40,7 +40,7 @@ CREATE TABLE "user" (
     username VARCHAR(255) UNIQUE NOT NULL,
     surname VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255),
     temp_password VARCHAR(255) UNIQUE NOT NULL,
     first_access BOOLEAN DEFAULT TRUE,
     roleId INTEGER NOT NULL,
@@ -420,17 +420,22 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     device_id          VARCHAR(255) NOT NULL,
     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
     created_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-    updated_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+    updated_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    is_changed_when_used BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 
-
 CREATE TABLE IF NOT EXISTS alarm_event (
-    id              VARCHAR(255) PRIMARY KEY,
-    activation_time TIMESTAMP    NOT NULL,
-    resolution_time TIMESTAMP,
-    alarm_rule_id   VARCHAR(255) NOT NULL REFERENCES alarm_rule(id),
-    user_id         INTEGER      REFERENCES "user"(id)
+    id VARCHAR(255) PRIMARY KEY,
+    alarm_rule_id VARCHAR(255),
+    activation_time TIMESTAMPTZ NOT NULL,
+    resolution_time TIMESTAMPTZ,
+    user_id INTEGER,
+    FOREIGN KEY (alarm_rule_id)
+        REFERENCES alarm_rule(id)
+        ON DELETE SET NULL,
+    FOREIGN KEY (user_id)
+        REFERENCES "user"(id)
 );
 
 CREATE TABLE IF NOT EXISTS notification (

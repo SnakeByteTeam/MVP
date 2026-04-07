@@ -146,43 +146,37 @@ describe('AlarmApiService', () => {
         request.flush(null);
     });
 
-    it('getActiveAlarms chiama GET /alarm-events/:limit/:offset e restituisce la lista', () => {
-        service.getActiveAlarms(6, 0).subscribe((result) => {
+    it('getActiveAlarms chiama GET /alarm-events/unmanaged/:userId/:limit/:offset e restituisce la lista', () => {
+        service.getActiveAlarms(7, 6, 0).subscribe((result) => {
             expect(result).toEqual([activeAlarm]);
             expect(result).toHaveLength(1);
         });
 
-        const request = httpController.expectOne(`${alarmEventsBaseUrl}/6/0`);
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/unmanaged/7/6/0`);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
     });
 
-    it('getActiveAlarmsOfOperator chiama GET /alarm-events/:userId/:limit/:offset', () => {
-        const activeAlarmByUserDto = {
-            id: 'active-1',
-            alarmRuleId: 'alarm-1',
-            deviceId: 'dev-1',
-            alarmName: 'Temperatura alta',
-            priority: AlarmPriority.RED,
-            activationTime: '2026-03-24T10:00:00.000Z',
-            resolutionTime: null,
-            position: 'Camera 101',
-            userUsername: 'oss_7',
-        };
-
-        service.getActiveAlarmsOfOperator('operator-7', 6, 12).subscribe((result) => {
-            expect(result).toEqual([
-                {
-                    ...activeAlarmByUserDto,
-                    userId: null,
-                },
-            ]);
-            expect(result).toHaveLength(1);
+    it('getResolvedAlarms chiama GET /alarm-events/managed/:userId/:limit/:offset e restituisce la lista', () => {
+        service.getResolvedAlarms(7, 12, 6).subscribe((result) => {
+            expect(result).toEqual([activeAlarm]);
         });
 
-        const request = httpController.expectOne(`${alarmEventsBaseUrl}/operator-7/6/12`);
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/managed/7/12/6`);
         expect(request.request.method).toBe('GET');
-        request.flush([activeAlarmByUserDto]);
+        request.flush([activeAlarm]);
+    });
+
+    it('getActiveAlarms valida userId, limit e offset interi', () => {
+        expect(() => service.getActiveAlarms(1.5)).toThrow('userId must be an integer.');
+        expect(() => service.getActiveAlarms(7, 2.5, 0)).toThrow('limit and offset must be integers.');
+        expect(() => service.getActiveAlarms(7, 2, 1.5)).toThrow('limit and offset must be integers.');
+    });
+
+    it('getResolvedAlarms valida userId, limit e offset interi', () => {
+        expect(() => service.getResolvedAlarms(1.5)).toThrow('userId must be an integer.');
+        expect(() => service.getResolvedAlarms(7, 2.5, 0)).toThrow('limit and offset must be integers.');
+        expect(() => service.getResolvedAlarms(7, 2, 1.5)).toThrow('limit and offset must be integers.');
     });
 
     it('resolveAlarm chiama PATCH /alarm-events/resolve', () => {
@@ -205,6 +199,16 @@ describe('AlarmApiService', () => {
         expect(request.request.method).toBe('PATCH');
         expect(request.request.body).toEqual({ alarmId: 'active/1', userId: 9 });
         request.flush(null);
+    });
+
+    it('getAlarmRules restituisce lista vuota senza errori di parsing', () => {
+        service.getAlarmRules().subscribe((result) => {
+            expect(result).toEqual([]);
+        });
+
+        const request = httpController.expectOne(alarmRulesBaseUrl);
+        expect(request.request.method).toBe('GET');
+        request.flush([]);
     });
 
     it('propaga l errore HTTP al chiamante', () => {

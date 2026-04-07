@@ -49,7 +49,7 @@
         <p class="mt-1 text-xs text-slate-500">Quando verranno rilevati nuovi eventi, compariranno qui.</p>
     </div>
     } @else {
-    <app-alarm-table-shell [title]="'Allarmi attivi'" [caption]="'Tabella allarmi attivi'" [columns]="columns()">
+    <app-alarm-table-shell [title]="'Allarmi attivi'" [caption]="'Tabella allarmi attivi'" [columns]="columns">
         @for (row of rows(); track row.id) {
         <tr class="group transition-colors hover:bg-slate-50/80" [attr.data-testid]="'alarm-row-' + row.id">
             <td class="px-5 py-3.5 align-middle">

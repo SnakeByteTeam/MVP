@@ -58,7 +58,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
        VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10)
        RETURNING *`,
       [
-        randomUUID(),
+        uuidv4(),
         name,
         thresholdOperator,
         thresholdValue,

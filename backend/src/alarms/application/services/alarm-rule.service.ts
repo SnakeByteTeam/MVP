@@ -102,14 +102,14 @@ export class AlarmRuleService
 
   async checkAlarmRule(req: CheckAlarmRuleCmd): Promise<void> {
     this.logger.log(
-      `[checkAlarmRule] Start deviceId=${req.deviceId} value=${req.value} activationTime=${req.activationTime.toISOString()}`,
+      `[checkAlarmRule] Start datapointId=${req.datapointId} value=${req.value} activationTime=${req.activationTime.toISOString()}`,
     );
 
     const checkAlarm = await this.checkAlarmRulePort.checkAlarmRule(req);
 
     if (!checkAlarm) {
       this.logger.log(
-        `[checkAlarmRule] No matching armed alarm rule for deviceId=${req.deviceId}`,
+        `[checkAlarmRule] No matching armed alarm rule for datapointId=${req.datapointId}`,
       );
       return;
     }

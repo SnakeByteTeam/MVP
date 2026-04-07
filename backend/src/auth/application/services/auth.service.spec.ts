@@ -8,6 +8,7 @@ import { EXTRACT_FROM_REFRESH_TOKEN_PORT } from '../../adapters/out/extract-from
 import { CHANGE_CREDENTIALS_PORT } from '../../adapters/out/change-credentials-adapter';
 import { GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT } from '../../adapters/out/generate-change-password-access-token-adapter';
 import { GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT } from '../../adapters/out/generate-change-password-refresh-token-adapter';
+import { HASH_PASSWORD_PORT } from '../../adapters/out/hash-password-adapter';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -24,6 +25,7 @@ describe('AuthService', () => {
   const mockGenerateRefreshToken = { generateRefreshToken: jest.fn() };
   const mockExtractFromAccessToken = { extractFromAccessToken: jest.fn() };
   const mockExtractFromRefreshToken = { extractFromRefreshToken: jest.fn() };
+  const mockHashPassword = { hashPassword: jest.fn() };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,6 +33,7 @@ describe('AuthService', () => {
         AuthService,
         { provide: CHANGE_CREDENTIALS_PORT, useValue: mockChangeCredentials },
         { provide: CHECK_CREDENTIALS_PORT, useValue: mockCheckCredentials },
+        { provide: HASH_PASSWORD_PORT, useValue: mockHashPassword },
         {
           provide: GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT,
           useValue: mockGenerateChangePasswordAccessToken,

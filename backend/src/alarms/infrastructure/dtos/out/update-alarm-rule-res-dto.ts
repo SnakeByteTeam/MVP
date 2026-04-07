@@ -25,7 +25,4 @@ export class UpdateAlarmRuleResDto {
 
   @ApiProperty()
   isArmed!: boolean;
-
-  @ApiProperty()
-  deviceId!: string;
 }

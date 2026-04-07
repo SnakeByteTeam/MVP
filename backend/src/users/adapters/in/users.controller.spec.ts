@@ -71,6 +71,9 @@ describe('UsersController', () => {
   });
 
   it('should call findAllAvailableUsersUseCase.findAllAvailableUsers', async () => {
+    await controller.findAllAvailableUsers();
+    expect(
+      mockFindAllAvailableUsersUseCase.findAllAvailableUsers,
     ).toHaveBeenCalled();
   });
 
@@ -78,6 +81,7 @@ describe('UsersController', () => {
     await controller.findUserById(1);
     expect(
       mockFindAllAvailableUsersUseCase.findAllAvailableUsers,
+    ).toHaveBeenCalled();
   });
 
   it('should call updateUserUseCase.updateUser with correct args', async () => {

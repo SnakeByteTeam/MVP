@@ -30,6 +30,8 @@ export class AlarmRulesRepositoryImpl
         ar.id,
         ar.name,
         ar.priority,
+        ar.threshold_operator,
+        ar.threshold_value,
         room->>'name' AS room_name,
         device->>'name' AS device_name,
         p.data->>'name' AS plant_name,
@@ -46,7 +48,7 @@ export class AlarmRulesRepositoryImpl
         WHERE device->>'id' = ar.device_id
       ) d ON true
       WHERE d.device IS NOT NULL
-      AND id = $1
+      AND ar.id = $1
       ORDER BY ar.created_at DESC;`,
       [id],
     );
@@ -90,6 +92,8 @@ export class AlarmRulesRepositoryImpl
         ar.id,
         ar.name,
         ar.priority,
+        ar.threshold_operator,
+        ar.threshold_value,
         room->>'name' AS room_name,
         device->>'name' AS device_name,
         p.data->>'name' AS plant_name,

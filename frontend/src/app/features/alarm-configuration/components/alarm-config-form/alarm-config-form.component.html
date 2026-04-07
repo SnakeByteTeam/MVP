@@ -39,11 +39,11 @@
     }
 
     <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
-        <label for="sensorId" class="font-semibold text-slate-700">Dispositivo:</label>
+        <label for="deviceId" class="font-semibold text-slate-700">Dispositivo:</label>
         <div>
-            <select id="sensorId" formControlName="sensorId"
+            <select id="deviceId" formControlName="deviceId"
                 class="h-8 w-full rounded-md border border-slate-400 bg-white px-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
-                [attr.aria-invalid]="form.controls.sensorId.invalid && form.controls.sensorId.touched">
+                [attr.aria-invalid]="form.controls.deviceId.invalid && form.controls.deviceId.touched">
                 @if (!isEditMode()) {
                 <option value="">Seleziona dispositivo</option>
                 }
@@ -67,7 +67,7 @@
             }
             }
 
-            @if (form.controls.sensorId.invalid && form.controls.sensorId.touched) {
+            @if (form.controls.deviceId.invalid && form.controls.deviceId.touched) {
             <p role="alert" class="mt-1 text-xs font-medium text-rose-700">Il dispositivo è obbligatorio.</p>
             }
         </div>
@@ -161,12 +161,6 @@
             }
         </div>
     </div>
-
-    <!-- <div class="grid grid-cols-1 items-center gap-2 md:grid-cols-[180px_1fr]">
-        <span class="font-semibold text-slate-700">Abilita:</span>
-        <app-alarm-toggle-switch [checked]="form.controls.enabled.value" [ariaLabel]="'Abilita regola allarme'"
-            (toggled)="onEnabledToggled($event)" />
-    </div> -->
 
     <div class="mt-4 flex items-center justify-end gap-2 border-t border-slate-300 pt-3">
         <app-alarm-action-button label="ANNULLA" tone="neutral" (pressed)="onCancel()" />

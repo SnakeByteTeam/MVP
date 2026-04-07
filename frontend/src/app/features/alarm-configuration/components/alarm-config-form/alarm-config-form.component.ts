@@ -47,7 +47,7 @@ export class AlarmConfigFormComponent {
 	public readonly plantsLoadError = signal<string | null>(null);
 	public readonly devicesLoadError = signal<string | null>(null);
 	public readonly isDevicesLoading = signal(false);
-	public readonly isDeviceSelectionLocked = computed(() => this.isEditMode() || this.form.controls.sensorId.disabled);
+	public readonly isDeviceSelectionLocked = computed(() => this.isEditMode() || this.form.controls.deviceId.disabled);
 	public readonly isPlantSelectionVisible = computed(() => !this.isEditMode());
 
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
@@ -86,7 +86,7 @@ export class AlarmConfigFormComponent {
 		return this.fb.nonNullable.group({
 			name: [''],
 			plantId: [''],
-			sensorId: ['', [Validators.required]],
+			deviceId: ['', [Validators.required]],
 			priority: [null as AlarmPriority | null, [Validators.required]],
 			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
 			thresholdValue: ['', [Validators.required]],
@@ -100,7 +100,7 @@ export class AlarmConfigFormComponent {
 		return {
 			name: '',
 			plantId: '',
-			sensorId: '',
+			deviceId: '',
 			priority: null,
 			thresholdOperator: null,
 			thresholdValue: '',
@@ -133,7 +133,7 @@ export class AlarmConfigFormComponent {
 			this.form.controls.name.disable({ emitEvent: false });
 			this.form.controls.plantId.clearValidators();
 			this.form.controls.plantId.disable({ emitEvent: false });
-			this.form.controls.sensorId.disable({ emitEvent: false });
+			this.form.controls.deviceId.disable({ emitEvent: false });
 			this.form.controls.plantId.updateValueAndValidity({ emitEvent: false });
 			return;
 		}
@@ -144,11 +144,11 @@ export class AlarmConfigFormComponent {
 		this.form.controls.plantId.updateValueAndValidity({ emitEvent: false });
 
 		if (this.form.controls.plantId.value.trim().length === 0) {
-			this.form.controls.sensorId.disable({ emitEvent: false });
+			this.form.controls.deviceId.disable({ emitEvent: false });
 			return;
 		}
 
-		this.form.controls.sensorId.enable({ emitEvent: false });
+		this.form.controls.deviceId.enable({ emitEvent: false });
 	}
 
 	private ensurePlantsLoaded(): void {
@@ -208,15 +208,15 @@ export class AlarmConfigFormComponent {
 	private onPlantChanged(plantId: string): void {
 		this.devicesLoadError.set(null);
 		this.deviceOptions.set([]);
-		this.form.controls.sensorId.setValue('', { emitEvent: false });
+		this.form.controls.deviceId.setValue('', { emitEvent: false });
 
 		if (plantId.trim().length === 0) {
-			this.form.controls.sensorId.disable({ emitEvent: false });
+			this.form.controls.deviceId.disable({ emitEvent: false });
 			return;
 		}
 
 		this.isDevicesLoading.set(true);
-		this.form.controls.sensorId.disable({ emitEvent: false });
+		this.form.controls.deviceId.disable({ emitEvent: false });
 
 		this.apartmentApi
 			.getApartmentByPlantId(plantId)
@@ -229,13 +229,13 @@ export class AlarmConfigFormComponent {
 					);
 
 					this.deviceOptions.set(options);
-					this.form.controls.sensorId.enable({ emitEvent: false });
+					this.form.controls.deviceId.enable({ emitEvent: false });
 					this.isDevicesLoading.set(false);
 				},
 				error: () => {
 					this.deviceOptions.set([]);
 					this.devicesLoadError.set('Errore durante il caricamento dei dispositivi.');
-					this.form.controls.sensorId.disable({ emitEvent: false });
+					this.form.controls.deviceId.disable({ emitEvent: false });
 					this.isDevicesLoading.set(false);
 				},
 			});
@@ -243,10 +243,6 @@ export class AlarmConfigFormComponent {
 
 	public onCancel(): void {
 		this.cancelled.emit();
-	}
-
-	public onEnabledToggled(nextValue: boolean): void {
-		this.form.controls.enabled.setValue(nextValue);
 	}
 }
 

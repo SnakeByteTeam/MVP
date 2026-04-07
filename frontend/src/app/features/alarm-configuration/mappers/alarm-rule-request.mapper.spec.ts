@@ -21,7 +21,7 @@ describe('AlarmRuleRequestMapper', () => {
         const formValue: AlarmConfigFormValue = {
             name: '  Soglia temperatura  ',
             plantId: 'plant-1',
-            sensorId: '  DEV001  ',
+            deviceId: '  DEV001  ',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.LESS_THAN,
             thresholdValue: '12',
@@ -47,7 +47,7 @@ describe('AlarmRuleRequestMapper', () => {
         const formValue: AlarmConfigFormValue = {
             name: 'Soglia minima',
             plantId: 'plant-1',
-            sensorId: 'dev-77',
+            deviceId: 'dev-77',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
             thresholdValue: '18',
@@ -64,7 +64,7 @@ describe('AlarmRuleRequestMapper', () => {
         const formValue: AlarmConfigFormValue = {
             name: 'Soglia massima',
             plantId: 'plant-1',
-            sensorId: 'dev-88',
+            deviceId: 'dev-88',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.LESS_THAN_OR_EQUAL,
             thresholdValue: '26',
@@ -81,7 +81,7 @@ describe('AlarmRuleRequestMapper', () => {
         const onFormValue: AlarmConfigFormValue = {
             name: 'Allarme acceso',
             plantId: 'plant-1',
-            sensorId: 'dev-10',
+            deviceId: 'dev-10',
             priority: AlarmPriority.RED,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: 'ON',
@@ -112,7 +112,7 @@ describe('AlarmRuleRequestMapper', () => {
         const formValue: AlarmConfigFormValue = {
             name: '  Allarme trim  ',
             plantId: 'plant-1',
-            sensorId: '  dev-42  ',
+            deviceId: '  dev-42  ',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: '  ON  ',
@@ -136,7 +136,7 @@ describe('AlarmRuleRequestMapper', () => {
         const invalidFormValue: AlarmConfigFormValue = {
             name: 'Allarme invalido',
             plantId: 'plant-1',
-            sensorId: 'dev-42',
+            deviceId: 'dev-42',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: '   ',
@@ -152,7 +152,7 @@ describe('AlarmRuleRequestMapper', () => {
         const invalidFormValue: AlarmConfigFormValue = {
             name: 'Allarme invalido',
             plantId: 'plant-1',
-            sensorId: 'dev-42',
+            deviceId: 'dev-42',
             priority: AlarmPriority.GREEN,
             thresholdOperator: null,
             thresholdValue: '12',

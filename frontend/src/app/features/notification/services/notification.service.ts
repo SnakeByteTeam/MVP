@@ -22,18 +22,35 @@ export class NotificationService {
     private readonly alarmStateService = inject(AlarmStateService);
     private readonly notificationApiService = inject(NotificationApiService);
 
+    public removeNotification(notificationId: string): void {
+        this.alarmStateService.dismissNotification(notificationId);
+        this.alarmStateService.removeNotification(notificationId);
+    }
+
+    public clearAllNotifications(notifications: ReadonlyArray<NotificationEvent>): void {
+        if (notifications.length === 0) {
+            return;
+        }
+
+        this.alarmStateService.dismissNotifications(
+            notifications.map((notification) => notification.notificationId)
+        );
+        this.alarmStateService.clearNotifications();
+    }
+
     public readonly vm$: Observable<NotificationListVm> = combineLatest([
         this.notificationApiService
             .getNotificationsHistory()
             .pipe(catchError(() => of<NotificationEvent[]>([]))),
         this.alarmStateService.getNotifications$(),
         this.alarmStateService.getUnreadNotificationsCount$(),
+        this.alarmStateService.getDismissedNotificationIds$(),
     ]).pipe(
-        map(([historic, inSession, unreadCount]): NotificationListVm => {
+        map(([historic, inSession, unreadCount, dismissedNotificationIds]): NotificationListVm => {
             const merged = [...historic, ...inSession];
             const deduped = Array.from(
                 new Map(merged.map((notification) => [notification.notificationId, notification])).values()
-            );
+            ).filter((notification) => !dismissedNotificationIds.has(notification.notificationId));
 
             deduped.sort(
                 (left, right) =>

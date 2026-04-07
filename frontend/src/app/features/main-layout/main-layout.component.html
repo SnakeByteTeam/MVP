@@ -9,7 +9,9 @@
 
 @if (isNotificationPanelOpen) {
 <app-notification-topbar-panel-component [notifications]="(notifications$ | async) ?? []"
-    (viewAllClicked)="openNotificationsArchive()"></app-notification-topbar-panel-component>
+    (viewAllClicked)="openNotificationsArchive()"
+    (removeClicked)="removeTopbarNotification($event)"
+    (clearAllClicked)="clearTopbarNotifications()"></app-notification-topbar-panel-component>
 }
 
 @if (realtimeToastMessage) {

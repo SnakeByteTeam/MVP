@@ -13,10 +13,20 @@ import { NotificationEvent } from '../../models/notification-event.model';
 export class NotificationTopbarPanelComponent {
   @Input() notifications: ReadonlyArray<NotificationEvent> = [];
   @Output() viewAllClicked = new EventEmitter<void>();
+  @Output() removeClicked = new EventEmitter<string>();
+  @Output() clearAllClicked = new EventEmitter<void>();
 
   private readonly maxVisibleNotifications = 6;
 
   public get visibleNotifications(): ReadonlyArray<NotificationEvent> {
     return this.notifications.slice(0, this.maxVisibleNotifications);
+  }
+
+  public onRemove(notificationId: string): void {
+    this.removeClicked.emit(notificationId);
+  }
+
+  public onClearAll(): void {
+    this.clearAllClicked.emit();
   }
 }

@@ -18,4 +18,12 @@ export class NotificationPageComponent {
 
   public readonly vm$: Observable<NotificationListVm> = this.notificationService.vm$;
   public readonly skeletonRows = [0, 1, 2];
+
+  public onNotificationRemoved(notificationId: string): void {
+    this.notificationService.removeNotification(notificationId);
+  }
+
+  public onClearAllNotifications(vm: NotificationListVm): void {
+    this.notificationService.clearAllNotifications(vm.notifications);
+  }
 }

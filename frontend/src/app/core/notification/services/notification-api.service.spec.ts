@@ -53,6 +53,8 @@ describe('NotificationApiService', () => {
                 id: 'alarm-managed-1',
                 activationTime: '2026-03-24T10:00:00.000Z',
                 resolutionTime: null,
+                alarmName: 'Pulsante antipanico camera 101',
+                priority: 4,
             },
         ];
 
@@ -61,19 +63,23 @@ describe('NotificationApiService', () => {
                 id: 'alarm-unmanaged-1',
                 activationTime: '2026-03-24T09:00:00.000Z',
                 resolutionTime: '2026-03-24T09:05:00.000Z',
+                alarmName: 'Sensore porta',
+                priority: 2,
             },
         ];
 
         const expected: NotificationEvent[] = [
             {
                 notificationId: 'alarm-triggered-alarm-managed-1',
-                title: "C'e un allarme in corso",
+                title: '▲ Pulsante antipanico camera 101',
                 sentAt: '2026-03-24T10:00:00.000Z',
+                eventType: 'triggered',
             },
             {
                 notificationId: 'alarm-resolved-alarm-unmanaged-1',
                 title: 'Allarme risolto',
                 sentAt: '2026-03-24T09:05:00.000Z',
+                eventType: 'resolved',
             },
         ];
 
@@ -159,16 +165,20 @@ describe('NotificationApiService', () => {
                 id: 'alarm-unmanaged-2',
                 activationTime: '2026-03-24T09:00:00.000Z',
                 resolutionTime: null,
+                alarmName: 'Allarme finestra molto lungo molto lungo molto lungo molto lungo molto lungo',
+                priority: 3,
             },
         ]);
 
-        expect(result).toEqual([
-            {
-                notificationId: 'alarm-triggered-alarm-unmanaged-2',
-                title: "C'e un allarme in corso",
-                sentAt: '2026-03-24T09:00:00.000Z',
-            },
-        ]);
+        expect(result).toHaveLength(1);
+        const firstNotification = ((result ?? [])[0] as NotificationEvent | undefined);
+        expect(firstNotification).toMatchObject({
+            notificationId: 'alarm-triggered-alarm-unmanaged-2',
+            sentAt: '2026-03-24T09:00:00.000Z',
+            eventType: 'triggered',
+        });
+        expect(firstNotification?.title.startsWith('! ')).toBe(true);
+        expect(firstNotification?.title.endsWith('...')).toBe(true);
     });
 
     it('se non c e sessione attiva restituisce [] senza chiamate HTTP', () => {

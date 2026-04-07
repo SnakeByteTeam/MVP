@@ -7,6 +7,7 @@ import {
 	catchError,
 	finalize,
 	fromEvent,
+	map,
 	of,
 	takeUntil,
 } from 'rxjs';
@@ -16,6 +17,7 @@ import { ConnectionStatus } from '../models/connection-status.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 import { InternalAuthService } from '../../services/internal-auth.service';
+import { AlarmApiService } from './alarm-api.service';
 import {
 	REALTIME_ALARM_EVENT_NORMALIZER,
 	type RealtimeAlarmEventNormalizerPort,
@@ -38,6 +40,7 @@ export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>('SOCKET_IO_FACTOR
 export class EventSubscriptionService implements OnDestroy {
 	private readonly socketIoFactory = inject(SOCKET_IO_FACTORY);
 	private readonly http = inject(HttpClient, { optional: true });
+	private readonly alarmApiService = inject(AlarmApiService, { optional: true });
 	private readonly alarmStateService = inject(AlarmStateService);
 	private readonly apiBaseUrl = inject(API_BASE_URL, { optional: true });
 	private readonly internalAuthService = inject(InternalAuthService, { optional: true });
@@ -219,17 +222,24 @@ export class EventSubscriptionService implements OnDestroy {
 
 		this.joinRoom(String(payload.wardId));
 
-		const timestamp = new Date().toISOString();
-		this.alarmStateService.onAlarmTriggered({
-			id: payload.alarmEventId,
-			alarmRuleId: payload.alarmRuleId,
-			alarmName: 'Allarme in corso',
-			priority: AlarmPriority.ORANGE,
-			activationTime: timestamp,
-			resolutionTime: null,
-		});
+		this.resolveTriggeredAlarmDetails(payload.alarmEventId)
+			.pipe(takeUntil(this.destroy$))
+			.subscribe((resolvedDetails) => {
+				const timestamp = new Date().toISOString();
+				this.alarmStateService.onAlarmTriggered({
+					id: payload.alarmEventId,
+					alarmRuleId: payload.alarmRuleId,
+					alarmName: resolvedDetails.alarmName,
+					priority: resolvedDetails.priority,
+					activationTime: timestamp,
+					resolutionTime: null,
+				});
 
-		this.lifecycleNotifier.publish('triggered', payload.alarmEventId, timestamp);
+				this.lifecycleNotifier.publish('triggered', payload.alarmEventId, timestamp, {
+					alarmName: resolvedDetails.alarmName,
+					priority: resolvedDetails.priority,
+				});
+			});
 	}
 
 	private handleBackendResolvedRawEvent(raw: unknown): void {
@@ -245,6 +255,68 @@ export class EventSubscriptionService implements OnDestroy {
 		this.alarmStateService.onAlarmResolved(payload.alarmEventId);
 		const timestamp = new Date().toISOString();
 		this.lifecycleNotifier.publish('resolved', payload.alarmEventId, timestamp);
+	}
+
+	private resolveTriggeredAlarmDetails(
+		alarmEventId: string
+	): Observable<{ alarmName: string; priority: AlarmPriority }> {
+		const fallback = {
+			alarmName: 'Allarme in corso',
+			priority: AlarmPriority.ORANGE,
+		};
+
+		if (!this.alarmApiService) {
+			return of(fallback);
+		}
+
+		return this.alarmApiService.getAlarmEventById(alarmEventId).pipe(
+			map((alarmEvent) => ({
+				alarmName:
+					typeof alarmEvent.alarmName === 'string' && alarmEvent.alarmName.trim()
+						? alarmEvent.alarmName.trim()
+						: fallback.alarmName,
+				priority: this.normalizeAlarmPriority(alarmEvent.priority) ?? fallback.priority,
+			})),
+			catchError(() => of(fallback))
+		);
+	}
+
+	private normalizeAlarmPriority(value: unknown): AlarmPriority | null {
+		if (typeof value === 'number' && Number.isInteger(value)) {
+			return this.isAlarmPriority(value) ? value : null;
+		}
+
+		if (typeof value !== 'string') {
+			return null;
+		}
+
+		const compact = value.trim().toUpperCase();
+		if (!compact) {
+			return null;
+		}
+
+		if (compact in AlarmPriority) {
+			const enumValue = AlarmPriority[compact as keyof typeof AlarmPriority];
+			return typeof enumValue === 'number' && this.isAlarmPriority(enumValue)
+				? enumValue
+				: null;
+		}
+
+		const parsed = Number(compact);
+		if (Number.isInteger(parsed) && this.isAlarmPriority(parsed)) {
+			return parsed;
+		}
+
+		return null;
+	}
+
+	private isAlarmPriority(value: number): value is AlarmPriority {
+		return (
+			value === AlarmPriority.WHITE ||
+			value === AlarmPriority.GREEN ||
+			value === AlarmPriority.ORANGE ||
+			value === AlarmPriority.RED
+		);
 	}
 
 	private rejoinAllRooms(): void {

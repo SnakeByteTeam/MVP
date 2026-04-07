@@ -74,4 +74,18 @@ describe('NotificationItemComponent', () => {
     expect(title.textContent).toContain('Temperatura elevata in cucina');
     expect(time.textContent.trim()).toBe('40s fa');
   });
+
+  it('emette removeClicked quando si clicca la X', () => {
+    const emitSpy = vi.spyOn(component.removeClicked, 'emit');
+
+    fixture.componentRef.setInput('notification', notification);
+    fixture.componentRef.setInput('showRemoveAction', true);
+    fixture.detectChanges();
+
+    const removeButton = fixture.nativeElement.querySelector('.notification-item__remove') as HTMLButtonElement;
+    removeButton.click();
+
+    expect(emitSpy).toHaveBeenCalledWith('n-1');
+    expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
 });

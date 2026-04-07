@@ -19,4 +19,5 @@ export interface NotificationEvent {
 	notificationId: string;
 	title: string;
 	sentAt: string;
+	eventType?: 'triggered' | 'resolved';
 }

@@ -4,11 +4,18 @@ import { Observable, catchError, forkJoin, map, of, switchMap, take } from 'rxjs
 import { InternalAuthService } from '../../services/internal-auth.service';
 import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
+import {
+    DEFAULT_RESOLVED_NOTIFICATION_TITLE,
+    DEFAULT_TRIGGERED_NOTIFICATION_TITLE,
+    formatTriggeredNotificationTitle,
+} from '../utils/notification-title.util';
 
 interface AlarmEventHistoryDto {
     id?: unknown;
     activationTime?: unknown;
     resolutionTime?: unknown;
+    alarmName?: unknown;
+    priority?: unknown;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -90,8 +97,12 @@ export class NotificationApiService {
 
         return {
             notificationId: `alarm-${isResolved ? 'resolved' : 'triggered'}-${alarmEventId}`,
-            title: isResolved ? 'Allarme risolto' : "C'e un allarme in corso",
+            title: isResolved
+                ? DEFAULT_RESOLVED_NOTIFICATION_TITLE
+                : formatTriggeredNotificationTitle(alarmEvent.alarmName, alarmEvent.priority) ||
+                  DEFAULT_TRIGGERED_NOTIFICATION_TITLE,
             sentAt,
+            eventType: isResolved ? 'resolved' : 'triggered',
         };
     }
 

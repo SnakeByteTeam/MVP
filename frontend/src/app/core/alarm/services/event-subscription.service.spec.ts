@@ -6,7 +6,9 @@ import { Socket } from 'socket.io-client';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 import { InternalAuthService } from '../../services/internal-auth.service';
 import { ConnectionStatus } from '../models/connection-status.enum';
+import { AlarmPriority } from '../models/alarm-priority.enum';
 import { AlarmStateService } from './alarm-state.service';
+import { AlarmApiService } from './alarm-api.service';
 import { EventSubscriptionService, SOCKET_IO_FACTORY } from './event-subscription.service';
 import { UserRole } from '../../models/user-role.enum';
 import { UserSession } from '../../../features/user-auth/models/user-session.model';
@@ -33,6 +35,7 @@ describe('EventSubscriptionService', () => {
   let currentUser$: BehaviorSubject<UserSession | null>;
   let internalAuthServiceSpy: { getCurrentUser$: ReturnType<typeof vi.fn> };
   let httpClientSpy: { get: ReturnType<typeof vi.fn> };
+  let alarmApiServiceSpy: { getAlarmEventById: ReturnType<typeof vi.fn> };
 
   const alarmStateSpy = {
     onAlarmTriggered: vi.fn(),
@@ -51,6 +54,22 @@ describe('EventSubscriptionService', () => {
     };
     httpClientSpy = {
       get: vi.fn(() => of([])),
+    };
+    alarmApiServiceSpy = {
+      getAlarmEventById: vi.fn(() =>
+        of({
+          id: 'active-alarm-backend-1',
+          alarmRuleId: 'alarm-rule-backend-1',
+          deviceId: 'device-1',
+          alarmName: 'Saturazione bassa reparto A',
+          priority: AlarmPriority.RED,
+          activationTime: '2026-04-07T10:00:00.000Z',
+          resolutionTime: null,
+          position: 'Stanza 12',
+          userId: null,
+          userUsername: null,
+        })
+      ),
     };
 
     TestBed.configureTestingModule({
@@ -75,6 +94,10 @@ describe('EventSubscriptionService', () => {
         {
           provide: HttpClient,
           useValue: httpClientSpy,
+        },
+        {
+          provide: AlarmApiService,
+          useValue: alarmApiServiceSpy,
         },
       ],
     });
@@ -127,6 +150,10 @@ describe('EventSubscriptionService', () => {
         {
           provide: HttpClient,
           useValue: httpClientSpy,
+        },
+        {
+          provide: AlarmApiService,
+          useValue: alarmApiServiceSpy,
         },
       ],
     });
@@ -272,14 +299,14 @@ describe('EventSubscriptionService', () => {
       expect.objectContaining({
         id: 'active-alarm-backend-1',
         alarmRuleId: 'alarm-rule-backend-1',
-        alarmName: 'Allarme in corso',
+        alarmName: 'Saturazione bassa reparto A',
       }),
     );
 
     expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith(
       expect.objectContaining({
         notificationId: 'alarm-triggered-active-alarm-backend-1',
-        title: "C'e un allarme in corso",
+        title: '▲ Saturazione bassa reparto A',
       }),
     );
 

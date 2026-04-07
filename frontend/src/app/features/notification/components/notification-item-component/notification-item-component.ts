@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { NotificationEvent } from '../../models/notification-event.model';
 import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 
@@ -11,6 +11,12 @@ import { ElapsedTimePipe } from '../../../../shared/pipes/elapsed-time.pipe';
 })
 export class NotificationItemComponent {
   public readonly notification = input.required<NotificationEvent>();
+  public readonly showRemoveAction = input<boolean>(false);
+  public readonly removeClicked = output<string>();
   public readonly sentAt = computed(() => this.notification().sentAt);
   public readonly ariaLabel = computed(() => `Notifica: ${this.notification().title}`);
+
+  public onRemove(): void {
+    this.removeClicked.emit(this.notification().notificationId);
+  }
 }

@@ -17,6 +17,10 @@ export class CreateAlarmRuleReqDto {
 
   @ApiProperty()
   @IsString()
+  datapointId!: string;
+
+  @ApiProperty()
+  @IsString()
   deviceId!: string;
 
   @ApiProperty()

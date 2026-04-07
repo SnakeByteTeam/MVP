@@ -42,7 +42,7 @@ describe('ApiAuthTokensService', () => {
     });
     writeTokensRepoPort.writeTokens.mockResolvedValue(true);
 
-    await service.getTokens('auth-code', '42');
+    await service.getTokens('auth-code', 42);
 
     expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledWith(
       'auth-code',
@@ -50,7 +50,7 @@ describe('ApiAuthTokensService', () => {
     expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledTimes(1);
     expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledWith(
       tokens,
-      '42',
+      42,
       'utente@example.com',
     );
     expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledTimes(1);
@@ -70,7 +70,7 @@ describe('ApiAuthTokensService', () => {
     });
     writeTokensRepoPort.writeTokens.mockResolvedValue(false);
 
-    await expect(service.getTokens('auth-code', '42')).rejects.toThrow(
+    await expect(service.getTokens('auth-code', 42)).rejects.toThrow(
       'Unable to persist OAuth tokens in cache',
     );
     expect(eventEmitter.emit).toHaveBeenCalledTimes(0);

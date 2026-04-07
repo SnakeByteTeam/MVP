@@ -2,15 +2,22 @@ import { DOCUMENT } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable, inject } from '@angular/core';
 import { Observable, catchError, of, throwError } from 'rxjs';
+import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { IVimarCloudApiService } from '../../../core/services/vimar-cloud-api.service.interface';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { MyVimarAccount } from '../models/my-vimar-account.model';
+
+interface PrepareOAuthTicketResponse {
+  ticket: string;
+}
 
 @Injectable()
 export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = inject(API_BASE_URL);
-  private readonly authorizeEndpoint = `${this.baseUrl}/my-vimar/auth`;
+  private readonly apiErrorDisplayService = inject(ApiErrorDisplayService);
+  private readonly prepareAuthorizeEndpoint = `${this.baseUrl}/api/auth/prepare-oauth`;
+  private readonly authorizeEndpoint = `${this.baseUrl}/api/auth/authorize`;
   private readonly accountEndpoints = [
     `${this.baseUrl}/my-vimar/account`,
     `${this.baseUrl}/api/vimar-account`,
@@ -25,6 +32,8 @@ export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
 
   public initiateOAuth(): void {
     const location = this.document.defaultView?.location;
+    const browser = this.document.defaultView;
+
     if (!location) {
       throw new Error('Browser location is not available for OAuth redirection.');
     }
@@ -32,8 +41,33 @@ export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
     const redirectUrl = `${location.origin}/vimar-link`;
     const encodedRedirectUrl = encodeURIComponent(redirectUrl);
 
-    // Trigger a full-page navigation so backend 302 redirects are handled by the browser.
-    location.href = `${this.authorizeEndpoint}?redirect_url=${encodedRedirectUrl}`;
+    this.http.post<PrepareOAuthTicketResponse>(this.prepareAuthorizeEndpoint, {}).subscribe({
+      next: (response) => {
+        const ticket = response?.ticket?.trim();
+        if (!ticket) {
+          this.showOAuthError(
+            'Ticket OAuth non valido. Riprova tra qualche istante.',
+            browser,
+          );
+          return;
+        }
+
+        // Trigger a full-page navigation so backend 302 redirects are handled by the browser.
+        location.href =
+          `${this.authorizeEndpoint}?ticket=${encodeURIComponent(ticket)}` +
+          `&redirect_url=${encodedRedirectUrl}`;
+      },
+      error: (error: unknown) => {
+        const message = this.apiErrorDisplayService.toMessage(error, {
+          fallbackMessage:
+            'Impossibile avviare il collegamento MyVimar. Riprova tra qualche istante.',
+          actionLabel: 'avviare il collegamento MyVimar',
+          nonHttpStrategy: 'message',
+        });
+
+        this.showOAuthError(message, browser);
+      },
+    });
   }
 
   public unlinkAccount(): Observable<void> {
@@ -74,5 +108,9 @@ export class MyVimarCloudApiFeatureService implements IVimarCloudApiService {
 
   private isNotFound(error: unknown): error is HttpErrorResponse {
     return error instanceof HttpErrorResponse && error.status === 404;
+  }
+
+  private showOAuthError(message: string, browser: Window | null): void {
+    browser?.alert(message);
   }
 }

@@ -34,6 +34,7 @@ export class AlarmRulesPersistenceAdapter
     const alarmRule = await this.alarmRulesRepository.createAlarmRule(
       cmd.name,
       cmd.priority,
+      cmd.datapointId,
       cmd.deviceId,
       cmd.plantId,
       cmd.thresholdOperator,
@@ -56,7 +57,6 @@ export class AlarmRulesPersistenceAdapter
       alarmRule.arming_time,
       alarmRule.dearming_time,
       alarmRule.is_armed,
-      alarmRule.device_id,
     );
   }
   async deleteAlarmRule(req: DeleteAlarmRuleCmd): Promise<void> {
@@ -83,7 +83,6 @@ export class AlarmRulesPersistenceAdapter
       alarmRule.arming_time,
       alarmRule.dearming_time,
       alarmRule.is_armed,
-      alarmRule.device_id,
     );
   }
   async getAllAlarmRules(): Promise<AlarmRule[]> {
@@ -105,7 +104,6 @@ export class AlarmRulesPersistenceAdapter
           alarmRule.arming_time,
           alarmRule.dearming_time,
           alarmRule.is_armed,
-          alarmRule.device_id,
         ),
     );
   }
@@ -134,7 +132,6 @@ export class AlarmRulesPersistenceAdapter
       alarmRule.arming_time,
       alarmRule.dearming_time,
       alarmRule.is_armed,
-      alarmRule.device_id,
     );
   }
 

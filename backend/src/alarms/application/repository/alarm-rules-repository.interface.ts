@@ -12,6 +12,7 @@ export interface AlarmRulesRepository {
   createAlarmRule(
     name: string,
     priority: AlarmPriority,
+    datapointId: string,
     deviceId: string,
     plantId: string,
     thresholdOperator: string,

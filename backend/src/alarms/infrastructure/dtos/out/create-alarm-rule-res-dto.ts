@@ -9,9 +9,6 @@ export class CreateAlarmRuleResDto {
   name!: string;
 
   @ApiProperty()
-  deviceId!: string;
-
-  @ApiProperty()
   priority!: AlarmPriority;
 
   @ApiProperty()

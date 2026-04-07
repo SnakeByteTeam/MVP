@@ -11,7 +11,5 @@ export class AlarmRule {
     public readonly armingTime: Date,
     public readonly dearmingTime: Date,
     public readonly isArmed: boolean,
-    public readonly deviceId: string,
-    public readonly datapointId: string,
   ) {}
 }

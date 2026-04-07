@@ -28,12 +28,13 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
       LEFT JOIN LATERAL (
-        SELECT device
-        FROM jsonb_array_elements(room->'devices') AS device
-        WHERE device->>'id' = ar.device_id
+        SELECT datapoint
+        FROM jsonb_array_elements(device->'datapoints') AS datapoint
+        WHERE datapoint->>'id' = ar.datapoint_id
       ) d ON true
-      WHERE d.device IS NOT NULL 
+      WHERE d.datapoint IS NOT NULL 
       AND ar.is_changed_when_used = FALSE
       AND ar.id = $1
       ORDER BY ar.created_at DESC;`,
@@ -45,6 +46,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
   async createAlarmRule(
     name: string,
     priority: AlarmPriority,
+    datapointId: string,
     deviceId: string,
     plantId: string,
     thresholdOperator: string,
@@ -54,8 +56,8 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
   ): Promise<AlarmRuleEntity> {
     const result = await this.pool.query(
       `INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, 
-       arming_time, dearming_time, is_armed, device_id, plant_id)
-       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10)
+       arming_time, dearming_time, is_armed, device_id, plant_id, datapoint_id)
+       VALUES ($1, $2, $3, $4, $5, $6::time, $7::time, $8, $9, $10, $11)
        RETURNING *`,
       [
         uuidv4(),
@@ -68,6 +70,7 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
         true,
         deviceId,
         plantId,
+        datapointId
       ],
     );
     return result.rows[0];
@@ -91,12 +94,13 @@ export class AlarmRulesRepositoryImpl implements AlarmRulesRepository {
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
       LEFT JOIN LATERAL (
-        SELECT device
-        FROM jsonb_array_elements(room->'devices') AS device
-        WHERE device->>'id' = ar.device_id
+        SELECT datapoint
+        FROM jsonb_array_elements(device->'datapoints') AS datapoint
+        WHERE datapoint->>'id' = ar.datapoint_id
       ) d ON true
-      WHERE d.device IS NOT NULL 
+      WHERE d.datapoint IS NOT NULL 
       AND ar.is_changed_when_used = FALSE
       ORDER BY ar.created_at DESC;`,
     );

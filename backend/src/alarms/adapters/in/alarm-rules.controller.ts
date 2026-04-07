@@ -68,6 +68,7 @@ export class AlarmRulesController {
     const alarm = await this.createAlarmUseCase.createAlarmRule(
       new CreateAlarmRuleCmd(
         req.name,
+        req.datapointId,
         req.deviceId,
         req.plantId,
         req.priority,

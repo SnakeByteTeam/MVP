@@ -25,7 +25,7 @@ export class ApiAuthTokensService implements GetTokensCallbackUseCase {
     const { tokenPair, email } =
       await this.getTokensWithCodePort.getTokensWithCode(code);
 
-      console.log(`Received tokens for user ${userId} with email ${email}`); // Log per debug
+    console.log(`Received tokens for user ${userId} with email ${email}`); // Log per debug
 
     const persisted = await this.writeTokensRepoPort.writeTokens(
       tokenPair,
@@ -34,8 +34,7 @@ export class ApiAuthTokensService implements GetTokensCallbackUseCase {
     );
     if (!persisted) {
       throw new Error('Unable to persist OAuth tokens in cache');
-    }
-    else {
+    } else {
       this.eventEmitter.emit('fetched.tokens');
     }
   }

@@ -23,7 +23,9 @@ describe('EventNotificationController', () => {
   });
 
   it('should ignore activation event when payload is empty', async () => {
-    await controller.handleAlarmEvent(undefined as unknown as CheckAlarmRuleResDto);
+    await controller.handleAlarmEvent(
+      undefined as unknown as CheckAlarmRuleResDto,
+    );
 
     expect(notifyService.notifyAlarmWard).toHaveBeenCalledTimes(0);
   });

@@ -16,7 +16,6 @@ import { ValidationModule } from './validation/validation.module';
 import { GuardModule } from './guard/guard.module';
 import { NotificationModule } from './notifications/notification.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,7 +27,8 @@ import { NotificationModule } from './notifications/notification.module';
     DeviceModule,
     PlantModule,
     AuthModule,
-    WardsModule, AlarmsModule,
+    WardsModule,
+    AlarmsModule,
     CacheModule,
     SubscriptionModule,
     AnalyticsModule,
@@ -42,4 +42,4 @@ import { NotificationModule } from './notifications/notification.module';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}

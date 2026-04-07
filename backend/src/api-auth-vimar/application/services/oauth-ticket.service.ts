@@ -26,7 +26,11 @@ export class OAuthTicketService
     const ticket = randomUUID();
     const expiresAt = new Date(Date.now() + OAuthTicketService.TICKET_TTL_MS);
 
-    const saved = await this.oauthTicketPort.saveTicket(ticket, userId, expiresAt);
+    const saved = await this.oauthTicketPort.saveTicket(
+      ticket,
+      userId,
+      expiresAt,
+    );
     if (!saved) {
       throw new Error('Unable to persist OAuth ticket');
     }

@@ -150,11 +150,9 @@ export class AlarmEventsPersistenceAdapter
   }
 
   async getWardAlarmEvent(cmd: GetWardAlarmEventCmd): Promise<number> {
-        if(!cmd || !cmd.alarmId) {
-            throw new Error('Invalid command: alarmId is required');
-        }
-        return await this.alarmEventsRepository.getWardAlarmEvent(cmd.alarmId);
+    if (!cmd || !cmd.alarmId) {
+      throw new Error('Invalid command: alarmId is required');
     }
-
-  
+    return await this.alarmEventsRepository.getWardAlarmEvent(cmd.alarmId);
+  }
 }

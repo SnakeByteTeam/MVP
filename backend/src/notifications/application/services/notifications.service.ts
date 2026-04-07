@@ -12,10 +12,15 @@ import {
 import { timestamp } from 'rxjs';
 import { NotifyAlarmResolutionUseCase } from '../ports/in/notify-alarm-resolution.usecase';
 import { NotifyAlarmResolutionCmd } from '../commands/notify-alarm-resolution.command';
-import { NOTIFY_ALARM_RESOLUTION_PORT, type NotifyAlarmResolutionPort } from '../ports/out/notify-alarm-resolution.port';
+import {
+  NOTIFY_ALARM_RESOLUTION_PORT,
+  type NotifyAlarmResolutionPort,
+} from '../ports/out/notify-alarm-resolution.port';
 
 @Injectable()
-export class NotificationsService implements NotifyAlarmWardUseCase, NotifyAlarmResolutionUseCase {
+export class NotificationsService
+  implements NotifyAlarmWardUseCase, NotifyAlarmResolutionUseCase
+{
   constructor(
     @Inject(NOTIFY_ALARM_WARD_PORT)
     private readonly notifyPort: NotifyAlarmWardPort,
@@ -28,7 +33,8 @@ export class NotificationsService implements NotifyAlarmWardUseCase, NotifyAlarm
   async notifyAlarmWard(cmd: NotifyAlarmWardCmd): Promise<void> {
     await this.notifyPort.notifyAlarmWard(cmd);
 
-    if(!cmd.alarm.alarm_event_id) throw new Error('Can\'t write notification without alarm event id');
+    if (!cmd.alarm.alarm_event_id)
+      throw new Error("Can't write notification without alarm event id");
 
     const timeNow: string = new Date(Date.now()).toISOString();
 
@@ -40,16 +46,17 @@ export class NotificationsService implements NotifyAlarmWardUseCase, NotifyAlarm
   }
 
   async notifyAlarmResolution(cmd: NotifyAlarmResolutionCmd): Promise<void> {
-      await this.notifyResolutionPort.notifyAlarmResolution(cmd);
+    await this.notifyResolutionPort.notifyAlarmResolution(cmd);
 
-      if(!cmd.alarmId || !cmd.wardId) throw new Error('Can\'t write notification without parameters');
+    if (!cmd.alarmId || !cmd.wardId)
+      throw new Error("Can't write notification without parameters");
 
-      const timeNow: string = new Date(Date.now()).toISOString();
+    const timeNow: string = new Date(Date.now()).toISOString();
 
-      await this.writeNotificationPort.writeNotification({
-        alarm_event_id: cmd.alarmId,
-        timestamp: timeNow,
-        ward_id: cmd.wardId,
-      });
+    await this.writeNotificationPort.writeNotification({
+      alarm_event_id: cmd.alarmId,
+      timestamp: timeNow,
+      ward_id: cmd.wardId,
+    });
   }
 }

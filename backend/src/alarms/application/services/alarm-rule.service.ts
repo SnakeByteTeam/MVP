@@ -132,8 +132,9 @@ export class AlarmRuleService
       alarmEventId,
     );
 
-    const checkAlarmDto: CheckAlarmRuleResDto =
-      CheckAlarmRuleResDto.fromDomain(checkAlarmWithEventId);
+    const checkAlarmDto: CheckAlarmRuleResDto = CheckAlarmRuleResDto.fromDomain(
+      checkAlarmWithEventId,
+    );
 
     this.emitter.emit('alarm.activated', checkAlarmDto);
     this.logger.log(

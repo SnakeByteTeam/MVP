@@ -11,6 +11,8 @@ describe('AlarmRulesPersistenceAdapter', () => {
       checkAlarmRule: jest.fn(),
     };
 
-    expect(new AlarmRulesPersistenceAdapter(repositoryMock as any)).toBeDefined();
+    expect(
+      new AlarmRulesPersistenceAdapter(repositoryMock as any),
+    ).toBeDefined();
   });
 });

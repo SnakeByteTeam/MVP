@@ -25,7 +25,10 @@ import {
   GetAllUnmanagedAlarmEventsByUserIdPort,
 } from '../ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GET_WARD_ALARM_EVENT_PORT, type GetWardAlarmEventPort } from '../ports/out/get-ward-alarm-event.port';
+import {
+  GET_WARD_ALARM_EVENT_PORT,
+  type GetWardAlarmEventPort,
+} from '../ports/out/get-ward-alarm-event.port';
 import { GetAlarmEventByIdUseCase } from '../ports/in/get-alarm-event-by-id-use-case.interface';
 import { GetAlarmEventByIdCmd } from '../commands/get-alarm-event-by-id-cmd';
 import {
@@ -91,12 +94,13 @@ export class AlarmEventsService
   async resolveAlarmEvent(req: ResolveAlarmEventCmd): Promise<void> {
     await this.resolveAlarmEventPort.resolveAlarmEvent(req);
 
-    const wardId: number = await this.getWardAlarmEventPort.getWardAlarmEvent({ alarmId: req.alarmId });
+    const wardId: number = await this.getWardAlarmEventPort.getWardAlarmEvent({
+      alarmId: req.alarmId,
+    });
 
     this.emitter.emit('alarm.resolved', {
       alarmEventId: req.alarmId,
-      wardId: wardId
+      wardId: wardId,
     });
-
   }
 }

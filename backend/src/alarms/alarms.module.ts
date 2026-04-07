@@ -118,7 +118,10 @@ import { AlarmRulesPersistenceAdapter } from './adapters/out/alarm-rules-persist
       provide: CHECK_ALARM_RULE_USECASE,
       useClass: AlarmRuleService,
     },
-    {provide: GET_WARD_ALARM_EVENT_PORT, useClass: AlarmEventsPersistenceAdapter}, 
+    {
+      provide: GET_WARD_ALARM_EVENT_PORT,
+      useClass: AlarmEventsPersistenceAdapter,
+    },
   ],
   exports: [CHECK_ALARM_RULE_USECASE],
 })

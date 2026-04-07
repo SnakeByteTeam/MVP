@@ -49,7 +49,9 @@ export class AlarmRulesPersistenceAdapter
         ' ' +
         alarmRule.room_name +
         ' ' +
-        alarmRule.device_name,
+        alarmRule.device_name +
+        ' ' +
+        alarmRule.datapoint_name,
       alarmRule.name,
       alarmRule.threshold_operator,
       alarmRule.threshold_value,
@@ -75,7 +77,9 @@ export class AlarmRulesPersistenceAdapter
         ' ' +
         alarmRule.room_name +
         ' ' +
-        alarmRule.device_name,
+        alarmRule.device_name +
+        ' ' +
+        alarmRule.datapoint_name,
       alarmRule.name,
       alarmRule.threshold_operator,
       alarmRule.threshold_value,
@@ -96,7 +100,9 @@ export class AlarmRulesPersistenceAdapter
             ' ' +
             alarmRule.room_name +
             ' ' +
-            alarmRule.device_name,
+            alarmRule.device_name +
+            ' ' +
+            alarmRule.datapoint_name,
           alarmRule.name,
           alarmRule.threshold_operator,
           alarmRule.threshold_value,
@@ -124,7 +130,9 @@ export class AlarmRulesPersistenceAdapter
         ' ' +
         alarmRule.room_name +
         ' ' +
-        alarmRule.device_name,
+        alarmRule.device_name +
+        ' ' +
+        alarmRule.datapoint_name,
       alarmRule.name,
       alarmRule.threshold_operator,
       alarmRule.threshold_value,
@@ -135,7 +143,7 @@ export class AlarmRulesPersistenceAdapter
     );
   }
 
-  async checkAlarmRule(req: CheckAlarmRuleCmd): Promise<CheckAlarm| null> {
+  async checkAlarmRule(req: CheckAlarmRuleCmd): Promise<CheckAlarm | null> {
     const hours: string = req.activationTime
       .getUTCHours()
       .toString()

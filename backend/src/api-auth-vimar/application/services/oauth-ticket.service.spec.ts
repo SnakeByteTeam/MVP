@@ -37,7 +37,9 @@ describe('OAuthTicketService', () => {
   });
 
   it('should throw when user id is not valid', async () => {
-    await expect(service.prepareOAuth(0)).rejects.toThrow('Invalid user identity');
+    await expect(service.prepareOAuth(0)).rejects.toThrow(
+      'Invalid user identity',
+    );
 
     expect(oauthTicketPort.saveTicket).toHaveBeenCalledTimes(0);
   });

@@ -7,8 +7,7 @@ export class ApiAuthVimarService implements ApiAuthUseCase {
     process.env.HOST1 || process.env.AUTHORIZE_HOST || '';
   private readonly clientId: string =
     process.env.CLIENTID || process.env.CLIENT_ID || '';
-  private readonly redirectUri: string =
-    process.env.REDIRECT_URI || '';
+  private readonly redirectUri: string = process.env.REDIRECT_URI || '';
 
   getLoginUrl(state?: string): string {
     if (!this.redirectUri) {

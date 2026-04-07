@@ -1,17 +1,18 @@
 CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 
+DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS alarm_event;
 DROP TABLE IF EXISTS alarm_rule;
 DROP TABLE IF EXISTS status;
 DROP TABLE IF EXISTS plant;
 DROP TABLE IF EXISTS token_cache;
+DROP TABLE IF EXISTS oauth_ticket_cache;
 DROP TABLE IF EXISTS datapoint_history;
 DROP TABLE IF EXISTS ward_user;
 DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS ward;
 DROP TABLE IF EXISTS role;
 
-CREATE EXTENSION IF NOT EXISTS timescaledb;
 
 CREATE TABLE role (
     id SERIAL PRIMARY KEY,
@@ -84,10 +85,21 @@ CREATE UNLOGGED TABLE token_cache (
     access_token  TEXT        NOT NULL,
     refresh_token TEXT        NOT NULL,
     expires_at    TIMESTAMPTZ NOT NULL,
+    user_id       INTEGER     NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    email         VARCHAR(255) NOT NULL,
     lock          BOOLEAN     NOT NULL DEFAULT TRUE,
     CONSTRAINT single_row    UNIQUE (lock),
     CONSTRAINT lock_always_true CHECK (lock = TRUE)
 );
+
+CREATE UNLOGGED TABLE oauth_ticket_cache (
+    ticket     UUID        PRIMARY KEY,
+    user_id    INTEGER     NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX idx_oauth_ticket_cache_expires_at
+    ON oauth_ticket_cache (expires_at);
 
 CREATE TABLE datapoint_history (
     timestamp    TIMESTAMPTZ NOT NULL,
@@ -113,255 +125,6 @@ CREATE TABLE plant (
     ward_id   INTEGER      REFERENCES ward(id) ON DELETE SET NULL
 );
 
-INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
-  NOW(),
-  'AA0011BB0011',
-  '{
-    "id": "AA0011BB0011",
-    "name": "Appartamento Rossi",
-    "rooms": [
-      {
-        "id": "loc-AA0011BB0011-1",
-        "name": "Soggiorno",
-        "devices": [
-          {
-            "id": "fct-AA0011BB0011-1000000001",
-            "plantId": "AA0011BB0011",
-            "name": "Luce Soggiorno",
-            "type": "SS_Light_Switch",
-            "subType": "SF_Light",
-            "datapoints": [
-              {
-                "id": "dp-AA0011BB0011-1000000001-SFE_Cmd_OnOff",
-                "name": "SFE_Cmd_OnOff",
-                "readable": false, "writable": true,
-                "valueType": "string", "enum": ["Off","On"],
-                "sfeType": "SFE_Cmd_OnOff"
-              },
-              {
-                "id": "dp-AA0011BB0011-1000000001-SFE_State_OnOff",
-                "name": "SFE_State_OnOff",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Off","On"],
-                "sfeType": "SFE_State_OnOff"
-              }
-            ]
-          },
-          {
-            "id": "fct-AA0011BB0011-1000000002",
-            "plantId": "AA0011BB0011",
-            "name": "Termostato Soggiorno",
-            "type": "SS_Clima_Zone",
-            "subType": "SF_Clima",
-            "datapoints": [
-              {
-                "id": "dp-AA0011BB0011-1000000002-SFE_State_Temperature",
-                "name": "SFE_State_Temperature",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": [],
-                "sfeType": "SFE_State_Temperature"
-              },
-              {
-                "id": "dp-AA0011BB0011-1000000002-SFE_State_HVACMode",
-                "name": "SFE_State_HVACMode",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Heating","Cooling","Off"],
-                "sfeType": "SFE_State_HVACMode"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "loc-AA0011BB0011-2",
-        "name": "Camera da letto",
-        "devices": [
-          {
-            "id": "fct-AA0011BB0011-1000000003",
-            "plantId": "AA0011BB0011",
-            "name": "Sensore Presenza 1",
-            "type": "SS_Access_RadarDetector",
-            "subType": "SF_Access",
-            "datapoints": [
-              {
-                "id": "dp-AA0011BB0011-1000000003-SFE_State_Presence",
-                "name": "SFE_State_Presence",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Detected","NotDetected"],
-                "sfeType": "SFE_State_Presence"
-              }
-            ]
-          },
-          {
-            "id": "fct-AA0011BB0011-1000000004",
-            "plantId": "AA0011BB0011",
-            "name": "Sensore Presenza 2",
-            "type": "SS_Access_RadarDetector",
-            "subType": "SF_Access",
-            "datapoints": [
-              {
-                "id": "dp-AA0011BB0011-1000000004-SFE_State_Presence",
-                "name": "SFE_State_Presence",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Detected","NotDetected"],
-                "sfeType": "SFE_State_Presence"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "loc-AA0011BB0011-3",
-        "name": "Bagno",
-        "devices": [
-          {
-            "id": "fct-AA0011BB0011-1000000005",
-            "plantId": "AA0011BB0011",
-            "name": "Sensore Caduta",
-            "type": "SS_Safety_ManDown",
-            "subType": "SF_Safety",
-            "datapoints": [
-              {
-                "id": "dp-AA0011BB0011-1000000005-SFE_State_ManDown",
-                "name": "SFE_State_ManDown",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["True","False"],
-                "sfeType": "SFE_State_ManDown"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "wardId": null
-  }',
-  (SELECT id FROM ward WHERE name = 'test-ward')
-);
-
-INSERT INTO plant (cached_at, id, data, ward_id) VALUES (
-  NOW(),
-  'BB0022CC0022',
-  '{
-    "id": "BB0022CC0022",
-    "name": "Appartamento Bianchi",
-    "rooms": [
-      {
-        "id": "loc-BB0022CC0022-1",
-        "name": "Ingresso",
-        "devices": [
-          {
-            "id": "fct-BB0022CC0022-2000000001",
-            "plantId": "BB0022CC0022",
-            "name": "Luce Ingresso",
-            "type": "SS_Light_Switch",
-            "subType": "SF_Light",
-            "datapoints": [
-              {
-                "id": "dp-BB0022CC0022-2000000001-SFE_Cmd_OnOff",
-                "name": "SFE_Cmd_OnOff",
-                "readable": false, "writable": true,
-                "valueType": "string", "enum": ["Off","On"],
-                "sfeType": "SFE_Cmd_OnOff"
-              },
-              {
-                "id": "dp-BB0022CC0022-2000000001-SFE_State_OnOff",
-                "name": "SFE_State_OnOff",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Off","On"],
-                "sfeType": "SFE_State_OnOff"
-              }
-            ]
-          },
-          {
-            "id": "fct-BB0022CC0022-2000000002",
-            "plantId": "BB0022CC0022",
-            "name": "Termostato Ingresso",
-            "type": "SS_Clima_Zone",
-            "subType": "SF_Clima",
-            "datapoints": [
-              {
-                "id": "dp-BB0022CC0022-2000000002-SFE_State_Temperature",
-                "name": "SFE_State_Temperature",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": [],
-                "sfeType": "SFE_State_Temperature"
-              },
-              {
-                "id": "dp-BB0022CC0022-2000000002-SFE_State_HVACMode",
-                "name": "SFE_State_HVACMode",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Heating","Cooling","Off"],
-                "sfeType": "SFE_State_HVACMode"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "loc-BB0022CC0022-2",
-        "name": "Camera da letto",
-        "devices": [
-          {
-            "id": "fct-BB0022CC0022-2000000003",
-            "plantId": "BB0022CC0022",
-            "name": "Sensore Presenza 1",
-            "type": "SS_Access_RadarDetector",
-            "subType": "SF_Access",
-            "datapoints": [
-              {
-                "id": "dp-BB0022CC0022-2000000003-SFE_State_Presence",
-                "name": "SFE_State_Presence",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Detected","NotDetected"],
-                "sfeType": "SFE_State_Presence"
-              }
-            ]
-          },
-          {
-            "id": "fct-BB0022CC0022-2000000004",
-            "plantId": "BB0022CC0022",
-            "name": "Sensore Presenza 2",
-            "type": "SS_Access_RadarDetector",
-            "subType": "SF_Access",
-            "datapoints": [
-              {
-                "id": "dp-BB0022CC0022-2000000004-SFE_State_Presence",
-                "name": "SFE_State_Presence",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["Detected","NotDetected"],
-                "sfeType": "SFE_State_Presence"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "loc-BB0022CC0022-3",
-        "name": "Bagno",
-        "devices": [
-          {
-            "id": "fct-BB0022CC0022-2000000005",
-            "plantId": "BB0022CC0022",
-            "name": "Sensore Caduta",
-            "type": "SS_Safety_ManDown",
-            "subType": "SF_Safety",
-            "datapoints": [
-              {
-                "id": "dp-BB0022CC0022-2000000005-SFE_State_ManDown",
-                "name": "SFE_State_ManDown",
-                "readable": true, "writable": false,
-                "valueType": "string", "enum": ["True","False"],
-                "sfeType": "SFE_State_ManDown"
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    "wardId": null
-  }',
-  NULL
-);
 
 INSERT INTO datapoint_history (timestamp, datapoint_id, value) VALUES
 -- giorno -10: 2026-03-24
@@ -661,24 +424,8 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     is_changed_when_used BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-('rule-001', 'Temperatura critica',    '>',  '30',    1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-002', 'Luce accesa di notte',   '=',  'on',    3, '22:00', '06:00', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
-('rule-003', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
-('rule-004', 'Temperatura alta',       '>',  '25',    2, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
-('rule-005', 'Caduta rilevata',        '=',  'on',    1, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000005-SFE_State_ManDown',      'BB0022CC0022');
 
--- Regole aggiuntive per test UI/paginazione/stati su allarmi attivi.
-INSERT INTO alarm_rule (id, name, threshold_operator, threshold_value, priority, arming_time, dearming_time, is_armed, device_id, plant_id) VALUES
-('rule-006', 'Temp soggiorno warning',      '>',  '28',   3, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-007', 'Temp soggiorno critica',      '>=', '31',   4, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011'),
-('rule-008', 'Luce soggiorno sempre accesa','=',  'on',   2, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000001-SFE_State_OnOff',        'AA0011BB0011'),
-('rule-009', 'Caduta bagno test-ward',      '=',  'on',   4, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000005-SFE_State_ManDown',      'AA0011BB0011'),
-('rule-010', 'Temp ingresso alta',          '>',  '21',   3, '00:00', '23:59', TRUE, 'dp-BB0022CC0022-2000000002-SFE_State_Temperature',  'BB0022CC0022'),
-('rule-orphan-temp', 'Regola da eliminare', '>',  '29',   1, '00:00', '23:59', TRUE, 'dp-AA0011BB0011-1000000002-SFE_State_Temperature', 'AA0011BB0011');
-
-
-CREATE TABLE alarm_event (
+CREATE TABLE IF NOT EXISTS alarm_event (
     id VARCHAR(255) PRIMARY KEY,
     alarm_rule_id VARCHAR(255),
     activation_time TIMESTAMPTZ NOT NULL,
@@ -691,55 +438,10 @@ CREATE TABLE alarm_event (
         REFERENCES "user"(id)
 );
 
-INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
-VALUES
--- Eventi per rule-001 (Temperatura critica)
-('EVT001', 'rule-001', '2026-04-04 20:15:00', NULL, NULL),
-('EVT010', 'rule-001', '2026-03-30 09:15:00', NULL, NULL),
-('EVT002', 'rule-001', '2026-03-31 11:20:00', NULL, NULL),
-('EVT003', 'rule-001', '2026-03-29 14:05:00', '2026-03-29 14:45:00', 1),
-
--- Eventi per rule-003 (Caduta rilevata)
-('EVT004', 'rule-003', '2026-03-28 08:00:00', '2026-03-28 08:30:00', 1),
-('EVT005', 'rule-003', '2026-03-31 16:10:00', NULL, NULL),
-
--- Eventi per rule-004 (Temperatura alta)
-('EVT006', 'rule-004', '2026-03-30 22:00:00', '2026-03-30 22:20:00', 2),
-
--- Eventi per rule-005 (Caduta rilevata)
-('EVT007', 'rule-005', '2026-03-31 02:15:00', '2026-03-31 02:50:00', 2),
-('EVT008', 'rule-005', '2026-04-01 01:10:00', NULL, NULL),
-
--- Eventi per rule-002 (Luce accesa di notte)
-('EVT009', 'rule-002', '2026-03-31 23:30:00', '2026-04-01 00:10:00', 2);
-
--- Eventi aggiuntivi per test paginazione/stato attivo/gestito.
-INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
-VALUES
-('EVT101', 'rule-006', '2026-04-03 07:10:00', NULL, NULL),
-('EVT102', 'rule-007', '2026-04-03 07:25:00', NULL, NULL),
-('EVT103', 'rule-008', '2026-04-03 08:05:00', NULL, NULL),
-('EVT104', 'rule-009', '2026-04-03 08:30:00', NULL, NULL),
-('EVT105', 'rule-001', '2026-04-03 09:00:00', NULL, NULL),
-('EVT106', 'rule-003', '2026-04-03 09:20:00', NULL, NULL),
-('EVT107', 'rule-006', '2026-04-03 09:35:00', NULL, NULL),
-('EVT108', 'rule-008', '2026-04-03 09:50:00', NULL, NULL),
-('EVT109', 'rule-010', '2026-04-03 10:10:00', NULL, NULL),
-('EVT110', 'rule-005', '2026-04-03 10:40:00', NULL, NULL),
-('EVT111', 'rule-006', '2026-04-02 09:40:00', '2026-04-02 10:05:00', 1),
-('EVT112', 'rule-007', '2026-04-02 11:10:00', '2026-04-02 11:40:00', 2),
-('EVT113', 'rule-010', '2026-04-02 12:30:00', '2026-04-02 12:55:00', 2),
-('EVT199', 'rule-orphan-temp', '2026-04-03 12:00:00', NULL, NULL);
-
--- Eventi aggiuntivi per verificare la visualizzazione del tempo trascorso
--- nella UI: tutti nel passato, alcuni meno di un giorno e altri oltre un giorno.
-INSERT INTO alarm_event (id, alarm_rule_id, activation_time, resolution_time, user_id)
-VALUES
-('EVT200', 'rule-007', '2026-04-04 10:40:00', NULL, NULL),
-('EVT201', 'rule-006', '2026-04-04 08:20:00', NULL, NULL),
-('EVT202', 'rule-010', '2026-04-04 19:15:00', NULL, NULL),
-('EVT203', 'rule-005', '2026-04-03 14:00:00', NULL, NULL),
-('EVT204', 'rule-003', '2026-04-02 09:30:00', '2026-04-02 10:05:00', 1),
-('EVT205', 'rule-001', '2026-04-01 06:45:00', NULL, NULL)
-ON CONFLICT DO NOTHING;
+CREATE TABLE IF NOT EXISTS notification (
+    id SERIAL PRIMARY KEY, 
+    ward_id INTEGER REFERENCES ward(id) ON DELETE CASCADE,
+    alarm_event_id VARCHAR(255) REFERENCES alarm_event(id) ON DELETE CASCADE,
+    timestamp TIMESTAMPTZ NOT NULL
+);
 

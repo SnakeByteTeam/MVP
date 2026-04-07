@@ -17,6 +17,8 @@ describe('ReadTokensFromRepoAdapter', () => {
       accessToken: 'access_token_1',
       refreshToken: 'refresh_token_1',
       expiresAt: new Date(Date.now()),
+      userId: 42,
+      email: 'utente@example.com',
     };
 
     readTokensAdapter = new ReadTokensFromRepoAdapter(readTokensFromRepo);

@@ -1,4 +1,4 @@
-import { CheckAlarmEntity } from '../../infrastructure/entities/check-alarm-entity';
+import { CheckAlarmEntity } from 'src/alarms/infrastructure/entities/check-alarm-entity';
 
 export interface CheckAlarmRuleRepository {
   checkAlarmRule(

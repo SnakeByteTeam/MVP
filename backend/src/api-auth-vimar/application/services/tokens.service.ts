@@ -13,9 +13,11 @@ import {
   WRITETOKENSREPOPORT,
 } from '../ports/out/write-tokens-repo.port';
 import { TokenPair } from 'src/api-auth-vimar/domain/model/token-pair.model';
+import { GetAccountStatusUseCase } from '../ports/in/get-account-status.usecase';
+import { READ_STATUS_PORT, type ReadStatusPort } from '../ports/out/read-status.port';
 
 @Injectable()
-export class TokenService implements GetValidTokenPort {
+export class TokenService implements GetValidTokenPort, GetAccountStatusUseCase {
   constructor(
     @Inject(WRITETOKENSREPOPORT)
     private readonly writeTokensOnRepo: WriteTokensRepoPort,
@@ -23,6 +25,8 @@ export class TokenService implements GetValidTokenPort {
     private readonly readTokensFromRepo: ReadTokensFromRepoPort,
     @Inject(REFRESHTOKENSPORT)
     private readonly refreshTokens: RefreshTokensPort,
+    @Inject(READ_STATUS_PORT)
+    private readonly readStatus: ReadStatusPort,
   ) {}
 
   async getValidToken(): Promise<string | null> {
@@ -34,5 +38,11 @@ export class TokenService implements GetValidTokenPort {
     }
     await this.writeTokensOnRepo.writeTokens(tokens);
     return tokens.getAccessToken();
+  }
+
+  async getAccountStatus(userId: number): Promise<{ isLinked: boolean, email: string }> {
+    let status = await this.readStatus.readStatus(userId);
+    
+    return status;
   }
 }

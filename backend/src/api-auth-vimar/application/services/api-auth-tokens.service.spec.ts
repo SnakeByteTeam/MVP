@@ -36,16 +36,43 @@ describe('ApiAuthTokensService', () => {
       'refresh-token',
       new Date('2030-01-01T00:00:00.000Z'),
     );
-    getTokensWithCodePort.getTokensWithCode.mockResolvedValue(tokens);
+    getTokensWithCodePort.getTokensWithCode.mockResolvedValue({
+      tokenPair: tokens,
+      email: 'utente@example.com',
+    });
     writeTokensRepoPort.writeTokens.mockResolvedValue(true);
 
-    await service.getTokens('auth-code');
+    await service.getTokens('auth-code', '42');
 
     expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledWith(
       'auth-code',
     );
     expect(getTokensWithCodePort.getTokensWithCode).toHaveBeenCalledTimes(1);
-    expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledWith(tokens);
+    expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledWith(
+      tokens,
+      '42',
+      'utente@example.com',
+    );
     expect(writeTokensRepoPort.writeTokens).toHaveBeenCalledTimes(1);
+    expect(eventEmitter.emit).toHaveBeenCalledWith('fetched.tokens');
+  });
+
+  it('should throw when token persistence fails', async () => {
+    const tokens = new TokenPair(
+      'access-token',
+      'refresh-token',
+      new Date('2030-01-01T00:00:00.000Z'),
+    );
+
+    getTokensWithCodePort.getTokensWithCode.mockResolvedValue({
+      tokenPair: tokens,
+      email: 'utente@example.com',
+    });
+    writeTokensRepoPort.writeTokens.mockResolvedValue(false);
+
+    await expect(service.getTokens('auth-code', '42')).rejects.toThrow(
+      'Unable to persist OAuth tokens in cache',
+    );
+    expect(eventEmitter.emit).toHaveBeenCalledTimes(0);
   });
 });

@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
+import { Pool } from 'pg';
 import { PG_POOL } from '../../../database/database.module';
 import { ResolveAlarmEventRepository } from '../../application/repository/resolve-alarm-event-repository.interface';
 import { AlarmEventEntity } from '../entities/alarm-event-entity';
@@ -15,7 +16,7 @@ export class AlarmEventsRepositoryImpl
   GetAllManagedAlarmEventsByUserIdRepository,
   GetAllUnmanagedAlarmEventsByUserIdRepository,
   CreateAlarmEventRepository {
-  constructor(@Inject(PG_POOL) private readonly pool) { }
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async getAllAlarmEvents(
     limit: number = 5,
@@ -152,10 +153,14 @@ export class AlarmEventsRepositoryImpl
   async createAlarmEvent(
     alarmRuleId: string,
     activationTime: Date,
-  ): Promise<void> {
-    return await this.pool.query(
-      `INSERT INTO alarm_event (id, alarm_rule_id, activation_time) VALUES ($1,$2,$3)`,
+  ): Promise<string> {
+    const result = await this.pool.query<{ id: string }>(
+      `INSERT INTO alarm_event (id, alarm_rule_id, activation_time)
+       VALUES ($1, $2, $3)
+       RETURNING id`,
       [randomUUID(), alarmRuleId, activationTime],
     );
+
+    return result.rows[0]?.id ?? '';
   }
 }

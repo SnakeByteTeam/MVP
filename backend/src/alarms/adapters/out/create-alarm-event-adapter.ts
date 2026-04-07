@@ -12,7 +12,7 @@ export class CreateAlarmEventAdapter implements CreateAlarmEventPort {
     private readonly createAlarmEventRepository: CreateAlarmEventRepository,
   ) {}
 
-  async createAlarmEvent(req: CreateAlarmEventCmd): Promise<void> {
+  async createAlarmEvent(req: CreateAlarmEventCmd): Promise<string> {
     return await this.createAlarmEventRepository.createAlarmEvent(
       req.alarmRuleId,
       req.activationTime,

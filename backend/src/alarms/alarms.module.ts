@@ -44,6 +44,7 @@ import { CREATE_ALARM_EVENT_REPOSITORY } from './application/repository/create-a
 import { CreateAlarmEventAdapter } from './adapters/out/create-alarm-event-adapter';
 import { CREATE_ALARM_EVENT_PORT } from './application/ports/out/create-alarm-event-port.interface';
 import { GuardModule } from '../guard/guard.module';
+import { CHECK_ALARM_RULE_USECASE } from './application/ports/in/check-alarm-rule-use-case.interface';
 import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE } from './application/ports/in/get-all-unmanaged-alarm-events-by-user-id-use-case.interface';
 import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY } from './application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
 import { GetAllUnmanagedAlarmEventsByUserIdAdapter } from './adapters/out/get-all-unmanaged-alarm-events-by-user-id-adapter';
@@ -156,6 +157,11 @@ import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from './application/po
       provide: CREATE_ALARM_EVENT_PORT,
       useClass: CreateAlarmEventAdapter,
     },
+    {
+      provide: CHECK_ALARM_RULE_USECASE,
+      useClass: AlarmRuleService,
+    },
   ],
+  exports: [CHECK_ALARM_RULE_USECASE],
 })
 export class AlarmsModule {}

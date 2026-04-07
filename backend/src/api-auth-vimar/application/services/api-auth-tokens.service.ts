@@ -9,7 +9,7 @@ import {
   type WriteTokensRepoPort,
   WRITETOKENSREPOPORT,
 } from '../ports/out/write-tokens-repo.port';
-import { TokenPair } from 'src/api-auth-vimar/domain/model/token-pair.model';
+import { GetAccountStatusUseCase } from '../ports/in/get-account-status.usecase';
 
 @Injectable()
 export class ApiAuthTokensService implements GetTokensCallbackUseCase {
@@ -21,12 +21,22 @@ export class ApiAuthTokensService implements GetTokensCallbackUseCase {
     private readonly writeTokensRepoPort: WriteTokensRepoPort,
   ) {}
 
-  async getTokens(code: string) {
-    const tokens: TokenPair =
+  async getTokens(code: string, userId: number) {
+    const { tokenPair, email } =
       await this.getTokensWithCodePort.getTokensWithCode(code);
 
-    await this.writeTokensRepoPort.writeTokens(tokens);
+      console.log(`Received tokens for user ${userId} with email ${email}`); // Log per debug
 
-    this.eventEmitter.emit('fetched.tokens');
+    const persisted = await this.writeTokensRepoPort.writeTokens(
+      tokenPair,
+      userId,
+      email,
+    );
+    if (!persisted) {
+      throw new Error('Unable to persist OAuth tokens in cache');
+    }
+    else {
+      this.eventEmitter.emit('fetched.tokens');
+    }
   }
 }

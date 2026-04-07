@@ -29,6 +29,8 @@ describe('TokenCacheImpl', () => {
       'access-1',
       'refresh-1',
       expiresAt,
+      42,
+      'utente@example.com',
     );
 
     expect(result).toBe(true);
@@ -36,7 +38,7 @@ describe('TokenCacheImpl', () => {
     expect(queryMock).toHaveBeenCalledTimes(1);
     expect(queryMock).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO token_cache'),
-      ['access-1', 'refresh-1', expiresAt],
+      ['access-1', 'refresh-1', expiresAt, 42, 'utente@example.com'],
     );
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
@@ -48,6 +50,8 @@ describe('TokenCacheImpl', () => {
       'access-1',
       'refresh-1',
       new Date('2030-01-01T00:00:00.000Z'),
+      42,
+      'utente@example.com',
     );
 
     expect(result).toBe(false);
@@ -64,6 +68,8 @@ describe('TokenCacheImpl', () => {
           access_token: 'access-1',
           refresh_token: 'refresh-1',
           expires_at: expiresAt,
+          user_id: 42,
+          email: 'utente@example.com',
         },
       ],
     });
@@ -74,6 +80,8 @@ describe('TokenCacheImpl', () => {
       accessToken: 'access-1',
       refreshToken: 'refresh-1',
       expiresAt,
+      userId: 42,
+      email: 'utente@example.com',
     });
     expect(queryMock).toHaveBeenCalledWith('SELECT * FROM token_cache');
     expect(releaseMock).toHaveBeenCalledTimes(1);

@@ -3,6 +3,8 @@ export interface WriteTokensCachePort {
     accessToken: string,
     refreshToken: string,
     expiresAt: Date,
+    userId: number,
+    email: string,
   ): Promise<boolean>;
 }
 

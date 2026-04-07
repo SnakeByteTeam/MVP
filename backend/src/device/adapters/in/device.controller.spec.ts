@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { GetDeviceValueUseCase } from 'src/device/application/ports/in/get-device-value.usecase';
 import { WriteDatapointValueUseCase } from 'src/device/application/ports/in/write-datapoint-value.usecase';
+import { CheckAlarmRuleUseCase } from 'src/alarms/application/ports/in/check-alarm-rule-use-case.interface';
+import { FindDeviceByDatapointIdUsecase } from 'src/device/application/ports/in/find-device-by-datapointId.usecase';
 import {
   DeviceValue,
   DatapointValue,
@@ -26,6 +28,8 @@ describe('DeviceController', () => {
   let ingestTimeseries: jest.Mocked<IngestTimeseriesUseCase>;
   let getDeviceValue: jest.Mocked<GetDeviceValueUseCase>;
   let writeDatapointUseCase: jest.Mocked<WriteDatapointValueUseCase>;
+  let checkAlarmUseCase: jest.Mocked<CheckAlarmRuleUseCase>;
+  let findDeviceByDatapointId: jest.Mocked<FindDeviceByDatapointIdUsecase>;
 
   beforeEach(() => {
     findDeviceById = {
@@ -48,12 +52,22 @@ describe('DeviceController', () => {
       writeDatapointValue: jest.fn(),
     } as any;
 
+    checkAlarmUseCase = {
+      checkAlarmRule: jest.fn(),
+    } as any;
+
+    findDeviceByDatapointId = {
+      findByDatapointId: jest.fn(),
+    } as any;
+
     controller = new DeviceController(
       findDeviceById,
       findDeviceByPlantId,
       ingestTimeseries,
       getDeviceValue,
       writeDatapointUseCase,
+      checkAlarmUseCase,
+      findDeviceByDatapointId,
     );
   });
 

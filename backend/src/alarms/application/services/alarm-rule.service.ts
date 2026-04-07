@@ -40,6 +40,9 @@ import {
   CreateAlarmEventPort,
 } from '../ports/out/create-alarm-event-port.interface';
 import { CreateAlarmEventCmd } from '../commands/create-alarm-event-cmd';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CheckAlarmRuleResDto } from 'src/alarms/infrastructure/dtos/out/check-alarm-rule-res-dto';
+import { CheckAlarm } from '../../domain/models/check-alarm';
 
 @Injectable()
 export class AlarmRuleService
@@ -52,6 +55,7 @@ export class AlarmRuleService
     CheckAlarmRuleUseCase
 {
   constructor(
+    private readonly emitter: EventEmitter2,
     @Inject(GET_ALL_ALARM_RULES_PORT)
     private readonly getAllAlarmRulesPort: GetAllAlarmRulesPort,
 
@@ -94,15 +98,24 @@ export class AlarmRuleService
     return await this.deleteAlarmRulePort.deleteAlarmRule(req);
   }
 
-  async checkAlarmRule(req: CheckAlarmRuleCmd): Promise<number | void> {
+  async checkAlarmRule(req: CheckAlarmRuleCmd): Promise<void> {
     const checkAlarm = await this.checkAlarmRulePort.checkAlarmRule(req);
 
     if (!checkAlarm) return;
 
-    await this.createAlarmEventPort.createAlarmEvent(
-      new CreateAlarmEventCmd(checkAlarm.id, req.activationTime),
+    const alarmEventId = await this.createAlarmEventPort.createAlarmEvent(
+      new CreateAlarmEventCmd(checkAlarm.alarm_rule_id, req.activationTime),
     );
 
-    return checkAlarm.ward_id;
+    const checkAlarmWithEventId = new CheckAlarm(
+      checkAlarm.alarm_rule_id,
+      checkAlarm.ward_id,
+      alarmEventId,
+    );
+
+    const checkAlarmDto: CheckAlarmRuleResDto =
+      CheckAlarmRuleResDto.fromDomain(checkAlarmWithEventId);
+
+    this.emitter.emit('alarm.activated', checkAlarmDto);
   }
 }

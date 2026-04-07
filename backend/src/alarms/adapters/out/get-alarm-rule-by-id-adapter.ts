@@ -24,6 +24,7 @@ export class GetAlarmRuleByIdAdapter implements GetAlarmRuleByIdPort {
 
     return new AlarmRule(
       alarmRule.id,
+      alarmRule.plant_name + ' ' + alarmRule.room_name + ' ' + alarmRule.device_name,
       alarmRule.name,
       alarmRule.threshold_operator,
       alarmRule.threshold_value,

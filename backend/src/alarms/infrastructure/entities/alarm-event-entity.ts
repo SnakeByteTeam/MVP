@@ -3,6 +3,7 @@ import { AlarmPriority } from '../../domain/models/alarm-priority.enum';
 export class AlarmEventEntity {
   constructor(
     public readonly id: string,
+    public readonly plant_name: string,
     public readonly room_name: string,
     public readonly device_name: string,
     public readonly device_id: string,

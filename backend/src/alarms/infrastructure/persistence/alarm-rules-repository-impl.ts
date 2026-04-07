@@ -47,7 +47,8 @@ export class AlarmRulesRepositoryImpl
         FROM jsonb_array_elements(room->'devices') AS device
         WHERE device->>'id' = ar.device_id
       ) d ON true
-      WHERE d.device IS NOT NULL
+      WHERE d.device IS NOT NULL 
+      AND ar.is_changed_when_used = FALSE
       AND ar.id = $1
       ORDER BY ar.created_at DESC;`,
       [id],
@@ -109,7 +110,8 @@ export class AlarmRulesRepositoryImpl
         FROM jsonb_array_elements(room->'devices') AS device
         WHERE device->>'id' = ar.device_id
       ) d ON true
-      WHERE d.device IS NOT NULL
+      WHERE d.device IS NOT NULL 
+      AND ar.is_changed_when_used = FALSE
       ORDER BY ar.created_at DESC;`,
     );
     return result.rows;
@@ -262,7 +264,8 @@ export class AlarmRulesRepositoryImpl
       FROM alarm_rule ar
       LEFT JOIN plant p ON p.id = ar.plant_id
       WHERE ar.device_id = $2
-        AND ar.is_armed = true
+        AND ar.is_armed = TRUE
+        AND ar.is_changed_when_used = FALSE
         AND (
           (
             ar.arming_time <= ar.dearming_time

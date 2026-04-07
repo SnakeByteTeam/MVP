@@ -6,6 +6,9 @@ export class GetAlarmRuleByIdResDto {
   id!: string;
 
   @ApiProperty()
+  position!: string;
+
+  @ApiProperty()
   name!: string;
 
   @ApiProperty()

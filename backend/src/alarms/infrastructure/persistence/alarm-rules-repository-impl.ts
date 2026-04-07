@@ -24,8 +24,22 @@ export class AlarmRulesRepositoryImpl
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {
     const result = await this.pool.query(
-      `SELECT * FROM alarm_rule
-       WHERE id = $1`,
+      `SELECT
+        ar.id,
+        ar.name,
+        ar.priority,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        p.data->>'name' AS plant_name,
+        ar.device_id,
+        ar.arming_time,
+        ar.dearming_time,
+        ar.is_armed
+      FROM alarm_rule ar
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      WHERE id = $1`,
       [id],
     );
     return result.rows.length > 0 ? result.rows[0] : null;
@@ -64,9 +78,22 @@ export class AlarmRulesRepositoryImpl
 
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
-      `SELECT * FROM alarm_rule 
-       WHERE is_changed_when_used = FALSE
-       ORDER BY created_at DESC`,
+      `SELECT
+        ar.id,
+        ar.name,
+        ar.priority,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        p.data->>'name' AS plant_name,
+        ar.device_id,
+        ar.arming_time,
+        ar.dearming_time,
+        ar.is_armed
+      FROM alarm_rule ar
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      ORDER BY ar.created_at DESC`,
     );
     return result.rows;
   }

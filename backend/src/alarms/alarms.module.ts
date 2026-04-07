@@ -5,7 +5,7 @@ import { AlarmRuleService } from './application/services/alarm-rule.service';
 import { RESOLVE_ALARM_EVENT_USE_CASE } from './application/ports/in/resolve-active-alarm.use-case';
 import { CREATE_ALARM_RULE_USE_CASE } from './application/ports/in/create-alarm-rule.use-case';
 import { DELETE_ALARM_RULE_USE_CASE } from './application/ports/in/delete-alarm-rule.use-case';
-import { GET_ALARM_RULE_BY_ID_USE_CASE } from './application/ports/in/get-alarm-rule.use-case';
+import { GET_ALARM_RULE_BY_ID_USE_CASE } from './application/ports/in/get-alarm-rule-by-id.use-case';
 import { GET_ALL_ALARM_RULES_USE_CASE } from './application/ports/in/get-all-alarm-rules.use-case';
 import { UPDATE_ALARM_RULE_USE_CASE } from './application/ports/in/update-alarm-rule.use-case';
 import { CREATE_ALARM_RULE_REPOSITORY } from './application/repository/create-alarm-rule-repository.interface';
@@ -48,6 +48,10 @@ import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE } from './applicatio
 import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY } from './application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
 import { GetAllUnmanagedAlarmEventsByUserIdAdapter } from './adapters/out/get-all-unmanaged-alarm-events-by-user-id-adapter';
 import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from './application/ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
+import { GET_ALARM_EVENT_BY_ID_REPOSITORY } from './application/repository/get-alarm-event-by-id-repository.interface';
+import { GET_ALARM_EVENT_BY_ID_PORT } from './application/ports/out/get-alarm-event-by-id-port.interface';
+import { GetAlarmEventByIdAdapter } from './adapters/out/get-alarm-event-by-id-adapter';
+import { GET_ALARM_EVENT_BY_ID_USE_CASE } from './application/ports/in/get-alarm-event-by-id-use-case.interface';
 
 @Module({
   imports: [GuardModule],
@@ -127,6 +131,18 @@ import { GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from './application/po
     {
       provide: GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_REPOSITORY,
       useClass: AlarmEventsRepositoryImpl,
+    },
+    {
+      provide: GET_ALARM_EVENT_BY_ID_REPOSITORY,
+      useClass: AlarmEventsRepositoryImpl,
+    },
+    {
+      provide: GET_ALARM_EVENT_BY_ID_PORT,
+      useClass: GetAlarmEventByIdAdapter
+    },
+    {
+      provide: GET_ALARM_EVENT_BY_ID_USE_CASE,
+      useClass: AlarmEventsService
     },
     {
       provide: RESOLVE_ALARM_EVENT_USE_CASE,

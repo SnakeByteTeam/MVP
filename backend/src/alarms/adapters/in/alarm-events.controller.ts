@@ -36,12 +36,17 @@ import {
   GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,
   GetAllUnmanagedAlarmEventsByUserIdUseCase,
 } from '../../application/ports/in/get-all-unmanaged-alarm-events-by-user-id-use-case.interface';
+import { GET_ALARM_EVENT_BY_ID_USE_CASE, GetAlarmEventByIdUseCase } from '../../application/ports/in/get-alarm-event-by-id-use-case.interface';
+import { GetAlarmEventByIdCmd } from '../../application/commands/get-alarm-event-by-id-cmd';
+import { GetAlarmEventByIdResDto } from '../../infrastructure/dtos/out/get-alarm-event-by-id-res-dto';
 
 @Controller('alarm-events')
 export class AlarmEventsController {
   constructor(
     @Inject(GET_ALL_ALARM_EVENTS_USE_CASE)
     private readonly getAllAlarmEventsUseCase: GetAllAlarmEventsUseCase,
+    @Inject(GET_ALARM_EVENT_BY_ID_USE_CASE)
+    private readonly getAlarmEventByIdUseCase: GetAlarmEventByIdUseCase
     @Inject(GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE)
     private readonly getAllManagedAlarmEventsByUserIdUseCase: GetAllManagedAlarmEventsByUserIdUseCase,
     @Inject(GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE)
@@ -49,6 +54,18 @@ export class AlarmEventsController {
     @Inject(RESOLVE_ALARM_EVENT_USE_CASE)
     private readonly resolveAlarmEventUseCase: ResolveAlarmEventUseCase,
   ) {}
+
+  @ApiOkResponse({ type: GetAlarmEventByIdResDto })
+  //@UseGuards(UserGuard, AdminGuard)
+  @Get('/:id')
+  async getAlarmEventById(
+     @Param('id') id: string,
+  ): Promise<GetAlarmEventByIdResDto> {
+    const alarmEvent = await this.getAlarmEventByIdUseCase.getAlarmEventById(
+      new GetAlarmEventByIdCmd(id)
+    );
+    return plainToInstance(GetAlarmEventByIdResDto, alarmEvent);
+  }
 
   @ApiOkResponse({
     type: GetAllManagedAlarmEventsByUserIdResDto,

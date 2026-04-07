@@ -23,7 +23,7 @@ import {
 import {
   GET_ALARM_RULE_BY_ID_USE_CASE,
   GetAlarmRuleByIdUseCase,
-} from '../../application/ports/in/get-alarm-rule.use-case';
+} from '../../application/ports/in/get-alarm-rule-by-id.use-case';
 import {
   GET_ALL_ALARM_RULES_USE_CASE,
   GetAllAlarmRulesUseCase,

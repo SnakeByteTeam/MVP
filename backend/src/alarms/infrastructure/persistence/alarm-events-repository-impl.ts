@@ -7,6 +7,7 @@ import { GetAllAlarmEventsRepository } from '../../application/repository/get-al
 import { GetAllManagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-managed-alarm-events-by-user-id-repository.interface';
 import { CreateAlarmEventRepository } from '../../application/repository/create-alarm-event-repository.interface';
 import { GetAllUnmanagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
+import { GetAlarmEventByIdRepository } from '../../application/repository/get-alarm-event-by-id-repository.interface';
 
 export class AlarmEventsRepositoryImpl
   implements
@@ -14,6 +15,7 @@ export class AlarmEventsRepositoryImpl
     GetAllAlarmEventsRepository,
     GetAllManagedAlarmEventsByUserIdRepository,
     GetAllUnmanagedAlarmEventsByUserIdRepository,
+    GetAlarmEventByIdRepository,
     CreateAlarmEventRepository
 {
   constructor(@Inject(PG_POOL) private readonly pool) {}
@@ -49,6 +51,32 @@ export class AlarmEventsRepositoryImpl
       [limit, offset],
     );
     return result.rows;
+  }
+
+  async getAlarmEventById(id: string): Promise<AlarmEventEntity | null> {
+    const result = await this.pool.query(
+      `SELECT 
+        ae.id,
+        p.data->>'name' AS plant_name,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        ar.device_id,
+        ae.alarm_rule_id,
+        ar.name AS alarm_name,
+        ar.priority,
+        ae.activation_time,
+        ae.resolution_time,
+        ae.user_id as user_id,
+        (SELECT username FROM "user" WHERE id = ae.user_id LIMIT 1) as user_username
+      FROM alarm_event ae
+      LEFT JOIN alarm_rule ar ON ae.alarm_rule_id = ar.id
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL jsonb_array_elements(room->'devices') AS device ON true
+      WHERE device->>'id' = ar.device_id AND ae.id = $1;`,
+      [id],
+    );
+    return result.rows.length > 0 ? result.rows[0] : null;
   }
 
   async getAllManagedAlarmEventsByUserId(

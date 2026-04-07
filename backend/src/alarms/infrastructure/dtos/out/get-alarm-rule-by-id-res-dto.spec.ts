@@ -1,4 +1,4 @@
-import { GetAlarmRuleByIdResDto } from './get-alarm-rule-res-dto';
+import { GetAlarmRuleByIdResDto } from './get-alarm-rule-by-id-res-dto';
 
 describe('GetAlarmRuleByIdResDto', () => {
   it('should be defined', () => {

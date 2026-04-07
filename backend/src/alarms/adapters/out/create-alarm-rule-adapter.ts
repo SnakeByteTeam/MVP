@@ -27,6 +27,7 @@ export class CreateAlarmRuleAdapter implements CreateAlarmRulePort {
 
     return new AlarmRule(
       alarmRule.id,
+      "",
       alarmRule.name,
       alarmRule.threshold_operator,
       alarmRule.threshold_value,

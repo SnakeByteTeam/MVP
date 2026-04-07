@@ -3,7 +3,6 @@ CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
 DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS alarm_event;
 DROP TABLE IF EXISTS alarm_rule;
-DROP TABLE IF EXISTS status;
 DROP TABLE IF EXISTS plant;
 DROP TABLE IF EXISTS token_cache;
 DROP TABLE IF EXISTS oauth_ticket_cache;
@@ -124,17 +123,6 @@ CREATE TABLE plant (
     data      JSONB        NOT NULL,
     ward_id   INTEGER      REFERENCES ward(id) ON DELETE SET NULL
 );
-
-
-CREATE TABLE IF NOT EXISTS status (
-    id   SERIAL PRIMARY KEY,
-    name VARCHAR(30) NOT NULL
-);
-
-INSERT INTO status (name) VALUES
-('Attivo'),
-('Risolto'),
-('In gestione');
 
 CREATE TABLE IF NOT EXISTS alarm_rule (
     id                 VARCHAR(255) PRIMARY KEY,

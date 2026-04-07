@@ -10,7 +10,7 @@ import {
 } from '../ports/out/get-alarm-rule-by-id.port';
 import { CreateAlarmRuleUseCase } from '../ports/in/create-alarm-rule.use-case';
 import { GetAllAlarmRulesUseCase } from '../ports/in/get-all-alarm-rules.use-case';
-import { GetAlarmRuleByIdUseCase } from '../ports/in/get-alarm-rule.use-case';
+import { GetAlarmRuleByIdUseCase } from '../ports/in/get-alarm-rule-by-id.use-case';
 import { UpdateAlarmRuleUseCase } from '../ports/in/update-alarm-rule.use-case';
 import { DeleteAlarmRuleUseCase } from '../ports/in/delete-alarm-rule.use-case';
 import { CreateAlarmRuleCmd } from '../commands/create-alarm-rule.cmd';

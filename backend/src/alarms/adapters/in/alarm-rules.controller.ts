@@ -23,7 +23,7 @@ import {
 import {
   GET_ALARM_RULE_BY_ID_USE_CASE,
   GetAlarmRuleByIdUseCase,
-} from '../../application/ports/in/get-alarm-rule.use-case';
+} from '../../application/ports/in/get-alarm-rule-by-id.use-case';
 import {
   GET_ALL_ALARM_RULES_USE_CASE,
   GetAllAlarmRulesUseCase,
@@ -40,7 +40,7 @@ import {
   UpdateAlarmRuleUseCase,
 } from '../../application/ports/in/update-alarm-rule.use-case';
 import { GetAllAlarmRulesResDto } from '../../infrastructure/dtos/out/get-all-alarm-rules-res-dto';
-import { GetAlarmRuleByIdResDto } from '../../infrastructure/dtos/out/get-alarm-rule-res-dto';
+import { GetAlarmRuleByIdResDto } from '../../infrastructure/dtos/out/get-alarm-rule-by-id-res-dto';
 import { UserGuard } from '../../../guard/user/user.guard';
 import { AdminGuard } from '../../../guard/admin/admin.guard';
 

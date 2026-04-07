@@ -26,8 +26,28 @@ export class AlarmRulesRepositoryImpl
 
   async getAlarmRuleById(id: string): Promise<AlarmRuleEntity | null> {
     const result = await this.pool.query(
-      `SELECT * FROM alarm_rule
-       WHERE id = $1`,
+      `SELECT
+        ar.id,
+        ar.name,
+        ar.priority,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        p.data->>'name' AS plant_name,
+        ar.device_id,
+        ar.arming_time,
+        ar.dearming_time,
+        ar.is_armed
+      FROM alarm_rule ar
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL (
+        SELECT device
+        FROM jsonb_array_elements(room->'devices') AS device
+        WHERE device->>'id' = ar.device_id
+      ) d ON true
+      WHERE d.device IS NOT NULL
+      AND id = $1
+      ORDER BY ar.created_at DESC;`,
       [id],
     );
     return result.rows.length > 0 ? result.rows[0] : null;
@@ -66,9 +86,27 @@ export class AlarmRulesRepositoryImpl
 
   async getAllAlarmRules(): Promise<AlarmRuleEntity[]> {
     const result = await this.pool.query(
-      `SELECT * FROM alarm_rule 
-       WHERE is_changed_when_used = FALSE
-       ORDER BY created_at DESC`,
+      `SELECT
+        ar.id,
+        ar.name,
+        ar.priority,
+        room->>'name' AS room_name,
+        device->>'name' AS device_name,
+        p.data->>'name' AS plant_name,
+        ar.device_id,
+        ar.arming_time,
+        ar.dearming_time,
+        ar.is_armed
+      FROM alarm_rule ar
+      LEFT JOIN plant p ON p.id = ar.plant_id
+      LEFT JOIN LATERAL jsonb_array_elements(p.data->'rooms') AS room ON true
+      LEFT JOIN LATERAL (
+        SELECT device
+        FROM jsonb_array_elements(room->'devices') AS device
+        WHERE device->>'id' = ar.device_id
+      ) d ON true
+      WHERE d.device IS NOT NULL
+      ORDER BY ar.created_at DESC;`,
     );
     return result.rows;
   }
@@ -130,8 +168,7 @@ export class AlarmRulesRepositoryImpl
             threshold_value = $5,
             arming_time = $6,
             dearming_time = $7,
-            is_armed = $8,
-            updated_at = NOW()
+            is_armed = $8
           WHERE id = $1
           RETURNING *
           `,
@@ -153,8 +190,7 @@ export class AlarmRulesRepositoryImpl
 
       await client.query(
         `UPDATE alarm_rule
-        SET is_changed_when_used = TRUE,
-          updated_at = NOW()
+        SET is_changed_when_used = TRUE
         WHERE id = $1
         `,
         [id],
@@ -173,7 +209,6 @@ export class AlarmRulesRepositoryImpl
           device_id,
           plant_id,
           created_at,
-          updated_at,
           is_changed_when_used
         )
         SELECT
@@ -181,7 +216,6 @@ export class AlarmRulesRepositoryImpl
           $3, $4, $5, $6, $7, $8, $9,
           device_id,
           plant_id,
-          NOW(),
           NOW(),
           FALSE
         FROM alarm_rule

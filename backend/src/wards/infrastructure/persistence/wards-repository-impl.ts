@@ -9,12 +9,11 @@ import { Pool } from 'pg';
 
 export class WardsRepositoryImpl
   implements
-    CreateWardRepository,
-    DeleteWardRepository,
-    FindAllWardsRepository,
-    UpdateWardRepository
-{
-  constructor(@Inject(PG_POOL) private readonly conn: Pool) {}
+  CreateWardRepository,
+  DeleteWardRepository,
+  FindAllWardsRepository,
+  UpdateWardRepository {
+  constructor(@Inject(PG_POOL) private readonly conn: Pool) { }
 
   async createWard(name: string): Promise<WardEntity> {
     const result = await this.conn.query(
@@ -41,7 +40,7 @@ export class WardsRepositoryImpl
 
       // Keep cache consistent for environments where structure_cache is the source of availability.
       await client.query(
-        'UPDATE structure_cache SET ward_id = NULL WHERE ward_id IS NOT NULL AND ward_id::text = $1::text',
+        'UPDATE plant SET ward_id = NULL WHERE ward_id IS NOT NULL AND ward_id::text = $1::text',
         [id],
       );
 

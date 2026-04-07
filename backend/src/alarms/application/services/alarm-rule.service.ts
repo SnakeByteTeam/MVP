@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AlarmRule } from '../../domain/models/alarm-rule.model';
 import {
   GET_ALL_ALARM_RULES_PORT,
@@ -54,6 +54,8 @@ export class AlarmRuleService
     DeleteAlarmRuleUseCase,
     CheckAlarmRuleUseCase
 {
+  private readonly logger = new Logger(AlarmRuleService.name);
+
   constructor(
     private readonly emitter: EventEmitter2,
     @Inject(GET_ALL_ALARM_RULES_PORT)
@@ -99,12 +101,29 @@ export class AlarmRuleService
   }
 
   async checkAlarmRule(req: CheckAlarmRuleCmd): Promise<void> {
+    this.logger.log(
+      `[checkAlarmRule] Start deviceId=${req.deviceId} value=${req.value} activationTime=${req.activationTime.toISOString()}`,
+    );
+
     const checkAlarm = await this.checkAlarmRulePort.checkAlarmRule(req);
 
-    if (!checkAlarm) return;
+    if (!checkAlarm) {
+      this.logger.log(
+        `[checkAlarmRule] No matching armed alarm rule for deviceId=${req.deviceId}`,
+      );
+      return;
+    }
+
+    this.logger.log(
+      `[checkAlarmRule] Match found alarmRuleId=${checkAlarm.alarm_rule_id} wardId=${checkAlarm.ward_id}`,
+    );
 
     const alarmEventId = await this.createAlarmEventPort.createAlarmEvent(
       new CreateAlarmEventCmd(checkAlarm.alarm_rule_id, req.activationTime),
+    );
+
+    this.logger.log(
+      `[checkAlarmRule] Alarm event created alarmEventId=${alarmEventId}`,
     );
 
     const checkAlarmWithEventId = new CheckAlarm(
@@ -117,5 +136,8 @@ export class AlarmRuleService
       CheckAlarmRuleResDto.fromDomain(checkAlarmWithEventId);
 
     this.emitter.emit('alarm.activated', checkAlarmDto);
+    this.logger.log(
+      `[checkAlarmRule] Event emitted alarm.activated alarmEventId=${checkAlarmDto.alarmEventId}`,
+    );
   }
 }

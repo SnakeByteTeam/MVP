@@ -193,6 +193,13 @@ export class DeviceController {
   ): Promise<{ message: string; statusCode: number }> {
     const ingestCmds: IngestTimeseriesCmd[] = payload.data
       .filter((item: NotificationDataDto) => item.type === 'datapoint')
+      .filter(
+        (item: NotificationDataDto) =>
+          typeof item?.id === 'string' &&
+          item.id.length > 0 &&
+          item?.attributes?.value != null &&
+          item?.attributes?.timestamp != null,
+      )
       .map((item: NotificationDataDto) => ({
         datapointId: item.id,
         value: item.attributes.value as string,
@@ -229,8 +236,13 @@ export class DeviceController {
               new Date(cmd.timestamp),
             ),
           );
-        } catch {
-          console.log('Errore nelle notifiche');
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          const stack = err instanceof Error ? err.stack : undefined;
+          console.error(
+            `[DeviceController] checkAlarmRule failed for datapoint ${cmd.datapointId} (value=${cmd.value}, timestamp=${cmd.timestamp}): ${message}`,
+            stack,
+          );
         }
       }
     });

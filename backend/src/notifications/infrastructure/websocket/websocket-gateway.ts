@@ -29,12 +29,12 @@ export class NotificationsGateway implements NotifyAlarmWardRepoPort {
     try {
       if (!wardId) {
         client.disconnect();
-        this.logger.debug(`client ${client.id} has no wardId`);
+        this.logger.log(`client ${client.id} has no wardId`);
       }
 
       await client.join(`ward:${wardId}`);
 
-      this.logger.debug(`client ${client.id} joined ward ${wardId}`);
+      this.logger.log(`client ${client.id} joined ward ${wardId}`);
     } catch {
       client.disconnect();
     }
@@ -48,12 +48,12 @@ export class NotificationsGateway implements NotifyAlarmWardRepoPort {
     try {
       if (!wardId) {
         client.disconnect();
-        this.logger.debug(`client ${client.id} has no wardId`);
+        this.logger.log(`client ${client.id} has no wardId`);
       }
 
       await client.leave(`ward:${wardId}`);
 
-      this.logger.debug(`client ${client.id} left ward ${wardId}`);
+      this.logger.log(`client ${client.id} left ward ${wardId}`);
     } catch {
       client.disconnect();
     }

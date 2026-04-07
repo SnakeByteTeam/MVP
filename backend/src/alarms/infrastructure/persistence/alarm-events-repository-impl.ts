@@ -8,6 +8,7 @@ import { GetAllAlarmEventsRepository } from '../../application/repository/get-al
 import { GetAllManagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-managed-alarm-events-by-user-id-repository.interface';
 import { CreateAlarmEventRepository } from '../../application/repository/create-alarm-event-repository.interface';
 import { GetAllUnmanagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
+import { GetWardAlarmEventRepoPort } from 'src/alarms/application/repository/get-ward-alarm-rule.repository';
 
 export class AlarmEventsRepositoryImpl
   implements
@@ -15,7 +16,9 @@ export class AlarmEventsRepositoryImpl
   GetAllAlarmEventsRepository,
   GetAllManagedAlarmEventsByUserIdRepository,
   GetAllUnmanagedAlarmEventsByUserIdRepository,
-  CreateAlarmEventRepository {
+  CreateAlarmEventRepository, 
+  GetWardAlarmEventRepoPort{
+
   constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async getAllAlarmEvents(
@@ -162,5 +165,25 @@ export class AlarmEventsRepositoryImpl
     );
 
     return result.rows[0]?.id ?? '';
+  }
+
+  async getWardAlarmEvent(alarmId: string): Promise<number> {
+    const result = await this.pool.query<{ ward_id: number | null }>(
+      `SELECT p.ward_id
+       FROM alarm_event ae
+       JOIN alarm_rule ar ON ar.id = ae.alarm_rule_id
+       JOIN plant p ON p.id = ar.plant_id
+       WHERE ae.id = $1
+       LIMIT 1`,
+      [alarmId],
+    );
+
+    const wardId = result.rows[0]?.ward_id;
+
+    if (wardId == null) {
+      throw new Error(`Ward not found for alarm event ${alarmId}`);
+    }
+
+    return wardId;
   }
 }

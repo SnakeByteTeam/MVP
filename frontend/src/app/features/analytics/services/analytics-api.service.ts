@@ -2,8 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { AnalyticsDto } from '../models/analytics.model';
-import { Observable, map, of } from 'rxjs';
-import { Apartment } from '../../apartment-monitor/models/apartment.model';
+import { Observable, map } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {

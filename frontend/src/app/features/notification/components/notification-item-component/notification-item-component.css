@@ -15,6 +15,12 @@
     animation-delay: var(--notification-delay, 0ms);
 }
 
+.notification-card--highlighted {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.26), 0 22px 42px -34px rgba(245, 158, 11, 0.55);
+    background: linear-gradient(180deg, #fffbeb 0%, #ffffff 55%);
+}
+
 .notification-item__remove {
     cursor: pointer;
 }

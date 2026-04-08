@@ -17,6 +17,7 @@ import {
 export class NotificationItemComponent {
   public readonly notification = input.required<NotificationEvent>();
   public readonly showRemoveAction = input<boolean>(false);
+  public readonly isHighlighted = input<boolean>(false);
   public readonly removeClicked = output<string>();
   public readonly sentAt = computed(() => this.notification().sentAt);
   public readonly isResolved = computed(() => {

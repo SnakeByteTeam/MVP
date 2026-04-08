@@ -1,5 +1,4 @@
-
-import { Component, inject, ChangeDetectionStrategy, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnDestroy, OnInit, ChangeDetectorRef, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { NavItem } from '../../core/models/nav-item.model';
 import { Observable, Subject, take, takeUntil } from 'rxjs';
 import { NavService } from './services/nav.service';
@@ -16,10 +15,9 @@ import { NotificationTopbarPanelComponent } from '../notification/components/not
 import { MyVimarAccount } from '../my-vimar-integration/models/my-vimar-account.model';
 import { IVimarCloudApiService, VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
-
-@Component({ 
-    selector: 'app-main-layout', 
-    standalone: true, 
+@Component({
+    selector: 'app-main-layout',
+    standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         CommonModule,
@@ -29,8 +27,10 @@ import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-m
         SidebarComponent
     ],
     templateUrl: './main-layout.component.html',
-    styleUrl: './main-layout.component.css'})
-export class MainLayoutComponent implements OnInit, OnDestroy {
+    styleUrl: './main-layout.component.css'
+})
+export class MainLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
+    @ViewChild('topbarRef', { read: ElementRef }) topbarRef!: ElementRef;
     public isCollapsed: boolean = true;
     public navItems!: NavItem[];
     public isProfilePanelOpen = false;
@@ -56,16 +56,18 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     private toastTimer: ReturnType<typeof setTimeout> | null = null;
     private latestRealtimeNotificationId: string | null = null;
 
-    public currentUser : UserInfo = {
+    public currentUser: UserInfo = {
         username: '',
         firstName: '',
         lastName: '',
         role: UserRole.OPERATORE_SANITARIO
     };
 
-    public activeAlarmCount$ : Observable<number> = this.alarmStateService.getActiveAlarmsCount$();
+    public activeAlarmCount$: Observable<number> = this.alarmStateService.getActiveAlarmsCount$();
+    private resizeObserver!: ResizeObserver;
 
-    public ngOnInit(): void{
+
+    public ngOnInit(): void {
         this.bindRealtimeAlarmNotifications();
 
         this.internalAuthService
@@ -80,7 +82,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
                 this.currentUser = {
                     username: session.username,
-                    // The backend token does not include first/last name claims yet.
                     firstName: session.username,
                     lastName: '',
                     role: session.role,
@@ -96,30 +97,32 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
             });
     }
 
+    public ngAfterViewInit(): void {
+        this.resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                const h = entry.contentRect.height;
+                document.documentElement.style.setProperty('--topbar-height', `${h}px`);
+            }
+        });
+        this.resizeObserver.observe(this.topbarRef.nativeElement);
+    }
+
     public ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
         this.clearToastTimer();
+        this.resizeObserver?.disconnect();
     }
 
-    public toggleSidebar(): void{
+    public toggleSidebar(): void {
         this.isCollapsed = !this.isCollapsed;
     }
 
     public toggleProfilePanel(): void {
         this.closeNotificationPanel();
-
-        if (this.canOpenProfilePanel()) {
-            this.isAdmin = true;
-        } else {
-            this.isAdmin = false;
-            this.isProfilePanelOpen = false;
-            return;
-        }
-
         this.isProfilePanelOpen = !this.isProfilePanelOpen;
 
-        if (this.isProfilePanelOpen) {
+        if (this.isProfilePanelOpen && this.isAdmin) {
             this.loadVimarStatus();
         }
     }
@@ -161,6 +164,14 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         void this.router.navigate(['/notifications']);
     }
 
+    public openNotificationsArchiveFromPreview(notificationId: string): void {
+        this.closeNotificationPanel();
+
+        void this.router.navigate(['/notifications'], {
+            queryParams: { focus: notificationId },
+        });
+    }
+
     public removeTopbarNotification(notificationId: string): void {
         this.alarmStateService.removeNotification(notificationId);
     }
@@ -177,8 +188,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }
 
     public canOpenProfilePanel(): boolean {
-        const role = this.internalAuthService.getRole() ?? this.currentUser.role;
-        return role === UserRole.AMMINISTRATORE;
+        return true;
     }
 
     private bindRealtimeAlarmNotifications(): void {

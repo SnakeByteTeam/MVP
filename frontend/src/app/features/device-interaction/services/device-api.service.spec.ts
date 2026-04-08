@@ -248,4 +248,172 @@ describe('DeviceApiService', () => {
     expect(rows).toEqual([]);
     expect(storage.getItem('activePlantId')).toBe('plant-2');
   });
+
+  it('esclude dispositivi energy measure dalla tabella endpoint', async () => {
+    const rowsPromise = firstValueFrom(service.getWritableEndpointRows());
+
+    const request = httpMock.expectOne('http://localhost:3000/plant?plantid=plant-1');
+    expect(request.request.method).toBe('GET');
+
+    request.flush({
+      id: 'plant-1',
+      name: 'Plant Demo',
+      rooms: [
+        {
+          id: 'room-1',
+          name: 'Soggiorno',
+          devices: [
+            {
+              id: 'energy-device',
+              name: 'Contatore energia',
+              type: 'SS_ENERGY_MEASURE_TOTAL',
+              subType: 'SF_ENERGY',
+              datapoints: [
+                {
+                  id: 'dp-energy-1',
+                  name: 'Energia',
+                  readable: true,
+                  writable: true,
+                  valueType: 'string',
+                  enum: ['Off', 'On'],
+                  sfeType: 'SFE_Cmd_OnOff',
+                },
+              ],
+            },
+            {
+              id: 'allowed-device',
+              name: 'Luce corridoio',
+              type: 'SF_Light',
+              datapoints: [
+                {
+                  id: 'dp-light-1',
+                  name: 'On/Off',
+                  readable: true,
+                  writable: true,
+                  valueType: 'string',
+                  enum: ['Off', 'On'],
+                  sfeType: 'SFE_Cmd_OnOff',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const rows = await rowsPromise;
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].deviceId).toBe('allowed-device');
+  });
+
+  it('deduplica dispositivi con stesso nome mantenendo quello a priorita maggiore', async () => {
+    const rowsPromise = firstValueFrom(service.getWritableEndpointRows());
+
+    const request = httpMock.expectOne('http://localhost:3000/plant?plantid=plant-1');
+    expect(request.request.method).toBe('GET');
+
+    request.flush({
+      id: 'plant-1',
+      name: 'Plant Demo',
+      rooms: [
+        {
+          id: 'room-1',
+          name: 'Soggiorno',
+          devices: [
+            {
+              id: 'generic-device',
+              name: 'Sensore ingresso',
+              type: 'SS_AUTOMATION_ONOFF',
+              subType: 'SF_GENERIC',
+              datapoints: [
+                {
+                  id: 'dp-generic-1',
+                  name: 'On/Off',
+                  readable: true,
+                  writable: true,
+                  valueType: 'string',
+                  enum: ['Off', 'On'],
+                  sfeType: 'SFE_Cmd_OnOff',
+                },
+              ],
+            },
+            {
+              id: 'priority-device',
+              name: ' sensore ingresso ',
+              type: 'SS_SECURITY_RADARDETECTOR',
+              subType: 'SF_ACCESS',
+              datapoints: [
+                {
+                  id: 'dp-priority-1',
+                  name: 'On/Off',
+                  readable: true,
+                  writable: true,
+                  valueType: 'string',
+                  enum: ['Off', 'On'],
+                  sfeType: 'SFE_Cmd_OnOff',
+                },
+                {
+                  id: 'dp-priority-2',
+                  name: 'Stato',
+                  readable: true,
+                  writable: false,
+                  valueType: 'string',
+                  enum: [],
+                  sfeType: 'SFE_State_OnOff',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const rows = await rowsPromise;
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0].deviceId).toBe('priority-device');
+  });
+
+  it('recupera i valori correnti dai device unici e li mappa per datapoint', async () => {
+    const valuesPromise = firstValueFrom(
+      service.getDatapointCurrentValuesByDeviceIds(['device-1', 'device-2', 'device-1']),
+    );
+
+    const req1 = httpMock.expectOne('http://localhost:3000/device/device-1/value');
+    expect(req1.request.method).toBe('GET');
+    req1.flush({
+      deviceId: 'device-1',
+      values: [{ datapointId: 'dp-1', name: 'On/Off', value: 'On' }],
+    });
+
+    const req2 = httpMock.expectOne('http://localhost:3000/device/device-2/value');
+    expect(req2.request.method).toBe('GET');
+    req2.flush({
+      deviceId: 'device-2',
+      values: [{ datapointId: 'dp-2', name: 'Temperatura', value: 21 }],
+    });
+
+    const values = await valuesPromise;
+    expect(values.get('dp-1')).toBe('On');
+    expect(values.get('dp-2')).toBe(21);
+  });
+
+  it('continua il merge valori anche se un device value endpoint fallisce', async () => {
+    const valuesPromise = firstValueFrom(
+      service.getDatapointCurrentValuesByDeviceIds(['device-ok', 'device-ko']),
+    );
+
+    const okReq = httpMock.expectOne('http://localhost:3000/device/device-ok/value');
+    okReq.flush({
+      deviceId: 'device-ok',
+      values: [{ datapointId: 'dp-ok', name: 'On/Off', value: 'Off' }],
+    });
+
+    const koReq = httpMock.expectOne('http://localhost:3000/device/device-ko/value');
+    koReq.flush({}, { status: 500, statusText: 'Server Error' });
+
+    const values = await valuesPromise;
+    expect(values.get('dp-ok')).toBe('Off');
+  });
 });

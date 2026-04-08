@@ -286,6 +286,22 @@ describe('EventSubscriptionService', () => {
     expect(httpClientSpy.get).toHaveBeenCalledTimes(1);
   });
 
+  it('refreshWardRoomSubscription riallinea le room joinate senza reload pagina', () => {
+    httpClientSpy.get
+      .mockReturnValueOnce(of([{ id: 'plant-1', wardId: 10 }]))
+      .mockReturnValueOnce(of([{ id: 'plant-2', wardId: 11 }]));
+
+    service.initialize([]);
+    currentUser$.next(buildSession('oss-4'));
+
+    service.refreshWardRoomSubscription();
+
+    expect(httpClientSpy.get).toHaveBeenCalledTimes(2);
+    expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '10');
+    expect(fakeSocket.emit).toHaveBeenCalledWith('leave-ward', '10');
+    expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '11');
+  });
+
   it('gestisce payload backend nativo su push-event per allarme attivato', () => {
     service.initialize([]);
 

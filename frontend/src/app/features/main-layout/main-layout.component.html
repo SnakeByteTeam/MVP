@@ -1,6 +1,6 @@
 <!-- temporaneo per far visualizzare la topbar anche senza utente vero 
  TO DELETE-->
-<app-topbar class="block h-[13vh] relative z-60" [user]="currentUser" [isProfileActive]="isProfilePanelOpen"
+<app-topbar #topbarRef class="block relative z-60" [user]="currentUser" [isProfileActive]="isProfilePanelOpen"
     [isNotificationActive]="isNotificationPanelOpen"
     [unreadNotificationsCount]="(unreadNotificationsCount$ | async) ?? 0"
     [showVimarWarning]="showVimarAssociationWarning" (hamburgerClicked)="toggleSidebar()"
@@ -10,6 +10,7 @@
 @if (isNotificationPanelOpen) {
 <app-notification-topbar-panel-component [notifications]="(notifications$ | async) ?? []"
     (viewAllClicked)="openNotificationsArchive()"
+    (notificationSelected)="openNotificationsArchiveFromPreview($event)"
     (removeClicked)="removeTopbarNotification($event)"
     (clearAllClicked)="clearTopbarNotifications()"></app-notification-topbar-panel-component>
 }
@@ -52,6 +53,7 @@
                 </header>
 
                 <div class="grid gap-5 lg:grid-cols-2">
+                    @if (isAdmin) {
                     <section class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                         <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Stato Collegamento
                         </p>
@@ -79,6 +81,7 @@
                         </div>
                         }
                     </section>
+                    }
 
                     <section class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                         <p class="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">Sessione</p>

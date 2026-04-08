@@ -51,6 +51,9 @@ export class AlarmConfigPageComponent implements OnInit {
 	public readonly pendingToggleRuleId = signal<string | null>(null);
 
 	public readonly rows = computed(() => this.tablePresenter.toRows(this.alarms()));
+	public readonly modalTitle = computed(() =>
+		this.editingRule() ? 'Modifica allarme' : 'Creazione allarme'
+	);
 
 	public ngOnInit(): void {
 		this.stateService.loadAlarmRules();

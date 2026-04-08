@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator.enum';
 import { Apartment } from '../../apartment-monitor/models/apartment.model';
 import { Datapoint } from '../../apartment-monitor/models/datapoint.model';
+import { PlantDto } from '../../apartment-monitor/models/plant-response.model';
 
 export type DeviceDatapointOption = {
     id: string;
@@ -37,6 +38,49 @@ export class DeviceDatapointExtractionService {
 
     public findDatapointById(datapointId: string, datapoints: readonly Datapoint[]): Datapoint | null {
         return datapoints.find((datapoint) => datapoint.id === datapointId) ?? null;
+    }
+
+    //lookup per edit
+    public findDatapointByDeviceAndDatapointId(
+        plants: readonly PlantDto[],
+        deviceId: string,
+        datapointId: string,
+    ): Datapoint | null {
+        const normalizedDeviceId = deviceId.trim();
+        const normalizedDatapointId = datapointId.trim();
+
+        if (normalizedDeviceId.length === 0 || normalizedDatapointId.length === 0) {
+            return null;
+        }
+
+        for (const plant of plants) {
+            for (const room of plant.rooms ?? []) {
+                const selectedDevice = room.devices.find((device) => device.id === normalizedDeviceId);
+                if (!selectedDevice) {
+                    continue;
+                }
+
+                const selectedDatapoint = (selectedDevice.datapoints ?? []).find(
+                    (datapoint) => datapoint.id === normalizedDatapointId,
+                );
+
+                if (!selectedDatapoint) {
+                    continue;
+                }
+
+                return {
+                    id: selectedDatapoint.id,
+                    name: selectedDatapoint.name,
+                    readable: selectedDatapoint.readable,
+                    writable: selectedDatapoint.writable,
+                    valueType: selectedDatapoint.valueType,
+                    enum: this.normalizeEnumValues(selectedDatapoint.enum),
+                    sfeType: selectedDatapoint.sfeType,
+                };
+            }
+        }
+
+        return null;
     }
 
     public getAllowedOperators(datapoint: Datapoint | null): ThresholdOperator[] {

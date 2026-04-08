@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { Datapoint } from '../../apartment-monitor/models/datapoint.model';
 import { WardPlantDto } from '../../ward-management/models/ward-api.dto';
 import { WardApiService } from '../../ward-management/services/ward-api.service';
 import { ApartmentApiService } from '../../apartment-monitor/services/apartment-api.service';
@@ -67,6 +68,27 @@ export class AlarmConfigFormStateService {
                 this.isDevicesLoading.set(false);
                 return of([] as DeviceDatapointOption[]);
             }),
+        );
+    }
+
+
+    public resolveDatapointForEdit(deviceId: string, datapointId: string): Observable<Datapoint | null> {
+        const normalizedDeviceId = deviceId.trim();
+        const normalizedDatapointId = datapointId.trim();
+
+        if (normalizedDeviceId.length === 0 || normalizedDatapointId.length === 0) {
+            return of(null);
+        }
+
+        return this.apartmentApi.getAllPlants().pipe(
+            map((plants) =>
+                this.datapointExtraction.findDatapointByDeviceAndDatapointId(
+                    plants,
+                    normalizedDeviceId,
+                    normalizedDatapointId,
+                ),
+            ),
+            catchError(() => of(null)),
         );
     }
 

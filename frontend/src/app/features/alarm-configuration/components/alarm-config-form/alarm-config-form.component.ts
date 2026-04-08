@@ -35,6 +35,7 @@ export class AlarmConfigFormComponent {
 	private readonly validationHelper = inject(AlarmConfigFormValidationHelper);
 	private readonly fieldOrchestrator = inject(AlarmConfigFormFieldOrchestratorHelper);
 	private readonly destroyRef = inject(DestroyRef);
+	private editDatapointLookupVersion = 0;
 
 	public readonly form = this.buildForm();
 	public readonly isEditMode = computed(() => this.mode() === 'edit');
@@ -56,31 +57,33 @@ export class AlarmConfigFormComponent {
 		const position = this.initialRule()?.position ?? '';
 		return this.toPositionLabel(position);
 	});
-	public readonly editDatapoint = computed(() => {
-		if (!this.isEditMode()) {
-			return '-';
-		}
-
-		const datapointId = this.selectedDatapointId().trim();
-		return datapointId.length > 0 ? datapointId : '-';
-	});
 
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
 		(value): value is AlarmPriority => typeof value === 'number'
 	);
 	public readonly thresholdOperatorOptions = computed(() => {
-		if (this.isEditMode()) {
-			return Object.values(ThresholdOperator);
+		if (!this.isEditMode()) {
+			return this.datapointExtraction.getAllowedOperators(this.selectedDatapoint());
 		}
 
-		return this.datapointExtraction.getAllowedOperators(this.selectedDatapoint());
+		const datapoint = this.selectedDatapoint();
+		if (datapoint !== null) {
+			return this.datapointExtraction.getAllowedOperators(datapoint);
+		}
+
+		const currentOperator = this.form.controls.thresholdOperator.value;
+		return currentOperator === null ? Object.values(ThresholdOperator) : [currentOperator];
 	});
 	public readonly thresholdValueEnumHints = computed(() =>
 		this.datapointExtraction.getEnumValues(this.selectedDatapoint())
 	);
 	public readonly thresholdValueHelpText = computed(() => {
 		if (this.isEditMode()) {
-			return 'Per soglie booleane usa ON oppure OFF, altrimenti inserisci un valore numerico.';
+			if (this.thresholdValueEnumHints().length > 0) {
+				return 'Inserisci uno dei valori previsti dal datapoint associato alla regola.';
+			}
+
+			return 'Inserisci un valore numerico (es. 10, 10.5, -3).';
 		}
 
 		if (this.selectedDeviceId().length === 0) {
@@ -102,6 +105,7 @@ export class AlarmConfigFormComponent {
 		effect(() => {
 			const rule = this.initialRule();
 			if (rule) {
+				const lookupVersion = ++this.editDatapointLookupVersion;
 				this.form.reset(this.formMapper.toFormValue(rule));
 				this.deviceOptions.set([{ id: rule.deviceId, label: rule.deviceId, datapoints: [] }]);
 				this.datapointOptions.set([]);
@@ -110,9 +114,11 @@ export class AlarmConfigFormComponent {
 				this.selectedDatapoint.set(null);
 				this.applyModeState();
 				this.applyThresholdConstraints(null);
+				this.loadEditDatapointMetadata(rule.deviceId, rule.datapointId ?? '', lookupVersion);
 				return;
 			}
 
+			this.editDatapointLookupVersion += 1;
 			this.form.reset(this.createEmptyFormValue());
 			this.deviceOptions.set([]);
 			this.datapointOptions.set([]);
@@ -286,6 +292,35 @@ export class AlarmConfigFormComponent {
 			thresholdOperatorControl: this.form.controls.thresholdOperator,
 			thresholdValueControl: this.form.controls.thresholdValue,
 		});
+	}
+
+	private loadEditDatapointMetadata(deviceId: string, datapointId: string, lookupVersion: number): void {
+		if (this.mode() !== 'edit') {
+			return;
+		}
+
+		const normalizedDatapointId = datapointId.trim();
+		if (normalizedDatapointId.length === 0) {
+			if (lookupVersion !== this.editDatapointLookupVersion || this.mode() !== 'edit') {
+				return;
+			}
+
+			this.selectedDatapoint.set(null);
+			this.applyThresholdConstraints(null);
+			return;
+		}
+
+		this.formState
+			.resolveDatapointForEdit(deviceId, normalizedDatapointId)
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((resolvedDatapoint) => {
+				if (lookupVersion !== this.editDatapointLookupVersion || this.mode() !== 'edit') {
+					return;
+				}
+
+				this.selectedDatapoint.set(resolvedDatapoint);
+				this.applyThresholdConstraints(resolvedDatapoint);
+			});
 	}
 
 	private toPositionLabel(position: string): string {

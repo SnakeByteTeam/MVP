@@ -27,7 +27,7 @@ describe('AlarmConfigFormComponent', () => {
         id: 'alarm-42',
         name: 'Porta aperta',
         thresholdOperator: '=',
-        thresholdValue: '5',
+        thresholdValue: 'ON',
         priority: AlarmPriority.ORANGE,
         armingTime: '07:00:00',
         dearmingTime: '19:00:00',
@@ -121,7 +121,34 @@ describe('AlarmConfigFormComponent', () => {
         );
         apartmentApiStub.getAllPlants.mockReturnValue(
             of([
-                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                {
+                    id: 'plant-1',
+                    name: 'Appartamento 1',
+                    rooms: [
+                        {
+                            id: 'room-edit',
+                            name: 'Ingresso',
+                            devices: [
+                                {
+                                    id: 'sensor-9',
+                                    name: 'Sensore porta edit',
+                                    type: 'LIGHT',
+                                    datapoints: [
+                                        {
+                                            id: 'dp-readable-1',
+                                            name: 'SFE_State_OnOff',
+                                            readable: true,
+                                            writable: false,
+                                            valueType: 'string',
+                                            enum: ['Off', 'On'],
+                                            sfeType: 'SFE_State_OnOff',
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
                 { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
                 { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
             ])
@@ -182,7 +209,7 @@ describe('AlarmConfigFormComponent', () => {
             datapointId: 'dp-readable-1',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
-            thresholdValue: '5',
+            thresholdValue: 'ON',
             armingTime: '07:00',
             dearmingTime: '19:00',
             enabled: true,
@@ -191,6 +218,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.name.disabled).toBe(true);
         expect(component.form.controls.deviceId.disabled).toBe(true);
         expect(component.form.controls.datapointId.disabled).toBe(true);
+        expect(component.form.controls.thresholdOperator.disabled).toBe(true);
     });
 
     it('buildForm applica i validatori required ai campi richiesti', () => {
@@ -259,12 +287,70 @@ describe('AlarmConfigFormComponent', () => {
         expect(positionInput?.value).toBe('Appartamento 2 - Ingresso - Sensore porta');
     });
 
-    it('in edit mode mostra il campo datapoint read-only valorizzato', () => {
+    it('in edit mode non mostra il campo datapoint nel form', () => {
         setInputs('edit', existingRule);
 
         const datapointInput = fixture.nativeElement.querySelector('#datapoint') as HTMLInputElement | null;
-        expect(datapointInput).not.toBeNull();
-        expect(datapointInput?.value).toBe('dp-readable-1');
+        expect(datapointInput).toBeNull();
+    });
+
+    it('in edit mode mostra thresholdOperator come campo readonly', () => {
+        setInputs('edit', existingRule);
+
+        const thresholdOperatorReadonly = fixture.nativeElement.querySelector('#thresholdOperatorReadonly') as HTMLInputElement | null;
+        const thresholdOperatorSelect = fixture.nativeElement.querySelector('#thresholdOperator') as HTMLSelectElement | null;
+
+        expect(thresholdOperatorReadonly).not.toBeNull();
+        expect(thresholdOperatorReadonly?.value).toBe(ThresholdOperator.EQUAL_TO);
+        expect(thresholdOperatorSelect).toBeNull();
+    });
+
+    it('in edit mode limita gli operatori al datapoint risolto e resetta operatori non supportati', () => {
+        const enumRuleWithUnsupportedOperator: AlarmRule = {
+            ...existingRule,
+            thresholdOperator: '>',
+        };
+
+        setInputs('edit', enumRuleWithUnsupportedOperator);
+
+        expect(component.thresholdOperatorOptions()).toEqual([ThresholdOperator.EQUAL_TO]);
+        expect(component.form.controls.thresholdOperator.value).toBeNull();
+    });
+
+    it('in edit mode valida thresholdValue in base al datapoint risolto', () => {
+        setInputs('edit', existingRule);
+
+        component.form.controls.thresholdValue.enable({ emitEvent: false });
+        component.form.controls.thresholdValue.setValue('123');
+        component.form.controls.thresholdValue.markAsTouched();
+        component.form.controls.thresholdValue.updateValueAndValidity();
+
+        expect(component.form.controls.thresholdValue.errors?.['invalidEnumThreshold']).toBe(true);
+    });
+
+    it('in edit mode consente submit anche se i metadati datapoint non sono risolvibili', () => {
+        const emitSpy = vi.spyOn(component.submittedForm, 'emit');
+        const missingDatapointRule: AlarmRule = {
+            ...existingRule,
+            datapointId: 'dp-missing',
+        };
+
+        setInputs('edit', missingDatapointRule);
+        component.onSubmit();
+
+        expect(emitSpy).toHaveBeenCalledWith({
+            name: 'Porta aperta',
+            plantId: '',
+            deviceId: 'sensor-9',
+            datapointId: 'dp-missing',
+            priority: AlarmPriority.ORANGE,
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: 'ON',
+            armingTime: '07:00',
+            dearmingTime: '19:00',
+            enabled: true,
+        });
+        expect(emitSpy).toHaveBeenCalledTimes(1);
     });
 
     it('onSubmit emette submittedForm in create mode con form valido', () => {
@@ -289,6 +375,8 @@ describe('AlarmConfigFormComponent', () => {
             plantId: '',
             deviceId: 'sensor-9',
             datapointId: 'dp-readable-1',
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: 'ON',
         });
 
         component.onSubmit();
@@ -299,6 +387,8 @@ describe('AlarmConfigFormComponent', () => {
             plantId: '',
             deviceId: 'sensor-9',
             datapointId: 'dp-readable-1',
+            thresholdOperator: ThresholdOperator.EQUAL_TO,
+            thresholdValue: 'ON',
         });
         expect(emitSpy).toHaveBeenCalledTimes(1);
     });

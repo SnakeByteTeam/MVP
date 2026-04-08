@@ -100,6 +100,7 @@ describe('AlarmConfigPageComponent', () => {
 
         expect(component.isModalOpen()).toBe(true);
         expect(component.editingRule()).toBeNull();
+        expect(component.modalTitle()).toBe('Creazione allarme');
     });
 
     it('onEdit apre la modale in edit mode con regola selezionata', () => {
@@ -110,6 +111,7 @@ describe('AlarmConfigPageComponent', () => {
 
         expect(component.isModalOpen()).toBe(true);
         expect(component.editingRule()?.id).toBe('alarm-1');
+        expect(component.modalTitle()).toBe('Modifica allarme');
     });
 
     it('onEdit ignora id non trovato', () => {

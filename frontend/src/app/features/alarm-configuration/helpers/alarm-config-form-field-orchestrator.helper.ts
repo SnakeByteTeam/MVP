@@ -9,6 +9,7 @@ type AlarmConfigFormLike = {
         plantId: AbstractControl;
         deviceId: AbstractControl;
         datapointId: AbstractControl;
+        thresholdOperator: AbstractControl;
     };
 };
 
@@ -37,8 +38,10 @@ export class AlarmConfigFormFieldOrchestratorHelper {
             form.controls.deviceId.disable({ emitEvent: false });
             form.controls.datapointId.clearValidators();
             form.controls.datapointId.disable({ emitEvent: false });
+            form.controls.thresholdOperator.disable({ emitEvent: false });
             form.controls.plantId.updateValueAndValidity({ emitEvent: false });
             form.controls.datapointId.updateValueAndValidity({ emitEvent: false });
+            form.controls.thresholdOperator.updateValueAndValidity({ emitEvent: false });
             return;
         }
 
@@ -46,8 +49,10 @@ export class AlarmConfigFormFieldOrchestratorHelper {
         form.controls.plantId.setValidators([Validators.required]);
         form.controls.datapointId.setValidators([Validators.required]);
         form.controls.plantId.enable({ emitEvent: false });
+        form.controls.thresholdOperator.enable({ emitEvent: false });
         form.controls.plantId.updateValueAndValidity({ emitEvent: false });
         form.controls.datapointId.updateValueAndValidity({ emitEvent: false });
+        form.controls.thresholdOperator.updateValueAndValidity({ emitEvent: false });
 
         if (String(form.controls.plantId.value ?? '').trim().length === 0) {
             form.controls.deviceId.disable({ emitEvent: false });

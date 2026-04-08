@@ -21,17 +21,20 @@ export class AlarmConfigFormValidationHelper {
         thresholdOperatorControl,
         thresholdValueControl,
     }: ApplyThresholdConstraintsParams): void {
-        const allowedOperators =
-            mode === 'edit'
-                ? Object.values(ThresholdOperator)
-                : this.datapointExtraction.getAllowedOperators(datapoint);
+        const allowedOperators = this.resolveAllowedOperators(
+            mode,
+            datapoint,
+            thresholdOperatorControl.value as ThresholdOperator | null,
+        );
 
         thresholdOperatorControl.setValidators([
             Validators.required,
             this.operatorAllowedValidator(allowedOperators),
         ]);
 
-        if (mode === 'create' && datapoint !== null && this.datapointExtraction.usesEnumeratedThreshold(datapoint)) {
+        if (datapoint === null) {
+            thresholdValueControl.setValidators([Validators.required]);
+        } else if (this.datapointExtraction.usesEnumeratedThreshold(datapoint)) {
             const enumValues = this.datapointExtraction.getEnumValues(datapoint);
             thresholdValueControl.setValidators([
                 Validators.required,
@@ -45,13 +48,11 @@ export class AlarmConfigFormValidationHelper {
             if (normalizedValue !== thresholdValueControl.value) {
                 thresholdValueControl.setValue(normalizedValue, { emitEvent: false });
             }
-        } else if (mode === 'create' && datapoint !== null) {
+        } else {
             thresholdValueControl.setValidators([
                 Validators.required,
                 Validators.pattern(/^[+-]?\d+([.]\d+)?$/),
             ]);
-        } else {
-            thresholdValueControl.setValidators([Validators.required]);
         }
 
         if (
@@ -63,6 +64,22 @@ export class AlarmConfigFormValidationHelper {
 
         thresholdOperatorControl.updateValueAndValidity({ emitEvent: false });
         thresholdValueControl.updateValueAndValidity({ emitEvent: false });
+    }
+
+    private resolveAllowedOperators(
+        mode: 'create' | 'edit',
+        datapoint: Datapoint | null,
+        currentOperator: ThresholdOperator | null,
+    ): ThresholdOperator[] {
+        if (datapoint !== null) {
+            return this.datapointExtraction.getAllowedOperators(datapoint);
+        }
+
+        if (mode === 'edit' && currentOperator !== null) {
+            return [currentOperator];
+        }
+
+        return Object.values(ThresholdOperator);
     }
 
     private operatorAllowedValidator(allowedOperators: readonly ThresholdOperator[]): ValidatorFn {

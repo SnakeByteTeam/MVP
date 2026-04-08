@@ -63,7 +63,7 @@ describe('AlarmConfigFormValidationHelper', () => {
         expect(valueControl.errors?.['pattern']).toBeTruthy();
     });
 
-    it('in edit mode non applica vincoli enum/numerici al valore soglia', () => {
+    it('in edit mode con datapoint enum applica lo stesso vincolo operatore della create', () => {
         const operatorControl = new FormControl<ThresholdOperator | null>(ThresholdOperator.LESS_THAN);
         const valueControl = new FormControl('abc');
 
@@ -74,7 +74,38 @@ describe('AlarmConfigFormValidationHelper', () => {
             thresholdValueControl: valueControl,
         });
 
-        expect(operatorControl.value).toBe(ThresholdOperator.LESS_THAN);
-        expect(valueControl.errors).toBeNull();
+        expect(operatorControl.value).toBeNull();
+        expect(valueControl.errors?.['invalidEnumThreshold']).toBe(true);
+    });
+
+    it('in edit mode con datapoint numerico applica validazione numerica', () => {
+        const operatorControl = new FormControl<ThresholdOperator | null>(ThresholdOperator.GREATER_THAN);
+        const valueControl = new FormControl('not-a-number');
+
+        helper.applyThresholdConstraints({
+            mode: 'edit',
+            datapoint: numericDatapoint,
+            thresholdOperatorControl: operatorControl,
+            thresholdValueControl: valueControl,
+        });
+
+        expect(valueControl.errors?.['pattern']).toBeTruthy();
+    });
+
+    it('in edit mode senza metadati datapoint mantiene come ammesso solo l operatore corrente', () => {
+        const operatorControl = new FormControl<ThresholdOperator | null>(ThresholdOperator.LESS_THAN);
+        const valueControl = new FormControl('10');
+
+        helper.applyThresholdConstraints({
+            mode: 'edit',
+            datapoint: null,
+            thresholdOperatorControl: operatorControl,
+            thresholdValueControl: valueControl,
+        });
+
+        operatorControl.setValue(ThresholdOperator.GREATER_THAN);
+        operatorControl.updateValueAndValidity();
+
+        expect(operatorControl.errors?.['unsupportedOperator']).toBe(true);
     });
 });

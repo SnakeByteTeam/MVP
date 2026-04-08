@@ -17,10 +17,12 @@ describe('AlarmConfigFormStateService', () => {
 
     const apartmentApiStub = {
         getApartmentByPlantId: vi.fn(),
+        getAllPlants: vi.fn(),
     };
 
     const datapointExtractionStub = {
         extractDeviceOptions: vi.fn(),
+        findDatapointByDeviceAndDatapointId: vi.fn(),
     };
 
     beforeEach(() => {
@@ -29,7 +31,9 @@ describe('AlarmConfigFormStateService', () => {
         wardApiStub.getWards.mockReturnValue(of([]));
         wardApiStub.getPlantsByWardId.mockReturnValue(of([]));
         apartmentApiStub.getApartmentByPlantId.mockReturnValue(of({ id: 'plant-1', rooms: [] }));
+        apartmentApiStub.getAllPlants.mockReturnValue(of([]));
         datapointExtractionStub.extractDeviceOptions.mockReturnValue([]);
+        datapointExtractionStub.findDatapointByDeviceAndDatapointId.mockReturnValue(null);
 
         TestBed.configureTestingModule({
             providers: [
@@ -93,5 +97,37 @@ describe('AlarmConfigFormStateService', () => {
         expect(result).toEqual([]);
         expect(service.isDevicesLoading()).toBe(false);
         expect(service.devicesLoadError()).toBe('Errore durante il caricamento dei dispositivi.');
+    });
+
+    it('resolveDatapointForEdit usa il catalogo piante e restituisce il datapoint trovato', async () => {
+        const expectedDatapoint = {
+            id: 'dp-1',
+            name: 'SFE_State_OnOff',
+            readable: true,
+            writable: false,
+            valueType: 'string',
+            enum: ['Off', 'On'],
+            sfeType: 'SFE_State_OnOff',
+        };
+        apartmentApiStub.getAllPlants.mockReturnValueOnce(of([{ id: 'plant-1', name: 'Apt', rooms: [] }]));
+        datapointExtractionStub.findDatapointByDeviceAndDatapointId.mockReturnValueOnce(expectedDatapoint);
+
+        const result = await firstValueFrom(service.resolveDatapointForEdit('device-1', 'dp-1'));
+
+        expect(apartmentApiStub.getAllPlants).toHaveBeenCalledTimes(1);
+        expect(datapointExtractionStub.findDatapointByDeviceAndDatapointId).toHaveBeenCalledWith(
+            [{ id: 'plant-1', name: 'Apt', rooms: [] }],
+            'device-1',
+            'dp-1',
+        );
+        expect(result).toEqual(expectedDatapoint);
+    });
+
+    it('resolveDatapointForEdit ritorna null se il catalogo piante fallisce', async () => {
+        apartmentApiStub.getAllPlants.mockReturnValueOnce(throwError(() => new Error('network')));
+
+        const result = await firstValueFrom(service.resolveDatapointForEdit('device-1', 'dp-1'));
+
+        expect(result).toBeNull();
     });
 });

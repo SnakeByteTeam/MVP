@@ -19,6 +19,7 @@ describe('AlarmConfigFormFieldOrchestratorHelper', () => {
                 plantId: new FormControl('plant-1', { nonNullable: true }),
                 deviceId: new FormControl('device-1', { nonNullable: true }),
                 datapointId: new FormControl('dp-1', { nonNullable: true }),
+                thresholdOperator: new FormControl('>', { nonNullable: true }),
             },
         };
 
@@ -28,6 +29,7 @@ describe('AlarmConfigFormFieldOrchestratorHelper', () => {
         expect(formLike.controls.plantId.disabled).toBe(true);
         expect(formLike.controls.deviceId.disabled).toBe(true);
         expect(formLike.controls.datapointId.disabled).toBe(true);
+        expect(formLike.controls.thresholdOperator.disabled).toBe(true);
     });
 
     it('resolveDeviceSelection ritorna solo datapoint leggibili e auto-selezione se singolo', () => {

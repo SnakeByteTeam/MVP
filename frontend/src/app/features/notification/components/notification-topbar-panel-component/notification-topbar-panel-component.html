@@ -20,27 +20,36 @@
     @for (notification of visibleNotifications; track notification.notificationId) {
     <li class="notification-topbar-panel__item">
       <div class="notification-topbar-panel__item-header">
-        <div class="notification-topbar-panel__title-wrap">
-          @if (getPriority(notification); as notificationPriority) {
-          <span class="notification-topbar-panel__priority inline-flex items-center gap-1.5" aria-hidden="true">
-            <span
-              class="notification-topbar-panel__priority-badge inline-flex h-5 min-w-5 items-center justify-center rounded-full border bg-white px-1 text-[11px] font-bold"
-              [class]="getPriorityBubbleClass(notificationPriority)">
-              {{ notificationPriority }}
+        <button
+          type="button"
+          class="notification-topbar-panel__open"
+          (click)="onNotificationSelected(notification.notificationId)"
+          [attr.aria-label]="'Apri notifica: ' + getDisplayTitle(notification)">
+          <div class="notification-topbar-panel__title-wrap">
+            @if (getPriority(notification); as notificationPriority) {
+            <span class="notification-topbar-panel__priority inline-flex items-center gap-1.5" aria-hidden="true">
+              <span
+                class="notification-topbar-panel__priority-badge inline-flex h-5 min-w-5 items-center justify-center rounded-full border bg-white px-1 text-[11px] font-bold"
+                [class]="getPriorityBubbleClass(notificationPriority)">
+                {{ notificationPriority }}
+              </span>
+              <span
+                class="notification-topbar-panel__priority-symbol text-sm font-bold leading-none"
+                [class]="getPrioritySymbolClass(notificationPriority)">
+                {{ getPrioritySymbol(notificationPriority) }}
+              </span>
             </span>
-            <span
-              class="notification-topbar-panel__priority-symbol text-sm font-bold leading-none"
-              [class]="getPrioritySymbolClass(notificationPriority)">
-              {{ getPrioritySymbol(notificationPriority) }}
-            </span>
-          </span>
-          }
-          <p class="notification-topbar-panel__title">{{ getDisplayTitle(notification) }}</p>
-        </div>
+            }
+            <p class="notification-topbar-panel__title">{{ getDisplayTitle(notification) }}</p>
+          </div>
+          <time class="notification-topbar-panel__time" [attr.datetime]="notification.sentAt">
+            {{ notification.sentAt | date: 'dd/MM/yyyy HH:mm:ss' }}
+          </time>
+        </button>
         <button
           type="button"
           class="notification-topbar-panel__remove"
-          (click)="onRemove(notification.notificationId)"
+          (click)="onRemove(notification.notificationId, $event)"
           aria-label="Rimuovi notifica"
         >
           <svg class="notification-topbar-panel__remove-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
@@ -48,9 +57,6 @@
           </svg>
         </button>
       </div>
-      <time class="notification-topbar-panel__time" [attr.datetime]="notification.sentAt">
-        {{ notification.sentAt | date: 'dd/MM/yyyy HH:mm:ss' }}
-      </time>
     </li>
     }
   </ul>

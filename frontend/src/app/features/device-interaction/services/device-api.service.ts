@@ -1,17 +1,30 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, throwError, timeout } from 'rxjs';
+import {
+	Observable,
+	catchError,
+	forkJoin,
+	map,
+	of,
+	switchMap,
+	throwError,
+	timeout,
+} from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Datapoint } from '../../apartment-monitor/models/datapoint.model';
-import { PlantDatapointDto, PlantDto } from '../../apartment-monitor/models/plant-response.model';
+import {
+	PlantDatapointDto,
+	PlantDeviceDto,
+	PlantDto,
+} from '../../apartment-monitor/models/plant-response.model';
 import { Room } from '../../apartment-monitor/models/room.model';
 import { WritableEndpointRow } from '../models/writable-endpoint-row.model';
+import type {
+	DeviceValueDto,
+	DeviceValuePointDto,
+	WriteDatapointDto,
+} from '../models/write-datapoint-request.model';
 import { resolveDeviceType } from '../../../shared/models/device-taxonomy';
-
-export interface WriteDatapointDto {
-	datapointId: string;
-	value: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class DeviceApiService {
@@ -57,6 +70,75 @@ export class DeviceApiService {
 		);
 	}
 
+	public getDatapointCurrentValuesByDeviceIds(
+		deviceIds: ReadonlyArray<string>,
+	): Observable<Map<string, string | number>> {
+		return this.getCurrentValuePointsByDeviceIds(deviceIds).pipe(
+			map((valuesByDevice) => {
+				const valuesByDatapoint = new Map<string, string | number>();
+
+				for (const points of valuesByDevice.values()) {
+					for (const valuePoint of points) {
+						if (!valuePoint?.datapointId) {
+							continue;
+						}
+
+						valuesByDatapoint.set(valuePoint.datapointId, valuePoint.value);
+					}
+				}
+
+				return valuesByDatapoint;
+			}),
+		);
+	}
+
+	public getCurrentValuePointsByDeviceIds(
+		deviceIds: ReadonlyArray<string>,
+	): Observable<Map<string, DeviceValuePointDto[]>> {
+		const uniqueDeviceIds = Array.from(
+			new Set(
+				deviceIds
+					.filter((deviceId): deviceId is string => typeof deviceId === 'string')
+					.map((deviceId) => deviceId.trim())
+					.filter((deviceId) => deviceId.length > 0),
+			),
+		);
+
+		if (uniqueDeviceIds.length === 0) {
+			return of(new Map<string, DeviceValuePointDto[]>());
+		}
+
+		const requests = uniqueDeviceIds.map((deviceId) =>
+			this.http
+				.get<DeviceValueDto>(`${this.deviceEndpoint}/${encodeURIComponent(deviceId)}/value`)
+				.pipe(catchError(() => of<DeviceValueDto>({ deviceId, values: [] }))),
+		);
+
+		return forkJoin(requests).pipe(
+			map((responses) => {
+				const valuesByDevice = new Map<string, DeviceValuePointDto[]>();
+
+				for (const response of responses) {
+					const deviceId = typeof response?.deviceId === 'string' ? response.deviceId : '';
+					if (!deviceId.trim()) {
+						continue;
+					}
+
+					valuesByDevice.set(
+						deviceId,
+						(response.values ?? []).filter(
+							(point): point is DeviceValuePointDto =>
+								typeof point?.datapointId === 'string' &&
+								typeof point?.name === 'string',
+						),
+					);
+				}
+
+				return valuesByDevice;
+			}),
+		);
+	}
+
 	private resolveActivePlantId(): Observable<string> {
 		const activePlantId = this.getActivePlantId();
 		if (activePlantId) {
@@ -94,7 +176,7 @@ export class DeviceApiService {
 
 		if (storage && typeof storage.getItem === 'function') {
 			const plantId = storage.getItem('activePlantId');
-			return plantId && plantId.trim() ? plantId : null;
+			return plantId?.trim() ? plantId : null;
 		}
 
 		return null;
@@ -156,7 +238,11 @@ export class DeviceApiService {
 		const rows: WritableEndpointRow[] = [];
 
 		for (const room of plant.rooms) {
-			for (const device of room.devices) {
+			const visibleDevices = this.deduplicateRoomDevices(
+				room.devices.filter((device) => !this.isEnergyMeasureDevice(device.type, device.subType)),
+			);
+
+			for (const device of visibleDevices) {
 				const mappedDatapoints = this.mapDatapoints(device.datapoints);
 				const resolvedDeviceType = resolveDeviceType({
 					rawType: device.type,
@@ -186,6 +272,54 @@ export class DeviceApiService {
 		}
 
 		return rows;
+	}
+
+	private deduplicateRoomDevices(devices: ReadonlyArray<PlantDeviceDto>): PlantDeviceDto[] {
+		const byName = new Map<string, PlantDeviceDto>();
+
+		for (const device of devices) {
+			const key = this.normalizeDeviceName(device.name);
+			const current = byName.get(key);
+
+			if (!current || this.getDevicePriorityScore(device) > this.getDevicePriorityScore(current)) {
+				byName.set(key, device);
+			}
+		}
+
+		return Array.from(byName.values());
+	}
+
+	private normalizeDeviceName(name: string): string {
+		return name.trim().toLowerCase();
+	}
+
+	private getDevicePriorityScore(device: PlantDeviceDto): number {
+		const normalizedType = device.type?.toUpperCase() ?? '';
+		const normalizedSubType = device.subType?.toUpperCase() ?? '';
+
+		let score = 0;
+
+		if (normalizedType.includes('RADARDETECTOR')) {
+			score += 100;
+		}
+
+		if (normalizedSubType === 'SF_ACCESS') {
+			score += 60;
+		}
+
+		if (normalizedType === 'SS_AUTOMATION_ONOFF') {
+			score -= 20;
+		}
+
+		score += device.datapoints?.length ?? 0;
+		return score;
+	}
+
+	private isEnergyMeasureDevice(rawType: string | undefined, rawSubType: string | undefined): boolean {
+		const normalizedType = rawType?.toUpperCase() ?? '';
+		const normalizedSubType = rawSubType?.toUpperCase() ?? '';
+
+		return normalizedType.startsWith('SS_ENERGY_MEASURE') || normalizedSubType === 'SF_ENERGY';
 	}
 
 }

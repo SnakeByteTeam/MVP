@@ -201,12 +201,6 @@
   height: 0.85rem;
 }
 
-@media (max-width: 960px) {
-  .notification-topbar-panel {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .notification-topbar-panel,
   .notification-topbar-panel__item {

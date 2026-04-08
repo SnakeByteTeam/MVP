@@ -17,7 +17,7 @@ export class TokensDto {
   @IsNotEmpty()
   expiresIn: number;
 
-  @ApiProperty({ example: 'ciao@ciao.it'})
+  @ApiProperty({ example: 'ciao@ciao.it' })
   @IsString()
   @IsNotEmpty()
   email: string;

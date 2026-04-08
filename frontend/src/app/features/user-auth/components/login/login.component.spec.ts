@@ -65,7 +65,7 @@ describe('LoginComponent', () => {
     expect(authServiceMock.login).not.toHaveBeenCalled();
   });
 
-  it('invoca login e naviga su apartment-monitor se autenticazione ok', () => {
+  it('invoca login e naviga su dashboard se autenticazione ok', () => {
     authServiceMock.login.mockReturnValue(
       of({
         userId: 'u1',
@@ -81,7 +81,7 @@ describe('LoginComponent', () => {
     component.onSubmit();
 
     expect(authServiceMock.login).toHaveBeenCalledWith('mrossi', userCredential);
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/apartment-monitor']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard']);
     expect(component.errorType).toBeNull();
     expect(component.isLoading).toBe(false);
   });

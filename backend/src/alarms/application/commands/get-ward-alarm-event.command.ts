@@ -1,3 +1,3 @@
 export interface GetWardAlarmEventCmd {
-    alarmId: string;
+  alarmId: string;
 }

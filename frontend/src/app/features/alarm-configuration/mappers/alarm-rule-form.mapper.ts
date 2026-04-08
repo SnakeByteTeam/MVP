@@ -13,6 +13,7 @@ export class AlarmRuleFormMapper {
             name: rule.name,
             plantId: '',
             deviceId: rule.deviceId,
+            datapointId: rule.datapointId ?? '',
             priority: rule.priority,
             thresholdOperator: this.toFormThresholdOperator(rule.thresholdOperator),
             thresholdValue: rule.thresholdValue,

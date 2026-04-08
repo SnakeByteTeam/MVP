@@ -5,15 +5,29 @@
 }
 
 .topbar-shell {
-    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.6rem 1.55rem;
+    background: linear-gradient(180deg, #14110f 0%, #221a14 45%, #31271e 100%);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.55);
+    box-shadow: 0 1px 0 rgba(251, 191, 36, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.topbar-shell__main-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 1.2rem 1.55rem;
-    background: linear-gradient(180deg, #14110f 0%, #221a14 45%, #31271e 100%);
-    border-bottom: 1px solid rgba(251, 191, 36, 0.55);
-    box-shadow: 0 1px 0 rgba(251, 191, 36, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+    width: 100%;
+}
+
+.topbar-warning-row {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 0.3rem;
+    width: 100%;
+    padding-top: .5em;
 }
 
 .topbar-brand {
@@ -227,6 +241,10 @@
 }
 
 @media (max-width: 767px) {
+    .logout-button {
+        display: none;
+    }
+
     .hamburger-btn {
         display: flex;
         align-items: center;
@@ -254,7 +272,6 @@
 
     .topbar-vimar-warning {
         font-size: 0.68rem;
-        max-width: 46vw;
         overflow: hidden;
         text-overflow: ellipsis;
     }

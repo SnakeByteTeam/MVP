@@ -7,6 +7,7 @@ import { AuthErrorType } from '../../models/auth-error-type.enum';
 	selector: 'app-first-access',
 	imports: [ReactiveFormsModule],
 	templateUrl: './first-access.component.html',
+	styleUrls: ['./first-access.component.css'],
 })
 export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 	private readonly fb = inject(FormBuilder);
@@ -17,7 +18,7 @@ export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 		this.firstAccessForm = this.fb.nonNullable.group({
 			username: ['', [Validators.required]],
 			temporaryPassword: ['', [Validators.required]],
-			newPassword: ['', [Validators.required, Validators.minLength(8)]],
+			newPassword: ['', [Validators.required, Validators.minLength(12)]],
 		});
 	}
 
@@ -51,9 +52,8 @@ export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 		this.errorType = null;
 
 		this.authService.setFirstAccessPassword(username, temporaryPassword, newPassword).subscribe({
-			next: () => {
-				this.isLoading = false;
-				void this.router.navigate(['/auth/login']);
+			next: (session) => {
+				this.handleSuccess(session);
 			},
 			error: () => {
 				this.isLoading = false;
@@ -68,7 +68,7 @@ export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 			return false;
 		}
 
-		if (newPassword.length < 8) {
+		if (newPassword.length < 12) {
 			this.errorType = AuthErrorType.NEW_PASSWORD_NOT_VALID;
 			return false;
 		}

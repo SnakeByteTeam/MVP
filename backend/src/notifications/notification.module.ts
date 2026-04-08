@@ -18,7 +18,6 @@ import { NOTIFY_ALARM_RESOLUTION_USECASE } from './application/ports/in/notify-a
 import { NOTIFY_ALARM_RESOLUTION_PORT } from './application/ports/out/notify-alarm-resolution.port';
 import { NOTIFY_ALARM_RESOLUTION_REPO_PORT } from './application/repository/notify-alarm-resolution.repository';
 
-
 @Module({
   imports: [],
   controllers: [EventNotificationController],
@@ -27,11 +26,23 @@ import { NOTIFY_ALARM_RESOLUTION_REPO_PORT } from './application/repository/noti
     { provide: NOTIFY_ALARM_WARD_USECASE, useClass: NotificationsService },
     { provide: NOTIFY_ALARM_WARD_PORT, useClass: NotifyAlarmWardAdapter },
     { provide: NOTIFY_ALARM_WARD_REPO_PORT, useExisting: NotificationsGateway },
-    { provide: WRITE_NOTIFICATION_PORT, useClass: WriteNotificationAdapter }, 
-    { provide: WRITE_NOTIFICATION_REPO_PORT, useClass: NotificationRepositoryImpl }, 
-    { provide: NOTIFY_ALARM_RESOLUTION_USECASE, useClass: NotificationsService },
-    { provide: NOTIFY_ALARM_RESOLUTION_PORT, useClass: NotifyAlarmResolutionAdapter }, 
-    { provide: NOTIFY_ALARM_RESOLUTION_REPO_PORT, useExisting: NotificationsGateway },
+    { provide: WRITE_NOTIFICATION_PORT, useClass: WriteNotificationAdapter },
+    {
+      provide: WRITE_NOTIFICATION_REPO_PORT,
+      useClass: NotificationRepositoryImpl,
+    },
+    {
+      provide: NOTIFY_ALARM_RESOLUTION_USECASE,
+      useClass: NotificationsService,
+    },
+    {
+      provide: NOTIFY_ALARM_RESOLUTION_PORT,
+      useClass: NotifyAlarmResolutionAdapter,
+    },
+    {
+      provide: NOTIFY_ALARM_RESOLUTION_REPO_PORT,
+      useExisting: NotificationsGateway,
+    },
   ],
 })
 export class NotificationModule {}

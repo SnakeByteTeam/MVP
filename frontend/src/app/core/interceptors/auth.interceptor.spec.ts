@@ -49,6 +49,24 @@ describe('authInterceptor', () => {
     expect(capturedRequest?.headers.get('Authorization')).toBe('Bearer jwt-123');
   });
 
+  it('aggiunge header Authorization anche su /auth/first-login', () => {
+    authServiceMock.getToken.mockReturnValue('jwt-123');
+    const request = new HttpRequest('POST', '/auth/first-login', {
+      username: 'mrossi',
+      tempPassword: 'temp',
+      password: 'new-password',
+    });
+    let capturedRequest: HttpRequest<unknown> | undefined;
+    const next = vi.fn((forwardedRequest: HttpRequest<unknown>) => {
+      capturedRequest = forwardedRequest;
+      return of(new HttpResponse({ status: 200 }));
+    });
+
+    TestBed.runInInjectionContext(() => authInterceptor(request, next)).subscribe();
+
+    expect(capturedRequest?.headers.get('Authorization')).toBe('Bearer jwt-123');
+  });
+
   it('su 401 esegue refresh e ritenta con il nuovo access token', () => {
     authServiceMock.getToken.mockReturnValue('jwt-old');
     authServiceMock.refreshAccessToken.mockReturnValue(of('jwt-new'));

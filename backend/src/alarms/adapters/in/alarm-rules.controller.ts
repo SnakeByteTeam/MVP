@@ -57,7 +57,7 @@ export class AlarmRulesController {
     private readonly getAllAlarmRulesUseCase: GetAllAlarmRulesUseCase,
     @Inject(UPDATE_ALARM_RULE_USE_CASE)
     private readonly updateAlarmRuleUseCase: UpdateAlarmRuleUseCase,
-  ) { }
+  ) {}
 
   @ApiOkResponse({ type: CreateAlarmRuleResDto })
   //@UseGuards(UserGuard, AdminGuard)
@@ -68,6 +68,7 @@ export class AlarmRulesController {
     const alarm = await this.createAlarmUseCase.createAlarmRule(
       new CreateAlarmRuleCmd(
         req.name,
+        req.datapointId,
         req.deviceId,
         req.plantId,
         req.priority,

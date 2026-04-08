@@ -20,10 +20,6 @@ export class CheckAlarmRuleResDto {
   }
 
   static toDomain(dto: CheckAlarmRuleResDto): CheckAlarm {
-    return new CheckAlarm(
-      dto.alarmRuleId,
-      dto.wardId,
-      dto.alarmEventId,
-    );
+    return new CheckAlarm(dto.alarmRuleId, dto.wardId, dto.alarmEventId);
   }
 }

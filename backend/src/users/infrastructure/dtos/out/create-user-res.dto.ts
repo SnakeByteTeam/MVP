@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserResDto {
   @ApiProperty()
-  id!: number
+  id!: number;
 
   @ApiProperty()
   username!: number;

@@ -23,6 +23,7 @@
                   <th scope="col">Dispositivo</th>
                   <th scope="col">Tipo</th>
                   <th scope="col">Endpoint</th>
+                  <th scope="col">Stato attuale</th>
                   <th scope="col">Valore</th>
                   <th scope="col">Azione</th>
                 </tr>
@@ -38,6 +39,9 @@
                     </td>
                     <td>{{ getTypeLabel(row.deviceType) }}</td>
                     <td [attr.title]="row.datapointName">{{ getEndpointLabel(row) }}</td>
+                    <td>
+                      <span class="endpoint-table__current-value">{{ getCurrentValue(row) }}</span>
+                    </td>
                     <td>
                       <select
                         class="care-select endpoint-table__select"

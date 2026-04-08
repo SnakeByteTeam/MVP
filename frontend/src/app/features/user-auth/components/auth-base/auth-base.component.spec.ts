@@ -9,9 +9,9 @@ import { UserSession } from '../../models/user-session.model';
 import { AuthBaseComponent } from './auth-base.component';
 
 class TestAuthBaseComponent extends AuthBaseComponent {
-  public onUsernameChange(): void {}
+  public onUsernameChange(): void { }
 
-  public onSubmit(): void {}
+  public onSubmit(): void { }
 
   public callHandleSuccess(session: UserSession): void {
     this.handleSuccess(session);
@@ -80,7 +80,7 @@ describe('AuthBaseComponent', () => {
     expect(routerMock.navigate).toHaveBeenCalledWith(['/auth/first-access']);
   });
 
-  it('handleSuccess naviga ad apartment-monitor quando isFirstAccess e false', () => {
+  it('handleSuccess naviga a dashboard quando isFirstAccess e false', () => {
     component.callHandleSuccess({
       userId: 'u1',
       username: 'mrossi',
@@ -89,7 +89,7 @@ describe('AuthBaseComponent', () => {
       isFirstAccess: false,
     });
 
-    expect(routerMock.navigate).toHaveBeenCalledWith(['/apartment-monitor']);
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/dashboard']);
   });
 
   it('handleSuccess naviga su returnUrl quando presente', () => {
@@ -104,7 +104,7 @@ describe('AuthBaseComponent', () => {
     });
 
     expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/vimar-link');
-    expect(routerMock.navigate).not.toHaveBeenCalledWith(['/apartment-monitor']);
+    expect(routerMock.navigate).not.toHaveBeenCalledWith(['/dashboard']);
   });
 
   it('handleError imposta USERNAME_OR_PASSWORD_WRONG su 400 e 401', () => {

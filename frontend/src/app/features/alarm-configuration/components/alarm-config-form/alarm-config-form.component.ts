@@ -1,27 +1,24 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
-import { ApartmentApiService } from '../../../apartment-monitor/services/apartment-api.service';
+import { Datapoint } from '../../../apartment-monitor/models/datapoint.model';
 import { AlarmPriority } from '../../../../core/alarm/models/alarm-priority.enum';
 import { AlarmRule } from '../../../../core/alarm/models/alarm-rule.model';
 import { ThresholdOperator } from '../../../../core/alarm/models/threshold-operator.enum';
-import { WardPlantDto } from '../../../ward-management/models/ward-api.dto';
-import { WardApiService } from '../../../ward-management/services/ward-api.service';
 import { AlarmRuleFormMapper } from '../../mappers/alarm-rule-form.mapper';
 import { AlarmConfigFormValue } from '../../models/alarm-config-form-value.model';
 import { AlarmPriorityIndicatorComponent } from '../../../../shared/components/alarm-table/alarm-priority-indicator.component';
 import { AlarmActionButtonComponent } from '../../../../shared/components/alarm-table/alarm-action-button.component';
-
-type DeviceOption = {
-	id: string;
-	label: string;
-};
+import { DeviceDatapointExtractionService, DeviceDatapointOption } from '../../services/device-datapoint-extraction.service';
+import { AlarmConfigFormValidationHelper } from '../../helpers/alarm-config-form-validation.helper';
+import { AlarmConfigFormStateService } from '../../services/alarm-config-form-state.service';
+import { AlarmConfigFormFieldOrchestratorHelper } from '../../helpers/alarm-config-form-field-orchestrator.helper';
 
 @Component({
 	selector: 'app-alarm-config-form',
 	templateUrl: './alarm-config-form.component.html',
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	providers: [AlarmConfigFormStateService],
 	imports: [ReactiveFormsModule, AlarmPriorityIndicatorComponent, AlarmActionButtonComponent],
 })
 export class AlarmConfigFormComponent {
@@ -33,18 +30,23 @@ export class AlarmConfigFormComponent {
 
 	private readonly fb = inject(FormBuilder);
 	private readonly formMapper = inject(AlarmRuleFormMapper);
-	private readonly wardApi = inject(WardApiService);
-	private readonly apartmentApi = inject(ApartmentApiService);
+	private readonly formState = inject(AlarmConfigFormStateService);
+	private readonly datapointExtraction = inject(DeviceDatapointExtractionService);
+	private readonly validationHelper = inject(AlarmConfigFormValidationHelper);
+	private readonly fieldOrchestrator = inject(AlarmConfigFormFieldOrchestratorHelper);
 	private readonly destroyRef = inject(DestroyRef);
-	private hasRequestedPlants = false;
 
 	public readonly form = this.buildForm();
 	public readonly isEditMode = computed(() => this.mode() === 'edit');
-	public readonly plants = signal<WardPlantDto[]>([]);
-	public readonly deviceOptions = signal<DeviceOption[]>([]);
-	public readonly plantsLoadError = signal<string | null>(null);
-	public readonly devicesLoadError = signal<string | null>(null);
-	public readonly isDevicesLoading = signal(false);
+	public readonly plants = this.formState.plants;
+	public readonly deviceOptions = signal<DeviceDatapointOption[]>([]);
+	public readonly datapointOptions = signal<Datapoint[]>([]);
+	public readonly plantsLoadError = this.formState.plantsLoadError;
+	public readonly devicesLoadError = this.formState.devicesLoadError;
+	public readonly isDevicesLoading = this.formState.isDevicesLoading;
+	public readonly selectedDeviceId = signal('');
+	public readonly selectedDatapointId = signal('');
+	public readonly selectedDatapoint = signal<Datapoint | null>(null);
 	public readonly isPlantSelectionVisible = computed(() => !this.isEditMode());
 	public readonly editPosition = computed(() => {
 		if (!this.isEditMode()) {
@@ -54,25 +56,71 @@ export class AlarmConfigFormComponent {
 		const position = this.initialRule()?.position ?? '';
 		return this.toPositionLabel(position);
 	});
+	public readonly editDatapoint = computed(() => {
+		if (!this.isEditMode()) {
+			return '-';
+		}
+
+		const datapointId = this.selectedDatapointId().trim();
+		return datapointId.length > 0 ? datapointId : '-';
+	});
 
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
 		(value): value is AlarmPriority => typeof value === 'number'
 	);
-	public readonly thresholdOperatorOptions = Object.values(ThresholdOperator);
+	public readonly thresholdOperatorOptions = computed(() => {
+		if (this.isEditMode()) {
+			return Object.values(ThresholdOperator);
+		}
+
+		return this.datapointExtraction.getAllowedOperators(this.selectedDatapoint());
+	});
+	public readonly thresholdValueEnumHints = computed(() =>
+		this.datapointExtraction.getEnumValues(this.selectedDatapoint())
+	);
+	public readonly thresholdValueHelpText = computed(() => {
+		if (this.isEditMode()) {
+			return 'Per soglie booleane usa ON oppure OFF, altrimenti inserisci un valore numerico.';
+		}
+
+		if (this.selectedDeviceId().length === 0) {
+			return 'Seleziona prima il dispositivo.';
+		}
+
+		if (this.selectedDatapointId().length === 0) {
+			return 'Seleziona un datapoint leggibile per impostare la soglia.';
+		}
+
+		if (this.thresholdValueEnumHints().length > 0) {
+			return 'Inserisci uno dei valori previsti dal datapoint selezionato.';
+		}
+
+		return 'Inserisci un valore numerico (es. 10, 10.5, -3).';
+	});
 
 	constructor() {
 		effect(() => {
 			const rule = this.initialRule();
 			if (rule) {
 				this.form.reset(this.formMapper.toFormValue(rule));
-				this.deviceOptions.set([{ id: rule.deviceId, label: rule.deviceId }]);
+				this.deviceOptions.set([{ id: rule.deviceId, label: rule.deviceId, datapoints: [] }]);
+				this.datapointOptions.set([]);
+				this.selectedDeviceId.set(rule.deviceId);
+				this.selectedDatapointId.set(rule.datapointId ?? '');
+				this.selectedDatapoint.set(null);
 				this.applyModeState();
+				this.applyThresholdConstraints(null);
 				return;
 			}
 
 			this.form.reset(this.createEmptyFormValue());
 			this.deviceOptions.set([]);
+			this.datapointOptions.set([]);
+			this.selectedDeviceId.set('');
+			this.selectedDatapointId.set('');
+			this.selectedDatapoint.set(null);
 			this.applyModeState();
+			this.applyThresholdConstraints(null);
 			this.ensurePlantsLoaded();
 		});
 
@@ -85,6 +133,26 @@ export class AlarmConfigFormComponent {
 
 				this.onPlantChanged(plantId);
 			});
+
+		this.form.controls.deviceId.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((deviceId) => {
+				if (this.mode() === 'edit') {
+					return;
+				}
+
+				this.onDeviceChanged(deviceId);
+			});
+
+		this.form.controls.datapointId.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe((datapointId) => {
+				if (this.mode() === 'edit') {
+					return;
+				}
+
+				this.onDatapointChanged(datapointId);
+			});
 	}
 
 	private buildForm() {
@@ -92,6 +160,7 @@ export class AlarmConfigFormComponent {
 			name: [''],
 			plantId: [''],
 			deviceId: ['', [Validators.required]],
+			datapointId: [''],
 			priority: [null as AlarmPriority | null, [Validators.required]],
 			thresholdOperator: [null as ThresholdOperator | null, [Validators.required]],
 			thresholdValue: ['', [Validators.required]],
@@ -101,11 +170,13 @@ export class AlarmConfigFormComponent {
 		});
 	}
 
+	//valore iniziale del form in create mode
 	private createEmptyFormValue(): AlarmConfigFormValue {
 		return {
 			name: '',
 			plantId: '',
 			deviceId: '',
+			datapointId: '',
 			priority: null,
 			thresholdOperator: null,
 			thresholdValue: '',
@@ -116,6 +187,15 @@ export class AlarmConfigFormComponent {
 	}
 
 	public onSubmit(): void {
+		if (this.mode() === 'create' && this.selectedDatapoint() !== null) {
+			const normalizedThreshold = this.datapointExtraction.normalizeThresholdValue(
+				this.selectedDatapoint(),
+				this.form.controls.thresholdValue.value,
+			);
+			this.form.controls.thresholdValue.setValue(normalizedThreshold, { emitEvent: false });
+			this.form.controls.thresholdValue.updateValueAndValidity({ emitEvent: false });
+		}
+
 		if (this.form.invalid) {
 			this.form.markAllAsTouched();
 			return;
@@ -132,142 +212,80 @@ export class AlarmConfigFormComponent {
 	}
 
 	private applyModeState(): void {
-		const isEditMode = this.mode() === 'edit';
-
-		if (isEditMode) {
-			this.form.controls.name.disable({ emitEvent: false });
-			this.form.controls.plantId.clearValidators();
-			this.form.controls.plantId.disable({ emitEvent: false });
-			this.form.controls.deviceId.disable({ emitEvent: false });
-			this.form.controls.plantId.updateValueAndValidity({ emitEvent: false });
-			return;
-		}
-
-		this.form.controls.name.enable({ emitEvent: false });
-		this.form.controls.plantId.setValidators([Validators.required]);
-		this.form.controls.plantId.enable({ emitEvent: false });
-		this.form.controls.plantId.updateValueAndValidity({ emitEvent: false });
-
-		if (this.form.controls.plantId.value.trim().length === 0) {
-			this.form.controls.deviceId.disable({ emitEvent: false });
-			return;
-		}
-
-		this.form.controls.deviceId.enable({ emitEvent: false });
+		this.fieldOrchestrator.applyModeState(this.form, this.mode());
 	}
 
 	private ensurePlantsLoaded(): void {
-		if (this.mode() === 'edit' || this.plants().length > 0 || this.hasRequestedPlants) {
-			return;
-		}
-
-		this.hasRequestedPlants = true;
-
-		this.loadAllPlants()
+		this.formState.ensurePlantsLoaded(this.mode())
 			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe({
-				next: (plants) => {
-					this.plantsLoadError.set(null);
-					this.plants.set(plants);
-				},
-				error: () => {
-					this.plants.set([]);
-					this.plantsLoadError.set('Errore durante il caricamento degli impianti disponibili.');
-				},
-			});
+			.subscribe();
 	}
 
-	private loadAllPlants(): Observable<WardPlantDto[]> {
-		return this.apartmentApi.getAllPlants().pipe(
-			map((plants) => this.toWardPlants(plants)),
-			catchError(() => this.loadAllPlantsFromWardRelationships()),
-		);
-	}
-
-	private loadAllPlantsFromWardRelationships(): Observable<WardPlantDto[]> {
-		return forkJoin({
-			availablePlants: this.wardApi.getAvailablePlants().pipe(catchError(() => of([] as WardPlantDto[]))),
-			wards: this.wardApi.getWards().pipe(catchError(() => of([]))),
-		}).pipe(
-			switchMap(({ availablePlants, wards }) => {
-				if (wards.length === 0) {
-					return of(this.mergePlants(availablePlants, []));
-				}
-
-				const wardPlantsRequests = wards.map((ward) =>
-					this.wardApi
-						.getPlantsByWardId(ward.id)
-						.pipe(catchError(() => of([] as WardPlantDto[])))
-				);
-
-				return forkJoin(wardPlantsRequests).pipe(
-					map((assignedPlantsByWard) => this.mergePlants(availablePlants, assignedPlantsByWard.flat()))
-				);
-			})
-		);
-	}
-
-	private toWardPlants(plants: ReadonlyArray<{ id: string; name: string }>): WardPlantDto[] {
-		const uniquePlants = new Map<string, WardPlantDto>();
-
-		for (const plant of plants) {
-			if (typeof plant.id !== 'string' || !plant.id.trim()) {
-				continue;
-			}
-
-			const normalizedName = typeof plant.name === 'string' && plant.name.trim() ? plant.name : plant.id;
-			uniquePlants.set(plant.id, {
-				id: plant.id,
-				name: normalizedName,
-			});
-		}
-
-		return Array.from(uniquePlants.values()).sort((first, second) => first.name.localeCompare(second.name));
-	}
-
-	private mergePlants(availablePlants: WardPlantDto[], assignedPlants: WardPlantDto[]): WardPlantDto[] {
-		const mergedMap = new Map<string, WardPlantDto>();
-
-		for (const plant of [...availablePlants, ...assignedPlants]) {
-			mergedMap.set(plant.id, plant);
-		}
-
-		return Array.from(mergedMap.values()).sort((first, second) => first.name.localeCompare(second.name));
-	}
-
+	//opzioni dispositovo per gl'impianto scelto
 	private onPlantChanged(plantId: string): void {
-		this.devicesLoadError.set(null);
+		this.formState.resetDevicesLoadState();
 		this.deviceOptions.set([]);
 		this.form.controls.deviceId.setValue('', { emitEvent: false });
+		this.onDeviceChanged('');
 
 		if (plantId.trim().length === 0) {
 			this.form.controls.deviceId.disable({ emitEvent: false });
 			return;
 		}
 
-		this.isDevicesLoading.set(true);
 		this.form.controls.deviceId.disable({ emitEvent: false });
 
-		this.apartmentApi
-			.getApartmentByPlantId(plantId)
+		this.formState
+			.loadDeviceOptionsByPlant(plantId)
 			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe({
-				next: (apartment) => {
-					const options = apartment.rooms.flatMap((room) =>
-						room.devices.map((device) => ({ id: device.id, label: `${room.name} - ${device.name}` }))
-					);
-
-					this.deviceOptions.set(options);
-					this.form.controls.deviceId.enable({ emitEvent: false });
-					this.isDevicesLoading.set(false);
-				},
-				error: () => {
-					this.deviceOptions.set([]);
-					this.devicesLoadError.set('Errore durante il caricamento dei dispositivi.');
+			.subscribe((options) => {
+				this.deviceOptions.set(options);
+				if (options.length === 0) {
 					this.form.controls.deviceId.disable({ emitEvent: false });
-					this.isDevicesLoading.set(false);
-				},
+				} else {
+					this.form.controls.deviceId.enable({ emitEvent: false });
+				}
 			});
+	}
+
+	//trasforma device -> tutti datapoint leggibili
+	private onDeviceChanged(deviceId: string): void {
+		const deviceSelection = this.fieldOrchestrator.resolveDeviceSelection(deviceId, this.deviceOptions());
+		this.selectedDeviceId.set(deviceSelection.normalizedDeviceId);
+		this.datapointOptions.set([]);
+		this.selectedDatapoint.set(null);
+		this.selectedDatapointId.set('');
+		this.fieldOrchestrator.resetDatapointControl(this.form);
+		this.applyThresholdConstraints(null);
+
+		if (deviceSelection.normalizedDeviceId.length === 0) {
+			this.form.controls.datapointId.disable({ emitEvent: false });
+			return;
+		}
+
+		this.datapointOptions.set(deviceSelection.readableDatapoints);
+		this.form.controls.datapointId.enable({ emitEvent: false });
+
+		if (deviceSelection.autoSelectedDatapointId !== null) {
+			this.form.controls.datapointId.setValue(deviceSelection.autoSelectedDatapointId, { emitEvent: false });
+			this.onDatapointChanged(deviceSelection.autoSelectedDatapointId);
+		}
+	}
+
+	private onDatapointChanged(datapointId: string): void {
+		const datapointSelection = this.fieldOrchestrator.resolveDatapointSelection(datapointId, this.datapointOptions());
+		this.selectedDatapointId.set(datapointSelection.normalizedDatapointId);
+		this.selectedDatapoint.set(datapointSelection.selectedDatapoint);
+		this.applyThresholdConstraints(datapointSelection.selectedDatapoint);
+	}
+
+	private applyThresholdConstraints(datapoint: Datapoint | null): void {
+		this.validationHelper.applyThresholdConstraints({
+			mode: this.mode(),
+			datapoint,
+			thresholdOperatorControl: this.form.controls.thresholdOperator,
+			thresholdValueControl: this.form.controls.thresholdValue,
+		});
 	}
 
 	private toPositionLabel(position: string): string {

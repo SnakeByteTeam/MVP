@@ -91,6 +91,19 @@
   font-size: 1rem;
 }
 
+.endpoint-table__current-value {
+  display: inline-flex;
+  min-width: 3.5rem;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 0.16rem 0.55rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
 .endpoint-table__write-button {
   min-height: 2.35rem;
   border: 1px solid rgba(217, 119, 6, 0.36);

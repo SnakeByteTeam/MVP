@@ -32,13 +32,16 @@ export class OAuthTicketAdapter implements OAuthTicketPort {
     userId: number,
     expiresAt: Date,
   ): Promise<boolean> {
-    return this.writeOAuthTicketCachePort.writeTicket(ticket, userId, expiresAt);
+    return this.writeOAuthTicketCachePort.writeTicket(
+      ticket,
+      userId,
+      expiresAt,
+    );
   }
 
   async consumeTicket(ticket: string): Promise<number | null> {
-    const persistedTicket = await this.readOAuthTicketCachePort.readValidTicket(
-      ticket,
-    );
+    const persistedTicket =
+      await this.readOAuthTicketCachePort.readValidTicket(ticket);
 
     if (!persistedTicket) {
       return null;

@@ -2,7 +2,10 @@ import { Controller, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CheckAlarm } from 'src/alarms/domain/models/check-alarm';
 import { CheckAlarmRuleResDto } from 'src/alarms/infrastructure/dtos/out/check-alarm-rule-res-dto';
-import { NOTIFY_ALARM_RESOLUTION_USECASE, type NotifyAlarmResolutionUseCase } from 'src/notifications/application/ports/in/notify-alarm-resolution.usecase';
+import {
+  NOTIFY_ALARM_RESOLUTION_USECASE,
+  type NotifyAlarmResolutionUseCase,
+} from 'src/notifications/application/ports/in/notify-alarm-resolution.usecase';
 import {
   NOTIFY_ALARM_WARD_USECASE,
   type NotifyAlarmWardUseCase,
@@ -14,7 +17,7 @@ export class EventNotificationController {
     @Inject(NOTIFY_ALARM_WARD_USECASE)
     private readonly notifyService: NotifyAlarmWardUseCase,
     @Inject(NOTIFY_ALARM_RESOLUTION_USECASE)
-    private readonly notifyResolutionService: NotifyAlarmResolutionUseCase
+    private readonly notifyResolutionService: NotifyAlarmResolutionUseCase,
   ) {}
 
   @OnEvent('alarm.activated')
@@ -35,7 +38,10 @@ export class EventNotificationController {
   }
 
   @OnEvent('alarm.resolved')
-  async handleAlarmResolvedEvent(payload: { alarmEventId: string, wardId: number }) {
+  async handleAlarmResolvedEvent(payload: {
+    alarmEventId: string;
+    wardId: number;
+  }) {
     if (!payload || !payload.alarmEventId) return;
 
     console.log(

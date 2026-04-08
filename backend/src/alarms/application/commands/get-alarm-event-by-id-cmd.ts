@@ -1,3 +1,3 @@
 export class GetAlarmEventByIdCmd {
-    constructor(public id: string) {}
+  constructor(public id: string) {}
 }

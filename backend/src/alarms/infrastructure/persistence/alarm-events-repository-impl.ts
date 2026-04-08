@@ -2,24 +2,11 @@ import { randomUUID } from 'crypto';
 import { Inject } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from '../../../database/database.module';
-import { ResolveAlarmEventRepository } from '../../application/repository/resolve-alarm-event-repository.interface';
 import { AlarmEventEntity } from '../entities/alarm-event-entity';
-import { GetAllAlarmEventsRepository } from '../../application/repository/get-all-alarm-events-repository.interface';
-import { GetAllManagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-managed-alarm-events-by-user-id-repository.interface';
-import { CreateAlarmEventRepository } from '../../application/repository/create-alarm-event-repository.interface';
-import { GetAllUnmanagedAlarmEventsByUserIdRepository } from '../../application/repository/get-all-unmanaged-alarm-events-by-user-id-repository.interface';
-import { GetWardAlarmEventRepoPort } from 'src/alarms/application/repository/get-ward-alarm-rule.repository';
+import { AlarmEventsRepository } from '../../application/repository/alarm-events-repository.interface';
 
-export class AlarmEventsRepositoryImpl
-  implements
-  ResolveAlarmEventRepository,
-  GetAllAlarmEventsRepository,
-  GetAllManagedAlarmEventsByUserIdRepository,
-  GetAllUnmanagedAlarmEventsByUserIdRepository,
-  CreateAlarmEventRepository, 
-  GetWardAlarmEventRepoPort{
-
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
+export class AlarmEventsRepositoryImpl implements AlarmEventsRepository {
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
   async getAllAlarmEvents(
     limit: number = 5,

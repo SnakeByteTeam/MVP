@@ -121,7 +121,9 @@ export class ApiAuthTicketController {
     };
   }
 
-  private extractUserId(payload: JwtPayloadWithUserId | undefined): number | null {
+  private extractUserId(
+    payload: JwtPayloadWithUserId | undefined,
+  ): number | null {
     if (!payload || payload.id === undefined || payload.id === null) {
       return null;
     }

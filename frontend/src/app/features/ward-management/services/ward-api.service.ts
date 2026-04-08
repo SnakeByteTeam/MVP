@@ -49,10 +49,9 @@ export class WardApiService {
 
     public getAvailableOperators(): Observable<WardUserDto[]> {
         return this.http.get<WardUserDto[]>(
-            `${this.usersEndpoint}/available`,
+            `${this.usersEndpoint}`,
         );
     }
-
     public assignOperatorToWard(wardId: number, dto: AssignOperatorDto): Observable<void> {
         return this.http.post<void>(this.wardUsersRelationshipsEndpoint, {
             wardId,

@@ -33,12 +33,8 @@ export class AssignmentOperationsService {
   }
 
   public getAvailableUsersForWard(wardId: number): Observable<Ward['operators']> {
-    const assignedUserIds = new Set(
-      this.store
-        .getWardsSnapshot()
-        .flatMap((ward) => ward.operators)
-        .map((operator) => operator.id),
-    );
+    const ward = this.store.getWardsSnapshot().find((w) => w.id === wardId);
+    const assignedUserIds = new Set((ward?.operators ?? []).map((operator) => operator.id));
 
     return this.api.getAvailableOperators().pipe(
       map((users) => users.filter((user) => !assignedUserIds.has(user.id))),

@@ -21,13 +21,6 @@
                 <span class="care-page__header-badge-dot"></span>
                 Sistema attivo
             </div>
-            <button type="button" (click)="onCreateWard()"
-                class="care-btn care-btn--primary px-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-                Nuovo reparto
-            </button>
         </div>
     </header>
 
@@ -71,7 +64,14 @@
             </svg>
         </div>
         <p class="mt-4 text-sm font-semibold text-slate-700">Nessun reparto disponibile</p>
-        <p class="mt-1 text-xs text-slate-400">Crea il primo reparto con il pulsante in alto a destra.</p>
+        <p class="mt-1 text-xs text-slate-400">Crea il primo reparto dal pannello dei reparti a sinistra.</p>
+        <button type="button" (click)="onCreateWard()"
+            class="care-btn care-btn--primary mt-5 px-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nuovo reparto
+        </button>
     </div>
 
     } @else {
@@ -123,15 +123,35 @@
             class="col-separator col-scroll flex w-60 shrink-0 flex-col overflow-y-auto lg:flex"
             [class.hidden]="mobileStep() !== 'wards'">
 
-            <div
-                class="flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3">
+            <div class="flex items-center justify-between border-b border-slate-100 bg-white/95 px-4 py-3">
                 <span class="font-display text-xs font-bold uppercase tracking-widest text-slate-400">Reparti</span>
-                <button type="button" (click)="onCreateWard()" aria-label="Nuovo reparto"
-                    class="care-btn care-btn--primary care-btn--icon care-btn--compact h-6 w-6">
-                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button type="button" (click)="onDeleteWard(selectedWard()!.id)" [disabled]="!selectedWard()"
+                        aria-label="Elimina reparto"
+                        class="care-btn care-btn--danger care-btn--icon care-btn--compact h-6 w-6 disabled:cursor-not-allowed disabled:opacity-40">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                        </svg>
+                        <span class="sr-only">Elimina reparto</span>
+                    </button>
+                    <button type="button" (click)="onEditSelectedWard()" [disabled]="!selectedWard()"
+                        aria-label="Modifica reparto"
+                        class="care-btn care-btn--neutral care-btn--icon care-btn--compact h-6 w-6 disabled:cursor-not-allowed disabled:opacity-40">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
+                        <span class="sr-only">Modifica reparto</span>
+                    </button>
+                    <button type="button" (click)="onCreateWard()" aria-label="Nuovo reparto"
+                        class="care-btn care-btn--primary care-btn--icon care-btn--compact h-6 w-6">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        <span class="sr-only">Nuovo reparto</span>
+                    </button>
+                </div>
             </div>
 
             <ul class="flex-1 space-y-0.5 p-2">
@@ -142,15 +162,14 @@
                     ? 'group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-left transition bg-amber-300 text-slate-900 shadow-sm'
                     : 'group flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-left transition text-slate-700 hover:bg-slate-50'">
                         <div class="flex min-w-0 items-center gap-2">
-                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24"
-                                stroke-width="2" stroke="currentColor">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21" />
                             </svg>
                             <span class="truncate text-sm font-medium">{{ ward.name }}</span>
                         </div>
-                        <span
-                            [class]="selectedWardId() === ward.id
+                        <span [class]="selectedWardId() === ward.id
                     ? 'ml-1 shrink-0 rounded-full bg-white/30 px-1.5 py-0.5 text-[10px] font-bold text-slate-800'
                     : 'ml-1 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500'">
                             {{ ward.apartments.length }}
@@ -176,26 +195,6 @@
                         <h2 class="mt-0.5 truncate text-sm font-semibold text-slate-800">{{ activeWard.name }}</h2>
                     </div>
                     <div class="flex shrink-0 items-center gap-1.5">
-                        <button type="button" (click)="onEditWard(activeWard)"
-                            class="care-btn care-btn--neutral care-btn--icon care-btn--compact h-7 w-7"
-                            aria-label="Modifica reparto">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            <span class="sr-only">Modifica</span>
-                        </button>
-                        <button type="button" (click)="onDeleteWard(activeWard.id)"
-                            class="care-btn care-btn--danger care-btn--icon care-btn--compact h-7 w-7"
-                            aria-label="Elimina reparto">
-                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
-                            <span class="sr-only">Elimina</span>
-                        </button>
                         <button type="button" (click)="onAssignPlant(activeWard.id)"
                             class="care-btn care-btn--primary care-btn--icon care-btn--compact h-7 w-7"
                             aria-label="Assegna appartamento">
@@ -239,8 +238,7 @@
                             </button>
                             <button type="button"
                                 (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
-                                aria-label="Rimuovi appartamento"
-                                [class]="selectedApartmentId() === apartment.id
+                                aria-label="Rimuovi appartamento" [class]="selectedApartmentId() === apartment.id
                             ? 'care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0 border-red-300 bg-red-600 text-white'
                             : 'care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0'">
                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
@@ -347,10 +345,10 @@
         </section>
 
     </div>
-    <!-- end finder panel -->
 
-    }
-    }
+    } <!-- chiude @else (wards.length > 0) -->
+
+    } <!-- chiude @if (wards$ | async; as wards) -->
 
     <!-- Dialogs -->
     @if (wardDialogMode() !== 'closed') {

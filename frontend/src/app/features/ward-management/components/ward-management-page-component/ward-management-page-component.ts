@@ -185,6 +185,15 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     this.wardDialogMode.set('edit');
   }
 
+  public onEditSelectedWard(): void {
+    const ward = this.selectedWard();
+    if (!ward) {
+      return;
+    }
+
+    this.onEditWard(ward);
+  }
+
   public onEditWardSubmit(dto: UpdateWardDto): void {
     const ward = this.selectedWard();
     if (!ward) {

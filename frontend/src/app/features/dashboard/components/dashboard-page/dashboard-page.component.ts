@@ -12,7 +12,7 @@ import { AlarmWidgetComponent } from '../alarms-widget/alarms-widget.component';
         AlarmWidgetComponent
     ],
     templateUrl: './dashboard-page.component.html', 
-    styleUrl: '.dashboard-page.component.css'})
+    styleUrl: './dashboard-page.component.css'})
 export class DashboardComponent{}
 
 

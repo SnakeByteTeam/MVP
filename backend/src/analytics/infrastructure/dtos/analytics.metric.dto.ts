@@ -26,7 +26,7 @@ export const AnalyticsMetric = {
     title: 'Variazione e cambio di temperatura di impianto',
     metric: 'thermostat-temperature',
     unit: '°C',
-    sfeType: 'SFE_State_Temperature',
+    sfeType: 'SFE_State_AmbientTemperature',
     desc: `Temperatura media (°C)`,
   },
 
@@ -34,14 +34,14 @@ export const AnalyticsMetric = {
     title: 'Rilevamento di presenza',
     metric: 'sensor-presence',
     unit: 'eventi',
-    sfeType: 'SFE_State_Presence',
+    sfeType: 'SFE_State_PresenceType',
   },
 
   SENSOR_LONG_PRESENCE: {
     title: 'Rilevamento di presenza prolungata',
     metric: 'sensor-long-presence',
     unit: 'eventi',
-    sfeType: 'SFE_State_Presence',
+    sfeType: 'SFE_State_PresenceType',
   },
 
   WARD_ALARMS_FREQUENCY: {

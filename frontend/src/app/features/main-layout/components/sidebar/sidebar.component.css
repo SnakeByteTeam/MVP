@@ -126,9 +126,9 @@ li:hover {
 
 	.sidebar-inner {
 		position: fixed;
-		top: 13vh;
+		top: var(--topbar-height, 13vh);
+        height: calc(100vh - var(--topbar-height, 13vh));
 		left: 0;
-		height: calc(100vh - 13vh);
 		width: 240px;
 		background: white;
 		transform: translateX(-100%);

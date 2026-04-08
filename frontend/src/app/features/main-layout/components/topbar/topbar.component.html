@@ -1,67 +1,54 @@
 <section class="topbar-shell">
-    <div class="topbar-brand">
-        <button
-            type="button"
-            class="hamburger-btn"
-            aria-label="Apri menu"
-            (click)="hamburgerClicked.emit()"
-        >☰</button>
-        <img src="logo.png" alt="" class="topbar-logo">
-        <div>
-            <h1 class="topbar-title">View4Life</h1>
-            <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
-                <ol class="flex items-center gap-1 text-sm">
-                    @for (crumb of breadcrumbs$ | async; track crumb.url; let last = $last) {
-                    <li class="flex items-center gap-1">
-                        @if (!last) {
-                        <a [routerLink]="crumb.url" class="hover:text-amber-600">{{ crumb.label }}</a>
-                        <span class="opacity-40">/</span>
-                        } @else {
-                        <span class="font-semibold">{{ crumb.label }}</span>
+    <div class="topbar-shell__main-row">
+        <div class="topbar-brand">
+            <button type="button" class="hamburger-btn" aria-label="Apri menu" (click)="hamburgerClicked.emit()">☰</button>
+            <img src="logo.png" alt="" class="topbar-logo">
+            <div>
+                <h1 class="topbar-title">View4Life</h1>
+                <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+                    <ol class="flex items-center gap-1 text-sm">
+                        @for (crumb of breadcrumbs$ | async; track crumb.url; let last = $last) {
+                        <li class="flex items-center gap-1">
+                            @if (!last) {
+                            <a [routerLink]="crumb.url" class="hover:text-amber-600">{{ crumb.label }}</a>
+                            <span class="opacity-40">/</span>
+                            } @else {
+                            <span class="font-semibold">{{ crumb.label }}</span>
+                            }
+                        </li>
                         }
-                    </li>
-                    }
-                </ol>
-            </nav>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="topbar-actions">
+            <button type="button" class="topbar-button topbar-button-neutral notification-btn" aria-label="Visualizza notifiche"
+                (click)="onNotificationClick()" [class.notification-active]="isNotificationActive">
+                <img src="notification.png" class="topbar-avatar" alt="">
+                @if (unreadNotificationsCount > 0) {
+                <span class="topbar-notification-count" aria-live="polite" aria-atomic="true">
+                    {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
+                </span>
+                }
+            </button>
+
+            <button type="button" aria-label="Apri profilo" (click)="onProfileClick()"
+                class="topbar-profile topbar-profile--desktop"
+                [class.profile-active]="isProfileActive"
+                [class.bg-amber-300]="isProfileActive">
+                <img src="user-avatar.png" class="topbar-avatar" alt="">
+                <div class="topbar-user-meta"></div>
+            </button>
         </div>
     </div>
 
     @if (showVimarWarning) {
-    <output class="topbar-vimar-warning" aria-live="polite" aria-atomic="true">
-        Account da associare a MyVimar
-    </output>
+    <div class="topbar-warning-row">
+        <output class="topbar-vimar-warning" aria-live="polite" aria-atomic="true">
+            Account da associare a MyVimar
+        </output>
+    </div>
     }
 
-    <div class="topbar-actions">
-        <button
-            type="button"
-            class="topbar-button topbar-button-neutral"
-            aria-label="Esci"
-            (click)="logoutClicked.emit()"
-        >Esci</button>
-
-        <button type="button" class="topbar-button topbar-button-neutral notification-btn" aria-label="Visualizza notifiche"
-            (click)="onNotificationClick()" [class.notification-active]="isNotificationActive">
-            <img src="notification.png" class="topbar-avatar" alt="">
-            @if (unreadNotificationsCount > 0) {
-            <span class="topbar-notification-count" aria-live="polite" aria-atomic="true">
-                {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
-            </span>
-            }
-        </button>
-
-        <button
-            type="button"
-            aria-label="Apri profilo"
-            (click)="onProfileClick()"
-            class="topbar-profile topbar-profile--desktop"
-            [disabled]="!canOpenProfile"
-            [class.profile-active]="isProfileActive"
-            [class.bg-amber-300]="isProfileActive"
-        >
-            <img src="user-avatar.png" class="topbar-avatar" alt="">
-            <div class="topbar-user-meta">
-            </div>
-        </button>
-    </div>
 </section>

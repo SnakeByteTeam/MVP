@@ -1,6 +1,5 @@
 import { Component,EventEmitter, Input, Output } from '@angular/core';
 import { UserInfo } from '../../../../core/models/user-info.model';
-import { UserRole } from '../../../../core/models/user-role.enum';
 import { AsyncPipe } from '@angular/common';
 import { Breadcrumb, BreadcrumbService } from '../../../../core/services/breadcrumb.service';
 import { Observable } from 'rxjs';
@@ -33,14 +32,6 @@ export class TopbarComponent {
     }
 
     public onProfileClick(): void {
-        if (!this.canOpenProfile) {
-            return;
-        }
-
         this.profileClicked.emit();
-    }
-
-    public get canOpenProfile(): boolean {
-        return this.user?.role === UserRole.AMMINISTRATORE;
     }
 }

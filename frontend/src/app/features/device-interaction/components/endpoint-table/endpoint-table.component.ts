@@ -9,6 +9,7 @@ import {
 	filter,
 	finalize,
 	fromEvent,
+	interval,
 	map,
 	of,
 	startWith,
@@ -20,6 +21,7 @@ import { EndpointRoomGroup } from '../../models/endpoint-room-group.model';
 import { RowFeedback } from '../../models/row-feedback.model';
 import { WritableEndpointRow } from '../../models/writable-endpoint-row.model';
 import { DeviceApiService } from '../../services/device-api.service';
+import type { DeviceValuePointDto } from '../../models/write-datapoint-request.model';
 import { getDeviceTypeLabel, getEndpointLabel as resolveEndpointLabel } from '../../../../shared/models/device-taxonomy';
 
 @Component({
@@ -30,13 +32,18 @@ import { getDeviceTypeLabel, getEndpointLabel as resolveEndpointLabel } from '..
 	styleUrl: './endpoint-table.component.css',
 })
 export class EndpointTableComponent implements OnInit, OnDestroy {
+	private static readonly CURRENT_VALUES_POLL_MS = 15000;
+
 	private readonly deviceApi = inject(DeviceApiService);
 	private readonly refresh$ = new Subject<void>();
 	private readonly selectedValuesByRow = new Map<string, string>();
 	private readonly executingRows = new Set<string>();
 	private readonly feedbackByRow = new Map<string, RowFeedback>();
 	private readonly feedbackTimerByRow = new Map<string, ReturnType<typeof setTimeout>>();
+	private currentValuesByDevice = new Map<string, DeviceValuePointDto[]>();
+	private latestRows: WritableEndpointRow[] = [];
 	private activePlantChangeSubscription: Subscription | null = null;
+	private currentValuesPollingSubscription: Subscription | null = null;
 
 	public readonly roomGroups$: Observable<EndpointRoomGroup[]> = this.refresh$.pipe(
 		startWith(void 0),
@@ -44,7 +51,12 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 			tap(() => {
 				this.loadError = '';
 			}),
-			map((rows) => this.groupRowsByRoom(rows)),
+			tap((rows) => {
+				this.latestRows = rows;
+			}),
+			switchMap((rows) =>
+				this.loadCurrentValues(rows).pipe(map(() => this.groupRowsByRoom(rows))),
+			),
 		)),
 		catchError(() => {
 			this.loadError = 'Impossibile caricare i dispositivi con endpoint.';
@@ -56,10 +68,12 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 
 	public ngOnInit(): void {
 		this.subscribeToActivePlantChanges();
+		this.startCurrentValuesPolling();
 	}
 
 	public ngOnDestroy(): void {
 		this.activePlantChangeSubscription?.unsubscribe();
+		this.currentValuesPollingSubscription?.unsubscribe();
 		this.clearAllRowFeedback();
 	}
 
@@ -77,6 +91,32 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 
 	public getEndpointLabel(row: WritableEndpointRow): string {
 		return resolveEndpointLabel(row.datapointSfeType);
+	}
+
+	public getCurrentValue(row: WritableEndpointRow): string {
+		const valuePoints = this.currentValuesByDevice.get(row.deviceId) ?? [];
+
+		const exactMatch = valuePoints.find((point) => point.datapointId === row.datapointId);
+		if (exactMatch?.value !== undefined && exactMatch?.value !== null) {
+			return String(exactMatch.value);
+		}
+
+		const semanticCandidates = this.getSemanticCandidates(row);
+		const semanticMatch = valuePoints.find((point) =>
+			semanticCandidates.has(this.normalizeKey(point.name)),
+		);
+		if (semanticMatch?.value !== undefined && semanticMatch?.value !== null) {
+			return String(semanticMatch.value);
+		}
+
+		const firstAvailable = valuePoints.find(
+			(point) => point.value !== undefined && point.value !== null,
+		);
+		if (firstAvailable) {
+			return String(firstAvailable.value);
+		}
+
+		return '-';
 	}
 
 	public getSelectedValue(row: WritableEndpointRow): string {
@@ -199,10 +239,68 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 		});
 	}
 
+	private startCurrentValuesPolling(): void {
+		this.currentValuesPollingSubscription = interval(
+			EndpointTableComponent.CURRENT_VALUES_POLL_MS,
+		)
+			.pipe(switchMap(() => this.loadCurrentValues(this.latestRows)))
+			.subscribe();
+	}
+
+	private loadCurrentValues(rows: ReadonlyArray<WritableEndpointRow>): Observable<void> {
+		const uniqueDeviceIds = Array.from(
+			new Set(rows.map((row) => row.deviceId).filter((deviceId) => deviceId.trim().length > 0)),
+		);
+
+		if (uniqueDeviceIds.length === 0) {
+			this.currentValuesByDevice.clear();
+			return of(void 0);
+		}
+
+		return this.deviceApi.getCurrentValuePointsByDeviceIds(uniqueDeviceIds).pipe(
+			tap((valuesByDevice) => {
+				this.currentValuesByDevice = valuesByDevice;
+			}),
+			map(() => void 0),
+			catchError(() => {
+				this.currentValuesByDevice.clear();
+				return of(void 0);
+			}),
+		);
+	}
+
+	private getSemanticCandidates(row: WritableEndpointRow): Set<string> {
+		const cmdKey = this.normalizeKey(row.datapointSfeType || row.datapointName);
+		const nameKey = this.normalizeKey(row.datapointName);
+		const stateFromCmd = this.convertCmdToState(cmdKey);
+		const stateFromName = this.convertCmdToState(nameKey);
+
+		return new Set([cmdKey, nameKey, stateFromCmd, stateFromName].filter((key) => key.length > 0));
+	}
+
+	private convertCmdToState(value: string): string {
+		return value.replaceAll('cmd', 'state');
+	}
+
+	private normalizeKey(value: string | undefined): string {
+		if (!value) {
+			return '';
+		}
+
+		let normalized = value.toLowerCase();
+		for (const char of [' ', '_', '-', '.', '/', ':']) {
+			normalized = normalized.replaceAll(char, '');
+		}
+
+		return normalized;
+	}
+
 	private resetTransientState(): void {
 		this.selectedValuesByRow.clear();
 		this.executingRows.clear();
 		this.clearAllRowFeedback();
+		this.currentValuesByDevice.clear();
+		this.latestRows = [];
 		this.loadError = '';
 	}
 

@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
+import { EventSubscriptionService } from '../../../core/alarm/services/event-subscription.service';
 import { UserRole } from '../../../core/models/user-role.enum';
 import type {
   AssignPlantDto,
@@ -17,6 +18,7 @@ import { WardStore } from './ward.store';
 export class AssignmentOperationsService {
   private readonly api = inject(WardApiService);
   private readonly store = inject(WardStore);
+  private readonly eventSubscriptionService = inject(EventSubscriptionService, { optional: true });
 
   public getAvailablePlantsForWard(wardId: number): Observable<Ward['apartments']> {
     const assignedPlantIds = new Set(
@@ -74,6 +76,7 @@ export class AssignmentOperationsService {
       }),
       tap((wards) => this.store.setWards(wards)),
       tap(() => this.store.setLoading(false)),
+      tap(() => this.eventSubscriptionService?.refreshWardRoomSubscription()),
       map(() => void 0),
       catchError((error) => {
         this.store.setError(this.getErrorMessage(error));

@@ -18,6 +18,7 @@ import {
 export class NotificationTopbarPanelComponent {
   @Input() notifications: ReadonlyArray<NotificationEvent> = [];
   @Output() viewAllClicked = new EventEmitter<void>();
+  @Output() notificationSelected = new EventEmitter<string>();
   @Output() removeClicked = new EventEmitter<string>();
   @Output() clearAllClicked = new EventEmitter<void>();
 
@@ -27,7 +28,12 @@ export class NotificationTopbarPanelComponent {
     return this.notifications.slice(0, this.maxVisibleNotifications);
   }
 
-  public onRemove(notificationId: string): void {
+  public onNotificationSelected(notificationId: string): void {
+    this.notificationSelected.emit(notificationId);
+  }
+
+  public onRemove(notificationId: string, event?: Event): void {
+    event?.stopPropagation();
     this.removeClicked.emit(notificationId);
   }
 

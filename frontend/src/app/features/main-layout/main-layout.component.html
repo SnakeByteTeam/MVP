@@ -10,6 +10,7 @@
 @if (isNotificationPanelOpen) {
 <app-notification-topbar-panel-component [notifications]="(notifications$ | async) ?? []"
     (viewAllClicked)="openNotificationsArchive()"
+    (notificationSelected)="openNotificationsArchiveFromPreview($event)"
     (removeClicked)="removeTopbarNotification($event)"
     (clearAllClicked)="clearTopbarNotifications()"></app-notification-topbar-panel-component>
 }

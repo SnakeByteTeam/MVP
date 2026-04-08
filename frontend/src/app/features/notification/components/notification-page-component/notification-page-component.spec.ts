@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { NotificationEvent } from '../../models/notification-event.model';
 import { NotificationListVm } from '../../models/notification-list-vm.model';
 import { NotificationService } from '../../services/notification.service';
@@ -13,6 +14,7 @@ describe('NotificationPageComponent', () => {
   let component: NotificationPageComponent;
   let fixture: ComponentFixture<NotificationPageComponent>;
   let vmSubject: BehaviorSubject<NotificationListVm>;
+  let queryParamMapSubject: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
 
   const notificationServiceStub = {
     vm$: undefined as unknown as BehaviorSubject<NotificationListVm>,
@@ -38,9 +40,18 @@ describe('NotificationPageComponent', () => {
       unreadCount: 0,
     });
     notificationServiceStub.vm$ = vmSubject;
+    queryParamMapSubject = new BehaviorSubject(convertToParamMap({}));
 
     await TestBed.configureTestingModule({
       imports: [NotificationPageComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParamMap: queryParamMapSubject.asObservable(),
+          },
+        },
+      ],
     })
       .overrideComponent(NotificationPageComponent, {
         set: {
@@ -132,5 +143,18 @@ describe('NotificationPageComponent', () => {
       notificationA,
       notificationB,
     ]);
+  });
+
+  it('evidenzia leggermente la notifica richiesta da query param focus', () => {
+    queryParamMapSubject.next(convertToParamMap({ focus: 'n-2' }));
+    vmSubject.next({
+      notifications: [notificationA, notificationB],
+      unreadCount: 2,
+    });
+    fixture.detectChanges();
+
+    const items = fixture.debugElement.queryAll(By.directive(NotificationItemComponent));
+    expect(items[0].componentInstance.isHighlighted()).toBe(false);
+    expect(items[1].componentInstance.isHighlighted()).toBe(true);
   });
 });

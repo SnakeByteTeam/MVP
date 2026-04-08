@@ -67,6 +67,14 @@ export class EventSubscriptionService implements OnDestroy {
 		}
 	}
 
+	public refreshWardRoomSubscription(): void {
+		if (!this.activeUserId) {
+			return;
+		}
+
+		this.bootstrapWardRoomSubscription(this.activeUserId, true);
+	}
+
 	public getConnectionStatus$(): Observable<ConnectionStatus> {
 		return this.connectionStatus$.asObservable();
 	}
@@ -183,14 +191,14 @@ export class EventSubscriptionService implements OnDestroy {
 			});
 	}
 
-	private bootstrapWardRoomSubscription(userId: string): void {
+	private bootstrapWardRoomSubscription(userId: string, forceRefresh = false): void {
 		if (!this.http) {
 			return;
 		}
 
 		if (
 			this.wardBootstrapInFlightUserIds.has(userId) ||
-			this.wardBootstrapDoneUserIds.has(userId)
+			(!forceRefresh && this.wardBootstrapDoneUserIds.has(userId))
 		) {
 			return;
 		}
@@ -200,18 +208,45 @@ export class EventSubscriptionService implements OnDestroy {
 		this.http
 			.get<unknown>(this.resolvePlantAllEndpoint())
 			.pipe(
-				catchError(() => of<unknown>([])),
+				map((response) => ({ response, success: true as const })),
+				catchError(() => of({ response: null, success: false as const })),
 				takeUntil(this.destroy$),
 				finalize(() => {
 					this.wardBootstrapInFlightUserIds.delete(userId);
 					this.wardBootstrapDoneUserIds.add(userId);
 				})
 			)
-			.subscribe((response) => {
-				for (const wardId of this.extractWardIdsFromPlantResponse(response)) {
+			.subscribe((result) => {
+				if (!result.success) {
+					return;
+				}
+
+				const wardIds = this.extractWardIdsFromPlantResponse(result.response);
+				if (forceRefresh) {
+					this.syncJoinedRoomsWithWardIds(wardIds);
+					return;
+				}
+
+				for (const wardId of wardIds) {
 					this.joinRoom(wardId);
 				}
 			});
+	}
+
+	private syncJoinedRoomsWithWardIds(targetWardIds: ReadonlyArray<string>): void {
+		const targetRooms = new Set(targetWardIds);
+
+		for (const joinedWardId of this.roomCoordinator.getJoinedRooms()) {
+			if (targetRooms.has(joinedWardId)) {
+				continue;
+			}
+
+			this.leaveRoom(joinedWardId);
+		}
+
+		for (const wardId of targetWardIds) {
+			this.joinRoom(wardId);
+		}
 	}
 
 	private handleBackendTriggeredRawEvent(raw: unknown): void {

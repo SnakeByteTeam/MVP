@@ -45,6 +45,7 @@
                 <li class="m-0" [style.--notification-delay]="(index * 48) + 'ms'">
                     <app-notification-item-component
                         [notification]="notification"
+                        [isHighlighted]="notification.notificationId === ((highlightedNotificationId$ | async) ?? '')"
                         [showRemoveAction]="true"
                         (removeClicked)="onNotificationRemoved($event)"></app-notification-item-component>
                 </li>

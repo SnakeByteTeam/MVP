@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { AddUserToWardReqDto } from '../../infrastructure/dtos/in/add-user-to-ward-req.dto';
 import { AddUserToWardUseCase } from '../../application/ports/in/add-user-to-ward-use-case.interface';
@@ -24,6 +25,8 @@ import { plainToInstance } from 'class-transformer';
 import { AddUserToWardResDto } from '../../infrastructure/dtos/out/add-user-to-ward-res-dto';
 import { FindAllUsersByWardIdResDto } from '../../infrastructure/dtos/out/find-all-users-by-ward-id-res.dto';
 import { User } from '../../domain/user';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
 
 @Controller('wards-users-relationships')
 export class WardsUsersRelationshipsController {
@@ -36,6 +39,7 @@ export class WardsUsersRelationshipsController {
     private readonly removeUserFromWardUseCase: RemoveUserFromWardUseCase,
   ) {}
 
+  @UseGuards(UserGuard, AdminGuard)
   @Post()
   async addUserToWard(
     @Body() req: AddUserToWardReqDto,
@@ -47,6 +51,7 @@ export class WardsUsersRelationshipsController {
     return plainToInstance(AddUserToWardResDto, user);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/:wardId')
   async findAllUsersByWardId(
     @Param('wardId', ParseIntPipe) id: number,
@@ -59,6 +64,7 @@ export class WardsUsersRelationshipsController {
     return plainToInstance(FindAllUsersByWardIdResDto, users);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Delete('/:wardId/:userId')
   async removeUserFromWard(
     @Param('wardId', ParseIntPipe) wardId: number,

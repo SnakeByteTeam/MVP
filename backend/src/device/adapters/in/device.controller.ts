@@ -9,6 +9,7 @@ import {
   Body,
   BadRequestException,
   ServiceUnavailableException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
@@ -55,6 +56,7 @@ import { Device } from 'src/device/domain/models/device.model';
 import { WriteDatapointDto } from 'src/device/infrastructure/http/dtos/in/write-datapoint-value.dto';
 import { DeviceValueDto } from 'src/device/infrastructure/http/dtos/out/device-value.dto';
 import { DeviceDto } from 'src/device/infrastructure/http/dtos/out/device.dto';
+import { UserGuard } from 'src/guard/user/user.guard';
 
 @ApiTags('device')
 @Controller('/device')
@@ -74,6 +76,7 @@ export class DeviceController {
     private readonly checkAlarmUseCase: CheckAlarmRuleUseCase,
   ) {}
 
+  @UseGuards(UserGuard)
   @Get('/:id')
   @ApiOperation({
     summary: 'Get device by ID',
@@ -108,6 +111,7 @@ export class DeviceController {
 
   @Post('')
   @HttpCode(202)
+  @UseGuards(UserGuard)
   async writeDatapointValue(@Body() req: WriteDatapointDto) {
     if (!req.datapointId || !req.value) throw new BadRequestException();
 
@@ -131,6 +135,7 @@ export class DeviceController {
     }
   }
 
+  @UseGuards(UserGuard)
   @Get('/plant/:plantId')
   @ApiOperation({
     summary: 'Get devices by plant ID',
@@ -240,6 +245,7 @@ export class DeviceController {
     return { message: 'Datapoints updated received', statusCode: 200 };
   }
 
+  @UseGuards(UserGuard)
   @Get(':deviceId/value')
   @ApiOperation({
     summary: 'Get device value',

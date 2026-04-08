@@ -109,11 +109,7 @@ export class AuthController {
   @ApiOkResponse({ type: LogoutResDto })
   @Post('/logout')
   logout(@Res({ passthrough: true }) res: Response): LogoutResDto {
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-    });
+    res.clearCookie('refreshToken', clearRefreshCookieOptions);
 
     return plainToInstance(LogoutResDto, {
       success: true,

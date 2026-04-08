@@ -22,6 +22,7 @@ export class StructureCacheImpl implements WriteCacheRepoPort {
                     ward_id   = EXCLUDED.ward_id`,
         [plant.id, JSON.stringify(plant.data), plant.ward_id],
       );
+      
       return true;
     } catch {
       return false;

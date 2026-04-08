@@ -116,32 +116,6 @@ export class ApiAuthVimarController {
     }
   }
 
-  @Get('auth')
-  @Redirect()
-  @UseGuards(UserGuard, AdminGuard)
-  @ApiOperation({
-    summary: 'Login with Vimar API',
-    description: 'Initiates authentication flow by redirecting to Vimar login.',
-  })
-  @ApiQuery({
-    name: 'redirect_url',
-    required: true,
-    type: String,
-    description: 'URL to redirect after login',
-    example: 'http://localhost:4200/dashboard',
-  })
-  login(@Query() payload: PlantAuthDto): { url: string; statusCode: number } {
-    if (!payload?.redirect_url) throw new BadRequestException();
-
-    const state = Buffer.from(payload.redirect_url).toString('base64');
-    this.logger.log(`Redirecting with state: ${state}`);
-
-    return {
-      url: this.apiAuthVimarUseCase.getLoginUrl(state),
-      statusCode: 302,
-    };
-  }
-
   @Get('callback')
   @Redirect()
   @ApiOperation({

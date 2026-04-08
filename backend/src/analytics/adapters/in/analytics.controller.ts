@@ -1,4 +1,4 @@
-import { Controller, Inject, Get, Query, Param } from '@nestjs/common';
+import { Controller, Inject, Get, Query, Param, UseGuards } from '@nestjs/common';
 import { GetAnalyticsCmd } from '../../application/commands/get-analytics.cmd';
 import { GetAnalyticsUseCase } from '../../application/ports/in/get-analytics.usecase';
 import { GetAnalyticsDto } from '../../infrastructure/dtos/get-analytics.dto';
@@ -9,6 +9,9 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
+
 
 @Controller('analytics')
 export class AnalyticsController {
@@ -17,6 +20,7 @@ export class AnalyticsController {
     private readonly getAnalyticsUseCase: GetAnalyticsUseCase,
   ) {}
 
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/:plantId')
   @ApiOperation({
     summary: 'Get all analytics by Plant ID',

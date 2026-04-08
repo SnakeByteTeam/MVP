@@ -32,9 +32,10 @@ import { DeviceApiImpl } from './infrastructure/http/device-api-impl';
 import { WriteDatapointValueAdapter } from './adapters/out/write-datapoint-value.adapter';
 import { FindDeviceByDatapointIdAdapter } from './adapters/out/find-device-by-datapointId.adapter';
 import { FIND_DEVICE_BY_DATAPOINTID_USECASE } from './application/ports/in/find-device-by-datapointId.usecase';
+import { GuardModule } from 'src/guard/guard.module';
 
 @Module({
-  imports: [HttpModule, ApiAuthVimarModule, AlarmsModule],
+  imports: [HttpModule, ApiAuthVimarModule, AlarmsModule, GuardModule],
   controllers: [DeviceController],
   providers: [
     { provide: FIND_DEVICE_BY_ID_USECASE, useClass: DeviceService },

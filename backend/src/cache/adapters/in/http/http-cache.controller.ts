@@ -1,10 +1,12 @@
-import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Inject, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import {
   UPDATE_CACHE_USE_CASE,
   type UpdateCacheUseCase,
 } from 'src/cache/application/ports/in/update-cache.usecase';
 import { SubNotificationPayloadDto } from 'src/cache/infrastructure/http/dtos/in/subNotification.dto';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
 
 @ApiTags('cache')
 @Controller('cache')

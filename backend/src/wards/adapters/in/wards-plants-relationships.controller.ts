@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { AddPlantToWardReqDto } from '../../infrastructure/dtos/in/add-plant-to-ward-req.dto';
 import {
@@ -24,6 +25,8 @@ import { FindAllPlantsByWardIdResDto } from '../../infrastructure/dtos/out/find-
 import { plainToInstance } from 'class-transformer';
 import { AddPlantToWardResDto } from '../../infrastructure/dtos/out/add-plant-to-ward-res-dto';
 import { Plant } from 'src/plant/domain/models/plant.model';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
 
 @Controller('wards-plants-relationships')
 export class WardsPlantsRelationshipsController {
@@ -36,6 +39,7 @@ export class WardsPlantsRelationshipsController {
     private readonly removePlantFromWardUseCase: RemovePlantFromWardUseCase,
   ) {}
 
+  @UseGuards(UserGuard, AdminGuard)
   @Post()
   async addPlantToWard(
     @Body() req: AddPlantToWardReqDto,
@@ -47,6 +51,7 @@ export class WardsPlantsRelationshipsController {
     return plainToInstance(AddPlantToWardResDto, plant);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/:wardId')
   async findAllPlantsByWardId(
     @Param('wardId', ParseIntPipe) id: number,
@@ -59,6 +64,7 @@ export class WardsPlantsRelationshipsController {
     return plainToInstance(FindAllPlantsByWardIdResDto, plants);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Delete('/:plantId')
   removePlantFromWard(@Param('plantId') plantId: string): Promise<void> {
     return this.removePlantFromWardUseCase.removePlantFromWard(

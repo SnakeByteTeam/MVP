@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UsersController } from './adapters/in/users.controller';
+import { GuardModule } from 'src/guard/guard.module';
 import {
   CREATE_USER_USE_CASE,
   DELETE_USER_USE_CASE,
@@ -32,6 +33,7 @@ import { FIND_USER_BY_ID_PORT } from './application/ports/out/find-user-by-id-po
 import { UPDATE_USER_PORT } from './application/ports/out/update-user-port.interface';
 
 @Module({
+  imports: [GuardModule],
   controllers: [UsersController],
   providers: [
     {

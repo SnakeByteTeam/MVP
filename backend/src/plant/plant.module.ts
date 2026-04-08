@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PlantController } from './adapters/in/plant.controller';
+import { GuardModule } from 'src/guard/guard.module';
 
 import { FIND_PLANT_BY_ID_USECASE } from './application/ports/in/find-plant-by-id.usecase';
 import { FIND_PLANT_BY_ID_PORT } from './application/ports/out/find-plant-by-id.port';
@@ -18,7 +19,7 @@ import { FindAllPlantsAdapter } from './adapters/out/find-all-plants.adapter';
 import { FIND_ALL_PLANTS_REPO_PORT } from './application/repository/find-all-plants.repository';
 
 @Module({
-  imports: [],
+  imports: [GuardModule],
   controllers: [PlantController],
   providers: [
     { provide: FIND_PLANT_BY_ID_USECASE, useClass: PlantService },

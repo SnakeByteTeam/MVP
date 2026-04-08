@@ -10,6 +10,7 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
       <label for="username">Username</label>
       <input
+        #usernameInput
         id="username"
         type="text"
         formControlName="username"
@@ -20,6 +21,7 @@
 
       <label for="password">Password</label>
       <input
+        #passwordInput
         id="password"
         type="password"
         formControlName="password"

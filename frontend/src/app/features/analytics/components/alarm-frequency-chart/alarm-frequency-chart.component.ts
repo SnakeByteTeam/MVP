@@ -8,9 +8,11 @@ import { CommonModule } from '@angular/common';
     selector: 'app-alarm-frequency-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../shared/ward-chart-analytics.html'})
+    templateUrl: '../shared/chart-analytics.html'})
 export class AlarmFrequencyChartComponent extends ChartComponent {
-    override chartType: ChartType = 'line';
+    override chartType: ChartType = 'bar';
+
+    override description: string = "Dati relativi al numero di allarmi del reparto.";
 }
 
 

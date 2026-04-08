@@ -9,8 +9,11 @@ import { CommonModule } from '@angular/common';
     selector: 'app-presence-detection-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../shared/device-chart-analytics.html'})
+    templateUrl: '../shared/chart-analytics.html'})
 export class PresenceDetectionChartComponent extends ChartComponent {
 
     override chartType: ChartType = 'bar';
+
+    override description: string = "Dati relativi ai sensori di presenza dell'appartamento.";
+
 }

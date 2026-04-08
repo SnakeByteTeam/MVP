@@ -9,8 +9,11 @@ import { ChartType } from 'chart.js';
     selector: 'app-alarms-sent-resolved-chart', 
     standalone: true, 
     imports: [BaseChartDirective, CommonModule],
-    templateUrl: '../shared/ward-chart-analytics.html'})
+    templateUrl: '../shared/chart-analytics.html'})
 export class AlarmsSentResolvedChartComponent extends ChartComponent {
 
-    override chartType: ChartType = 'line';
+    override chartType: ChartType = 'bar';
+
+    override description: string = "Dati relativi alla gestione allarmi del reparto.";
+
 }

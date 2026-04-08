@@ -34,49 +34,57 @@
     <app-energy-consumption-chart 
         *ngIf="getChartByMetric(data, 'plant-consumption') as info"
         class="col-span-6 2xl:col-span-3 w-full"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="true">
     </app-energy-consumption-chart>
 
     <app-temperature-variations-chart 
         *ngIf="getChartByMetric(data, 'thermostat-temperature') as info"
         class="col-span-6 2xl:col-span-3"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="true">
     </app-temperature-variations-chart>
 
     <app-alarm-frequency-chart 
         *ngIf="getChartByMetric(data, 'ward-alarms-frequency') as info"
         class="col-span-6 lg:col-span-3 2xl:col-span-2"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="false">
     </app-alarm-frequency-chart>
 
     <app-alarms-sent-resolved-chart 
         *ngIf="getChartByMetric(data, 'ward-resolved-alarm') as info"
         class="col-span-6 lg:col-span-3 2xl:col-span-2"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="false">
     </app-alarms-sent-resolved-chart>
 
     <app-fall-frequency-chart 
         *ngIf="getChartByMetric(data, 'ward-falls') as info"
         class="col-span-6 lg:col-span-3 2xl:col-span-2"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="false">
     </app-fall-frequency-chart>
 
     <app-plant-anomalies-chart 
         *ngIf="getChartByMetric(data, 'plant-anomalies') as info"
         class="col-span-6 lg:col-span-3 2xl:col-span-2"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="false">
     </app-plant-anomalies-chart>
 
     <app-presence-detection-chart 
         *ngIf="getChartByMetric(data, 'sensor-presence') as info"
         class="col-span-6 lg:col-span-3 2xl:col-span-2"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="false">
     </app-presence-detection-chart>
 
     <app-prolonged-presence-chart 
         *ngIf="getChartByMetric(data, 'sensor-long-presence') as info"
         class="col-span-6 lg:col-span-3 2xl:col-span-2"
-        [chartInfo]="info">
+        [chartInfo]="info"
+        [showSuggestions]="false">
     </app-prolonged-presence-chart>
 
 </div>

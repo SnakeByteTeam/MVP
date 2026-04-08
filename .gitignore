@@ -71,6 +71,7 @@ typings/
 *.launch
 .settings/
 *.sublime-workspace
+deploy-digitalocean.mjs
 
 # VS Code
 .vscode/*

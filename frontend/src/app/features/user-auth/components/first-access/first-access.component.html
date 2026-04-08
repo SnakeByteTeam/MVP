@@ -1,26 +1,43 @@
-<form [formGroup]="firstAccessForm" (ngSubmit)="onSubmit()">
-  <input
-    type="text"
-    formControlName="username"
-    (input)="onUsernameChange($any($event.target).value)"
-    placeholder="Username"
-  />
-  <input
-    type="password"
-    formControlName="temporaryPassword"
-    (input)="onTempPasswordChange($any($event.target).value)"
-    placeholder="Password temporanea"
-  />
-  <input
-    type="password"
-    formControlName="newPassword"
-    (input)="onNewPasswordChange($any($event.target).value)"
-    placeholder="Nuova password"
-  />
+<section class="auth-shell">
+  <div class="auth-bg-orb auth-bg-orb-left" aria-hidden="true"></div>
+  <div class="auth-bg-orb auth-bg-orb-right" aria-hidden="true"></div>
 
-  <button type="submit" [disabled]="isLoading">Conferma</button>
+  <div class="auth-card">
+    <p class="auth-kicker">Primo accesso</p>
+    <h1>Imposta la tua password personale</h1>
+    <p class="auth-subtitle">
+      Hai appena effettuato il primo login con una password temporanea. Conferma le credenziali e scegli una nuova
+      password per continuare.
+    </p>
 
-  @if (errorType) {
-    <p>{{ errorType }}</p>
-  }
-</form>
+    <ul class="auth-hints" aria-label="Indicazioni per il primo accesso">
+      <li>Usa l'username assegnato all'account.</li>
+      <li>Inserisci la password temporanea ricevuta.</li>
+      <li>La nuova password deve avere almeno 12 caratteri ed essere diversa da quella temporanea.</li>
+    </ul>
+
+    <form [formGroup]="firstAccessForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <label for="username">Username</label>
+      <input id="username" type="text" formControlName="username" (input)="onUsernameChange($any($event.target).value)"
+        placeholder="Inserisci username" autocomplete="username" />
+
+      <label for="temporaryPassword">Password temporanea</label>
+      <input id="temporaryPassword" type="password" formControlName="temporaryPassword"
+        (input)="onTempPasswordChange($any($event.target).value)" placeholder="Inserisci password temporanea"
+        autocomplete="current-password" />
+
+      <label for="newPassword">Nuova password</label>
+      <input id="newPassword" type="password" formControlName="newPassword"
+        (input)="onNewPasswordChange($any($event.target).value)" placeholder="Scegli una nuova password"
+        autocomplete="new-password" />
+
+      <button type="submit" [disabled]="isLoading" class="auth-submit">
+        {{ isLoading ? 'Aggiornamento in corso...' : 'Conferma e continua' }}
+      </button>
+
+      @if (errorType) {
+      <p class="auth-error" role="alert">{{ errorType }}</p>
+      }
+    </form>
+  </div>
+</section>

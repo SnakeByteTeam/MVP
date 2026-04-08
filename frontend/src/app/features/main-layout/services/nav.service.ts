@@ -13,6 +13,11 @@ export class NavService {
                 route: "dashboard"
             },
             {
+                label: "Notifiche",
+                icon: "notification.png",
+                route: "notifications"
+            },
+            {
                 label: "Dispositivi",
                 icon: "device.png",
                 route: "apartment-monitor"

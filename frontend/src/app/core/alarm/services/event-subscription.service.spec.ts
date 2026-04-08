@@ -1,13 +1,17 @@
+import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, of, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Socket } from 'socket.io-client';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
-import { AlarmPriority } from '../models/alarm-priority.enum';
+import { InternalAuthService } from '../../services/internal-auth.service';
 import { ConnectionStatus } from '../models/connection-status.enum';
-import { PushEventType } from '../models/push-event-type.enum';
+import { AlarmPriority } from '../models/alarm-priority.enum';
 import { AlarmStateService } from './alarm-state.service';
+import { AlarmApiService } from './alarm-api.service';
 import { EventSubscriptionService, SOCKET_IO_FACTORY } from './event-subscription.service';
+import { UserRole } from '../../models/user-role.enum';
+import { UserSession } from '../../../features/user-auth/models/user-session.model';
 
 
 type SocketEventHandler = (payload?: unknown) => void;
@@ -28,6 +32,10 @@ describe('EventSubscriptionService', () => {
   let fakeSocket: FakeSocket;
   let socketIoFactoryMock: ReturnType<typeof vi.fn>;
   let subscriptions: Subscription[];
+  let currentUser$: BehaviorSubject<UserSession | null>;
+  let internalAuthServiceSpy: { getCurrentUser$: ReturnType<typeof vi.fn> };
+  let httpClientSpy: { get: ReturnType<typeof vi.fn> };
+  let alarmApiServiceSpy: { getAlarmEventById: ReturnType<typeof vi.fn> };
 
   const alarmStateSpy = {
     onAlarmTriggered: vi.fn(),
@@ -40,6 +48,29 @@ describe('EventSubscriptionService', () => {
 
     fakeSocket = createFakeSocket();
     socketIoFactoryMock = vi.fn(() => fakeSocket as unknown as Socket);
+    currentUser$ = new BehaviorSubject<UserSession | null>(null);
+    internalAuthServiceSpy = {
+      getCurrentUser$: vi.fn(() => currentUser$.asObservable()),
+    };
+    httpClientSpy = {
+      get: vi.fn(() => of([])),
+    };
+    alarmApiServiceSpy = {
+      getAlarmEventById: vi.fn(() =>
+        of({
+          id: 'active-alarm-backend-1',
+          alarmRuleId: 'alarm-rule-backend-1',
+          deviceId: 'device-1',
+          alarmName: 'Saturazione bassa reparto A',
+          priority: AlarmPriority.RED,
+          activationTime: '2026-04-07T10:00:00.000Z',
+          resolutionTime: null,
+          position: 'Stanza 12',
+          userId: null,
+          userUsername: null,
+        })
+      ),
+    };
 
     TestBed.configureTestingModule({
       providers: [
@@ -56,6 +87,18 @@ describe('EventSubscriptionService', () => {
           provide: API_BASE_URL,
           useValue: '  http://api.example.local  ',
         },
+        {
+          provide: InternalAuthService,
+          useValue: internalAuthServiceSpy,
+        },
+        {
+          provide: HttpClient,
+          useValue: httpClientSpy,
+        },
+        {
+          provide: AlarmApiService,
+          useValue: alarmApiServiceSpy,
+        },
       ],
     });
 
@@ -68,13 +111,57 @@ describe('EventSubscriptionService', () => {
       subscription.unsubscribe();
     }
 
+    currentUser$.complete();
     service.ngOnDestroy();
   });
 
   it('crea la connessione socket in initialize usando API_BASE_URL normalizzato', () => {
     service.initialize([]);
 
-    expect(socketIoFactoryMock).toHaveBeenCalledWith('http://api.example.local', {
+    expect(socketIoFactoryMock).toHaveBeenCalledWith('http://api.example.local/ws', {
+      transports: ['websocket'],
+      reconnection: true,
+      autoConnect: true,
+    });
+  });
+
+  it('risolve il namespace websocket ws quando API_BASE_URL termina con api', () => {
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      providers: [
+        EventSubscriptionService,
+        {
+          provide: SOCKET_IO_FACTORY,
+          useValue: socketIoFactoryMock,
+        },
+        {
+          provide: AlarmStateService,
+          useValue: alarmStateSpy,
+        },
+        {
+          provide: API_BASE_URL,
+          useValue: 'http://localhost/api',
+        },
+        {
+          provide: InternalAuthService,
+          useValue: internalAuthServiceSpy,
+        },
+        {
+          provide: HttpClient,
+          useValue: httpClientSpy,
+        },
+        {
+          provide: AlarmApiService,
+          useValue: alarmApiServiceSpy,
+        },
+      ],
+    });
+
+    service = TestBed.inject(EventSubscriptionService);
+    service.initialize([]);
+
+    expect(socketIoFactoryMock).toHaveBeenCalledWith('http://localhost/ws', {
       transports: ['websocket'],
       reconnection: true,
       autoConnect: true,
@@ -141,64 +228,62 @@ describe('EventSubscriptionService', () => {
     expect(joinCallsAfterReconnect.at(-1)).toEqual(['join-ward', 'ward-a']);
   });
 
-  it('dispatcha gli eventi ALARM_TRIGGERED verso AlarmStateService', () => {
+  it('bootstrap delle room da plant all al login quando cache ward e vuota', () => {
+    httpClientSpy.get.mockReturnValue(
+      of([
+        { id: 'plant-1', wardId: 21 },
+        { id: 'plant-2', wardId: ' 22 ' },
+        { id: 'plant-3', wardId: 21 },
+        { id: 'plant-4' },
+      ])
+    );
+
     service.initialize([]);
+    currentUser$.next(buildSession('oss-1'));
 
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.ALARM_TRIGGERED,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        id: 'active-alarm-123',
-        alarmRuleId: 'alarm-rule-123',
-        alarmName: 'Caduta rilevata',
-        priority: AlarmPriority.RED,
-        activationTime: '2026-03-19T10:00:00.000Z',
-        resolutionTime: null,
-      },
-    });
+    expect(httpClientSpy.get).toHaveBeenCalledWith('http://api.example.local/plant/all');
 
-    expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith({
-      id: 'active-alarm-123',
-      alarmRuleId: 'alarm-rule-123',
-      alarmName: 'Caduta rilevata',
-      priority: AlarmPriority.RED,
-      activationTime: '2026-03-19T10:00:00.000Z',
-      resolutionTime: null,
-    });
+    const joinWardCalls = fakeSocket.emit.mock.calls.filter(([event]) => event === 'join-ward');
+    expect(joinWardCalls).toEqual([
+      ['join-ward', '21'],
+      ['join-ward', '22'],
+    ]);
   });
 
-  it('dispatcha gli eventi ALARM_RESOLVED con activeAlarmId', () => {
+  it('non interrompe il realtime quando bootstrap plant all fallisce', () => {
+    httpClientSpy.get.mockReturnValue(throwError(() => new Error('network')));
+
     service.initialize([]);
+    currentUser$.next(buildSession('oss-2'));
+
+    expect(httpClientSpy.get).toHaveBeenCalledTimes(1);
 
     fakeSocket.trigger('push-event', {
-      eventType: PushEventType.ALARM_RESOLVED,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        id: 'active-alarm-123',
-      },
+      alarmRuleId: 'alarm-rule-bootstrap-fallback',
+      wardId: 15,
+      alarmEventId: 'active-alarm-bootstrap-fallback',
     });
 
-    expect(alarmStateSpy.onAlarmResolved).toHaveBeenCalledWith('active-alarm-123');
+    expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'active-alarm-bootstrap-fallback',
+      }),
+    );
+    expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationId: 'alarm-triggered-active-alarm-bootstrap-fallback',
+      }),
+    );
   });
 
-  it('dispatcha gli eventi NOTIFICATION verso AlarmStateService', () => {
+  it('evita bootstrap ripetuto per lo stesso utente nella stessa sessione', () => {
+    httpClientSpy.get.mockReturnValue(of([]));
+
     service.initialize([]);
+    currentUser$.next(buildSession('oss-3'));
+    currentUser$.next(buildSession('oss-3'));
 
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.NOTIFICATION,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        notificationId: 'notification-1',
-        title: 'Messaggio operatore',
-        sentAt: '2026-03-19T10:00:00.000Z',
-      },
-    });
-
-    expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith({
-      notificationId: 'notification-1',
-      title: 'Messaggio operatore',
-      sentAt: '2026-03-19T10:00:00.000Z',
-    });
+    expect(httpClientSpy.get).toHaveBeenCalledTimes(1);
   });
 
   it('gestisce payload backend nativo su push-event per allarme attivato', () => {
@@ -214,14 +299,14 @@ describe('EventSubscriptionService', () => {
       expect.objectContaining({
         id: 'active-alarm-backend-1',
         alarmRuleId: 'alarm-rule-backend-1',
-        alarmName: 'Allarme in corso',
+        alarmName: 'Saturazione bassa reparto A',
       }),
     );
 
     expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith(
       expect.objectContaining({
         notificationId: 'alarm-triggered-active-alarm-backend-1',
-        title: "C'e un allarme in corso",
+        title: '▲ Saturazione bassa reparto A',
       }),
     );
 
@@ -246,24 +331,21 @@ describe('EventSubscriptionService', () => {
     expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '13');
   });
 
-  it('ignora eventi raw malformati e payload non validi', () => {
+  it('ignora eventi raw malformati e payload backend non validi', () => {
     service.initialize([]);
 
     fakeSocket.trigger('push-event', {
-      eventType: 'UNKNOWN_EVENT',
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {},
-    });
-
-    fakeSocket.trigger('push-event', {
-      eventType: PushEventType.ALARM_TRIGGERED,
-      timestamp: '2026-03-19T10:00:00.000Z',
-      payload: {
-        id: 'active-alarm-123',
-      },
+      alarmRuleId: 'alarm-rule-backend-3',
+      wardId: 'not-a-number',
+      alarmEventId: 'active-alarm-backend-3',
     });
 
     fakeSocket.trigger('push-event', 'not-an-object');
+
+    fakeSocket.trigger('alarm-resolved', {
+      alarmEventId: 42,
+      wardId: 10,
+    });
 
     expect(alarmStateSpy.onAlarmTriggered).not.toHaveBeenCalled();
     expect(alarmStateSpy.onAlarmResolved).not.toHaveBeenCalled();
@@ -326,4 +408,14 @@ function createFakeSocket(): FakeSocket {
   };
 
   return fakeSocket;
+}
+
+function buildSession(userId: string): UserSession {
+  return {
+    userId,
+    username: `${userId}@example.local`,
+    role: UserRole.OPERATORE_SANITARIO,
+    accessToken: 'test-token',
+    isFirstAccess: false,
+  };
 }

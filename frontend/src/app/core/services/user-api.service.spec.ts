@@ -39,4 +39,36 @@ describe('UserApiService', () => {
         expect(request.request.method).toBe('DELETE');
         request.flush(null);
     });
+
+    it('createUser decodifica tempPassword base64 prima di esporla al chiamante', () => {
+        const dto = {
+            name: 'Mario',
+            surname: 'Rossi',
+            username: 'mrossi',
+        };
+
+        service.createUser(dto).subscribe((result) => {
+            expect(result.tempPassword).toBe('TempPass123');
+        });
+
+        const request = httpController.expectOne(`${baseUrl}/users`);
+        expect(request.request.method).toBe('POST');
+        expect(request.request.body).toEqual(dto);
+        request.flush({ tempPassword: 'VGVtcFBhc3MxMjM=' });
+    });
+
+    it('createUser mantiene tempPassword invariata se non e base64 valida', () => {
+        const dto = {
+            name: 'Mario',
+            surname: 'Rossi',
+            username: 'mrossi',
+        };
+
+        service.createUser(dto).subscribe((result) => {
+            expect(result.tempPassword).toBe('TempPass123');
+        });
+
+        const request = httpController.expectOne(`${baseUrl}/users`);
+        request.flush({ tempPassword: 'TempPass123' });
+    });
 });

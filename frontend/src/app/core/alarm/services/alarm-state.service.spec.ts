@@ -152,6 +152,65 @@ describe('AlarmStateService', () => {
     expect(latestNotificationIds).toEqual([notificationB.notificationId, notificationA.notificationId]);
   });
 
+  it('removeNotification elimina una sola notifica e aggiorna il contatore', () => {
+    let latestNotificationIds: string[] = [];
+    let unreadNotificationsCount = -1;
+
+    subscriptions.push(
+      service.getNotifications$().subscribe((notifications) => {
+        latestNotificationIds = notifications.map((notification) => notification.notificationId);
+      }),
+      service.getUnreadNotificationsCount$().subscribe((count) => {
+        unreadNotificationsCount = count;
+      })
+    );
+
+    service.onNotificationReceived(notificationA);
+    service.onNotificationReceived(notificationB);
+    service.removeNotification(notificationA.notificationId);
+
+    expect(latestNotificationIds).toEqual([notificationB.notificationId]);
+    expect(unreadNotificationsCount).toBe(1);
+  });
+
+  it('clearNotifications svuota la lista notifiche e porta il contatore a zero', () => {
+    let latestNotificationIds: string[] = [];
+    let unreadNotificationsCount = -1;
+
+    subscriptions.push(
+      service.getNotifications$().subscribe((notifications) => {
+        latestNotificationIds = notifications.map((notification) => notification.notificationId);
+      }),
+      service.getUnreadNotificationsCount$().subscribe((count) => {
+        unreadNotificationsCount = count;
+      })
+    );
+
+    service.onNotificationReceived(notificationA);
+    service.onNotificationReceived(notificationB);
+    service.clearNotifications();
+
+    expect(latestNotificationIds).toEqual([]);
+    expect(unreadNotificationsCount).toBe(0);
+  });
+
+  it('una notifica dismissata non viene reintrodotta quando arriva di nuovo', () => {
+    let latestNotificationIds: string[] = [];
+
+    subscriptions.push(
+      service.getNotifications$().subscribe((notifications) => {
+        latestNotificationIds = notifications.map((notification) => notification.notificationId);
+      })
+    );
+
+    service.onNotificationReceived(notificationA);
+    service.dismissNotification(notificationA.notificationId);
+    service.removeNotification(notificationA.notificationId);
+    service.onNotificationReceived(notificationA);
+
+    expect(latestNotificationIds).toEqual([]);
+  });
+
   it('setActiveAlarms imposta snapshot iniziale degli allarmi attivi', () => {
     let latestActiveAlarmIds: string[] = [];
 

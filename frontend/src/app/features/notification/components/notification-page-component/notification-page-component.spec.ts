@@ -16,6 +16,8 @@ describe('NotificationPageComponent', () => {
 
   const notificationServiceStub = {
     vm$: undefined as unknown as BehaviorSubject<NotificationListVm>,
+    removeNotification: vi.fn(),
+    clearAllNotifications: vi.fn(),
   };
 
   const notificationA: NotificationEvent = {
@@ -83,6 +85,17 @@ describe('NotificationPageComponent', () => {
     expect(items[1].componentInstance.notification()).toEqual(notificationB);
   });
 
+  it('usa il singolare nel riepilogo quando unreadCount e 1', () => {
+    vmSubject.next({
+      notifications: [notificationA],
+      unreadCount: 1,
+    });
+    fixture.detectChanges();
+
+    const summary = fixture.nativeElement.querySelector('.notification-page__summary');
+    expect(summary.textContent).toContain('1 notifica non letta');
+  });
+
   it('aggiorna il DOM quando vm$ emette un nuovo snapshot coerente', () => {
     fixture.detectChanges();
 
@@ -103,5 +116,21 @@ describe('NotificationPageComponent', () => {
 
     items = fixture.debugElement.queryAll(By.directive(NotificationItemComponent));
     expect(items).toHaveLength(2);
+  });
+
+  it('invoca clearAllNotifications quando si clicca Cancella tutte', () => {
+    vmSubject.next({
+      notifications: [notificationA, notificationB],
+      unreadCount: 2,
+    });
+    fixture.detectChanges();
+
+    const clearAllButton = fixture.nativeElement.querySelector('button');
+    clearAllButton.click();
+
+    expect(notificationServiceStub.clearAllNotifications).toHaveBeenCalledWith([
+      notificationA,
+      notificationB,
+    ]);
   });
 });

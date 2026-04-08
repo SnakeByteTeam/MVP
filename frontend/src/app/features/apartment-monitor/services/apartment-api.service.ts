@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, take, tap, timer } from 'rxjs';
+import { Observable, map, switchMap, take, tap } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
@@ -16,17 +16,12 @@ export interface ApartmentOption {
 
 @Injectable({ providedIn: 'root' })
 export class ApartmentApiService {
-	private static readonly PLANT_FETCH_RETRY_DELAY_MS = 1500;
-	private static readonly MAX_PLANT_FETCH_RETRIES = 8;
-
 	private readonly http = inject(HttpClient);
 	private readonly baseUrl: string = inject(API_BASE_URL);
 	private readonly authService = inject(InternalAuthService);
 	private readonly wardRealtimeCache = inject(WardRealtimeCacheService);
 	private readonly plantEndpoint = `${this.baseUrl}/plant`;
-	private readonly legacyPlantEndpoint = `${this.baseUrl}/api/plant`;
 	private readonly apartmentsEndpoint = `${this.baseUrl}/apartments`;
-	private readonly legacyApartmentsEndpoint = `${this.baseUrl}/api/apartments`;
 
 	public getCurrentApartment(): Observable<Apartment> {
 		return this.getAvailablePlants().pipe(
@@ -47,57 +42,41 @@ export class ApartmentApiService {
 
 	public getAvailableApartments(): Observable<ApartmentOption[]> {
 		return this.getAvailablePlants().pipe(
-			map((plants) => plants.map((plant) => ({ id: plant.id, name: plant.name }))),
+			map((plants) =>
+				plants
+					.map((plant) => ({ id: plant.id, name: plant.name }))
+					.sort((left, right) => left.name.localeCompare(right.name))
+			),
 		);
 	}
 
 	public getApartmentByPlantId(plantId: string): Observable<Apartment> {
 		const query = `?plantid=${encodeURIComponent(plantId)}`;
 
-		return this.http
-			.get<PlantDto>(`${this.plantEndpoint}${query}`)
-			.pipe(
-				catchError(() => this.http.get<PlantDto>(`${this.legacyPlantEndpoint}${query}`)),
-				map((plant) => this.mapPlantToApartment(plant)),
-			);
+		return this.http.get<PlantDto>(`${this.plantEndpoint}${query}`).pipe(
+			map((plant) => this.mapPlantToApartment(plant)),
+		);
 	}
 
 	public getAllPlants(): Observable<PlantDto[]> {
-		return this.http
-			.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.plantEndpoint}/all`)
-			.pipe(
-				catchError(() =>
-					this.http.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.legacyPlantEndpoint}/all`),
-				),
-				map((response) => (Array.isArray(response) ? response : [])),
-				tap((plants) => {
-					this.cacheWardIdsForCurrentUser(plants);
-				}),
-			);
+		return this.http.get<unknown>(`${this.plantEndpoint}/all`).pipe(
+			map((response) => this.extractPlants(response)),
+			tap((plants) => {
+				this.cacheWardIdsForCurrentUser(plants);
+			}),
+		);
 	}
 
 	public enableApartment(apartmentId: string): Observable<void> {
 		const encodedApartmentId = encodeURIComponent(apartmentId);
 
-		return this.http
-			.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/enable`, {})
-			.pipe(
-				catchError(() =>
-					this.http.patch<void>(`${this.legacyApartmentsEndpoint}/${encodedApartmentId}/enable`, {}),
-				),
-			);
+		return this.http.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/enable`, {});
 	}
 
 	public disableApartment(apartmentId: string): Observable<void> {
 		const encodedApartmentId = encodeURIComponent(apartmentId);
 
-		return this.http
-			.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/disable`, {})
-			.pipe(
-				catchError(() =>
-					this.http.patch<void>(`${this.legacyApartmentsEndpoint}/${encodedApartmentId}/disable`, {}),
-				),
-			);
+		return this.http.patch<void>(`${this.apartmentsEndpoint}/${encodedApartmentId}/disable`, {});
 	}
 
 	public setActivePlantId(plantId: string): void {
@@ -141,38 +120,49 @@ export class ApartmentApiService {
 	}
 
 	private getAvailablePlants(): Observable<PlantDto[]> {
-		return this.getAvailablePlantsWithRetry(0);
+		return this.getAllPlants();
 	}
 
-	private getAvailablePlantsWithRetry(attempt: number): Observable<PlantDto[]> {
-		return this.fetchAvailablePlantsOnce().pipe(
-			switchMap((plants) => {
-				if (plants.length > 0 || attempt >= ApartmentApiService.MAX_PLANT_FETCH_RETRIES) {
-					return of(plants);
-				}
+	private extractPlants(response: unknown): PlantDto[] {
+		const directArray = this.asPlantArray(response);
+		if (directArray.length > 0) {
+			return directArray;
+		}
 
-				return timer(ApartmentApiService.PLANT_FETCH_RETRY_DELAY_MS).pipe(
-					switchMap(() => this.getAvailablePlantsWithRetry(attempt + 1)),
-				);
-			}),
-		);
+		if (typeof response !== 'object' || response === null) {
+			return [];
+		}
+
+		const wrappedResponse = response as { data?: unknown; plants?: unknown };
+		const wrappedArray = this.asPlantArray(wrappedResponse.data ?? wrappedResponse.plants);
+		return wrappedArray;
 	}
 
-	private fetchAvailablePlantsOnce(): Observable<PlantDto[]> {
-		return this.http
-			.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.plantEndpoint}/available`)
-			.pipe(
-				catchError(() =>
-					this.http.get<PlantDto[] | { statusCode?: number; message?: string }>(
-						`${this.legacyPlantEndpoint}/available`,
-					),
-				),
-				map((response) => (Array.isArray(response) ? response : [])),
-				tap((plants) => {
-					this.cacheWardIdsForCurrentUser(plants);
-				}),
-				switchMap((plants) => (plants.length > 0 ? of(plants) : this.getAllPlants())),
-			);
+	private asPlantArray(value: unknown): PlantDto[] {
+		if (!Array.isArray(value)) {
+			return [];
+		}
+
+		const uniqueById = new Map<string, PlantDto>();
+		for (const candidate of value) {
+			if (typeof candidate !== 'object' || candidate === null) {
+				continue;
+			}
+
+			const plant = candidate as PlantDto;
+			if (typeof plant.id !== 'string' || !plant.id.trim()) {
+				continue;
+			}
+
+			const normalizedName = typeof plant.name === 'string' && plant.name.trim() ? plant.name : plant.id;
+			uniqueById.set(plant.id, {
+				...plant,
+				name: normalizedName,
+				rooms: Array.isArray(plant.rooms) ? plant.rooms : [],
+			});
+		}
+
+		return Array.from(uniqueById.values());
 	}
 
 	private cacheWardIdsForCurrentUser(plants: ReadonlyArray<PlantDto>): void {

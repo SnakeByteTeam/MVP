@@ -10,6 +10,7 @@ type ActiveAlarmsSnapshotMode = 'merge' | 'replace';
 export class AlarmStateService {
 	private readonly activeAlarms$ = new BehaviorSubject<ActiveAlarm[]>([]);
 	private readonly notifications$ = new BehaviorSubject<NotificationEvent[]>([]);
+	private readonly dismissedNotificationIds$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
 	private readonly locallyResolvedActiveAlarmIds = new Set<string>();
 
 	public setActiveAlarms(alarms: ActiveAlarm[], mode: ActiveAlarmsSnapshotMode = 'merge'): void {
@@ -64,7 +65,57 @@ export class AlarmStateService {
 	}
 
 	public onNotificationReceived(event: NotificationEvent): void {
-		this.notifications$.next([event, ...this.notifications$.getValue()]);
+		if (this.dismissedNotificationIds$.getValue().has(event.notificationId)) {
+			return;
+		}
+
+		const withoutCurrentNotification = this.notifications$
+			.getValue()
+			.filter((notification) => notification.notificationId !== event.notificationId);
+
+		this.notifications$.next([event, ...withoutCurrentNotification]);
+	}
+
+	public removeNotification(notificationId: string): void {
+		const normalizedNotificationId = notificationId.trim();
+		if (!normalizedNotificationId) {
+			return;
+		}
+
+		this.dismissNotification(normalizedNotificationId);
+		this.notifications$.next(
+			this.notifications$
+				.getValue()
+				.filter((notification) => notification.notificationId !== normalizedNotificationId)
+		);
+	}
+
+	public clearNotifications(): void {
+		const notificationIds = this.notifications$.getValue().map((notification) => notification.notificationId);
+		this.dismissNotifications(notificationIds);
+		this.notifications$.next([]);
+	}
+
+	public dismissNotification(notificationId: string): void {
+		this.dismissNotifications([notificationId]);
+	}
+
+	public dismissNotifications(notificationIds: ReadonlyArray<string>): void {
+		if (notificationIds.length === 0) {
+			return;
+		}
+
+		const nextDismissedIds = new Set(this.dismissedNotificationIds$.getValue());
+		for (const notificationId of notificationIds) {
+			const normalizedNotificationId = notificationId.trim();
+			if (!normalizedNotificationId) {
+				continue;
+			}
+
+			nextDismissedIds.add(normalizedNotificationId);
+		}
+
+		this.dismissedNotificationIds$.next(nextDismissedIds);
 	}
 
 	public getActiveAlarms$(): Observable<ActiveAlarm[]> {
@@ -77,6 +128,10 @@ export class AlarmStateService {
 
 	public getNotifications$(): Observable<NotificationEvent[]> {
 		return this.notifications$.asObservable();
+	}
+
+	public getDismissedNotificationIds$(): Observable<ReadonlySet<string>> {
+		return this.dismissedNotificationIds$.asObservable();
 	}
 
 	public getUnreadNotificationsCount$(): Observable<number> {

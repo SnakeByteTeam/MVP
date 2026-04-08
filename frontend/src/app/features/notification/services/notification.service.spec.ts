@@ -10,10 +10,16 @@ describe('NotificationService', () => {
     let service: NotificationService;
     let notificationsSubject: BehaviorSubject<NotificationEvent[]>;
     let unreadCountSubject: BehaviorSubject<number>;
+    let dismissedIdsSubject: BehaviorSubject<ReadonlySet<string>>;
 
     const alarmStateStub = {
         getNotifications$: vi.fn(),
         getUnreadNotificationsCount$: vi.fn(),
+        getDismissedNotificationIds$: vi.fn(),
+        dismissNotification: vi.fn(),
+        dismissNotifications: vi.fn(),
+        removeNotification: vi.fn(),
+        clearNotifications: vi.fn(),
     };
 
     const notificationApiStub = {
@@ -49,9 +55,11 @@ describe('NotificationService', () => {
 
         notificationsSubject = new BehaviorSubject<NotificationEvent[]>([]);
         unreadCountSubject = new BehaviorSubject<number>(0);
+        dismissedIdsSubject = new BehaviorSubject<ReadonlySet<string>>(new Set());
 
         alarmStateStub.getNotifications$.mockReturnValue(notificationsSubject.asObservable());
         alarmStateStub.getUnreadNotificationsCount$.mockReturnValue(unreadCountSubject.asObservable());
+        alarmStateStub.getDismissedNotificationIds$.mockReturnValue(dismissedIdsSubject.asObservable());
         notificationApiStub.getNotificationsHistory.mockReturnValue(of([]));
 
         TestBed.configureTestingModule({
@@ -242,5 +250,39 @@ describe('NotificationService', () => {
 
         expect(vm.notifications).toHaveLength(1);
         expect(vm.unreadCount).toBe(5);
+    });
+
+    it('filtra le notifiche dismissate localmente dall archivio unificato', async () => {
+        notificationApiStub.getNotificationsHistory.mockReturnValueOnce(of([historyOlder, sharedHistoric]));
+        notificationsSubject.next([inSessionOnly]);
+        dismissedIdsSubject.next(new Set<string>(['historic-1']));
+
+        service = TestBed.inject(NotificationService);
+        const vm = await firstValueFrom(service.vm$);
+
+        expect(vm.notifications.map((notification) => notification.notificationId)).toEqual([
+            'session-1',
+            'shared-id',
+        ]);
+    });
+
+    it('removeNotification delega dismiss + remove allo stato realtime', () => {
+        service = TestBed.inject(NotificationService);
+
+        service.removeNotification('n-100');
+
+        expect(alarmStateStub.dismissNotification).toHaveBeenCalledWith('n-100');
+        expect(alarmStateStub.removeNotification).toHaveBeenCalledWith('n-100');
+    });
+
+    it('clearAllNotifications delega dismiss multiplo + clear realtime', () => {
+        service = TestBed.inject(NotificationService);
+        service.clearAllNotifications([historyOlder, inSessionOnly]);
+
+        expect(alarmStateStub.dismissNotifications).toHaveBeenCalledWith([
+            historyOlder.notificationId,
+            inSessionOnly.notificationId,
+        ]);
+        expect(alarmStateStub.clearNotifications).toHaveBeenCalledTimes(1);
     });
 });

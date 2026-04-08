@@ -19,6 +19,7 @@ describe('AlarmConfigFormComponent', () => {
     };
 
     const apartmentApiStub = {
+        getAllPlants: vi.fn(),
         getApartmentByPlantId: vi.fn(),
     };
 
@@ -117,6 +118,13 @@ describe('AlarmConfigFormComponent', () => {
                     },
                 ],
             })
+        );
+        apartmentApiStub.getAllPlants.mockReturnValue(
+            of([
+                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
+                { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
+            ])
         );
 
         await TestBed.configureTestingModule({
@@ -368,51 +376,43 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.thresholdValue.valid).toBe(true);
     });
 
-    it('carica impianti da piu reparti deduplicando per id', () => {
-        wardApiStub.getAvailablePlants.mockReturnValueOnce(
-            of([{ id: 'plant-1', name: 'Appartamento 1' }])
-        );
-        wardApiStub.getWards.mockReturnValueOnce(
+    it('carica impianti da /plant/all deduplicando e ordinando per nome', () => {
+        apartmentApiStub.getAllPlants.mockReturnValueOnce(
             of([
-                { id: 10, name: 'Reparto A' },
-                { id: 20, name: 'Reparto B' },
+                { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
+                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
             ])
         );
-        wardApiStub.getPlantsByWardId.mockImplementation((wardId: number) => {
-            if (wardId === 10) {
-                return of([
-                    { id: 'plant-2', name: 'Appartamento 2' },
-                    { id: 'plant-3', name: 'Appartamento 3' },
-                ]);
-            }
-
-            return of([
-                { id: 'plant-3', name: 'Appartamento 3' },
-                { id: 'plant-4', name: 'Appartamento 4' },
-            ]);
-        });
 
         setInputs('create', null);
 
-        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(2);
-        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3', 'plant-4']);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3']);
         expect(component.plantsLoadError()).toBeNull();
+        expect(apartmentApiStub.getAllPlants).toHaveBeenCalledTimes(1);
     });
 
-    it('se il recupero reparti fallisce usa solo gli impianti disponibili', () => {
+    it('se /plant/all fallisce usa fallback available + plants assegnati ai reparti', () => {
+        apartmentApiStub.getAllPlants.mockReturnValueOnce(throwError(() => new Error('plant all down')));
         wardApiStub.getAvailablePlants.mockReturnValueOnce(
             of([
                 { id: 'plant-7', name: 'Appartamento 7' },
                 { id: 'plant-8', name: 'Appartamento 8' },
             ])
         );
-        wardApiStub.getWards.mockReturnValueOnce(throwError(() => new Error('wards down')));
+        wardApiStub.getWards.mockReturnValueOnce(of([{ id: 90, name: 'Reparto 90' }]));
+        wardApiStub.getPlantsByWardId.mockReturnValueOnce(
+            of([
+                { id: 'plant-9', name: 'Appartamento 9' },
+            ])
+        );
 
         setInputs('create', null);
 
-        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-7', 'plant-8']);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-7', 'plant-8', 'plant-9']);
         expect(component.plantsLoadError()).toBeNull();
-        expect(wardApiStub.getPlantsByWardId).not.toHaveBeenCalled();
+        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(1);
     });
 
     it('se il plant viene deselezionato resetta opzioni dispositivo e blocca il campo dispositivo', () => {

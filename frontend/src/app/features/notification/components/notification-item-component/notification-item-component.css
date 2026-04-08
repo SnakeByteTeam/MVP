@@ -15,6 +15,23 @@
     animation-delay: var(--notification-delay, 0ms);
 }
 
+.notification-item__remove {
+    cursor: pointer;
+}
+
+.notification-item__remove:hover {
+    transform: translateY(-1px);
+}
+
+.notification-item__title-wrap {
+    max-width: 100%;
+}
+
+.notification-item__title {
+    margin: 0;
+    word-break: break-word;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .notification-card {
         animation: none;

@@ -4,6 +4,7 @@ import { ThresholdOperator } from '../../../core/alarm/models/threshold-operator
 import { DeviceType } from '../../device-interaction/models/device-type.enum';
 import type { Apartment } from '../../apartment-monitor/models/apartment.model';
 import type { Datapoint } from '../../apartment-monitor/models/datapoint.model';
+import type { PlantDto } from '../../apartment-monitor/models/plant-response.model';
 import { DeviceDatapointExtractionService } from './device-datapoint-extraction.service';
 
 describe('DeviceDatapointExtractionService', () => {
@@ -62,6 +63,36 @@ describe('DeviceDatapointExtractionService', () => {
         ],
     };
 
+    const plantCatalog: PlantDto[] = [
+        {
+            id: 'plant-1',
+            name: 'Appartamento demo',
+            rooms: [
+                {
+                    id: 'room-1',
+                    name: 'Soggiorno',
+                    devices: [
+                        {
+                            id: 'dev-1',
+                            name: 'Sensore UWB',
+                            datapoints: [
+                                {
+                                    id: 'dp-lookup',
+                                    name: 'SFE_State_OnOff',
+                                    readable: true,
+                                    writable: false,
+                                    valueType: 'string',
+                                    enum: ['Off', 'On', 'On'],
+                                    sfeType: 'SFE_State_OnOff',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+
     beforeEach(() => {
         TestBed.configureTestingModule({ providers: [DeviceDatapointExtractionService] });
         service = TestBed.inject(DeviceDatapointExtractionService);
@@ -101,5 +132,19 @@ describe('DeviceDatapointExtractionService', () => {
         expect(service.isThresholdValueValid(enumDatapoint, 'Unknown')).toBe(false);
         expect(service.isThresholdValueValid(numericDatapoint, '10.5')).toBe(true);
         expect(service.isThresholdValueValid(numericDatapoint, 'abc')).toBe(false);
+    });
+
+    it('findDatapointByDeviceAndDatapointId trova e normalizza il datapoint dal catalogo plant', () => {
+        const datapoint = service.findDatapointByDeviceAndDatapointId(plantCatalog, 'dev-1', 'dp-lookup');
+
+        expect(datapoint).not.toBeNull();
+        expect(datapoint?.id).toBe('dp-lookup');
+        expect(datapoint?.enum).toEqual(['Off', 'On']);
+    });
+
+    it('findDatapointByDeviceAndDatapointId ritorna null se non trova corrispondenze', () => {
+        const datapoint = service.findDatapointByDeviceAndDatapointId(plantCatalog, 'dev-missing', 'dp-lookup');
+
+        expect(datapoint).toBeNull();
     });
 });

@@ -10,8 +10,8 @@ import { DatapointValue } from '../../../domain/datapoint-value.model';
 import { Series } from 'src/analytics/domain/series.model';
 import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
-const DETECTED = 'Detected';
-const NOT_DETECTED = 'NotDetected';
+const DETECTED = 'Moving';
+const NOT_DETECTED = 'Absent';
 const DAYS_RANGE = 30;
 const {
   title: TITLE,

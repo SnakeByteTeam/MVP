@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { EventSubscriptionService } from '../../../core/alarm/services/event-subscription.service';
 import { UserRole } from '../../../core/models/user-role.enum';
 import type { WardSummaryDto } from '../models/ward-api.dto';
 import type { Ward } from '../models/ward.model';
@@ -50,6 +51,10 @@ describe('AssignmentOperationsService', () => {
         getWardsSnapshot: vi.fn(),
     };
 
+    const eventSubscriptionStub = {
+        refreshWardRoomSubscription: vi.fn(),
+    };
+
     beforeEach(() => {
         vi.clearAllMocks();
 
@@ -58,6 +63,7 @@ describe('AssignmentOperationsService', () => {
                 AssignmentOperationsService,
                 { provide: WardApiService, useValue: apiStub },
                 { provide: WardStore, useValue: storeStub },
+                { provide: EventSubscriptionService, useValue: eventSubscriptionStub },
             ],
         });
 
@@ -83,6 +89,7 @@ describe('AssignmentOperationsService', () => {
         expect(storeStub.setWards).toHaveBeenCalledTimes(1);
         expect(storeStub.setLoading).toHaveBeenCalledWith(false);
         expect(storeStub.setLoading).toHaveBeenCalledTimes(1);
+        expect(eventSubscriptionStub.refreshWardRoomSubscription).toHaveBeenCalledTimes(1);
         expect(storeStub.setError).not.toHaveBeenCalled();
     });
 

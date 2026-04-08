@@ -53,6 +53,24 @@ describe('NotificationTopbarPanelComponent', () => {
     expect(removeSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('emette notificationSelected quando si clicca su un item notifica in preview', () => {
+    const selectedSpy = vi.spyOn(component.notificationSelected, 'emit');
+    component.notifications = [
+      {
+        notificationId: 'n-1',
+        title: 'Notifica test',
+        sentAt: '2026-04-07T12:00:00.000Z',
+      },
+    ];
+    fixture.detectChanges();
+
+    const openButton = fixture.nativeElement.querySelector('.notification-topbar-panel__open') as HTMLButtonElement;
+    openButton.click();
+
+    expect(selectedSpy).toHaveBeenCalledWith('n-1');
+    expect(selectedSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('emette clearAllClicked quando si clicca Cancella tutte', () => {
     const clearAllSpy = vi.spyOn(component.clearAllClicked, 'emit');
     component.notifications = [

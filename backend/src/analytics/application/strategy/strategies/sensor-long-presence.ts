@@ -11,8 +11,8 @@ import { Series } from 'src/analytics/domain/series.model';
 import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const LONG_PRESENCE_THRESHOLD_MS = 30 * 60 * 1000; // 30 minuti
-const DETECTED = 'Detected';
-const NOT_DETECTED = 'NotDetected';
+const DETECTED = 'Moving';
+const NOT_DETECTED = 'Absent';
 const DAYS_RANGE = 30;
 const {
   title: TITLE,

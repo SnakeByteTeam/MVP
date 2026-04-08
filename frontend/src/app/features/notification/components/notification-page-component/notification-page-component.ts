@@ -1,9 +1,10 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { NotificationListVm } from '../../models/notification-list-vm.model';
 import { NotificationService } from '../../services/notification.service';
 import { NotificationItemComponent } from '../notification-item-component/notification-item-component';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-notification-page-component',
@@ -15,8 +16,15 @@ import { Observable } from 'rxjs';
 })
 export class NotificationPageComponent {
   private readonly notificationService = inject(NotificationService);
+  private readonly route = inject(ActivatedRoute);
 
   public readonly vm$: Observable<NotificationListVm> = this.notificationService.vm$;
+  public readonly highlightedNotificationId$: Observable<string | null> = this.route.queryParamMap.pipe(
+    map((params) => {
+      const focusedId = params.get('focus');
+      return focusedId && focusedId.trim().length > 0 ? focusedId : null;
+    })
+  );
   public readonly skeletonRows = [0, 1, 2];
 
   public onNotificationRemoved(notificationId: string): void {

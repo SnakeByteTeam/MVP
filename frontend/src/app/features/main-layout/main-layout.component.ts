@@ -164,6 +164,14 @@ export class MainLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
         void this.router.navigate(['/notifications']);
     }
 
+    public openNotificationsArchiveFromPreview(notificationId: string): void {
+        this.closeNotificationPanel();
+
+        void this.router.navigate(['/notifications'], {
+            queryParams: { focus: notificationId },
+        });
+    }
+
     public removeTopbarNotification(notificationId: string): void {
         this.alarmStateService.removeNotification(notificationId);
     }

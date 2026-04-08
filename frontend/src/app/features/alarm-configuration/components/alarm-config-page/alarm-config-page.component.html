@@ -57,10 +57,12 @@
         }
     </app-alarm-table-shell>
 
-    <app-modal-shell [open]="isModalOpen()" title="Creazione/modifica allarme"
+    <app-modal-shell [open]="isModalOpen()" [title]="modalTitle()"
         description="Compila i campi richiesti e conferma per salvare la regola." (closed)="onModalClosed()">
+        @if (isModalOpen()) {
         <app-alarm-config-form [mode]="editingRule() ? 'edit' : 'create'" [initialRule]="editingRule()"
             (submittedForm)="onFormSubmitted($event)" (cancelled)="onModalClosed()" />
+        }
     </app-modal-shell>
 
     @if (pendingDelete()) {

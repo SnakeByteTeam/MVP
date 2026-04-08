@@ -6,7 +6,7 @@ import { AlarmEventEntity } from '../entities/alarm-event-entity';
 import { AlarmEventsRepository } from '../../application/repository/alarm-events-repository.interface';
 
 export class AlarmEventsRepositoryImpl implements AlarmEventsRepository {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) { }
 
   async getAllAlarmEvents(
     limit: number = 5,
@@ -34,7 +34,7 @@ export class AlarmEventsRepositoryImpl implements AlarmEventsRepository {
       WHERE device->>'id' = ar.device_id
       ORDER BY
         ar.priority DESC,
-        ae.activation_time ASC
+        ae.activation_time DESC
       LIMIT $1 OFFSET $2;`,
       [limit, offset],
     );
@@ -103,7 +103,7 @@ export class AlarmEventsRepositoryImpl implements AlarmEventsRepository {
       )
       ORDER BY
         ar.priority DESC,
-        ae.activation_time ASC
+        ae.activation_time DESC
       LIMIT $2 OFFSET $3;`,
       [id, limit, offset],
     );
@@ -147,7 +147,7 @@ export class AlarmEventsRepositoryImpl implements AlarmEventsRepository {
       )
       ORDER BY
         ar.priority DESC,
-        ae.activation_time ASC
+        ae.activation_time DESC
       LIMIT $2 OFFSET $3;`,
       [id, limit, offset],
     );

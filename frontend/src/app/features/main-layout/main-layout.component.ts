@@ -164,7 +164,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
         void this.router.navigate(['/notifications']);
     }
 
-    public logout(): void {
+    public removeTopbarNotification(notificationId: string): void {
+        this.alarmStateService.removeNotification(notificationId);
+    }
+
+    public clearTopbarNotifications(): void {
+        this.alarmStateService.clearNotifications();
+    }
+
+    public logout(): void{
         this.closeNotificationPanel();
         this.internalAuthService.logoutFromBackend().subscribe(() => {
             void this.router.navigate(['/auth/login']);
@@ -186,18 +194,22 @@ export class MainLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
 
                 this.latestRealtimeNotificationId = latest.notificationId;
-
-                const normalizedTitle = latest.title.trim().toLowerCase();
-
-                if (normalizedTitle.includes('allarme in corso')) {
-                    this.showRealtimeToast("C'e un allarme in corso", 'alert');
-                    return;
-                }
-
-                if (normalizedTitle.includes('allarme risolto')) {
-                    this.showRealtimeToast('Allarme risolto', 'success');
-                }
+                this.openRealtimeNotificationPanel();
             });
+    }
+
+    private openRealtimeNotificationPanel(): void {
+        this.clearToastTimer();
+        this.realtimeToastMessage = null;
+        this.closeProfilePanel();
+
+        if (this.isNotificationPanelOpen) {
+            this.cdr.markForCheck();
+            return;
+        }
+
+        this.isNotificationPanelOpen = true;
+        this.cdr.markForCheck();
     }
 
     private showRealtimeToast(message: string, kind: 'alert' | 'success'): void {

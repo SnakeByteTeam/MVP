@@ -17,6 +17,10 @@ export class CreateAlarmRuleReqDto {
 
   @ApiProperty()
   @IsString()
+  datapointId!: string;
+
+  @ApiProperty()
+  @IsString()
   deviceId!: string;
 
   @ApiProperty()
@@ -35,11 +39,12 @@ export class CreateAlarmRuleReqDto {
 
   @ApiProperty()
   @IsString()
+  /*
   @ApiProperty({ example: '10 | on | off' })
   @ValidateIf((o) => o.thresholdValue !== 'on' && o.thresholdValue !== 'off')
   @IsNumberString()
   @ValidateIf((o) => o.thresholdValue === 'on' || o.thresholdValue === 'off')
-  @IsIn(['on', 'off'])
+  @IsIn(['on', 'off']) */
   thresholdValue!: string;
 
   @ApiProperty()

@@ -19,6 +19,7 @@ describe('AlarmConfigFormComponent', () => {
     };
 
     const apartmentApiStub = {
+        getAllPlants: vi.fn(),
         getApartmentByPlantId: vi.fn(),
     };
 
@@ -32,6 +33,7 @@ describe('AlarmConfigFormComponent', () => {
         dearmingTime: '19:00:00',
         isArmed: true,
         deviceId: 'sensor-9',
+        datapointId: 'dp-readable-1',
         position: 'Appartamento 2 - Ingresso - Sensore porta',
     };
 
@@ -39,6 +41,7 @@ describe('AlarmConfigFormComponent', () => {
         name: 'Nuova regola',
         plantId: 'plant-1',
         deviceId: 'sensor-1',
+        datapointId: 'dp-readable-2',
         priority: AlarmPriority.GREEN,
         thresholdOperator: ThresholdOperator.GREATER_THAN,
         thresholdValue: '12',
@@ -81,11 +84,47 @@ describe('AlarmConfigFormComponent', () => {
                                 status: 'ONLINE',
                                 type: 'LIGHT',
                                 actions: [],
+                                datapoints: [
+                                    {
+                                        id: 'dp-readable-1',
+                                        name: 'SFE_State_OnOff',
+                                        readable: true,
+                                        writable: false,
+                                        valueType: 'string',
+                                        enum: ['Off', 'On'],
+                                        sfeType: 'SFE_State_OnOff',
+                                    },
+                                    {
+                                        id: 'dp-write-only-1',
+                                        name: 'SFE_Cmd_OnOff',
+                                        readable: false,
+                                        writable: true,
+                                        valueType: 'string',
+                                        enum: ['Off', 'On'],
+                                        sfeType: 'SFE_Cmd_OnOff',
+                                    },
+                                    {
+                                        id: 'dp-readable-2',
+                                        name: 'SFE_State_Temperature',
+                                        readable: true,
+                                        writable: false,
+                                        valueType: 'string',
+                                        enum: [],
+                                        sfeType: 'SFE_State_Temperature',
+                                    },
+                                ],
                             },
                         ],
                     },
                 ],
             })
+        );
+        apartmentApiStub.getAllPlants.mockReturnValue(
+            of([
+                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
+                { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
+            ])
         );
 
         await TestBed.configureTestingModule({
@@ -120,6 +159,7 @@ describe('AlarmConfigFormComponent', () => {
             name: '',
             plantId: '',
             deviceId: '',
+            datapointId: '',
             priority: null,
             thresholdOperator: null,
             thresholdValue: '',
@@ -139,6 +179,7 @@ describe('AlarmConfigFormComponent', () => {
             name: 'Porta aperta',
             plantId: '',
             deviceId: 'sensor-9',
+            datapointId: 'dp-readable-1',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: '5',
@@ -149,6 +190,7 @@ describe('AlarmConfigFormComponent', () => {
 
         expect(component.form.controls.name.disabled).toBe(true);
         expect(component.form.controls.deviceId.disabled).toBe(true);
+        expect(component.form.controls.datapointId.disabled).toBe(true);
     });
 
     it('buildForm applica i validatori required ai campi richiesti', () => {
@@ -167,6 +209,10 @@ describe('AlarmConfigFormComponent', () => {
         component.form.controls.deviceId.setValue('');
 
         expect(component.form.controls.deviceId.invalid).toBe(true);
+        component.form.controls.deviceId.setValue('sensor-1');
+        component.form.controls.datapointId.setValue('');
+
+        expect(component.form.controls.datapointId.invalid).toBe(true);
         expect(component.form.controls.priority.invalid).toBe(true);
         expect(component.form.controls.thresholdOperator.invalid).toBe(true);
         expect(component.form.controls.thresholdValue.invalid).toBe(true);
@@ -181,7 +227,21 @@ describe('AlarmConfigFormComponent', () => {
 
         expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
         expect(component.form.controls.deviceId.enabled).toBe(true);
-        expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+        expect(component.deviceOptions()[0]?.id).toBe('sensor-1');
+        expect(component.deviceOptions()[0]?.label).toBe('Soggiorno - Sensore porta');
+    });
+
+    it('mostra solo datapoint leggibili dopo la selezione dispositivo', () => {
+        setInputs('create', null);
+
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.deviceId.setValue('sensor-1');
+
+        expect(component.datapointOptions().map((datapoint) => datapoint.id)).toEqual([
+            'dp-readable-1',
+            'dp-readable-2',
+        ]);
+        expect(component.datapointOptions().every((datapoint) => datapoint.readable)).toBe(true);
     });
 
     it('in create mode non mostra il campo posizione read-only', () => {
@@ -197,6 +257,14 @@ describe('AlarmConfigFormComponent', () => {
         const positionInput = fixture.nativeElement.querySelector('#position') as HTMLInputElement | null;
         expect(positionInput).not.toBeNull();
         expect(positionInput?.value).toBe('Appartamento 2 - Ingresso - Sensore porta');
+    });
+
+    it('in edit mode mostra il campo datapoint read-only valorizzato', () => {
+        setInputs('edit', existingRule);
+
+        const datapointInput = fixture.nativeElement.querySelector('#datapoint') as HTMLInputElement | null;
+        expect(datapointInput).not.toBeNull();
+        expect(datapointInput?.value).toBe('dp-readable-1');
     });
 
     it('onSubmit emette submittedForm in create mode con form valido', () => {
@@ -220,6 +288,7 @@ describe('AlarmConfigFormComponent', () => {
             name: 'Nome modificato manualmente',
             plantId: '',
             deviceId: 'sensor-9',
+            datapointId: 'dp-readable-1',
         });
 
         component.onSubmit();
@@ -229,6 +298,7 @@ describe('AlarmConfigFormComponent', () => {
             name: 'Porta aperta',
             plantId: '',
             deviceId: 'sensor-9',
+            datapointId: 'dp-readable-1',
         });
         expect(emitSpy).toHaveBeenCalledTimes(1);
     });
@@ -239,6 +309,7 @@ describe('AlarmConfigFormComponent', () => {
         component.form.patchValue({
             plantId: '',
             deviceId: '',
+            datapointId: '',
             priority: null,
             thresholdOperator: null,
             thresholdValue: '',
@@ -267,13 +338,32 @@ describe('AlarmConfigFormComponent', () => {
             AlarmPriority.ORANGE,
             AlarmPriority.RED,
         ]);
-        expect(component.thresholdOperatorOptions).toEqual([
+        expect(component.thresholdOperatorOptions()).toEqual([
             ThresholdOperator.GREATER_THAN,
             ThresholdOperator.GREATER_THAN_OR_EQUAL,
             ThresholdOperator.LESS_THAN,
             ThresholdOperator.LESS_THAN_OR_EQUAL,
             ThresholdOperator.EQUAL_TO,
         ]);
+    });
+
+    it('limita operatori e valore soglia quando il datapoint ha enum', () => {
+        setInputs('create', null);
+
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.deviceId.setValue('sensor-1');
+        component.form.controls.datapointId.setValue('dp-readable-1');
+
+        expect(component.thresholdOperatorOptions()).toEqual([ThresholdOperator.EQUAL_TO]);
+
+        component.form.controls.thresholdOperator.setValue(ThresholdOperator.GREATER_THAN);
+        component.form.controls.thresholdValue.setValue('Invalid value');
+        component.form.controls.thresholdOperator.markAsTouched();
+        component.form.controls.thresholdValue.markAsTouched();
+
+        expect(component.form.controls.thresholdOperator.invalid).toBe(true);
+        expect(component.form.controls.thresholdValue.invalid).toBe(true);
+        expect(component.form.controls.thresholdValue.errors?.['invalidEnumThreshold']).toBe(true);
     });
 
     it('accetta valore soglia booleano quando operatore e uguale', () => {
@@ -286,58 +376,50 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.thresholdValue.valid).toBe(true);
     });
 
-    it('carica impianti da piu reparti deduplicando per id', () => {
-        wardApiStub.getAvailablePlants.mockReturnValueOnce(
-            of([{ id: 'plant-1', name: 'Appartamento 1' }])
-        );
-        wardApiStub.getWards.mockReturnValueOnce(
+    it('carica impianti da /plant/all deduplicando e ordinando per nome', () => {
+        apartmentApiStub.getAllPlants.mockReturnValueOnce(
             of([
-                { id: 10, name: 'Reparto A' },
-                { id: 20, name: 'Reparto B' },
+                { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
+                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                { id: 'plant-1', name: 'Appartamento 1', rooms: [] },
+                { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
             ])
         );
-        wardApiStub.getPlantsByWardId.mockImplementation((wardId: number) => {
-            if (wardId === 10) {
-                return of([
-                    { id: 'plant-2', name: 'Appartamento 2' },
-                    { id: 'plant-3', name: 'Appartamento 3' },
-                ]);
-            }
-
-            return of([
-                { id: 'plant-3', name: 'Appartamento 3' },
-                { id: 'plant-4', name: 'Appartamento 4' },
-            ]);
-        });
 
         setInputs('create', null);
 
-        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(2);
-        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3', 'plant-4']);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3']);
         expect(component.plantsLoadError()).toBeNull();
+        expect(apartmentApiStub.getAllPlants).toHaveBeenCalledTimes(1);
     });
 
-    it('se il recupero reparti fallisce usa solo gli impianti disponibili', () => {
+    it('se /plant/all fallisce usa fallback available + plants assegnati ai reparti', () => {
+        apartmentApiStub.getAllPlants.mockReturnValueOnce(throwError(() => new Error('plant all down')));
         wardApiStub.getAvailablePlants.mockReturnValueOnce(
             of([
                 { id: 'plant-7', name: 'Appartamento 7' },
                 { id: 'plant-8', name: 'Appartamento 8' },
             ])
         );
-        wardApiStub.getWards.mockReturnValueOnce(throwError(() => new Error('wards down')));
+        wardApiStub.getWards.mockReturnValueOnce(of([{ id: 90, name: 'Reparto 90' }]));
+        wardApiStub.getPlantsByWardId.mockReturnValueOnce(
+            of([
+                { id: 'plant-9', name: 'Appartamento 9' },
+            ])
+        );
 
         setInputs('create', null);
 
-        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-7', 'plant-8']);
+        expect(component.plants().map((plant) => plant.id)).toEqual(['plant-7', 'plant-8', 'plant-9']);
         expect(component.plantsLoadError()).toBeNull();
-        expect(wardApiStub.getPlantsByWardId).not.toHaveBeenCalled();
+        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(1);
     });
 
     it('se il plant viene deselezionato resetta opzioni dispositivo e blocca il campo dispositivo', () => {
         setInputs('create', null);
 
         component.form.controls.plantId.setValue('plant-1');
-        expect(component.deviceOptions()).toEqual([{ id: 'sensor-1', label: 'Soggiorno - Sensore porta' }]);
+        expect(component.deviceOptions()[0]?.id).toBe('sensor-1');
         expect(component.form.controls.deviceId.enabled).toBe(true);
 
         component.form.controls.plantId.setValue('');
@@ -345,13 +427,14 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.deviceOptions()).toEqual([]);
         expect(component.form.controls.deviceId.value).toBe('');
         expect(component.form.controls.deviceId.disabled).toBe(true);
+        expect(component.datapointOptions()).toEqual([]);
     });
 
     it('in edit mode non consente di modificare il dispositivo associato', () => {
         setInputs('edit', existingRule);
 
         expect(component.form.controls.deviceId.disabled).toBe(true);
-        expect(component.deviceOptions()).toEqual([{ id: 'sensor-9', label: 'sensor-9' }]);
+        expect(component.deviceOptions()).toEqual([{ id: 'sensor-9', label: 'sensor-9', datapoints: [] }]);
     });
 
     it('imposta errore quando il caricamento dispositivi fallisce', () => {

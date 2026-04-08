@@ -5,11 +5,12 @@ import { InternalAuthService } from '../../core/services/internal-auth.service';
 import { NavService } from './services/nav.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../core/models/user-role.enum';
-import { firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { provideRouter, Router } from '@angular/router'; 
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
+import { NotificationEvent } from '../notification/models/notification-event.model';
 
 @Component({ template: '', standalone: true })
 class DummyRouteComponent {}
@@ -18,6 +19,7 @@ class DummyRouteComponent {}
 describe('MainLayoutComponent', () => {
     let component: MainLayoutComponent;
     let fixture: ComponentFixture<MainLayoutComponent>;
+    let notificationsSubject: BehaviorSubject<NotificationEvent[]>;
 
     const mockAuthService = {
         getRole: vi.fn(),
@@ -51,6 +53,7 @@ describe('MainLayoutComponent', () => {
     
     beforeEach(async () => {
         vi.clearAllMocks();
+        notificationsSubject = new BehaviorSubject<NotificationEvent[]>([]);
         mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
         mockAuthService.getCurrentUser$.mockReturnValue(
             of({
@@ -62,6 +65,7 @@ describe('MainLayoutComponent', () => {
             })
         );
         mockMyVimarService.getLinkedAccount.mockReturnValue(of({ email: '', isLinked: false }));
+        mockAlarmService.getNotifications$.mockReturnValue(notificationsSubject.asObservable());
 
         await TestBed.configureTestingModule({
         imports: [MainLayoutComponent],
@@ -191,6 +195,22 @@ describe('MainLayoutComponent', () => {
         fixture.detectChanges();
         const result = await firstValueFrom(component.unreadNotificationsCount$);
         expect(result).toBe(mockCount);
+    });
+
+    it('apre automaticamente il pannello notifiche quando arriva una nuova notifica realtime', () => {
+        component.ngOnInit();
+        expect(component.isNotificationPanelOpen).toBe(false);
+
+        notificationsSubject.next([
+            {
+                notificationId: 'rt-1',
+                title: '▲ Allarme test',
+                sentAt: '2026-04-07T22:00:00.000Z',
+                eventType: 'triggered',
+            },
+        ]);
+
+        expect(component.isNotificationPanelOpen).toBe(true);
     });
 
 });

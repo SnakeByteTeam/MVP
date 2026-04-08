@@ -31,10 +31,6 @@ import { FindDeviceByPlantIdCmd } from 'src/device/application/commands/find-dev
 import { IngestTimeseriesCmd } from 'src/device/application/commands/ingest-timeseries.command';
 import { WriteDatapointValueCmd } from 'src/device/application/commands/write-datapoint-value.command';
 import {
-  FIND_DEVICE_BY_DATAPOINTID_USECASE,
-  type FindDeviceByDatapointIdUsecase,
-} from 'src/device/application/ports/in/find-device-by-datapointId.usecase';
-import {
   type FindDeviceByIdUseCase,
   FIND_DEVICE_BY_ID_USECASE,
 } from 'src/device/application/ports/in/find-device-by-id.usecase';
@@ -76,8 +72,6 @@ export class DeviceController {
     private readonly writeDatapointUseCase: WriteDatapointValueUseCase,
     @Inject(CHECK_ALARM_RULE_USECASE)
     private readonly checkAlarmUseCase: CheckAlarmRuleUseCase,
-    @Inject(FIND_DEVICE_BY_DATAPOINTID_USECASE)
-    private readonly findByDatapointIdUseCase: FindDeviceByDatapointIdUsecase,
   ) {}
 
   @Get('/:id')
@@ -216,22 +210,18 @@ export class DeviceController {
           console.log(
             `[DeviceController] Ingestion ended successfully for ${cmd.datapointId}`,
           );
-        } catch (err) {
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
           console.error(
             `[DeviceController] Error ingesting for ${cmd.datapointId}:`,
-            err.message,
+            message,
           );
         }
 
         try {
-          const device: Device =
-            await this.findByDatapointIdUseCase.findByDatapointId({
-              datapointId: cmd.datapointId,
-            });
-
           await this.checkAlarmUseCase.checkAlarmRule(
             new CheckAlarmRuleCmd(
-              device.getId(),
+              cmd.datapointId,
               cmd.value,
               new Date(cmd.timestamp),
             ),

@@ -75,7 +75,7 @@ export class WardApiService {
 
     public getAvailablePlants(): Observable<WardPlantDto[]> {
         return this.http.get<WardPlantDto[]>(
-            `${this.plantEndpoint}/available`,
+            `${this.plantEndpoint}/all`,
         );
     }
 

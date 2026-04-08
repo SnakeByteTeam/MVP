@@ -40,27 +40,26 @@ CREATE TABLE "user" (
     surname VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255),
-    temp_password VARCHAR(255) UNIQUE NOT NULL,
     first_access BOOLEAN DEFAULT TRUE,
     roleId INTEGER NOT NULL,
     FOREIGN KEY (roleId) REFERENCES role(id)
 );
 
-INSERT INTO "user" (username, surname, name, password, temp_password, first_access, roleId) VALUES
-    ('test',        'test',     'test',      'test', 'tmp_test',        FALSE, 1),
-    ('admin',       'admin',    'admin',     'admin','tmp_admin',        FALSE, 2),
-    ('mrossi',      'Rossi',    'Mario',     'test', 'tmp_mrossi',       TRUE,  1),
-    ('gbianchi',    'Bianchi',  'Gioia',     'test', 'tmp_gbianchi',     TRUE,  1),
-    ('lverdi',      'Verdi',    'Luca',      'test', 'tmp_lverdi',       TRUE,  1),
-    ('asala',       'Sala',     'Anna',      'test', 'tmp_asala',        TRUE,  1),
-    ('fneri',       'Neri',     'Franco',    'test', 'tmp_fneri',        TRUE,  1),
-    ('gcolombo',    'Colombo',  'Giuseppe',  'test', 'tmp_gcolombo',     TRUE,  1),
-    ('fferrari',    'Ferrari',  'Francesca', 'test', 'tmp_fferrari',     TRUE,  1),
-    ('arusso',      'Russo',    'Antonio',   'test', 'tmp_arusso',       TRUE,  1),
-    ('cgallo',      'Gallo',    'Chiara',    'test', 'tmp_cgallo',       TRUE,  1),
-    ('mromano',     'Romano',   'Matteo',    'test', 'tmp_mromano',      TRUE,  1),
-    ('admin_mario', 'Draghi',   'Mario',     'test', 'tmp_admin_mario',  TRUE,  2),
-    ('admin_luigi', 'Einaudi',  'Luigi',     'test', 'tmp_admin_luigi',  TRUE,  2)
+INSERT INTO "user" (username, surname, name, password, first_access, roleId) VALUES
+    ('test',        'test',     'test',      'ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff', FALSE, 1),
+    ('admin',       'admin',    'admin',     'c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec',  FALSE, 2),
+    ('mrossi',      'Rossi',    'Mario',     'test',  TRUE,  1),
+    ('gbianchi',    'Bianchi',  'Gioia',     'test',  TRUE,  1),
+    ('lverdi',      'Verdi',    'Luca',      'test',  TRUE,  1),
+    ('asala',       'Sala',     'Anna',      'test',  TRUE,  1),
+    ('fneri',       'Neri',     'Franco',    'test',  TRUE,  1),
+    ('gcolombo',    'Colombo',  'Giuseppe',  'test',  TRUE,  1),
+    ('fferrari',    'Ferrari',  'Francesca', 'test',  TRUE,  1),
+    ('arusso',      'Russo',    'Antonio',   'test',  TRUE,  1),
+    ('cgallo',      'Gallo',    'Chiara',    'test',  TRUE,  1),
+    ('mromano',     'Romano',   'Matteo',    'test',  TRUE,  1),
+    ('admin_mario', 'Draghi',   'Mario',     'test',  TRUE,  2),
+    ('admin_luigi', 'Einaudi',  'Luigi',     'test',  TRUE,  2)
 ON CONFLICT (username) DO NOTHING;
 
 CREATE TABLE ward_user (
@@ -134,6 +133,7 @@ CREATE TABLE IF NOT EXISTS alarm_rule (
     dearming_time      TIME,
     is_armed           BOOLEAN      NOT NULL DEFAULT TRUE,
     device_id          VARCHAR(255) NOT NULL,
+    datapoint_id       VARCHAR(255) NOT NULL,
     plant_id           VARCHAR(64)  NOT NULL REFERENCES plant(id),
     created_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at         TIMESTAMPTZ    NOT NULL DEFAULT NOW(),

@@ -16,7 +16,9 @@ import { NotifyAlarmResolutionRepoPort } from 'src/notifications/application/rep
   transports: ['websocket'],
   cors: { origin: '*', credentials: true },
 })
-export class NotificationsGateway implements NotifyAlarmWardRepoPort, NotifyAlarmResolutionRepoPort{
+export class NotificationsGateway
+  implements NotifyAlarmWardRepoPort, NotifyAlarmResolutionRepoPort
+{
   constructor() {}
 
   @WebSocketServer() private server!: Server;
@@ -73,13 +75,13 @@ export class NotificationsGateway implements NotifyAlarmWardRepoPort, NotifyAlar
   }
 
   async notifyAlarmResolution(alarmId: string, wardId: number): Promise<void> {
-    if(!this.server) {
+    if (!this.server) {
       this.logger.error('WebSocket server not initialized');
       return;
     }
-    
-    this.server.to(`ward:${wardId}`).emit('alarm-resolved', { alarmEventId: alarmId, wardId: wardId });
-  }
 
-  
+    this.server
+      .to(`ward:${wardId}`)
+      .emit('alarm-resolved', { alarmEventId: alarmId, wardId: wardId });
+  }
 }

@@ -51,6 +51,14 @@ import {
   CHANGE_CREDENTIALS_PORT,
   ChangeCredentialsAdapter,
 } from './adapters/out/change-credentials-adapter';
+import {
+  PASSWORD_HASHER,
+  Sha512PasswordHasher,
+} from './infrastructure/sha512-password-hasher/sha512-password-hasher';
+import {
+  HASH_PASSWORD_PORT,
+  HashPasswordAdapter,
+} from './adapters/out/hash-password-adapter';
 
 @Module({
   controllers: [AuthController],
@@ -130,6 +138,14 @@ import {
     {
       provide: CHANGE_CREDENTIALS_REPOSITORY,
       useClass: ChangeCredentialsRepositoryImpl,
+    },
+    {
+      provide: HASH_PASSWORD_PORT,
+      useClass: HashPasswordAdapter,
+    },
+    {
+      provide: PASSWORD_HASHER,
+      useClass: Sha512PasswordHasher,
     },
   ],
 })

@@ -14,5 +14,5 @@ export class AlarmEventEntity {
     public readonly resolution_time: Date | null,
     public readonly user_id: number | null,
     public readonly user_username: string | null,
-  ) { }
+  ) {}
 }

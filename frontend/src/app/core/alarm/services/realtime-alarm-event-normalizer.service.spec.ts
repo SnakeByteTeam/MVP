@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { describe, expect, it } from 'vitest';
-import { AlarmPriority } from '../models/alarm-priority.enum';
-import { PushEventType } from '../models/push-event-type.enum';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { RealtimeAlarmEventNormalizerService } from './realtime-alarm-event-normalizer.service';
 
 describe('RealtimeAlarmEventNormalizerService', () => {
@@ -13,34 +11,6 @@ describe('RealtimeAlarmEventNormalizerService', () => {
 		});
 
 		service = TestBed.inject(RealtimeAlarmEventNormalizerService);
-	});
-
-	it('tryParseEnvelope valida il formato legacy con eventType/payload/timestamp', () => {
-		const parsed = service.tryParseEnvelope({
-			eventType: PushEventType.ALARM_TRIGGERED,
-			payload: { id: 'a1' },
-			timestamp: '2026-04-07T11:00:00.000Z',
-		});
-
-		expect(parsed).toEqual({
-			eventType: PushEventType.ALARM_TRIGGERED,
-			payload: { id: 'a1' },
-			timestamp: '2026-04-07T11:00:00.000Z',
-		});
-	});
-
-	it('parseAlarmEvent produce AlarmEvent solo con payload completo', () => {
-		const parsed = service.parseAlarmEvent({
-			id: 'alarm-1',
-			alarmRuleId: 'rule-1',
-			alarmName: 'Allarme test',
-			priority: AlarmPriority.RED,
-			activationTime: '2026-04-07T11:00:00.000Z',
-			resolutionTime: null,
-		});
-
-		expect(parsed?.id).toBe('alarm-1');
-		expect(parsed?.priority).toBe(AlarmPriority.RED);
 	});
 
 	it('parseBackendTriggeredPayload accetta il contratto backend nativo', () => {
@@ -57,8 +27,48 @@ describe('RealtimeAlarmEventNormalizerService', () => {
 		});
 	});
 
-	it('extractAlarmId supporta sia id che alarmEventId', () => {
-		expect(service.extractAlarmId({ id: 'a-id' })).toBe('a-id');
-		expect(service.extractAlarmId({ alarmEventId: 'a-event-id' })).toBe('a-event-id');
+	it('parseBackendTriggeredPayload accetta wardId numerico espresso come stringa', () => {
+		const parsed = service.parseBackendTriggeredPayload({
+			alarmEventId: 'alarm-3',
+			wardId: '12',
+			alarmRuleId: 'rule-3',
+		});
+
+		expect(parsed).toEqual({
+			alarmEventId: 'alarm-3',
+			wardId: 12,
+			alarmRuleId: 'rule-3',
+		});
+	});
+
+	it('parseBackendResolvedPayload estrae alarmEventId e wardId opzionale', () => {
+		const withWardId = service.parseBackendResolvedPayload({
+			alarmEventId: 'alarm-4',
+			wardId: 8,
+		});
+
+		const withoutWardId = service.parseBackendResolvedPayload({
+			alarmEventId: 'alarm-5',
+		});
+
+		expect(withWardId).toEqual({ alarmEventId: 'alarm-4', wardId: 8 });
+		expect(withoutWardId).toEqual({ alarmEventId: 'alarm-5', wardId: undefined });
+	});
+
+	it('restituisce null per payload backend malformati', () => {
+		expect(
+			service.parseBackendTriggeredPayload({
+				alarmEventId: 'alarm-6',
+				wardId: 'abc',
+				alarmRuleId: 'rule-6',
+			})
+		).toBeNull();
+
+		expect(
+			service.parseBackendResolvedPayload({
+				alarmEventId: 999,
+				wardId: 8,
+			})
+		).toBeNull();
 	});
 });

@@ -9,9 +9,9 @@ import {
   type GetTokensCallbackUseCase,
 } from 'src/api-auth-vimar/application/ports/in/get-tokens.usecase';
 import {
-  GETVALIDTOKENPORT,
-  type GetValidTokenPort,
-} from 'src/api-auth-vimar/application/ports/out/get-valid-token.port';
+  GET_ACCOUNT_STATUS_USECASE,
+  type GetAccountStatusUseCase,
+} from 'src/api-auth-vimar/application/ports/in/get-account-status.usecase';
 import {
   DELETETOKENSFROMREPOPORT,
   type DeleteTokensFromRepoPort,
@@ -25,7 +25,7 @@ describe('ApiAuthVimarController', () => {
   let controller: ApiAuthVimarController;
   let apiAuthUseCase: jest.Mocked<ApiAuthUseCase>;
   let getTokensCallbackUseCase: jest.Mocked<GetTokensCallbackUseCase>;
-  let getValidTokenPort: jest.Mocked<GetValidTokenPort>;
+  let getAccountStatusUseCase: jest.Mocked<GetAccountStatusUseCase>;
   let deleteTokensFromRepo: jest.Mocked<DeleteTokensFromRepoPort>;
 
   beforeEach(async () => {
@@ -36,8 +36,8 @@ describe('ApiAuthVimarController', () => {
       getTokens: jest.fn(),
     };
 
-    getValidTokenPort = {
-      getValidToken: jest.fn(),
+    getAccountStatusUseCase = {
+      getAccountStatus: jest.fn(),
     };
 
     deleteTokensFromRepo = {
@@ -61,8 +61,8 @@ describe('ApiAuthVimarController', () => {
           useValue: getTokensCallbackUseCase,
         },
         {
-          provide: GETVALIDTOKENPORT,
-          useValue: getValidTokenPort,
+          provide: GET_ACCOUNT_STATUS_USECASE,
+          useValue: getAccountStatusUseCase,
         },
         {
           provide: DELETETOKENSFROMREPOPORT,
@@ -108,25 +108,30 @@ describe('ApiAuthVimarController', () => {
 
   describe('getAccountStatus', () => {
     it('should return linked=true when a valid token is available', async () => {
-      getValidTokenPort.getValidToken.mockResolvedValue('token-123');
+      getAccountStatusUseCase.getAccountStatus.mockResolvedValue({
+        isLinked: true,
+        email: 'utente@example.com',
+      });
 
-      const result = await controller.getAccountStatus();
+      const result = await controller.getAccountStatus({ user: { id: 7 } });
 
-      expect(getValidTokenPort.getValidToken).toHaveBeenCalledTimes(1);
+      expect(getAccountStatusUseCase.getAccountStatus).toHaveBeenCalledTimes(1);
+      expect(getAccountStatusUseCase.getAccountStatus).toHaveBeenCalledWith(7);
       expect(result).toEqual({
         isLinked: true,
-        email: '',
+        email: 'utente@example.com',
       });
     });
 
     it('should return linked=false when token is not available', async () => {
-      getValidTokenPort.getValidToken.mockRejectedValue(
+      getAccountStatusUseCase.getAccountStatus.mockRejectedValue(
         new Error('No tokens found in cache'),
       );
 
-      const result = await controller.getAccountStatus();
+      const result = await controller.getAccountStatus({ user: { id: 7 } });
 
-      expect(getValidTokenPort.getValidToken).toHaveBeenCalledTimes(1);
+      expect(getAccountStatusUseCase.getAccountStatus).toHaveBeenCalledTimes(1);
+      expect(getAccountStatusUseCase.getAccountStatus).toHaveBeenCalledWith(7);
       expect(result).toEqual({
         isLinked: false,
         email: '',
@@ -166,10 +171,7 @@ describe('ApiAuthVimarController', () => {
 
       const result = await controller.saveTokens(code, state);
 
-      expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith(
-        code,
-        '7',
-      );
+      expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith(code, 7);
       expect(result).toEqual({
         url: redirectUrl,
         statusCode: 302,
@@ -188,7 +190,7 @@ describe('ApiAuthVimarController', () => {
 
       expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledWith(
         'auth_code_123',
-        '7',
+        7,
       );
       expect(result).toEqual({
         url: redirectUrl,
@@ -227,9 +229,9 @@ describe('ApiAuthVimarController', () => {
         'base64',
       );
 
-      await expect(controller.saveTokens('auth_code_123', state)).rejects.toThrow(
-        'State must contain redirectUrl as string',
-      );
+      await expect(
+        controller.saveTokens('auth_code_123', state),
+      ).rejects.toThrow('State must contain redirectUrl as string');
       expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledTimes(0);
     });
 
@@ -238,9 +240,9 @@ describe('ApiAuthVimarController', () => {
         JSON.stringify({ redirectUrl: 'http://localhost:4200/dashboard' }),
       ).toString('base64');
 
-      await expect(controller.saveTokens('auth_code_123', state)).rejects.toThrow(
-        'State must contain userId as string or number',
-      );
+      await expect(
+        controller.saveTokens('auth_code_123', state),
+      ).rejects.toThrow('State must contain userId as string or number');
       expect(getTokensCallbackUseCase.getTokens).toHaveBeenCalledTimes(0);
     });
 

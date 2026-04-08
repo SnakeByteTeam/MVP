@@ -3,12 +3,14 @@ import { TokenService } from './tokens.service';
 import { ReadTokensFromRepoPort } from '../ports/out/read-tokens-from-repo.port';
 import { RefreshTokensPort } from '../ports/out/refresh-tokens.port';
 import { WriteTokensRepoPort } from '../ports/out/write-tokens-repo.port';
+import { ReadStatusPort } from '../ports/out/read-status.port';
 
 describe('TokenService', () => {
   let service: TokenService;
   let readTokenFromRepo: jest.Mocked<ReadTokensFromRepoPort>;
   let refreshTokens: jest.Mocked<RefreshTokensPort>;
   let writeTokens: jest.Mocked<WriteTokensRepoPort>;
+  let readStatus: jest.Mocked<ReadStatusPort>;
 
   beforeEach(() => {
     readTokenFromRepo = {
@@ -23,7 +25,16 @@ describe('TokenService', () => {
       writeTokens: jest.fn(),
     };
 
-    service = new TokenService(writeTokens, readTokenFromRepo, refreshTokens);
+    readStatus = {
+      readStatus: jest.fn(),
+    };
+
+    service = new TokenService(
+      writeTokens,
+      readTokenFromRepo,
+      refreshTokens,
+      readStatus,
+    );
   });
 
   it('should fetch tokens from repo and return them', async () => {
@@ -85,5 +96,20 @@ describe('TokenService', () => {
     expect(readTokenFromRepo.readTokens).toHaveBeenCalledTimes(1);
     expect(refreshTokens.refreshTokens).toHaveBeenCalledTimes(1);
     expect(writeTokens.writeTokens).toHaveBeenCalledTimes(0);
+  });
+
+  it('should return account status from read status port', async () => {
+    readStatus.readStatus.mockResolvedValue({
+      isLinked: true,
+      email: 'utente@example.com',
+    });
+
+    const result = await service.getAccountStatus(42);
+
+    expect(readStatus.readStatus).toHaveBeenCalledWith(42);
+    expect(result).toEqual({
+      isLinked: true,
+      email: 'utente@example.com',
+    });
   });
 });

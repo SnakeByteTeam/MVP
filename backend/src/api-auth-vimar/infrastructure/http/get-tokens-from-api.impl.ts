@@ -15,7 +15,7 @@ export class GetTokensFromApiImpl
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   private readonly clientId = process.env.CLIENTID || process.env.CLIENT_ID;
@@ -48,7 +48,7 @@ export class GetTokensFromApiImpl
 
       const accessToken = response.data?.access_token;
       const email = this.extractEmailFromAccessToken(accessToken);
-      
+
       const tokensDto: TokensDto = {
         accessToken,
         refreshToken: response.data?.refresh_token,

@@ -32,6 +32,10 @@ interface AuthClaims {
 	firstAccess?: boolean;
 }
 
+interface TokenResponse {
+	accessToken: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class InternalAuthService {
 	private readonly http = inject(HttpClient);
@@ -56,8 +60,8 @@ export class InternalAuthService {
 		username: string,
 		temporaryPassword: string,
 		newPassword: string
-	): Observable<void> {
-		return this.http.post<void>(
+	): Observable<UserSession> {
+		return this.http.post<TokenResponse>(
 			`${this.baseUrl}/auth/first-login`,
 			{
 				username,
@@ -65,6 +69,9 @@ export class InternalAuthService {
 				password: newPassword,
 			},
 			{ withCredentials: true }
+		).pipe(
+			map((response) => this.buildSessionFromAccessToken(response.accessToken)),
+			tap((session) => this.setSession(session))
 		);
 	}
 
@@ -176,4 +183,6 @@ export class InternalAuthService {
 	private isUserRole(role: string): role is UserRole {
 		return role === UserRole.AMMINISTRATORE || role === UserRole.OPERATORE_SANITARIO;
 	}
+
+
 }

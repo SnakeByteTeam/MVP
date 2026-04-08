@@ -27,6 +27,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '18:00:00',
             isArmed: true,
             deviceId: 'device-1',
+            datapointId: 'dp-1',
             position: 'Appartamento 1 - Soggiorno - Sensore temperatura',
         };
 
@@ -34,6 +35,7 @@ describe('AlarmRuleFormMapper', () => {
             name: 'Temperatura alta',
             plantId: '',
             deviceId: 'device-1',
+            datapointId: 'dp-1',
             priority: AlarmPriority.RED,
             thresholdOperator: ThresholdOperator.GREATER_THAN,
             thresholdValue: '30',
@@ -54,6 +56,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '23:59:00',
             isArmed: false,
             deviceId: 'device-2',
+            datapointId: 'dp-2',
             position: 'Appartamento 1 - Ingresso - Sensore porta',
         };
 
@@ -61,6 +64,7 @@ describe('AlarmRuleFormMapper', () => {
             name: 'Allarme acceso',
             plantId: '',
             deviceId: 'device-2',
+            datapointId: 'dp-2',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: 'ON',
@@ -81,6 +85,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '19:30:00',
             isArmed: true,
             deviceId: 'device-3',
+            datapointId: 'dp-3',
             position: 'Appartamento 2 - Camera - Sensore finestra',
         };
 
@@ -88,6 +93,7 @@ describe('AlarmRuleFormMapper', () => {
             name: 'Allarme spento',
             plantId: '',
             deviceId: 'device-3',
+            datapointId: 'dp-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
             thresholdValue: 'OFF',
@@ -108,6 +114,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '22:00:00',
             isArmed: true,
             deviceId: 'device-4',
+            datapointId: 'dp-4',
             position: 'Appartamento 3 - Cucina - Sensore temperatura',
         };
 
@@ -125,6 +132,7 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '22:00:00',
             isArmed: false,
             deviceId: 'device-5',
+            datapointId: 'dp-5',
             position: 'Appartamento 3 - Camera - Sensore temperatura',
         };
 
@@ -142,9 +150,11 @@ describe('AlarmRuleFormMapper', () => {
             dearmingTime: '23:59:00',
             isArmed: true,
             deviceId: 'device-6',
+            datapointId: 'dp-6',
             position: 'Appartamento 4 - Bagno - Sensore custom',
         };
 
         expect(() => mapper.toFormValue(rule)).toThrow('Operatore soglia non supportato: !=');
     });
+
 });

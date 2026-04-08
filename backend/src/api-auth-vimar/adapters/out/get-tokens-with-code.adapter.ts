@@ -14,7 +14,9 @@ export class GetTokenWithCodeAdapter implements GetTokensWithCodePort {
     private readonly getTokensFromApiPort: GetTokensFromApiPort,
   ) {}
 
-  async getTokensWithCode(code: string): Promise<{ tokenPair: TokenPair, email: string }> {
+  async getTokensWithCode(
+    code: string,
+  ): Promise<{ tokenPair: TokenPair; email: string }> {
     const tokensDto: TokensDto | null =
       await this.getTokensFromApiPort.getTokensWithCode(code);
 
@@ -22,7 +24,11 @@ export class GetTokenWithCodeAdapter implements GetTokensWithCodePort {
 
     const expiresAt: Date = new Date(Date.now() + tokensDto.expiresIn * 1000);
 
-    const tokenPair: TokenPair = new TokenPair( tokensDto.accessToken, tokensDto.refreshToken, expiresAt);
+    const tokenPair: TokenPair = new TokenPair(
+      tokensDto.accessToken,
+      tokensDto.refreshToken,
+      expiresAt,
+    );
 
     return { tokenPair: tokenPair, email: tokensDto.email };
   }

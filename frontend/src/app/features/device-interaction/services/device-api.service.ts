@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, timeout } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError, timeout } from 'rxjs';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { Datapoint } from '../../apartment-monitor/models/datapoint.model';
 import { PlantDatapointDto, PlantDto } from '../../apartment-monitor/models/plant-response.model';
@@ -21,20 +21,15 @@ export class DeviceApiService {
 	private readonly deviceEndpoint = `${this.baseUrl}/device`;
 
 	public getWritableEndpointRows(): Observable<WritableEndpointRow[]> {
-		const plantId = this.getActivePlantId();
-
-		return this.http.get<PlantDto>(`${this.plantEndpoint}?plantid=${encodeURIComponent(plantId)}`).pipe(
-			catchError(() => of(this.getFallbackPlant(plantId))),
+		return this.resolveActivePlantId().pipe(
+			switchMap((plantId) => this.fetchPlantById(plantId)),
 			map((plant) => this.mapWritableEndpointRows(plant)),
 		);
 	}
 
 	public getRoom(roomId: string): Observable<Room> {
-		// TO_DO(back-end): usare la sorgente ufficiale del plant attivo quando viene definita nel contratto.
-		const plantId = this.getActivePlantId();
-
-		return this.http.get<PlantDto>(`${this.plantEndpoint}?plantid=${encodeURIComponent(plantId)}`).pipe(
-			catchError(() => of(this.getFallbackPlant(plantId))),
+		return this.resolveActivePlantId().pipe(
+			switchMap((plantId) => this.fetchPlantById(plantId)),
 			map((plant) => this.mapRoomFromPlant(plant, roomId)),
 		);
 	}
@@ -62,21 +57,63 @@ export class DeviceApiService {
 		);
 	}
 
-	private getActivePlantId(): string {
+	private resolveActivePlantId(): Observable<string> {
+		const activePlantId = this.getActivePlantId();
+		if (activePlantId) {
+			return of(activePlantId);
+		}
+
+		return this.fetchAllPlants().pipe(
+			map((plants) => plants[0]?.id ?? null),
+			switchMap((plantId) => {
+				if (!plantId) {
+					return throwError(() => new Error('No plants available'));
+				}
+
+				this.setActivePlantId(plantId);
+				return of(plantId);
+			}),
+		);
+	}
+
+	private fetchPlantById(plantId: string): Observable<PlantDto> {
+		return this.http.get<PlantDto>(`${this.plantEndpoint}?plantid=${encodeURIComponent(plantId)}`);
+	}
+
+	private fetchAllPlants(): Observable<PlantDto[]> {
+		return this.http
+			.get<PlantDto[] | { statusCode?: number; message?: string }>(`${this.plantEndpoint}/all`)
+			.pipe(
+				map((response) => (Array.isArray(response) ? response : [])),
+				catchError(() => of([])),
+			);
+	}
+
+	private getActivePlantId(): string | null {
 		const storage = globalThis.localStorage as { getItem?: (key: string) => string | null } | undefined;
 
 		if (storage && typeof storage.getItem === 'function') {
-			return storage.getItem('activePlantId') ?? 'plant-1';
+			const plantId = storage.getItem('activePlantId');
+			return plantId && plantId.trim() ? plantId : null;
 		}
 
-		return 'plant-1';
+		return null;
+	}
+
+	private setActivePlantId(plantId: string): void {
+		const storage = globalThis.localStorage as { setItem?: (key: string, value: string) => void } | undefined;
+		if (!storage || typeof storage.setItem !== 'function') {
+			return;
+		}
+
+		storage.setItem('activePlantId', plantId);
 	}
 
 	private mapRoomFromPlant(plant: PlantDto, roomId: string): Room {
 		const sourceRoom = plant.rooms.find((room) => room.id === roomId);
 
 		if (!sourceRoom) {
-			return this.getFallbackRoom(roomId);
+			throw new Error(`Room ${roomId} not found in plant ${plant.id}`);
 		}
 
 		return {
@@ -151,70 +188,4 @@ export class DeviceApiService {
 		return rows;
 	}
 
-	private getFallbackPlant(plantId: string): PlantDto {
-		// TO_DO(back-end): eliminare il fallback quando i dati reali di /plant saranno sempre disponibili.
-		return {
-			id: plantId,
-			name: 'Appartamento Demo',
-			rooms: [
-				{
-					id: 'living-room',
-					name: 'Soggiorno',
-					devices: [
-						{
-							id: 'light-1',
-							name: 'Luce',
-							type: 'SF_Light',
-							subType: 'SS_Light_Switch',
-							datapoints: [
-								{
-									id: 'dp-light-1',
-									name: 'On/Off',
-									readable: true,
-									writable: true,
-									valueType: 'string',
-									enum: ['Off', 'On'],
-									sfeType: 'SFE_Cmd_OnOff',
-								},
-							],
-						},
-						{
-							id: 'blind-1',
-							name: 'Tapparella',
-							type: 'SF_Blind',
-							subType: 'SS_Blind',
-							datapoints: [
-								{
-									id: 'dp-blind-1',
-									name: 'Movimento',
-									readable: true,
-									writable: true,
-									valueType: 'string',
-									enum: ['Up', 'Stop', 'Down'],
-									sfeType: 'SFE_Cmd_Blind',
-								},
-							],
-						},
-					],
-				},
-				{
-					id: 'bedroom',
-					name: 'Camera',
-					devices: [
-						{
-							id: 'sensor-1',
-							name: 'Sensore Presenza',
-							type: 'SF_Presence',
-							datapoints: [],
-						},
-					],
-				},
-			],
-		};
-	}
-
-	private getFallbackRoom(roomId: string): Room {
-		const plant = this.getFallbackPlant('plant-1');
-		return this.mapRoomFromPlant(plant, roomId === 'living-room' || roomId === 'bedroom' ? roomId : 'living-room');
-	}
 }

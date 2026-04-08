@@ -30,6 +30,9 @@ import { FirstLoginCmd } from '../commands/first-login-cmd';
 import { CheckCredentialsCmd } from '../commands/check-credentials-cmd';
 import { ChangeCredentialsPort } from '../ports/out/change-credentials-port.interface';
 import { ChangeCredentialsCmd } from '../commands/change-credentials-cmd';
+import { HASH_PASSWORD_PORT } from '../../adapters/out/hash-password-adapter';
+import { HashPasswordPort } from '../ports/out/hash-password-port.interface';
+import { HashPasswordCmd } from '../commands/hash-password-cmd';
 
 @Injectable()
 export class AuthService
@@ -52,15 +55,25 @@ export class AuthService
     private readonly extractFromAccessTokenPort: ExtractFromAccessTokenPort,
     @Inject(EXTRACT_FROM_REFRESH_TOKEN_PORT)
     private readonly extractFromRefreshTokenPort: ExtractFromRefreshTokenPort,
+    @Inject(HASH_PASSWORD_PORT)
+    private readonly hashPasswordPort: HashPasswordPort,
   ) {}
 
   async firstLogin(req: FirstLoginCmd): Promise<Tokens> {
+    const hashedTempPassword = this.hashPasswordPort.hashPassword(
+      new HashPasswordCmd(req.tempPassword),
+    );
+
     const payload: Payload = await this.checkCredentialsPort.checkCredentials(
-      new CheckCredentialsCmd(req.username, req.tempPassword),
+      new CheckCredentialsCmd(req.username, hashedTempPassword),
+    );
+
+    const hashedPassword = this.hashPasswordPort.hashPassword(
+      new HashPasswordCmd(req.password),
     );
 
     await this.changeCredentialsPort.changeCredentials(
-      new ChangeCredentialsCmd(req.username, req.password, false),
+      new ChangeCredentialsCmd(req.username, hashedPassword, false),
     );
 
     payload.firstAccess = false;
@@ -77,8 +90,12 @@ export class AuthService
   }
 
   async login(req: LoginCmd): Promise<Tokens> {
+    const hashedPassword = this.hashPasswordPort.hashPassword(
+      new HashPasswordCmd(req.password),
+    );
+
     const payload: Payload = await this.checkCredentialsPort.checkCredentials(
-      new CheckCredentialsCmd(req.username, req.password),
+      new CheckCredentialsCmd(req.username, hashedPassword),
     );
 
     let accessToken: string = '';

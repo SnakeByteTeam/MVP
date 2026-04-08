@@ -20,6 +20,7 @@ describe('AlarmApiService', () => {
 
     const alarm: AlarmRule = {
         id: 'alarm-1',
+        position: 'Camera 101',
         name: 'Temperatura alta',
         thresholdOperator: '>',
         thresholdValue: '30',
@@ -28,6 +29,7 @@ describe('AlarmApiService', () => {
         dearmingTime: '20:00:00',
         isArmed: true,
         deviceId: 'device-1',
+        position: 'Camera 101 - Sensore temperatura',
     };
 
     const activeAlarm: ActiveAlarm = {
@@ -165,6 +167,16 @@ describe('AlarmApiService', () => {
         const request = httpController.expectOne(`${alarmEventsBaseUrl}/managed/7/12/6`);
         expect(request.request.method).toBe('GET');
         request.flush([activeAlarm]);
+    });
+
+    it('getAlarmEventById chiama GET /alarm-events/:id e restituisce il dettaglio', () => {
+        service.getAlarmEventById('active-1').subscribe((result) => {
+            expect(result).toEqual(activeAlarm);
+        });
+
+        const request = httpController.expectOne(`${alarmEventsBaseUrl}/active-1`);
+        expect(request.request.method).toBe('GET');
+        request.flush(activeAlarm);
     });
 
     it('getActiveAlarms valida userId, limit e offset interi', () => {

@@ -5,9 +5,24 @@ import {
 	AlarmLifecycleUpdateDetail,
 	ALARM_LIFECYCLE_UPDATED_EVENT,
 } from '../models/realtime-alarm-event.model';
+import {
+	DEFAULT_RESOLVED_NOTIFICATION_TITLE,
+	DEFAULT_TRIGGERED_NOTIFICATION_TITLE,
+	formatTriggeredNotificationTitle,
+} from '../../notification/utils/notification-title.util';
+
+export interface AlarmNotificationDetails {
+	alarmName?: string;
+	priority?: unknown;
+}
 
 export interface AlarmLifecycleNotifierPort {
-	publish(type: AlarmLifecycleType, alarmEventId: string, timestamp: string): void;
+	publish(
+		type: AlarmLifecycleType,
+		alarmEventId: string,
+		timestamp: string,
+		details?: AlarmNotificationDetails
+	): void;
 }
 
 export const ALARM_LIFECYCLE_NOTIFIER = new InjectionToken<AlarmLifecycleNotifierPort>(
@@ -22,18 +37,33 @@ export const ALARM_LIFECYCLE_NOTIFIER = new InjectionToken<AlarmLifecycleNotifie
 export class AlarmLifecycleNotifierService implements AlarmLifecycleNotifierPort {
 	private readonly alarmStateService = inject(AlarmStateService);
 
-	public publish(type: AlarmLifecycleType, alarmEventId: string, timestamp: string): void {
-		this.publishNotification(type, alarmEventId, timestamp);
+	public publish(
+		type: AlarmLifecycleType,
+		alarmEventId: string,
+		timestamp: string,
+		details?: AlarmNotificationDetails
+	): void {
+		this.publishNotification(type, alarmEventId, timestamp, details);
 		this.publishLifecycleUpdate(type, alarmEventId);
 	}
 
-	private publishNotification(type: AlarmLifecycleType, alarmEventId: string, timestamp: string): void {
-		const title = type === 'triggered' ? "C'e un allarme in corso" : 'Allarme risolto';
+	private publishNotification(
+		type: AlarmLifecycleType,
+		alarmEventId: string,
+		timestamp: string,
+		details?: AlarmNotificationDetails
+	): void {
+		const title =
+			type === 'triggered'
+				? formatTriggeredNotificationTitle(details?.alarmName, details?.priority) ||
+					DEFAULT_TRIGGERED_NOTIFICATION_TITLE
+				: DEFAULT_RESOLVED_NOTIFICATION_TITLE;
 
 		this.alarmStateService.onNotificationReceived({
 			notificationId: `alarm-${type}-${alarmEventId}`,
 			title,
 			sentAt: timestamp,
+			eventType: type,
 		});
 	}
 

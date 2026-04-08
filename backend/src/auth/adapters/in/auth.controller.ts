@@ -52,7 +52,7 @@ export class AuthController {
     private readonly firstLoginUseCase: FirstLoginUseCase,
     @Inject(LOGIN_USE_CASE) private readonly loginUseCase: LoginUseCase,
     @Inject(REFRESH_USE_CASE) private readonly refreshUseCase: RefreshUseCase,
-  ) {}
+  ) { }
 
   @ApiBearerAuth('access-token')
   @ApiOkResponse({ type: FirstLoginResDto })
@@ -108,8 +108,12 @@ export class AuthController {
 
   @ApiOkResponse({ type: LogoutResDto })
   @Post('/logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('refreshToken', clearRefreshCookieOptions);
+  logout(@Res({ passthrough: true }) res: Response): LogoutResDto {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
 
     return plainToInstance(LogoutResDto, {
       success: true,

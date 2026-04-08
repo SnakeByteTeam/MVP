@@ -29,12 +29,16 @@ describe('AlarmLifecycleNotifierService', () => {
 
 	it('publish emette NotificationEvent coerente per allarme triggerato', () => {
 		const dispatchSpy = vi.spyOn(globalThis, 'dispatchEvent');
-		service.publish('triggered', 'alarm-1', '2026-04-07T11:10:00.000Z');
+		service.publish('triggered', 'alarm-1', '2026-04-07T11:10:00.000Z', {
+			alarmName: 'Sensore di movimento in corridoio ovest',
+			priority: 4,
+		});
 
 		expect(alarmStateSpy.onNotificationReceived).toHaveBeenCalledWith({
 			notificationId: 'alarm-triggered-alarm-1',
-			title: "C'e un allarme in corso",
+			title: '▲ Sensore di movimento in corridoio ovest',
 			sentAt: '2026-04-07T11:10:00.000Z',
+			eventType: 'triggered',
 		});
 		expect(dispatchSpy).toHaveBeenCalled();
 	});
@@ -46,6 +50,7 @@ describe('AlarmLifecycleNotifierService', () => {
 			notificationId: 'alarm-resolved-alarm-2',
 			title: 'Allarme risolto',
 			sentAt: '2026-04-07T11:11:00.000Z',
+			eventType: 'resolved',
 		});
 	});
 });

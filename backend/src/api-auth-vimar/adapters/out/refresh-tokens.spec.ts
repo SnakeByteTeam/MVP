@@ -16,6 +16,7 @@ describe('RefreshTokensAdapter', () => {
       accessToken: 'access-token-1',
       refreshToken: 'refresh-token-1',
       expiresIn: 600,
+      email: 'utente@example.com',
     };
 
     refreshTokenAdapter = new RefreshTokensAdapter(refreshTokensFromApi);

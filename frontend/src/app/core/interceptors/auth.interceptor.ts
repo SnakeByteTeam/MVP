@@ -7,13 +7,16 @@ let refreshInFlight$: Observable<string> | null = null;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
 	const authService = inject(InternalAuthService);
-	const authEndpoint = isAuthEndpoint(req.url);
 	const token = authService.getToken();
-	const request = !authEndpoint && token ? withAuthorization(req, token) : req;
+
+	const request = token && shouldAttachAuthHeader(req.url) ? withAuthorization(req, token) : req;
 
 	return next(request).pipe(
 		catchError((error: unknown) => {
-			if (!(error instanceof HttpErrorResponse) || error.status !== 401 || authEndpoint) {
+			if (!(error instanceof HttpErrorResponse) ||
+				error.status !== 401 ||
+				shouldSkipRefresh(req.url)
+			) {
 				return throwError(() => error);
 			}
 
@@ -43,6 +46,11 @@ function withAuthorization(req: HttpRequest<unknown>, token: string): HttpReques
 	});
 }
 
-function isAuthEndpoint(url: string): boolean {
+
+function shouldAttachAuthHeader(url: string): boolean {
+	return !/\/auth\/(login|refresh|logout)/.test(url);
+}
+
+function shouldSkipRefresh(url: string): boolean {
 	return /\/auth\/(login|refresh|first-login|logout)/.test(url);
 }

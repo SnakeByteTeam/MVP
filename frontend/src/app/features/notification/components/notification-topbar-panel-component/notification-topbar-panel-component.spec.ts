@@ -29,9 +29,44 @@ describe('NotificationTopbarPanelComponent', () => {
 
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('.notification-topbar-panel__header button') as HTMLButtonElement;
+    const button = fixture.nativeElement.querySelector('.notification-topbar-panel__view-all') as HTMLButtonElement;
     button.click();
 
     expect(emitSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('emette removeClicked quando si clicca sulla X di una notifica', () => {
+    const removeSpy = vi.spyOn(component.removeClicked, 'emit');
+    component.notifications = [
+      {
+        notificationId: 'n-1',
+        title: 'Notifica test',
+        sentAt: '2026-04-07T12:00:00.000Z',
+      },
+    ];
+    fixture.detectChanges();
+
+    const removeButton = fixture.nativeElement.querySelector('.notification-topbar-panel__remove') as HTMLButtonElement;
+    removeButton.click();
+
+    expect(removeSpy).toHaveBeenCalledWith('n-1');
+    expect(removeSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('emette clearAllClicked quando si clicca Cancella tutte', () => {
+    const clearAllSpy = vi.spyOn(component.clearAllClicked, 'emit');
+    component.notifications = [
+      {
+        notificationId: 'n-1',
+        title: 'Notifica test',
+        sentAt: '2026-04-07T12:00:00.000Z',
+      },
+    ];
+    fixture.detectChanges();
+
+    const clearAllButton = fixture.nativeElement.querySelector('.notification-topbar-panel__clear-all') as HTMLButtonElement;
+    clearAllButton.click();
+
+    expect(clearAllSpy).toHaveBeenCalledTimes(1);
   });
 });

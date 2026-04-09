@@ -5,6 +5,9 @@ import {
   FIND_ALL_USERS_BY_WARD_ID_USE_CASE,
   REMOVE_USER_FROM_WARD_USE_CASE,
 } from '../../application/services/wards-users-relationships.service';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { JwtService } from '@nestjs/jwt';
 
 describe('WardsUsersRelationshipsController', () => {
   let controller: WardsUsersRelationshipsController;
@@ -36,6 +39,20 @@ describe('WardsUsersRelationshipsController', () => {
         {
           provide: FIND_ALL_USERS_BY_WARD_ID_USE_CASE,
           useValue: mockFindAllUsersByWardIdUseCase,
+        },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
         },
       ],
     }).compile();

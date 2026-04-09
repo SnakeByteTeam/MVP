@@ -8,6 +8,9 @@ import {
   GET_ANALYTICS_USECASE,
 } from '../../application/ports/in/get-analytics.usecase';
 import { PlotDto } from '../../infrastructure/dtos/plot.dto';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { JwtService } from '@nestjs/jwt';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -33,6 +36,20 @@ describe('AnalyticsController', () => {
         {
           provide: GET_ANALYTICS_USECASE,
           useValue: mockUseCase,
+        },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
         },
       ],
     }).compile();

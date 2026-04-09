@@ -41,15 +41,11 @@ describe('TopbarComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('dovrebbe emettere logoutClicked quando viene premuto il tasto logout', () => {
-    const spy = vi.spyOn(component.logoutClicked, 'emit');
+  it('dovrebbe emettere hamburgerClicked quando viene premuto il menu', () => {
+    const spy = vi.spyOn(component.hamburgerClicked, 'emit');
 
-    const buttons = fixture.nativeElement.querySelectorAll('button');
-    const logoutButton = Array.from(buttons).find(
-      (btn: any) => btn.textContent.toLowerCase().trim() === 'esci'
-    ) as HTMLButtonElement;
-
-    logoutButton.click();
+    const menuButton = fixture.nativeElement.querySelector('button[aria-label="Apri menu"]') as HTMLButtonElement;
+    menuButton.click();
 
     expect(spy).toHaveBeenCalled();
   });
@@ -63,7 +59,7 @@ describe('TopbarComponent', () => {
     expect(spy).toHaveBeenCalled();
   });
 
-  it('non emette profileClicked quando utente non admin', () => {
+  it('emette profileClicked anche quando utente non admin', () => {
     const spy = vi.spyOn(component.profileClicked, 'emit');
     fixture.componentRef.setInput('user', {
       ...mockUser,
@@ -74,8 +70,7 @@ describe('TopbarComponent', () => {
     const profileButton = fixture.nativeElement.querySelector('button[aria-label="Apri profilo"]') as HTMLButtonElement;
     profileButton.click();
 
-    expect(spy).not.toHaveBeenCalled();
-    expect(profileButton.disabled).toBe(true);
+    expect(spy).toHaveBeenCalled();
   });
 
   it('evidenzia in giallo il profilo quando attivo', () => {

@@ -17,7 +17,7 @@ const buildTempDatapoint = (value: string): DatapointValue[] => [
     datapointId: 'dp-thermo-001-temp',
     name: 'Temperature',
     value,
-    sfeType: 'SFE_State_Temperature',
+    sfeType: 'SFE_State_AmbientTemperature',
     deviceType: 'SF_Thermostat',
   },
 ];

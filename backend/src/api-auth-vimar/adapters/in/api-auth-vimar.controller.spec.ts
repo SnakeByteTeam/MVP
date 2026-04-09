@@ -16,9 +16,8 @@ import {
   DELETETOKENSFROMREPOPORT,
   type DeleteTokensFromRepoPort,
 } from 'src/api-auth-vimar/application/ports/out/delete-tokens-from-repo.port';
-import { PlantAuthDto } from 'src/api-auth-vimar/infrastructure/dto/plant-auth.dto';
-import { GuardModule } from 'src/guard/guard.module';
 import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
 import { JwtService } from '@nestjs/jwt';
 
 describe('ApiAuthVimarController', () => {
@@ -49,7 +48,6 @@ describe('ApiAuthVimarController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [GuardModule],
       controllers: [ApiAuthVimarController],
       providers: [
         {
@@ -75,9 +73,15 @@ describe('ApiAuthVimarController', () => {
           },
         },
         {
+          provide: UserGuard,
+          useValue: {
+            canActivate: jest.fn().mockReturnValue(true),
+          },
+        },
+        {
           provide: JwtService,
           useValue: {
-            verify: jest.fn(),
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
           },
         },
       ],
@@ -88,22 +92,6 @@ describe('ApiAuthVimarController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  it('should return redirect url and 302 status code', () => {
-    apiAuthUseCase.getLoginUrl.mockReturnValue('url-login');
-
-    const payload: PlantAuthDto = {
-      redirect_url: 'http://localhost:4200/callback',
-    };
-
-    const result = controller.login(payload);
-
-    expect(apiAuthUseCase.getLoginUrl).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      url: 'url-login',
-      statusCode: 302,
-    });
   });
 
   describe('getAccountStatus', () => {

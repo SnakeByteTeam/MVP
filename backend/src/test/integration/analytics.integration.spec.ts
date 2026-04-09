@@ -11,6 +11,9 @@ import {
   GetSuggestionUseCase,
 } from 'src/analytics/application/ports/in/get-suggestion.usecase';
 import { ANALYTICS_STRATEGIES_TOKEN } from 'src/analytics/analytics.module';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { JwtService } from '@nestjs/jwt';
 
 const PLANT_ID = 'plant-42';
 
@@ -42,6 +45,7 @@ describe('Analytics Integration Test', () => {
   let mockPlot: jest.Mocked<Plot>;
   let mockStrategy: jest.Mocked<AnalyticsStrategy>;
   let mockGetSuggestionUseCase: jest.Mocked<GetSuggestionUseCase>;
+  const authToken = 'test-token';
 
   beforeEach(async () => {
     mockPlot = makeMockPlot();
@@ -72,6 +76,20 @@ describe('Analytics Integration Test', () => {
           provide: GET_SUGGESTION_USECASE,
           useValue: mockGetSuggestionUseCase,
         },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
+        },
       ],
     }).compile();
 
@@ -86,12 +104,15 @@ describe('Analytics Integration Test', () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   it('should retrieve all analytics given the plantId', async () => {
     const response = await request(app.getHttpServer() as http.Server)
       .get(`/analytics/${PLANT_ID}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
 
     expect(mockStrategy.execute).toHaveBeenCalledWith(
@@ -133,6 +154,20 @@ describe('Analytics Integration Test', () => {
         { provide: 'GET_ANALYTICS_USECASE', useClass: AnalyticsService },
         { provide: ANALYTICS_STRATEGIES_TOKEN, useValue: multiStrategies },
         { provide: GET_SUGGESTION_USECASE, useValue: mockGetSuggestionUseCase },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
+        },
       ],
     }).compile();
 
@@ -141,6 +176,7 @@ describe('Analytics Integration Test', () => {
 
     const response = await request(app.getHttpServer() as http.Server)
       .get(`/analytics/${PLANT_ID}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .expect(200);
 
     expect(response.body).toHaveLength(2);
@@ -165,6 +201,20 @@ describe('Analytics Integration Test', () => {
           useValue: new Map([['failingStrategy', failingStrategy]]),
         },
         { provide: GET_SUGGESTION_USECASE, useValue: mockGetSuggestionUseCase },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
+        },
       ],
     }).compile();
 
@@ -173,6 +223,7 @@ describe('Analytics Integration Test', () => {
 
     await request(app.getHttpServer() as http.Server)
       .get(`/analytics/${PLANT_ID}`)
+      .set('Authorization', `Bearer ${authToken}`)
       .expect(500);
   });
 

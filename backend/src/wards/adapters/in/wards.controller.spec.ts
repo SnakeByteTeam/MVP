@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WardsController } from './wards.controller';
 import { CREATE_WARD_USE_CASE } from '../../application/services/ward.service';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { JwtService } from '@nestjs/jwt';
 
 describe('WardsController', () => {
   let controller: WardsController;
@@ -29,6 +32,20 @@ describe('WardsController', () => {
         { provide: 'FIND_ALL_WARD_USE_CASE', useValue: mockFindAllWardUseCase },
         { provide: 'UPDATE_WARD_USE_CASE', useValue: mockUpdateWardUseCase },
         { provide: 'DELETE_WARD_USE_CASE', useValue: mockDeleteWardUseCase },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
+        },
       ],
     }).compile();
 

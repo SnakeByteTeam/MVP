@@ -13,13 +13,13 @@ const yesterday = toISO(1);
 const twoDaysAgo = toISO(2);
 
 const buildPresenceDatapoint = (
-  value: 'NotDetected' | 'Detected',
+  value: 'Absent' | 'Moving',
 ): DatapointValue[] => [
   {
     datapointId: 'dp-presence-001',
     name: 'Presence Sensor',
     value,
-    sfeType: 'SFE_State_Presence',
+    sfeType: 'SFE_State_PresenceType',
     deviceType: 'SF_Access',
   },
 ];
@@ -49,10 +49,10 @@ describe('SensorPresence', () => {
     expect(result.getSeries()).toHaveLength(0);
   });
 
-  it('should detect presence when it changes from NotDetected to Detected', async () => {
+  it('should detect presence when it changes from Absent to Moving', async () => {
     const snapshots = new Map([
-      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('NotDetected')],
-      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Detected')],
+      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Absent')],
+      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Moving')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
@@ -65,11 +65,11 @@ describe('SensorPresence', () => {
     expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
-  it('should not count presence if value stays Detected', async () => {
+  it('should not count presence if value stays Moving', async () => {
     const snapshots = new Map([
-      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Detected')],
-      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Detected')],
-      [`${yesterday}T10:00:00.000Z`, buildPresenceDatapoint('Detected')],
+      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Moving')],
+      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Moving')],
+      [`${yesterday}T10:00:00.000Z`, buildPresenceDatapoint('Moving')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
@@ -83,10 +83,10 @@ describe('SensorPresence', () => {
 
   it('should count two separate presences on the same day', async () => {
     const snapshots = new Map([
-      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('NotDetected')],
-      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Detected')],
-      [`${yesterday}T10:00:00.000Z`, buildPresenceDatapoint('NotDetected')],
-      [`${yesterday}T11:00:00.000Z`, buildPresenceDatapoint('Detected')],
+      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Absent')],
+      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Moving')],
+      [`${yesterday}T10:00:00.000Z`, buildPresenceDatapoint('Absent')],
+      [`${yesterday}T11:00:00.000Z`, buildPresenceDatapoint('Moving')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
@@ -101,12 +101,12 @@ describe('SensorPresence', () => {
 
   it('should correctly aggregate presences over multiple days', async () => {
     const snapshots = new Map([
-      [`${twoDaysAgo}T08:00:00.000Z`, buildPresenceDatapoint('NotDetected')],
-      [`${twoDaysAgo}T09:00:00.000Z`, buildPresenceDatapoint('Detected')],
-      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('NotDetected')],
-      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Detected')],
-      [`${yesterday}T10:00:00.000Z`, buildPresenceDatapoint('NotDetected')],
-      [`${yesterday}T11:00:00.000Z`, buildPresenceDatapoint('Detected')],
+      [`${twoDaysAgo}T08:00:00.000Z`, buildPresenceDatapoint('Absent')],
+      [`${twoDaysAgo}T09:00:00.000Z`, buildPresenceDatapoint('Moving')],
+      [`${yesterday}T08:00:00.000Z`, buildPresenceDatapoint('Absent')],
+      [`${yesterday}T09:00:00.000Z`, buildPresenceDatapoint('Moving')],
+      [`${yesterday}T10:00:00.000Z`, buildPresenceDatapoint('Absent')],
+      [`${yesterday}T11:00:00.000Z`, buildPresenceDatapoint('Moving')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);

@@ -24,7 +24,7 @@ describe('CheckCredentialsRepositoryImpl', () => {
         {
           id: 1,
           username: 'testuser',
-          role: 'admin',
+          role: 'AMMINISTRATORE',
           first_access: false,
         },
       ],
@@ -33,9 +33,7 @@ describe('CheckCredentialsRepositoryImpl', () => {
     const result = await repo.checkCredentials('testuser', 'password');
 
     expect(result).toBeInstanceOf(PayloadEntity);
-    expect(result).toEqual(
-      new PayloadEntity(1, 'testuser', 'OPERATORE_SANITARIO', false),
-    );
+    expect(result).toEqual(new PayloadEntity(1, 'testuser', 'AMMINISTRATORE', false));
 
     expect(mockConn.query).toHaveBeenCalledWith(
       expect.stringContaining('FROM "user" u'),

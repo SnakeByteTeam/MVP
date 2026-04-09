@@ -8,6 +8,9 @@ import {
   FIND_USER_BY_ID_USE_CASE,
   UPDATE_USER_USE_CASE,
 } from '../../application/services/users.service';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { JwtService } from '@nestjs/jwt';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -55,6 +58,20 @@ describe('UsersController', () => {
         { provide: UPDATE_USER_USE_CASE, useValue: mockUpdateUserUseCase },
         { provide: CREATE_USER_USE_CASE, useValue: mockCreateUserUseCase },
         { provide: DELETE_USER_USE_CASE, useValue: mockDeleteUserUseCase },
+        {
+          provide: UserGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            verify: jest.fn().mockReturnValue({ id: 1, role: 'AMMINISTRATORE' }),
+          },
+        },
       ],
     }).compile();
 
@@ -79,9 +96,7 @@ describe('UsersController', () => {
 
   it('should call findUserByIdUseCase.findUserById', async () => {
     await controller.findUserById(1);
-    expect(
-      mockFindAllAvailableUsersUseCase.findAllAvailableUsers,
-    ).toHaveBeenCalled();
+    expect(mockFindUserByIdUseCase.findUserById).toHaveBeenCalled();
   });
 
   it('should call updateUserUseCase.updateUser with correct args', async () => {

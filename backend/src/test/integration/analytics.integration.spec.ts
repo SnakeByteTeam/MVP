@@ -225,6 +225,8 @@ describe('Analytics Integration Test', () => {
       .get(`/analytics/${PLANT_ID}`)
       .set('Authorization', `Bearer ${authToken}`)
       .expect(500);
+
+    expect(failingStrategy.execute).toHaveBeenCalledTimes(1);
   });
 
   it('should return 404 when plantId query param is missing', async () => {

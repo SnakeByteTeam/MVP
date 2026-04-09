@@ -1,10 +1,10 @@
 import { ChartInfoDto } from "../models/chart-info.model";
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { SimpleChanges, Directive, Input } from "@angular/core";
+import { SimpleChanges, Directive, Input, OnChanges } from "@angular/core";
 
 
 @Directive()
-export abstract class ChartComponent {
+export abstract class ChartComponent implements OnChanges {
 
     @Input() chartInfo!: ChartInfoDto;
     abstract chartType: ChartType;

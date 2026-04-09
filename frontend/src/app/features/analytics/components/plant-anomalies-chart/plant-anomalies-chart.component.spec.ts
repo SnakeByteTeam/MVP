@@ -13,5 +13,13 @@ describe('PlantAnomaliesChartComponent', () => {
     }).compileComponents();
   });
 
+  it('espone metadati chart consistenti', () => {
+    const fixture = TestBed.createComponent(PlantAnomaliesChartComponent);
+    const component = fixture.componentInstance;
+
+    expect(component.chartType).toBe('bar');
+    expect(component.description.length).toBeGreaterThan(0);
+  });
+
   runSharedChartTests(PlantAnomaliesChartComponent);
 });

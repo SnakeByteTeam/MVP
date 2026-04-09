@@ -233,6 +233,18 @@ describe('WardManagementPageComponent', () => {
     expect(component.mobileStep()).toBe('apartments');
   });
 
+  it('selectWard sul ward gia selezionato mantiene la selezione dell appartamento', () => {
+    component.selectedWardId.set(wardA.id);
+    component.selectedApartmentId.set('101');
+    component.mobileStep.set('wards');
+
+    component.selectWard(wardA.id);
+
+    expect(component.selectedWardId()).toBe(wardA.id);
+    expect(component.selectedApartmentId()).toBe('101');
+    expect(component.mobileStep()).toBe('apartments');
+  });
+
   it('selectApartment e step helpers dovrebbero aggiornare lo stato ui', () => {
     component.selectApartment('101');
     expect(component.selectedApartmentId()).toBe('101');
@@ -245,6 +257,16 @@ describe('WardManagementPageComponent', () => {
 
     component.showOperatorsStep();
     expect(component.mobileStep()).toBe('operators');
+  });
+
+  it('onEditSelectedWard non dovrebbe fare nulla senza ward selezionato', () => {
+    component.wardsSnapshot.set([wardA]);
+    component.selectedWardId.set(null);
+
+    component.onEditSelectedWard();
+
+    expect(component.selectedWardId()).toBeNull();
+    expect(component.wardDialogMode()).toBe('closed');
   });
 
   it('flow operator dovrebbe impostare wardId, submit e chiudere', () => {
@@ -381,6 +403,11 @@ describe('WardManagementPageComponent', () => {
     component.confirmState.set({ kind: 'remove-plant', wardId: 1, plantId: '101' });
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'appartamento dal reparto?');
     expect(component.getConfirmLabel()).toBe('Rimuovi');
+  });
+
+  it('getOperatorDisplayName dovrebbe comporre e trimmare nome e cognome', () => {
+    expect(component.getOperatorDisplayName('Mario', 'Rossi')).toBe('Mario Rossi');
+    expect(component.getOperatorDisplayName('Mario', '')).toBe('Mario');
   });
 
   it('availablePlants dovrebbe deduplicare e escludere quelli gia assegnati al ward selezionato', () => {

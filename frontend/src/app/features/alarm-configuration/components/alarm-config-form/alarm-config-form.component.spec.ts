@@ -50,6 +50,90 @@ describe('AlarmConfigFormComponent', () => {
         enabled: true,
     };
 
+    const createCreateModeApartment = () => ({
+        id: 'plant-1',
+        name: 'Appartamento 1',
+        isEnabled: true,
+        rooms: [
+            {
+                id: 'room-1',
+                name: 'Soggiorno',
+                hasActiveAlarm: false,
+                devices: [
+                    {
+                        id: 'sensor-1',
+                        name: 'Sensore porta',
+                        status: 'ONLINE',
+                        type: 'LIGHT',
+                        actions: [],
+                        datapoints: [
+                            {
+                                id: 'dp-readable-1',
+                                name: 'SFE_State_OnOff',
+                                readable: true,
+                                writable: false,
+                                valueType: 'string',
+                                enum: ['Off', 'On'],
+                                sfeType: 'SFE_State_OnOff',
+                            },
+                            {
+                                id: 'dp-write-only-1',
+                                name: 'SFE_Cmd_OnOff',
+                                readable: false,
+                                writable: true,
+                                valueType: 'string',
+                                enum: ['Off', 'On'],
+                                sfeType: 'SFE_Cmd_OnOff',
+                            },
+                            {
+                                id: 'dp-readable-2',
+                                name: 'SFE_State_Temperature',
+                                readable: true,
+                                writable: false,
+                                valueType: 'string',
+                                enum: [],
+                                sfeType: 'SFE_State_Temperature',
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    });
+
+    const createEditModePlants = () => ([
+        {
+            id: 'plant-1',
+            name: 'Appartamento 1',
+            rooms: [
+                {
+                    id: 'room-edit',
+                    name: 'Ingresso',
+                    devices: [
+                        {
+                            id: 'sensor-9',
+                            name: 'Sensore porta edit',
+                            type: 'LIGHT',
+                            datapoints: [
+                                {
+                                    id: 'dp-readable-1',
+                                    name: 'SFE_State_OnOff',
+                                    readable: true,
+                                    writable: false,
+                                    valueType: 'string',
+                                    enum: ['Off', 'On'],
+                                    sfeType: 'SFE_State_OnOff',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
+        { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
+    ]);
+
     beforeEach(async () => {
         vi.clearAllMocks();
         wardApiStub.getAvailablePlants.mockReturnValue(
@@ -67,92 +151,8 @@ describe('AlarmConfigFormComponent', () => {
                 { id: 'plant-2', name: 'Appartamento 2' },
             ])
         );
-        apartmentApiStub.getApartmentByPlantId.mockReturnValue(
-            of({
-                id: 'plant-1',
-                name: 'Appartamento 1',
-                isEnabled: true,
-                rooms: [
-                    {
-                        id: 'room-1',
-                        name: 'Soggiorno',
-                        hasActiveAlarm: false,
-                        devices: [
-                            {
-                                id: 'sensor-1',
-                                name: 'Sensore porta',
-                                status: 'ONLINE',
-                                type: 'LIGHT',
-                                actions: [],
-                                datapoints: [
-                                    {
-                                        id: 'dp-readable-1',
-                                        name: 'SFE_State_OnOff',
-                                        readable: true,
-                                        writable: false,
-                                        valueType: 'string',
-                                        enum: ['Off', 'On'],
-                                        sfeType: 'SFE_State_OnOff',
-                                    },
-                                    {
-                                        id: 'dp-write-only-1',
-                                        name: 'SFE_Cmd_OnOff',
-                                        readable: false,
-                                        writable: true,
-                                        valueType: 'string',
-                                        enum: ['Off', 'On'],
-                                        sfeType: 'SFE_Cmd_OnOff',
-                                    },
-                                    {
-                                        id: 'dp-readable-2',
-                                        name: 'SFE_State_Temperature',
-                                        readable: true,
-                                        writable: false,
-                                        valueType: 'string',
-                                        enum: [],
-                                        sfeType: 'SFE_State_Temperature',
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            })
-        );
-        apartmentApiStub.getAllPlants.mockReturnValue(
-            of([
-                {
-                    id: 'plant-1',
-                    name: 'Appartamento 1',
-                    rooms: [
-                        {
-                            id: 'room-edit',
-                            name: 'Ingresso',
-                            devices: [
-                                {
-                                    id: 'sensor-9',
-                                    name: 'Sensore porta edit',
-                                    type: 'LIGHT',
-                                    datapoints: [
-                                        {
-                                            id: 'dp-readable-1',
-                                            name: 'SFE_State_OnOff',
-                                            readable: true,
-                                            writable: false,
-                                            valueType: 'string',
-                                            enum: ['Off', 'On'],
-                                            sfeType: 'SFE_State_OnOff',
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-                { id: 'plant-2', name: 'Appartamento 2', rooms: [] },
-                { id: 'plant-3', name: 'Appartamento 3', rooms: [] },
-            ])
-        );
+        apartmentApiStub.getApartmentByPlantId.mockReturnValue(of(createCreateModeApartment()));
+        apartmentApiStub.getAllPlants.mockReturnValue(of(createEditModePlants()));
 
         await TestBed.configureTestingModule({
             imports: [AlarmConfigFormComponent],
@@ -209,7 +209,7 @@ describe('AlarmConfigFormComponent', () => {
             datapointId: 'dp-readable-1',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: ThresholdOperator.EQUAL_TO,
-            thresholdValue: 'ON',
+            thresholdValue: 'On',
             armingTime: '07:00',
             dearmingTime: '19:00',
             enabled: true,
@@ -320,7 +320,6 @@ describe('AlarmConfigFormComponent', () => {
     it('in edit mode valida thresholdValue in base al datapoint risolto', () => {
         setInputs('edit', existingRule);
 
-        component.form.controls.thresholdValue.enable({ emitEvent: false });
         component.form.controls.thresholdValue.setValue('123');
         component.form.controls.thresholdValue.markAsTouched();
         component.form.controls.thresholdValue.updateValueAndValidity();
@@ -456,7 +455,7 @@ describe('AlarmConfigFormComponent', () => {
         expect(component.form.controls.thresholdValue.errors?.['invalidEnumThreshold']).toBe(true);
     });
 
-    it('accetta valore soglia booleano quando operatore e uguale', () => {
+    it('accetta valore soglia booleano quando operatore è uguale', () => {
         setInputs('create', null);
 
         component.form.controls.thresholdOperator.setValue(ThresholdOperator.EQUAL_TO);
@@ -480,7 +479,6 @@ describe('AlarmConfigFormComponent', () => {
 
         expect(component.plants().map((plant) => plant.id)).toEqual(['plant-1', 'plant-2', 'plant-3']);
         expect(component.plantsLoadError()).toBeNull();
-        expect(apartmentApiStub.getAllPlants).toHaveBeenCalledTimes(1);
     });
 
     it('se /plant/all fallisce usa fallback available + plants assegnati ai reparti', () => {

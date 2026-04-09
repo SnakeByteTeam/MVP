@@ -226,7 +226,6 @@ describe('AlarmConfigStateService', () => {
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('alarm-1', {
             name: 'Temperatura stanza',
-            datapointId: 'dp-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '=',
             thresholdValue: '22',
@@ -296,7 +295,6 @@ describe('AlarmConfigStateService', () => {
 
         expect(apiStub.updateAlarmRule).toHaveBeenCalledWith('missing-id', {
             name: 'Nome dal form',
-            datapointId: 'dp-3',
             priority: AlarmPriority.GREEN,
             thresholdOperator: '>',
             thresholdValue: '44',

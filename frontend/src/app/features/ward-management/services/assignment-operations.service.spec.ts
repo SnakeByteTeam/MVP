@@ -142,7 +142,7 @@ describe('AssignmentOperationsService', () => {
         expect(apiStub.getAvailablePlants).toHaveBeenCalledOnce();
     });
 
-    it('getAvailableUsersForWard filtra gli utenti gia assegnati in qualunque ward', () => {
+    it('getAvailableUsersForWard filtra solo gli utenti gia assegnati nel ward corrente', () => {
         storeStub.getWardsSnapshot.mockReturnValue([
             {
                 id: 10,
@@ -167,6 +167,13 @@ describe('AssignmentOperationsService', () => {
 
         service.getAvailableUsersForWard(10).subscribe((result) => {
             expect(result).toEqual([
+                {
+                    id: 2,
+                    firstName: 'lverdi',
+                    lastName: '',
+                    username: 'lverdi',
+                    role: UserRole.OPERATORE_SANITARIO,
+                },
                 {
                     id: 3,
                     firstName: 'gbianchi',

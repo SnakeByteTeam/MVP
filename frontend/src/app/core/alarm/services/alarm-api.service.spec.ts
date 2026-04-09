@@ -20,7 +20,7 @@ describe('AlarmApiService', () => {
 
     const alarm: AlarmRule = {
         id: 'alarm-1',
-        position: 'Camera 101',
+        position: 'Camera 101 - Sensore temperatura',
         name: 'Temperatura alta',
         thresholdOperator: '>',
         thresholdValue: '30',
@@ -29,7 +29,6 @@ describe('AlarmApiService', () => {
         dearmingTime: '20:00:00',
         isArmed: true,
         deviceId: 'device-1',
-        position: 'Camera 101 - Sensore temperatura',
     };
 
     const activeAlarm: ActiveAlarm = {

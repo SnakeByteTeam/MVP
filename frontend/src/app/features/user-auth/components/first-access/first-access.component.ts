@@ -1,7 +1,20 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { FormGroup, ReactiveFormsModule, Validators, FormBuilder } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AuthBaseComponent } from '../auth-base/auth-base.component';
 import { AuthErrorType } from '../../models/auth-error-type.enum';
+
+function newPasswordDiffersFromTempPassword(): ValidatorFn {
+	return (control: AbstractControl): ValidationErrors | null => {
+		const tempPassword = control.get('temporaryPassword')?.value as string;
+		const newPassword = control.get('newPassword')?.value as string;
+
+		if (!tempPassword || !newPassword) {
+			return null;
+		}
+
+		return tempPassword === newPassword ? { sameAsTemporaryPassword: true } : null;
+	};
+}
 
 @Component({
 	selector: 'app-first-access',
@@ -9,29 +22,29 @@ import { AuthErrorType } from '../../models/auth-error-type.enum';
 	templateUrl: './first-access.component.html',
 	styleUrls: ['./first-access.component.css'],
 })
-export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
+export class FirstAccessComponent extends AuthBaseComponent {
 	private readonly fb = inject(FormBuilder);
 
-	public firstAccessForm!: FormGroup;
-
-	public ngOnInit(): void {
-		this.firstAccessForm = this.fb.nonNullable.group({
-			username: ['', [Validators.required]],
-			temporaryPassword: ['', [Validators.required]],
+	public readonly firstAccessForm = this.fb.nonNullable.group(
+		{
+			username: ['', [Validators.required, Validators.minLength(3)]],
+			temporaryPassword: ['', [Validators.required, Validators.minLength(12)]],
 			newPassword: ['', [Validators.required, Validators.minLength(12)]],
-		});
-	}
+		},
+		{ validators: [newPasswordDiffersFromTempPassword()] }
+	);
+
 
 	public override onUsernameChange(value: string): void {
-		this.firstAccessForm.controls['username'].setValue(value);
+		this.firstAccessForm.controls.username.setValue(value);
 	}
 
 	public onTempPasswordChange(value: string): void {
-		this.firstAccessForm.controls['temporaryPassword'].setValue(value);
+		this.firstAccessForm.controls.temporaryPassword.setValue(value);
 	}
 
 	public onNewPasswordChange(value: string): void {
-		this.firstAccessForm.controls['newPassword'].setValue(value);
+		this.firstAccessForm.controls.newPassword.setValue(value);
 	}
 
 	public override onSubmit(): void {
@@ -40,13 +53,7 @@ export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 			return;
 		}
 
-		const username = this.firstAccessForm.controls['username'].value as string;
-		const temporaryPassword = this.firstAccessForm.controls['temporaryPassword'].value as string;
-		const newPassword = this.firstAccessForm.controls['newPassword'].value as string;
-
-		if (!this.validateNewPassword(newPassword, temporaryPassword)) {
-			return;
-		}
+		const { username, temporaryPassword, newPassword } = this.firstAccessForm.getRawValue();
 
 		this.isLoading = true;
 		this.errorType = null;
@@ -62,17 +69,4 @@ export class FirstAccessComponent extends AuthBaseComponent implements OnInit {
 		});
 	}
 
-	private validateNewPassword(newPassword: string, temporaryPassword: string): boolean {
-		if (newPassword === temporaryPassword) {
-			this.errorType = AuthErrorType.NEW_PASSWORD_EQUALS_TEMP;
-			return false;
-		}
-
-		if (newPassword.length < 12) {
-			this.errorType = AuthErrorType.NEW_PASSWORD_NOT_VALID;
-			return false;
-		}
-
-		return true;
-	}
 }

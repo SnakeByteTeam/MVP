@@ -57,14 +57,15 @@ describe('FirstAccessComponent', () => {
     expect(content).toContain('Conferma e continua');
   });
 
-  it('non invia la richiesta se nuova password uguale alla temporanea', () => {
+  it('imposta errore di validazione quando la nuova password coincide con la temporanea', () => {
     component.onUsernameChange('mrossi');
     component.onTempPasswordChange(temporaryCredential);
     component.onNewPasswordChange(temporaryCredential);
+
     component.onSubmit();
 
+    expect(component.firstAccessForm.errors?.['sameAsTemporaryPassword']).toBe(true);
     expect(authServiceMock.setFirstAccessPassword).not.toHaveBeenCalled();
-    expect(component.errorType).toBe(AuthErrorType.NEW_PASSWORD_EQUALS_TEMP);
   });
 
   it('invia setFirstAccessPassword e naviga su dashboard in caso di successo', () => {
@@ -104,6 +105,20 @@ describe('FirstAccessComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
+  it('renderizza un messaggio umano quando username o password temporanea sono errati', () => {
+    authServiceMock.setFirstAccessPassword.mockReturnValue(throwError(() => new Error('api error')));
+
+    component.onUsernameChange('mrossi');
+    component.onTempPasswordChange(temporaryCredential);
+    component.onNewPasswordChange(nextCredential);
+    component.onSubmit();
+
+    fixture.detectChanges();
+
+    const content = fixture.nativeElement.textContent as string;
+    expect(content).toContain('Username o password temporanea errati.');
+  });
+
   it('marca il form touched quando submit su form invalido', () => {
     const markAllAsTouchedSpy = vi.spyOn(component.firstAccessForm, 'markAllAsTouched');
 
@@ -113,21 +128,17 @@ describe('FirstAccessComponent', () => {
     expect(authServiceMock.setFirstAccessPassword).not.toHaveBeenCalled();
   });
 
-  it('imposta NEW_PASSWORD_NOT_VALID quando la nuova credenziale e troppo corta', () => {
-    const newPasswordControl = component.firstAccessForm.controls['newPassword'];
-    newPasswordControl.clearValidators();
-    newPasswordControl.updateValueAndValidity();
-
+  it('non invia la richiesta quando la nuova password e troppo corta', () => {
     component.onUsernameChange('mrossi');
     component.onTempPasswordChange(temporaryCredential);
     component.onNewPasswordChange('short');
     component.onSubmit();
 
-    expect(component.errorType).toBe(AuthErrorType.NEW_PASSWORD_NOT_VALID);
+    expect(component.firstAccessForm.controls.newPassword.errors?.['minlength']).toBeTruthy();
     expect(authServiceMock.setFirstAccessPassword).not.toHaveBeenCalled();
   });
 
-  it('renderizza il testo errore quando errorType e valorizzato', () => {
+  it('renderizza il messaggio di validazione quando la nuova password coincide con la temporanea', () => {
     component.onUsernameChange('mrossi');
     component.onTempPasswordChange(temporaryCredential);
     component.onNewPasswordChange(temporaryCredential);
@@ -136,6 +147,6 @@ describe('FirstAccessComponent', () => {
     fixture.detectChanges();
 
     const content = fixture.nativeElement.textContent as string;
-    expect(content).toContain(AuthErrorType.NEW_PASSWORD_EQUALS_TEMP);
+    expect(content).toContain('La nuova password deve essere diversa da quella temporanea.');
   });
 });

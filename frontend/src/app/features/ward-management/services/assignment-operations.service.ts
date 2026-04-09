@@ -38,10 +38,11 @@ export class AssignmentOperationsService {
     const ward = this.store.getWardsSnapshot().find((w) => w.id === wardId);
     const assignedUserIds = new Set((ward?.operators ?? []).map((operator) => operator.id));
 
-    return this.api.getAvailableOperators().pipe(
-      map((users) => users.filter((user) => !assignedUserIds.has(user.id))),
-      map((users) => this.toOperators(users)),
-    );
+    return this.api.getAvailableOperators
+      ().pipe(
+        map((users) => users.filter((user) => !assignedUserIds.has(user.id))),
+        map((users) => this.toOperators(users)),
+      );
   }
 
   public assignOperator(wardId: number, dto: AssignOperatorDto): Observable<void> {

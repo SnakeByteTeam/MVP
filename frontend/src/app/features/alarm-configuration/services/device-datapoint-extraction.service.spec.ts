@@ -116,6 +116,14 @@ describe('DeviceDatapointExtractionService', () => {
         expect(datapoints.every((datapoint) => datapoint.readable)).toBe(true);
     });
 
+    it('findReadableDatapoints ritorna lista vuota se il device non esiste', () => {
+        const options = service.extractDeviceOptions(apartment);
+
+        const datapoints = service.findReadableDatapoints('missing-device', options);
+
+        expect(datapoints).toEqual([]);
+    });
+
     it('getAllowedOperators limita a uguale quando il datapoint ha enum', () => {
         expect(service.getAllowedOperators(enumDatapoint)).toEqual([ThresholdOperator.EQUAL_TO]);
         expect(service.getAllowedOperators(numericDatapoint)).toEqual([

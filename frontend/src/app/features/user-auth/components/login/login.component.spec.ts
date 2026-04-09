@@ -59,9 +59,15 @@ describe('LoginComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('non invoca login se il form e invalido', () => {
+  it('non invoca login se il form non rispetta i validator', () => {
+    component.loginForm.controls.username.setValue('ab');
+    component.loginForm.controls.password.setValue('short');
+
+    const markAllAsTouchedSpy = vi.spyOn(component.loginForm, 'markAllAsTouched');
+
     component.onSubmit();
 
+    expect(markAllAsTouchedSpy).toHaveBeenCalled();
     expect(authServiceMock.login).not.toHaveBeenCalled();
   });
 
@@ -141,6 +147,19 @@ describe('LoginComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
+  it('espone il messaggio umano gia al primo tentativo fallito', () => {
+    authServiceMock.login.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
+    );
+
+    component.onUsernameChange('mrossi');
+    component.onPasswordChange(userCredential);
+    component.onSubmit();
+
+    expect(component.isLoading).toBe(false);
+    expect(component.loginErrorMessage).toBe('Utente non trovato: username o password errati.');
+  });
+
   it('renderizza il testo errore quando errorType e valorizzato', () => {
     authServiceMock.login.mockReturnValue(
       throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
@@ -153,6 +172,7 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
 
     const content = fixture.nativeElement.textContent as string;
-    expect(content).toContain(AuthErrorType.USERNAME_OR_PASSWORD_WRONG);
+    expect(content).toContain('Utente non trovato: username o password errati.');
   });
+
 });

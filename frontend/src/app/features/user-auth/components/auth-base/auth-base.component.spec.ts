@@ -125,4 +125,10 @@ describe('AuthBaseComponent', () => {
     expect(component.errorType).toBe(AuthErrorType.USERNAME_OR_PASSWORD_WRONG);
     expect(component.isLoading).toBe(false);
   });
+
+  it('espone il messaggio umano per credenziali errate', () => {
+    component.callHandleError(new HttpErrorResponse({ status: 401 }));
+
+    expect(component.loginErrorMessage).toBe('Utente non trovato: username o password errati.');
+  });
 });

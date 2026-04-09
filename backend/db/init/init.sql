@@ -43,8 +43,13 @@ CREATE TABLE "user" (
 );
 
 INSERT INTO "user" (username, surname, name, password, first_access, roleId) VALUES
+<<<<<<< HEAD
     ('test',        'test',     'test',      'a99c978de251dfd8228aa8535328babc748597244057da09aa2c6c4def0a8b3ba0eaeb469a050a2f13d94d70127ab7f19b324fd4d7ac8a1625a3328d893925b8', FALSE, 1),
     ('admin',       'admin',    'admin',     '7b6a1f4038412d54a79432aea5d8e58a7e5db172468f08963bbeef7981141309c0ff63c70de64565009a13c24f1ed63d93a1100548ef0d56abcad96edee8c8f6',  FALSE, 2),
+=======
+    ('test',        'test',     'test',      '623c92d8c3e80a6963599e42aa37d43f8f4f4e84c742bfe5cf26b33b6e5a281599dd9e948691b5f76566e526375ef46cc5485af55bac2a198b69b40333ac92fb', FALSE, 1),
+    ('admin',       'admin',    'admin',     '68196d44350ba7a579fa43b08309a166217432e5b29067b8d1012ccecb0c96963466da7386f86fd272f6bed9ba36ed6679c0ff222305eff7fc813959ebc9b590',  FALSE, 2),
+>>>>>>> prova_integrazione
     ('mrossi',      'Rossi',    'Mario',     'test',  TRUE,  1),
     ('gbianchi',    'Bianchi',  'Gioia',     'test',  TRUE,  1)
 ON CONFLICT (username) DO NOTHING;

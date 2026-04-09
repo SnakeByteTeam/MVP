@@ -45,7 +45,7 @@ describe('UsersRepositoryImpl', () => {
     expect(mockConn.query).toHaveBeenNthCalledWith(
       2,
       `WITH created_user AS (
-         INSERT INTO "user" (username, surname, name, temp_password, roleId)
+         INSERT INTO "user" (username, surname, name, password, roleId)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *
        )
@@ -82,7 +82,7 @@ describe('UsersRepositoryImpl', () => {
 
     expect(mockConn.query).toHaveBeenCalledWith(
       `WITH updated_user AS ( UPDATE "user" SET username = $1, surname = $2, name = $3 WHERE id = $4 RETURNING * ) 
-      SELECT u.id, u.username, u.surname, u.name, u.password, u.temp_password, u.roleId, r.id AS role_id, r.name AS role 
+      SELECT u.id, u.username, u.surname, u.name, u.password, u.roleId, r.id AS role_id, r.name AS role 
       FROM updated_user u LEFT JOIN role r ON u.roleId = r.id;`,
       ['username', 'surname', 'name', 1],
     );

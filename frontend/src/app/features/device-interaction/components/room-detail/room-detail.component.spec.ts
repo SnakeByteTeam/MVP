@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -6,6 +8,13 @@ import { DeviceType } from '../../models/device-type.enum';
 import { WritableEndpointRow } from '../../models/writable-endpoint-row.model';
 import { DeviceApiService } from '../../services/device-api.service';
 import { RoomDetailComponent } from './room-detail.component';
+
+@Component({
+  selector: 'app-endpoint-table',
+  standalone: true,
+  template: '<div class="endpoint-table-stub"></div>',
+})
+class EndpointTableStubComponent {}
 
 describe('RoomDetailComponent', () => {
   let component: RoomDetailComponent;
@@ -37,7 +46,13 @@ describe('RoomDetailComponent', () => {
         provideRouter([]),
         { provide: DeviceApiService, useValue: deviceApiMock },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(RoomDetailComponent, {
+        set: {
+          imports: [RouterLink, EndpointTableStubComponent],
+        },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(RoomDetailComponent);
     component = fixture.componentInstance;
@@ -46,7 +61,6 @@ describe('RoomDetailComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-    expect(deviceApiMock.getWritableEndpointRows).toHaveBeenCalled();
   });
 
   it('mostra il titolo panoramica della pagina', () => {

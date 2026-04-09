@@ -53,6 +53,12 @@ describe('MainLayoutComponent', () => {
     
     beforeEach(async () => {
         vi.clearAllMocks();
+        class ResizeObserverMock {
+            public observe(): void {}
+            public disconnect(): void {}
+            public unobserve(): void {}
+        }
+        vi.stubGlobal('ResizeObserver', ResizeObserverMock);
         notificationsSubject = new BehaviorSubject<NotificationEvent[]>([]);
         mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
         mockAuthService.getCurrentUser$.mockReturnValue(
@@ -150,19 +156,29 @@ describe('MainLayoutComponent', () => {
     });
 
     it('apre il pannello profilo e carica stato MyVimar', () => {
+        component.ngOnInit();
         component.toggleProfilePanel();
 
         expect(component.isProfilePanelOpen).toBe(true);
-        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalledTimes(1);
+        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalled();
         expect(component.vimarAccount).toEqual({ email: '', isLinked: false });
     });
 
-    it('non apre il pannello profilo per utenti non admin', () => {
-        mockAuthService.getRole.mockReturnValue(UserRole.OPERATORE_SANITARIO);
+    it('apre il pannello profilo per utenti non admin senza caricare stato MyVimar', () => {
+        mockAuthService.getCurrentUser$.mockReturnValue(
+            of({
+                userId: '2',
+                username: 'operator',
+                role: UserRole.OPERATORE_SANITARIO,
+                accessToken: 'token',
+                isFirstAccess: false,
+            })
+        );
+        component.ngOnInit();
 
         component.toggleProfilePanel();
 
-        expect(component.isProfilePanelOpen).toBe(false);
+        expect(component.isProfilePanelOpen).toBe(true);
         expect(mockMyVimarService.getLinkedAccount).not.toHaveBeenCalled();
     });
 

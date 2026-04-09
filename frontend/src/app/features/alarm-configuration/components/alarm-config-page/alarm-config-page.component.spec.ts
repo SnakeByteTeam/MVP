@@ -12,18 +12,16 @@ import { AlarmConfigPageComponent } from './alarm-config-page.component';
 describe('AlarmConfigPageComponent', () => {
     let component: AlarmConfigPageComponent;
     let fixture: ComponentFixture<AlarmConfigPageComponent>;
-
-    const alarmsSubject = new BehaviorSubject<AlarmRule[]>([]);
-    const errorSubject = new BehaviorSubject<string | null>(null);
-
-    const stateServiceStub = {
-        alarms$: alarmsSubject.asObservable(),
-        error$: errorSubject.asObservable(),
-        loadAlarmRules: vi.fn(),
-        createAlarmRule: vi.fn(() => of({} as AlarmRule)),
-        updateAlarmRule: vi.fn(() => of({} as AlarmRule)),
-        toggleEnabled: vi.fn(() => of({} as AlarmRule)),
-        deleteAlarmRule: vi.fn(() => of(void 0)),
+    let alarmsSubject: BehaviorSubject<AlarmRule[]>;
+    let errorSubject: BehaviorSubject<string | null>;
+    let stateServiceStub: {
+        alarms$: ReturnType<BehaviorSubject<AlarmRule[]>['asObservable']>;
+        error$: ReturnType<BehaviorSubject<string | null>['asObservable']>;
+        loadAlarmRules: ReturnType<typeof vi.fn>;
+        createAlarmRule: ReturnType<typeof vi.fn>;
+        updateAlarmRule: ReturnType<typeof vi.fn>;
+        toggleEnabled: ReturnType<typeof vi.fn>;
+        deleteAlarmRule: ReturnType<typeof vi.fn>;
     };
 
     const wardApiStub = {
@@ -63,8 +61,17 @@ describe('AlarmConfigPageComponent', () => {
 
     beforeEach(async () => {
         vi.clearAllMocks();
-        alarmsSubject.next([]);
-        errorSubject.next(null);
+        alarmsSubject = new BehaviorSubject<AlarmRule[]>([]);
+        errorSubject = new BehaviorSubject<string | null>(null);
+        stateServiceStub = {
+            alarms$: alarmsSubject.asObservable(),
+            error$: errorSubject.asObservable(),
+            loadAlarmRules: vi.fn(),
+            createAlarmRule: vi.fn(() => of({} as AlarmRule)),
+            updateAlarmRule: vi.fn(() => of({} as AlarmRule)),
+            toggleEnabled: vi.fn(() => of({} as AlarmRule)),
+            deleteAlarmRule: vi.fn(() => of(void 0)),
+        };
 
         await TestBed.configureTestingModule({
             imports: [AlarmConfigPageComponent],

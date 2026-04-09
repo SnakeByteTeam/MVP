@@ -80,12 +80,12 @@ describe('WardApiService', () => {
         request.flush([{ id: 1, username: 'mrossi' }]);
     });
 
-    it('chiama GET /api/users/available in getAvailableOperators', () => {
+    it('chiama GET /users in getAvailableOperators', () => {
         service.getAvailableOperators().subscribe((result) => {
             expect(result).toEqual([{ id: 2, username: 'lverdi' }]);
         });
 
-        const request = httpController.expectOne(`${usersEndpoint}/available`);
+        const request = httpController.expectOne(usersEndpoint);
         expect(request.request.method).toBe('GET');
         request.flush([{ id: 2, username: 'lverdi' }]);
     });

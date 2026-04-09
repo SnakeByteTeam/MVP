@@ -35,7 +35,6 @@ describe('AlarmRuleRequestMapper', () => {
 
         expect(result).toEqual({
             name: 'Soglia temperatura',
-            datapointId: 'dp-1',
             priority: AlarmPriority.ORANGE,
             thresholdOperator: '<',
             thresholdValue: '12',

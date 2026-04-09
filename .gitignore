@@ -88,3 +88,4 @@ deploy-digitalocean.mjs
 # local documentation / notes
 .ignore/
 .vscode/settings.json
+deploy-digitalocean-preserve-db.mjs

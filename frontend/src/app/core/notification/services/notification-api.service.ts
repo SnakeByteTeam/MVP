@@ -98,9 +98,8 @@ export class NotificationApiService {
         return {
             notificationId: `alarm-${isResolved ? 'resolved' : 'triggered'}-${alarmEventId}`,
             title: isResolved
-                ? DEFAULT_RESOLVED_NOTIFICATION_TITLE
-                : formatTriggeredNotificationTitle(alarmEvent.alarmName, alarmEvent.priority) ||
-                  DEFAULT_TRIGGERED_NOTIFICATION_TITLE,
+                ? alarmEvent.alarmName as string + ' risolto'
+                : formatTriggeredNotificationTitle(alarmEvent.alarmName, alarmEvent.priority), 
             sentAt,
             eventType: isResolved ? 'resolved' : 'triggered',
         };

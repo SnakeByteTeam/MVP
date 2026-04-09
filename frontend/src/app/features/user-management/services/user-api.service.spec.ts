@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { API_BASE_URL } from '../tokens/api-base-url.token';
+import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { UserApiService } from './user-api.service';
 
 describe('UserApiService', () => {

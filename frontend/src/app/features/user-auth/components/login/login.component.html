@@ -7,33 +7,45 @@
     <h1>Benvenuto su View4Life</h1>
     <p class="auth-subtitle">Accedi con le tue credenziali per gestire monitoraggio e allarmi</p>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
       <label for="username">Username</label>
-      <input
-        id="username"
-        type="text"
-        formControlName="username"
-        (input)="onUsernameChange($any($event.target).value)"
-        placeholder="Inserisci username"
+      <input id="username" type="text" formControlName="username" placeholder="Inserisci username"
         autocomplete="username"
-      />
+        [attr.aria-invalid]="loginForm.controls.username.invalid && loginForm.controls.username.touched"
+        [attr.aria-describedby]="loginForm.controls.username.invalid && loginForm.controls.username.touched ? 'username-error' : null" />
+
+      @if (loginForm.controls.username.touched && loginForm.controls.username.invalid) {
+      <p id="username-error" class="auth-field-error" role="alert">
+        @if (loginForm.controls.username.errors?.['required']) {
+        L'username è obbligatorio.
+        } @else if (loginForm.controls.username.errors?.['minlength']) {
+        L'username deve avere almeno 3 caratteri.
+        }
+      </p>
+      }
 
       <label for="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        formControlName="password"
-        (input)="onPasswordChange($any($event.target).value)"
-        placeholder="Inserisci password"
+      <input id="password" type="password" formControlName="password" placeholder="Inserisci password"
         autocomplete="current-password"
-      />
+        [attr.aria-invalid]="loginForm.controls.password.invalid && loginForm.controls.password.touched"
+        [attr.aria-describedby]="loginForm.controls.password.invalid && loginForm.controls.password.touched ? 'password-error' : null" />
 
-      <button type="submit" [disabled]="isLoading" class="auth-submit">
+      @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+      <p id="password-error" class="auth-field-error" role="alert">
+        @if (loginForm.controls.password.errors?.['required']) {
+        La password è obbligatoria.
+        } @else if (loginForm.controls.password.errors?.['minlength']) {
+        La password deve avere almeno 12 caratteri.
+        }
+      </p>
+      }
+
+      <button type="submit" [disabled]="isLoading || loginForm.invalid" class="auth-submit">
         {{ isLoading ? 'Accesso in corso...' : 'Accedi' }}
       </button>
 
-      @if (errorType) {
-        <p class="auth-error" role="alert">{{ errorType }}</p>
+      @if (loginErrorMessage) {
+      <p class="auth-error" role="alert">{{ loginErrorMessage }}</p>
       }
     </form>
   </div>

@@ -46,8 +46,8 @@ CREATE TABLE "user" (
 );
 
 INSERT INTO "user" (username, surname, name, password, first_access, roleId) VALUES
-    ('test',        'test',     'test',      'ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff', FALSE, 1),
-    ('admin',       'admin',    'admin',     'c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec',  FALSE, 2),
+    ('test',        'test',     'test',      '623c92d8c3e80a6963599e42aa37d43f8f4f4e84c742bfe5cf26b33b6e5a281599dd9e948691b5f76566e526375ef46cc5485af55bac2a198b69b40333ac92fb', FALSE, 1),
+    ('admin',       'admin',    'admin',     '68196d44350ba7a579fa43b08309a166217432e5b29067b8d1012ccecb0c96963466da7386f86fd272f6bed9ba36ed6679c0ff222305eff7fc813959ebc9b590',  FALSE, 2),
     ('mrossi',      'Rossi',    'Mario',     'test',  TRUE,  1),
     ('gbianchi',    'Bianchi',  'Gioia',     'test',  TRUE,  1),
     ('lverdi',      'Verdi',    'Luca',      'test',  TRUE,  1),

@@ -1,0 +1,278 @@
+:host {
+    display: block;
+    position: relative;
+    z-index: 50;
+}
+
+.topbar-shell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.6rem 1.55rem;
+    background: linear-gradient(180deg, #14110f 0%, #221a14 45%, #31271e 100%);
+    border-bottom: 1px solid rgba(251, 191, 36, 0.55);
+    box-shadow: 0 1px 0 rgba(251, 191, 36, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.topbar-shell__main-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+}
+
+.topbar-warning-row {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 0.3rem;
+    width: 100%;
+    padding-top: .5em;
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.95rem;
+    min-width: 0;
+}
+
+.topbar-logo {
+    width: 2.9rem;
+    height: 2.9rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(251, 191, 36, 0.65);
+    background: linear-gradient(160deg, rgba(251, 191, 36, 0.35), rgba(252, 211, 77, 0.14));
+}
+
+.topbar-title {
+    margin: 0;
+    line-height: 1.1;
+    font-size: 1.58rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.topbar-breadcrumb {
+    font-size: 0.86rem;
+    color: rgba(255, 255, 255, 0.72);
+    margin-top: 0.1rem;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 2em;
+}
+
+.topbar-vimar-warning {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.44rem 0.85rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(251, 191, 36, 0.85);
+    background: rgba(120, 53, 15, 0.9);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.topbar-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 0.84rem;
+    border: 2px solid transparent;
+    min-height: 3.15rem;
+    padding: 0.5em;
+    font-size: 1.01rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    transition: background 120ms ease, border-color 120ms ease, filter 120ms ease;
+}
+
+.topbar-button-neutral {
+    color: #ffffff;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.topbar-button-neutral img {
+    filter: brightness(0) invert(1);
+    transition: filter 120ms ease;
+    border: 0;
+    border-radius: 0;
+    height: 1.8rem;
+    width: 1.8rem;
+}
+
+.topbar-button-neutral:hover {
+    background: transparent;
+	border: 2px solid rgba(251, 191, 36, 0.85);
+}
+
+.topbar-button-neutral:active {
+    background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
+    border-color: rgba(217, 119, 6, 0.65);
+    animation: btn-bounce 0.4s ease forwards;
+}
+
+.topbar-button-neutral:active img {
+    filter: brightness(0);
+}
+
+.topbar-button-neutral.notification-active {
+    background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
+    border-color: rgba(217, 119, 6, 0.65);
+    animation: btn-bounce 0.4s ease forwards;
+}
+
+.topbar-button-neutral.notification-active img {
+    filter: brightness(0);
+}
+
+.topbar-notification-count {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.1rem;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    padding: 0 0.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: #dc2626;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    color: #ffffff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.topbar-profile {
+    display: flex;
+    align-items: center;
+    border: 2px solid transparent;
+    border-radius: 0.92rem;
+    background: transparent;
+    min-height: 3.15rem;
+    padding: 0.44rem 0.62rem;
+    cursor: pointer;
+    position: relative;
+    transition: background 120ms ease, border-color 120ms ease;
+}
+
+.topbar-profile .topbar-avatar {
+    filter: brightness(0) invert(1);
+    transition: filter 120ms ease;
+}
+
+.topbar-profile:hover {
+    background: transparent;
+    border: 2px solid rgba(251, 191, 36, 0.85);
+}
+
+.topbar-profile.profile-active {
+    background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
+    border-color: rgba(217, 119, 6, 0.65);
+    animation: btn-bounce 0.4s ease forwards;
+}
+
+.topbar-profile.profile-active .topbar-avatar {
+    filter: brightness(0);
+}
+
+.topbar-profile.profile-disabled {
+    opacity: 0.68;
+    cursor: not-allowed;
+    filter: saturate(0.75);
+}
+
+.topbar-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.topbar-user-meta {
+    text-align: left;
+    line-height: 1.08;
+    color: #1f2937;
+    font-size: 0.93rem;
+}
+
+.topbar-user-meta p {
+    margin: 0;
+}
+
+@keyframes btn-bounce {
+    0%, 100% { transform: translateY(0); }
+    40%       { transform: translateY(-4px); }
+    70%       { transform: translateY(-2px); }
+}
+
+@keyframes btn-bounce-out {
+    0%   { transform: translateY(0); }
+    40%  { transform: translateY(4px); }
+    70%  { transform: translateY(2px); }
+    100% { transform: translateY(0); }
+}
+
+.topbar-profile:not(.profile-active) {
+    animation: btn-bounce-out 0.4s ease forwards;
+}
+
+.topbar-button-neutral:not(.notification-active) {
+    animation: btn-bounce-out 0.4s ease forwards;
+}
+
+.hamburger-btn {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .logout-button {
+        display: none;
+    }
+
+    .hamburger-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 2px solid rgba(251, 191, 36, 0.5);
+        border-radius: 0.6rem;
+        color: #fcd34d;
+        font-size: 1.3rem;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+    }
+
+    .topbar-shell {
+        padding-inline: 0.9rem;
+    }
+
+    .topbar-user-meta {
+        display: none;
+    }
+
+    .topbar-profile--desktop {
+        display: none;
+    }
+
+    .topbar-vimar-warning {
+        font-size: 0.68rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

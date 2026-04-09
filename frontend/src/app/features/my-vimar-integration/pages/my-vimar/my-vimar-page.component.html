@@ -1,0 +1,43 @@
+<section
+  class="relative grid min-h-[100dvh] place-items-center overflow-hidden bg-[radial-gradient(circle_at_12%_18%,#fde68a_0_8%,transparent_45%),radial-gradient(circle_at_82%_12%,#fcd34d_0_10%,transparent_48%),linear-gradient(140deg,#fff7d1_0%,#fef3c7_46%,#fef3c7_100%)] px-4 py-6 text-[#1f2933]">
+  <div
+    class="pointer-events-none absolute -left-36 bottom-[-8rem] h-[28rem] w-[28rem] rounded-full bg-[#fcd34d]/25 blur-3xl"
+    aria-hidden="true"></div>
+  <div
+    class="pointer-events-none absolute -right-40 top-[-8rem] h-[28rem] w-[28rem] rounded-full bg-[#fcd34d]/25 blur-3xl"
+    aria-hidden="true"></div>
+
+  <div class="relative z-10 w-full max-w-3xl">
+    <article
+      class="rounded-[1.25rem] border border-[#1f2933]/10 bg-[#fffdf8] p-6 shadow-[0_24px_54px_rgba(17,24,39,0.18),0_3px_12px_rgba(252,211,77,0.4)] sm:p-8">
+      <p class="text-[0.72rem] font-bold uppercase tracking-[0.13em] text-[#fcd34d]">Integrazione</p>
+
+      <div
+        class="mt-2 flex flex-col gap-3 border-b border-[#1f2933]/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div class="space-y-2">
+          <h1 class="text-[clamp(1.55rem,2.7vw,2rem)] font-bold leading-tight text-[#1f2933]">Integrazione MyVimar</h1>
+          <p class="max-w-2xl text-sm font-medium leading-6 text-[#5c6470]">
+            Collega o rimuovi l'account MyVimar associato al sistema.
+          </p>
+        </div>
+
+        <div
+          class="inline-flex w-fit items-center rounded-full border border-[#fcd34d]/50 bg-[#fff7d1] px-3 py-1 text-xs font-semibold text-[#7c5d00] shadow-sm">
+          Stato account
+        </div>
+      </div>
+
+      <div class="mt-6">
+        @if (account$ | async; as account) {
+        <app-my-vimar-account-status [account]="account" [isLoading]="isLoading" [error]="error"
+          (linkClicked)="onLinkAccount()" (unlinkClicked)="onUnlinkAccount()" />
+        } @else {
+        <div
+          class="rounded-xl border border-[#b7c3d1]/70 bg-white/80 px-4 py-4 text-sm font-medium text-[#5c6470] shadow-sm">
+          Caricamento stato account in corso...
+        </div>
+        }
+      </div>
+    </article>
+  </div>
+</section>

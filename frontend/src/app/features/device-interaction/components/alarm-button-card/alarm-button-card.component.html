@@ -1,0 +1,16 @@
+<article class="device-card">
+  <header>
+    <h3>{{ device().name }}</h3>
+    <p>Pulsante allarme · {{ device().status }}</p>
+  </header>
+  @if (error()) {
+    <p class="device-card__error">{{ error() }}</p>
+  }
+  <div class="device-card__actions">
+    @for (action of device().actions; track action.key) {
+      <button type="button" [disabled]="isExecuting() || !!action.disabled" (click)="onAction(action.key)">
+        {{ action.label }}
+      </button>
+    }
+  </div>
+</article>

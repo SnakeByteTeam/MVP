@@ -1,0 +1,79 @@
+<section class="auth-shell">
+  <div class="auth-bg-orb auth-bg-orb-left" aria-hidden="true"></div>
+  <div class="auth-bg-orb auth-bg-orb-right" aria-hidden="true"></div>
+
+  <div class="auth-card">
+    <p class="auth-kicker">Primo accesso</p>
+    <h1>Imposta la tua password personale</h1>
+    <p class="auth-subtitle">
+      Hai appena effettuato il primo login con una password temporanea. Conferma le credenziali e scegli una nuova
+      password per continuare.
+    </p>
+
+    <ul class="auth-hints" aria-label="Indicazioni per il primo accesso">
+      <li>Usa l'username assegnato all'account.</li>
+      <li>Inserisci la password temporanea ricevuta.</li>
+      <li>La nuova password deve avere almeno 12 caratteri ed essere diversa da quella temporanea.</li>
+    </ul>
+
+    <form [formGroup]="firstAccessForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+      <label for="username">Username</label>
+      <input id="username" type="text" formControlName="username" placeholder="Inserisci username"
+        autocomplete="username"
+        [attr.aria-invalid]="firstAccessForm.controls.username.invalid && firstAccessForm.controls.username.touched"
+        [attr.aria-describedby]="firstAccessForm.controls.username.invalid && firstAccessForm.controls.username.touched ? 'username-error' : null" />
+
+      @if (firstAccessForm.controls.username.touched && firstAccessForm.controls.username.invalid) {
+      <p id="username-error" class="auth-field-error" role="alert">
+        @if (firstAccessForm.controls.username.errors?.['required']) {
+        L'username è obbligatorio.
+        } @else if (firstAccessForm.controls.username.errors?.['minlength']) {
+        L'username deve avere almeno 3 caratteri.
+        }
+      </p>
+      }
+
+      <label for="temporaryPassword">Password temporanea</label>
+      <input id="temporaryPassword" type="password" formControlName="temporaryPassword"
+        placeholder="Inserisci password temporanea" autocomplete="current-password"
+        [attr.aria-invalid]="firstAccessForm.controls.temporaryPassword.invalid && firstAccessForm.controls.temporaryPassword.touched"
+        [attr.aria-describedby]="firstAccessForm.controls.temporaryPassword.invalid && firstAccessForm.controls.temporaryPassword.touched ? 'temporaryPassword-error' : null" />
+
+      @if (firstAccessForm.controls.temporaryPassword.touched && firstAccessForm.controls.temporaryPassword.invalid) {
+      <p id="temporaryPassword-error" class="auth-field-error" role="alert">
+        @if (firstAccessForm.controls.temporaryPassword.errors?.['required']) {
+        La password temporanea è obbligatoria.
+        } @else if (firstAccessForm.controls.temporaryPassword.errors?.['minlength']) {
+        La password temporanea deve avere almeno 12 caratteri.
+        }
+      </p>
+      }
+
+      <label for="newPassword">Nuova password</label>
+      <input id="newPassword" type="password" formControlName="newPassword" placeholder="Scegli una nuova password"
+        autocomplete="new-password"
+        [attr.aria-invalid]="(firstAccessForm.controls.newPassword.invalid || !!firstAccessForm.errors?.['sameAsTemporaryPassword']) && firstAccessForm.controls.newPassword.touched"
+        [attr.aria-describedby]="(firstAccessForm.controls.newPassword.invalid || !!firstAccessForm.errors?.['sameAsTemporaryPassword']) && firstAccessForm.controls.newPassword.touched ? 'newPassword-error' : null" />
+      @if (firstAccessForm.controls.newPassword.touched && (firstAccessForm.controls.newPassword.invalid ||
+      firstAccessForm.errors?.['sameAsTemporaryPassword'])) {
+      <p id="newPassword-error" class="auth-field-error" role="alert">
+        @if (firstAccessForm.controls.newPassword.errors?.['required']) {
+        La nuova password è obbligatoria.
+        } @else if (firstAccessForm.controls.newPassword.errors?.['minlength']) {
+        La nuova password deve avere almeno 12 caratteri.
+        } @else if (firstAccessForm.errors?.['sameAsTemporaryPassword']) {
+        La nuova password deve essere diversa da quella temporanea.
+        }
+      </p>
+      }
+
+      <button type="submit" [disabled]="isLoading || firstAccessForm.invalid" class="auth-submit">
+        {{ isLoading ? 'Aggiornamento in corso...' : 'Conferma e continua' }}
+      </button>
+
+      @if (loginErrorMessage) {
+      <p class="auth-error" role="alert">{{ loginErrorMessage }}</p>
+      }
+    </form>
+  </div>
+</section>

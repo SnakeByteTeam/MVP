@@ -1,0 +1,5 @@
+.alarm-management__status,
+.alarm-management__error,
+.alarm-management__empty {
+    margin-top: 0.75rem;
+}

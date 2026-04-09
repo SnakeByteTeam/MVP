@@ -1,0 +1,89 @@
+.room-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.room-list h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  font-family: var(--care-font-display);
+  color: #0f172a;
+}
+
+.room-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.room-list__item {
+  --room-button-accent: #fcd34d;
+  --room-button-accent-strong: #f59e0b;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.68rem 0.72rem;
+  border: 1px solid rgba(217, 119, 6, 0.36);
+  border-radius: 0.8rem;
+  background: linear-gradient(120deg, var(--room-button-accent) 0%, #fbbf24 100%);
+  color: #1f2937;
+  font-size: 1.06rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease, box-shadow 140ms ease;
+  box-shadow: 0 8px 14px rgba(245, 158, 11, 0.24);
+  min-width: 0;
+}
+
+.room-list__item:hover {
+  background: rgba(254, 243, 199, 0.75);
+  border-color: rgba(245, 158, 11, 0.28);
+  transform: translateX(1px);
+}
+
+.room-list__item-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.room-list__item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.3rem;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 9999px;
+  background: rgba(254, 243, 199, 0.75);
+  color: #7c2d12;
+  font-size: 0.8rem;
+}
+
+.room-list__item-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.room-list__alarm {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #7f1d1d;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 999px;
+  background: rgba(254, 226, 226, 0.9);
+  padding: 0.15rem 0.45rem;
+}
+
+.room-list__empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}

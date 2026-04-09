@@ -1,0 +1,45 @@
+.apartment-monitor {
+  gap: 1.25rem;
+}
+
+.apartment-monitor__hero-side {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: end;
+  min-width: 0;
+}
+
+.apartment-monitor__selector {
+  min-width: 100%;
+  max-width: 19rem;
+}
+
+.apartment-monitor__content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.apartment-monitor__panel {
+  min-height: 100%;
+}
+
+.apartment-monitor__panel--highlight {
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 0 12px 24px -22px rgba(245, 158, 11, 0.55);
+}
+
+@media (max-width: 960px) {
+  .apartment-monitor__content {
+    grid-template-columns: 1fr;
+  }
+
+  .apartment-monitor__hero-side {
+    justify-items: stretch;
+    min-width: 0;
+  }
+
+  .apartment-monitor__selector {
+    max-width: none;
+  }
+}

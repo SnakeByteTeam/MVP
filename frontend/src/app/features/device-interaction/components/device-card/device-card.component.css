@@ -1,0 +1,120 @@
+.device-card {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.device-card h3,
+.device-card p {
+  margin: 0;
+}
+
+.device-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.device-card h3 {
+  font-size: 1.08rem;
+  font-family: var(--care-font-display);
+  font-weight: 700;
+  line-height: 1.25;
+  color: #0f172a;
+}
+
+.device-card__meta {
+  margin-top: 0.2rem;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.device-card__status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.device-card__status--online {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.device-card__status--offline {
+  border: 1px solid #fecdd3;
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.device-card__writes {
+  display: grid;
+  gap: 0.55rem;
+  max-height: clamp(12rem, 42vh, 20rem);
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.device-card__writes::-webkit-scrollbar {
+  width: 6px;
+}
+
+.device-card__writes::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.device-card__write-row {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.7rem;
+}
+
+.device-card__write-row label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.device-card__write-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.device-card__write-controls select,
+.device-card__write-controls button {
+  flex: 1 1 8rem;
+}
+
+.device-card__write-controls .care-button {
+  border: 1px solid rgba(217, 119, 6, 0.36);
+  background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
+  color: #1f2937;
+  box-shadow: 0 8px 14px rgba(245, 158, 11, 0.24);
+}
+
+.device-card__write-controls .care-button:hover {
+  background: rgba(254, 243, 199, 0.75);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.device-card__error {
+  margin: 0;
+  border: 1px solid #fecdd3;
+  border-radius: 0.65rem;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 0.88rem;
+  padding: 0.52rem 0.64rem;
+}
+
+.device-card__no-write {
+  color: #475569;
+  font-size: 0.9rem;
+}

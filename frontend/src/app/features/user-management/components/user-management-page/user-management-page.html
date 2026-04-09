@@ -1,0 +1,42 @@
+<section aria-label="Gestione operatori sanitari"
+    class="care-page care-dot-grid sidebar-page user-management-page">
+
+    <header class="care-page__hero">
+        <div>
+            <p class="care-eyebrow">Utenti</p>
+            <h1 class="care-title">Gestione operatori sanitari</h1>
+            <p class="care-subtitle">Crea nuovi profili OSS e gestisci l'anagrafica utenti esistente.</p>
+        </div>
+    </header>
+
+    <div class="min-h-0 flex-1">
+        <app-create-user-form [errorType]="formError()" [isOpen]="isCreateFormOpen()" (openRequest)="openCreateForm()"
+            (formSubmit)="onFormSubmit($event)" (closeRequest)="closeCreateForm()">
+        </app-create-user-form>
+
+        <div class="h-4 lg:h-6" aria-hidden="true"></div>
+
+        <main class="min-h-[22rem]">
+            @if (users$ | async; as users) {
+            <app-user-list [users]="users" (deleteUser)="onUserDeleted($event)">
+            </app-user-list>
+            } @else {
+            <div
+                class="flex min-h-[22rem] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white/60 shadow-sm backdrop-blur-sm">
+                <div
+                    class="flex h-10 w-10 animate-spin items-center justify-center rounded-full border-2 border-slate-200 border-t-emerald-500">
+                </div>
+                <p class="mt-4 text-sm font-medium text-slate-500">Caricamento operatori in corso…</p>
+            </div>
+            }
+        </main>
+    </div>
+
+    @if (createdResponse(); as response) {
+    @if (createdUser(); as createdUser) {
+    <app-user-created-dialog [response]="response" [user]="createdUser" (closed)="onDialogClosed()">
+    </app-user-created-dialog>
+    }
+    }
+
+</section>

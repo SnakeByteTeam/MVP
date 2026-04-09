@@ -1,0 +1,21 @@
+.dashboard-page__cards {
+	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+	gap: 1rem;
+}
+
+.dashboard-page__card {
+	min-height: 9.5rem;
+}
+
+.dashboard-page__card-title {
+	margin: 0;
+	font-family: var(--care-font-display);
+	font-size: 1.03rem;
+	color: var(--care-primary-strong);
+}
+
+.dashboard-page__card-text {
+	margin: 0.55rem 0 0;
+	color: var(--care-muted);
+	font-size: 0.94rem;
+}

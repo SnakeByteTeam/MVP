@@ -1,0 +1,30 @@
+<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <header class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+        <h2 class="text-sm font-bold tracking-tight text-slate-900">{{ title() }}</h2>
+
+        @if (showCreateButton()) {
+        <button type="button" (click)="onCreateRequest()" [attr.aria-label]="createButtonAriaLabel()"
+            class="care-btn care-btn--primary care-btn--icon care-btn--compact text-base leading-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400">
+            +
+        </button>
+        }
+    </header>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm" [attr.aria-label]="caption()">
+            <caption class="sr-only">{{ caption() }}</caption>
+            <thead>
+                <tr class="border-b border-slate-100">
+                    @for (column of columns(); track column.id) {
+                    <th scope="col" class="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        {{
+                        column.label }}</th>
+                    }
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                <ng-content />
+            </tbody>
+        </table>
+    </div>
+</section>

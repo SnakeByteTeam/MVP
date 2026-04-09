@@ -1,0 +1,84 @@
+<dialog open aria-labelledby="assign-apartment-title"
+    class="fixed inset-0 z-50 m-auto w-[95vw] max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 shadow-2xl backdrop:bg-slate-900/50 focus:outline-none">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+        <div class="flex items-center gap-3">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                <svg class="h-4 w-4 text-amber-700" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+            </div>
+            <div>
+                <h2 id="assign-apartment-title" class="text-sm font-bold text-slate-900"
+                    style="font-family:'Syne',sans-serif">
+                    Assegna appartamento
+                </h2>
+                <p class="text-xs text-slate-500">Seleziona un appartamento non ancora assegnato</p>
+            </div>
+        </div>
+        <button type="button" (click)="onCancel()" aria-label="Chiudi"
+            class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-5 py-5">
+
+        <!-- Ward context pill -->
+        <div class="mb-4 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
+            <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21" />
+            </svg>
+            Reparto: <span class="font-semibold text-slate-700">{{ wardId() }}</span>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-3">
+            <div class="space-y-1">
+                <label for="apartment-id"
+                    class="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Appartamento <span class="text-rose-500">*</span>
+                </label>
+                <select id="apartment-id" formControlName="plantId"
+                    class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-amber-300 focus:bg-white focus:ring-3 focus:ring-amber-100">
+                    <option [ngValue]="null">Seleziona un appartamento…</option>
+                    @for (apartment of availablePlants(); track apartment.id) {
+                    <option [ngValue]="apartment.id">{{ apartment.name }}</option>
+                    }
+                </select>
+                <p class="text-[11px] text-slate-400">Campo obbligatorio.</p>
+            </div>
+
+            @if (form.controls.plantId.touched && form.controls.plantId.invalid) {
+            <p role="alert"
+                class="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                <svg class="mt-0.5 h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clip-rule="evenodd" />
+                </svg>
+                Seleziona un appartamento.
+            </p>
+            }
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-3">
+        <button type="button" (click)="onCancel()"
+            class="cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            Annulla
+        </button>
+        <button type="submit" (click)="onSubmit()" [disabled]="form.invalid"
+            class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-300 px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-400">
+            Assegna
+        </button>
+    </div>
+
+</dialog>

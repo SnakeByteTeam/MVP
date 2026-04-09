@@ -1,0 +1,8 @@
+@if (isVisible()) {
+<output
+    class="notification-badge inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 shadow-sm shadow-rose-100/60"
+    aria-live="polite" aria-atomic="true" [attr.aria-label]="ariaLabel()">
+    <span class="h-2.5 w-2.5 rounded-full bg-rose-500"></span>
+    {{ displayCount() }}
+</output>
+}

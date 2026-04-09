@@ -1,0 +1,45 @@
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { NotificationListVm } from '../../models/notification-list-vm.model';
+import { NotificationService } from '../../services/notification.service';
+import { NotificationItemComponent } from '../notification-item-component/notification-item-component';
+import { Observable, map } from 'rxjs';
+
+@Component({
+  selector: 'app-notification-page-component',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AsyncPipe, NotificationItemComponent],
+  providers: [NotificationService],
+  templateUrl: './notification-page-component.html',
+  styleUrl: './notification-page-component.css',
+})
+export class NotificationPageComponent {
+  private readonly notificationService = inject(NotificationService);
+  private readonly route = inject(ActivatedRoute);
+
+  public readonly vm$: Observable<NotificationListVm> = this.notificationService.vm$;
+  public readonly highlightedNotificationId$: Observable<string | null> = this.route.queryParamMap.pipe(
+    map((params) => {
+      const focusedId = params.get('focus');
+      return focusedId && focusedId.trim().length > 0 ? focusedId : null;
+    })
+  );
+  public readonly skeletonRows = [0, 1, 2];
+
+  public onNotificationRemoved(notificationId: string): void {
+    this.notificationService.removeNotification(notificationId);
+  }
+
+  public onClearAllNotifications(vm: NotificationListVm): void {
+    this.notificationService.clearAllNotifications(vm.notifications);
+  }
+
+  public unreadSummaryLabel(unreadCount: number): string {
+    if (unreadCount === 1) {
+      return '1 notifica non letta';
+    }
+
+    return `${unreadCount} notifiche non lette`;
+  }
+}

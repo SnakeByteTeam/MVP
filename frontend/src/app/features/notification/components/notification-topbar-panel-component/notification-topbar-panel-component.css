@@ -1,0 +1,209 @@
+@keyframes notification-preview-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes notification-preview-item-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-topbar-panel {
+  position: fixed;
+  top: 4.9rem;
+  right: 1rem;
+  z-index: 75;
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: 24rem;
+  overflow: auto;
+  border: 1px solid #f59e0b;
+  border-radius: 0.95rem;
+  background: #ffffff;
+  box-shadow: 0 24px 46px -30px rgba(15, 23, 42, 0.62);
+  padding: 0.9rem;
+  animation: notification-preview-panel-enter 180ms ease-out both;
+}
+
+.notification-topbar-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.75rem;
+}
+
+.notification-topbar-panel__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.notification-topbar-panel__header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.notification-topbar-panel__view-all,
+.notification-topbar-panel__clear-all {
+  border: 1px solid #f59e0b;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 0.65rem;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.notification-topbar-panel__view-all:hover,
+.notification-topbar-panel__clear-all:hover {
+  background: #fde68a;
+  border-color: #d97706;
+}
+
+.notification-topbar-panel__empty {
+  margin: 0;
+  padding: 0.4rem 0.2rem;
+  color: #475569;
+  font-size: 0.88rem;
+}
+
+.notification-topbar-panel__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notification-topbar-panel__item {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  background: #ffffff;
+  animation: notification-preview-item-enter 220ms ease-out both;
+}
+
+.notification-topbar-panel__item:hover {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+
+.notification-topbar-panel__open {
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.notification-topbar-panel__open:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+  border-radius: 0.45rem;
+}
+
+.notification-topbar-panel__item:nth-child(1) {
+  animation-delay: 24ms;
+}
+
+.notification-topbar-panel__item:nth-child(2) {
+  animation-delay: 48ms;
+}
+
+.notification-topbar-panel__item:nth-child(3) {
+  animation-delay: 72ms;
+}
+
+.notification-topbar-panel__item:nth-child(4) {
+  animation-delay: 96ms;
+}
+
+.notification-topbar-panel__item:nth-child(5) {
+  animation-delay: 120ms;
+}
+
+.notification-topbar-panel__item:nth-child(6) {
+  animation-delay: 144ms;
+}
+
+.notification-topbar-panel__item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.notification-topbar-panel__title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.notification-topbar-panel__title-wrap {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.notification-topbar-panel__time {
+  display: inline-block;
+  margin-top: 0.22rem;
+  margin-left: 0.7rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.notification-topbar-panel__remove {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 0.45rem;
+  border: 1px solid #fcd34d;
+  background: #ffffff;
+  color: #b45309;
+  cursor: pointer;
+}
+
+.notification-topbar-panel__remove:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.notification-topbar-panel__remove-icon {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notification-topbar-panel,
+  .notification-topbar-panel__item {
+    animation: none;
+  }
+}

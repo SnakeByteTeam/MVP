@@ -1,0 +1,21 @@
+<section class="room-detail care-page care-dot-grid" aria-label="Dispositivi con endpoint">
+  <header class="care-page__hero">
+    <div>
+      <a class="room-detail__back-button" routerLink="/apartment-monitor">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Torna al monitor appartamento
+      </a>
+      <h1 class="care-title">Panoramica allarmi e dispositivi</h1>
+      <p class="care-subtitle">Tutti i dispositivi con endpoint scrivibili, organizzati per stanza.</p>
+    </div>
+
+    <p class="care-chip">
+      <span class="care-chip__dot" aria-hidden="true"></span>
+      Controllo centralizzato
+    </p>
+  </header>
+
+  <app-endpoint-table />
+</section>

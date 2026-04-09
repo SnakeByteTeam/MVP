@@ -1,0 +1,72 @@
+<section aria-label="Configurazione allarmi" class="alarm-config-page care-page care-dot-grid sidebar-page">
+    <header class="care-page__hero">
+        <div>
+            <p class="care-eyebrow">Allarmi</p>
+            <h1 class="care-title">Configurazione allarmi</h1>
+            <p class="care-subtitle">Gestisci soglie e pianificazioni con una vista tabellare unica.</p>
+        </div>
+    </header>
+
+    @if (error(); as errorMessage) {
+    @if (errorMessage) {
+    <p role="alert" aria-live="polite"
+        class="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-sm">
+        {{ errorMessage }}
+    </p>
+    }
+    }
+
+    <app-alarm-table-shell [title]="'Allarmi'" [caption]="'Tabella configurazione allarmi'" [columns]="columns"
+        [showCreateButton]="true" [createButtonAriaLabel]="'Crea nuova regola allarme'"
+        (createRequested)="onCreateNew()">
+        @if (rows().length === 0) {
+        <tr>
+            <td [attr.colspan]="columns.length" class="px-5 py-14 text-center text-sm text-slate-600">
+                @if (error()) {
+                Impossibile caricare le regole di allarme. Verifica la sessione o riprova tra poco.
+                } @else {
+                Nessuna regola configurata.
+                }
+            </td>
+        </tr>
+        } @else {
+        @for (row of rows(); track row.id) {
+        <tr class="group transition-colors hover:bg-slate-50/80">
+            <td class="px-5 py-3.5 align-middle text-sm font-semibold text-slate-900">
+                {{ row.name }}
+            </td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.position }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <app-alarm-priority-indicator [priority]="row.priority" />
+            </td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.threshold }}</td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.armingTime }}</td>
+            <td class="px-5 py-3.5 align-middle text-sm text-slate-700">{{ row.dearmingTime }}</td>
+            <td class="px-5 py-3.5 align-middle">
+                <div class="flex items-center gap-2">
+                    <app-alarm-action-button label="MODIFICA" [ariaLabel]="'Modifica regola ' + row.name"
+                        (pressed)="onEdit(row.id)" />
+                    <app-alarm-action-button label="ELIMINA" tone="danger" [ariaLabel]="'Elimina regola ' + row.name"
+                        (pressed)="onDelete(row.id, row.name)" />
+                    <app-alarm-toggle-switch [checked]="row.isEnabled" [disabled]="pendingToggleRuleId() === row.id"
+                        [ariaLabel]="'Abilita regola ' + row.name" (toggled)="onToggleEnabled(row.id, $event)" />
+                </div>
+            </td>
+        </tr>
+        }
+        }
+    </app-alarm-table-shell>
+
+    <app-modal-shell [open]="isModalOpen()" [title]="modalTitle()"
+        description="Compila i campi richiesti e conferma per salvare la regola." (closed)="onModalClosed()">
+        @if (isModalOpen()) {
+        <app-alarm-config-form [mode]="editingRule() ? 'edit' : 'create'" [initialRule]="editingRule()"
+            (submittedForm)="onFormSubmitted($event)" (cancelled)="onModalClosed()" />
+        }
+    </app-modal-shell>
+
+    @if (pendingDelete()) {
+    <app-confirm-dialog [message]="getDeleteConfirmMessage()" confirmLabel="Elimina" cancelLabel="Annulla"
+        (confirmed)="onDeleteConfirmed()" (cancelled)="onDeleteCancelled()" />
+    }
+</section>

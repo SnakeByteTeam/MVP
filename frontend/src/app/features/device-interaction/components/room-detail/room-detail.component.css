@@ -1,0 +1,31 @@
+.room-detail {
+  gap: 1.1rem;
+}
+
+.room-detail__back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.7rem;
+  border: 1px solid rgba(217, 119, 6, 0.36);
+  border-radius: 0.8rem;
+  background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);
+  color: #1f2937;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.48rem 0.72rem;
+  box-shadow: 0 8px 14px rgba(245, 158, 11, 0.24);
+  transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+
+.room-detail__back-button:hover {
+  background: rgba(254, 243, 199, 0.75);
+  border-color: rgba(245, 158, 11, 0.28);
+  transform: translateX(-1px);
+}
+
+.room-detail__back-button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}

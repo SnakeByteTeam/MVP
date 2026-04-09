@@ -1,0 +1,91 @@
+# system
+.DS_Store
+Thumbs.db
+
+# dependencies
+node_modules/
+deploy-digitalocean.mjs
+
+# build outputs
+dist/
+build/
+out-tsc/
+bazel-out/
+*.tsbuildinfo
+
+# keep frontend API DTOs under features/*/models/out tracked
+!frontend/src/app/features/user-management/models/out/
+!frontend/src/app/features/user-management/models/out/*.ts
+
+#backend out ports
+!backend/src/alarms/application/ports/out
+!backend/src/alarms/application/ports/out/*.ts
+
+# temporary files
+tmp/
+.temp/
+.tmp/
+*.tmp
+*.swp
+*.swo
+
+# logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# test / coverage
+coverage/
+.nyc_output/
+
+# runtime / diagnostics
+pids/
+*.pid
+*.seed
+*.pid.lock
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# frontend cache
+.angular/cache/
+.sass-cache/
+connect.lock
+libpeerconnection.log
+testem.log
+typings/
+
+# IDEs
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+deploy-digitalocean.mjs
+
+# VS Code
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+!backend/src/alarms/application/ports/out
+!backend/src/alarms/application/ports/out/*.ts
+
+
+# local documentation / notes
+.ignore/
+.vscode/settings.json
+deploy-digitalocean-preserve-db.mjs

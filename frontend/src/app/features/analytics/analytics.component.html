@@ -1,0 +1,96 @@
+<section class="care-page care-dot-grid sidebar-page" aria-label="Analytics reparto">
+<header class="care-page__hero">
+    <div>
+        <p class="care-eyebrow">Analytics</p>
+        <h1 class="care-title">Cruscotto analitico</h1>
+        <p class="care-subtitle">Andamento energetico, presenza e anomalie per appartamento monitorato.</p>
+    </div>
+    <div class="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[20rem]">
+        <button (click)="onRefresh()" class="care-button inline-flex items-center justify-center gap-2 whitespace-nowrap">
+            <img class="h-5 w-5" src="reload.png" alt="" aria-hidden="true">
+            Aggiorna grafici
+        </button>
+        <div class="care-field" *ngIf="selectedApartmentId$ | async as selectedId">
+            <label for="apartment-select">Appartamento monitorato</label>
+            <div class="relative group z-0">
+                <select [value]="selectedId" id="apartment-select" (change)="onApartmentChange($event)"
+                    class="care-select block w-full cursor-pointer appearance-none pr-10 transition-all group-hover:border-amber-300">
+                    <option *ngFor="let apt of apartments$ | async" [value]="apt.id" class="bg-white text-slate-700">
+                        {{ apt.name }} - {{ apt.id }}
+                    </option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-amber-600">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div *ngIf="analytics | async as data; else loading" class="grid grid-cols-6 w-full gap-8 content-start">
+
+    <app-energy-consumption-chart 
+        *ngIf="getChartByMetric(data, 'plant-consumption') as info"
+        class="col-span-6 2xl:col-span-3 w-full"
+        [chartInfo]="info"
+        [showSuggestions]="true">
+    </app-energy-consumption-chart>
+
+    <app-temperature-variations-chart 
+        *ngIf="getChartByMetric(data, 'thermostat-temperature') as info"
+        class="col-span-6 2xl:col-span-3"
+        [chartInfo]="info"
+        [showSuggestions]="true">
+    </app-temperature-variations-chart>
+
+    <app-alarm-frequency-chart 
+        *ngIf="getChartByMetric(data, 'ward-alarms-frequency') as info"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
+        [chartInfo]="info"
+        [showSuggestions]="false">
+    </app-alarm-frequency-chart>
+
+    <app-alarms-sent-resolved-chart 
+        *ngIf="getChartByMetric(data, 'ward-resolved-alarm') as info"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
+        [chartInfo]="info"
+        [showSuggestions]="false">
+    </app-alarms-sent-resolved-chart>
+
+    <app-fall-frequency-chart 
+        *ngIf="getChartByMetric(data, 'ward-falls') as info"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
+        [chartInfo]="info"
+        [showSuggestions]="false">
+    </app-fall-frequency-chart>
+
+    <app-plant-anomalies-chart 
+        *ngIf="getChartByMetric(data, 'plant-anomalies') as info"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
+        [chartInfo]="info"
+        [showSuggestions]="false">
+    </app-plant-anomalies-chart>
+
+    <app-presence-detection-chart 
+        *ngIf="getChartByMetric(data, 'sensor-presence') as info"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
+        [chartInfo]="info"
+        [showSuggestions]="false">
+    </app-presence-detection-chart>
+
+    <app-prolonged-presence-chart 
+        *ngIf="getChartByMetric(data, 'sensor-long-presence') as info"
+        class="col-span-6 lg:col-span-3 2xl:col-span-2"
+        [chartInfo]="info"
+        [showSuggestions]="false">
+    </app-prolonged-presence-chart>
+
+</div>
+
+
+<ng-template #loading>
+    <p class="care-loading" aria-live="polite">Caricamento dati in corso...</p>
+</ng-template>
+</section>

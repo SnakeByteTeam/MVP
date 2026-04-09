@@ -1,0 +1,185 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.auth-shell {
+  --bg: #fef3c7;
+  --card: #fffdf8;
+  --ink: #1f2933;
+  --muted: #5c6470;
+  --accent: #fcd34d;
+  --accent-strong: #fcd34d;
+  --focus: #fcd34d;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at 12% 18%, #fde68a 0 8%, transparent 45%),
+    radial-gradient(circle at 82% 12%, #fcd34d 0 10%, transparent 48%),
+    linear-gradient(140deg, #fff7d1 0%, var(--bg) 46%, #fef3c7 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-bg-orb {
+  position: absolute;
+  width: 28rem;
+  height: 28rem;
+  border-radius: 9999px;
+  opacity: 0.25;
+  filter: blur(24px);
+  pointer-events: none;
+}
+
+.auth-bg-orb-left {
+  background: #fcd34d;
+  left: -9rem;
+  bottom: -8rem;
+}
+
+.auth-bg-orb-right {
+  background: #fcd34d;
+  right: -10rem;
+  top: -8rem;
+}
+
+.auth-card {
+  width: min(92vw, 32rem);
+  background: color-mix(in srgb, var(--card) 88%, white 12%);
+  border: 1px solid color-mix(in srgb, var(--ink) 18%, transparent 82%);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 24px 54px rgba(17, 24, 39, 0.18),
+    0 3px 12px rgba(252, 211, 77, 0.4);
+  padding: 1.9rem;
+  position: relative;
+  z-index: 1;
+  animation: card-enter 260ms ease-out;
+}
+
+.auth-kicker {
+  margin: 0;
+  font: 700 0.72rem/1.1 "Avenir Next", "Gill Sans", sans-serif;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1 {
+  margin: 0.45rem 0 0;
+  font: 700 clamp(1.55rem, 2.7vw, 2rem)/1.12 "Avenir Next", "Trebuchet MS", sans-serif;
+  color: var(--ink);
+}
+
+.auth-subtitle {
+  margin: 0.6rem 0 1rem;
+  color: var(--muted);
+  font: 500 0.95rem/1.45 "Avenir Next", "Gill Sans", sans-serif;
+}
+
+.auth-hints {
+  margin: 0 0 1.2rem;
+  padding: 0 0 0 1.15rem;
+  display: grid;
+  gap: 0.45rem;
+  color: #32404d;
+  font: 500 0.88rem/1.45 "Avenir Next", "Gill Sans", sans-serif;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.72rem;
+}
+
+label {
+  font: 600 0.82rem/1.2 "Avenir Next", "Gill Sans", sans-serif;
+  color: #2e3a46;
+}
+
+input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #b7c3d1;
+  background: #ffffff;
+  padding: 0.74rem 0.86rem;
+  color: #111827;
+  font: 500 0.94rem/1.2 "Avenir Next", "Gill Sans", sans-serif;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+input::placeholder {
+  color: #7f8b97;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 35%, transparent 65%);
+}
+
+input.ng-invalid.ng-touched {
+  border-color: #b91c1c;
+}
+
+.auth-field-error {
+  margin: -0.25rem 0 0;
+  color: #b91c1c;
+  font: 600 0.82rem/1.35 "Avenir Next", "Gill Sans", sans-serif;
+}
+
+.auth-submit {
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 0.78rem 1rem;
+  margin-top: 0.4rem;
+  background: linear-gradient(120deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: #1f2933;
+  font: 700 0.95rem/1 "Avenir Next", "Trebuchet MS", sans-serif;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 140ms ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.auth-submit:disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+.auth-error {
+  margin: 0.35rem 0 0;
+  color: #b91c1c;
+  font: 600 0.82rem/1.35 "Avenir Next", "Gill Sans", sans-serif;
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-card {
+    padding: 1.35rem;
+    border-radius: 1rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .auth-hints {
+    font-size: 0.84rem;
+  }
+}

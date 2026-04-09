@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { WardsController } from './adapters/in/wards.controller';
+import { GuardModule } from 'src/guard/guard.module';
 import {
   CREATE_WARD_USE_CASE,
   DELETE_WARD_USE_CASE,
@@ -76,6 +77,7 @@ import { FIND_ALL_PLANTS_BY_WARD_ID_REPOSITORY } from './application/repository/
 import { REMOVE_PLANT_FROM_WARD_REPOSITORY } from './application/repository/remove-plant-from-ward-repository.interface';
 
 @Module({
+  imports: [GuardModule],
   controllers: [
     WardsController,
     WardsPlantsRelationshipsController,

@@ -92,6 +92,28 @@ describe('LoginComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
+  it('invoca login anche con valori presenti solo nel DOM (autofill browser)', () => {
+    authServiceMock.login.mockReturnValue(
+      of({
+        userId: 'u1',
+        username: 'mrossi',
+        role: UserRole.OPERATORE_SANITARIO,
+        accessToken: 'jwt-token',
+        isFirstAccess: false,
+      })
+    );
+
+    const usernameInput = fixture.nativeElement.querySelector('#username') as HTMLInputElement;
+    const passwordInput = fixture.nativeElement.querySelector('#password') as HTMLInputElement;
+
+    usernameInput.value = 'mrossi';
+    passwordInput.value = userCredential;
+
+    component.onSubmit();
+
+    expect(authServiceMock.login).toHaveBeenCalledWith('mrossi', userCredential);
+  });
+
   it('invoca login e naviga su returnUrl se presente', () => {
     activatedRouteMock.snapshot.queryParamMap.get.mockReturnValue('/vimar-link');
     authServiceMock.login.mockReturnValue(

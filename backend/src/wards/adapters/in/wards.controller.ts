@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateWardReqDto } from '../../infrastructure/dtos/in/create-ward-req.dto';
 import { UpdateWardReqDto } from '../../infrastructure/dtos/in/update-ward-req.dto';
@@ -27,6 +28,8 @@ import { CreateWardResDto } from '../../infrastructure/dtos/out/create-ward-res.
 import { plainToInstance } from 'class-transformer';
 import { FindAllWardsResDto } from '../../infrastructure/dtos/out/find-all-wards-res.dto';
 import { UpdateWardResDto } from '../../infrastructure/dtos/out/update-ward-res.dto';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { UserGuard } from 'src/guard/user/user.guard';
 
 @Controller('wards')
 export class WardsController {
@@ -41,6 +44,7 @@ export class WardsController {
     private readonly deleteWardUseCase: DeleteWardUseCase,
   ) {}
 
+  @UseGuards(UserGuard, AdminGuard)
   @Post()
   async createWard(@Body() req: CreateWardReqDto): Promise<CreateWardResDto> {
     const ward = await this.createWardUseCase.createWard(
@@ -49,12 +53,14 @@ export class WardsController {
     return plainToInstance(CreateWardResDto, ward);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Get()
   async findAllWards(): Promise<FindAllWardsResDto[]> {
     const wards = await this.findAllWardUseCase.findAllWards();
     return plainToInstance(FindAllWardsResDto, wards);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Put('/:id')
   async updateWard(
     @Param('id') id: number,
@@ -66,6 +72,7 @@ export class WardsController {
     return plainToInstance(UpdateWardResDto, ward);
   }
 
+  @UseGuards(UserGuard, AdminGuard)
   @Delete('/:id')
   async deleteWard(@Param('id') id: number): Promise<void> {
     return await this.deleteWardUseCase.deleteWard(new DeleteWardCmd(id));

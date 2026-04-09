@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UpdateUserReqDto } from '../../infrastructure/dtos/in/update-user-req.dto';
 import { CreateUserReqDto } from '../../infrastructure/dtos/in/create-user-req.dto';
@@ -36,6 +37,8 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { FindUserByIdUseCase } from '../../application/ports/in/find-user-by-id-use-case.interface';
 import { FindUserByIdCmd } from '../../application/commands/find-user-by-id-cmd';
 import { FindUserByIdResDto } from '../../infrastructure/dtos/out/find-user-by-id-res-dto';
+import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
 
 @Controller('users')
 export class UsersController {
@@ -55,6 +58,7 @@ export class UsersController {
   ) {}
 
   @ApiOkResponse({ type: FindAllUserResDto, isArray: true })
+  @UseGuards(UserGuard, AdminGuard)
   @Get()
   async findAllUsers(): Promise<FindAllUserResDto[]> {
     const users = await this.findAllUsersUseCase.findAllUsers();
@@ -62,6 +66,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: FindAllAvailableUsersResDto, isArray: true })
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/available')
   async findAllAvailableUsers(): Promise<FindAllAvailableUsersResDto[]> {
     const users =
@@ -70,6 +75,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: FindUserByIdResDto })
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/:id')
   async findUserById(
     @Param('id', ParseIntPipe) id: number,
@@ -81,6 +87,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: UpdateUserResDto })
+  @UseGuards(UserGuard, AdminGuard)
   @Put('/:id')
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -93,6 +100,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: CreateUserResDto })
+  @UseGuards(UserGuard, AdminGuard)
   @Post()
   async createUser(@Body() req: CreateUserReqDto): Promise<CreateUserResDto> {
     const createdUser = await this.createUserUseCase.createUser(
@@ -102,6 +110,7 @@ export class UsersController {
   }
 
   @ApiOkResponse()
+  @UseGuards(UserGuard, AdminGuard)
   @Delete('/:id')
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.deleteUserUseCase.deleteUser(new DeleteUserCmd(id));

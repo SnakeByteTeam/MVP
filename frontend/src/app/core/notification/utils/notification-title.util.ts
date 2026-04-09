@@ -22,7 +22,7 @@ export function formatTriggeredNotificationTitle(
 		? normalizedAlarmName
 		: `${normalizedAlarmName.slice(0, Math.max(allowedNameLength - 1, 1)).trimEnd()}...`;
 
-	return `${prefix}${compactAlarmName}`;
+	return `${prefix}${alarmName} in corso`;
 }
 
 function normalizeAlarmName(value: unknown): string | null {

@@ -4,6 +4,7 @@ Thumbs.db
 
 # dependencies
 node_modules/
+deploy-digitalocean.mjs
 
 # build outputs
 dist/
@@ -71,6 +72,7 @@ typings/
 *.launch
 .settings/
 *.sublime-workspace
+deploy-digitalocean.mjs
 
 # VS Code
 .vscode/*
@@ -86,3 +88,4 @@ typings/
 # local documentation / notes
 .ignore/
 .vscode/settings.json
+deploy-digitalocean-preserve-db.mjs

@@ -25,6 +25,7 @@ import { LLM_SUGGESTION_PORT } from './application/ports/out/llm-suggestion.port
 import { LLMSuggestionAdapter } from './adapters/out/llm-suggestion.adapter';
 import { GROQ_CLIENT } from './infrastructure/groq/groq.client';
 import { GroqClientImpl } from './infrastructure/groq/groq-client.impl';
+import { GuardModule } from 'src/guard/guard.module';
 
 const PLANT_STRATEGIES_TOKEN = 'PLANT_STRATEGIES';
 const SENSOR_STRATEGIES_TOKEN = 'SENSOR_STRATEGIES';
@@ -32,6 +33,7 @@ const WARD_STRATEGIES_TOKEN = 'WARD_STRATEGIES';
 export const ANALYTICS_STRATEGIES_TOKEN = 'ANALYTICS_STRATEGIES';
 
 @Module({
+  imports: [GuardModule],
   controllers: [AnalyticsController],
   providers: [
     PlantConsumption,

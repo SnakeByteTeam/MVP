@@ -12,6 +12,7 @@ import { ProlongedPresenceChartComponent } from './components/prolonged-presence
 import { TemperatureVariationsChartComponent } from './components/temperature-variations-chart/temperature-variations-chart.component';
 import { Observable, switchMap, filter, BehaviorSubject, startWith, combineLatest } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { PlantDto } from '../apartment-monitor/models/plant-response.model';
 
 @Component({
     selector: 'app-analytics',
@@ -36,8 +37,8 @@ export class AnalyticsComponent implements OnInit {
     private readonly loadTrigger$ = new BehaviorSubject<{ id: string; refresh: boolean } | null>(null);
 
     public selectedApartmentId$ = new BehaviorSubject<string | null>(null);
-
-    public apartments$: Observable<any[]> | null = null;
+    
+    public apartments$: Observable<PlantDto[]> | null = null;
     public analytics: Observable<AnalyticsDto | null> | null = null;
 
     public ngOnInit(): void {

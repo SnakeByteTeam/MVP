@@ -2,7 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { AnalyticsDto } from '../models/analytics.model';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
+import { PlantDto } from '../../apartment-monitor/models/plant-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsApiService {
@@ -12,16 +13,17 @@ export class AnalyticsApiService {
   private analyticsEndpoint = "";
   private readonly apartmentsEndpoint = `${this.baseUrl}/plant/all`;
 
-  public getAllApartments(): Observable<any[]> {
+    public getAllApartments():Observable<any[]>{
+  
+      return this.http.get<any[]>(this.apartmentsEndpoint).pipe(
+        map(response => response.map(item => ({
+          id: item.id,
+          name: item.name,
+          rooms: item.rooms,
+        } as PlantDto)))
+      );
+    }
 
-
-    return this.http.get<any[]>(this.apartmentsEndpoint).pipe(
-      map(response => response.map(item => ({
-        id: item.id,
-        name: item.name,
-      })))
-    );
-  }
 
   public getAnalytics(apartmentId: string, refresh: boolean = false): Observable<AnalyticsDto> {
     if(refresh){

@@ -28,11 +28,8 @@ CREATE TABLE ward (
 );
 
 INSERT INTO ward (name) VALUES
-    ('test-ward'),
-    ('Reparto autosufficienti'),
-    ('Reparto cure livello 1'),
-    ('Reparto cure livello 2'),
-    ('Reparto riabilitazione');
+    ('Ala est'),
+    ('Ala ovest');
 
 CREATE TABLE "user" (
     id SERIAL PRIMARY KEY,
@@ -46,20 +43,10 @@ CREATE TABLE "user" (
 );
 
 INSERT INTO "user" (username, surname, name, password, first_access, roleId) VALUES
-    ('test',        'test',     'test',      '623c92d8c3e80a6963599e42aa37d43f8f4f4e84c742bfe5cf26b33b6e5a281599dd9e948691b5f76566e526375ef46cc5485af55bac2a198b69b40333ac92fb', FALSE, 1),
-    ('admin',       'admin',    'admin',     '68196d44350ba7a579fa43b08309a166217432e5b29067b8d1012ccecb0c96963466da7386f86fd272f6bed9ba36ed6679c0ff222305eff7fc813959ebc9b590',  FALSE, 2),
+    ('test',        'test',     'test',      'a99c978de251dfd8228aa8535328babc748597244057da09aa2c6c4def0a8b3ba0eaeb469a050a2f13d94d70127ab7f19b324fd4d7ac8a1625a3328d893925b8', FALSE, 1),
+    ('admin',       'admin',    'admin',     '7b6a1f4038412d54a79432aea5d8e58a7e5db172468f08963bbeef7981141309c0ff63c70de64565009a13c24f1ed63d93a1100548ef0d56abcad96edee8c8f6',  FALSE, 2),
     ('mrossi',      'Rossi',    'Mario',     'test',  TRUE,  1),
-    ('gbianchi',    'Bianchi',  'Gioia',     'test',  TRUE,  1),
-    ('lverdi',      'Verdi',    'Luca',      'test',  TRUE,  1),
-    ('asala',       'Sala',     'Anna',      'test',  TRUE,  1),
-    ('fneri',       'Neri',     'Franco',    'test',  TRUE,  1),
-    ('gcolombo',    'Colombo',  'Giuseppe',  'test',  TRUE,  1),
-    ('fferrari',    'Ferrari',  'Francesca', 'test',  TRUE,  1),
-    ('arusso',      'Russo',    'Antonio',   'test',  TRUE,  1),
-    ('cgallo',      'Gallo',    'Chiara',    'test',  TRUE,  1),
-    ('mromano',     'Romano',   'Matteo',    'test',  TRUE,  1),
-    ('admin_mario', 'Draghi',   'Mario',     'test',  TRUE,  2),
-    ('admin_luigi', 'Einaudi',  'Luigi',     'test',  TRUE,  2)
+    ('gbianchi',    'Bianchi',  'Gioia',     'test',  TRUE,  1)
 ON CONFLICT (username) DO NOTHING;
 
 CREATE TABLE ward_user (
@@ -70,11 +57,8 @@ CREATE TABLE ward_user (
 
 INSERT INTO ward_user (ward_id, user_id)
 SELECT w.id, u.id FROM (VALUES
-    ('mrossi',   'Reparto autosufficienti'),
-    ('gbianchi', 'Reparto autosufficienti'),
-    ('lverdi',   'Reparto cure livello 1'),
-    ('asala',    'Reparto cure livello 2'),
-    ('fneri',    'Reparto riabilitazione')
+    ('mrossi',   'Ala est'),
+    ('gbianchi', 'Ala ovest')
 ) AS a(username, ward_name)
 JOIN ward w ON w.name = a.ward_name
 JOIN "user" u ON u.username = a.username;

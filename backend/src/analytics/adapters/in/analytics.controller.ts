@@ -10,6 +10,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 
+
 @Controller('analytics')
 export class AnalyticsController {
   constructor(

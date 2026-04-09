@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiInternalServerErrorResponse,
@@ -12,6 +13,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { UserGuard } from 'src/guard/user/user.guard';
 import { FindPlantByIdCmd } from 'src/plant/application/commands/find-plant-by-id.command';
 import {
   FIND_ALL_AVAILABLE_PLANTS_USECASE,
@@ -40,6 +42,7 @@ export class PlantController {
     private readonly findAllPlants: FindAllPlantsUseCase,
   ) {}
 
+  @UseGuards(UserGuard)
   @Get()
   @ApiOperation({
     summary: 'Get plant structure',
@@ -72,7 +75,8 @@ export class PlantController {
       throw new NotFoundException();
     }
   }
-
+  
+  @UseGuards(UserGuard)
   @Get('available')
   @ApiOperation({
     summary: 'Get available plants',
@@ -97,6 +101,7 @@ export class PlantController {
     }
   }
 
+  @UseGuards(UserGuard)
   @Get('all')
   async getAllPlants() {
     try {

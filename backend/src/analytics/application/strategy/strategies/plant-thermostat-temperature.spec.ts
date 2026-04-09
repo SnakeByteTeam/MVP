@@ -2,6 +2,7 @@ import { PlantThermostatTemperature } from './plant-thermostat-temperature';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -11,13 +12,14 @@ const toISO = (daysAgo: number): string => {
 
 const yesterday = toISO(1);
 const twoDaysAgo = toISO(2);
+const temperatureSfeType = AnalyticsMetric.THERMOSTAT_TEMPERATURE.sfeType ?? '';
 
 const buildTempDatapoint = (value: string): DatapointValue[] => [
   {
     datapointId: 'dp-thermo-001-temp',
     name: 'Temperature',
     value,
-    sfeType: 'SFE_State_Temperature',
+    sfeType: temperatureSfeType,
     deviceType: 'SF_Thermostat',
   },
 ];

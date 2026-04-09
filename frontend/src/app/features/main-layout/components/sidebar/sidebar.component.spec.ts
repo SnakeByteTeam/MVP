@@ -25,7 +25,7 @@ describe('SidebarComponent', () => {
     ];
     fixture.detectChanges();
 
-    const links = fixture.nativeElement.querySelectorAll('a');
+    const links = fixture.nativeElement.querySelectorAll('a[href^="/path"]');
     expect(links.length).toBe(2);
     expect(links[0].textContent).toContain('test1');
     expect(links[0].getAttribute('href')).toBe('/path1');

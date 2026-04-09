@@ -2,6 +2,7 @@ import { SensorLongPresence } from './sensor-long-presence';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -10,15 +11,16 @@ const toISO = (daysAgo: number): string => {
 };
 
 const yesterday = toISO(1);
+const presenceSfeType = AnalyticsMetric.SENSOR_LONG_PRESENCE.sfeType ?? '';
 
 const buildPresenceDatapoint = (
-  value: 'NotDetected' | 'Detected',
+  value: 'Absent' | 'Moving',
 ): DatapointValue[] => [
   {
     datapointId: 'dp-presence-001',
     name: 'Presence Sensor',
     value,
-    sfeType: 'SFE_State_Presence',
+    sfeType: presenceSfeType,
     deviceType: 'SF_Access',
   },
 ];
@@ -53,9 +55,9 @@ describe('SensorLongPresence', () => {
 
   it('should not detect long presence if duration is less than 30 minutes', async () => {
     const snapshots = new Map([
-      [ts(8, 0), buildPresenceDatapoint('Detected')],
-      [ts(8, 20), buildPresenceDatapoint('Detected')],
-      [ts(8, 25), buildPresenceDatapoint('NotDetected')],
+      [ts(8, 0), buildPresenceDatapoint('Moving')],
+      [ts(8, 20), buildPresenceDatapoint('Moving')],
+      [ts(8, 25), buildPresenceDatapoint('Absent')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
@@ -69,9 +71,9 @@ describe('SensorLongPresence', () => {
 
   it('should detect long presence if duration exceeds 30 minutes', async () => {
     const snapshots = new Map([
-      [ts(8, 0), buildPresenceDatapoint('Detected')],
-      [ts(8, 35), buildPresenceDatapoint('Detected')],
-      [ts(9, 0), buildPresenceDatapoint('NotDetected')],
+      [ts(8, 0), buildPresenceDatapoint('Moving')],
+      [ts(8, 35), buildPresenceDatapoint('Moving')],
+      [ts(9, 0), buildPresenceDatapoint('Absent')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
@@ -86,10 +88,10 @@ describe('SensorLongPresence', () => {
 
   it('should count only one event per long presence session', async () => {
     const snapshots = new Map([
-      [ts(8, 0), buildPresenceDatapoint('Detected')],
-      [ts(8, 35), buildPresenceDatapoint('Detected')],
-      [ts(9, 10), buildPresenceDatapoint('Detected')],
-      [ts(9, 30), buildPresenceDatapoint('NotDetected')],
+      [ts(8, 0), buildPresenceDatapoint('Moving')],
+      [ts(8, 35), buildPresenceDatapoint('Moving')],
+      [ts(9, 10), buildPresenceDatapoint('Moving')],
+      [ts(9, 30), buildPresenceDatapoint('Absent')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);
@@ -102,14 +104,14 @@ describe('SensorLongPresence', () => {
     expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
-  it('should reset and count a new event after NotDetected', async () => {
+  it('should reset and count a new event after Absent', async () => {
     const snapshots = new Map([
-      [ts(8, 0), buildPresenceDatapoint('Detected')],
-      [ts(8, 35), buildPresenceDatapoint('Detected')],
-      [ts(9, 0), buildPresenceDatapoint('NotDetected')],
-      [ts(10, 0), buildPresenceDatapoint('Detected')],
-      [ts(10, 35), buildPresenceDatapoint('Detected')],
-      [ts(11, 0), buildPresenceDatapoint('NotDetected')],
+      [ts(8, 0), buildPresenceDatapoint('Moving')],
+      [ts(8, 35), buildPresenceDatapoint('Moving')],
+      [ts(9, 0), buildPresenceDatapoint('Absent')],
+      [ts(10, 0), buildPresenceDatapoint('Moving')],
+      [ts(10, 35), buildPresenceDatapoint('Moving')],
+      [ts(11, 0), buildPresenceDatapoint('Absent')],
     ]);
 
     mockPort.getDataForSensor.mockResolvedValue(snapshots);

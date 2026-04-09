@@ -98,6 +98,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
+        if (typeof ResizeObserver === 'undefined' || !this.topbarRef?.nativeElement) {
+            return;
+        }
+
         this.resizeObserver = new ResizeObserver(entries => {
             for (const entry of entries) {
                 const h = entry.contentRect.height;

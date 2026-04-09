@@ -53,6 +53,7 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 			}),
 			tap((rows) => {
 				this.latestRows = rows;
+				this.syncSelectedValues(rows);
 			}),
 			switchMap((rows) =>
 				this.loadCurrentValues(rows).pipe(map(() => this.groupRowsByRoom(rows))),
@@ -127,9 +128,7 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 			return currentValue;
 		}
 
-		const fallbackValue = row.enumValues[0] ?? '';
-		this.selectedValuesByRow.set(rowKey, fallbackValue);
-		return fallbackValue;
+		return row.enumValues[0] ?? '';
 	}
 
 	public onSelectionChange(row: WritableEndpointRow, value: string): void {
@@ -293,6 +292,25 @@ export class EndpointTableComponent implements OnInit, OnDestroy {
 		}
 
 		return normalized;
+	}
+
+	private syncSelectedValues(rows: ReadonlyArray<WritableEndpointRow>): void {
+		const activeRowKeys = new Set<string>();
+
+		for (const row of rows) {
+			const rowKey = this.buildRowKey(row);
+			activeRowKeys.add(rowKey);
+
+			if (!this.selectedValuesByRow.has(rowKey)) {
+				this.selectedValuesByRow.set(rowKey, row.enumValues[0] ?? '');
+			}
+		}
+
+		for (const rowKey of this.selectedValuesByRow.keys()) {
+			if (!activeRowKeys.has(rowKey)) {
+				this.selectedValuesByRow.delete(rowKey);
+			}
+		}
 	}
 
 	private resetTransientState(): void {

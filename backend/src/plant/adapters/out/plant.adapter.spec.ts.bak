@@ -42,9 +42,10 @@ describe('PlantAdapter', () => {
         data: { name: 'Test Plant' },
       } as PlantEntity;
 
-      jest.spyOn(PlantEntity, 'toDomain').mockReturnValue(
-        new Plant('plant-123', 'Test Plant')
-      );
+      jest.spyOn(PlantEntity, 'toDomain').mockReturnValue({
+        id: 'plant-123',
+        name: 'Test Plant',
+      } as unknown as Plant);
 
       repo.findById.mockResolvedValue(mockEntity);
 

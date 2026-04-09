@@ -1,21 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PG_POOL } from 'src/database/database.module';
-import { FindDeviceByIdRepoPort } from 'src/device/application/repository/find-device-by-id.repository';
-import { FindDeviceByPlantIdRepoPort } from 'src/device/application/repository/find-device-by-plant-id.repository';
+import {
+  DEVICE_REPOSITORY_PORT,
+  DeviceRepositoryPort,
+} from 'src/device/application/repository/device.repository';
 import { DeviceEntity } from './entities/device.entity';
-import { IngestTimeseriesRepoPort } from 'src/device/application/repository/ingest-timeseries.repository';
-import { FindDeviceByDatapointIdRepoPort } from 'src/device/application/repository/find-device-by-datapointId.repository';
+import { DeviceApiImpl } from '../http/device-api-impl';
+import { DatapointExtractedDto } from 'src/device/infrastructure/http/dtos/in/datapoint-response.dto';
 
 @Injectable()
-export class DeviceRepositoryImpl
-  implements
-    FindDeviceByIdRepoPort,
-    FindDeviceByPlantIdRepoPort,
-    IngestTimeseriesRepoPort,
-    FindDeviceByDatapointIdRepoPort
-{
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+export class DeviceRepositoryImpl implements DeviceRepositoryPort {
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Pool,
+    private readonly deviceApi: DeviceApiImpl,
+  ) {}
 
   async findById(id: string): Promise<DeviceEntity | null> {
     const client = await this.pool.connect();
@@ -108,5 +107,27 @@ export class DeviceRepositoryImpl
     } finally {
       client.release();
     }
+  }
+
+  async getDeviceValue(
+    validToken: string,
+    plantId: string,
+    deviceId: string,
+  ): Promise<DatapointExtractedDto[]> {
+    return this.deviceApi.getDeviceValue(validToken, plantId, deviceId);
+  }
+
+  async writeDeviceValue(
+    validToken: string,
+    plantId: string,
+    datapointId: string,
+    value: string,
+  ): Promise<boolean> {
+    return this.deviceApi.writeDeviceValue(
+      validToken,
+      plantId,
+      datapointId,
+      value,
+    );
   }
 }

@@ -1,14 +1,11 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { RefreshNodeSubscriptionRepoPort } from 'src/subscription/application/repository/refresh-node-subscription.repository';
 import { SubscriptionCreateDto } from './dtos/subscription.dto';
-import { RefreshDatapointSubRepoPort } from 'src/subscription/application/repository/refresh-datapoint-subscription.respository';
+import { SubscriptionRepositoryPort } from 'src/subscription/application/repository/subscription.repository';
 
 @Injectable()
-export class SubscriptionRepoImpl
-  implements RefreshNodeSubscriptionRepoPort, RefreshDatapointSubRepoPort
-{
+export class SubscriptionRepoImpl implements SubscriptionRepositoryPort {
   private readonly SUB_DOMAIN: string = process.env.HOST3 || '';
 
   constructor(private readonly httpService: HttpService) {}

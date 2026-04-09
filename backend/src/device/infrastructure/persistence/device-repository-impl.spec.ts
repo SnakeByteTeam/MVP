@@ -3,11 +3,14 @@ import { DeviceRepositoryImpl } from './device-repository-impl';
 import { PG_POOL } from 'src/database/database.module';
 import { Pool } from 'pg';
 import { DeviceEntity } from './entities/device.entity';
+import { DeviceApiImpl } from '../http/device-api-impl';
+import { DatapointExtractedDto } from 'src/device/infrastructure/http/dtos/in/datapoint-response.dto';
 
 describe('DeviceRepositoryImpl', () => {
   let repository: DeviceRepositoryImpl;
   let mockPool: Partial<Pool>;
   let mockClient: any;
+  let mockDeviceApi: jest.Mocked<DeviceApiImpl>;
 
   beforeEach(async () => {
     mockClient = {
@@ -19,10 +22,16 @@ describe('DeviceRepositoryImpl', () => {
       connect: jest.fn().mockResolvedValue(mockClient),
     };
 
+    mockDeviceApi = {
+      getDeviceValue: jest.fn(),
+      writeDeviceValue: jest.fn(),
+    } as any;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DeviceRepositoryImpl,
         { provide: PG_POOL, useValue: mockPool },
+        { provide: DeviceApiImpl, useValue: mockDeviceApi },
       ],
     }).compile();
 
@@ -456,6 +465,87 @@ describe('DeviceRepositoryImpl', () => {
         'Database error: Query failed',
       );
       expect(mockClient.release).toHaveBeenCalled();
+    });
+  });
+
+  describe('getDeviceValue', () => {
+    it('should delegate to DeviceApiImpl', async () => {
+      mockDeviceApi.getDeviceValue.mockResolvedValue([
+        new DatapointExtractedDto('dp-1', 'Power', 'On'),
+        new DatapointExtractedDto('dp-2', 'Brightness', 85),
+      ]);
+
+      const result = await repository.getDeviceValue(
+        'token-123',
+        'plant-01',
+        'device-123',
+      );
+
+      expect(result).toHaveLength(2);
+      expect(mockDeviceApi.getDeviceValue).toHaveBeenCalledWith(
+        'token-123',
+        'plant-01',
+        'device-123',
+      );
+    });
+
+    it('should propagate DeviceApiImpl errors', async () => {
+      mockDeviceApi.getDeviceValue.mockRejectedValue(
+        new Error('API request failed'),
+      );
+
+      await expect(
+        repository.getDeviceValue('token-123', 'plant-01', 'device-123'),
+      ).rejects.toThrow('API request failed');
+    });
+  });
+
+  describe('writeDatapointValue', () => {
+    it('should delegate to DeviceApiImpl', async () => {
+      mockDeviceApi.writeDeviceValue.mockResolvedValue(true);
+
+      const result = await repository.writeDeviceValue(
+        'token-123',
+        'plant-01',
+        'dp-1',
+        '85',
+      );
+
+      expect(result).toBe(true);
+      expect(mockDeviceApi.writeDeviceValue).toHaveBeenCalledWith(
+        'token-123',
+        'plant-01',
+        'dp-1',
+        '85',
+      );
+    });
+
+    it('should return false when DeviceApiImpl returns false', async () => {
+      mockDeviceApi.writeDeviceValue.mockResolvedValue(false);
+
+      const result = await repository.writeDeviceValue(
+        'token-123',
+        'plant-01',
+        'dp-1',
+        '85',
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should propagate DeviceApiImpl errors', async () => {
+      mockDeviceApi.writeDeviceValue.mockRejectedValue(
+        new Error('API request failed'),
+      );
+
+      await expect(
+        repository.writeDeviceValue(
+          'token-123',
+          'plant-01',
+          'dp-1',
+          '85',
+        ),
+      ).rejects.toThrow('API request failed');
     });
   });
 });

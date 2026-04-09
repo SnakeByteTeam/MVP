@@ -3,10 +3,9 @@ import { PG_POOL } from 'src/database/database.module';
 import { Pool } from 'pg';
 
 import { PlantEntity } from '../../../plant/infrastructure/persistence/entities/plant.entity';
-import { WriteCacheRepoPort } from 'src/cache/application/repository/write-cache.repository';
 
 @Injectable()
-export class StructureCacheImpl implements WriteCacheRepoPort {
+export class StructureCacheImpl {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
   async write(plant: PlantEntity): Promise<boolean> {

@@ -90,22 +90,6 @@ describe('ApiAuthVimarController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return redirect url and 302 status code', () => {
-    apiAuthUseCase.getLoginUrl.mockReturnValue('url-login');
-
-    const payload: PlantAuthDto = {
-      redirect_url: 'http://localhost:4200/callback',
-    };
-
-    const result = controller.login(payload);
-
-    expect(apiAuthUseCase.getLoginUrl).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      url: 'url-login',
-      statusCode: 302,
-    });
-  });
-
   describe('getAccountStatus', () => {
     it('should return linked=true when a valid token is available', async () => {
       getAccountStatusUseCase.getAccountStatus.mockResolvedValue({

@@ -72,7 +72,16 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "setupFiles": [
+              "test/unit/setup/canvas.mock.ts"
+            ],
+            "include": [
+              "../test/unit/**/*.spec.ts"
+            ]
+          }
         }
       }
     }

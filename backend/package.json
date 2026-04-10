@@ -86,8 +86,11 @@
       ".entity.ts",
       "main.ts"
     ],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "rootDir": ".",
+    "testMatch": [
+      "<rootDir>/test/unit/**/*.spec.ts",
+      "<rootDir>/test/integration/**/*.spec.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
@@ -95,15 +98,15 @@
       "node_modules/(?!(uuid)/)"
     ],
     "moduleNameMapper": {
-      "^src/(.*)$": "<rootDir>/$1"
+      "^src/(.*)$": "<rootDir>/src/$1"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
+    "coverageDirectory": "coverage",
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.ts"
+      "<rootDir>/src/jest.setup.ts"
     ],
     "reporters": [
       "default",
@@ -111,7 +114,7 @@
         "jest-html-reporter",
         {
           "pageTitle": "Unit Test Report",
-          "outputPath": "../coverage/jest-unit-report.html",
+          "outputPath": "coverage/jest-unit-report.html",
           "includeFailureMsg": true,
           "includeSuiteFailure": true
         }

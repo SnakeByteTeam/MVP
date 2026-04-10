@@ -1,0 +1,373 @@
+import { HttpCacheController } from 'src/cache/adapters/in/http/http-cache.controller';
+import { UpdateCacheUseCase } from 'src/cache/application/ports/in/update-cache.usecase';
+
+describe('HttpCacheController', () => {
+  let controller: HttpCacheController;
+  let updateCacheUseCase: jest.Mocked<UpdateCacheUseCase>;
+  let setImmediateSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    updateCacheUseCase = {
+      updateCache: jest.fn().mockResolvedValue(true),
+    } as any;
+
+    controller = new HttpCacheController(updateCacheUseCase);
+
+    // Run setImmediate callbacks synchronously only for this suite
+    setImmediateSpy = jest
+      .spyOn(global, 'setImmediate')
+      .mockImplementation((cb: (...args: any[]) => void, ...args: any[]) => {
+        cb(...args);
+        return 0 as any;
+      });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+
+    if (setImmediateSpy) {
+      setImmediateSpy.mockRestore();
+    }
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
+  describe('updateCache', () => {
+    const flushPromises = () => new Promise(setImmediate);
+    it('should return 202 immediately with success message', async () => {
+      const body = {
+        data: [
+          {
+            type: 'service',
+            id: 'plant-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      const response = await controller.updateCache(body);
+
+      expect(response.statusCode).toBe(202);
+      expect(response.success).toBe(true);
+      expect(response.message).toContain('Processing update for 1 plant(s)');
+    });
+
+    it('should update cache for all service items asynchronously', async () => {
+      const body = {
+        data: [
+          {
+            type: 'service',
+            id: 'plant-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'service',
+            id: 'plant-2',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'device',
+            id: 'device-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'service',
+            id: 'plant-3',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      await controller.updateCache(body);
+
+      await flushPromises();
+      await flushPromises();
+      await flushPromises();
+
+      expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
+        plantId: 'plant-1',
+      });
+      expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
+        plantId: 'plant-2',
+      });
+      expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
+        plantId: 'plant-3',
+      });
+    });
+
+    it('should filter out non-service items', async () => {
+      const body = {
+        data: [
+          {
+            type: 'device',
+            id: 'device-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'room',
+            id: 'room-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'service',
+            id: 'plant-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      await controller.updateCache(body);
+
+      await flushPromises();
+
+      expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
+        plantId: 'plant-1',
+      });
+    });
+
+    it('should handle empty data array', async () => {
+      const body = { data: [] };
+
+      const response = await controller.updateCache(body);
+
+      expect(response.statusCode).toBe(202);
+      expect(response.success).toBe(true);
+      expect(response.message).toContain('Processing update for 0 plant(s)');
+
+      await flushPromises();
+    });
+
+    it('should handle data with no service items', async () => {
+      const body = {
+        data: [
+          {
+            type: 'device',
+            id: 'device-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'room',
+            id: 'room-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      const response = await controller.updateCache(body);
+
+      expect(response.statusCode).toBe(202);
+      expect(response.message).toContain('Processing update for 0 plant(s)');
+
+      await new Promise(setImmediate);
+    });
+
+    it('should handle updateCache errors gracefully', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      (updateCacheUseCase.updateCache as jest.Mock)
+        .mockRejectedValueOnce(new Error('Update failed'))
+        .mockResolvedValueOnce(true);
+
+      const body = {
+        data: [
+          {
+            type: 'service',
+            id: 'plant-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'service',
+            id: 'plant-2',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      const response = await controller.updateCache(body);
+
+      expect(response.statusCode).toBe(202);
+
+      await flushPromises();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[CacheController] Error updating cache'),
+        expect.any(String),
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should continue processing plants if one updateCache fails', async () => {
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        new Error('Update failed'),
+      );
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const body = {
+        data: [
+          {
+            type: 'service',
+            id: 'plant-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      await controller.updateCache(body);
+
+      await flushPromises();
+
+      expect(updateCacheUseCase.updateCache).toHaveBeenCalledWith({
+        plantId: 'plant-1',
+      });
+    });
+
+    it('should stringify non-Error values when updateCache fails', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        'raw-failure',
+      );
+
+      await controller.updateCache({
+        data: [
+          {
+            type: 'service',
+            id: 'plant-raw-error',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      });
+
+      await flushPromises();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[CacheController] Error updating cache for plant plant-raw-error:',
+        'raw-failure',
+      );
+    });
+
+    it('should handle queue-level errors when promise chain throws an Error', async () => {
+      const queueErrorSpy = jest.spyOn(console, 'error');
+      queueErrorSpy
+        .mockImplementationOnce(() => {
+          throw new Error('queue-chain-error');
+        })
+        .mockImplementation(() => undefined);
+
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        new Error('plant-update-failure'),
+      );
+
+      await controller.updateCache({
+        data: [
+          {
+            type: 'service',
+            id: 'plant-queue-error',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      });
+
+      await flushPromises();
+      await flushPromises();
+      await flushPromises();
+
+      expect(queueErrorSpy).toHaveBeenCalledWith(
+        '[CacheController] Error in webhook processing queue:',
+        'queue-chain-error',
+      );
+    });
+
+    it('should handle queue-level errors when promise chain throws non-Error values', async () => {
+      const queueErrorSpy = jest.spyOn(console, 'error');
+      queueErrorSpy
+        .mockImplementationOnce(() => {
+          throw 'queue-raw-error';
+        })
+        .mockImplementation(() => undefined);
+
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        new Error('plant-update-failure'),
+      );
+
+      await controller.updateCache({
+        data: [
+          {
+            type: 'service',
+            id: 'plant-queue-raw-error',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      });
+
+      await flushPromises();
+      await flushPromises();
+      await flushPromises();
+
+      expect(queueErrorSpy).toHaveBeenCalledWith(
+        '[CacheController] Error in webhook processing queue:',
+        'queue-raw-error',
+      );
+    });
+
+    it('should include correct count in response message', async () => {
+      const body = {
+        data: [
+          {
+            type: 'service',
+            id: 'plant-1',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'service',
+            id: 'plant-2',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+          {
+            type: 'service',
+            id: 'plant-3',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      };
+
+      const response = await controller.updateCache(body);
+
+      expect(response.message).toBe(
+        'Webhook accepted. Processing update for 3 plant(s)',
+      );
+    });
+  });
+});

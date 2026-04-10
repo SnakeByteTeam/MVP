@@ -1,0 +1,15 @@
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'test-uuid'),
+}));
+
+import { AlarmRulesRepositoryImpl } from 'src/alarms/infrastructure/persistence/alarm-rules-repository-impl';
+
+describe('AlarmRulesRepositoryImpl', () => {
+  it('should be defined', () => {
+    expect(
+      new AlarmRulesRepositoryImpl({
+        query: jest.fn(),
+      } as any),
+    ).toBeDefined();
+  });
+});

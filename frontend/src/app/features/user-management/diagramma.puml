@@ -1,4 +1,4 @@
-@startuml
+@startuml UserManagementDiagram
 interface CreateUserDto {
     +name: string
     +surname: string
@@ -63,7 +63,7 @@ class UserApiService {
     +createUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
     +deleteUser(id: number): Observable<void>
 }
-class UserManagementPageComponent implements OnInit {
+class UserManagementPageStateService {
     -userApi: UserApiService
     -refreshTrigger$: BehaviorSubject<void>
     +users$: Observable<UserDto[]>
@@ -71,8 +71,20 @@ class UserManagementPageComponent implements OnInit {
     +createdUser: WritableSignal<CreateUserDto>
     +formError: WritableSignal<UserManagementErrorType>
     +isCreateFormOpen: WritableSignal<boolean>
+    +openCreateForm(): void
+    +closeCreateForm(): void
+    +submitUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
+    +deleteUser(id: number): Observable<void>
+    +closeDialog(): void
+}
+class UserManagementPageComponent {
+    -pageState: UserManagementPageStateService
+    +users$: Observable<UserDto[]>
+    +createdResponse: WritableSignal<UserCreatedResponseDto>
+    +createdUser: WritableSignal<CreateUserDto>
+    +formError: WritableSignal<UserManagementErrorType>
+    +isCreateFormOpen: WritableSignal<boolean>
     -createUserFormComponent?: CreateUserFormComponent
-    +ngOnInit(): void
     +openCreateForm(): void
     +closeCreateForm(): void
     +onFormSubmit(dto: CreateUserDto): void
@@ -126,4 +138,12 @@ class InternalAuthService {
     -parseAccessToken(accessToken: string): AuthClaims
     -isUserRole(role: string): boolean
 }
+UserManagementPageStateService ..> UserApiService
+UserManagementPageComponent ..> UserManagementPageStateService
+UserManagementPageComponent ..> CreateUserFormComponent
+UserManagementPageComponent ..> UserListComponent
+UserManagementPageComponent ..> UserCreatedDialogComponent
+UserManagementPageComponent ..> UserDto
+UserManagementPageComponent ..> UserCreatedResponseDto
+UserManagementPageComponent ..> CreateUserDto
 @enduml

@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
@@ -8,6 +7,8 @@ import { DeviceType } from '../../models/device-type.enum';
 import { WritableEndpointRow } from '../../models/writable-endpoint-row.model';
 import { DeviceApiService } from '../../services/device-api.service';
 import { RoomDetailComponent } from './room-detail.component';
+import { EndpointTableComponent } from '../endpoint-table/endpoint-table.component';
+
 
 @Component({
   selector: 'app-endpoint-table',
@@ -48,9 +49,8 @@ describe('RoomDetailComponent', () => {
       ],
     })
       .overrideComponent(RoomDetailComponent, {
-        set: {
-          imports: [RouterLink, EndpointTableStubComponent],
-        },
+        remove: { imports: [EndpointTableComponent] },
+        add: { imports: [EndpointTableStubComponent] },
       })
       .compileComponents();
 

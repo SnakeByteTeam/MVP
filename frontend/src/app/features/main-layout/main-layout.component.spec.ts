@@ -6,7 +6,7 @@ import { NavService } from './services/nav.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
 import { UserRole } from '../../core/models/user-role.enum';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { provideRouter, Router } from '@angular/router'; 
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { AlarmManagementRefreshService } from '../../core/alarm/services/alarm-management-refresh.service';
@@ -20,6 +20,7 @@ describe('MainLayoutComponent', () => {
     let component: MainLayoutComponent;
     let fixture: ComponentFixture<MainLayoutComponent>;
     let notificationsSubject: BehaviorSubject<NotificationEvent[]>;
+    let originalResizeObserver: typeof ResizeObserver | undefined;
 
     const mockAuthService = {
         getRole: vi.fn(),
@@ -53,12 +54,14 @@ describe('MainLayoutComponent', () => {
     
     beforeEach(async () => {
         vi.clearAllMocks();
-        class ResizeObserverMock {
-            public observe(): void {}
-            public disconnect(): void {}
-            public unobserve(): void {}
-        }
-        vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+        originalResizeObserver = globalThis.ResizeObserver;
+        (globalThis as typeof globalThis & { ResizeObserver: typeof ResizeObserver }).ResizeObserver =
+            class ResizeObserverMock {
+                public observe = vi.fn();
+                public unobserve = vi.fn();
+                public disconnect = vi.fn();
+            } as unknown as typeof ResizeObserver;
+
         notificationsSubject = new BehaviorSubject<NotificationEvent[]>([]);
         mockAuthService.getRole.mockReturnValue(UserRole.AMMINISTRATORE);
         mockAuthService.getCurrentUser$.mockReturnValue(
@@ -90,6 +93,15 @@ describe('MainLayoutComponent', () => {
 
         fixture = TestBed.createComponent(MainLayoutComponent);
         component = fixture.componentInstance;
+    });
+
+    afterEach(() => {
+        if (originalResizeObserver) {
+            (globalThis as typeof globalThis & { ResizeObserver: typeof ResizeObserver }).ResizeObserver = originalResizeObserver;
+            return;
+        }
+
+        delete (globalThis as Partial<typeof globalThis> & { ResizeObserver?: typeof ResizeObserver }).ResizeObserver;
     });
 
     it('carica i NavItem con il ruolo corretto', () => {
@@ -160,11 +172,11 @@ describe('MainLayoutComponent', () => {
         component.toggleProfilePanel();
 
         expect(component.isProfilePanelOpen).toBe(true);
-        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalled();
+        expect(mockMyVimarService.getLinkedAccount).toHaveBeenCalledTimes(2);
         expect(component.vimarAccount).toEqual({ email: '', isLinked: false });
     });
 
-    it('apre il pannello profilo per utenti non admin senza caricare stato MyVimar', () => {
+    it('apre il pannello profilo anche per utenti non admin ma senza caricare stato MyVimar', () => {
         mockAuthService.getCurrentUser$.mockReturnValue(
             of({
                 userId: '2',

@@ -89,3 +89,4 @@ deploy-digitalocean.mjs
 .ignore/
 .vscode/settings.json
 deploy-digitalocean-preserve-db.mjs
+.vscode/

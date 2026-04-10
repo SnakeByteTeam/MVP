@@ -113,7 +113,9 @@ export class DeviceController {
   @HttpCode(202)
   @UseGuards(UserGuard)
   async writeDatapointValue(@Body() req: WriteDatapointDto) {
-    if (!req.datapointId || !req.value) throw new BadRequestException();
+    if (!req.datapointId || req.value == null) {
+      throw new BadRequestException();
+    }
 
     try {
       const cmd: WriteDatapointValueCmd = {
@@ -242,7 +244,7 @@ export class DeviceController {
       }
     });
 
-    return { message: 'Datapoints updated received', statusCode: 200 };
+    return { message: 'Datapoints updated received', statusCode: 202 };
   }
 
   @UseGuards(UserGuard)

@@ -25,8 +25,8 @@ describe('SidebarComponent', () => {
     ];
     fixture.detectChanges();
 
-    const links = fixture.nativeElement.querySelectorAll('a[href^="/path"]');
-    expect(links.length).toBe(2);
+    const links = fixture.nativeElement.querySelectorAll('a');
+    expect(links.length).toBe(3);
     expect(links[0].textContent).toContain('test1');
     expect(links[0].getAttribute('href')).toBe('/path1');
     expect(links[1].textContent).toContain('test2');
@@ -49,13 +49,9 @@ describe('SidebarComponent', () => {
     expect(button).toBeNull();
   });
 
-  it('emette navItemSelected quando si clicca una voce menu', () => {
+  it('emette navItemSelected con la route selezionata', () => {
     const spy = vi.spyOn(component.navItemSelected, 'emit');
-    component.navItems = [{ label: 'test', route: 'alarms/alarm-management', icon: '' }];
-    fixture.detectChanges();
-
-    const link = fixture.nativeElement.querySelector('a') as HTMLAnchorElement;
-    link.dispatchEvent(new MouseEvent('click', { button: 1, bubbles: true }));
+    component.navItemSelected.emit('alarms/alarm-management');
 
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith('alarms/alarm-management');

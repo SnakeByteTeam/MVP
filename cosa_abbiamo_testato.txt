@@ -1,6 +1,0 @@
-Nel branch:
-- dockerfile, dockercompose, .env corretti (e nella posizione corretta nel project)
-
-Funziona:
-- gestione reparti 
-- manuale richiesta di oauth e reindirizzamento al frontend dopo autenticazione vimar

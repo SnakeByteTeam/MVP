@@ -33,6 +33,36 @@ export class UserApiService {
         return this.http.delete<void>(`${this.baseUrl}/users/${encodeURIComponent(id.toString())}`);
     }
 
+    private decodeTempPassword(tempPassword: string): string {
+        if (!this.isBase64Encoded(tempPassword)) {
+            return tempPassword;
+        }
 
+        try {
+            return atob(tempPassword);
+        } catch {
+            return tempPassword;
+        }
+    }
+
+    private isBase64Encoded(value: string): boolean {
+        const normalized = value.trim();
+        if (normalized.length === 0 || normalized.length % 4 !== 0) {
+            return false;
+        }
+
+        if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) {
+            return false;
+        }
+
+        try {
+            const decoded = atob(normalized);
+            const reEncoded = btoa(decoded).replace(/=+$/, '');
+            const withoutPadding = normalized.replace(/=+$/, '');
+            return reEncoded === withoutPadding;
+        } catch {
+            return false;
+        }
+    }
 
 }

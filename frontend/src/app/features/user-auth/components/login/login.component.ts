@@ -25,6 +25,8 @@ export class LoginComponent extends AuthBaseComponent {
     }
 
     public override onSubmit(): void {
+        this.syncAutofilledCredentialsFromDom();
+
         if (this.loginForm.invalid) {
             this.loginForm.markAllAsTouched();
             return;
@@ -42,5 +44,28 @@ export class LoginComponent extends AuthBaseComponent {
             },
             error: (error) => this.handleError(error),
         });
+    }
+
+    private syncAutofilledCredentialsFromDom(): void {
+        if (typeof document === 'undefined') {
+            return;
+        }
+
+        const usernameControl = this.loginForm.controls.username;
+        const passwordControl = this.loginForm.controls.password;
+
+        if (!usernameControl.value) {
+            const usernameInput = document.getElementById('username') as HTMLInputElement | null;
+            if (usernameInput?.value) {
+                usernameControl.setValue(usernameInput.value);
+            }
+        }
+
+        if (!passwordControl.value) {
+            const passwordInput = document.getElementById('password') as HTMLInputElement | null;
+            if (passwordInput?.value) {
+                passwordControl.setValue(passwordInput.value);
+            }
+        }
     }
 }

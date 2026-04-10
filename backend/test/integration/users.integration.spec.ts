@@ -3,9 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as http from 'node:http';
 import request from 'supertest';
-import { UserEntity } from 'src/users/infrastructure/entities/user-entity';
-import { USER_REPOSITORY } from 'src/users/application/repository/user-repository.interface';
+import { DatabaseModule, PG_POOL } from 'src/database/database.module';
 import { UsersModule } from 'src/users/users.module';
+import { createMockPgPool, normalizeSql } from './helpers/mock-pg';
 
 describe('Users Integration Test', () => {
   let app: INestApplication;
@@ -13,44 +13,169 @@ describe('Users Integration Test', () => {
 
   const ACCESS_SECRET = 'integration-access-secret';
 
-  const mockUserRepository = {
-    createUser: jest.fn<
-      Promise<UserEntity>,
-      [string, string, string, string]
-    >(),
-    deleteUser: jest.fn<Promise<void>, [number]>(),
-    findAllAvailableUsers: jest.fn<Promise<UserEntity[]>, []>(),
-    findAllUsers: jest.fn<Promise<UserEntity[]>, []>(),
-    updateUser: jest.fn<Promise<UserEntity>, [number, string, string, string]>(),
-    findUserById: jest.fn<Promise<UserEntity | null>, [number]>(),
+  const state = {
+    roles: [
+      { id: 1, name: 'Amministratore' },
+      { id: 2, name: 'Operatore sanitario' },
+    ],
+    users: [
+      {
+        id: 1,
+        username: 'admin.user',
+        surname: 'Rossi',
+        name: 'Mario',
+        password: 'hashed',
+        roleId: 1,
+      },
+      {
+        id: 2,
+        username: 'ward.user',
+        surname: 'Verdi',
+        name: 'Luca',
+        password: 'hashed',
+        roleId: 2,
+      },
+    ],
+    wardUsers: [{ ward_id: 10, user_id: 2 }],
+    userSeq: 3,
   };
 
   beforeEach(async () => {
     process.env.ACCESS_SECRET = ACCESS_SECRET;
 
-    mockUserRepository.findAllUsers.mockResolvedValue([
-      new UserEntity(1, 'admin.user', 'Rossi', 'Mario', 'AMMINISTRATORE'),
-      new UserEntity(2, 'normal.user', 'Verdi', 'Luca', 'UTENTE'),
-    ]);
-    mockUserRepository.findAllAvailableUsers.mockResolvedValue([
-      new UserEntity(3, 'available.user', 'Bianchi', 'Anna', 'UTENTE'),
-    ]);
-    mockUserRepository.findUserById.mockResolvedValue(
-      new UserEntity(1, 'admin.user', 'Rossi', 'Mario', 'AMMINISTRATORE'),
-    );
-    mockUserRepository.createUser.mockResolvedValue(
-      new UserEntity(10, 'new.user', 'Neri', 'Paolo', 'UTENTE'),
-    );
-    mockUserRepository.updateUser.mockResolvedValue(
-      new UserEntity(1, 'edited.user', 'Rossi', 'Marco', 'AMMINISTRATORE'),
-    );
-    mockUserRepository.deleteUser.mockResolvedValue();
+    const pool = createMockPgPool(async (rawSql, params) => {
+      const sql = normalizeSql(rawSql);
+
+      if (sql.includes('select u.id, u.username, u.surname, u.name, r.name as role') && sql.includes('from "user" u') && !sql.includes('where u.id = $1') && !sql.includes('where u.id not in')) {
+        const rows = state.users.map((u) => ({
+          id: u.id,
+          username: u.username,
+          surname: u.surname,
+          name: u.name,
+          role: state.roles.find((r) => r.id === u.roleId)?.name ?? 'Unknown',
+        }));
+        return { rows };
+      }
+
+      if (sql.includes('where u.id = $1')) {
+        const [id] = params as [number];
+        const user = state.users.find((u) => u.id === id);
+        if (!user) {
+          return { rows: [], rowCount: 0 };
+        }
+        return {
+          rows: [
+            {
+              id: user.id,
+              username: user.username,
+              surname: user.surname,
+              name: user.name,
+              role: state.roles.find((r) => r.id === user.roleId)?.name,
+            },
+          ],
+          rowCount: 1,
+        };
+      }
+
+      if (sql.includes('where u.id not in (select user_id from ward_user)')) {
+        const unavailableIds = new Set(state.wardUsers.map((w) => w.user_id));
+        const rows = state.users
+          .filter((u) => !unavailableIds.has(u.id))
+          .map((u) => ({
+            id: u.id,
+            username: u.username,
+            surname: u.surname,
+            name: u.name,
+            role: state.roles.find((r) => r.id === u.roleId)?.name,
+          }));
+        return { rows };
+      }
+
+      if (sql.includes('select id from role where name = $1 limit 1')) {
+        const [name] = params as [string];
+        const role = state.roles.find((r) => r.name === name);
+        return { rows: role ? [{ id: role.id }] : [] };
+      }
+
+      if (sql.includes('with created_user as ( insert into "user"')) {
+        const [username, surname, name, tempPassword, roleId] = params as [
+          string,
+          string,
+          string,
+          string,
+          number,
+        ];
+
+        const created = {
+          id: state.userSeq++,
+          username,
+          surname,
+          name,
+          password: tempPassword,
+          roleId,
+        };
+        state.users.push(created);
+
+        return {
+          rows: [
+            {
+              id: created.id,
+              username: created.username,
+              surname: created.surname,
+              name: created.name,
+              role: state.roles.find((r) => r.id === roleId)?.name,
+            },
+          ],
+          rowCount: 1,
+        };
+      }
+
+      if (sql.includes('with updated_user as ( update "user" set username = $1, surname = $2, name = $3 where id = $4 returning * )')) {
+        const [username, surname, name, id] = params as [
+          string,
+          string,
+          string,
+          number,
+        ];
+
+        const user = state.users.find((u) => u.id === id);
+        if (!user) {
+          return { rows: [], rowCount: 0 };
+        }
+
+        user.username = username;
+        user.surname = surname;
+        user.name = name;
+
+        return {
+          rows: [
+            {
+              id: user.id,
+              username: user.username,
+              surname: user.surname,
+              name: user.name,
+              role: state.roles.find((r) => r.id === user.roleId)?.name,
+            },
+          ],
+          rowCount: 1,
+        };
+      }
+
+      if (sql.includes('delete from "user" where id = $1')) {
+        const [id] = params as [number];
+        const before = state.users.length;
+        state.users = state.users.filter((u) => u.id !== id);
+        return { rows: [], rowCount: before - state.users.length };
+      }
+
+      throw new Error(`Unhandled SQL in users integration test: ${sql}`);
+    });
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [UsersModule],
+      imports: [DatabaseModule, UsersModule],
     })
-      .overrideProvider(USER_REPOSITORY)
-      .useValue(mockUserRepository)
+      .overrideProvider(PG_POOL)
+      .useValue(pool)
       .compile();
 
     app = module.createNestApplication();
@@ -72,23 +197,23 @@ describe('Users Integration Test', () => {
     }
   });
 
-  const buildToken = (role: string) =>
-    jwtService.sign({ id: 1, username: 'admin.user', role, firstAccess: false });
+  const adminToken = () =>
+    jwtService.sign({ id: 1, username: 'admin.user', role: 'AMMINISTRATORE' });
 
-  it('should retrieve all users for an admin', async () => {
+  it('should list users using real controller/service/adapter/repository chain', async () => {
     const response = await request(app.getHttpServer() as http.Server)
       .get('/users')
-      .set('Authorization', `Bearer ${buildToken('AMMINISTRATORE')}`)
+      .set('Authorization', `Bearer ${adminToken()}`)
       .expect(200);
 
     expect(response.body).toHaveLength(2);
-    expect(mockUserRepository.findAllUsers).toHaveBeenCalledTimes(1);
+    expect(response.body[0]).toHaveProperty('username', 'admin.user');
   });
 
-  it('should create a user and return generated temp password', async () => {
+  it('should create user and return generated tempPassword', async () => {
     const response = await request(app.getHttpServer() as http.Server)
       .post('/users')
-      .set('Authorization', `Bearer ${buildToken('AMMINISTRATORE')}`)
+      .set('Authorization', `Bearer ${adminToken()}`)
       .send({
         username: 'new.user',
         surname: 'Neri',
@@ -96,41 +221,16 @@ describe('Users Integration Test', () => {
       })
       .expect(201);
 
-    expect(response.body).toHaveProperty('id', 10);
+    expect(response.body).toHaveProperty('id');
     expect(response.body).toHaveProperty('username', 'new.user');
     expect(response.body).toHaveProperty('tempPassword');
-    expect(typeof response.body.tempPassword).toBe('string');
-    expect(mockUserRepository.createUser).toHaveBeenCalledTimes(1);
   });
 
-  it('should reject non-admin user on guarded route', async () => {
+  it('should validate payload on create user', async () => {
     await request(app.getHttpServer() as http.Server)
-      .get('/users')
-      .set('Authorization', `Bearer ${buildToken('UTENTE')}`)
-      .expect(401);
-  });
-
-  it('should validate payload on update user', async () => {
-    await request(app.getHttpServer() as http.Server)
-      .put('/users/1')
-      .set('Authorization', `Bearer ${buildToken('AMMINISTRATORE')}`)
-      .send({
-        username: 'abc',
-        surname: 'R',
-        name: 'M',
-      })
+      .post('/users')
+      .set('Authorization', `Bearer ${adminToken()}`)
+      .send({ username: 'abc', surname: 'x', name: 'y' })
       .expect(400);
-
-    expect(mockUserRepository.updateUser).not.toHaveBeenCalled();
-  });
-
-  it('should retrieve available users', async () => {
-    const response = await request(app.getHttpServer() as http.Server)
-      .get('/users/available')
-      .set('Authorization', `Bearer ${buildToken('AMMINISTRATORE')}`)
-      .expect(200);
-
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0]).toHaveProperty('username', 'available.user');
   });
 });

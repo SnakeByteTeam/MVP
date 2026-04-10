@@ -16,7 +16,7 @@ describe('AlarmConfigFormStateService', () => {
     };
 
     const apartmentApiStub = {
-        getApartmentByPlantId: vi.fn(),
+        loadApartmentViewForPlantId: vi.fn(),
         getAllPlants: vi.fn(),
     };
 
@@ -30,7 +30,7 @@ describe('AlarmConfigFormStateService', () => {
         wardApiStub.getAvailablePlants.mockReturnValue(of([]));
         wardApiStub.getWards.mockReturnValue(of([]));
         wardApiStub.getPlantsByWardId.mockReturnValue(of([]));
-        apartmentApiStub.getApartmentByPlantId.mockReturnValue(of({ id: 'plant-1', rooms: [] }));
+        apartmentApiStub.loadApartmentViewForPlantId.mockReturnValue(of({ id: 'plant-1', rooms: [] }));
         apartmentApiStub.getAllPlants.mockReturnValue(of([]));
         datapointExtractionStub.extractDeviceOptions.mockReturnValue([]);
         datapointExtractionStub.findDatapointByDeviceAndDatapointId.mockReturnValue(null);
@@ -83,14 +83,14 @@ describe('AlarmConfigFormStateService', () => {
 
         const result = await firstValueFrom(service.loadDeviceOptionsByPlant('plant-1'));
 
-        expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
+        expect(apartmentApiStub.loadApartmentViewForPlantId).toHaveBeenCalledWith('plant-1');
         expect(result).toEqual(options);
         expect(service.isDevicesLoading()).toBe(false);
         expect(service.devicesLoadError()).toBeNull();
     });
 
     it('loadDeviceOptionsByPlant in errore restituisce lista vuota e imposta messaggio', async () => {
-        apartmentApiStub.getApartmentByPlantId.mockReturnValueOnce(throwError(() => new Error('network')));
+        apartmentApiStub.loadApartmentViewForPlantId.mockReturnValueOnce(throwError(() => new Error('network')));
 
         const result = await firstValueFrom(service.loadDeviceOptionsByPlant('plant-1'));
 

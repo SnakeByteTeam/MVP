@@ -31,7 +31,7 @@ describe('AlarmConfigPageComponent', () => {
     };
 
     const apartmentApiStub = {
-        getApartmentByPlantId: vi.fn(() => of({ id: 'plant-1', name: 'Plant', isEnabled: true, rooms: [] })),
+        loadApartmentViewForPlantId: vi.fn(() => of({ id: 'plant-1', name: 'Plant', isEnabled: true, rooms: [] })),
     };
 
     const alarmRule: AlarmRule = {

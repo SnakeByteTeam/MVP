@@ -20,7 +20,7 @@ describe('AlarmConfigFormComponent', () => {
 
     const apartmentApiStub = {
         getAllPlants: vi.fn(),
-        getApartmentByPlantId: vi.fn(),
+        loadApartmentViewForPlantId: vi.fn(),
     };
 
     const existingRule: AlarmRule = {
@@ -151,7 +151,7 @@ describe('AlarmConfigFormComponent', () => {
                 { id: 'plant-2', name: 'Appartamento 2' },
             ])
         );
-        apartmentApiStub.getApartmentByPlantId.mockReturnValue(of(createCreateModeApartment()));
+        apartmentApiStub.loadApartmentViewForPlantId.mockReturnValue(of(createCreateModeApartment()));
         apartmentApiStub.getAllPlants.mockReturnValue(of(createEditModePlants()));
 
         await TestBed.configureTestingModule({
@@ -253,7 +253,7 @@ describe('AlarmConfigFormComponent', () => {
 
         component.form.controls.plantId.setValue('plant-1');
 
-        expect(apartmentApiStub.getApartmentByPlantId).toHaveBeenCalledWith('plant-1');
+        expect(apartmentApiStub.loadApartmentViewForPlantId).toHaveBeenCalledWith('plant-1');
         expect(component.form.controls.deviceId.enabled).toBe(true);
         expect(component.deviceOptions()[0]?.id).toBe('sensor-1');
         expect(component.deviceOptions()[0]?.label).toBe('Soggiorno - Sensore porta');
@@ -526,7 +526,7 @@ describe('AlarmConfigFormComponent', () => {
     });
 
     it('imposta errore quando il caricamento dispositivi fallisce', () => {
-        apartmentApiStub.getApartmentByPlantId.mockReturnValueOnce(throwError(() => new Error('network')));
+        apartmentApiStub.loadApartmentViewForPlantId.mockReturnValueOnce(throwError(() => new Error('network')));
         setInputs('create', null);
 
         component.form.controls.plantId.setValue('plant-1');

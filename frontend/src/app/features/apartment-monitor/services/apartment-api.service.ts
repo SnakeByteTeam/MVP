@@ -24,7 +24,7 @@ export class ApartmentApiService {
 	private readonly apartmentsEndpoint = `${this.baseUrl}/apartments`;
 
 	public getCurrentApartment(): Observable<Apartment> {
-		return this.getAvailablePlants().pipe(
+		return this.getAllPlants().pipe(
 			map((plants) => {
 				const storedPlantId = this.getActivePlantId();
 				const selectedPlant = plants.find((plant) => plant.id === storedPlantId) ?? plants[0];
@@ -36,12 +36,12 @@ export class ApartmentApiService {
 				this.setActivePlantId(selectedPlant.id);
 				return selectedPlant.id;
 			}),
-			switchMap((plantId) => this.getApartmentByPlantId(plantId)),
+			switchMap((plantId) => this.loadApartmentViewForPlantId(plantId)),
 		);
 	}
 
 	public getAvailableApartments(): Observable<ApartmentOption[]> {
-		return this.getAvailablePlants().pipe(
+		return this.getAllPlants().pipe(
 			map((plants) =>
 				plants
 					.map((plant) => ({ id: plant.id, name: plant.name }))
@@ -50,7 +50,7 @@ export class ApartmentApiService {
 		);
 	}
 
-	public getApartmentByPlantId(plantId: string): Observable<Apartment> {
+	public loadApartmentViewForPlantId(plantId: string): Observable<Apartment> {
 		const query = `?plantid=${encodeURIComponent(plantId)}`;
 
 		return this.http.get<PlantDto>(`${this.plantEndpoint}${query}`).pipe(
@@ -117,10 +117,6 @@ export class ApartmentApiService {
 		}
 
 		return null;
-	}
-
-	private getAvailablePlants(): Observable<PlantDto[]> {
-		return this.getAllPlants();
 	}
 
 	private extractPlants(response: unknown): PlantDto[] {
@@ -192,13 +188,16 @@ export class ApartmentApiService {
 	}
 
 	private mapPlantToApartment(plant: PlantDto): Apartment {
+		const rooms = Array.isArray(plant.rooms) ? plant.rooms : [];
+
 		return {
 			id: plant.id,
 			name: plant.name,
 			isEnabled: true,
-			rooms: plant.rooms.map((room) => {
+			rooms: rooms.map((room) => {
+				const roomDevices = Array.isArray(room.devices) ? room.devices : [];
 				const visibleDevices = this.deduplicateRoomDevices(
-					room.devices.filter((device) => !this.isEnergyMeasureDevice(device.type, device.subType)),
+					roomDevices.filter((device) => !this.isEnergyMeasureDevice(device.type, device.subType)),
 				);
 
 				return {

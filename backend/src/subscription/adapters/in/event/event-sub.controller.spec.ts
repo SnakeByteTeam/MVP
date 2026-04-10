@@ -187,5 +187,18 @@ describe('EventSubscriptionController', () => {
         expect.any(Error),
       );
     });
+
+    it('should skip duplicate cache.all.updated events while a refresh is running', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      (controller as any).isBulkRefreshRunning = true;
+
+      await controller.refreshAllSubsAfterFullCacheSync();
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        'Event received: cache.all.updated. Bulk subscription refresh already running, skipping duplicate event.',
+      );
+      expect(refreshNodeSub.refreshSub).not.toHaveBeenCalled();
+      expect(refreshDatapointSub.refreshDatapointSub).not.toHaveBeenCalled();
+    });
   });
 });

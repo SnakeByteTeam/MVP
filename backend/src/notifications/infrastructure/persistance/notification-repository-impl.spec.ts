@@ -42,4 +42,16 @@ describe('NotificationRepositoryImpl', () => {
 
     expect(result).toBe(false);
   });
+
+  it('should return false when rowCount is undefined', async () => {
+    queryMock.mockResolvedValue({});
+
+    const result = await repository.writeNotification(
+      3,
+      'alarm-rule-1',
+      '2026-04-07T20:00:00.000Z',
+    );
+
+    expect(result).toBe(false);
+  });
 });

@@ -246,6 +246,99 @@ describe('HttpCacheController', () => {
       });
     });
 
+    it('should stringify non-Error values when updateCache fails', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => undefined);
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        'raw-failure',
+      );
+
+      await controller.updateCache({
+        data: [
+          {
+            type: 'service',
+            id: 'plant-raw-error',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      });
+
+      await flushPromises();
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '[CacheController] Error updating cache for plant plant-raw-error:',
+        'raw-failure',
+      );
+    });
+
+    it('should handle queue-level errors when promise chain throws an Error', async () => {
+      const queueErrorSpy = jest.spyOn(console, 'error');
+      queueErrorSpy
+        .mockImplementationOnce(() => {
+          throw new Error('queue-chain-error');
+        })
+        .mockImplementation(() => undefined);
+
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        new Error('plant-update-failure'),
+      );
+
+      await controller.updateCache({
+        data: [
+          {
+            type: 'service',
+            id: 'plant-queue-error',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      });
+
+      await flushPromises();
+      await flushPromises();
+      await flushPromises();
+
+      expect(queueErrorSpy).toHaveBeenCalledWith(
+        '[CacheController] Error in webhook processing queue:',
+        'queue-chain-error',
+      );
+    });
+
+    it('should handle queue-level errors when promise chain throws non-Error values', async () => {
+      const queueErrorSpy = jest.spyOn(console, 'error');
+      queueErrorSpy
+        .mockImplementationOnce(() => {
+          throw 'queue-raw-error';
+        })
+        .mockImplementation(() => undefined);
+
+      (updateCacheUseCase.updateCache as jest.Mock).mockRejectedValue(
+        new Error('plant-update-failure'),
+      );
+
+      await controller.updateCache({
+        data: [
+          {
+            type: 'service',
+            id: 'plant-queue-raw-error',
+            attributes: { lastModified: '2026-01-01' },
+            links: { self: '/' },
+          },
+        ],
+      });
+
+      await flushPromises();
+      await flushPromises();
+      await flushPromises();
+
+      expect(queueErrorSpy).toHaveBeenCalledWith(
+        '[CacheController] Error in webhook processing queue:',
+        'queue-raw-error',
+      );
+    });
+
     it('should include correct count in response message', async () => {
       const body = {
         data: [

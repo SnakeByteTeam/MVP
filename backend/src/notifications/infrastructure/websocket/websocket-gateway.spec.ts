@@ -80,6 +80,19 @@ describe('NotificationsGateway', () => {
     expect(client.disconnect).toHaveBeenCalledTimes(1);
   });
 
+  it('should disconnect client when join is called with empty ward id', async () => {
+    const client = {
+      id: 'socket-1',
+      join: jest.fn().mockResolvedValue(undefined),
+      disconnect: jest.fn(),
+    } as any;
+
+    await gateway.handleJoin(client, 0);
+
+    expect(client.disconnect).toHaveBeenCalledTimes(1);
+    expect(client.join).toHaveBeenCalledWith('ward:0');
+  });
+
   it('should leave ward room', async () => {
     const client = {
       id: 'socket-1',
@@ -103,5 +116,18 @@ describe('NotificationsGateway', () => {
     await gateway.handleLeave(client, 7);
 
     expect(client.disconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('should disconnect client when leave is called with empty ward id', async () => {
+    const client = {
+      id: 'socket-1',
+      leave: jest.fn().mockResolvedValue(undefined),
+      disconnect: jest.fn(),
+    } as any;
+
+    await gateway.handleLeave(client, 0);
+
+    expect(client.disconnect).toHaveBeenCalledTimes(1);
+    expect(client.leave).toHaveBeenCalledWith('ward:0');
   });
 });

@@ -1,4 +1,4 @@
-import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
+import { AlarmPriority } from '../../../src/alarms/domain/models/alarm-priority.enum';
 
 describe('AlarmPriority', () => {
   it('dovrebbe avere il valore WHITE', () => {

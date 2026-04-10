@@ -18,6 +18,10 @@ describe('GetTokensFromApiImpl', () => {
     process.env.CLIENTSECRET = 'my-client-secret';
     process.env.HOST2 = 'https://auth.example.com/token';
     process.env.REDIRECT_URI = 'http://localhost:3000/callback';
+    delete process.env.CLIENT_ID;
+    delete process.env.CLIENT_SECRET;
+    delete process.env.OAUTH_TOKEN_URL;
+    delete process.env.OAUTH_REDIRECT_URI;
 
     httpService = {
       post: jest.fn().mockReturnValue(
@@ -101,12 +105,109 @@ describe('GetTokensFromApiImpl', () => {
       );
     });
 
+    it('should use secondary env variables when primary ones are missing', async () => {
+      delete process.env.CLIENTID;
+      delete process.env.CLIENTSECRET;
+      delete process.env.HOST2;
+      delete process.env.REDIRECT_URI;
+
+      process.env.CLIENT_ID = 'fallback-client-id';
+      process.env.CLIENT_SECRET = 'fallback-client-secret';
+      process.env.OAUTH_TOKEN_URL = 'https://fallback.example.com/token';
+      process.env.OAUTH_REDIRECT_URI = 'https://fallback.example.com/callback';
+
+      const apiWithSecondaryEnv = new GetTokensFromApiImpl(
+        httpService as unknown as HttpService,
+        jwtService as unknown as JwtService,
+      );
+
+      await apiWithSecondaryEnv.getTokensWithCode('my-code');
+
+      const expectedAuth =
+        'Basic ' +
+        Buffer.from('fallback-client-id:fallback-client-secret').toString(
+          'base64',
+        );
+
+      expect(httpService.post).toHaveBeenCalledWith(
+        'https://fallback.example.com/token',
+        expect.stringContaining(
+          encodeURIComponent('https://fallback.example.com/callback'),
+        ),
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: expectedAuth }),
+        }),
+      );
+    });
+
     it('should return null when api call fails', async () => {
       httpService.post.mockReturnValue(
         new Observable((observer) =>
           observer.error(new Error('Network error')),
         ),
       );
+
+      const result = await apiImpl.getTokensWithCode('my-code');
+
+      expect(result).toBeNull();
+    });
+
+    it('should log unknown error details when failure is not an Error instance', async () => {
+      const loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
+      httpService.post.mockReturnValue(
+        new Observable((observer) => observer.error('raw-error')),
+      );
+
+      const result = await apiImpl.getTokensWithCode('my-code');
+
+      expect(result).toBeNull();
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Error getting tokens: Unknown error',
+        undefined,
+      );
+    });
+
+    it('should use preferred_username when email claim is missing', async () => {
+      jwtService.decode.mockReturnValue({
+        preferred_username: 'preferred.user@example.com',
+      });
+
+      const result = await apiImpl.getTokensWithCode('my-code');
+
+      expect(result?.email).toBe('preferred.user@example.com');
+    });
+
+    it('should return null when access token is empty', async () => {
+      httpService.post.mockReturnValueOnce(
+        of({
+          data: {
+            access_token: '',
+            refresh_token: 'refresh_token',
+            expires_in: 600,
+          },
+        } as any),
+      );
+
+      const result = await apiImpl.getTokensWithCode('my-code');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when decoded access token is invalid', async () => {
+      jwtService.decode.mockReturnValue(null);
+
+      const result = await apiImpl.getTokensWithCode('my-code');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when all email-like claims are blank', async () => {
+      jwtService.decode.mockReturnValue({
+        email: '   ',
+        preferred_username: '',
+        upn: '',
+        username: '',
+      });
 
       const result = await apiImpl.getTokensWithCode('my-code');
 
@@ -178,6 +279,22 @@ describe('GetTokensFromApiImpl', () => {
       const result = await apiImpl.refresh('my-refresh-token');
 
       expect(result).toBeNull();
+    });
+
+    it('should use upn when email and preferred_username are missing', async () => {
+      jwtService.decode.mockReturnValue({ upn: 'upn.user@example.com' });
+
+      const result = await apiImpl.refresh('my-refresh-token');
+
+      expect(result?.email).toBe('upn.user@example.com');
+    });
+
+    it('should use username as last fallback claim', async () => {
+      jwtService.decode.mockReturnValue({ username: 'last.user@example.com' });
+
+      const result = await apiImpl.refresh('my-refresh-token');
+
+      expect(result?.email).toBe('last.user@example.com');
     });
   });
 });

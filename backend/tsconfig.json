@@ -30,6 +30,7 @@
     ]
   },
   "include": [
+    "test/**/*",
     "src/**/*.ts",
     "**/*.spec.ts"
   ]

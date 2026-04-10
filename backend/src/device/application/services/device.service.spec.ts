@@ -256,4 +256,32 @@ describe('DeviceService', () => {
       expect(writeDatapointPort.writeDatapointValue).not.toHaveBeenCalled();
     });
   });
+
+  describe('findByDatapointId', () => {
+    it('should throw when datapointId is missing', async () => {
+      await expect(
+        service.findByDatapointId({ datapointId: '' }),
+      ).rejects.toThrow('[Device Controller] DatapointId is missing');
+    });
+
+    it('should delegate to output port when datapointId is provided', async () => {
+      const expectedDevice = new Device(
+        'device-1',
+        'plant-1',
+        'Lamp',
+        'light',
+        'dimmer',
+        [],
+      );
+
+      findByDatapointIdPort.findByDatapointId.mockResolvedValue(expectedDevice);
+
+      const result = await service.findByDatapointId({ datapointId: 'dp-1' });
+
+      expect(findByDatapointIdPort.findByDatapointId).toHaveBeenCalledWith({
+        datapointId: 'dp-1',
+      });
+      expect(result).toBe(expectedDevice);
+    });
+  });
 });

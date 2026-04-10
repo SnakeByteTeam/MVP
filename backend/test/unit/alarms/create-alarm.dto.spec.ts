@@ -1,5 +1,5 @@
-import { CreateAlarmDto } from '../src/alarms/infrastructure/dtos/create-alarm.dto';
-import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
+import { CreateAlarmDto } from '../../../src/alarms/infrastructure/dtos/create-alarm.dto';
+import { AlarmPriority } from '../../../src/alarms/domain/models/alarm-priority.enum';
 
 describe('CreateAlarmDto', () => {
   it('dovrebbe creare un dto con tutti i campi assegnati correttamente', () => {

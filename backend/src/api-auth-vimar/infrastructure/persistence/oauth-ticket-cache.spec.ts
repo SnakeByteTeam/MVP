@@ -123,6 +123,16 @@ describe('OAuthTicketCacheImpl', () => {
     expect(releaseMock).toHaveBeenCalledTimes(1);
   });
 
+  it('should return false when delete rowCount is undefined', async () => {
+    queryMock.mockResolvedValue({});
+
+    const result = await cacheImpl.deleteTicket('ticket-1');
+
+    expect(result).toBe(false);
+    expect(queryMock).toHaveBeenCalledTimes(1);
+    expect(releaseMock).toHaveBeenCalledTimes(1);
+  });
+
   it('should return false when delete query throws', async () => {
     queryMock.mockRejectedValue(new Error('db delete error'));
 

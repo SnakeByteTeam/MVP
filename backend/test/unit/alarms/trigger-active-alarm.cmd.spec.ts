@@ -1,4 +1,4 @@
-import { TriggerActiveAlarmCmd } from '../src/alarms/application/commands/trigger-active-alarm.cmd';
+import { TriggerActiveAlarmCmd } from '../../../src/alarms/application/commands/trigger-active-alarm.cmd';
 
 describe('TriggerActiveAlarmCmd', () => {
   it('dovrebbe creare un comando con tutti i campi corretti', () => {

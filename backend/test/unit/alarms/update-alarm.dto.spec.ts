@@ -1,5 +1,5 @@
-import { UpdateAlarmDto } from '../src/alarms/infrastructure/dtos/update-alarm.dto';
-import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
+import { UpdateAlarmDto } from '../../../src/alarms/infrastructure/dtos/update-alarm.dto';
+import { AlarmPriority } from '../../../src/alarms/domain/models/alarm-priority.enum';
 
 describe('UpdateAlarmDto', () => {
   it('dovrebbe creare un dto vuoto con tutti i campi undefined', () => {

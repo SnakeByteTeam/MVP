@@ -1,5 +1,5 @@
-import { Alarm } from '../src/alarms/domain/models/alarm-rule.model';
-import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
+import { Alarm } from '../../../src/alarms/domain/models/alarm-rule.model';
+import { AlarmPriority } from '../../../src/alarms/domain/models/alarm-priority.enum';
 
 describe('Alarm', () => {
   const createdAt = new Date('2024-01-01');

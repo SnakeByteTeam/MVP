@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, OnInit, ViewChild, inject, signal }
 import { UserListComponent } from '../user-list/user-list';
 import { CreateUserFormComponent } from '../create-user-form/create-user-form.component';
 import { UserCreatedDialogComponent } from '../user-created-dialog/user-created-dialog';
-import { UserApiService } from '../../../../core/services/user-api.service';
+import { UserApiService } from '../../services/user-api.service';
 import { BehaviorSubject, catchError, Observable, of, switchMap } from 'rxjs';
 import { UserDto } from '../../models/in/user.model.dto';
 import { UserCreatedResponseDto } from '../../models/in/user-created-response.model.dto';

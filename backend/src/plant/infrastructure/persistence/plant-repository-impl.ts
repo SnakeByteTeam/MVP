@@ -2,17 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
 import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant.entity';
 import { PG_POOL } from 'src/database/database.module';
-import { FindPlantByIdRepoPort } from 'src/plant/application/repository/find-plant-by-id.repository';
-import { FindAllAvailablePlantsRepoPort } from 'src/plant/application/repository/find-all-available-plants.repository';
-import { FindAllPlantsRepoPort } from 'src/plant/application/repository/find-all-plants.repository';
+import { PlantRepositoryPort } from 'src/plant/application/repository/plant.repository';
 
 @Injectable()
-export class PlantRepositoryImpl
-  implements
-    FindPlantByIdRepoPort,
-    FindAllAvailablePlantsRepoPort,
-    FindAllPlantsRepoPort
-{
+export class PlantRepositoryImpl implements PlantRepositoryPort {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
   async findById(plantId: string): Promise<PlantEntity | null> {

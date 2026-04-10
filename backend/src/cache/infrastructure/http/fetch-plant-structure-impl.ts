@@ -13,14 +13,10 @@ import {
 } from './dtos/in/api-datapoint.dto';
 import { PlantDto } from 'src/plant/infrastructure/http/dtos/plant.dto';
 import { RoomDto } from 'src/plant/infrastructure/http/dtos/room.dto';
-import { FetchNewCacheRepoPort } from 'src/cache/application/repository/fetch-new-cache.repository';
-import { GetAllPlantIdsRepoPort } from 'src/cache/application/repository/get-all-plantids.repository';
 import { PlantSeekResponseDto } from './dtos/in/plant-seek.dto';
 
 @Injectable()
-export class FetchStructureCacheImpl
-  implements FetchNewCacheRepoPort, GetAllPlantIdsRepoPort
-{
+export class FetchStructureCacheImpl {
   private readonly API_DOMAIN = process.env.HOST3 || '';
 
   constructor(private readonly httpService: HttpService) {}

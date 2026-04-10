@@ -9,8 +9,9 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
-import { AdminGuard } from 'src/guard/admin/admin.guard';
+import { User } from 'src/wards/domain/user';
 import { UserGuard } from 'src/guard/user/user.guard';
+import { AdminGuard } from 'src/guard/admin/admin.guard';
 
 
 @Controller('analytics')

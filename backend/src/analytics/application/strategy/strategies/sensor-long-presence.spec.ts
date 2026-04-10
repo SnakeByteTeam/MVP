@@ -2,6 +2,7 @@ import { SensorLongPresence } from './sensor-long-presence';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -10,6 +11,7 @@ const toISO = (daysAgo: number): string => {
 };
 
 const yesterday = toISO(1);
+const presenceSfeType = AnalyticsMetric.SENSOR_LONG_PRESENCE.sfeType ?? '';
 
 const buildPresenceDatapoint = (
   value: 'Absent' | 'Moving',
@@ -102,7 +104,7 @@ describe('SensorLongPresence', () => {
     expect(result.getSeries()[0].getData()[0]).toBe(1);
   });
 
-  it('should reset and count a new event after NotDetected', async () => {
+  it('should reset and count a new event after Absent', async () => {
     const snapshots = new Map([
       [ts(8, 0), buildPresenceDatapoint('Moving')],
       [ts(8, 35), buildPresenceDatapoint('Moving')],

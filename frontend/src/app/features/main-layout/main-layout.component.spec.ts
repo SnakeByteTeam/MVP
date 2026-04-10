@@ -186,7 +186,6 @@ describe('MainLayoutComponent', () => {
                 isFirstAccess: false,
             })
         );
-
         component.ngOnInit();
 
         component.toggleProfilePanel();

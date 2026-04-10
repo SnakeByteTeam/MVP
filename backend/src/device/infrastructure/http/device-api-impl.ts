@@ -1,18 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { GetDeviceValueRepoPort } from 'src/device/application/repository/get-device-value.repository';
 import { delay, firstValueFrom, retry } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import {
   DatapointApiResponse,
   DatapointExtractedDto,
 } from './dtos/in/datapoint-response.dto';
-import { WriteDatapointValueRepoPort } from 'src/device/application/repository/write-datapoint-value.repo';
 import { WriteDatapointValueRequestDto } from './dtos/out/write-datapoint-value-request.dto';
 
 @Injectable()
-export class DeviceApiImpl
-  implements GetDeviceValueRepoPort, WriteDatapointValueRepoPort
-{
+export class DeviceApiImpl {
   constructor(private readonly httpService: HttpService) {}
 
   private readonly API_DOMAIN = process.env.HOST3 || '';

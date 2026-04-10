@@ -9,10 +9,11 @@ import { DeviceApiService } from '../../services/device-api.service';
 import { RoomDetailComponent } from './room-detail.component';
 import { EndpointTableComponent } from '../endpoint-table/endpoint-table.component';
 
+
 @Component({
   selector: 'app-endpoint-table',
   standalone: true,
-  template: '',
+  template: '<div class="endpoint-table-stub"></div>',
 })
 class EndpointTableStubComponent {}
 

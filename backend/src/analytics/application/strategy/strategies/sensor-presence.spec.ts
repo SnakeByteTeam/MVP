@@ -2,6 +2,7 @@ import { SensorPresence } from './sensor-presence';
 import { GetAnalyticsPort } from '../../ports/out/get-analytics.port';
 import { GetAnalyticsCmd } from '../../commands/get-analytics.cmd';
 import { DatapointValue } from 'src/analytics/domain/datapoint-value.model';
+import { AnalyticsMetric } from 'src/analytics/infrastructure/dtos/analytics.metric.dto';
 
 const toISO = (daysAgo: number): string => {
   const d = new Date();
@@ -11,6 +12,7 @@ const toISO = (daysAgo: number): string => {
 
 const yesterday = toISO(1);
 const twoDaysAgo = toISO(2);
+const presenceSfeType = AnalyticsMetric.SENSOR_PRESENCE.sfeType ?? '';
 
 const buildPresenceDatapoint = (
   value: 'Absent' | 'Moving',

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { UserManagementPageComponent } from './user-management-page.component';
 import { API_BASE_URL } from '../../../../core/tokens/api-base-url.token';
-import { UserApiService } from '../../../../core/services/user-api.service';
+import { UserApiService } from '../../services/user-api.service';
 import { UserManagementErrorType } from '../../models/user-management-error-type.enum';
 
 describe('UserManagementPage', () => {
@@ -52,32 +52,32 @@ describe('UserManagementPage', () => {
         expect(getUsersMock).toHaveBeenCalledTimes(1);
     });
 
-        it('mostra di default solo la tabella e non il form OSS', () => {
-            const nativeElement = fixture.nativeElement as HTMLElement;
-            const panel = nativeElement.querySelector('[data-testid="create-user-panel"]') as HTMLElement | null;
+    it('mostra di default solo la tabella e non il form OSS', () => {
+        const nativeElement = fixture.nativeElement as HTMLElement;
+        const panel = nativeElement.querySelector('[data-testid="create-user-panel"]') as HTMLElement | null;
 
-            expect(component.isCreateFormOpen()).toBe(false);
-            expect(nativeElement.textContent).toContain('Elenco operatori sanitari');
-            expect(panel).not.toBeNull();
-            expect(panel?.className).toContain('max-h-0');
-        });
+        expect(component.isCreateFormOpen()).toBe(false);
+        expect(nativeElement.textContent).toContain('Elenco operatori sanitari');
+        expect(panel).not.toBeNull();
+        expect(panel?.className).toContain('max-h-0');
+    });
 
-        it('apre e chiude il form OSS con i pulsanti dedicati', () => {
-            component.openCreateForm();
-            fixture.detectChanges();
+    it('apre e chiude il form OSS con i pulsanti dedicati', () => {
+        component.openCreateForm();
+        fixture.detectChanges();
 
-            expect(component.isCreateFormOpen()).toBe(true);
+        expect(component.isCreateFormOpen()).toBe(true);
 
-            component.openCreateForm();
-            fixture.detectChanges();
+        component.openCreateForm();
+        fixture.detectChanges();
 
-            expect(component.isCreateFormOpen()).toBe(true);
+        expect(component.isCreateFormOpen()).toBe(true);
 
-            component.closeCreateForm();
-            fixture.detectChanges();
+        component.closeCreateForm();
+        fixture.detectChanges();
 
-            expect(component.isCreateFormOpen()).toBe(false);
-        });
+        expect(component.isCreateFormOpen()).toBe(false);
+    });
 
     it('onFormSubmit in successo imposta createdResponse e triggera refresh lista', () => {
         component.onFormSubmit({

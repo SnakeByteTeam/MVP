@@ -120,6 +120,17 @@ describe('WardManagementStore', () => {
         expect(wardStoreStub.setError).toHaveBeenCalledWith('fetch failed');
     });
 
+    it('getAvailablePlantsForWard con errore non strutturato usa il messaggio di fallback', async () => {
+        assignmentOperationsStub.getAvailablePlantsForWard.mockReturnValue(
+            throwError(() => ({ bad: true })),
+        );
+
+        const result = await firstValueFrom(store.getAvailablePlantsForWard(10));
+
+        expect(result).toBeNull();
+        expect(wardStoreStub.setError).toHaveBeenCalledWith('Operazione plant non riuscita.');
+    });
+
     it('getAvailableUsersForWard delega ad AssignmentOperationsService', async () => {
         assignmentOperationsStub.getAvailableUsersForWard.mockReturnValue(
             of([{ id: 7, firstName: 'Mario', lastName: 'Rossi', username: 'mrossi', role: UserRole.OPERATORE_SANITARIO }]),

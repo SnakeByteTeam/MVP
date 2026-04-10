@@ -13,6 +13,7 @@ import { DeviceDatapointExtractionService, DeviceDatapointOption } from '../../s
 import { AlarmConfigFormValidationHelper } from '../../helpers/alarm-config-form-validation.helper';
 import { AlarmConfigFormStateService } from '../../services/alarm-config-form-state.service';
 import { AlarmConfigFormFieldOrchestratorHelper } from '../../helpers/alarm-config-form-field-orchestrator.helper';
+import { formatAlarmPositionLabel } from '../../utils/alarm-position-label.util';
 
 @Component({
 	selector: 'app-alarm-config-form',
@@ -55,7 +56,7 @@ export class AlarmConfigFormComponent {
 		}
 
 		const position = this.initialRule()?.position ?? '';
-		return this.toPositionLabel(position);
+		return formatAlarmPositionLabel(position);
 	});
 
 	public readonly priorityOptions = Object.values(AlarmPriority).filter(
@@ -321,15 +322,6 @@ export class AlarmConfigFormComponent {
 				this.selectedDatapoint.set(resolvedDatapoint);
 				this.applyThresholdConstraints(resolvedDatapoint);
 			});
-	}
-
-	private toPositionLabel(position: string): string {
-		const normalized = position.replaceAll(/\s*-\s*/g, ' - ').trim();
-		if (normalized.length === 0) {
-			return '-';
-		}
-
-		return normalized;
 	}
 
 	public onCancel(): void {

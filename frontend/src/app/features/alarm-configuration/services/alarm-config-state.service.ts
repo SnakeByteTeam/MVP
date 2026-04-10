@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, OperatorFunction } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { AlarmRule } from '../../../core/alarm/models/alarm-rule.model';
 import { CreateAlarmRuleRequestDto } from '../../../core/alarm/models/dto/create-alarm-rule-request.model.dto';
@@ -35,6 +35,22 @@ export class AlarmConfigStateService {
         return EMPTY;
     }
 
+    private handleApiError<T>(fallbackMessage: string): OperatorFunction<T, T> {
+        return catchError<T, Observable<T>>((error: unknown) =>
+            this.handleError<T>(
+                this.apiErrorDisplayService.toMessage(error, {
+                    fallbackMessage,
+                    nonHttpStrategy: 'fallback',
+                }),
+            ),
+        );
+    }
+
+    private reloadAlarmsAfterMutation(): void {
+        this.loadAlarmRules();
+        this.alarmManagementRefreshService.requestRefresh();
+    }
+
 
     //carica soglie di allarme
     public loadAlarmRules(): void {
@@ -43,14 +59,7 @@ export class AlarmConfigStateService {
             .getAlarmRules()
             .pipe(
                 tap((alarms) => this.alarmsSubject.next(alarms)),
-                catchError((error: unknown) =>
-                    this.handleError<AlarmRule[]>(
-                        this.apiErrorDisplayService.toMessage(error, {
-                            fallbackMessage: 'Errore durante il caricamento degli allarmi.',
-                            nonHttpStrategy: 'fallback',
-                        }),
-                    ),
-                )
+                this.handleApiError<AlarmRule[]>('Errore durante il caricamento degli allarmi.')
             )
             .subscribe();
     }
@@ -58,14 +67,7 @@ export class AlarmConfigStateService {
     public getAlarmRuleById(id: string): Observable<AlarmRule> {
         this.clearError();
         return this.api.getAlarmRule(id).pipe(
-            catchError((error: unknown) =>
-                this.handleError<AlarmRule>(
-                    this.apiErrorDisplayService.toMessage(error, {
-                        fallbackMessage: 'Errore durante il recupero dell\'allarme.',
-                        nonHttpStrategy: 'fallback',
-                    }),
-                ),
-            ),
+            this.handleApiError<AlarmRule>('Errore durante il recupero dell\'allarme.'),
         );
     }
 
@@ -80,18 +82,8 @@ export class AlarmConfigStateService {
         }
 
         return this.api.createAlarmRule(payload).pipe(
-            tap(() => {
-                this.loadAlarmRules();
-                this.alarmManagementRefreshService.requestRefresh();
-            }),
-            catchError((error: unknown) =>
-                this.handleError<AlarmRule>(
-                    this.apiErrorDisplayService.toMessage(error, {
-                        fallbackMessage: 'Errore durante la creazione dell\'allarme.',
-                        nonHttpStrategy: 'fallback',
-                    }),
-                ),
-            )
+            tap(() => this.reloadAlarmsAfterMutation()),
+            this.handleApiError<AlarmRule>('Errore durante la creazione dell\'allarme.')
         );
     }
 
@@ -110,18 +102,8 @@ export class AlarmConfigStateService {
         }
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
-            tap(() => {
-                this.loadAlarmRules();
-                this.alarmManagementRefreshService.requestRefresh();
-            }),
-            catchError((error: unknown) =>
-                this.handleError<AlarmRule>(
-                    this.apiErrorDisplayService.toMessage(error, {
-                        fallbackMessage: 'Errore durante l\'aggiornamento dell\'allarme.',
-                        nonHttpStrategy: 'fallback',
-                    }),
-                ),
-            )
+            tap(() => this.reloadAlarmsAfterMutation()),
+            this.handleApiError<AlarmRule>('Errore durante l\'aggiornamento dell\'allarme.')
         );
     }
 
@@ -135,18 +117,8 @@ export class AlarmConfigStateService {
         const payload = this.requestMapper.toToggleRequest(currentAlarm, enabled);
 
         return this.api.updateAlarmRule(alarmId, payload).pipe(
-            tap(() => {
-                this.loadAlarmRules();
-                this.alarmManagementRefreshService.requestRefresh();
-            }),
-            catchError((error: unknown) =>
-                this.handleError<AlarmRule>(
-                    this.apiErrorDisplayService.toMessage(error, {
-                        fallbackMessage: 'Errore durante la modifica dello stato dell\'allarme.',
-                        nonHttpStrategy: 'fallback',
-                    }),
-                ),
-            )
+            tap(() => this.reloadAlarmsAfterMutation()),
+            this.handleApiError<AlarmRule>('Errore durante la modifica dello stato dell\'allarme.')
         );
     }
 
@@ -159,14 +131,7 @@ export class AlarmConfigStateService {
                 this.alarmsSubject.next(currentAlarms.filter((alarm) => alarm.id !== alarmId));
                 this.alarmManagementRefreshService.requestRefresh();
             }),
-            catchError((error: unknown) =>
-                this.handleError<void>(
-                    this.apiErrorDisplayService.toMessage(error, {
-                        fallbackMessage: 'Errore durante l\'eliminazione dell\'allarme.',
-                        nonHttpStrategy: 'fallback',
-                    }),
-                ),
-            )
+            this.handleApiError<void>('Errore durante l\'eliminazione dell\'allarme.')
         );
     }
 

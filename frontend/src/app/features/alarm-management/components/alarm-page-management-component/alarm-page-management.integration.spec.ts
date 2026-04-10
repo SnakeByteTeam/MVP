@@ -77,7 +77,6 @@ describe('AlarmManagement feature integration', () => {
         vmSubject = new BehaviorSubject<AlarmListVm>({
             alarms: [alarm1, alarm2],
             currentPage: 1,
-            pageLimit: 6,
             pageOffset: 0,
             canGoPrevious: false,
             canGoNext: true,
@@ -134,7 +133,6 @@ describe('AlarmManagement feature integration', () => {
         vmSubject.next({
             alarms: [alarm1, alarm2],
             currentPage: 1,
-            pageLimit: 6,
             pageOffset: 0,
             canGoPrevious: false,
             canGoNext: true,
@@ -162,7 +160,6 @@ describe('AlarmManagement feature integration', () => {
                 alarm2,
             ],
             currentPage: 1,
-            pageLimit: 6,
             pageOffset: 0,
             canGoPrevious: false,
             canGoNext: true,

@@ -74,7 +74,6 @@ interface ActiveAlarm {
 interface AlarmListVm {
     +alarms: ActiveAlarm[]
     +currentPage: number
-    +pageLimit: number
     +pageOffset: number
     +canGoPrevious: boolean
     +canGoNext: boolean
@@ -162,25 +161,6 @@ interface ActiveAlarmTableRow {
     +actionLabel: string
     +actionAriaLabel: string
 }
-interface AlarmItemViewModel {
-    +id: string
-    +alarmName: string
-    +position: string
-    +alarmTitle: string
-    +alarmRuleId: string
-    +activationTime: string
-    +isResolving: boolean
-    +priorityLabel: string
-    +cardClass: string
-    +priorityBadgeClass: string
-    +priorityDotClass: string
-    +priorityIconClass: string
-    +articleAriaLabel: string
-    +resolveButtonAriaLabel: string
-    +resolveButtonText: string
-    +resolvingStatusText: string
-    +waitingStatusText: string
-}
 interface AlarmTableColumn {
     +id: string
     +label: string
@@ -232,11 +212,9 @@ class AlarmManagementService {
     -alarmApiService: AlarmApiService
     -authService: InternalAuthService
     -apiErrorDisplayService: ApiErrorDisplayService
-    -pageLimit: 6
+    -paginationService: AlarmManagementPaginationService
     -resolvingId$: BehaviorSubject<string>
     -resolveError$: BehaviorSubject<string>
-    -pageOffset$: BehaviorSubject<number>
-    -canGoNext$: BehaviorSubject<boolean>
     -pendingResolveRequests: number
     +vm$: Observable<AlarmListVm>
     +initialize(): void
@@ -246,6 +224,19 @@ class AlarmManagementService {
     -loadPage(offset: number, fallbackToPreviousIfEmpty?: boolean): void
     -getActiveAlarmsForSession$(session: UserSession, offset: number): Observable<ActiveAlarm[]>
     -loadPageState$(session: UserSession, offset: number, fallbackToPreviousIfEmpty?: boolean): Observable<{ alarms: ActiveAlarm[]; pageOffset: number; canGoNext: boolean; }>
+}
+class AlarmManagementPaginationService {
+    +pageLimit: 6
+    +pageOffset$: Observable<number>
+    +canGoNext$: Observable<boolean>
+    +reset(): void
+    +getOffset(): number
+    +canGoNext(): boolean
+    +canGoPrevious(): boolean
+    +getNextOffset(): number
+    +getPreviousOffset(): number
+    +update(offset: number, canGoNext: boolean): void
+    +toPageNumber(offset: number): number
 }
 class AlarmManagementTablePresenterService {
     +toRows(alarms: ActiveAlarm[], resolvingId: string): ActiveAlarmTableRow[]
@@ -301,23 +292,6 @@ class AlarmPageManagementComponent implements OnInit {
     +onNextPage(): void
     +onPreviousPage(): void
 }
-class AlarmItemPresenterService {
-    +toViewModel(alarm: ActiveAlarm, isResolving: boolean): AlarmItemViewModel
-    -buildCardClass(borderClass: string, isResolving: boolean): string
-    -buildPriorityBadgeClass(badgeClass: string): string
-    -buildPriorityDotClass(dotClass: string): string
-    -buildPriorityIconClass(iconClass: string): string
-    -getSafeAlarmName(alarmName: string): string
-    -getSafePosition(position: string): string
-}
-class AlarmItemComponent {
-    -presenter: AlarmItemPresenterService
-    +alarm: InputSignal<ActiveAlarm>
-    +isResolving: InputSignal<boolean>
-    +resolve: OutputEmitterRef<string>
-    +vm: Signal<AlarmItemViewModel>
-    +onResolveClick(): void
-}
 UserSession --> UserRole
 LoginResponse --> TokenResponse
 RefreshResponse --> TokenResponse
@@ -330,6 +304,7 @@ AlarmManagementService ..> AlarmStateService
 AlarmManagementService ..> AlarmApiService
 AlarmManagementService ..> InternalAuthService
 AlarmManagementService ..> ApiErrorDisplayService
+AlarmManagementService ..> AlarmManagementPaginationService
 AlarmManagementService ..> AlarmListVm
 AlarmManagementService ..> ActiveAlarm
 AlarmManagementService ..> UserSession
@@ -360,11 +335,4 @@ AlarmPageManagementComponent ..> ElapsedTimePipe
 AlarmPageManagementComponent *-- AlarmTableShellComponent
 AlarmPageManagementComponent *-- AlarmPriorityIndicatorComponent
 AlarmPageManagementComponent *-- AlarmActionButtonComponent
-AlarmItemPresenterService ..> ActiveAlarm
-AlarmItemPresenterService ..> AlarmItemViewModel
-AlarmItemPresenterService ..> AlarmPriority
-AlarmItemComponent ..> ActiveAlarm
-AlarmItemComponent ..> AlarmItemViewModel
-AlarmItemComponent ..> AlarmItemPresenterService
-AlarmItemComponent ..> ElapsedTimePipe
 @enduml

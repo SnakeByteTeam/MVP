@@ -84,7 +84,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject = new BehaviorSubject<AlarmListVm>({
       alarms: [],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: false,
@@ -132,7 +131,6 @@ describe('AlarmPageManagementComponent', () => {
     expect(component.vm()).toEqual({
       alarms: [],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: false,
@@ -158,7 +156,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: false,
@@ -180,7 +177,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [alarm1],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: false,
@@ -204,7 +200,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [alarm1, alarm2],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: true,
@@ -238,7 +233,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [alarm1],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: false,
@@ -258,7 +252,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [alarm1, alarm2],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: true,
@@ -284,7 +277,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [alarm1],
       currentPage: 3,
-      pageLimit: 6,
       pageOffset: 12,
       canGoPrevious: true,
       canGoNext: false,
@@ -317,7 +309,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [alarm1],
       currentPage: 1,
-      pageLimit: 6,
       pageOffset: 0,
       canGoPrevious: false,
       canGoNext: false,
@@ -341,7 +332,6 @@ describe('AlarmPageManagementComponent', () => {
     vmSubject.next({
       alarms: [managedAlarm],
       currentPage: 2,
-      pageLimit: 6,
       pageOffset: 6,
       canGoPrevious: true,
       canGoNext: false,

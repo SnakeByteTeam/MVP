@@ -18,6 +18,7 @@ import { AlarmStateService } from '../../../core/alarm/services/alarm-state.serv
 import { InternalAuthService } from '../../user-auth/services/internal-auth.service';
 import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
+import { AlarmManagementPaginationService } from './alarm-management-pagination.service';
 import type { UserSession } from '../../user-auth/models/user-session.model';
 
 @Injectable({ providedIn: 'root' })
@@ -26,26 +27,23 @@ export class AlarmManagementService {
     private readonly alarmApiService = inject(AlarmApiService);
     private readonly authService = inject(InternalAuthService);
     private readonly apiErrorDisplayService = inject(ApiErrorDisplayService);
-    private readonly pageLimit = 6;
+    private readonly paginationService = inject(AlarmManagementPaginationService);
 
     private readonly resolvingId$ = new BehaviorSubject<string | null>(null);
     private readonly resolveError$ = new BehaviorSubject<string | null>(null);
-    private readonly pageOffset$ = new BehaviorSubject<number>(0);
-    private readonly canGoNext$ = new BehaviorSubject<boolean>(false);
     private pendingResolveRequests = 0;
 
     public readonly vm$ = combineLatest([
         this.alarmStateService.getActiveAlarms$(),
         this.resolvingId$.asObservable(),
         this.resolveError$.asObservable(),
-        this.pageOffset$.asObservable(),
-        this.canGoNext$.asObservable(),
+        this.paginationService.pageOffset$,
+        this.paginationService.canGoNext$,
     ]).pipe(
         map(([alarms, resolvingId, resolveError, pageOffset, canGoNext]): AlarmListVm => {
             return {
                 alarms,
-                currentPage: Math.floor(pageOffset / this.pageLimit) + 1,
-                pageLimit: this.pageLimit,
+                currentPage: this.paginationService.toPageNumber(pageOffset),
                 pageOffset,
                 canGoPrevious: pageOffset > 0,
                 canGoNext,
@@ -58,28 +56,24 @@ export class AlarmManagementService {
     );
 
     public initialize(): void {
-        this.pageOffset$.next(0);
-        this.canGoNext$.next(false);
+        this.paginationService.reset();
         this.loadPage(0);
     }
 
     public nextPage(): void {
-        if (!this.canGoNext$.getValue()) {
+        if (!this.paginationService.canGoNext()) {
             return;
         }
 
-        const nextOffset = this.pageOffset$.getValue() + this.pageLimit;
-        this.loadPage(nextOffset);
+        this.loadPage(this.paginationService.getNextOffset());
     }
 
     public previousPage(): void {
-        const currentOffset = this.pageOffset$.getValue();
-        if (currentOffset === 0) {
+        if (!this.paginationService.canGoPrevious()) {
             return;
         }
 
-        const previousOffset = Math.max(0, currentOffset - this.pageLimit);
-        this.loadPage(previousOffset);
+        this.loadPage(this.paginationService.getPreviousOffset());
     }
 
     public resolveAlarm(activeAlarmId: string): void {
@@ -101,7 +95,7 @@ export class AlarmManagementService {
                 }),
                 tap(() => {
                     this.alarmStateService.onAlarmResolved(activeAlarmId);
-                    this.loadPage(this.pageOffset$.getValue(), true);
+                    this.loadPage(this.paginationService.getOffset(), true);
                 }),
                 catchError((error: unknown) => {
                     this.resolveError$.next(
@@ -133,8 +127,7 @@ export class AlarmManagementService {
                 switchMap((session) => this.loadPageState$(session, offset, fallbackToPreviousIfEmpty)),
                 tap(({ alarms, pageOffset, canGoNext }) => {
                     this.alarmStateService.setActiveAlarms(alarms, 'replace');
-                    this.pageOffset$.next(pageOffset);
-                    this.canGoNext$.next(canGoNext);
+                    this.paginationService.update(pageOffset, canGoNext);
                 }),
                 catchError((error: unknown) => {
                     this.resolveError$.next(
@@ -156,7 +149,7 @@ export class AlarmManagementService {
             throw new TypeError('Utente corrente non valido per caricare gli allarmi attivi.');
         }
 
-        return this.alarmApiService.getActiveAlarms(numericUserId, this.pageLimit, offset);
+        return this.alarmApiService.getActiveAlarms(numericUserId, this.paginationService.pageLimit, offset);
     }
 
     private loadPageState$(
@@ -168,12 +161,12 @@ export class AlarmManagementService {
             take(1),
             switchMap((alarms) => {
                 if (fallbackToPreviousIfEmpty && offset > 0 && alarms.length === 0) {
-                    const previousOffset = Math.max(0, offset - this.pageLimit);
+                    const previousOffset = Math.max(0, offset - this.paginationService.pageLimit);
 
                     return this.getActiveAlarmsForSession$(session, previousOffset).pipe(
                         take(1),
                         switchMap((previousAlarms) =>
-                            this.getActiveAlarmsForSession$(session, previousOffset + this.pageLimit).pipe(
+                            this.getActiveAlarmsForSession$(session, previousOffset + this.paginationService.pageLimit).pipe(
                                 take(1),
                                 map((nextAlarms) => ({
                                     alarms: previousAlarms,
@@ -185,7 +178,7 @@ export class AlarmManagementService {
                     );
                 }
 
-                return this.getActiveAlarmsForSession$(session, offset + this.pageLimit).pipe(
+                return this.getActiveAlarmsForSession$(session, offset + this.paginationService.pageLimit).pipe(
                     take(1),
                     map((nextAlarms) => ({
                         alarms,

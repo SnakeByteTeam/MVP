@@ -150,7 +150,6 @@ describe('AlarmManagementService', () => {
         expect(vm).toEqual({
             alarms: [],
             currentPage: 1,
-            pageLimit: 6,
             pageOffset: 0,
             canGoPrevious: false,
             canGoNext: false,

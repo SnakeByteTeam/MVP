@@ -19,12 +19,13 @@
   "reporters": [
     "default",
     [
-      "jest-html-reporter",
+      "jest-html-reporters",
       {
         "pageTitle": "E2E Test Report",
-        "outputPath": "./coverage/jest-e2e-report.html",
-        "includeFailureMsg": true,
-        "includeSuiteFailure": true
+        "publicPath": "<rootDir>/../test/e2e/coverage",
+        "filename": "jest-e2e-report.html",
+        "expand": false,
+        "hideIcon": true
       }
     ]
   ]

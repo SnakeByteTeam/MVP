@@ -65,6 +65,7 @@
     "globals": "^15.14.0",
     "jest": "^29.7.0",
     "jest-html-reporter": "^4.4.0",
+    "jest-html-reporters": "^3.1.7",
     "prettier": "^3.4.2",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
@@ -86,7 +87,7 @@
       ".entity.ts",
       "main.ts"
     ],
-    "rootDir": ".",
+    "rootDir": "./",
     "testMatch": [
       "<rootDir>/test/unit/**/*.spec.ts",
       "<rootDir>/test/integration/**/*.spec.ts"
@@ -103,7 +104,7 @@
     "collectCoverageFrom": [
       "src/**/*.(t|j)s"
     ],
-    "coverageDirectory": "coverage",
+    "coverageDirectory": "test/coverage",
     "testEnvironment": "node",
     "setupFilesAfterEnv": [
       "<rootDir>/src/jest.setup.ts"
@@ -111,12 +112,13 @@
     "reporters": [
       "default",
       [
-        "jest-html-reporter",
+        "jest-html-reporters",
         {
-          "pageTitle": "Unit Test Report",
-          "outputPath": "coverage/jest-unit-report.html",
-          "includeFailureMsg": true,
-          "includeSuiteFailure": true
+          "pageTitle": "Test Report",
+          "publicPath": "./test/unit/coverage",
+          "filename:": "jest-unit-report.html",
+          "expand": false, 
+          "hideIcon": true
         }
       ]
     ]

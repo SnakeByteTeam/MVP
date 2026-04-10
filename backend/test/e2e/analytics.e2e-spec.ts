@@ -311,7 +311,6 @@ describe('Analytics (e2e)', () => {
     });
   });
 
-  // ─────────────────────────────────────────────
   describe('Performance & Load', () => {
     it('should respond within an acceptable time window', async () => {
       const start = Date.now();

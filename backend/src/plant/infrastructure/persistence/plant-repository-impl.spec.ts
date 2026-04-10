@@ -201,4 +201,50 @@ describe('PlantRepositoryImpl', () => {
       expect(mockClient.release).toHaveBeenCalled();
     });
   });
+
+  describe('findAllPlants', () => {
+    it('should return all plants', async () => {
+      const mockRows: PlantEntity[] = [
+        {
+          id: 'plant-1',
+          cached_at: new Date(),
+          ward_id: 1,
+          data: { name: 'Plant A', rooms: [] },
+        },
+        {
+          id: 'plant-2',
+          cached_at: new Date(),
+          ward_id: null,
+          data: { name: 'Plant B', rooms: [] },
+        },
+      ];
+
+      mockClient.query.mockResolvedValueOnce({ rows: mockRows });
+
+      const result = await repository.findAllPlants();
+
+      expect(mockPool.connect).toHaveBeenCalled();
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM plant'),
+      );
+      expect(mockClient.release).toHaveBeenCalled();
+      expect(result).toEqual(mockRows);
+    });
+
+    it('should return null when there are no plants', async () => {
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
+
+      const result = await repository.findAllPlants();
+
+      expect(result).toBeNull();
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('should release connection when findAllPlants fails', async () => {
+      mockClient.query.mockRejectedValueOnce(new Error('Query failed'));
+
+      await expect(repository.findAllPlants()).rejects.toThrow('Query failed');
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+  });
 });

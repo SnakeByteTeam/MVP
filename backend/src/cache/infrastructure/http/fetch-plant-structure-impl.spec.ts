@@ -397,6 +397,66 @@ describe('FetchStructureCacheImpl', () => {
       expect(result?.rooms).toHaveLength(1);
       expect(result?.rooms?.[0]?.id).toBe('room-1');
     });
+
+    it('should return null when room devices response has no data', async () => {
+      httpService.get
+        .mockReturnValueOnce(
+          of({
+            data: {
+              data: [
+                {
+                  id: 'room-1',
+                  attributes: { title: 'Living Room' },
+                  meta: { '@type': ['loc:Location'] },
+                },
+              ],
+            },
+          } as any),
+        )
+        .mockReturnValueOnce(of({ data: null } as any));
+
+      const result = await impl.fetch('valid-token', 'plant-1');
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when device datapoints response has no data', async () => {
+      httpService.get
+        .mockReturnValueOnce(
+          of({
+            data: {
+              data: [
+                {
+                  id: 'room-1',
+                  attributes: { title: 'Living Room' },
+                  meta: { '@type': ['loc:Location'] },
+                },
+              ],
+            },
+          } as any),
+        )
+        .mockReturnValueOnce(
+          of({
+            data: {
+              data: [
+                {
+                  id: 'device-1',
+                  attributes: { title: 'Lamp' },
+                  meta: {
+                    'vimar:ssType': 'SF_Light',
+                    'vimar:sfType': 'SS_Light_Switch',
+                  },
+                },
+              ],
+            },
+          } as any),
+        )
+        .mockReturnValueOnce(of({ data: null } as any));
+
+      const result = await impl.fetch('valid-token', 'plant-1');
+
+      expect(result).toBeNull();
+    });
   });
 
   describe('getAllPlantIds', () => {

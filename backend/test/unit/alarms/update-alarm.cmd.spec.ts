@@ -1,5 +1,5 @@
-import { UpdateAlarmCmd } from '../src/alarms/application/commands/update-alarm-rule.cmd';
-import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
+import { UpdateAlarmCmd } from '../../../src/alarms/application/commands/update-alarm-rule.cmd';
+import { AlarmPriority } from '../../../src/alarms/domain/models/alarm-priority.enum';
 
 describe('UpdateAlarmCmd', () => {
   it('dovrebbe creare un comando con solo id obbligatorio', () => {

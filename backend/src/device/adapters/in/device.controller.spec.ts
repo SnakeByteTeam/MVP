@@ -252,6 +252,12 @@ describe('DeviceController', () => {
     );
   });
 
+  it('should reject when plant id is missing', async () => {
+    await expect(controller.findByPlantId('' as any)).rejects.toBe(
+      BadRequestException,
+    );
+  });
+
   describe('writeDatapointValue', () => {
     it('should throw BadRequestException when datapointId is missing', async () => {
       await expect(
@@ -487,6 +493,94 @@ describe('DeviceController', () => {
       const result = await controller.onDatapointUpdate(payload);
 
       expect(result.statusCode).toBe(200);
+    });
+
+    it('should handle non-Error values from ingestTimeseries gracefully', async () => {
+      const payload: SubNotificationPayloadDto = {
+        data: [
+          {
+            id: 'dp-raw-error',
+            type: 'datapoint',
+            attributes: {
+              value: '1',
+              lastModified: '2026-04-01T13:41:58Z',
+              timestamp: '2026-04-01T13:41:58Z',
+            },
+            links: { self: 'http://example.com/dp-raw-error' },
+          },
+        ],
+      };
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      ingestTimeseries.ingestTimeseries.mockRejectedValue('raw-ingest-error');
+
+      await controller.onDatapointUpdate(payload);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[DeviceController] Error ingesting for dp-raw-error:'),
+        'raw-ingest-error',
+      );
+    });
+
+    it('should log stack trace when checkAlarmRule throws an Error', async () => {
+      const payload: SubNotificationPayloadDto = {
+        data: [
+          {
+            id: 'dp-check-error',
+            type: 'datapoint',
+            attributes: {
+              value: '2',
+              lastModified: '2026-04-01T13:41:58Z',
+              timestamp: '2026-04-01T13:41:58Z',
+            },
+            links: { self: 'http://example.com/dp-check-error' },
+          },
+        ],
+      };
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
+      checkAlarmUseCase.checkAlarmRule.mockRejectedValue(
+        new Error('alarm-check-error'),
+      );
+
+      await controller.onDatapointUpdate(payload);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('checkAlarmRule failed for datapoint dp-check-error'),
+        expect.any(String),
+      );
+    });
+
+    it('should log undefined stack when checkAlarmRule throws non-Error values', async () => {
+      const payload: SubNotificationPayloadDto = {
+        data: [
+          {
+            id: 'dp-check-raw-error',
+            type: 'datapoint',
+            attributes: {
+              value: '3',
+              lastModified: '2026-04-01T13:41:58Z',
+              timestamp: '2026-04-01T13:41:58Z',
+            },
+            links: { self: 'http://example.com/dp-check-raw-error' },
+          },
+        ],
+      };
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      ingestTimeseries.ingestTimeseries.mockResolvedValue(undefined);
+      checkAlarmUseCase.checkAlarmRule.mockRejectedValue('raw-check-error');
+
+      await controller.onDatapointUpdate(payload);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('checkAlarmRule failed for datapoint dp-check-raw-error'),
+        undefined,
+      );
     });
 
     it('should return 202 status code', async () => {

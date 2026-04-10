@@ -1,5 +1,5 @@
-import { ActiveAlarmDto } from '../src/alarms/infrastructure/dtos/active-alarm.dto';
-import { ActiveAlarm } from '../src/alarms/domain/models/alarm-event.model';
+import { ActiveAlarmDto } from '../../../src/alarms/infrastructure/dtos/active-alarm.dto';
+import { ActiveAlarm } from '../../../src/alarms/domain/models/alarm-event.model';
 
 describe('ActiveAlarmDto', () => {
   const triggeredAt = new Date('2024-01-01T10:00:00.000Z');

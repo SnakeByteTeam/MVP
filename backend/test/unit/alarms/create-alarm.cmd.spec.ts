@@ -1,5 +1,5 @@
-import { CreateAlarmCmd } from '../src/alarms/application/commands/create-alarm-rule.cmd';
-import { AlarmPriority } from '../src/alarms/domain/models/alarm-priority.enum';
+import { CreateAlarmCmd } from '../../../src/alarms/application/commands/create-alarm-rule.cmd';
+import { AlarmPriority } from '../../../src/alarms/domain/models/alarm-priority.enum';
 
 describe('CreateAlarmCmd', () => {
   it('dovrebbe creare un comando con tutti i campi readonly e corretti', () => {

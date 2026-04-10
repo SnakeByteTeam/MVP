@@ -178,7 +178,7 @@ describe('WardApiService', () => {
     });
 
     it('chiama DELETE /api/wards-plants-relationships/:plantId', () => {
-        service.removePlantFromWard(1, '102').subscribe((result) => {
+        service.removePlantFromWard('102').subscribe((result) => {
             expect(result).toBeNull();
         });
 

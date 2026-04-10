@@ -63,9 +63,8 @@ export class WardCardComponent {
   }
 
   public onRemovePlantClick(plantId: string): void {
-    const ward = this.ward();
-    if (ward) {
-      this.removePlant.emit({ wardId: ward.id, plantId });
+    if (this.ward()) {
+      this.removePlant.emit({ plantId });
     }
   }
 }

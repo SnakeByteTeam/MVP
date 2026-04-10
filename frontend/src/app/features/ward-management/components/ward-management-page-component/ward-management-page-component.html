@@ -229,8 +229,7 @@
                                 </svg>
                                 <span class="truncate text-sm font-medium">{{ apartment.name }}</span>
                             </button>
-                            <button type="button"
-                                (click)="onRemovePlant({ wardId: activeWard.id, plantId: apartment.id })"
+                            <button type="button" (click)="onRemovePlant({ plantId: apartment.id })"
                                 aria-label="Rimuovi appartamento" [class]="selectedApartmentId() === apartment.id
                             ? 'care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0 border-red-300 bg-red-600 text-white'
                             : 'care-btn care-btn--danger care-btn--icon care-btn--compact h-8 w-8 shrink-0'">

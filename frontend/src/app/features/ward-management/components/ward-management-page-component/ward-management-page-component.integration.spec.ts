@@ -268,7 +268,7 @@ describe('WardManagement feature integration', () => {
         clickButtonByAriaLabel('Rimuovi appartamento');
         expect(getDialog()?.textContent).toContain('rimozione dell\'appartamento');
         clickButtonByText('Rimuovi');
-        expect(wardApiStub.removePlantFromWard).toHaveBeenCalledWith(1, '101');
+        expect(wardApiStub.removePlantFromWard).toHaveBeenCalledWith('101');
     });
 
     it('elimina un ward dopo conferma e aggiorna la selezione', () => {

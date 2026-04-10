@@ -82,14 +82,4 @@ describe('WardStore', () => {
         expect(wards).toHaveLength(1);
     });
 
-    it('patchPlant aggiorna solo l appartamento richiesto', async () => {
-        store.setWards([wardA, wardB]);
-
-        store.patchPlant('102', { name: 'App. 102A' });
-
-        const wards = await firstValueFrom(store.wards$);
-        expect(wards).toHaveLength(2);
-        expect(wards[0].apartments[0]).toEqual(wardA.apartments[0]);
-        expect(wards[1].apartments[0]).toEqual({ id: '102', name: 'App. 102A' });
-    });
 });

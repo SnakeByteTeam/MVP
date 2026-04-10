@@ -79,10 +79,10 @@ export class WardManagementStore implements OnDestroy {
             .subscribe();
     }
 
-    public removePlant(wardId: number, plantId: string): void {
+    public removePlant(plantId: string): void {
         this.wardStore.setLoading(true);
         this.wardAssignmentOperations
-            .removePlant(wardId, plantId)
+            .removePlant(plantId)
             .pipe(takeUntil(this.destroy$))
             .subscribe();
     }

@@ -106,7 +106,6 @@ describe('WardCardComponent', () => {
     component.onRemovePlantClick('102');
 
     expect(removePlantSpy).toHaveBeenCalledWith({
-      wardId: 1,
       plantId: '102',
     });
     expect(removePlantSpy).toHaveBeenCalledTimes(1);

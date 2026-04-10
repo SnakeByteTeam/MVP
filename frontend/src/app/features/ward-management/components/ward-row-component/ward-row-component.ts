@@ -10,5 +10,4 @@ import type { Plant } from '../../models/plant.model';
 })
 export class WardRowComponent {
   public readonly plant = input<Plant | null>(null);
-  public readonly wardId = input<number>(0);
 }

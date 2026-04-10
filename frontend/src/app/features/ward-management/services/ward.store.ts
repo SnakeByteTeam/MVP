@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
-import type { Plant } from '../models/plant.model';
 import type { WardManagementState } from '../models/ward-management-state.model';
 import type { Ward } from '../models/ward.model';
 
@@ -56,22 +55,6 @@ export class WardStore {
       wards: current.wards.filter((ward) => ward.id !== wardId),
       isLoading: false,
       error: null,
-    });
-  }
-
-  public patchPlant(plantId: string, patch: Partial<Plant>): void {
-    const current = this.state$.value;
-    const wards = current.wards.map((ward) => ({
-      ...ward,
-      apartments: ward.apartments.map((apartment) =>
-        apartment.id === plantId ? { ...apartment, ...patch } : apartment,
-      ),
-    }));
-
-    this.setState({
-      wards,
-      isLoading: false,
-      error: null
     });
   }
 

@@ -84,7 +84,7 @@ describe('WardManagementStore', () => {
         store.assignOperator(1, { userId: 2 });
         store.removeOperator(1, 2);
         store.assignPlant(1, { plantId: '102' });
-        store.removePlant(1, '102');
+        store.removePlant('102');
 
         expect(assignmentOperationsStub.assignOperator).toHaveBeenCalledWith(1, {
             userId: 2,
@@ -93,7 +93,7 @@ describe('WardManagementStore', () => {
         expect(assignmentOperationsStub.assignPlant).toHaveBeenCalledWith(1, {
             plantId: '102',
         });
-        expect(assignmentOperationsStub.removePlant).toHaveBeenCalledWith(1, '102');
+        expect(assignmentOperationsStub.removePlant).toHaveBeenCalledWith('102');
         expect(wardStoreStub.setLoading).toHaveBeenCalledTimes(4);
     });
 

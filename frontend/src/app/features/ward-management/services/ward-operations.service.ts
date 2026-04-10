@@ -1,32 +1,23 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { EMPTY, Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
-import { UserRole } from '../../user-management/models/user-role.enum';
+import { EMPTY, Observable, catchError, map, tap } from 'rxjs';
 import type {
   CreateWardDto,
   UpdateWardDto,
-  WardPlantDto,
-  WardSummaryDto,
-  WardUserDto,
 } from '../models/ward-api.dto';
 import type { Ward } from '../models/ward.model';
 import { WardApiService } from './ward-api.service';
+import { WardHydrationService } from './ward-hydration.service';
 import { WardStore } from './ward.store';
 
 @Injectable()
 export class WardOperationsService {
   private readonly api = inject(WardApiService);
+  private readonly wardHydration = inject(WardHydrationService);
   private readonly store = inject(WardStore);
 
   public loadWards(): Observable<void> {
-    return this.api.getWards().pipe(
-      switchMap((wardSummaries) => {
-        if (wardSummaries.length === 0) {
-          return of([] as Ward[]);
-        }
-
-        return forkJoin(wardSummaries.map((wardSummary) => this.toWard(wardSummary)));
-      }),
+    return this.wardHydration.loadHydratedWards().pipe(
       tap((wards) => this.store.setWards(wards)),
       tap(() => this.store.setLoading(false)),
       map(() => void 0),
@@ -78,20 +69,6 @@ export class WardOperationsService {
     );
   }
 
-  private toWard(wardSummary: WardSummaryDto): Observable<Ward> {
-    return forkJoin({
-      apartmentsDto: this.api.getPlantsByWardId(wardSummary.id),
-      operatorsDto: this.api.getOperatorsByWardId(wardSummary.id),
-    }).pipe(
-      map(({ apartmentsDto, operatorsDto }) => ({
-        id: wardSummary.id,
-        name: wardSummary.name,
-        apartments: this.toApartments(apartmentsDto),
-        operators: this.toOperators(operatorsDto),
-      })),
-    );
-  }
-
   private normalizeMutationWard(ward: Ward): Ward {
     const currentWard = this.store.getWardsSnapshot().find((item) => item.id === ward.id);
 
@@ -101,23 +78,6 @@ export class WardOperationsService {
       apartments: ward.apartments ?? currentWard?.apartments ?? [],
       operators: ward.operators ?? currentWard?.operators ?? [],
     };
-  }
-
-  private toApartments(apartmentsDto: WardPlantDto[]): Ward['apartments'] {
-    return apartmentsDto.map((plant) => ({
-      id: plant.id,
-      name: plant.name,
-    }));
-  }
-
-  private toOperators(operatorsDto: WardUserDto[]): Ward['operators'] {
-    return operatorsDto.map((user) => ({
-      id: user.id,
-      firstName: user.username,
-      lastName: '',
-      username: user.username,
-      role: UserRole.OPERATORE_SANITARIO,
-    }));
   }
 
   private getErrorMessage(error: unknown): string {

@@ -352,7 +352,7 @@ describe('AssignmentOperationsService', () => {
     it('removePlant in errore non-http usa fallback message', () => {
         apiStub.removePlantFromWard.mockReturnValue(throwError(() => ({ bad: true })));
 
-        service.removePlant(1, '102').subscribe();
+        service.removePlant('102').subscribe();
 
         expect(storeStub.setError).toHaveBeenCalledWith('Operazione di assegnazione non riuscita.');
         expect(storeStub.setError).toHaveBeenCalledTimes(1);

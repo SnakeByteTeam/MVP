@@ -47,7 +47,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   public readonly confirmState = signal<
     | { kind: 'delete-ward'; wardId: number }
     | { kind: 'remove-operator'; wardId: number; userId: number }
-    | { kind: 'remove-plant'; wardId: number; plantId: string }
+    | { kind: 'remove-plant'; plantId: string }
     | null
   >(null);
 
@@ -275,7 +275,6 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
   public onRemovePlant(event: RemovePlantEvent): void {
     this.confirmState.set({
       kind: 'remove-plant',
-      wardId: event.wardId,
       plantId: event.plantId,
     });
   }
@@ -295,7 +294,7 @@ export class WardManagementPageComponent implements OnInit, OnDestroy {
     }
 
     if (state.kind === 'remove-plant') {
-      this.store.removePlant(state.wardId, state.plantId);
+      this.store.removePlant(state.plantId);
     }
 
     this.confirmState.set(null);

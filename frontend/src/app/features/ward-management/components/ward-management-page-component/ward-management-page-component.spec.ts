@@ -358,14 +358,13 @@ describe('WardManagementPageComponent', () => {
     expect(storeStub.removeOperator).toHaveBeenCalledWith(1, 2);
     expect(component.confirmState()).toBeNull();
 
-    component.onRemovePlant({ wardId: 2, plantId: '103' });
+    component.onRemovePlant({ plantId: '103' });
     expect(component.confirmState()).toEqual({
       kind: 'remove-plant',
-      wardId: 2,
       plantId: '103',
     });
     component.onConfirmDialogConfirmed();
-    expect(storeStub.removePlant).toHaveBeenCalledWith(2, '103');
+    expect(storeStub.removePlant).toHaveBeenCalledWith('103');
     expect(component.confirmState()).toBeNull();
   });
 
@@ -400,7 +399,7 @@ describe('WardManagementPageComponent', () => {
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'operatore dal reparto?');
     expect(component.getConfirmLabel()).toBe('Rimuovi');
 
-    component.confirmState.set({ kind: 'remove-plant', wardId: 1, plantId: '101' });
+    component.confirmState.set({ kind: 'remove-plant', plantId: '101' });
     expect(component.getConfirmMessage()).toBe('Confermi la rimozione dell\'appartamento dal reparto?');
     expect(component.getConfirmLabel()).toBe('Rimuovi');
   });

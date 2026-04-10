@@ -1,0 +1,129 @@
+@startuml
+interface CreateUserDto {
+    +name: string
+    +surname: string
+    +username: string
+}
+enum UserManagementErrorType {
+    USERNAME_ALREADY_IN_USE
+    OTHER_ERROR
+}
+class CreateUserFormComponent {
+    +errorType: InputSignal<UserManagementErrorType>
+    +isOpen: InputSignal<boolean>
+    +formSubmit: OutputEmitterRef<CreateUserDto>
+    +openRequest: OutputEmitterRef<void>
+    +closeRequest: OutputEmitterRef<void>
+    -nameInput?: ElementRef<HTMLInputElement>
+    -fb: FormBuilder
+    +form: FormGroup<ɵNonNullableFormControls<{ name: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; surname: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; username: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; }>>
+    +submit(): void
+    +reset(): void
+    +resetAndFocus(): void
+    +requestClose(): void
+    +requestOpen(): void
+}
+interface UserCreatedResponseDto {
+    +tempPassword: string
+}
+class UserCreatedDialogComponent {
+    +response: InputSignal<UserCreatedResponseDto>
+    +user: InputSignal<CreateUserDto>
+    +closed: OutputEmitterRef<void>
+    +closeDialog(): void
+}
+enum UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+interface UserDto {
+    +id: number
+    +name: string
+    +surname: string
+    +username: string
+    +role: UserRole
+}
+class UserListComponent {
+    +users: InputSignal<UserDto[]>
+    +deleteUser: OutputEmitterRef<number>
+    +pendingDeleteUser: WritableSignal<UserDto>
+    +onDeleteRequest(user: UserDto): void
+    +onDeleteCancel(): void
+    +onDeleteConfirm(): void
+    +onDelete(user: UserDto): void
+}
+class DecoderPasswordService {
+    +decodeTempPassword(tempPassword: string): string
+}
+class UserApiService {
+    -http: unknown
+    -baseUrl: string
+    -decoderPasswordService: DecoderPasswordService
+    +getUsers(): Observable<UserDto[]>
+    +createUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
+    +deleteUser(id: number): Observable<void>
+}
+class UserManagementPageComponent implements OnInit {
+    -userApi: UserApiService
+    -refreshTrigger$: BehaviorSubject<void>
+    +users$: Observable<UserDto[]>
+    +createdResponse: WritableSignal<UserCreatedResponseDto>
+    +createdUser: WritableSignal<CreateUserDto>
+    +formError: WritableSignal<UserManagementErrorType>
+    +isCreateFormOpen: WritableSignal<boolean>
+    -createUserFormComponent?: CreateUserFormComponent
+    +ngOnInit(): void
+    +openCreateForm(): void
+    +closeCreateForm(): void
+    +onFormSubmit(dto: CreateUserDto): void
+    +onUserDeleted(id: number): void
+    +onDialogClosed(): void
+}
+interface UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+interface LoginResponse {
+    +accessToken: string
+}
+interface RefreshResponse {
+    +accessToken: string
+}
+interface AuthClaims {
+    +userId?: string | number
+    +sub?: string | number
+    +id?: string | number
+    +username?: string
+    +role?: string
+    +isFirstAccess?: boolean
+    +firstAccess?: boolean
+}
+interface TokenResponse {
+    +accessToken: string
+}
+class InternalAuthService {
+    -http: unknown
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession>
+    -token: string
+    -restoreSessionInFlight$: Observable<boolean>
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string
+    +getCurrentUser$(): Observable<UserSession>
+    +getRole(): UserRole
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}
+@enduml

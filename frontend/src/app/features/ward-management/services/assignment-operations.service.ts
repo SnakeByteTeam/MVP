@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
 import { EventSubscriptionService } from '../../../core/alarm/services/event-subscription.service';
-import { UserRole } from '../../../core/models/user-role.enum';
+import { UserRole } from '../../user-management/models/user-role.enum';
 import type {
   AssignPlantDto,
   AssignOperatorDto,

@@ -1,6 +1,6 @@
 import { Injectable, inject } from "@angular/core";
 import { AlarmApiService } from "../../../core/alarm/services/alarm-api.service";
-import { InternalAuthService } from "../../../core/services/internal-auth.service";
+import { InternalAuthService } from "../../user-auth/services/internal-auth.service";
 import { ApiErrorDisplayService } from "../../../core/services/api-error-display.service";
 import {
     BehaviorSubject,

@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '../../core/guards/auth.guard';
 import { roleGuard } from '../../core/guards/role.guard';
-import { UserRole } from '../../core/models/user-role.enum';
+import { UserRole } from '../user-management/models/user-role.enum';
 import { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';
 import { MyVimarCloudApiFeatureService } from '../my-vimar-integration/services/my-vimar-cloud-api-feature.service';
 

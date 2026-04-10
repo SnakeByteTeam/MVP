@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Observable, Subject, catchError, of, takeUntil } from 'rxjs';
-import type { User } from '../../../core/models/user.model';
+import type { User } from '../../user-management/models/user.model';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../models/ward-api.dto';
 import type { Plant } from '../models/plant.model';
 import { AssignmentOperationsService } from './assignment-operations.service';

@@ -1,0 +1,660 @@
+@startuml
+enum UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+interface User {
+    +id: number
+    +firstName: string
+    +lastName: string
+    +username: string
+    +role: UserRole
+}
+interface CreateWardDto {
+    +name: string
+}
+interface UpdateWardDto {
+    +name: string
+}
+interface AssignOperatorDto {
+    +userId: number
+}
+interface AssignPlantDto {
+    +plantId: string
+}
+interface WardUserDto {
+    +id: number
+    +username: string
+}
+interface WardPlantDto {
+    +id: string
+    +name: string
+}
+interface WardSummaryDto {
+    +id: number
+    +name: string
+}
+interface Plant {
+    +id: string
+    +name: string
+}
+interface Ward {
+    +id: number
+    +name: string
+    +apartments: Plant[]
+    +operators: User[]
+}
+class AssignOperatorDialogComponent implements OnInit {
+    -formBuilder: FormBuilder
+    +wardId: InputSignal<number>
+    +availableWards: InputSignal<Ward[]>
+    +availableOperators: InputSignal<User[]>
+    +submitted: OutputEmitterRef<AssignOperatorDto>
+    +cancelled: OutputEmitterRef<void>
+    +form: FormGroup<ɵNullableFormControls<{ userId: FormControl<number>; }>>
+    +ngOnInit(): void
+    +onSubmit(): void
+    +onCancel(): void
+    +getOperatorLabel(operator: User): string
+}
+class AssignWardDialogComponent implements OnInit {
+    -formBuilder: FormBuilder
+    +wardId: InputSignal<number>
+    +availableWards: InputSignal<Ward[]>
+    +availablePlants: InputSignal<Plant[]>
+    +submitted: OutputEmitterRef<AssignPlantDto>
+    +cancelled: OutputEmitterRef<void>
+    +form: FormGroup<ɵNullableFormControls<{ plantId: FormControl<string>; }>>
+    +ngOnInit(): void
+    +onSubmit(): void
+    +onCancel(): void
+}
+interface RemoveOperatorEvent {
+    +wardId: number
+    +userId: number
+}
+interface RemovePlantEvent {
+    +wardId: number
+    +plantId: string
+}
+class WardRowComponent {
+    +plant: InputSignal<Plant>
+    +wardId: InputSignal<number>
+}
+class WardCardComponent {
+    +ward: InputSignal<Ward>
+    +editWard: OutputEmitterRef<Ward>
+    +deleteWard: OutputEmitterRef<number>
+    +assignOperator: OutputEmitterRef<number>
+    +removeOperator: OutputEmitterRef<RemoveOperatorEvent>
+    +assignPlant: OutputEmitterRef<number>
+    +removePlant: OutputEmitterRef<RemovePlantEvent>
+    -isExpandedSignal: WritableSignal<boolean>
+    +isExpanded: Signal<boolean>
+    +toggleExpanded(): void
+    +onEditWardClick(): void
+    +onDeleteWardClick(): void
+    +onAssignOperatorClick(): void
+    +onRemoveOperatorClick(userId: number): void
+    +onAssignPlantClick(): void
+    +onRemovePlantClick(plantId: string): void
+}
+class WardFormDialogComponent {
+    -formBuilder: FormBuilder
+    +ward: InputSignal<Ward>
+    +submitted: OutputEmitterRef<CreateWardDto>
+    +cancelled: OutputEmitterRef<void>
+    +form: FormGroup<ɵNonNullableFormControls<{ name: (string | ValidatorFn[])[]; }>>
+    -syncFormWithWard: EffectRef
+    +isEditMode: Signal<boolean>
+    +onSubmit(): void
+    +onCancel(): void
+}
+enum DeviceType {
+    UNKNOWN
+    THERMOSTAT
+    FALL_SENSOR
+    PRESENCE_SENSOR
+    LIGHT
+    ALARM_BUTTON
+    ENTRANCE_DOOR
+    BLIND
+}
+interface DeviceAction {
+    +key: string
+    +label: string
+    +disabled?: boolean
+}
+interface Datapoint {
+    +id: string
+    +name: string
+    +readable: boolean
+    +writable: boolean
+    +valueType: string
+    +enum: string[]
+    +sfeType: string
+}
+interface Device {
+    +id: string
+    +name: string
+    +type: DeviceType
+    +status: DeviceStatus
+    +actions: DeviceAction[]
+    +datapoints: Datapoint[]
+}
+interface Room {
+    +id: string
+    +name: string
+    +hasActiveAlarm: boolean
+    +devices: Device[]
+}
+interface Apartment {
+    +id: string
+    +name: string
+    +isEnabled: boolean
+    +rooms: Room[]
+}
+interface PlantDatapointDto {
+    +id: string
+    +name: string
+    +readable: boolean
+    +writable: boolean
+    +valueType: string
+    +enum?: string[]
+    +sfeType: string
+}
+interface PlantDeviceDto {
+    +id: string
+    +name: string
+    +type?: string
+    +subType?: string
+    +datapoints?: PlantDatapointDto[]
+}
+interface PlantRoomDto {
+    +id: string
+    +name: string
+    +devices: PlantDeviceDto[]
+}
+interface PlantDto {
+    +id: string
+    +name: string
+    +wardId?: number
+    +rooms: PlantRoomDto[]
+}
+interface DeviceTypeRule {
+    +deviceType: DeviceType
+    +tokens: readonly string[]
+}
+interface DeviceTypeResolutionInput {
+    +rawType?: string
+    +rawSubType?: string
+    +rawName?: string
+    +sfeTypes?: readonly string[]
+}
++resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
++getDeviceTypeLabel(type: DeviceType): string
++getEndpointLabel(sfeType: string): string
++getDiscoveredUnmappedSfeCodes(): string[]
++resolveFromRules(normalizedValues: readonly string[], rules: readonly DeviceTypeRule[]): DeviceType
++includesAny(value: string, tokens: readonly string[]): boolean
++normalize(value: string): string
++humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): string
++humanizeSfeSuffix(value: string): string
+interface UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+interface LoginResponse {
+    +accessToken: string
+}
+interface RefreshResponse {
+    +accessToken: string
+}
+interface AuthClaims {
+    +userId?: string | number
+    +sub?: string | number
+    +id?: string | number
+    +username?: string
+    +role?: string
+    +isFirstAccess?: boolean
+    +firstAccess?: boolean
+}
+interface TokenResponse {
+    +accessToken: string
+}
+class InternalAuthService {
+    -http: unknown
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession>
+    -token: string
+    -restoreSessionInFlight$: Observable<boolean>
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string
+    +getCurrentUser$(): Observable<UserSession>
+    +getRole(): UserRole
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}
+class WardRealtimeCacheService {
+    +getWardIds(userId: string): string[]
+    +setWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
+    +mergeWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
+    +clearWardIds(userId: string): void
+    +clearAll(): void
+    -normalizeUserId(value: string): string
+    -normalizeWardIds(values: readonly WardIdInput[]): string[]
+    -readCache(): WardIdsByUser
+    -writeCache(cache: WardIdsByUser): void
+    -getStorage(): Storage
+    -isWardIdsByUser(value: unknown): boolean
+}
+interface ApartmentOption {
+    +id: string
+    +name: string
+}
+class ApartmentApiService {
+    -http: unknown
+    -baseUrl: string
+    -authService: InternalAuthService
+    -wardRealtimeCache: WardRealtimeCacheService
+    -plantEndpoint: string
+    -apartmentsEndpoint: string
+    +getCurrentApartment(): Observable<Apartment>
+    +getAvailableApartments(): Observable<ApartmentOption[]>
+    +getApartmentByPlantId(plantId: string): Observable<Apartment>
+    +getAllPlants(): Observable<PlantDto[]>
+    +enableApartment(apartmentId: string): Observable<void>
+    +disableApartment(apartmentId: string): Observable<void>
+    +setActivePlantId(plantId: string): void
+    -getActivePlantId(): string
+    -getAvailablePlants(): Observable<PlantDto[]>
+    -extractPlants(response: unknown): PlantDto[]
+    -asPlantArray(value: unknown): PlantDto[]
+    -cacheWardIdsForCurrentUser(plants: readonly PlantDto[]): void
+    -mapPlantToApartment(plant: PlantDto): Apartment
+    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
+    -normalizeDeviceName(name: string): string
+    -getDevicePriorityScore(device: PlantDeviceDto): number
+    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
+    -mapDeviceStatus(rawType: string): DeviceStatus
+}
+enum AlarmPriority {
+    WHITE
+    GREEN
+    ORANGE
+    RED
+}
+enum ConnectionStatus {
+    CONNECTED
+    DISCONNECTED
+    RECONNECTING
+}
+interface ActiveAlarm {
+    +id: string
+    +alarmRuleId: string
+    +deviceId?: string
+    +alarmName: string
+    +priority: AlarmPriority
+    +activationTime: string
+    +resolutionTime: string
+    +position: string
+    +userId: number
+    +userUsername?: string
+}
+interface AlarmEvent {
+    +id: string
+    +alarmRuleId: string
+    +alarmName: string
+    +priority: AlarmPriority
+    +activationTime: string
+    +resolutionTime: string
+}
+interface NotificationEvent {
+    +notificationId: string
+    +title: string
+    +sentAt: string
+    +eventType?: "triggered" | "resolved"
+}
+class AlarmStateService {
+    -activeAlarms$: BehaviorSubject<ActiveAlarm[]>
+    -notifications$: BehaviorSubject<NotificationEvent[]>
+    -dismissedNotificationIds$: BehaviorSubject<ReadonlySet<string>>
+    -locallyResolvedActiveAlarmIds: Set<string>
+    +setActiveAlarms(alarms: ActiveAlarm[], mode?: ActiveAlarmsSnapshotMode): void
+    +onAlarmTriggered(event: AlarmEvent): void
+    +onAlarmResolved(id: string): void
+    +onNotificationReceived(event: NotificationEvent): void
+    +removeNotification(notificationId: string): void
+    +clearNotifications(): void
+    +dismissNotification(notificationId: string): void
+    +dismissNotifications(notificationIds: readonly string[]): void
+    +getActiveAlarms$(): Observable<ActiveAlarm[]>
+    +getActiveAlarmsCount$(): Observable<number>
+    +getNotifications$(): Observable<NotificationEvent[]>
+    +getDismissedNotificationIds$(): Observable<ReadonlySet<string>>
+    +getUnreadNotificationsCount$(): Observable<number>
+}
+interface AlarmRule {
+    +id: string
+    +name: string
+    +thresholdOperator: string
+    +thresholdValue: string
+    +priority: AlarmPriority
+    +armingTime: string | Date
+    +dearmingTime: string | Date
+    +isArmed: boolean
+    +deviceId: string
+    +datapointId?: string
+    +position: string
+}
+interface CreateAlarmRuleRequestDto {
+    +name: string
+    +deviceId: string
+    +datapointId?: string
+    +plantId: string
+    +priority: number
+    +thresholdOperator: string
+    +thresholdValue: string
+    +armingTime: string
+    +dearmingTime: string
+}
+interface UpdateAlarmRuleRequestDto {
+    +name: string
+    +priority: number
+    +thresholdOperator: string
+    +thresholdValue: string
+    +armingTime: string
+    +dearmingTime: string
+    +isArmed: boolean
+}
+class AlarmApiService {
+    -http: unknown
+    -baseUrl: string
+    -alarmsBaseUrl: string
+    -alarmEventsBaseUrl: string
+    +getAlarmRules(): Observable<AlarmRule[]>
+    +getAlarmRule(id: string): Observable<AlarmRule>
+    +createAlarmRule(payload: CreateAlarmRuleRequestDto): Observable<AlarmRule>
+    +updateAlarmRule(id: string, payload: UpdateAlarmRuleRequestDto): Observable<AlarmRule>
+    +deleteAlarmRule(id: string): Observable<void>
+    +getActiveAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
+    +getResolvedAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
+    +getAlarmEventById(alarmEventId: string): Observable<ActiveAlarm>
+    +resolveAlarm(alarmId: string, userId: number): Observable<void>
+}
+interface BackendTriggeredPayload {
+    +alarmEventId: string
+    +wardId: number
+    +alarmRuleId: string
+}
+interface BackendResolvedPayload {
+    +alarmEventId: string
+    +wardId?: number
+}
+interface AlarmLifecycleUpdateDetail {
+    +type: AlarmLifecycleType
+    +alarmEventId: string
+}
+interface RealtimeAlarmEventNormalizerPort {
+    +parseBackendTriggeredPayload(payload: unknown): BackendTriggeredPayload
+    +parseBackendResolvedPayload(payload: unknown): BackendResolvedPayload
+}
+class RealtimeAlarmEventNormalizerService implements RealtimeAlarmEventNormalizerPort {
+    +parseBackendTriggeredPayload(payload: unknown): BackendTriggeredPayload
+    +parseBackendResolvedPayload(payload: unknown): BackendResolvedPayload
+    -isObject(value: unknown): boolean
+    -parseWardId(value: unknown): number
+}
++formatTriggeredNotificationTitle(alarmName: unknown, priority: unknown, maxLength?: number): string
++normalizeAlarmName(value: unknown): string
++toPrioritySymbol(value: unknown): string
++normalizePriority(value: unknown): AlarmPriority
++normalizePriorityFromString(compact: string): AlarmPriority
++toEnumPriority(compact: string): AlarmPriority
++isKnownPriority(value: number): boolean
+interface AlarmNotificationDetails {
+    +alarmName?: string
+    +priority?: unknown
+}
+interface AlarmLifecycleNotifierPort {
+    +publish(type: AlarmLifecycleType, alarmEventId: string, timestamp: string, details?: AlarmNotificationDetails): void
+}
+class AlarmLifecycleNotifierService implements AlarmLifecycleNotifierPort {
+    -alarmStateService: AlarmStateService
+    +publish(type: AlarmLifecycleType, alarmEventId: string, timestamp: string, details?: AlarmNotificationDetails): void
+    -publishNotification(type: AlarmLifecycleType, alarmEventId: string, timestamp: string, details?: AlarmNotificationDetails): void
+    -publishLifecycleUpdate(type: AlarmLifecycleType, alarmEventId: string): void
+}
+interface UserActivationActions {
+    +roomsToLeave: string[]
+    +roomsToJoin: string[]
+}
+interface WardSocketRoomCoordinatorPort {
+    +activateUser(userId: string): UserActivationActions
+    +deactivateUser(): string[]
+    +requestJoinRoom(wardId: string): string
+    +requestLeaveRoom(wardId: string): string
+    +getJoinedRooms(): string[]
+    +resetRuntimeState(): void
+}
+class WardSocketRoomCoordinatorService implements WardSocketRoomCoordinatorPort {
+    -wardRealtimeCache: WardRealtimeCacheService
+    -joinedRooms: Set<string>
+    -currentUserId: string
+    +activateUser(userId: string): UserActivationActions
+    +deactivateUser(): string[]
+    +requestJoinRoom(wardId: string): string
+    +requestLeaveRoom(wardId: string): string
+    +getJoinedRooms(): string[]
+    +resetRuntimeState(): void
+    -persistJoinedRooms(): void
+}
+class EventSubscriptionService implements OnDestroy {
+    -socketIoFactory: { (opts?: Partial<ManagerOptions & SocketOptions>): Socket<DefaultEventsMap, DefaultEventsMap>; (uri?: string, opts?: Partial<...>): Socket<...>; }
+    -http: unknown
+    -alarmApiService: AlarmApiService
+    -alarmStateService: AlarmStateService
+    -apiBaseUrl: string
+    -internalAuthService: InternalAuthService
+    -eventNormalizer: RealtimeAlarmEventNormalizerPort
+    -lifecycleNotifier: AlarmLifecycleNotifierPort
+    -roomCoordinator: WardSocketRoomCoordinatorPort
+    -connectionStatus$: BehaviorSubject<ConnectionStatus>
+    -destroy$: Subject<void>
+    -socket: Socket<DefaultEventsMap, DefaultEventsMap>
+    -authLifecycleInitialized: boolean
+    -activeUserId: string
+    -wardBootstrapInFlightUserIds: Set<string>
+    -wardBootstrapDoneUserIds: Set<string>
+    +initialize(wardIds: string[]): void
+    +refreshWardRoomSubscription(): void
+    +getConnectionStatus$(): Observable<ConnectionStatus>
+    +joinRoom(wardId: string): void
+    +leaveRoom(wardId: string): void
+    +ngOnDestroy(): void
+    -connect(): void
+    -disconnect(): void
+    -ensureAuthLifecycleSubscription(): void
+    -bootstrapWardRoomSubscription(userId: string, forceRefresh?: boolean): void
+    -syncJoinedRoomsWithWardIds(targetWardIds: readonly string[]): void
+    -handleBackendTriggeredRawEvent(raw: unknown): void
+    -handleBackendResolvedRawEvent(raw: unknown): void
+    -resolveTriggeredAlarmDetails(alarmEventId: string): Observable<{ alarmName: string; priority: AlarmPriority; }>
+    -normalizeAlarmPriority(value: unknown): AlarmPriority
+    -isAlarmPriority(value: number): boolean
+    -rejoinAllRooms(): void
+    -emitJoinMany(wardIds: readonly string[]): void
+    -emitLeaveMany(wardIds: readonly string[]): void
+    -resolveSocketUrl(): string
+    -toWebsocketNamespaceUrl(baseUrl: string): string
+    -resolvePlantAllEndpoint(): string
+    -extractWardIdsFromPlantResponse(response: unknown): string[]
+    -extractPlantArray(response: unknown): { wardId?: unknown; }[]
+    -normalizeWardId(rawWardId: unknown): string
+}
+class WardApiService {
+    -http: unknown
+    -baseUrl: string
+    -wardsEndpoint: string
+    -wardUsersRelationshipsEndpoint: string
+    -wardPlantsRelationshipsEndpoint: string
+    -plantEndpoint: string
+    -usersEndpoint: string
+    +getWards(): Observable<WardSummaryDto[]>
+    +createWard(dto: CreateWardDto): Observable<Ward>
+    +updateWard(wardId: number, dto: UpdateWardDto): Observable<Ward>
+    +deleteWard(wardId: number): Observable<void>
+    +getOperatorsByWardId(wardId: number): Observable<WardUserDto[]>
+    +getAvailableOperators(): Observable<WardUserDto[]>
+    +assignOperatorToWard(wardId: number, dto: AssignOperatorDto): Observable<void>
+    +removeOperatorFromWard(wardId: number, userId: number): Observable<void>
+    +getPlantsByWardId(wardId: number): Observable<WardPlantDto[]>
+    +getAvailablePlants(): Observable<WardPlantDto[]>
+    +assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void>
+    +removePlantFromWard(wardId: number, plantId: string): Observable<void>
+}
+interface WardManagementState {
+    +wards: Ward[]
+    +isLoading: boolean
+    +error: string
+}
+class WardStore {
+    -state$: BehaviorSubject<WardManagementState>
+    +wards$: Observable<Ward[]>
+    +isLoading$: Observable<boolean>
+    +error$: Observable<string>
+    -setState(partial: Partial<WardManagementState>): void
+    +setWards(wards: Ward[]): void
+    +getWardsSnapshot(): Ward[]
+    +addWard(ward: Ward): void
+    +replaceWard(ward: Ward): void
+    +removeWard(wardId: number): void
+    +patchPlant(plantId: string, patch: Partial<Plant>): void
+    +setLoading(value: boolean): void
+    +setError(message: string): void
+}
+class AssignmentOperationsService {
+    -api: WardApiService
+    -store: WardStore
+    -eventSubscriptionService: EventSubscriptionService
+    +getAvailablePlantsForWard(wardId: number): Observable<Plant[]>
+    +getAvailableUsersForWard(wardId: number): Observable<User[]>
+    +assignOperator(wardId: number, dto: AssignOperatorDto): Observable<void>
+    +removeOperator(wardId: number, userId: number): Observable<void>
+    +assignPlant(wardId: number, dto: AssignPlantDto): Observable<void>
+    +removePlant(wardId: number, plantId: string): Observable<void>
+    -reloadAfter(operation$: Observable<void>): Observable<void>
+    -toWard(wardSummary: WardSummaryDto): Observable<Ward>
+    -toApartments(apartmentsDto: WardPlantDto[]): Plant[]
+    -toOperators(operatorsDto: WardUserDto[]): User[]
+    -getErrorMessage(error: unknown): string
+}
+class WardOperationsService {
+    -api: WardApiService
+    -store: WardStore
+    +loadWards(): Observable<void>
+    +createWard(dto: CreateWardDto): Observable<void>
+    +updateWard(wardId: number, dto: UpdateWardDto): Observable<void>
+    +deleteWard(wardId: number): Observable<void>
+    -toWard(wardSummary: WardSummaryDto): Observable<Ward>
+    -normalizeMutationWard(ward: Ward): Ward
+    -toApartments(apartmentsDto: WardPlantDto[]): Plant[]
+    -toOperators(operatorsDto: WardUserDto[]): User[]
+    -getErrorMessage(error: unknown): string
+}
+class WardManagementStore implements OnDestroy {
+    -wardStore: WardStore
+    -wardOperations: WardOperationsService
+    -wardAssignmentOperations: AssignmentOperationsService
+    -destroy$: Subject<void>
+    +wards$: Observable<Ward[]>
+    +isLoading$: Observable<boolean>
+    +error$: Observable<string>
+    +ngOnDestroy(): void
+    +loadWards(): void
+    +createWard(dto: CreateWardDto): void
+    +updateWard(wardId: number, dto: UpdateWardDto): void
+    +deleteWard(wardId: number): void
+    +assignOperator(wardId: number, dto: AssignOperatorDto): void
+    +removeOperator(wardId: number, userId: number): void
+    +assignPlant(wardId: number, dto: AssignPlantDto): void
+    +removePlant(wardId: number, plantId: string): void
+    +getAvailablePlantsForWard(wardId: number): Observable<Plant[]>
+    +getAvailableUsersForWard(wardId: number): Observable<User[]>
+    -getErrorMessage(error: unknown): string
+}
+class ConfirmDialogComponent {
+    +message: InputSignal<string>
+    +confirmLabel: InputSignal<string>
+    +cancelLabel: InputSignal<string>
+    +confirmed: OutputEmitterRef<void>
+    +cancelled: OutputEmitterRef<void>
+    +onConfirm(): void
+    +onCancel(): void
+}
+class WardManagementPageComponent implements OnInit, OnDestroy {
+    -store: WardManagementStore
+    -destroy$: Subject<void>
+    +wards$: Observable<Ward[]>
+    +isLoading$: Observable<boolean>
+    +error$: Observable<string>
+    +snackbarMessage: WritableSignal<string>
+    +wardDialogMode: WritableSignal<"closed" | "create" | "edit">
+    +selectedWardId: WritableSignal<number>
+    +selectedApartmentId: WritableSignal<string>
+    +mobileStep: WritableSignal<"apartments" | "operators" | "wards">
+    +operatorWardId: WritableSignal<number>
+    +availableOperatorsFromFetch: WritableSignal<User[]>
+    +isLoadingAvailableOperators: WritableSignal<boolean>
+    +plantWardId: WritableSignal<number>
+    +availablePlantsFromFetch: WritableSignal<Plant[]>
+    +isLoadingAvailablePlants: WritableSignal<boolean>
+    +confirmState: WritableSignal<{ kind: 'delete-ward'; wardId: number; } | { kind: 'remove-operator'; wardId: number; userId: number; } | { kind: 'remove-plant'; wardId: number; plantId: string; }>
+    +wardsSnapshot: WritableSignal<Ward[]>
+    +selectedWard: Signal<Ward>
+    +selectedApartment: Signal<Plant>
+    +wardDialogValue: Signal<Ward>
+    +availablePlants: Signal<Plant[]>
+    +availableOperators: Signal<User[]>
+    +ngOnInit(): void
+    +ngOnDestroy(): void
+    +dismissSnackbar(): void
+    +selectWard(wardId: number): void
+    +selectApartment(apartmentId: string): void
+    +showWardListStep(): void
+    +showApartmentsStep(): void
+    +showOperatorsStep(): void
+    +onCreateWard(): void
+    +onCreateWardSubmit(dto: CreateWardDto): void
+    +onEditWard(ward: Ward): void
+    +onEditSelectedWard(): void
+    +onEditWardSubmit(dto: UpdateWardDto): void
+    +onCloseWardDialog(): void
+    +onDeleteWard(wardId: number): void
+    +onAssignOperator(wardId: number): void
+    +onAssignOperatorSubmit(dto: AssignOperatorDto): void
+    +onCloseAssignOperatorDialog(): void
+    +onRemoveOperator(event: RemoveOperatorEvent): void
+    +onAssignPlant(wardId: number): void
+    +onAssignPlantSubmit(dto: AssignPlantDto): void
+    +onCloseAssignPlantDialog(): void
+    +onRemovePlant(event: RemovePlantEvent): void
+    +onConfirmDialogConfirmed(): void
+    +onConfirmDialogCancelled(): void
+    +getConfirmMessage(): string
+    +getConfirmLabel(): string
+    +getOperatorDisplayName(firstName: string, lastName: string): string
+}
+@enduml

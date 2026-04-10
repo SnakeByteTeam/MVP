@@ -15,7 +15,7 @@ import {
 import { ActiveAlarm } from '../../../core/alarm/models/active-alarm.model';
 import { AlarmApiService } from '../../../core/alarm/services/alarm-api.service';
 import { AlarmStateService } from '../../../core/alarm/services/alarm-state.service';
-import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import { InternalAuthService } from '../../user-auth/services/internal-auth.service';
 import { ApiErrorDisplayService } from '../../../core/services/api-error-display.service';
 import { AlarmListVm } from '../models/alarm-list-vm.model';
 import type { UserSession } from '../../user-auth/models/user-session.model';

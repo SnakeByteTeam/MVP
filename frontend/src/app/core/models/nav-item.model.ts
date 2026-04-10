@@ -1,4 +1,4 @@
-import {UserRole} from './user-role.enum'
+import {UserRole} from '../../features/user-management/models/user-role.enum'
 
 export interface NavItem {
     label: string;

@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
-import { InternalAuthService } from '../services/internal-auth.service';
+import { InternalAuthService } from '../../features/user-auth/services/internal-auth.service';
 
 export const authGuard: CanActivateFn = (_, state) => {
 	const authService = inject(InternalAuthService);

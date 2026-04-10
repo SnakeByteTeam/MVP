@@ -1,4 +1,4 @@
-import { UserRole } from '../../../core/models/user-role.enum';
+import { UserRole } from '../../user-management/models/user-role.enum';
 
 export interface UserSession {
 	userId: string;

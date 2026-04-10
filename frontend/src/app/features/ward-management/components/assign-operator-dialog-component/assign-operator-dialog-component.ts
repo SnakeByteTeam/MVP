@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { User } from '../../../../core/models/user.model';
+import type { User } from '../../../user-management/models/user.model';
 import type { AssignOperatorDto } from '../../models/ward-api.dto';
 import type { Ward } from '../../models/ward.model';
 

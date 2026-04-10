@@ -6,7 +6,7 @@ import { Apartment } from '../models/apartment.model';
 import { DeviceStatus } from '../models/device.model';
 import { PlantDeviceDto, PlantDto } from '../models/plant-response.model';
 import { resolveDeviceType } from '../../../shared/models/device-taxonomy';
-import { InternalAuthService } from '../../../core/services/internal-auth.service';
+import { InternalAuthService } from '../../user-auth/services/internal-auth.service';
 import { WardRealtimeCacheService } from '../../../core/alarm/services/ward-realtime-cache.service';
 
 export interface ApartmentOption {

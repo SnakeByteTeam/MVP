@@ -1,5 +1,5 @@
 import { Component,EventEmitter, Input, Output } from '@angular/core';
-import { UserInfo } from '../../../../core/models/user-info.model';
+import { UserInfo } from '../../../user-management/models/user-info.model';
 import { AsyncPipe } from '@angular/common';
 import { Breadcrumb, BreadcrumbService } from '../../../../core/services/breadcrumb.service';
 import { Observable } from 'rxjs';

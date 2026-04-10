@@ -16,7 +16,7 @@ import { AlarmPriority } from '../models/alarm-priority.enum';
 import { ConnectionStatus } from '../models/connection-status.enum';
 import { AlarmStateService } from './alarm-state.service';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
-import { InternalAuthService } from '../../services/internal-auth.service';
+import { InternalAuthService } from '../../../features/user-auth/services/internal-auth.service';
 import { AlarmApiService } from './alarm-api.service';
 import {
 	REALTIME_ALARM_EVENT_NORMALIZER,

@@ -2,14 +2,14 @@ import { Component, inject, ChangeDetectionStrategy, OnDestroy, OnInit, ChangeDe
 import { NavItem } from '../../core/models/nav-item.model';
 import { Observable, Subject, take, takeUntil } from 'rxjs';
 import { NavService } from './services/nav.service';
-import { InternalAuthService } from '../../core/services/internal-auth.service';
+import { InternalAuthService } from '../user-auth/services/internal-auth.service';
 import { AlarmStateService } from '../../core/alarm/services/alarm-state.service';
 import { TopbarComponent } from './components/topbar/topbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
-import { UserRole } from '../../core/models/user-role.enum';
+import { UserRole } from '../user-management/models/user-role.enum';
 import { Router, RouterOutlet } from '@angular/router';
-import { UserInfo } from '../../core/models/user-info.model';
+import { UserInfo } from '../user-management/models/user-info.model';
 import { NotificationEvent } from '../notification/models/notification-event.model';
 import { NotificationTopbarPanelComponent } from '../notification/components/notification-topbar-panel-component/notification-topbar-panel-component';
 import { MyVimarAccount } from '../my-vimar-integration/models/my-vimar-account.model';

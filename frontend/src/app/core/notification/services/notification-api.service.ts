@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of, switchMap, take } from 'rxjs';
-import { InternalAuthService } from '../../services/internal-auth.service';
+import { InternalAuthService } from '../../../features/user-auth/services/internal-auth.service';
 import { NotificationEvent } from '../../../features/notification/models/notification-event.model';
 import { API_BASE_URL } from '../../tokens/api-base-url.token';
 import {

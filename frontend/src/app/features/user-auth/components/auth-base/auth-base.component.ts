@@ -1,7 +1,7 @@
 import { inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InternalAuthService } from '../../../../core/services/internal-auth.service';
+import { InternalAuthService } from '../../services/internal-auth.service';
 import { AuthErrorType } from '../../models/auth-error-type.enum';
 import { UserSession } from '../../models/user-session.model';
 

@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { describe, expect, it, beforeEach } from 'vitest';
-import { API_BASE_URL } from '../tokens/api-base-url.token';
+import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
 import { UserRole } from '../models/user-role.enum';
 import { InternalAuthService } from './internal-auth.service';
 

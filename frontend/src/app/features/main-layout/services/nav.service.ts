@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserRole } from '../../../core/models/user-role.enum';
+import { UserRole } from '../../user-management/models/user-role.enum';
 import { NavItem } from '../../../core/models/nav-item.model';
 
 @Injectable({ providedIn: 'root' })

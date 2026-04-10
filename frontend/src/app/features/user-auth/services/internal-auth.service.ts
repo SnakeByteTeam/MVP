@@ -10,9 +10,9 @@ import {
 	shareReplay,
 	tap,
 } from 'rxjs';
-import { UserRole } from '../models/user-role.enum';
-import { API_BASE_URL } from '../tokens/api-base-url.token';
-import { UserSession } from '../../features/user-auth/models/user-session.model';
+import { UserRole } from '../../user-management/models/user-role.enum';
+import { API_BASE_URL } from '../../../core/tokens/api-base-url.token';
+import { UserSession } from '../models/user-session.model';
 
 interface LoginResponse {
 	accessToken: string;

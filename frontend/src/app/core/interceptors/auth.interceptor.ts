@@ -1,7 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable, catchError, finalize, shareReplay, switchMap, throwError } from 'rxjs';
-import { InternalAuthService } from '../services/internal-auth.service';
+import { InternalAuthService } from '../../features/user-auth/services/internal-auth.service';
 
 let refreshInFlight$: Observable<string> | null = null;
 

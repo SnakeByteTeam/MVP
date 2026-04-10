@@ -5,7 +5,7 @@ import type { Plant } from '../../models/plant.model';
 import type { AssignPlantDto, AssignOperatorDto, CreateWardDto, UpdateWardDto } from '../../models/ward-api.dto';
 import type { RemovePlantEvent, RemoveOperatorEvent } from '../../models/ward-management.events';
 import type { Ward } from '../../models/ward.model';
-import type { User } from '../../../../core/models/user.model';
+import type { User } from '../../../user-management/models/user.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { WardManagementStore } from '../../services/ward-management.store';
 import { AssignWardDialogComponent } from '../assign-ward-dialog-component/assign-ward-dialog-component';

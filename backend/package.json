@@ -116,7 +116,7 @@
         {
           "pageTitle": "Test Report",
           "publicPath": "./test/unit/coverage",
-          "filename:": "jest-unit-report.html",
+          "filename": "jest-unit-report.html",
           "expand": false, 
           "hideIcon": true
         }

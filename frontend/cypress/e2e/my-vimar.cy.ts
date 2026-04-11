@@ -81,7 +81,7 @@ const openMyVimarPageFromProfile = () => {
 };
 
 describe('Integrazione MyVimar', () => {
-    it('UC3 e UC3.1: visualizza account collegato ed email', () => {
+    it('RF11-OBL Visualizzazione account MyVimar configurato', () => {
         loginAsAdmin({
             email: linkedEmail,
             isLinked: true,
@@ -90,11 +90,21 @@ describe('Integrazione MyVimar', () => {
         openMyVimarPageFromProfile();
 
         cy.contains('Account collegato').should('be.visible');
-        cy.contains(linkedEmail).should('be.visible');
         cy.contains('button', 'Rimuovi account').should('be.visible');
     });
 
-    it('UC4: collega account MyVimar tramite OAuth', () => {
+    it('RF12-OBL Visualizzazione email account MyVimar collegato', () => {
+        loginAsAdmin({
+            email: linkedEmail,
+            isLinked: true,
+        });
+
+        openMyVimarPageFromProfile();
+
+        cy.contains(linkedEmail).should('be.visible');
+    });
+
+    it('RF13-OBL Collegamento account MyVimar', () => {
         loginAsAdmin({
             email: '',
             isLinked: false,
@@ -131,7 +141,7 @@ describe('Integrazione MyVimar', () => {
         cy.wait('@authorizePage');
     });
 
-    it('UC5: rimuove account MyVimar collegato', () => {
+    it('RF14-OBL Rimozione account MyVimar', () => {
         let accountState: MyVimarAccountState = {
             email: linkedEmail,
             isLinked: true,

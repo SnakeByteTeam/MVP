@@ -72,10 +72,23 @@ const openUserManagement = () => {
     cy.contains('h1', 'Gestione operatori sanitari').should('be.visible');
 };
 
+const openCreateUserForm = () => {
+    cy.contains('button', 'Inserisci Nuovo Operatore').click();
+    cy.get('[data-testid="create-user-panel"]').should('have.class', 'opacity-100');
+};
+
+const fillCreateUserForm = (payload: { name: string; surname: string; username: string }) => {
+    cy.get('#name').clear().type(payload.name);
+    cy.get('#surname').clear().type(payload.surname);
+    cy.get('#username').clear().type(payload.username);
+};
+
 describe('User management e2e', () => {
     let usersState: UserDto[];
+    let nextUserId: number;
 
     beforeEach(() => {
+        nextUserId = 3;
         usersState = [
             {
                 id: 1,
@@ -103,22 +116,26 @@ describe('User management e2e', () => {
         }).as('getUsers');
 
         cy.intercept('POST', '**/users', (req) => {
-            expect(req.body).to.deep.equal({
-                name: 'Giulia',
-                surname: 'Ferri',
-                username: 'giulia.ferri',
-            });
+            const payload = req.body as { name: string; surname: string; username: string };
 
-            usersState = [
-                ...usersState,
-                {
-                    id: 3,
-                    name: 'Giulia',
-                    surname: 'Ferri',
-                    username: 'giulia.ferri',
-                    role: UserRole.OPERATORE_SANITARIO,
-                },
-            ];
+            if (usersState.some((user) => user.username === payload.username)) {
+                req.reply({
+                    statusCode: 409,
+                    body: { message: 'Username already in use' },
+                });
+                return;
+            }
+
+            const createdUser: UserDto = {
+                id: nextUserId,
+                name: payload.name,
+                surname: payload.surname,
+                username: payload.username,
+                role: UserRole.OPERATORE_SANITARIO,
+            };
+
+            nextUserId += 1;
+            usersState = [...usersState, createdUser];
 
             req.reply({
                 statusCode: 201,
@@ -142,70 +159,142 @@ describe('User management e2e', () => {
         cy.wait('@getUsers');
     });
 
-    it('UC6 visualizza elenco utenti con nome, cognome e username', () => {
+    it('RF15-DEL Visualizzazione elenco utenti del Sistema', () => {
+        cy.get('section[aria-label="Elenco operatori sanitari"]').should('be.visible');
         cy.contains('th', 'Username').should('be.visible');
         cy.contains('th', 'Nome').should('be.visible');
         cy.contains('th', 'Cognome').should('be.visible');
 
-        cy.contains('td', '@m.verdi').should('be.visible');
-        cy.contains('td', 'Marco').should('be.visible');
-        cy.contains('td', 'Verdi').should('be.visible');
-        cy.contains('td', '@l.bianchi').should('be.visible');
-        cy.contains('td', 'Laura').should('be.visible');
-        cy.contains('td', 'Bianchi').should('be.visible');
+        cy.get('tbody tr').should('have.length.at.least', 2);
     });
 
-    it('UC7 crea un nuovo operatore sanitario e mostra la password temporanea', () => {
-        cy.contains('button', 'Inserisci Nuovo Operatore').click();
+    it('RF16-OBL Visualizzazione elemento utente nel dettaglio elenco', () => {
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('td', '@m.verdi').should('exist');
+            cy.contains('td', 'Marco').should('exist');
+            cy.contains('td', 'Verdi').should('exist');
+            cy.contains('button', 'Elimina').should('exist');
+        });
+    });
+
+    it('RF17-OBL Visualizzazione nome dell utente nel dettaglio', () => {
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('td', 'Marco').should('exist');
+        });
+
+        cy.contains('tr', '@l.bianchi').within(() => {
+            cy.contains('td', 'Laura').should('exist');
+        });
+    });
+
+    it('RF18-OBL Visualizzazione cognome utente nel dettaglio', () => {
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('td', 'Verdi').should('exist');
+        });
+
+        cy.contains('tr', '@l.bianchi').within(() => {
+            cy.contains('td', 'Bianchi').should('exist');
+        });
+    });
+
+    it('RF19-OBL Visualizzazione username utente nel dettaglio', () => {
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('td', '@m.verdi').should('exist');
+        });
+
+        cy.contains('tr', '@l.bianchi').within(() => {
+            cy.contains('td', '@l.bianchi').should('exist');
+        });
+    });
+
+    it('RF20-DEL Creazione utente Operatore Sanitario', () => {
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Giulia',
+            surname: 'Ferri',
+            username: 'giulia.ferri',
+        });
+
+        cy.contains('button', 'Crea utente').click();
+
+        cy.wait('@createUser');
+        cy.wait('@getUsers');
+        cy.contains('h2', 'Utente creato con successo').should('be.visible');
+        cy.contains('button', 'Ho comunicato la password').click();
+
+        cy.contains('tr', '@giulia.ferri').should('be.visible');
+    });
+
+    it('RF21-DEL Inserimento nome Operatore Sanitario per creazione utente', () => {
+        openCreateUserForm();
 
         cy.get('#name').focus().blur();
         cy.contains('Il nome è obbligatorio.').should('be.visible');
 
         cy.get('#name').clear().type('G').blur();
         cy.contains('Il nome deve essere di almeno 2 caratteri.').should('be.visible');
+    });
+
+    it('RF22-DEL Inserimento cognome Operatore Sanitario per creazione utente', () => {
+        openCreateUserForm();
 
         cy.get('#surname').focus().blur();
         cy.contains('Il cognome è obbligatorio.').should('be.visible');
 
         cy.get('#surname').clear().type('F').blur();
         cy.contains('Il cognome deve essere di almeno 2 caratteri.').should('be.visible');
+    });
+
+    it('RF23-DEL Inserimento username per creazione utente Operatore Sanitario', () => {
+        openCreateUserForm();
 
         cy.get('#username').focus().blur();
         cy.contains("L'username è obbligatorio.").should('be.visible');
 
         cy.get('#username').clear().type('abc').blur();
         cy.contains("L'username deve essere di almeno 4 caratteri.").should('be.visible');
+    });
 
-        cy.get('#name').clear().type('Giulia');
-        cy.get('#surname').clear().type('Ferri');
-        cy.get('#username').clear().type('giulia.ferri');
+    it('RF24-DEL Generazione password temporanea per creazione utente', () => {
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Luca',
+            surname: 'Neri',
+            username: 'luca.neri',
+        });
 
         cy.contains('button', 'Crea utente').click();
 
         cy.wait('@createUser');
-        cy.wait('@getUsers');
-        cy.contains('Utente creato con successo').should('be.visible');
         cy.contains('code', decodedTempPassword).should('be.visible');
-        cy.contains('Giulia Ferri').should('be.visible');
-        cy.contains('button', 'Ho comunicato la password').click();
-
-        cy.get('table').should('contain', '@giulia.ferri');
-        cy.get('table').should('contain', 'Giulia');
-        cy.get('table').should('contain', 'Ferri');
     });
 
-    it('UC8 elimina un operatore sanitario', () => {
+    it('RF25-DEL Errore se username già in uso', () => {
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Mario',
+            surname: 'Rossi',
+            username: 'm.verdi',
+        });
+
+        cy.contains('button', 'Crea utente').click();
+
+        cy.wait('@createUser');
+        cy.contains('Username già in uso. Scegline un altro.').should('be.visible');
+    });
+
+    it('RF26-DEL Eliminazione utente Operatore Sanitario', () => {
         cy.contains('tr', '@m.verdi').within(() => {
             cy.contains('button', 'Elimina').click();
         });
 
-        cy.contains('dialog', 'Conferma eliminazione').should('be.visible');
+        cy.contains('h3', 'Conferma eliminazione').should('be.visible');
         cy.contains('strong', 'Marco Verdi').should('be.visible');
         cy.contains('span', '@m.verdi').should('be.visible');
         cy.contains('button', 'Elimina operatore').click();
 
         cy.wait('@deleteUser');
         cy.wait('@getUsers');
-        cy.contains('td', '@m.verdi').should('not.exist');
+        cy.contains('tr', '@m.verdi').should('not.exist');
     });
 });

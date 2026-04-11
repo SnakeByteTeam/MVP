@@ -44,7 +44,7 @@ export class WardsUsersRelationshipsController {
   async addUserToWard(
     @Body() req: AddUserToWardReqDto,
   ): Promise<AddUserToWardResDto> {
-    const user: User = this.addUserToWardUseCase.addUserToWard(
+    const user: User = await this.addUserToWardUseCase.addUserToWard(
       new AddUserToWardCmd(req.wardId, req.userId),
     );
 

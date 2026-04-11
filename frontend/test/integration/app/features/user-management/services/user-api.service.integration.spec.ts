@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { API_BASE_URL } from 'src/app/core/tokens/api-base-url.token';
 import { UserApiService } from 'src/app/features/user-management/services/user-api.service';
 
@@ -70,5 +70,46 @@ describe('UserApiService', () => {
 
         const request = httpController.expectOne(`${baseUrl}/users`);
         request.flush({ tempPassword: 'TempPass123' });
+    });
+
+    it('isBase64Encoded gestisce i casi validi e non validi', () => {
+        const internalService = service as unknown as {
+            isBase64Encoded(value: string): boolean;
+        };
+
+        expect(internalService.isBase64Encoded('VGVzdA==')).toBe(true);
+        expect(internalService.isBase64Encoded('')).toBe(false);
+        expect(internalService.isBase64Encoded('abc')).toBe(false);
+        expect(internalService.isBase64Encoded('@@@=')).toBe(false);
+    });
+
+    it('isBase64Encoded ritorna false se atob lancia eccezione', () => {
+        const internalService = service as unknown as {
+            isBase64Encoded(value: string): boolean;
+        };
+
+        const atobSpy = vi.spyOn(globalThis, 'atob').mockImplementation(() => {
+            throw new Error('decode-failed');
+        });
+
+        expect(internalService.isBase64Encoded('VGVzdA==')).toBe(false);
+
+        atobSpy.mockRestore();
+    });
+
+    it('decodeTempPassword gestisce valore non base64 e gestione errore atob', () => {
+        const internalService = service as unknown as {
+            decodeTempPassword(value: string): string;
+        };
+
+        expect(internalService.decodeTempPassword('plainText')).toBe('plainText');
+
+        const atobSpy = vi.spyOn(globalThis, 'atob').mockImplementation(() => {
+            throw new Error('decode-failed');
+        });
+
+        expect(internalService.decodeTempPassword('VGVzdA==')).toBe('VGVzdA==');
+
+        atobSpy.mockRestore();
     });
 });

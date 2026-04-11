@@ -478,4 +478,40 @@ describe('Ward management e2e', () => {
             cy.contains('button', 'Assegna').should('not.be.disabled');
         });
     });
+
+    it('RF41-OBL Selezione reparto per assegnare un reparto a un appartamento', () => {
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Chirurgia').click();
+        cy.get('button[aria-label="Assegna appartamento"]').click();
+        cy.contains('h2', 'Assegna appartamento').should('be.visible');
+        cy.contains('Reparto:').should('contain', '1');
+
+        cy.get('dialog[aria-labelledby="assign-apartment-title"]').should('be.visible').within(() => {
+            cy.wait('@getPlantsCatalog');
+            pickSelectOptionByText('#apartment-id', 'Appartamento 301');
+            cy.contains('button', 'Assegna').click();
+        });
+
+        cy.wait('@assignPlant').its('request.body').should('deep.equal', { wardId: 1, plantId: '301' });
+    });
+
+    it('RF42-OBL Eliminazione assegnazione appartamento - reparto', () => {
+        wardDetails[2].plants = [{ id: '301', name: 'Appartamento 301' }];
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('section[aria-label="Dettagli reparto e appartamenti"]').should('contain', 'Appartamento 301');
+
+        cy.get('button[aria-label^="Rimuovi appartamento"]').click();
+        cy.contains('p', 'Confermi la rimozione dell\'appartamento dal reparto?').should('be.visible');
+        cy.contains('button', 'Rimuovi').click();
+
+        cy.wait('@removePlant');
+        cy.wait('@getWards');
+        cy.get('section[aria-label="Dettagli reparto e appartamenti"]').should('not.contain', 'Appartamento 301');
+    });
 });

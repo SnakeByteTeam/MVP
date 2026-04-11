@@ -368,6 +368,112 @@ describe('EventSubscriptionService', () => {
     expect(alarmStateSpy.onNotificationReceived).not.toHaveBeenCalled();
   });
 
+  it('usa location.origin quando API_BASE_URL non e configurato', () => {
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      providers: [
+        EventSubscriptionService,
+        {
+          provide: SOCKET_IO_FACTORY,
+          useValue: socketIoFactoryMock,
+        },
+        {
+          provide: AlarmStateService,
+          useValue: alarmStateSpy,
+        },
+      ],
+    });
+
+    service = TestBed.inject(EventSubscriptionService);
+    service.initialize([]);
+
+    expect(socketIoFactoryMock).toHaveBeenCalledWith(`${globalThis.location.origin}/ws`, {
+      transports: ['websocket'],
+      reconnection: true,
+      autoConnect: true,
+    });
+  });
+
+  it('bootstrap accetta risposta wrappata in data[]', () => {
+    httpClientSpy.get.mockReturnValue(
+      of({
+        data: [{ wardId: '31' }, { wardId: 32 }, { wardId: '   ' }, null, { id: 'no-ward' }],
+      }),
+    );
+
+    service.initialize([]);
+    currentUser$.next(buildSession('oss-data'));
+
+    const joinWardCalls = fakeSocket.emit.mock.calls.filter(([event]) => event === 'join-ward');
+    expect(joinWardCalls).toEqual([
+      ['join-ward', '31'],
+      ['join-ward', '32'],
+    ]);
+  });
+
+  it('bootstrap accetta risposta wrappata in plants[]', () => {
+    httpClientSpy.get.mockReturnValue(
+      of({
+        plants: [{ wardId: '41' }, { wardId: '42' }],
+      }),
+    );
+
+    service.initialize([]);
+    currentUser$.next(buildSession('oss-plants'));
+
+    const joinWardCalls = fakeSocket.emit.mock.calls.filter(([event]) => event === 'join-ward');
+    expect(joinWardCalls).toEqual([
+      ['join-ward', '41'],
+      ['join-ward', '42'],
+    ]);
+  });
+
+  it('su push-event usa fallback allarme quando AlarmApiService non e disponibile', () => {
+    TestBed.resetTestingModule();
+
+    TestBed.configureTestingModule({
+      providers: [
+        EventSubscriptionService,
+        {
+          provide: SOCKET_IO_FACTORY,
+          useValue: socketIoFactoryMock,
+        },
+        {
+          provide: AlarmStateService,
+          useValue: alarmStateSpy,
+        },
+      ],
+    });
+
+    service = TestBed.inject(EventSubscriptionService);
+    service.initialize([]);
+
+    fakeSocket.trigger('push-event', {
+      alarmRuleId: 'alarm-rule-no-api',
+      wardId: 22,
+      alarmEventId: 'active-alarm-no-api',
+    });
+
+    expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'active-alarm-no-api',
+        alarmName: 'Allarme in corso',
+        priority: AlarmPriority.ORANGE,
+      }),
+    );
+  });
+
+  it('su logout emette leave delle room joinate', () => {
+    service.initialize(['ward-10']);
+    currentUser$.next(buildSession('oss-leave'));
+
+    fakeSocket.emit.mockClear();
+    currentUser$.next(null);
+
+    expect(fakeSocket.emit).toHaveBeenCalledWith('leave-ward', 'ward-10');
+  });
+
   it('disconnette il socket e rimuove i listener alla distruzione', () => {
     service.initialize([]);
 

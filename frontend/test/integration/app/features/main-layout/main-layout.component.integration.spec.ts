@@ -5,7 +5,7 @@ import { InternalAuthService } from 'src/app/core/services/internal-auth.service
 import { NavService } from 'src/app/features/main-layout/services/nav.service';
 import { AlarmStateService } from 'src/app/core/alarm/services/alarm-state.service';
 import { UserRole } from 'src/app/core/models/user-role.enum';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { provideRouter, Router } from '@angular/router'; 
 import { VIMAR_CLOUD_API_SERVICE } from 'src/app/core/services/vimar-cloud-api.service.interface';
@@ -210,6 +210,26 @@ describe('MainLayoutComponent', () => {
         component.onNavItemSelected('alarms/alarm-management');
 
         expect(mockAlarmManagementRefreshService.requestRefresh).toHaveBeenCalledTimes(1);
+    });
+
+    it('non richiede refresh quando la nav route selezionata non e alarms/alarm-management', () => {
+        const router = TestBed.inject(Router);
+        vi.spyOn(router, 'url', 'get').mockReturnValue('/alarms/alarm-management');
+
+        component.onNavItemSelected('dashboard');
+
+        expect(mockAlarmManagementRefreshService.requestRefresh).not.toHaveBeenCalled();
+    });
+
+    it('su errore MyVimar imposta messaggio errore e non mostra warning topbar', () => {
+        mockMyVimarService.getLinkedAccount.mockReturnValueOnce(
+            throwError(() => new Error('network'))
+        );
+
+        component.ngOnInit();
+
+        expect(component.vimarStatusError).toBe('Impossibile recuperare lo stato del collegamento MyVimar.');
+        expect(component.showVimarAssociationWarning).toBe(false);
     });
 
 

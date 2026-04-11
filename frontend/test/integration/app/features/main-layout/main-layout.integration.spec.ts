@@ -84,7 +84,7 @@ describe('MainLayout feature integration', () => {
         fixture.detectChanges();
     }
 
-    it('TBD-RF carica menu da ruolo utente e stato topbar admin', () => {
+    it('RF46-OBL carica menu da ruolo utente e stato topbar admin', () => {
         createComponent();
 
         expect(navServiceStub.getNavItems).toHaveBeenCalledWith(UserRole.AMMINISTRATORE);
@@ -92,7 +92,7 @@ describe('MainLayout feature integration', () => {
         expect(component.showVimarAssociationWarning).toBe(true);
     });
 
-    it('TBD-RF senza sessione reindirizza al login', () => {
+    it('RF47-OBL senza sessione reindirizza al login', () => {
         authServiceStub.getCurrentUser$.mockReturnValue(of(null));
         const router = TestBed.inject(Router);
         const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
@@ -103,7 +103,7 @@ describe('MainLayout feature integration', () => {
         expect(navigateSpy).toHaveBeenCalledWith(['/auth/login']);
     });
 
-    it('TBD-RF nuova notifica realtime apre il pannello notifiche', () => {
+    it('RF48-OBL nuova notifica realtime apre il pannello notifiche', () => {
         createComponent();
         expect(component.isNotificationPanelOpen).toBe(false);
 

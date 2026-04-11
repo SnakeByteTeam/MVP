@@ -69,13 +69,13 @@ describe('ApartmentMonitor feature integration', () => {
         fixture.detectChanges();
     });
 
-    it('TBD-RF inizializza appartamento attivo dal feed e prepara la vista', () => {
+    it('RF72-OBL inizializza appartamento attivo dal feed e prepara la vista', () => {
         expect(component).toBeTruthy();
         expect(apartmentApiStub.getCurrentApartment).toHaveBeenCalled();
         expect(component.activeApartmentId).toBe('ap-1');
     });
 
-    it('TBD-RF cambio appartamento aggiorna plant attivo e resetta errore', () => {
+    it('RF73-OBL cambio appartamento aggiorna plant attivo e resetta errore', () => {
         component.error = 'errore precedente';
 
         component.onApartmentSelected('ap-2');
@@ -84,7 +84,7 @@ describe('ApartmentMonitor feature integration', () => {
         expect(component.error).toBe('');
     });
 
-    it('TBD-RF evento realtime forza refresh del caricamento appartamento', () => {
+    it('RF74-OBL evento realtime forza refresh del caricamento appartamento', () => {
         const beforeCalls = apartmentApiStub.getCurrentApartment.mock.calls.length;
 
         globalThis.dispatchEvent(new CustomEvent(ALARM_LIFECYCLE_UPDATED_EVENT));

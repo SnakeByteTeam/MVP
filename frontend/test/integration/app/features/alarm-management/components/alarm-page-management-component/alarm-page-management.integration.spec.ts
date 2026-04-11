@@ -115,7 +115,7 @@ describe('AlarmManagement feature integration', () => {
         fixture = TestBed.createComponent(AlarmPageManagementComponent);
     });
 
-    it('gestisce il flusso completo: render lista, resolve event e aggiornamento vm', () => {
+    it('RF49-OBL gestisce il flusso completo: render lista, resolve event e aggiornamento vm', () => {
         fixture.detectChanges();
 
         expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
@@ -182,7 +182,7 @@ describe('AlarmManagement feature integration', () => {
         expect(nativeElement.textContent).toContain('Non da gestire');
     });
 
-    it('riesegue initialize quando arriva una richiesta di refresh esterna', () => {
+    it('RF60-OBL riesegue initialize quando arriva una richiesta di refresh esterna', () => {
         fixture.detectChanges();
         expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
 

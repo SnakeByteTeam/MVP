@@ -67,18 +67,18 @@ describe('DeviceInteraction feature integration', () => {
         fixture.detectChanges();
     });
 
-    it('TBD-RF carica endpoint scrivibili e valori correnti alla init', () => {
+    it('RF79-OBL carica endpoint scrivibili e valori correnti alla init', () => {
         expect(component).toBeTruthy();
         expect(deviceApiStub.getWritableEndpointRows).toHaveBeenCalledTimes(1);
         expect(deviceApiStub.getCurrentValuePointsByDeviceIds).toHaveBeenCalledTimes(1);
     });
 
-    it('TBD-RF espone label endpoint leggibili per sfeType noti e ignoti', () => {
+    it('RF80-OBL espone label endpoint leggibili per sfeType noti e ignoti', () => {
         expect(component.getEndpointLabel(mappedRow)).toBe('Comando cambio modalita HVAC');
         expect(component.getEndpointLabel(unknownRow)).toBe('Comando future feature');
     });
 
-    it('TBD-RF risolve valore corrente dal datapoint state corrispondente', () => {
+    it('RF81-OBL risolve valore corrente dal datapoint state corrispondente', () => {
         expect(component.getCurrentValue(mappedRow)).toBe('Heat');
         expect(component.getCurrentValue(unknownRow)).toBe('-');
     });

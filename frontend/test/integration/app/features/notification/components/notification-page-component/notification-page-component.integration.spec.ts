@@ -64,14 +64,14 @@ describe('Notification feature integration', () => {
         fixture.detectChanges();
     });
 
-    it('TBD-RF visualizza stato vuoto quando non ci sono notifiche', () => {
+    it('RF102-OPL visualizza stato vuoto quando non ci sono notifiche', () => {
         expect(component).toBeTruthy();
         const emptyState = fixture.nativeElement.querySelector('.notification-page__empty');
         expect(emptyState).toBeTruthy();
         expect(emptyState.textContent).toContain('Nessuna notifica disponibile');
     });
 
-    it('TBD-RF renderizza lista notifiche e clear-all sul servizio', () => {
+    it('RF103-OPL renderizza lista notifiche e clear-all sul servizio', () => {
         vmSubject.next({
             notifications: [notificationA, notificationB],
             unreadCount: 2,
@@ -87,7 +87,7 @@ describe('Notification feature integration', () => {
         expect(notificationServiceStub.clearAllNotifications).toHaveBeenCalledWith([notificationA, notificationB]);
     });
 
-    it('TBD-RF focus query param evidenzia la notifica corretta', () => {
+    it('RF104-OPL focus query param evidenzia la notifica corretta', () => {
         queryParamMapSubject.next(convertToParamMap({ focus: 'n-2' }));
         vmSubject.next({
             notifications: [notificationA, notificationB],

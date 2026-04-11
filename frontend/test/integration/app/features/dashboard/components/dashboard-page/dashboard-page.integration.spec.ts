@@ -31,15 +31,15 @@ describe('Dashboard feature integration', () => {
         fixture.detectChanges();
     });
 
-    it('TBD-RF renderizza la dashboard', () => {
+    it('RF43-OBL renderizza la dashboard', () => {
         expect(component).toBeTruthy();
     });
 
-    it('TBD-RF visualizza widget allarmi', () => {
+    it('RF44-OBL visualizza widget allarmi', () => {
         expect(fixture.debugElement.query(By.css('app-alarms-widget'))).not.toBeNull();
     });
 
-    it('TBD-RF visualizza widget analytics', () => {
+    it('RF45-OBL visualizza widget analytics', () => {
         expect(fixture.debugElement.query(By.css('app-analytics-widget'))).not.toBeNull();
     });
 });

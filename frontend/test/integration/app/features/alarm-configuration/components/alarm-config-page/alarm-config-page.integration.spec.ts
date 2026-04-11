@@ -87,12 +87,12 @@ describe('AlarmConfiguration feature integration', () => {
         fixture.detectChanges();
     });
 
-    it('TBD-RF inizializza pagina e carica regole allarme', () => {
+    it('RF85-OBL inizializza pagina e carica regole allarme', () => {
         expect(component).toBeTruthy();
         expect(stateServiceStub.loadAlarmRules).toHaveBeenCalledTimes(1);
     });
 
-    it('TBD-RF create mode invia form al servizio e chiude modale', () => {
+    it('RF86-OBL create mode invia form al servizio e chiude modale', () => {
         component.onCreateNew();
         component.onFormSubmitted(formValue);
 
@@ -100,7 +100,7 @@ describe('AlarmConfiguration feature integration', () => {
         expect(component.isModalOpen()).toBe(false);
     });
 
-    it('TBD-RF edit mode mantiene modale aperta se update non emette esito', () => {
+    it('RF87-OBL edit mode mantiene modale aperta se update non emette esito', () => {
         alarmsSubject.next([alarmRule]);
         fixture.detectChanges();
         component.onEdit('alarm-1');

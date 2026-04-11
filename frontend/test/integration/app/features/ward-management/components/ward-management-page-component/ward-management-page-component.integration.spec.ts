@@ -161,7 +161,7 @@ describe('WardManagement feature integration', () => {
         fixture.detectChanges();
     }
 
-    it('mantiene coerente la selezione del ward e aggiorna il nome in entrambe le sezioni', () => {
+    it('RF27-OBL mantiene coerente la selezione del ward e aggiorna il nome in entrambe le sezioni', () => {
         const nativeElement = fixture.nativeElement as HTMLElement;
 
         expect(wardApiStub.getWards).toHaveBeenCalledTimes(1);
@@ -176,7 +176,7 @@ describe('WardManagement feature integration', () => {
         expect(nativeElement.querySelector('section[aria-label="Dettagli reparto e appartamenti"] h2')?.textContent).toContain(ward2.name);
     });
 
-    it('aggiorna il nome del ward e sincronizza lista e pannello centrale', () => {
+    it('RF28-OBL aggiorna il nome del ward e sincronizza lista e pannello centrale', () => {
         const nativeElement = fixture.nativeElement as HTMLElement;
 
         expect(nativeElement.querySelector('section[aria-label="Dettagli reparto e appartamenti"] h2')?.textContent).toContain(ward1.name);
@@ -194,7 +194,7 @@ describe('WardManagement feature integration', () => {
         expect(getWardButtons()[0].textContent).toContain('Cardiologia A');
     });
 
-    it('dopo la creazione mantiene cliccabile il ward appena creato', () => {
+    it('RF29-OBL dopo la creazione mantiene cliccabile il ward appena creato', () => {
         const nativeElement = fixture.nativeElement as HTMLElement;
 
         clickButtonByText('Nuovo reparto');
@@ -217,7 +217,7 @@ describe('WardManagement feature integration', () => {
         expect(wardButtons[2].textContent).toContain(ward3.name);
     });
 
-    it('assegna un operatore dal dialog e invoca il flusso di assegnazione', () => {
+    it('RF30-OBL assegna un operatore dal dialog e invoca il flusso di assegnazione', () => {
         clickButtonByText('Aggiungi operatore');
 
         expect(getDialog()?.textContent).toContain('Assegna operatore sanitario');
@@ -234,7 +234,7 @@ describe('WardManagement feature integration', () => {
         expect((fixture.nativeElement as HTMLElement).querySelector('#operator-id')).toBeNull();
     });
 
-    it('non mostra appartamenti assegnabili se fetch disponibile fallisce', () => {
+    it('RF31-OBL non mostra appartamenti assegnabili se fetch disponibile fallisce', () => {
         wardApiStub.getAvailablePlants.mockReturnValueOnce(throwError(() => new Error('network error')));
 
         clickButtonByText('Assegna appartamento');
@@ -259,7 +259,7 @@ describe('WardManagement feature integration', () => {
         expect((fixture.nativeElement as HTMLElement).querySelector('#apartment-id')).toBeNull();
     });
 
-    it('rimuove operatore e appartamento passando dal confirm dialog', () => {
+    it('RF32-OBL rimuove operatore e appartamento passando dal confirm dialog', () => {
         clickButtonByAriaLabel('Rimuovi operatore');
         expect(getDialog()?.textContent).toContain('rimozione dell\'operatore');
         clickButtonByText('Rimuovi');
@@ -271,7 +271,7 @@ describe('WardManagement feature integration', () => {
         expect(wardApiStub.removePlantFromWard).toHaveBeenCalledWith(1, '101');
     });
 
-    it('elimina un ward dopo conferma e aggiorna la selezione', () => {
+    it('RF33-OBL elimina un ward dopo conferma e aggiorna la selezione', () => {
         const nativeElement = fixture.nativeElement as HTMLElement;
 
         clickButtonByText('Elimina');

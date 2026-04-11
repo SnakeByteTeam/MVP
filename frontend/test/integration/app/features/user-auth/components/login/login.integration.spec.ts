@@ -54,7 +54,7 @@ describe('UserAuth feature integration', () => {
         await fixture.whenStable();
     });
 
-    it('TBD-RF login valido reindirizza in dashboard', () => {
+    it('RF1-OBL login valido reindirizza in dashboard', () => {
         authServiceStub.login.mockReturnValue(
             of({
                 userId: 'u1',
@@ -74,7 +74,7 @@ describe('UserAuth feature integration', () => {
         expect(component.errorType).toBeNull();
     });
 
-    it('TBD-RF login invalido espone errore credenziali', () => {
+    it('RF2-OBL login invalido espone errore credenziali', () => {
         authServiceStub.login.mockReturnValue(
             throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' })),
         );
@@ -87,7 +87,7 @@ describe('UserAuth feature integration', () => {
         expect(component.loginErrorMessage).toContain('username o password errati');
     });
 
-    it('TBD-RF form invalido non invoca autenticazione', () => {
+    it('RF3-OBL form invalido non invoca autenticazione', () => {
         component.loginForm.controls.username.setValue('ab');
         component.loginForm.controls.password.setValue('short');
 

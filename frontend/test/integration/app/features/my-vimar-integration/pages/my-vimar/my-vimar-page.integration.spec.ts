@@ -26,14 +26,14 @@ describe('MyVimarIntegration feature integration', () => {
         component = fixture.componentInstance;
     });
 
-    it('TBD-RF carica stato account in init', () => {
+    it('RF11-OBL carica stato account in init', () => {
         fixture.detectChanges();
 
         expect(component).toBeTruthy();
         expect(serviceStub.getLinkedAccount).toHaveBeenCalledTimes(1);
     });
 
-    it('TBD-RF unlink account esegue refresh stato', () => {
+    it('RF12-OBL unlink account esegue refresh stato', () => {
         fixture.detectChanges();
 
         component.onUnlinkAccount();
@@ -42,7 +42,7 @@ describe('MyVimarIntegration feature integration', () => {
         expect(serviceStub.getLinkedAccount).toHaveBeenCalledTimes(2);
     });
 
-    it('TBD-RF fallback errore quando unlink fallisce', () => {
+    it('RF13-OBL fallback errore quando unlink fallisce', () => {
         const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
         serviceStub.unlinkAccount.mockReturnValueOnce(throwError(() => new Error('boom')));
         fixture.detectChanges();

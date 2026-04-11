@@ -66,14 +66,14 @@ describe('AlarmHistory feature integration', () => {
         component = fixture.componentInstance;
     });
 
-    it('TBD-RF inizializza pagina e service', () => {
+    it('NO-RF-TAG inizializza pagina e service', () => {
         fixture.detectChanges();
 
         expect(component).toBeTruthy();
         expect(alarmHistoryServiceStub.initialize).toHaveBeenCalledTimes(1);
     });
 
-    it('TBD-RF ordina righe per chiusura desc e applica fallback handler', () => {
+    it('NO-RF-TAG ordina righe per chiusura desc e applica fallback handler', () => {
         vmSubject.next({
             alarms: [alarmB, alarmA],
             currentPage: 2,
@@ -91,7 +91,7 @@ describe('AlarmHistory feature integration', () => {
         expect(component.currentPage()).toBe(2);
     });
 
-    it('TBD-RF delega paginazione next/previous al service', () => {
+    it('NO-RF-TAG delega paginazione next/previous al service', () => {
         component.onNextPage();
         component.onPreviousPage();
 

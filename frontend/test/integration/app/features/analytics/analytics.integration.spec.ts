@@ -162,14 +162,14 @@ describe('Analytics feature integration', () => {
         component = fixture.componentInstance;
     });
 
-    it('TBD-RF inizializza appartamenti e carica analytics del primo plant', () => {
+    it('RF61-OBL inizializza appartamenti e carica analytics del primo plant', () => {
         fixture.detectChanges();
 
         expect(analyticsApiStub.getAllApartments).toHaveBeenCalled();
         expect(analyticsApiStub.getAnalytics).toHaveBeenCalledWith('1', expect.anything());
     });
 
-    it('TBD-RF cambio appartamento aggiorna i grafici', () => {
+    it('RF62-OBL cambio appartamento aggiorna i grafici', () => {
         fixture.detectChanges();
 
         component.onApartmentChange({ target: { value: '2' } } as unknown as Event);
@@ -177,7 +177,7 @@ describe('Analytics feature integration', () => {
         expect(analyticsApiStub.getAnalytics).toHaveBeenCalledWith('2', expect.anything());
     });
 
-    it('TBD-RF recupera correttamente una metrica esistente', () => {
+    it('RF63-OBL recupera correttamente una metrica esistente', () => {
         const chart = component.getChartByMetric(analyticsData, 'plant-anomalies');
         expect(chart?.metric).toBe('plant-anomalies');
     });

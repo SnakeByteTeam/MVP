@@ -43,13 +43,13 @@ describe('UserManagement feature integration', () => {
         await fixture.whenStable();
     });
 
-    it('TBD-RF inizializza pagina e carica elenco utenti', () => {
+    it('RF16-OBL inizializza pagina e carica elenco utenti', () => {
         expect(component).toBeTruthy();
         expect(getUsersStub).toHaveBeenCalledTimes(1);
         expect(component.isCreateFormOpen()).toBe(false);
     });
 
-    it('TBD-RF submit creazione utente aggiorna stato e refresha la lista', () => {
+    it('RF17-OBL submit creazione utente aggiorna stato e refresha la lista', () => {
         component.onFormSubmit({
             name: 'Mario',
             surname: 'Rossi',
@@ -65,7 +65,7 @@ describe('UserManagement feature integration', () => {
         expect(getUsersStub).toHaveBeenCalledTimes(2);
     });
 
-    it('TBD-RF errore 409 in creazione espone errore username in uso', () => {
+    it('RF18-OBL errore 409 in creazione espone errore username in uso', () => {
         createUserStub.mockReturnValueOnce(throwError(() => ({ status: 409 })));
 
         component.onFormSubmit({

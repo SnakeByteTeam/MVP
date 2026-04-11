@@ -16,7 +16,7 @@
     "test:integration": "ng run frontend:test-integration",
     "test:integration:ci": "ng run frontend:test-integration --watch=false",
     "test:integration:junit": "ng run frontend:test-integration --watch=false --reporters=junit --output-file=coverage/frontend/integration-junit.xml",
-    "test:integration:sonar": "ng run frontend:test-integration --watch=false --coverage --coverage-reporters=lcovonly --coverage-reporters=text-summary",
+    "test:integration:sonar": "ng run frontend:test-integration --watch=false --coverage --coverage-reporters=lcovonly --coverage-reporters=text-summary && node scripts/filter-integration-lcov.mjs coverage/frontend/lcov.info",
     "e2e": "ng e2e",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"

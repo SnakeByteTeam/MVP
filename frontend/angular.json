@@ -87,6 +87,18 @@
             ]
           }
         },
+        "test-integration": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.integration.json",
+            "setupFiles": [
+              "test/unit/setup/canvas.mock.ts"
+            ],
+            "include": [
+              "../test/integration/**/*.integration.spec.ts"
+            ]
+          }
+        },
         "cypress-run": {
           "builder": "@cypress/schematic:cypress",
           "options": {

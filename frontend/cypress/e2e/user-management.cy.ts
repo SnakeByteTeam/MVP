@@ -222,7 +222,11 @@ describe('User management e2e', () => {
         cy.contains('h2', 'Utente creato con successo').should('be.visible');
         cy.contains('button', 'Ho comunicato la password').click();
 
-        cy.contains('tr', '@giulia.ferri').should('be.visible');
+        cy.contains('tr', '@giulia.ferri').should('exist').within(() => {
+            cy.contains('td', 'Giulia').should('exist');
+            cy.contains('td', 'Ferri').should('exist');
+            cy.contains('td', '@giulia.ferri').should('exist');
+        });
     });
 
     it('RF21-DEL Inserimento nome Operatore Sanitario per creazione utente', () => {

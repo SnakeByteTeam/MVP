@@ -4,7 +4,10 @@
   "cli": {
     "packageManager": "npm",
     "analytics": false,
-    "schematicCollections": ["@cypress/schematic", "@schematics/angular"]
+    "schematicCollections": [
+      "@cypress/schematic",
+      "@schematics/angular"
+    ]
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -26,7 +29,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"]
+            "styles": [
+              "src/styles.css"
+            ]
           },
           "configurations": {
             "production": {
@@ -74,8 +79,12 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tsconfig.spec.json",
-            "setupFiles": ["test/unit/setup/canvas.mock.ts"],
-            "include": ["../test/unit/**/*.spec.ts"]
+            "setupFiles": [
+              "test/unit/setup/canvas.mock.ts"
+            ],
+            "include": [
+              "../test/unit/**/*.spec.ts"
+            ]
           }
         },
         "cypress-run": {

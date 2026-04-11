@@ -222,7 +222,7 @@ describe('User management e2e', () => {
         cy.contains('h2', 'Utente creato con successo').should('be.visible');
         cy.contains('button', 'Ho comunicato la password').click();
 
-        cy.contains('tr', '@giulia.ferri').should('exist').within(() => {
+        cy.contains('tbody tr', '@giulia.ferri').scrollIntoView().should('exist').within(() => {
             cy.contains('td', 'Giulia').should('exist');
             cy.contains('td', 'Ferri').should('exist');
             cy.contains('td', '@giulia.ferri').should('exist');

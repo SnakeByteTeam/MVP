@@ -96,7 +96,7 @@ describe('Notification e2e', () => {
             });
         }).as('getManagedNotificationHistory');
 
-        cy.visit('/auth/login?returnUrl=%2Fnotifications');
+        cy.visit('/auth/login?returnUrl=%2Fnotifications%3Ffocus%3Dalarm-triggered-evt-triggered-1');
         cy.get('#username').type(notificationUsername);
         cy.get('#password').type(notificationPassword);
         cy.get('button[type="submit"]').click();
@@ -130,5 +130,28 @@ describe('Notification e2e', () => {
         cy.get('#notification-alarm-triggered-evt-triggered-1 .notification-item__time')
             .invoke('text')
             .should('match', /fa|tra poco/);
+    });
+
+    it('highlights the notification selected through focus query param', () => {
+        cy.get('#notification-alarm-triggered-evt-triggered-1')
+            .should('have.class', 'notification-card--highlighted');
+    });
+
+    it('removes a single notification from the archive list', () => {
+        cy.get('#notification-alarm-triggered-evt-triggered-1')
+            .find('button[aria-label="Rimuovi notifica"]')
+            .click();
+
+        cy.get('ul[aria-label="Elenco notifiche"] li').should('have.length', 1);
+        cy.get('#notification-alarm-triggered-evt-triggered-1').should('not.exist');
+        cy.get('#notification-alarm-resolved-evt-resolved-1').should('exist');
+    });
+
+    it('clears all notifications and shows the empty state', () => {
+        cy.contains('button', 'Cancella tutte').click();
+
+        cy.contains('Nessuna notifica disponibile').should('be.visible');
+        cy.get('ul[aria-label="Elenco notifiche"]').should('not.exist');
+        cy.contains('button', 'Cancella tutte').should('not.exist');
     });
 });

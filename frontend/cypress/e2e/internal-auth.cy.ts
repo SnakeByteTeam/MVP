@@ -211,4 +211,170 @@ describe('Autenticazione frontend', () => {
       cy.contains('#newPassword-error', 'La nuova password deve avere almeno 12 caratteri.').should('be.visible');
     });
   });
+
+  it('navigates to the requested returnUrl after login', () => {
+    cy.intercept('GET', '**/my-vimar/account', {
+      statusCode: 200,
+      body: {
+        email: 'admin@example.com',
+        isLinked: true,
+      },
+    });
+
+    cy.intercept('GET', '**/api/vimar-account', {
+      statusCode: 200,
+      body: {
+        email: 'admin@example.com',
+        isLinked: true,
+      },
+    });
+
+    cy.intercept('POST', '**/auth/login', (req) => {
+      expect(req.body).to.deep.equal({
+        username: validUsername,
+        password: validLoginSecret,
+      });
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          accessToken: createAccessToken({ role: 'AMMINISTRATORE' }),
+        },
+      });
+    }).as('loginWithReturnUrl');
+
+    cy.visit('/auth/login?returnUrl=%2Fvimar-link');
+    cy.get('#username').type(validUsername);
+    cy.get('#password').type(validLoginSecret);
+    cy.get('form').submit();
+
+    cy.wait('@loginWithReturnUrl');
+    cy.location('pathname').should('eq', '/vimar-link');
+    cy.contains('h1', 'Integrazione MyVimar').should('be.visible');
+  });
+
+  it('restores session from refresh when opening a protected route', () => {
+    cy.intercept('POST', '**/auth/refresh', {
+      statusCode: 200,
+      body: {
+        accessToken: createAccessToken(),
+      },
+    }).as('refreshSession');
+
+    cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+      statusCode: 200,
+      body: [],
+    });
+
+    cy.visit('/alarms/alarm-management');
+
+    cy.wait('@refreshSession');
+    cy.location('pathname').should('eq', '/alarms/alarm-management');
+    cy.contains('h1', 'Gestione allarmi attivi').should('be.visible');
+  });
+
+  it('redirects to login when refresh fails and preserves returnUrl', () => {
+    cy.intercept('POST', '**/auth/refresh', {
+      statusCode: 401,
+      body: { message: 'Refresh token expired' },
+    }).as('refreshSessionFailed');
+
+    cy.visit('/alarms/alarm-management');
+
+    cy.wait('@refreshSessionFailed');
+    cy.location('pathname').should('eq', '/auth/login');
+    cy.location('search').should('include', 'returnUrl=%2Falarms%2Falarm-management');
+    cy.get('@refreshSessionFailed.all').should('have.length', 1);
+  });
+
+  it('ignores external returnUrl values and falls back to dashboard', () => {
+    cy.intercept('POST', '**/auth/login', {
+      statusCode: 200,
+      body: {
+        accessToken: createAccessToken(),
+      },
+    }).as('loginUnsafeReturnUrl');
+
+    cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+      statusCode: 200,
+      body: [],
+    });
+
+    cy.intercept('GET', '**/analytics/*', {
+      statusCode: 200,
+      body: [],
+    });
+
+    cy.visit('/auth/login?returnUrl=https%3A%2F%2Fevil.example%2Fsteal');
+    cy.get('#username').type(validUsername);
+    cy.get('#password').type(validLoginSecret);
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@loginUnsafeReturnUrl');
+    cy.location('pathname').should('eq', '/dashboard');
+  });
+
+  it('shows login error when backend returns a malformed access token', () => {
+    cy.intercept('POST', '**/auth/login', {
+      statusCode: 200,
+      body: {
+        accessToken: 'not-a-jwt-token',
+      },
+    }).as('loginMalformedToken');
+
+    cy.visit('/auth/login');
+    cy.get('#username').type(validUsername);
+    cy.get('#password').type(validLoginSecret);
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@loginMalformedToken');
+    cy.location('pathname').should('eq', '/auth/login');
+    cy.contains('p', 'Utente non trovato: username o password errati.').should('be.visible');
+  });
+
+  it('redirects first-access users to password setup even when returnUrl is provided', () => {
+    cy.intercept('POST', '**/auth/login', {
+      statusCode: 200,
+      body: {
+        accessToken: createAccessToken({ isFirstAccess: true }),
+      },
+    }).as('firstAccessLoginWithReturnUrl');
+
+    cy.visit('/auth/login?returnUrl=%2Fvimar-link');
+    cy.get('#username').type(validUsername);
+    cy.get('#password').type(validLoginSecret);
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@firstAccessLoginWithReturnUrl');
+    cy.location('pathname').should('eq', '/auth/first-access');
+    cy.contains('h1', 'Imposta la tua password personale').should('be.visible');
+  });
+
+  it('ignores protocol-relative returnUrl values and falls back to dashboard', () => {
+    cy.intercept('POST', '**/auth/login', {
+      statusCode: 200,
+      body: {
+        accessToken: createAccessToken(),
+      },
+    }).as('loginProtocolRelativeReturnUrl');
+
+    cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+      statusCode: 200,
+      body: [],
+    });
+
+    cy.intercept('GET', '**/analytics/*', {
+      statusCode: 200,
+      body: [],
+    });
+
+    cy.visit('/auth/login?returnUrl=%2F%2Fevil.example%2Fdashboard');
+    cy.get('#username').type(validUsername);
+    cy.get('#password').type(validLoginSecret);
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@loginProtocolRelativeReturnUrl');
+    cy.location('pathname').should('eq', '/dashboard');
+  });
+
 });

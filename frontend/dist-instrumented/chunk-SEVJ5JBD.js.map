@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/my-vimar-integration/my-vimar-integration.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\nimport { VIMAR_CLOUD_API_SERVICE } from '../../core/services/vimar-cloud-api.service.interface';\nimport { MyVimarCloudApiFeatureService } from './services/my-vimar-cloud-api-feature.service';\n\nexport const MY_VIMAR_INTEGRATION_ROUTES: Routes = [\n  {\n    path: '',\n    providers: [\n      MyVimarCloudApiFeatureService,\n      {\n        provide: VIMAR_CLOUD_API_SERVICE,\n        useExisting: MyVimarCloudApiFeatureService,\n      },\n    ],\n    children: [\n      {\n        path: '',\n        canActivate: [authGuard],\n        loadComponent: () => import('./pages/my-vimar/my-vimar-page.component').then((m) => m.MyVimarPageComponent),\n      },\n    ],\n  }\n];\n"],
+  "mappings": "4TAKO,IAAMA,EAAsC,CACjD,CACEC,KAAM,GACNC,UAAW,CACTC,EACA,CACEC,QAASC,EACTC,YAAaH,EACd,EAEHI,SAAU,CACR,CACEN,KAAM,GACNO,YAAa,CAACC,CAAS,EACvBC,cAAeA,IAAM,OAAO,qBAA0C,EAAEC,KAAMC,GAAMA,EAAEC,oBAAoB,EAC3G,EAEJ",
+  "names": ["MY_VIMAR_INTEGRATION_ROUTES", "path", "providers", "MyVimarCloudApiFeatureService", "provide", "VIMAR_CLOUD_API_SERVICE", "useExisting", "children", "canActivate", "authGuard", "loadComponent", "then", "m", "MyVimarPageComponent"]
+}

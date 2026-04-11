@@ -221,4 +221,21 @@ describe('Alarm history e2e', () => {
         cy.contains('button', 'Successiva').should('not.exist');
         cy.contains('button', 'Precedente').should('not.exist');
     });
+
+    it('falls back to a generic handler label when the operator name is missing', () => {
+        resolvedAlarmsState[0] = {
+            ...resolvedAlarmsState[0],
+            userUsername: null,
+        };
+
+        cy.get('a.sidebar-link').contains('Gestione Allarmi').click({ force: true });
+        cy.location('pathname').should('eq', '/alarms/alarm-management');
+        cy.wait('@getUnmanagedForLayout');
+
+        cy.get('a.sidebar-link').contains('Storico Allarmi').click({ force: true });
+        cy.location('pathname').should('eq', '/alarms/alarm-history');
+        cy.wait('@getResolvedHistory');
+
+        cy.get('[data-testid="alarm-row-rh-1"]').should('contain', 'sconosciuto');
+    });
 });

@@ -193,7 +193,7 @@ describe('Device interaction e2e', () => {
         }).as('getPlantById');
 
         cy.intercept('GET', '**/device/*/value', (req) => {
-            const deviceId = req.url.split('/').slice(-2, -1)[0];
+            const deviceId = req.url.split('/').at(-2) ?? '';
             const valuesMap: Record<string, { datapointId: string; name: string; value: string }[]> = {
                 'dev-thermostat': [{ datapointId: 'dp-thermostat', name: 'Setpoint', value: '20' }],
                 'dev-fall': [{ datapointId: 'dp-fall', name: 'Stato caduta', value: 'OFF' }],
@@ -268,4 +268,17 @@ describe('Device interaction e2e', () => {
             value: '22',
         });
     });
+
+    it('writes a command for another device row', () => {
+        cy.contains('table[aria-label="Tabella endpoint Suite principale"] tbody tr', 'Porta di Ingresso Principale').within(() => {
+            cy.get('select').select('UNLOCK');
+            cy.contains('button', 'Scrivi').click();
+        });
+
+        cy.wait('@writeDatapoint').its('request.body').should('deep.equal', {
+            datapointId: 'dp-door',
+            value: 'UNLOCK',
+        });
+    });
+
 });

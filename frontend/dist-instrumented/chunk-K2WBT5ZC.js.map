@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/guards/auth.guard.ts"],
+  "sourcesContent": ["import { inject } from '@angular/core';\nimport { CanActivateFn, Router } from '@angular/router';\nimport { map } from 'rxjs';\nimport { InternalAuthService } from '../services/internal-auth.service';\n\nexport const authGuard: CanActivateFn = (_, state) => {\n\tconst authService = inject(InternalAuthService);\n\tconst router = inject(Router);\n\n\tif (authService.isAuthenticated()) {\n\t\treturn true;\n\t}\n\n\treturn authService.restoreSessionFromRefresh().pipe(\n\t\tmap((restored) =>\n\t\t\trestored\n\t\t\t\t? true\n\t\t\t\t: router.createUrlTree(['/auth/login'], {\n\t\t\t\t\t\tqueryParams: { returnUrl: state.url },\n\t\t\t\t\t})\n\t\t)\n\t);\n};\n"],
+  "mappings": "+HAKO,IAAMA,EAA2BA,CAACC,EAAGC,IAAS,CACpD,IAAMC,EAAcC,EAAOC,CAAmB,EACxCC,EAASF,EAAOG,CAAM,EAE5B,OAAIJ,EAAYK,gBAAe,EACvB,GAGDL,EAAYM,0BAAyB,EAAGC,KAC9CC,EAAKC,GACJA,EACG,GACAN,EAAOO,cAAc,CAAC,aAAa,EAAG,CACtCC,YAAa,CAAEC,UAAWb,EAAMc,GAAG,EACnC,CAAC,CACJ,CAEH",
+  "names": ["authGuard", "_", "state", "authService", "inject", "InternalAuthService", "router", "Router", "isAuthenticated", "restoreSessionFromRefresh", "pipe", "map", "restored", "createUrlTree", "queryParams", "returnUrl", "url"]
+}

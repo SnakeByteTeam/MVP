@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/ward-management/components/ward-management-page-component/ward-management-page-component.css"],
+  "sourcesContent": [".ward-management-page {\n\tgap: 1.15rem;\n}\n\n.col-separator {\n\tborder-right: 1px solid #e2e8f0;\n}\n\n.col-scroll {\n\tscrollbar-width: thin;\n\tscrollbar-color: #cbd5e1 transparent;\n}\n\n.col-scroll::-webkit-scrollbar {\n\twidth: 4px;\n}\n\n.col-scroll::-webkit-scrollbar-thumb {\n\tbackground: #cbd5e1;\n\tborder-radius: 999px;\n}\n"],
+  "mappings": "AAAA,CAAA,qBACC,IAAA,OACD,CAEA,CAAA,cACC,aAAA,IAAA,MAAA,OACD,CAEA,CAAA,WACC,gBAAA,KACA,gBAAA,QAAA,WACD,CAEA,CALA,UAKA,oBACC,MAAA,GACD,CAEA,CATA,UASA,0BACC,WAAA,QAlBD,cAmBC,KACD",
+  "names": []
+}

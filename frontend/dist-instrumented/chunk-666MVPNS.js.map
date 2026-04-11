@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/alarm/models/realtime-alarm-event.model.ts"],
+  "sourcesContent": ["export type AlarmLifecycleType = 'triggered' | 'resolved';\n\nexport interface BackendTriggeredPayload {\n\talarmEventId: string;\n\twardId: number;\n\talarmRuleId: string;\n}\n\nexport interface BackendResolvedPayload {\n\talarmEventId: string;\n\twardId?: number;\n}\n\nexport interface AlarmLifecycleUpdateDetail {\n\ttype: AlarmLifecycleType;\n\talarmEventId: string;\n}\n\nexport const ALARM_LIFECYCLE_UPDATED_EVENT = 'alarm-lifecycle-updated';\n"],
+  "mappings": "AAkBO,IAAMA,EAAgC",
+  "names": ["ALARM_LIFECYCLE_UPDATED_EVENT"]
+}

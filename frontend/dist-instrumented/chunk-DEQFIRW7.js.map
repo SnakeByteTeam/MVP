@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/apartment-monitor/apartment-monitor.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const APARTMENT_MONITOR_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard],\n    loadComponent: () =>\n      import('./components/apartment-monitor/apartment-monitor.component').then((m) => m.ApartmentMonitorComponent)\n  }\n];\n"],
+  "mappings": "gNAGO,IAAMA,EAAmC,CAC9C,CACEC,KAAM,GACNC,YAAa,CAACC,CAAS,EACvBC,cAAeA,IACb,OAAO,qBAA4D,EAAEC,KAAMC,GAAMA,EAAEC,yBAAyB,EAC/G",
+  "names": ["APARTMENT_MONITOR_ROUTES", "path", "canActivate", "authGuard", "loadComponent", "then", "m", "ApartmentMonitorComponent"]
+}

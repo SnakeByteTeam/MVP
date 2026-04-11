@@ -117,6 +117,36 @@ describe('Apartment monitor e2e', () => {
                     },
                 ],
             },
+            {
+                id: '302',
+                name: 'Appartamento Luna',
+                wardId: 3,
+                rooms: [
+                    {
+                        id: 'room-3',
+                        name: 'Studio',
+                        devices: [
+                            {
+                                id: 'dev-light-2',
+                                name: 'Luce studio',
+                                type: 'SS_AUTOMATION_ONOFF',
+                                subType: 'SF_LIGHT',
+                                datapoints: [
+                                    {
+                                        id: 'dp-light-2',
+                                        name: 'Comando luce studio',
+                                        readable: true,
+                                        writable: true,
+                                        valueType: 'enum',
+                                        enum: ['ON', 'OFF'],
+                                        sfeType: 'SF_LIGHT_CMD',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
         ];
 
         cy.intercept('GET', '**/plant/all', {
@@ -124,13 +154,17 @@ describe('Apartment monitor e2e', () => {
             body: plantAllBody,
         }).as('getPlantAll');
 
-        cy.intercept('GET', /\/plant\?plantid=.*/, {
-            statusCode: 200,
-            body: plantAllBody[0],
+        cy.intercept('GET', /\/plant\?plantid=.*/, (req) => {
+            const plantId = req.url.split('plantid=').pop() ?? '301';
+
+            req.reply({
+                statusCode: 200,
+                body: plantId === '302' ? plantAllBody[1] : plantAllBody[0],
+            });
         }).as('getPlantById');
 
         cy.intercept('GET', '**/device/*/value', (req) => {
-            const deviceId = req.url.split('/').slice(-2, -1)[0];
+            const deviceId = req.url.split('/').at(-2) ?? '';
             req.reply({
                 statusCode: 200,
                 body: {
@@ -190,5 +224,13 @@ describe('Apartment monitor e2e', () => {
     it('RF78-OBL Visualizzazione elenco dispositivi della stanza', () => {
         cy.contains('table[aria-label="Tabella endpoint Soggiorno"] tbody tr', 'Luce soggiorno').should('exist');
         cy.contains('table[aria-label="Tabella endpoint Camera 1"] tbody tr', 'Termostato camera').should('exist');
+    });
+
+    it('switches the monitored apartment and reloads the detail view', () => {
+        cy.get('#active-apartment').select('302');
+        cy.wait('@getPlantById');
+
+        cy.contains('h1', 'Appartamento Luna').should('be.visible');
+        cy.get('table[aria-label="Tabella endpoint Studio"]').should('exist');
     });
 });

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/guards/admin.guard.ts", "src/app/features/user-management/user-management.routes.ts"],
+  "sourcesContent": ["import { CanActivateFn } from '@angular/router';\n\nexport const adminGuard: CanActivateFn = () => true;\n", "import { Routes } from '@angular/router';\nimport { adminGuard } from '../../core/guards/admin.guard';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const USER_MANAGEMENT_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard, adminGuard],\n    loadComponent: () =>\n      import('./components/user-management-page/user-management-page.component').then(\n        (m) => m.UserManagementPageComponent\n      )\n  }\n];\n"],
+  "mappings": "gNAEO,IAAMA,EAA4BA,IAAM,GCExC,IAAMC,EAAiC,CAC5C,CACEC,KAAM,GACNC,YAAa,CAACC,EAAWC,CAAU,EACnCC,cAAeA,IACb,OAAO,qBAAkE,EAAEC,KACxEC,GAAMA,EAAEC,2BAA2B,EAEzC",
+  "names": ["adminGuard", "USER_MANAGEMENT_ROUTES", "path", "canActivate", "authGuard", "adminGuard", "loadComponent", "then", "m", "UserManagementPageComponent"]
+}

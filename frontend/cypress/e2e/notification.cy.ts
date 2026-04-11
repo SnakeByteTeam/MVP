@@ -154,4 +154,94 @@ describe('Notification e2e', () => {
         cy.get('ul[aria-label="Elenco notifiche"]').should('not.exist');
         cy.contains('button', 'Cancella tutte').should('not.exist');
     });
+
+    it('deduplicates repeated triggered events from history payloads', () => {
+        const now = Date.now();
+
+        cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 'evt-dup-1',
+                    activationTime: new Date(now - 12 * 60 * 1000).toISOString(),
+                    resolutionTime: null,
+                    alarmName: 'Titolo vecchio duplicato',
+                    priority: 4,
+                },
+                {
+                    id: 'evt-dup-1',
+                    activationTime: new Date(now - 2 * 60 * 1000).toISOString(),
+                    resolutionTime: null,
+                    alarmName: 'Titolo nuovo duplicato',
+                    priority: 4,
+                },
+            ],
+        }).as('getUnmanagedDuplicatedHistory');
+
+        cy.intercept('GET', '**/alarm-events/managed/*/*/*', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 'evt-resolved-9',
+                    activationTime: new Date(now - 60 * 60 * 1000).toISOString(),
+                    resolutionTime: new Date(now - 20 * 60 * 1000).toISOString(),
+                    alarmName: 'Evento risolto storico',
+                    priority: 2,
+                },
+            ],
+        }).as('getManagedDuplicatedHistory');
+
+        cy.intercept('GET', '**/plant/all', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.intercept('GET', '**/analytics/*', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+
+        cy.get('a.sidebar-link').contains('Notifiche').click({ force: true });
+        cy.location('pathname').should('eq', '/notifications');
+
+        cy.wait('@getUnmanagedDuplicatedHistory');
+        cy.wait('@getManagedDuplicatedHistory');
+
+        cy.get('ul[aria-label="Elenco notifiche"] li').should('have.length', 2);
+        cy.contains('h2', 'Titolo nuovo duplicato').should('be.visible');
+        cy.contains('h2', 'Titolo vecchio duplicato').should('not.exist');
+    });
+
+    it('keeps a dismissed notification hidden after navigating away and back', () => {
+        cy.intercept('GET', '**/plant/all', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.intercept('GET', '**/analytics/*', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.get('#notification-alarm-triggered-evt-triggered-1')
+            .find('button[aria-label="Rimuovi notifica"]')
+            .click();
+
+        cy.get('#notification-alarm-triggered-evt-triggered-1').should('not.exist');
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+
+        cy.get('a.sidebar-link').contains('Notifiche').click({ force: true });
+        cy.location('pathname').should('eq', '/notifications');
+        cy.wait('@getUnmanagedNotificationHistory');
+        cy.wait('@getManagedNotificationHistory');
+
+        cy.get('#notification-alarm-triggered-evt-triggered-1').should('not.exist');
+        cy.get('#notification-alarm-resolved-evt-resolved-1').should('exist');
+    });
+
 });

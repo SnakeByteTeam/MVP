@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/alarm-configuration/components/alarm-config-page/alarm-config-page.component.css"],
+  "sourcesContent": [".alarm-config-page {\n    gap: 1.15rem;\n}"],
+  "mappings": "AAAA,CAAA,kBACI,IAAA,OACJ",
+  "names": []
+}

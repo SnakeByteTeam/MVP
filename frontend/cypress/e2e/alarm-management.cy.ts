@@ -235,6 +235,64 @@ describe('Alarm management e2e', () => {
         cy.get('[data-testid="alarm-row-am-2"]').should('exist');
     });
 
+    it('shows a network error message when resolve request cannot reach the server', () => {
+        cy.intercept('PATCH', '**/alarm-events/resolve', {
+            forceNetworkError: true,
+        }).as('resolveAlarmNetworkFailure');
+
+        cy.get('[data-testid="alarm-row-am-3"]').within(() => {
+            cy.contains('button', 'GESTISCI').click();
+        });
+
+        cy.wait('@resolveAlarmNetworkFailure');
+        cy.contains('Impossibile contattare il server durante').should('be.visible');
+        cy.get('[data-testid="alarm-row-am-3"]').should('exist');
+    });
+
+    it('shows permission error message on 403 resolve response', () => {
+        cy.intercept('PATCH', '**/alarm-events/resolve', {
+            statusCode: 403,
+            body: { message: 'Forbidden' },
+        }).as('resolveAlarmForbidden');
+
+        cy.get('[data-testid="alarm-row-am-2"]').within(() => {
+            cy.contains('button', 'GESTISCI').click();
+        });
+
+        cy.wait('@resolveAlarmForbidden');
+        cy.contains('Non hai i permessi necessari per completare la risoluzione dell\'allarme.').should('be.visible');
+        cy.get('[data-testid="alarm-row-am-2"]').should('exist');
+    });
+
+    it('shows joined validation messages when backend returns an array message', () => {
+        cy.intercept('PATCH', '**/alarm-events/resolve', {
+            statusCode: 422,
+            body: {
+                message: ['Campo userId mancante', 'Campo alarmId non valido'],
+            },
+        }).as('resolveAlarmValidationFailure');
+
+        cy.get('[data-testid="alarm-row-am-1"]').within(() => {
+            cy.contains('button', 'GESTISCI').click();
+        });
+
+        cy.wait('@resolveAlarmValidationFailure');
+        cy.contains('Campo userId mancante; Campo alarmId non valido').should('be.visible');
+        cy.get('[data-testid="alarm-row-am-1"]').should('exist');
+    });
+
+    it('shows load-page error when fetching the next page fails', () => {
+        cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+            statusCode: 500,
+            body: { message: 'Load failed' },
+        }).as('getActiveAlarmsFailure');
+
+        cy.contains('button', 'Successiva').click();
+
+        cy.wait('@getActiveAlarmsFailure');
+        cy.contains('Errore interno del server durante caricare gli allarmi attivi').should('be.visible');
+    });
+
     it('renders managed alarms as non actionable rows', () => {
         activeAlarmsState = activeAlarmsState.map((alarm) =>
             alarm.id === 'am-1'
@@ -295,5 +353,10 @@ describe('Alarm management e2e', () => {
         cy.contains('Nessun allarme attivo al momento.').should('be.visible');
         cy.contains('button', 'Successiva').should('not.exist');
         cy.contains('button', 'Precedente').should('not.exist');
+    });
+
+    it('keeps the previous button disabled on the first page', () => {
+        cy.contains('button', 'Precedente').should('be.disabled');
+        cy.contains('span', 'Pagina 1').should('be.visible');
     });
 });

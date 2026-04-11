@@ -371,6 +371,19 @@ describe('Ward management e2e', () => {
         cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').should('not.exist');
     });
 
+    it('cancels ward deletion without removing the ward', () => {
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Elimina reparto"]').click();
+        cy.contains('p', 'Confermi l\'eliminazione del reparto?').should('be.visible');
+        cy.contains('button', 'Annulla').click();
+
+        cy.contains('p', 'Confermi l\'eliminazione del reparto?').should('not.exist');
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').should('exist');
+    });
+
     it('RF35-OBL Assegnazione reparto a utente Operatore Sanitario', () => {
         openWardManagement();
         cy.wait('@getWards');
@@ -443,6 +456,36 @@ describe('Ward management e2e', () => {
         cy.get('section[aria-label="Operatori assegnati"]').should('not.contain', 'l.bianchi');
     });
 
+    it('cancels operator assignment dialog without sending API request', () => {
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Aggiungi operatore"]').click();
+        cy.contains('h2', 'Assegna operatore sanitario').should('be.visible');
+
+        cy.contains('button', 'Annulla').click();
+
+        cy.contains('h2', 'Assegna operatore sanitario').should('not.exist');
+        cy.get('@assignOperator.all').should('have.length', 0);
+    });
+
+    it('cancels operator removal confirmation without removing the operator', () => {
+        wardDetails[2].operators = [{ id: 12, username: 'l.bianchi' }];
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label^="Rimuovi operatore"]').click();
+        cy.contains('p', 'Confermi la rimozione dell\'operatore dal reparto?').should('be.visible');
+        cy.contains('button', 'Annulla').click();
+
+        cy.contains('p', 'Confermi la rimozione dell\'operatore dal reparto?').should('not.exist');
+        cy.get('section[aria-label="Operatori assegnati"]').should('contain', 'l.bianchi');
+        cy.get('@removeOperator.all').should('have.length', 0);
+    });
+
     it('RF39-OBL Assegnazione reparto a appartamento', () => {
         openWardManagement();
         cy.wait('@getWards');
@@ -513,5 +556,149 @@ describe('Ward management e2e', () => {
         cy.wait('@removePlant');
         cy.wait('@getWards');
         cy.get('section[aria-label="Dettagli reparto e appartamenti"]').should('not.contain', 'Appartamento 301');
+    });
+
+    it('closes apartment assignment dialog from close icon without sending API request', () => {
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Assegna appartamento"]').click();
+        cy.contains('h2', 'Assegna appartamento').should('be.visible');
+
+        cy.get('dialog[aria-labelledby="assign-apartment-title"]').within(() => {
+            cy.get('button[aria-label="Chiudi"]').click();
+        });
+
+        cy.contains('h2', 'Assegna appartamento').should('not.exist');
+        cy.get('@assignPlant.all').should('have.length', 0);
+    });
+
+    it('cancels apartment removal confirmation without removing the apartment', () => {
+        wardDetails[2].plants = [{ id: '301', name: 'Appartamento 301' }];
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label^="Rimuovi appartamento"]').click();
+        cy.contains('p', 'Confermi la rimozione dell\'appartamento dal reparto?').should('be.visible');
+        cy.contains('button', 'Annulla').click();
+
+        cy.contains('p', 'Confermi la rimozione dell\'appartamento dal reparto?').should('not.exist');
+        cy.get('section[aria-label="Dettagli reparto e appartamenti"]').should('contain', 'Appartamento 301');
+        cy.get('@removePlant.all').should('have.length', 0);
+    });
+
+    it('refreshes realtime room subscriptions after assigning an operator', () => {
+        let plantCatalogCallsBeforeAssign = 0;
+
+        openWardManagement();
+        cy.wait('@getWards');
+        cy.get('@getPlantsCatalog.all').then((calls) => {
+            plantCatalogCallsBeforeAssign = calls.length;
+        });
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Aggiungi operatore"]').click();
+
+        cy.get('dialog[aria-labelledby="assign-operator-title"]').should('be.visible').within(() => {
+            cy.wait('@getUsers');
+            pickSelectOptionByText('#operator-id', 'l.bianchi');
+            cy.contains('button', 'Assegna').click();
+        });
+
+        cy.wait('@assignOperator');
+        cy.wait('@getWards');
+        cy.get('@getPlantsCatalog.all').its('length').should('be.greaterThan', plantCatalogCallsBeforeAssign);
+        cy.get('section[aria-label="Operatori assegnati"]').should('contain', 'l.bianchi');
+    });
+
+    it('keeps assignment flow stable even when realtime refresh endpoint fails', () => {
+        cy.intercept('GET', '**/api/plant/all', {
+            statusCode: 500,
+            body: { message: 'refresh failed' },
+        }).as('getPlantsCatalogFailure');
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Aggiungi operatore"]').click();
+
+        cy.get('dialog[aria-labelledby="assign-operator-title"]').should('be.visible').within(() => {
+            cy.wait('@getUsers');
+            pickSelectOptionByText('#operator-id', 'l.bianchi');
+            cy.contains('button', 'Assegna').click();
+        });
+
+        cy.wait('@assignOperator');
+        cy.wait('@getWards');
+        cy.wait('@getPlantsCatalogFailure');
+        cy.get('section[aria-label="Operatori assegnati"]').should('contain', 'l.bianchi');
+    });
+
+    it('shows an error and keeps operators unchanged when assign operator API fails', () => {
+        cy.intercept('POST', '**/wards-users-relationships', {
+            statusCode: 500,
+            body: { message: 'operator assign failed' },
+        }).as('assignOperatorFailure');
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Aggiungi operatore"]').click();
+
+        cy.get('dialog[aria-labelledby="assign-operator-title"]').should('be.visible').within(() => {
+            cy.wait('@getUsers');
+            pickSelectOptionByText('#operator-id', 'l.bianchi');
+            cy.contains('button', 'Assegna').click();
+        });
+
+        cy.wait('@assignOperatorFailure');
+        cy.get('[role="alert"]').should('be.visible');
+        cy.get('section[aria-label="Operatori assegnati"]').should('not.contain', 'l.bianchi');
+    });
+
+    it('shows an error and keeps apartments unchanged when assign apartment API fails', () => {
+        cy.intercept('POST', '**/wards-plants-relationships', {
+            statusCode: 500,
+            body: { message: 'plant assign failed' },
+        }).as('assignPlantFailure');
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Assegna appartamento"]').click();
+
+        cy.get('dialog[aria-labelledby="assign-apartment-title"]').should('be.visible').within(() => {
+            cy.wait('@getPlantsCatalog');
+            pickSelectOptionByText('#apartment-id', 'Appartamento 301');
+            cy.contains('button', 'Assegna').click();
+        });
+
+        cy.wait('@assignPlantFailure');
+        cy.get('[role="alert"]').should('be.visible');
+        cy.get('section[aria-label="Dettagli reparto e appartamenti"]').should('not.contain', 'Appartamento 301');
+    });
+
+    it('shows an error and keeps ward list unchanged when ward deletion fails', () => {
+        cy.intercept('DELETE', '**/wards/*', {
+            statusCode: 500,
+            body: { message: 'delete ward failed' },
+        }).as('deleteWardFailure');
+
+        openWardManagement();
+        cy.wait('@getWards');
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Elimina reparto"]').click();
+        cy.contains('button', 'Conferma').click();
+
+        cy.wait('@deleteWardFailure');
+        cy.get('[role="alert"]').should('be.visible');
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').should('exist');
     });
 });

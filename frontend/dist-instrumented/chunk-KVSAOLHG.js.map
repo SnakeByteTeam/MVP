@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/guards/role.guard.ts"],
+  "sourcesContent": ["import { inject } from '@angular/core';\nimport { CanActivateFn, Router } from '@angular/router';\nimport { UserRole } from '../models/user-role.enum';\nimport { InternalAuthService } from '../services/internal-auth.service';\n\nexport const roleGuard: CanActivateFn = (route) => {\n\tconst authService = inject(InternalAuthService);\n\tconst router = inject(Router);\n\n\tconst requiredRole = route.data?.['requiredRole'] as UserRole | undefined;\n\tif (!requiredRole) {\n\t\treturn true;\n\t}\n\n\treturn authService.hasRole(requiredRole) ? true : router.createUrlTree(['/apartment-monitor']);\n};\n"],
+  "mappings": "wHAKO,IAAMA,EAA4BC,GAAS,CACjD,IAAMC,EAAcC,EAAOC,CAAmB,EACxCC,EAASF,EAAOG,CAAM,EAEtBC,EAAeN,EAAMO,MAAO,aAClC,OAAKD,EAIEL,EAAYO,QAAQF,CAAY,EAAI,GAAOF,EAAOK,cAAc,CAAC,oBAAoB,CAAC,EAHrF,EAIT",
+  "names": ["roleGuard", "route", "authService", "inject", "InternalAuthService", "router", "Router", "requiredRole", "data", "hasRole", "createUrlTree"]
+}

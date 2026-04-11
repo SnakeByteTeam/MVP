@@ -512,4 +512,86 @@ describe('Alarm configuration e2e', () => {
         cy.wait('@deleteAlarmRule');
         cy.contains('tr', ruleName).should('not.exist');
     });
+
+    it('cancels alarm deletion from the confirmation dialog', () => {
+        const ruleName = 'Regola annulla eliminazione';
+        createAlarmRuleFromModal(ruleName);
+
+        cy.get(`button[aria-label="Elimina regola ${ruleName}"]`).click();
+        cy.contains('button', 'Annulla').click();
+
+        cy.contains('tr', ruleName).should('exist');
+        cy.get('@deleteAlarmRule.all').should('have.length', 0);
+    });
+
+    it('closes the edit alarm modal with ANNULLA without persisting changes', () => {
+        const ruleName = 'Regola edit annulla';
+        createAlarmRuleFromModal(ruleName);
+        openEditRuleModal(ruleName);
+
+        cy.get('#priority').select('1');
+        cy.contains('button', 'ANNULLA').click();
+
+        cy.contains('h2', 'Modifica allarme').should('not.exist');
+        cy.contains('tr', ruleName).should('exist');
+        cy.get('@updateAlarmRule.all').should('have.length', 0);
+    });
+
+    it('closes the create alarm modal from the shell close button', () => {
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+
+        cy.get('#name').clear().type('Regola temporanea da chiudere');
+        cy.get('button[aria-label="Chiudi finestra"]').click();
+
+        cy.get('#name').should('not.exist');
+        cy.get('@createAlarmRule.all').should('have.length', 0);
+
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+        cy.get('#name').should('have.value', '');
+    });
+
+    it('closes the create alarm modal without submitting', () => {
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+
+        cy.contains('button', 'ANNULLA').click();
+
+        cy.get('#name').should('not.exist');
+        cy.get('@createAlarmRule.all').should('have.length', 0);
+    });
+
+    it('falls back to an empty plant list when the plant catalog cannot be loaded', () => {
+        cy.intercept('GET', '**/plant/all', {
+            statusCode: 500,
+            body: { message: 'Plant load failed' },
+        }).as('getPlantsFailure');
+
+        openCreateRuleModal();
+
+        cy.wait('@getPlantsFailure');
+        cy.get('#plantId option').should('have.length', 1);
+        cy.get('#deviceId').should('be.disabled');
+    });
+
+    it('shows a device load error when selecting a plant in create mode', () => {
+        cy.intercept('GET', '**/plant?plantid=plant-1', {
+            statusCode: 500,
+            body: { message: 'Device load failed' },
+        }).as('getPlantByIdFailure');
+
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+
+        cy.get('#plantId').select('plant-1');
+
+        cy.wait('@getPlantByIdFailure');
+        cy.contains('Errore durante il caricamento dei dispositivi.').should('be.visible');
+        cy.get('#deviceId').should('be.disabled');
+    });
 });

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/dashboard/components/dashboard-page/dashboard-page.component.css"],
+  "sourcesContent": [".dashboard-page__cards {\n\tgrid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));\n\tgap: 1rem;\n}\n\n.dashboard-page__card {\n\tmin-height: 9.5rem;\n}\n\n.dashboard-page__card-title {\n\tmargin: 0;\n\tfont-family: var(--care-font-display);\n\tfont-size: 1.03rem;\n\tcolor: var(--care-primary-strong);\n}\n\n.dashboard-page__card-text {\n\tmargin: 0.55rem 0 0;\n\tcolor: var(--care-muted);\n\tfont-size: 0.94rem;\n}\n"],
+  "mappings": "AAAA,CAAA,sBACC,sBAAA,OAAA,QAAA,CAAA,OAAA,KAAA,CAAA,MACA,IAAA,IACD,CAEA,CAAA,qBACC,WAAA,MACD,CAEA,CAAA,2BATA,OAUC,EACA,YAAA,IAAA,qBACA,UAAA,QACA,MAAA,IAAA,sBACD,CAEA,CAAA,0BAhBA,OAiBC,OAAA,EAAA,EACA,MAAA,IAAA,cACA,UAAA,MACD",
+  "names": []
+}

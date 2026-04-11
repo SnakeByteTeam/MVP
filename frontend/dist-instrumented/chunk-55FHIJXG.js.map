@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/user-auth/user-auth.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\n\nexport const USER_AUTH_ROUTES: Routes = [\n  {\n    path: 'login',\n    loadComponent: () => import('./components/login/login.component').then((m) => m.LoginComponent)\n  },\n  {\n    path: 'first-access',\n    loadComponent: () => import('./components/first-access/first-access.component').then((m) => m.FirstAccessComponent)\n  },\n  {\n    path: '',\n    pathMatch: 'full',\n    redirectTo: 'login'\n  }\n];\n"],
+  "mappings": "4BAEO,IAAMA,EAA2B,CACtC,CACEC,KAAM,QACNC,cAAeA,IAAM,OAAO,qBAAoC,EAAEC,KAAMC,GAAMA,EAAEC,cAAc,GAEhG,CACEJ,KAAM,eACNC,cAAeA,IAAM,OAAO,qBAAkD,EAAEC,KAAMC,GAAMA,EAAEE,oBAAoB,GAEpH,CACEL,KAAM,GACNM,UAAW,OACXC,WAAY,QACb",
+  "names": ["USER_AUTH_ROUTES", "path", "loadComponent", "then", "m", "LoginComponent", "FirstAccessComponent", "pathMatch", "redirectTo"]
+}

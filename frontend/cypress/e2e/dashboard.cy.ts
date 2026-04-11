@@ -26,6 +26,7 @@ const openProfilePanel = () => {
     cy.contains('p', 'Area Utente').should('be.visible');
 };
 
+
 describe('Dashboard e2e', () => {
     let activeAlarms: ActiveAlarm[];
 
@@ -93,7 +94,7 @@ describe('Dashboard e2e', () => {
 
         cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', (req) => {
             const chunks = req.url.split('/');
-            const offset = Number(chunks[chunks.length - 1]);
+            const offset = Number(chunks.at(-1));
 
             req.reply({
                 statusCode: 200,
@@ -286,5 +287,67 @@ describe('Dashboard e2e', () => {
         cy.wait('@resolveAlarm');
         cy.wait('@getUnmanagedAlarms');
         cy.get('[data-testid="alarm-row-a1"]').should('not.exist');
+    });
+
+    it('shows an error message when resolving an alarm from the dashboard widget fails', () => {
+        cy.intercept('PATCH', '**/alarm-events/resolve', {
+            statusCode: 500,
+            body: { message: 'Internal error' },
+        }).as('resolveAlarmFailure');
+
+        cy.get('[data-testid="alarm-row-a1"]').within(() => {
+            cy.contains('button', 'GESTISCI').click();
+        });
+
+        cy.wait('@resolveAlarmFailure');
+        cy.get('[role="alert"]').should('exist');
+        cy.get('[data-testid="alarm-row-a1"]').should('exist');
+    });
+
+    it('opens and closes the topbar notification panel preserving empty state', () => {
+        cy.get('button[aria-label="Visualizza notifiche"]').click();
+        cy.get('section[aria-label="Notifiche recenti"]').should('be.visible');
+        cy.contains('Nessuna notifica disponibile.').should('be.visible');
+
+        cy.get('button[aria-label="Visualizza notifiche"]').click();
+        cy.get('section[aria-label="Notifiche recenti"]').should('not.exist');
+
+        cy.get('button[aria-label="Visualizza notifiche"]').click();
+        cy.get('section[aria-label="Notifiche recenti"]').should('be.visible');
+        cy.contains('Nessuna notifica disponibile.').should('be.visible');
+    });
+
+    it('navigates to notifications archive from topbar panel using Vedi tutte', () => {
+        cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+            statusCode: 200,
+            body: [],
+        }).as('getUnmanagedArchive');
+
+        cy.intercept('GET', '**/alarm-events/managed/*/*/*', {
+            statusCode: 200,
+            body: [],
+        }).as('getManagedArchive');
+
+        cy.get('button[aria-label="Visualizza notifiche"]').click();
+        cy.get('section[aria-label="Notifiche recenti"]').should('be.visible');
+        cy.contains('button', 'Vedi tutte').click();
+
+        cy.location('pathname').should('eq', '/notifications');
+        cy.wait('@getUnmanagedArchive');
+        cy.wait('@getManagedArchive');
+        cy.get('section[aria-label="Notifiche recenti"]').should('not.exist');
+    });
+
+    it('logs out from the profile panel and returns to the login page', () => {
+        cy.intercept('POST', '**/auth/logout', {
+            statusCode: 200,
+            body: null,
+        }).as('logout');
+
+        openProfilePanel();
+        cy.contains('button', 'Esci').click();
+
+        cy.wait('@logout');
+        cy.location('pathname').should('eq', '/auth/login');
     });
 });

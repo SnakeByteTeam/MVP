@@ -58,118 +58,238 @@ describe('Analytics e2e', () => {
                     name: 'Appartamento Aurora',
                     rooms: [],
                 },
+                {
+                    id: '302',
+                    name: 'Appartamento Luna',
+                    rooms: [],
+                },
             ],
         }).as('getApartments');
 
-        cy.intercept('GET', '**/analytics/*', {
-            statusCode: 200,
-            body: [
-                {
-                    title: 'Consumo energetico appartamento',
-                    metric: 'plant-consumption',
-                    unit: 'kWh',
-                    labels: ['Lun', 'Mar'],
-                    series: [
-                        { id: 's1', name: 'Consumi', data: [18, 21] },
-                    ],
-                    suggestion: {
-                        isSuggestion: true,
-                        message: ['Ridurre il setpoint di 1 grado nelle ore notturne.'],
+        cy.intercept('GET', '**/analytics/*', (req) => {
+            const apartmentId = req.url.split('/').pop()?.split('?')[0] ?? '301';
+
+            const analyticsByApartment: Record<string, any[]> = {
+                '301': [
+                    {
+                        title: 'Consumo energetico appartamento',
+                        metric: 'plant-consumption',
+                        unit: 'kWh',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's1', name: 'Consumi', data: [18, 21] },
+                        ],
+                        suggestion: {
+                            isSuggestion: true,
+                            message: ['Ridurre il setpoint di 1 grado nelle ore notturne.'],
+                        },
                     },
-                },
-                {
-                    title: 'Anomalie impianto',
-                    metric: 'plant-anomalies',
-                    unit: 'numero',
-                    labels: ['Lun', 'Mar'],
-                    series: [
-                        { id: 's2', name: 'Anomalie', data: [2, 1] },
-                    ],
-                    suggestion: {
-                        isSuggestion: false,
-                        message: [],
+                    {
+                        title: 'Anomalie impianto',
+                        metric: 'plant-anomalies',
+                        unit: 'numero',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's2', name: 'Anomalie', data: [2, 1] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
                     },
-                },
-                {
-                    title: 'Rilevamento presenza',
-                    metric: 'sensor-presence',
-                    unit: 'rilevamenti',
-                    labels: ['Lun', 'Mar'],
-                    series: [
-                        { id: 's3', name: 'Presenze', data: [30, 25] },
-                    ],
-                    suggestion: {
-                        isSuggestion: false,
-                        message: [],
+                    {
+                        title: 'Rilevamento presenza',
+                        metric: 'sensor-presence',
+                        unit: 'rilevamenti',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's3', name: 'Presenze', data: [30, 25] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
                     },
-                },
-                {
-                    title: 'Presenza prolungata ambiente',
-                    metric: 'sensor-long-presence',
-                    unit: 'eventi',
-                    labels: ['Lun', 'Mar'],
-                    series: [
-                        { id: 's4', name: 'Presenza prolungata', data: [4, 3] },
-                    ],
-                    suggestion: {
-                        isSuggestion: false,
-                        message: [],
+                    {
+                        title: 'Presenza prolungata ambiente',
+                        metric: 'sensor-long-presence',
+                        unit: 'eventi',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's4', name: 'Presenza prolungata', data: [4, 3] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
                     },
-                },
-                {
-                    title: 'Variazioni temperatura',
-                    metric: 'thermostat-temperature',
-                    unit: '°C',
-                    labels: ['Lun', 'Mar'],
-                    series: [
-                        { id: 's5', name: 'Temperatura', data: [20, 21] },
-                    ],
-                    suggestion: {
-                        isSuggestion: true,
-                        message: ['Ottimizzare i cicli HVAC nelle fasce serali.'],
+                    {
+                        title: 'Variazioni temperatura',
+                        metric: 'thermostat-temperature',
+                        unit: '°C',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's5', name: 'Temperatura', data: [20, 21] },
+                        ],
+                        suggestion: {
+                            isSuggestion: true,
+                            message: ['Ottimizzare i cicli HVAC nelle fasce serali.'],
+                        },
                     },
-                },
-                {
-                    title: 'Allarmi inviati e risolti',
-                    metric: 'ward-resolved-alarm',
-                    unit: 'numero',
-                    labels: ['Settimana'],
-                    series: [
-                        { id: 's6', name: 'Inviati', data: [9] },
-                        { id: 's7', name: 'Risolti', data: [7] },
-                    ],
-                    suggestion: {
-                        isSuggestion: false,
-                        message: [],
+                    {
+                        title: 'Allarmi inviati e risolti',
+                        metric: 'ward-resolved-alarm',
+                        unit: 'numero',
+                        labels: ['Settimana'],
+                        series: [
+                            { id: 's6', name: 'Inviati', data: [9] },
+                            { id: 's7', name: 'Risolti', data: [7] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
                     },
-                },
-                {
-                    title: 'Frequenza allarmi',
-                    metric: 'ward-alarms-frequency',
-                    unit: 'numero',
-                    labels: ['Settimana'],
-                    series: [
-                        { id: 's8', name: 'Frequenza', data: [9] },
-                    ],
-                    suggestion: {
-                        isSuggestion: false,
-                        message: [],
+                    {
+                        title: 'Frequenza allarmi',
+                        metric: 'ward-alarms-frequency',
+                        unit: 'numero',
+                        labels: ['Settimana'],
+                        series: [
+                            { id: 's8', name: 'Frequenza', data: [9] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
                     },
-                },
-                {
-                    title: 'Frequenza cadute',
-                    metric: 'ward-falls',
-                    unit: 'numero',
-                    labels: ['Settimana'],
-                    series: [
-                        { id: 's9', name: 'Cadute', data: [2] },
-                    ],
-                    suggestion: {
-                        isSuggestion: false,
-                        message: [],
+                    {
+                        title: 'Frequenza cadute',
+                        metric: 'ward-falls',
+                        unit: 'numero',
+                        labels: ['Settimana'],
+                        series: [
+                            { id: 's9', name: 'Cadute', data: [2] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
                     },
-                },
-            ],
+                ],
+                '302': [
+                    {
+                        title: 'Consumo energetico appartamento B',
+                        metric: 'plant-consumption',
+                        unit: 'kWh',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's1', name: 'Consumi', data: [12, 15] },
+                        ],
+                        suggestion: {
+                            isSuggestion: true,
+                            message: ['Spostare i carichi sulle fasce meno energivore.'],
+                        },
+                    },
+                    {
+                        title: 'Anomalie impianto B',
+                        metric: 'plant-anomalies',
+                        unit: 'numero',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's2', name: 'Anomalie', data: [1, 0] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
+                    },
+                    {
+                        title: 'Rilevamento presenza B',
+                        metric: 'sensor-presence',
+                        unit: 'rilevamenti',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's3', name: 'Presenze', data: [22, 18] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
+                    },
+                    {
+                        title: 'Presenza prolungata ambiente B',
+                        metric: 'sensor-long-presence',
+                        unit: 'eventi',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's4', name: 'Presenza prolungata', data: [3, 2] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
+                    },
+                    {
+                        title: 'Variazioni temperatura B',
+                        metric: 'thermostat-temperature',
+                        unit: '°C',
+                        labels: ['Lun', 'Mar'],
+                        series: [
+                            { id: 's5', name: 'Temperatura', data: [19, 20] },
+                        ],
+                        suggestion: {
+                            isSuggestion: true,
+                            message: ['Verificare il profilo HVAC serale.'],
+                        },
+                    },
+                    {
+                        title: 'Allarmi inviati e risolti B',
+                        metric: 'ward-resolved-alarm',
+                        unit: 'numero',
+                        labels: ['Settimana'],
+                        series: [
+                            { id: 's6', name: 'Inviati', data: [6] },
+                            { id: 's7', name: 'Risolti', data: [5] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
+                    },
+                    {
+                        title: 'Frequenza allarmi B',
+                        metric: 'ward-alarms-frequency',
+                        unit: 'numero',
+                        labels: ['Settimana'],
+                        series: [
+                            { id: 's8', name: 'Frequenza', data: [4] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
+                    },
+                    {
+                        title: 'Frequenza cadute B',
+                        metric: 'ward-falls',
+                        unit: 'numero',
+                        labels: ['Settimana'],
+                        series: [
+                            { id: 's9', name: 'Cadute', data: [1] },
+                        ],
+                        suggestion: {
+                            isSuggestion: false,
+                            message: [],
+                        },
+                    },
+                ],
+            };
+
+            req.reply({
+                statusCode: 200,
+                body: analyticsByApartment[apartmentId] ?? analyticsByApartment['301'],
+            });
         }).as('getAnalytics');
 
         cy.visit('/auth/login');
@@ -230,5 +350,13 @@ describe('Analytics e2e', () => {
 
     it('RF71-OPL Visualizzazione grafico frequenza delle cadute', () => {
         cy.contains('h1', 'Frequenza cadute').should('exist');
+    });
+
+    it('switches analytics when a different apartment is selected', () => {
+        cy.get('#apartment-select').select('302');
+
+        cy.wait('@getAnalytics');
+        cy.contains('h1', 'Consumo energetico appartamento B').should('exist');
+        cy.contains('h1', 'Frequenza cadute B').should('exist');
     });
 });

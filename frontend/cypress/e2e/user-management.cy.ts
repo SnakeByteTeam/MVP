@@ -301,4 +301,43 @@ describe('User management e2e', () => {
         cy.wait('@getUsers');
         cy.contains('tr', '@m.verdi').should('not.exist');
     });
+
+    it('cancels user deletion without removing the row', () => {
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('button', 'Elimina').click();
+        });
+
+        cy.contains('h3', 'Conferma eliminazione').should('be.visible');
+        cy.contains('button', 'Annulla').click();
+
+        cy.contains('h3', 'Conferma eliminazione').should('not.exist');
+        cy.contains('tr', '@m.verdi').should('exist');
+    });
+
+    it('closes the create user panel without sending a create request', () => {
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Test',
+            surname: 'Close',
+            username: 'test.close',
+        });
+
+        cy.contains('button', 'Chiudi').click();
+
+        cy.get('[data-testid="create-user-panel"]').should('have.class', 'opacity-0');
+        cy.get('@createUser.all').should('have.length', 0);
+    });
+
+    it('closes delete confirmation using the close icon without deleting user', () => {
+        cy.contains('tr', '@l.bianchi').within(() => {
+            cy.contains('button', 'Elimina').click();
+        });
+
+        cy.contains('h3', 'Conferma eliminazione').should('be.visible');
+        cy.get('button[aria-label="Chiudi"]').click();
+
+        cy.contains('h3', 'Conferma eliminazione').should('not.exist');
+        cy.contains('tr', '@l.bianchi').should('exist');
+        cy.get('@deleteUser.all').should('have.length', 0);
+    });
 });

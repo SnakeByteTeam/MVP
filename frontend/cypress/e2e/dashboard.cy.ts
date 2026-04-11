@@ -101,6 +101,20 @@ describe('Dashboard e2e', () => {
             });
         }).as('getUnmanagedAlarms');
 
+        cy.intercept('PATCH', '**/alarm-events/resolve', (req) => {
+            expect(req.body).to.deep.equal({
+                alarmId: 'a1',
+                userId: 1,
+            });
+
+            activeAlarms = activeAlarms.filter((alarm) => alarm.id !== 'a1');
+
+            req.reply({
+                statusCode: 200,
+                body: null,
+            });
+        }).as('resolveAlarm');
+
         cy.intercept('GET', '**/plant/all', {
             statusCode: 200,
             body: [
@@ -262,5 +276,15 @@ describe('Dashboard e2e', () => {
 
     it('RF57-OBL Visualizzazione modulo analisi presenze nella dashboard', () => {
         cy.contains('presenze').should('be.visible');
+    });
+
+    it('RF60-OBL Utente deve poter risolvere un allarme', () => {
+        cy.get('[data-testid="alarm-row-a1"]').within(() => {
+            cy.contains('button', 'GESTISCI').click();
+        });
+
+        cy.wait('@resolveAlarm');
+        cy.wait('@getUnmanagedAlarms');
+        cy.get('[data-testid="alarm-row-a1"]').should('not.exist');
     });
 });

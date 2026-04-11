@@ -8,11 +8,7 @@ import {
   UPDATE_WARD_USE_CASE,
   WardService,
 } from './application/services/ward.service';
-import { CREATE_WARD_REPOSITORY } from './application/repository/create-ward-repository.interface';
 import { WardsRepositoryImpl } from './infrastructure/persistence/wards-repository-impl';
-import { DELETE_WARD_REPOSITORY } from './application/repository/delete-ward-repository.interface';
-import { FIND_ALL_WARDS_REPOSITORY } from './application/repository/find-all-wards-repository.interface';
-import { UPDATE_WARD_REPOSITORY } from './application/repository/update-ward-repository.interface';
 import { WardsPlantsRelationshipsController } from './adapters/in/wards-plants-relationships.controller';
 import { WardsUsersRelationshipsController } from './adapters/in/wards-users-relationships.controller';
 import {
@@ -27,54 +23,24 @@ import {
   REMOVE_PLANT_FROM_WARD_USE_CASE,
   WardsPlantsRelationshipsService,
 } from './application/services/wards-plants-relationships.service';
-import {
-  ADD_USER_TO_WARD_PORT,
-  AddUserToWardAdapter,
-} from './adapters/out/add-user-to-ward-adapter';
-import {
-  FIND_ALL_USERS_BY_WARD_ID_PORT,
-  FindAllUsersByWardIdAdapter,
-} from './adapters/out/find-all-users-by-ward-id-adapter';
-import {
-  REMOVE_USER_FROM_WARD_PORT,
-  RemoveUserFromWardAdapter,
-} from './adapters/out/remove-user-from-ward-adapter';
-import {
-  ADD_PLANT_TO_WARD_PORT,
-  AddPlantToWardAdapter,
-} from './adapters/out/add-plant-to-ward-adapter';
-import {
-  FIND_ALL_PLANTS_BY_WARD_ID_PORT,
-  FindAllPlantsByWardIdAdapter,
-} from './adapters/out/find-all-plants-by-ward-id-adapter';
-import {
-  REMOVE_PLANT_FROM_WARD_PORT,
-  RemovePlantFromWardAdapter,
-} from './adapters/out/remove-plant-from-ward-adapter';
-import {
-  CREATE_WARD_PORT,
-  CreateWardAdapter,
-} from './adapters/out/create-ward-adapter';
-import {
-  FIND_ALL_WARDS_PORT,
-  FindAllWardsAdapter,
-} from './adapters/out/find-all-wards-adapter';
-import {
-  UPDATE_WARD_PORT,
-  UpdateWardAdapter,
-} from './adapters/out/update-ward-adapter';
-import {
-  DELETE_WARD_PORT,
-  DeleteWardAdapter,
-} from './adapters/out/delete-ward-adapter';
-import { ADD_USER_TO_WARD_REPOSITORY } from './application/repository/add-user-to-ward-repository.interface';
 import { WardsUsersRelationshipsRepositoryImpl } from './infrastructure/persistence/wards-users-relationships-repository-impl';
 import { WardsPlantsRelationshipsRepositoryImpl } from './infrastructure/persistence/wards-plants-relationships-repository-impl';
-import { FIND_ALL_USERS_BY_WARD_ID_REPOSITORY } from './application/repository/find-all-users-by-ward-id-repository.interface';
-import { REMOVE_USER_FROM_WARD_REPOSITORY } from './application/repository/remove-user-from-ward-repository.interface';
-import { ADD_PLANT_TO_WARD_REPOSITORY } from './application/repository/add-plant-to-ward-repository.interface';
-import { FIND_ALL_PLANTS_BY_WARD_ID_REPOSITORY } from './application/repository/find-all-plants-by-ward-id-repository.interface';
-import { REMOVE_PLANT_FROM_WARD_REPOSITORY } from './application/repository/remove-plant-from-ward-repository.interface';
+import { WARDS_REPOSITORY } from './application/repository/wards-repository.interface';
+import { CREATE_WARD_PORT } from './application/ports/out/create-ward-port.interface';
+import { FIND_ALL_WARDS_PORT } from './application/ports/out/find-all-wards-port.interface';
+import { WardsPersistenceAdapter } from './adapters/out/wards-persistence-adapter';
+import { UPDATE_WARD_PORT } from './application/ports/out/update-ward-port.interface';
+import { DELETE_WARD_PORT } from './application/ports/out/delete-ward-port.interface';
+import { WARDS_USERS_RELATIONSHIPS_REPOSITORY } from './application/repository/wards-users-relationships-repository.interface';
+import { WARDS_PLANTS_RELATIONSHIPS_REPOSITORY } from './application/repository/wards-plants-relationships-repository.interface';
+import { WardsUsersRelationshipsPersistenceAdapter } from './adapters/out/wards-users-relationships-persistence-adapter';
+import { REMOVE_USER_FROM_WARD_PORT } from './application/ports/out/remove-user-from-ward-port.interface';
+import { FIND_ALL_USERS_BY_WARD_ID_PORT } from './application/ports/out/find-all-users-by-ward-id-port.interface';
+import { ADD_USER_TO_WARD_PORT } from './application/ports/out/add-user-to-ward-port.interface';
+import { WardsPlantsRelationshipsPersistenceAdapter } from './adapters/out/wards-plants-relationships-persistence-adapter';
+import { ADD_PLANT_TO_WARD_PORT } from './application/ports/out/add-plant-to-ward-port.interface';
+import { FIND_ALL_PLANTS_BY_WARD_ID_PORT } from './application/ports/out/find-all-plants-by-ward-id-port.interface';
+import { REMOVE_PLANT_FROM_WARD_PORT } from './application/ports/out/remove-plant-from-ward-port.interface';
 
 @Module({
   imports: [GuardModule],
@@ -101,19 +67,7 @@ import { REMOVE_PLANT_FROM_WARD_REPOSITORY } from './application/repository/remo
       useClass: WardService,
     },
     {
-      provide: CREATE_WARD_REPOSITORY,
-      useClass: WardsRepositoryImpl,
-    },
-    {
-      provide: DELETE_WARD_REPOSITORY,
-      useClass: WardsRepositoryImpl,
-    },
-    {
-      provide: FIND_ALL_WARDS_REPOSITORY,
-      useClass: WardsRepositoryImpl,
-    },
-    {
-      provide: UPDATE_WARD_REPOSITORY,
+      provide: WARDS_REPOSITORY,
       useClass: WardsRepositoryImpl,
     },
     {
@@ -142,66 +96,50 @@ import { REMOVE_PLANT_FROM_WARD_REPOSITORY } from './application/repository/remo
     },
     {
       provide: ADD_USER_TO_WARD_PORT,
-      useClass: AddUserToWardAdapter,
+      useClass: WardsUsersRelationshipsPersistenceAdapter,
     },
     {
       provide: FIND_ALL_USERS_BY_WARD_ID_PORT,
-      useClass: FindAllUsersByWardIdAdapter,
+      useClass: WardsUsersRelationshipsPersistenceAdapter,
     },
     {
       provide: REMOVE_USER_FROM_WARD_PORT,
-      useClass: RemoveUserFromWardAdapter,
+      useClass: WardsUsersRelationshipsPersistenceAdapter,
     },
     {
       provide: ADD_PLANT_TO_WARD_PORT,
-      useClass: AddPlantToWardAdapter,
+      useClass: WardsPlantsRelationshipsPersistenceAdapter,
     },
     {
       provide: FIND_ALL_PLANTS_BY_WARD_ID_PORT,
-      useClass: FindAllPlantsByWardIdAdapter,
+      useClass: WardsPlantsRelationshipsPersistenceAdapter,
     },
     {
       provide: REMOVE_PLANT_FROM_WARD_PORT,
-      useClass: RemovePlantFromWardAdapter,
+      useClass: WardsPlantsRelationshipsPersistenceAdapter,
     },
     {
       provide: CREATE_WARD_PORT,
-      useClass: CreateWardAdapter,
+      useClass: WardsPersistenceAdapter,
     },
     {
       provide: FIND_ALL_WARDS_PORT,
-      useClass: FindAllWardsAdapter,
+      useClass: WardsPersistenceAdapter,
     },
     {
       provide: UPDATE_WARD_PORT,
-      useClass: UpdateWardAdapter,
+      useClass: WardsPersistenceAdapter,
     },
     {
       provide: DELETE_WARD_PORT,
-      useClass: DeleteWardAdapter,
+      useClass: WardsPersistenceAdapter,
     },
     {
-      provide: ADD_USER_TO_WARD_REPOSITORY,
+      provide: WARDS_USERS_RELATIONSHIPS_REPOSITORY,
       useClass: WardsUsersRelationshipsRepositoryImpl,
     },
     {
-      provide: FIND_ALL_USERS_BY_WARD_ID_REPOSITORY,
-      useClass: WardsUsersRelationshipsRepositoryImpl,
-    },
-    {
-      provide: REMOVE_USER_FROM_WARD_REPOSITORY,
-      useClass: WardsUsersRelationshipsRepositoryImpl,
-    },
-    {
-      provide: ADD_PLANT_TO_WARD_REPOSITORY,
-      useClass: WardsPlantsRelationshipsRepositoryImpl,
-    },
-    {
-      provide: FIND_ALL_PLANTS_BY_WARD_ID_REPOSITORY,
-      useClass: WardsPlantsRelationshipsRepositoryImpl,
-    },
-    {
-      provide: REMOVE_PLANT_FROM_WARD_REPOSITORY,
+      provide: WARDS_PLANTS_RELATIONSHIPS_REPOSITORY,
       useClass: WardsPlantsRelationshipsRepositoryImpl,
     },
   ],

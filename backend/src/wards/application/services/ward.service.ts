@@ -7,14 +7,10 @@ import { DeleteWardUseCase } from '../ports/in/delete-ward-use-case.interface';
 import { FindAllWardsUseCase } from '../ports/in/find-all-wards-use-case.interface';
 import { UpdateWardUseCase } from '../ports/in/update-ward-use-case.interface';
 import { Inject } from '@nestjs/common';
-import { CREATE_WARD_PORT } from '../../adapters/out/create-ward-adapter';
-import { CreateWardPort } from '../ports/out/create-ward-port.interface';
-import { DELETE_WARD_PORT } from '../../adapters/out/delete-ward-adapter';
-import { UPDATE_WARD_PORT } from '../../adapters/out/update-ward-adapter';
-import { FIND_ALL_WARDS_PORT } from '../../adapters/out/find-all-wards-adapter';
-import { DeleteWardPort } from '../ports/out/delete-ward-port.interface';
-import { FindAllWardsPort } from '../ports/out/find-all-wards-port.interface';
-import { UpdateWardPort } from '../ports/out/update-ward-port.interface';
+import { CREATE_WARD_PORT, CreateWardPort } from '../ports/out/create-ward-port.interface';
+import { DELETE_WARD_PORT, DeleteWardPort } from '../ports/out/delete-ward-port.interface';
+import { FIND_ALL_WARDS_PORT, FindAllWardsPort } from '../ports/out/find-all-wards-port.interface';
+import { UPDATE_WARD_PORT, UpdateWardPort } from '../ports/out/update-ward-port.interface';
 
 export class WardService
   implements

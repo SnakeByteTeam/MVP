@@ -33,6 +33,7 @@ export class UserApiService {
         return this.http.delete<void>(`${this.baseUrl}/users/${encodeURIComponent(id.toString())}`);
     }
 
+    /*
     private decodeTempPassword(tempPassword: string): string {
         if (!this.isBase64Encoded(tempPassword)) {
             return tempPassword;
@@ -64,5 +65,6 @@ export class UserApiService {
             return false;
         }
     }
+    */
 
 }

@@ -244,4 +244,119 @@ describe('Notification e2e', () => {
         cy.get('#notification-alarm-resolved-evt-resolved-1').should('exist');
     });
 
+    it('does not show the bell badge when only archived notifications are present', () => {
+        cy.get('button[aria-label="Visualizza notifiche"]')
+            .find('.topbar-notification-count')
+            .should('not.exist');
+    });
+
+    it('opens the topbar notification panel when the bell icon is clicked', () => {
+        cy.get('section[aria-label="Notifiche recenti"]').should('not.exist');
+
+        cy.get('button[aria-label="Visualizza notifiche"]').click({ force: true });
+        cy.get('section[aria-label="Notifiche recenti"]').should('be.visible');
+    });
+
+    it('closes the topbar notification panel when the bell icon is clicked again', () => {
+        cy.get('button[aria-label="Visualizza notifiche"]').click({ force: true });
+        cy.get('section[aria-label="Notifiche recenti"]').should('be.visible');
+
+        cy.get('button[aria-label="Visualizza notifiche"]').click({ force: true });
+        cy.get('section[aria-label="Notifiche recenti"]').should('not.exist');
+    });
+
+    it('falls back to default triggered title when backend payload cannot build a priority title', () => {
+        const now = Date.now();
+
+        cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 'evt-fallback-1',
+                    activationTime: new Date(now - 4 * 60 * 1000).toISOString(),
+                    resolutionTime: null,
+                    alarmName: '   ',
+                    priority: 'NOT_A_PRIORITY',
+                },
+            ],
+        }).as('getUnmanagedFallbackHistory');
+
+        cy.intercept('GET', '**/alarm-events/managed/*/*/*', {
+            statusCode: 200,
+            body: [],
+        }).as('getManagedFallbackHistory');
+
+        cy.intercept('GET', '**/plant/all', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.intercept('GET', '**/analytics/*', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+
+        cy.get('a.sidebar-link').contains('Notifiche').click({ force: true });
+        cy.location('pathname').should('eq', '/notifications');
+
+        cy.wait('@getUnmanagedFallbackHistory');
+        cy.wait('@getManagedFallbackHistory');
+
+        cy.get('ul[aria-label="Elenco notifiche"] li').should('have.length', 1);
+        cy.contains('h2', "C'e un allarme in corso").should('be.visible');
+    });
+
+    it('truncates long triggered titles built from alarm names', () => {
+        const now = Date.now();
+        const veryLongName = 'Allarme con descrizione estremamente lunga per verificare la troncatura automatica del titolo generato in notifica realtime';
+
+        cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 'evt-long-title-1',
+                    activationTime: new Date(now - 7 * 60 * 1000).toISOString(),
+                    resolutionTime: null,
+                    alarmName: veryLongName,
+                    priority: 4,
+                },
+            ],
+        }).as('getUnmanagedLongTitleHistory');
+
+        cy.intercept('GET', '**/alarm-events/managed/*/*/*', {
+            statusCode: 200,
+            body: [],
+        }).as('getManagedLongTitleHistory');
+
+        cy.intercept('GET', '**/plant/all', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.intercept('GET', '**/analytics/*', {
+            statusCode: 200,
+            body: [],
+        });
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+
+        cy.get('a.sidebar-link').contains('Notifiche').click({ force: true });
+        cy.location('pathname').should('eq', '/notifications');
+
+        cy.wait('@getUnmanagedLongTitleHistory');
+        cy.wait('@getManagedLongTitleHistory');
+
+        cy.get('#notification-alarm-triggered-evt-long-title-1 .notification-item__title')
+            .invoke('text')
+            .then((text) => {
+                const compactText = text.trim();
+                expect(compactText.endsWith('...')).to.equal(true);
+                expect(compactText.length).to.be.at.most(64);
+                expect(compactText).to.contain('Allarme con descrizione');
+            });
+    });
 });

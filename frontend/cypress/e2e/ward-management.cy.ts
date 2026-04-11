@@ -41,7 +41,7 @@ const setupAdminSession = () => {
     cy.intercept('GET', '**/plant/all', {
         statusCode: 200,
         body: [],
-    });
+    }).as('getPlantAllRealtimeSync');
 
     cy.intercept('GET', '**/my-vimar/account', {
         statusCode: 200,
@@ -591,12 +591,12 @@ describe('Ward management e2e', () => {
     });
 
     it('refreshes realtime room subscriptions after assigning an operator', () => {
-        let plantCatalogCallsBeforeAssign = 0;
+        let plantAllCallsBeforeAssign = 0;
 
         openWardManagement();
         cy.wait('@getWards');
-        cy.get('@getPlantsCatalog.all').then((calls) => {
-            plantCatalogCallsBeforeAssign = calls.length;
+        cy.get('@getPlantAllRealtimeSync.all').then((calls) => {
+            plantAllCallsBeforeAssign = calls.length;
         });
 
         cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
@@ -610,15 +610,16 @@ describe('Ward management e2e', () => {
 
         cy.wait('@assignOperator');
         cy.wait('@getWards');
-        cy.get('@getPlantsCatalog.all').its('length').should('be.greaterThan', plantCatalogCallsBeforeAssign);
+        cy.wait('@getPlantAllRealtimeSync');
+        cy.get('@getPlantAllRealtimeSync.all').its('length').should('be.greaterThan', plantAllCallsBeforeAssign);
         cy.get('section[aria-label="Operatori assegnati"]').should('contain', 'l.bianchi');
     });
 
     it('keeps assignment flow stable even when realtime refresh endpoint fails', () => {
-        cy.intercept('GET', '**/api/plant/all', {
+        cy.intercept('GET', '**/plant/all', {
             statusCode: 500,
             body: { message: 'refresh failed' },
-        }).as('getPlantsCatalogFailure');
+        }).as('getPlantAllRealtimeSyncFailure');
 
         openWardManagement();
         cy.wait('@getWards');
@@ -634,8 +635,33 @@ describe('Ward management e2e', () => {
 
         cy.wait('@assignOperator');
         cy.wait('@getWards');
-        cy.wait('@getPlantsCatalogFailure');
+        cy.wait('@getPlantAllRealtimeSyncFailure');
         cy.get('section[aria-label="Operatori assegnati"]').should('contain', 'l.bianchi');
+    });
+
+    it('refreshes realtime room subscriptions after assigning an apartment', () => {
+        let plantAllCallsBeforeAssign = 0;
+
+        openWardManagement();
+        cy.wait('@getWards');
+        cy.get('@getPlantAllRealtimeSync.all').then((calls) => {
+            plantAllCallsBeforeAssign = calls.length;
+        });
+
+        cy.get('aside[aria-label="Elenco reparti"]').contains('Reparto Medicina').click();
+        cy.get('button[aria-label="Assegna appartamento"]').click();
+
+        cy.get('dialog[aria-labelledby="assign-apartment-title"]').should('be.visible').within(() => {
+            cy.wait('@getPlantsCatalog');
+            pickSelectOptionByText('#apartment-id', 'Appartamento 301');
+            cy.contains('button', 'Assegna').click();
+        });
+
+        cy.wait('@assignPlant');
+        cy.wait('@getWards');
+        cy.wait('@getPlantAllRealtimeSync');
+        cy.get('@getPlantAllRealtimeSync.all').its('length').should('be.greaterThan', plantAllCallsBeforeAssign);
+        cy.get('section[aria-label="Dettagli reparto e appartamenti"]').should('contain', 'Appartamento 301');
     });
 
     it('shows an error and keeps operators unchanged when assign operator API fails', () => {

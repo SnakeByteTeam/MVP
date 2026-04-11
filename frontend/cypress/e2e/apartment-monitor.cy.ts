@@ -233,4 +233,27 @@ describe('Apartment monitor e2e', () => {
         cy.contains('h1', 'Appartamento Luna').should('be.visible');
         cy.get('table[aria-label="Tabella endpoint Studio"]').should('exist');
     });
+
+    it('refreshes apartment data after alarm lifecycle updates are broadcast', () => {
+        let initialPlantCalls = 0;
+
+        cy.get('@getPlantById.all').then((calls) => {
+            initialPlantCalls = calls.length;
+        });
+
+        cy.window().then((windowObject) => {
+            windowObject.dispatchEvent(
+                new windowObject.CustomEvent('alarm-lifecycle-updated', {
+                    detail: {
+                        type: 'triggered',
+                        alarmEventId: 'evt-lifecycle-1',
+                    },
+                }),
+            );
+        });
+
+        cy.wait('@getPlantById');
+        cy.get('@getPlantById.all').its('length').should('be.greaterThan', initialPlantCalls);
+        cy.contains('h1', 'Appartamento Aurora').should('be.visible');
+    });
 });

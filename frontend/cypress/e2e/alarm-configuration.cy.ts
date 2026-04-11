@@ -594,4 +594,133 @@ describe('Alarm configuration e2e', () => {
         cy.contains('Errore durante il caricamento dei dispositivi.').should('be.visible');
         cy.get('#deviceId').should('be.disabled');
     });
+
+    it('auto-selects the only readable datapoint and locks operators to equal for enum datapoints', () => {
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+
+        cy.get('#plantId').select('plant-1');
+        cy.wait('@getPlantById');
+        cy.get('#deviceId').select('dev-presence');
+
+        cy.get('#datapointId').should('have.value', 'dp-presence-state');
+        cy.get('#thresholdOperator option').then(($options) => {
+            expect($options.length).to.equal(2);
+            expect($options.eq(1).text().trim().toLowerCase()).to.equal('uguale a');
+        });
+    });
+
+    it('shows enum validation error when threshold value is not part of datapoint enum', () => {
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+
+        cy.get('#name').clear().type('Regola enum non valida');
+        cy.get('#plantId').select('plant-1');
+        cy.wait('@getPlantById');
+        cy.get('#deviceId').select('dev-presence');
+        cy.get('#priority').select('4');
+        cy.get('#thresholdOperator').select('uguale a');
+        cy.get('#thresholdValue').clear().type('MAYBE');
+        cy.get('#armingTime').type('08:00');
+        cy.get('#dearmingTime').type('20:00');
+
+        cy.contains('button', 'CREA ALLARME').click();
+        cy.contains('Valore non previsto dall\'enum del datapoint selezionato.').should('be.visible');
+        cy.get('@createAlarmRule.all').should('have.length', 0);
+    });
+
+    it('accepts numeric thresholds and exposes multiple operators for non-enum datapoints', () => {
+        cy.intercept('GET', '**/plant?plantid=plant-1', {
+            statusCode: 200,
+            body: {
+                id: 'plant-1',
+                name: 'Appartamento Aurora',
+                rooms: [
+                    {
+                        id: 'room-1',
+                        name: 'Camera',
+                        devices: [
+                            {
+                                id: 'dev-thermo',
+                                name: 'Termostato camera',
+                                type: 'THERMOSTAT',
+                                datapoints: [
+                                    {
+                                        id: 'dp-temp',
+                                        name: 'Temperatura',
+                                        readable: true,
+                                        writable: true,
+                                        valueType: 'number',
+                                        enum: undefined,
+                                        sfeType: 'SFE_TEMP',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        }).as('getPlantByIdNumeric');
+
+        openCreateRuleModal();
+        cy.wait('@getPlants');
+        cy.wait('@getWards');
+
+        cy.get('#name').clear().type('Regola temperatura numerica');
+        cy.get('#plantId').select('plant-1');
+        cy.wait('@getPlantByIdNumeric');
+        cy.get('#deviceId').select('dev-thermo');
+
+        cy.get('#thresholdOperator option').its('length').should('be.greaterThan', 2);
+
+        cy.get('#priority').select('2');
+        cy.get('#thresholdOperator').select('maggiore di');
+        cy.get('#thresholdValue').clear().type('abc');
+        cy.get('#armingTime').type('09:00');
+        cy.get('#dearmingTime').type('21:00');
+        cy.contains('button', 'CREA ALLARME').click();
+
+        cy.contains('Inserisci un valore numerico valido.').should('be.visible');
+        cy.get('@createAlarmRule.all').should('have.length', 0);
+
+        cy.get('#thresholdValue').clear().type('20.5');
+        cy.contains('button', 'CREA ALLARME').click();
+
+        cy.wait('@createAlarmRule').its('request.body').should('deep.include', {
+            deviceId: 'dev-thermo',
+            datapointId: 'dp-temp',
+            thresholdValue: '20.5',
+        });
+    });
+
+    it('maps backend alarm times to HH:mm when opening edit modal', () => {
+        rulesState = [
+            {
+                id: 'rule-time-1',
+                name: 'Regola orari backend',
+                thresholdOperator: '=',
+                thresholdValue: 'on',
+                priority: 3,
+                armingTime: '2026-04-11T09:45:30.000Z',
+                dearmingTime: '18:30:59',
+                isArmed: true,
+                deviceId: 'dev-presence',
+                datapointId: 'dp-presence-state',
+                position: 'Camera - Sensore presenza camera',
+            },
+        ];
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+
+        cy.get('a.sidebar-link').contains('Configurazione Allarmi').click({ force: true });
+        cy.location('pathname').should('eq', '/alarms/alarm-configuration');
+        cy.wait('@getAlarmRules');
+
+        openEditRuleModal('Regola orari backend');
+        cy.get('#armingTime').should('have.value', '09:45');
+        cy.get('#dearmingTime').should('have.value', '18:30');
+    });
 });

@@ -72,6 +72,22 @@ const openUserManagement = () => {
     cy.contains('h1', 'Gestione operatori sanitari').should('be.visible');
 };
 
+const reloadUserManagementPage = () => {
+    cy.intercept('GET', '**/alarm-events/unmanaged/*/*/*', {
+        statusCode: 200,
+        body: [],
+    });
+
+    cy.intercept('GET', '**/analytics/*', {
+        statusCode: 200,
+        body: [],
+    });
+
+    cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+    cy.location('pathname').should('eq', '/dashboard');
+    openUserManagement();
+};
+
 const openCreateUserForm = () => {
     cy.contains('button', 'Inserisci Nuovo Operatore').click();
     cy.get('[data-testid="create-user-panel"]').should('have.class', 'opacity-100');
@@ -340,4 +356,159 @@ describe('User management e2e', () => {
         cy.contains('tr', '@l.bianchi').should('exist');
         cy.get('@deleteUser.all').should('have.length', 0);
     });
+
+    // addtional test for user api service
+    it('handles server error when fetching users', () => {
+        cy.intercept('GET', '**/users', {
+            statusCode: 500,
+            body: { message: 'Internal Server Error' },
+        }).as('getUsersError');
+
+        reloadUserManagementPage();
+        cy.wait('@getUsersError');
+        cy.contains('Nessun operatore sanitario presente').should('be.visible');
+    });
+
+
+    // ─── Additional tests for UserApiService ───────────────────────────────────
+
+    it('shows empty state when no users exist', () => {
+        cy.intercept('GET', '**/users', {
+            statusCode: 200,
+            body: [],
+        }).as('getUsersEmpty');
+
+        reloadUserManagementPage();
+        cy.wait('@getUsersEmpty');
+
+        cy.get('tbody tr').should('have.length', 1);
+        cy.contains('Nessun operatore sanitario presente').should('be.visible');
+    });
+
+    it('shows error when deleting a user fails with server error', () => {
+        cy.intercept('DELETE', '**/users/*', {
+            statusCode: 500,
+            body: { message: 'Internal Server Error' },
+        }).as('deleteUserError');
+
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('button', 'Elimina').click();
+        });
+
+        cy.contains('h3', 'Conferma eliminazione').should('be.visible');
+        cy.contains('button', 'Elimina operatore').click();
+
+        cy.wait('@deleteUserError');
+        cy.contains('tr', '@m.verdi').should('exist'); // utente NON rimosso dalla lista
+        cy.contains('h3', 'Conferma eliminazione').should('not.exist');
+    });
+
+    it('shows error when creating a user fails with 400 bad request', () => {
+        cy.intercept('POST', '**/users', {
+            statusCode: 400,
+            body: { message: 'Bad Request' },
+        }).as('createUserBadRequest');
+
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Errore',
+            surname: 'Richiesta',
+            username: 'errore.richiesta',
+        });
+
+        cy.contains('button', 'Crea utente').click();
+        cy.wait('@createUserBadRequest');
+
+        cy.contains('Errore durante la creazione').should('be.visible');
+        cy.get('[data-testid="create-user-panel"]').should('have.class', 'opacity-100'); // pannello rimane aperto
+    });
+
+    it('handles network failure when fetching users', () => {
+        cy.intercept('GET', '**/users', { forceNetworkError: true }).as('getUsersNetworkError');
+
+        reloadUserManagementPage();
+        cy.wait('@getUsersNetworkError');
+
+        cy.contains('Nessun operatore sanitario presente').should('be.visible');
+    });
+
+    it('handles network failure when creating a user', () => {
+        cy.intercept('POST', '**/users', { forceNetworkError: true }).as('createUserNetworkError');
+
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Rete',
+            surname: 'Assente',
+            username: 'rete.assente',
+        });
+
+        cy.contains('button', 'Crea utente').click();
+        cy.wait('@createUserNetworkError');
+
+        cy.contains('Errore durante la creazione').should('be.visible');
+    });
+
+    it('handles network failure when deleting a user', () => {
+        cy.intercept('DELETE', '**/users/*', { forceNetworkError: true }).as('deleteUserNetworkError');
+
+        cy.contains('tr', '@m.verdi').within(() => {
+            cy.contains('button', 'Elimina').click();
+        });
+
+        cy.contains('button', 'Elimina operatore').click();
+        cy.wait('@deleteUserNetworkError');
+
+        cy.contains('tr', '@m.verdi').should('exist');
+        cy.contains('h3', 'Conferma eliminazione').should('not.exist');
+    });
+
+    it('shows decoded temp password when backend returns a non-base64 plain string', () => {
+        const plainPassword = 'PlainPass1234';
+
+        cy.intercept('POST', '**/users', {
+            statusCode: 201,
+            body: { tempPassword: plainPassword }, // già in chiaro, non base64
+        }).as('createUserPlainPassword');
+
+        openCreateUserForm();
+        fillCreateUserForm({
+            name: 'Mario',
+            surname: 'Pianura',
+            username: 'mario.pianura',
+        });
+
+        cy.contains('button', 'Crea utente').click();
+        cy.wait('@createUserPlainPassword');
+
+        // il decoder restituisce la stringa as-is se non è base64 valido
+        cy.contains('code', plainPassword).should('be.visible');
+    });
+
+    it('uses the encoded userId in the delete user request URL', () => {
+        cy.intercept('DELETE', '**/users/42', (req) => {
+            // verifica che l'ID sia stato correttamente encoded nell'URL
+            expect(req.url).to.include(encodeURIComponent('42'));
+            req.reply({ statusCode: 204, body: null });
+        }).as('deleteUserEncoded');
+
+        // aggiungi temporaneamente un utente con id 42 nello stato
+        usersState = [
+            ...usersState,
+            { id: 42, name: 'Special', surname: 'User', username: 'special.user', role: UserRole.OPERATORE_SANITARIO },
+        ];
+
+        cy.intercept('GET', '**/users', { statusCode: 200, body: usersState }).as('getUsersWithSpecial');
+        reloadUserManagementPage();
+        cy.wait('@getUsersWithSpecial');
+
+        cy.contains('tr', '@special.user').within(() => {
+            cy.contains('button', 'Elimina').click();
+        });
+
+        cy.contains('button', 'Elimina operatore').click();
+        cy.wait('@deleteUserEncoded');
+    });
+
+
+
 });

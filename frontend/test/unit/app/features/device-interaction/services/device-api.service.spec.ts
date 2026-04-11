@@ -416,4 +416,28 @@ describe('DeviceApiService', () => {
     const values = await valuesPromise;
     expect(values.get('dp-ok')).toBe('Off');
   });
+
+  it('RF83-OBL abilita un appartamento nel Sistema', async () => {
+    const enablePromise = firstValueFrom(service.enableApartment('apt-101'));
+
+    const request = httpMock.expectOne('http://localhost:3000/apartments/apt-101/enable');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({});
+
+    request.flush(null, { status: 200, statusText: 'OK' });
+
+    await enablePromise;
+  });
+
+  it('RF84-OBL disabilita un appartamento nel Sistema', async () => {
+    const disablePromise = firstValueFrom(service.disableApartment('apt-101'));
+
+    const request = httpMock.expectOne('http://localhost:3000/apartments/apt-101/disable');
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({});
+
+    request.flush(null, { status: 200, statusText: 'OK' });
+
+    await disablePromise;
+  });
 });

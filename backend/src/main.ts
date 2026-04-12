@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import helmet from 'helmet'; //Middleware per la sicurezza HTTP, setta correttamente gli header HTTP per proteggere da vulnerabilità note.
 
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
 import cookieParser = require('cookie-parser');
 
 async function bootstrap() {
@@ -40,8 +40,25 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
 
+  const customOptions: SwaggerCustomOptions = {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    customSiteTitle: 'View4Life API Docs',
+    customCss: `
+      .topbar-wrapper img { 
+        content: url('https://view4life.me/view4life.ico'); 
+        width: 150px; 
+        height: auto; 
+      }
+      .swagger-ui .topbar { display: none }
+      .swagger-ui .info .title { color: #000000; }
+    `,
+    customfavIcon: 'https://view4life.me/view4life.ico',
+  };
+
+  SwaggerModule.setup('docs', app, document, customOptions);
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

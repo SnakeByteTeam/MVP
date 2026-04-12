@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/alarm-configuration/alarm-configuration.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\nimport { AlarmConfigStateService } from './services/alarm-config-state.service';\n\nexport const ALARM_CONFIGURATION_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard],\n    providers: [AlarmConfigStateService],\n    children: [\n      {\n        path: '',\n        loadComponent: () =>\n          import('./components/alarm-config-page/alarm-config-page.component').then((m) => m.AlarmConfigPageComponent),\n      },\n    ],\n  }\n];\n"],
+  "mappings": "4UAIO,IAAMA,EAAqC,CAChD,CACEC,KAAM,GACNC,YAAa,CAACC,CAAS,EACvBC,UAAW,CAACC,CAAuB,EACnCC,SAAU,CACR,CACEL,KAAM,GACNM,cAAeA,IACb,OAAO,qBAA4D,EAAEC,KAAMC,GAAMA,EAAEC,wBAAwB,EAC9G,EAEJ",
+  "names": ["ALARM_CONFIGURATION_ROUTES", "path", "canActivate", "authGuard", "providers", "AlarmConfigStateService", "children", "loadComponent", "then", "m", "AlarmConfigPageComponent"]
+}

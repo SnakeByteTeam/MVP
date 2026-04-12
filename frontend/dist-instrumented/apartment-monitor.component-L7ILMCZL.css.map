@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/apartment-monitor/components/apartment-monitor/apartment-monitor.component.css"],
+  "sourcesContent": [".apartment-monitor {\n  gap: 1.25rem;\n}\n\n.apartment-monitor__hero-side {\n  display: grid;\n  gap: 0.65rem;\n  justify-items: end;\n  min-width: 0;\n}\n\n.apartment-monitor__selector {\n  min-width: 100%;\n  max-width: 19rem;\n}\n\n.apartment-monitor__content {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 1rem;\n}\n\n.apartment-monitor__panel {\n  min-height: 100%;\n}\n\n.apartment-monitor__panel--highlight {\n  border-color: rgba(245, 158, 11, 0.3);\n  box-shadow: 0 12px 24px -22px rgba(245, 158, 11, 0.55);\n}\n\n@media (max-width: 960px) {\n  .apartment-monitor__content {\n    grid-template-columns: 1fr;\n  }\n\n  .apartment-monitor__hero-side {\n    justify-items: stretch;\n    min-width: 0;\n  }\n\n  .apartment-monitor__selector {\n    max-width: none;\n  }\n}\n"],
+  "mappings": "AAAA,CAAA,kBACE,IAAA,OACF,CAEA,CAAA,6BACE,QAAA,KACA,IAAA,OACA,cAAA,IACA,UAAA,CACF,CAEA,CAAA,4BACE,UAAA,KACA,UAAA,KACF,CAEA,CAAA,2BACE,QAAA,KACA,sBAAA,IACA,IAAA,IACF,CAEA,CAAA,yBACE,WAAA,IACF,CAEA,CAAA,oCACE,aAAA,UACA,WAAA,EAAA,KAAA,KAAA,MAAA,SACF,CAEA,OAAA,UAAA,OACE,CAhBF,2BAiBI,sBAAA,GACF,CAEA,CAhCF,6BAiCI,cAAA,QACA,UAAA,CACF,CAEA,CA9BF,4BA+BI,UAAA,IACF,CACF",
+  "names": []
+}

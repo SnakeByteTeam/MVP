@@ -27,7 +27,12 @@ export class EventNotificationController {
     console.log('[NOTIFICATION CONTROLLER] Allarme ricevuto, notifico');
 
     try {
-      const alarm: CheckAlarm = CheckAlarmRuleResDto.toDomain(payload);
+      const alarm: CheckAlarm = new CheckAlarm(
+        payload.alarmRuleId,
+        payload.wardId,
+        payload.alarmEventId
+      );
+      
       await this.notifyService.notifyAlarmWard({ alarm: alarm });
     } catch (error) {
       console.error(

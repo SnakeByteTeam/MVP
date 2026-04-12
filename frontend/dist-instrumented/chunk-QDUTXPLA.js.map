@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/alarm-history/alarm-history.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const ALARM_HISTORY_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard],\n    loadComponent: () =>\n      import('./components/alarm-history-page.component').then(\n        (m) => m.AlarmHistoryPageComponent\n      )\n  }\n];"],
+  "mappings": "gNAGO,IAAMA,EAA+B,CAC1C,CACEC,KAAM,GACNC,YAAa,CAACC,CAAS,EACvBC,cAAeA,IACb,OAAO,qBAA2C,EAAEC,KACjDC,GAAMA,EAAEC,yBAAyB,EAEvC",
+  "names": ["ALARM_HISTORY_ROUTES", "path", "canActivate", "authGuard", "loadComponent", "then", "m", "AlarmHistoryPageComponent"]
+}

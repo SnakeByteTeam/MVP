@@ -1,16 +1,12 @@
 import { Inject } from '@nestjs/common';
 import { PG_POOL } from '../../../database/database.module';
-import { AddPlantToWardRepository } from '../../application/repository/add-plant-to-ward-repository.interface';
-import { FindAllPlantsByWardIdRepository } from '../../application/repository/find-all-plants-by-ward-id-repository.interface';
-import { RemovePlantFromWardRepository } from '../../application/repository/remove-plant-from-ward-repository.interface';
 import { PlantEntity } from '../entities/plant-entity';
 import { Pool } from 'pg';
+import { WardsPlantsRelationshipsRepository } from 'src/wards/application/repository/wards-plants-relationships-repository.interface';
 
 export class WardsPlantsRelationshipsRepositoryImpl
   implements
-    AddPlantToWardRepository,
-    FindAllPlantsByWardIdRepository,
-    RemovePlantFromWardRepository
+    WardsPlantsRelationshipsRepository
 {
   constructor(@Inject(PG_POOL) private readonly conn: Pool) {}
 

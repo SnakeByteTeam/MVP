@@ -1,0 +1,6 @@
+{
+    "exclude": [
+        "src/main.ts",
+        "src/app/app.config.ts"
+    ]
+}

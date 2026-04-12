@@ -44,6 +44,10 @@ To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use th
 ng test
 ```
 
+Unit tests are located under `test/unit/` and mirror the application tree from `src/`.
+For example, a test previously at `src/app/features/foo/bar.component.spec.ts` is now at
+`test/unit/app/features/foo/bar.component.spec.ts`.
+
 ## Running end-to-end tests
 
 For end-to-end (e2e) testing, run:

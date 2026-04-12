@@ -184,7 +184,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
         this.alarmStateService.clearNotifications();
     }
 
-    public logout(): void{
+    public logout(): void {
         this.closeNotificationPanel();
         this.internalAuthService.logoutFromBackend().subscribe(() => {
             void this.router.navigate(['/auth/login']);

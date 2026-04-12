@@ -5,5 +5,5 @@ export class AddUserToWardResDto {
   id!: number;
 
   @ApiProperty()
-  name!: string;
+  username!: string;
 }

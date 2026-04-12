@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/notification/components/notification-page-component/notification-page-component.css"],
+  "sourcesContent": ["@keyframes notification-page-enter {\n    from {\n        opacity: 0;\n        transform: translateY(12px);\n    }\n\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n.notification-shell {\n    animation: notification-page-enter 220ms ease-out both;\n}\n\n.notification-header {\n    animation: notification-page-enter 260ms ease-out both;\n}\n\n.notification-list {\n    animation: notification-page-enter 300ms ease-out both;\n}\n\n@media (prefers-reduced-motion: reduce) {\n\n    .notification-shell,\n    .notification-header,\n    .notification-list {\n        animation: none;\n    }\n}"],
+  "mappings": "AAAA,WAAA,wBACI,GACI,QAAA,EACA,UAAA,WAAA,KACJ,CAEA,GACI,QAAA,EACA,UAAA,WAAA,EACJ,CACJ,CAEA,CAAA,mBACI,UAAA,wBAAA,KAAA,SAAA,IACJ,CAEA,CAAA,oBACI,UAAA,wBAAA,KAAA,SAAA,IACJ,CAEA,CAAA,kBACI,UAAA,wBAAA,IAAA,SAAA,IACJ,CAEA,OAAA,uBAAA,QAEI,CAdJ,oBAIA,qBAIA,kBASQ,UAAA,IACJ,CACJ",
+  "names": []
+}

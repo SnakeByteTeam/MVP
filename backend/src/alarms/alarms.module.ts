@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AlarmRulesController } from './adapters/in/alarm-rules.controller';
 import { AlarmEventsController } from './adapters/in/alarm-events.controller';
-import { AlarmRuleService } from './application/services/alarm-rule.service';
+import { AlarmRulesService } from './application/services/alarm-rules.service';
 import { RESOLVE_ALARM_EVENT_USE_CASE } from './application/ports/in/resolve-active-alarm.use-case';
 import { CREATE_ALARM_RULE_USE_CASE } from './application/ports/in/create-alarm-rule.use-case';
 import { DELETE_ALARM_RULE_USE_CASE } from './application/ports/in/delete-alarm-rule.use-case';
@@ -39,21 +39,21 @@ import { AlarmRulesPersistenceAdapter } from './adapters/out/alarm-rules-persist
   imports: [GuardModule],
   controllers: [AlarmRulesController, AlarmEventsController],
   providers: [
-    { provide: CREATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
+    { provide: CREATE_ALARM_RULE_USE_CASE, useClass: AlarmRulesService },
     { provide: CREATE_ALARM_RULE_PORT, useClass: AlarmRulesPersistenceAdapter },
-    { provide: DELETE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
+    { provide: DELETE_ALARM_RULE_USE_CASE, useClass: AlarmRulesService },
     { provide: DELETE_ALARM_RULE_PORT, useClass: AlarmRulesPersistenceAdapter },
-    { provide: GET_ALL_ALARM_RULES_USE_CASE, useClass: AlarmRuleService },
+    { provide: GET_ALL_ALARM_RULES_USE_CASE, useClass: AlarmRulesService },
     {
       provide: GET_ALL_ALARM_RULES_PORT,
       useClass: AlarmRulesPersistenceAdapter,
     },
-    { provide: GET_ALARM_RULE_BY_ID_USE_CASE, useClass: AlarmRuleService },
+    { provide: GET_ALARM_RULE_BY_ID_USE_CASE, useClass: AlarmRulesService },
     {
       provide: GET_ALARM_RULE_BY_ID_PORT,
       useClass: AlarmRulesPersistenceAdapter,
     },
-    { provide: UPDATE_ALARM_RULE_USE_CASE, useClass: AlarmRuleService },
+    { provide: UPDATE_ALARM_RULE_USE_CASE, useClass: AlarmRulesService },
     {
       provide: UPDATE_ALARM_RULE_PORT,
       useClass: AlarmRulesPersistenceAdapter,
@@ -116,7 +116,7 @@ import { AlarmRulesPersistenceAdapter } from './adapters/out/alarm-rules-persist
     },
     {
       provide: CHECK_ALARM_RULE_USECASE,
-      useClass: AlarmRuleService,
+      useClass: AlarmRulesService,
     },
     {
       provide: GET_WARD_ALARM_EVENT_PORT,

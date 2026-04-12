@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/user-management/components/user-management-page/user-management-page.css"],
+  "sourcesContent": [".user-management-page {\n    gap: 1.15rem;\n}"],
+  "mappings": "AAAA,CAAA,qBACI,IAAA,OACJ",
+  "names": []
+}

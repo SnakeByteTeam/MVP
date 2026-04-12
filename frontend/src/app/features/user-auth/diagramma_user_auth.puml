@@ -1,0 +1,148 @@
+@startuml
+
+enum UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+
+enum AuthErrorType {
+    USERNAME_OR_PASSWORD_WRONG
+    USERNAME_OR_TEMP_PASSWORD_WRONG
+    NEW_PASSWORD_EQUALS_TEMP
+    NEW_PASSWORD_NOT_VALID
+}
+
+interface UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+
+interface LoginResponse {
+    +accessToken: string
+}
+
+interface RefreshResponse {
+    +accessToken: string
+}
+
+interface AuthClaims {
+    +userId?: string | number
+    +sub?: string | number
+    +id?: string | number
+    +username?: string
+    +role?: string
+    +isFirstAccess?: boolean
+    +firstAccess?: boolean
+}
+
+interface TokenResponse {
+    +accessToken: string
+}
+
+class API_BASE_URL <<injection-token>>
+class Router
+class ActivatedRoute
+class HttpErrorResponse
+class FormBuilder
+interface ValidatorFn
+
+class InternalAuthService {
+    -http: HttpClient
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession | null>
+    -token: string | null
+    -restoreSessionInFlight$: Observable<boolean> | null
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string | null
+    +getCurrentUser$(): Observable<UserSession | null>
+    +getRole(): UserRole | null
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}
+
+abstract class AuthBaseComponent {
+    #authService: InternalAuthService
+    #router: Router
+    #route: ActivatedRoute
+    -errorTypeState: WritableSignal<AuthErrorType | null>
+    -isLoadingState: WritableSignal<boolean>
+    +errorType: AuthErrorType | null
+    +isLoading: boolean
+    +loginErrorMessage: string | null
+    +{abstract} onUsernameChange(value: string): void
+    +{abstract} onSubmit(): void
+    #handleSuccess(session: UserSession): void
+    #handleError(error: unknown): void
+}
+
+class LoginComponent {
+    -fb: FormBuilder
+    +loginForm: FormGroup
+    +onUsernameChange(value: string): void
+    +onPasswordChange(value: string): void
+    +onSubmit(): void
+}
+
+class FirstAccessPasswordValidator <<utility>> {
+    +newPasswordDiffersFromTempPassword(): ValidatorFn
+}
+
+class FirstAccessComponent {
+    -fb: FormBuilder
+    +firstAccessForm: FormGroup
+    +onUsernameChange(value: string): void
+    +onTempPasswordChange(value: string): void
+    +onNewPasswordChange(value: string): void
+    +onSubmit(): void
+}
+
+class USER_AUTH_ROUTES <<routes>>
+
+' Ereditarieta
+AuthBaseComponent <|-- LoginComponent
+AuthBaseComponent <|-- FirstAccessComponent
+
+' Relazioni modello
+UserSession --> UserRole
+
+' Relazioni servizi
+InternalAuthService ..> API_BASE_URL
+InternalAuthService ..> LoginResponse
+InternalAuthService ..> RefreshResponse
+InternalAuthService ..> TokenResponse
+InternalAuthService ..> AuthClaims
+InternalAuthService ..> UserSession
+InternalAuthService ..> UserRole
+
+' Relazioni componenti
+AuthBaseComponent --> InternalAuthService
+AuthBaseComponent --> Router
+AuthBaseComponent ..> ActivatedRoute
+AuthBaseComponent ..> AuthErrorType
+AuthBaseComponent ..> UserSession
+AuthBaseComponent ..> HttpErrorResponse
+
+LoginComponent ..> FormBuilder
+
+FirstAccessPasswordValidator ..> ValidatorFn
+FirstAccessComponent ..> FormBuilder
+FirstAccessComponent ..> AuthErrorType
+FirstAccessComponent ..> FirstAccessPasswordValidator
+
+' Route wiring
+USER_AUTH_ROUTES ..> LoginComponent : loadComponent()
+USER_AUTH_ROUTES ..> FirstAccessComponent : loadComponent()
+
+@enduml

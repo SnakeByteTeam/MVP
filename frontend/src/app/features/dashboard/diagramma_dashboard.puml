@@ -1,0 +1,11 @@
+@startuml
+
+class dashboardComponent
+class DASHBOARD_ROUTES <<routes>>
+class authGuard <<guard>>
+
+' Route wiring
+DASHBOARD_ROUTES ..> dashboardComponent : loadComponent()
+DASHBOARD_ROUTES ..> authGuard : import
+
+@enduml

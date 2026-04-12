@@ -1,0 +1,139 @@
+@startuml
+
+interface OnInit
+
+interface ChartDatasetDto {
+    +id: string
+    +name: string
+    +data: number[]
+}
+
+interface EnergySavingSuggestionDto {
+    +messages: string[]
+    +isSuggestion: boolean
+}
+
+interface ChartInfoDto {
+    +labels: string[]
+    +datasets: ChartDatasetDto[]
+    +title: string
+    +unit: string
+    +suggestions: EnergySavingSuggestionDto
+    +metric: string
+}
+
+interface AnalyticsDto {
+    +apartmentId: string
+    +analyticsInfo: ChartInfoDto[]
+}
+
+class AnalyticsApiService {
+    -http: HttpClient
+    -baseUrl: string
+    -analyticsEndpoint: string
+    -apartmentsEndpoint: string
+    +getAllApartments(): Observable<any[]>
+    +getAnalytics(apartmentId: string, refresh?: boolean): Observable<AnalyticsDto>
+}
+
+abstract class ChartComponent {
+    +chartInfo: ChartInfoDto
+    +chartType: ChartType
+    +renderedChartData: ChartData
+    +chartOptions: ChartOptions
+    +chartColors: { bg: string; border: string; }[]
+    +showSuggestions: boolean
+    +ngOnChanges(changes: SimpleChanges): void
+    #updateChart(data: ChartInfoDto): void
+    +showHideSugg(): void
+}
+
+class AlarmFrequencyChartComponent {
+    +chartType: ChartType
+}
+
+class AlarmsSentResolvedChartComponent {
+    +chartType: ChartType
+}
+
+class EnergyConsumptionChartComponent {
+    +chartType: ChartType
+    +chartColors: { bg: string; border: string; }[]
+    +updateChart(data: ChartInfoDto): void
+}
+
+class FallFrequencyChartComponent {
+    +chartType: ChartType
+}
+
+class PlantAnomaliesChartComponent {
+    +chartType: ChartType
+}
+
+class PresenceDetectionChartComponent {
+    +chartType: ChartType
+}
+
+class ProlongedPresenceChartComponent {
+    +chartType: ChartType
+}
+
+class TemperatureVariationsChartComponent {
+    +chartType: ChartType
+    +chartColors: { bg: string; border: string; }[]
+}
+
+class AnalyticsComponent {
+    -refreshTrigger$: BehaviorSubject<boolean>
+    -analyticsApiService: AnalyticsApiService
+    -loadTrigger$: BehaviorSubject<{ id: string; refresh: boolean; } | null>
+    +selectedApartmentId$: BehaviorSubject<string | null>
+    +apartments$: Observable<any[]> | null
+    +analytics: Observable<AnalyticsDto | null> | null
+    +ngOnInit(): void
+    +getChartByMetric(data: AnalyticsDto | null, metric: string): ChartInfoDto | undefined
+    +onApartmentChange(event: Event): void
+    +onRefresh(): void
+}
+
+class ANALYTICS_ROUTES <<routes>>
+
+' Realizzazione
+AnalyticsComponent ..|> OnInit
+
+' Relazioni modello
+ChartInfoDto *-- ChartDatasetDto
+ChartInfoDto --> EnergySavingSuggestionDto
+AnalyticsDto *-- ChartInfoDto
+
+' Relazioni API
+AnalyticsApiService ..> AnalyticsDto
+
+' Ereditarieta chart
+ChartComponent <|-- AlarmFrequencyChartComponent
+ChartComponent <|-- AlarmsSentResolvedChartComponent
+ChartComponent <|-- EnergyConsumptionChartComponent
+ChartComponent <|-- FallFrequencyChartComponent
+ChartComponent <|-- PlantAnomaliesChartComponent
+ChartComponent <|-- PresenceDetectionChartComponent
+ChartComponent <|-- ProlongedPresenceChartComponent
+ChartComponent <|-- TemperatureVariationsChartComponent
+ChartComponent ..> ChartInfoDto
+
+' Relazioni componente principale
+AnalyticsComponent --> AnalyticsApiService
+AnalyticsComponent ..> AnalyticsDto
+AnalyticsComponent ..> ChartInfoDto
+AnalyticsComponent ..> AlarmFrequencyChartComponent
+AnalyticsComponent ..> AlarmsSentResolvedChartComponent
+AnalyticsComponent ..> EnergyConsumptionChartComponent
+AnalyticsComponent ..> FallFrequencyChartComponent
+AnalyticsComponent ..> PlantAnomaliesChartComponent
+AnalyticsComponent ..> PresenceDetectionChartComponent
+AnalyticsComponent ..> ProlongedPresenceChartComponent
+AnalyticsComponent ..> TemperatureVariationsChartComponent
+
+' Route wiring
+ANALYTICS_ROUTES ..> AnalyticsComponent
+
+@enduml

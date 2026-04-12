@@ -1,0 +1,394 @@
+classDiagram
+direction LR
+
+class UserRole {
+  AMMINISTRATORE
+  OPERATORE_SANITARIO
+}
+
+class UserSession {
+  +string userId
+  +string username
+  +UserRole role
+  +string accessToken
+  +boolean isFirstAccess
+}
+
+class LoginResponse {
+  +string accessToken
+}
+
+class RefreshResponse {
+  +string accessToken
+}
+
+class TokenResponse {
+  +string accessToken
+}
+
+class AuthClaims {
+  +string | number userId
+  +string | number sub
+  +string | number id
+  +string username
+  +string role
+  +boolean isFirstAccess
+  +boolean firstAccess
+}
+
+class AlarmPriority {
+  WHITE
+  GREEN
+  ORANGE
+  RED
+}
+
+class ActiveAlarm {
+  +string id
+  +string alarmRuleId
+  +string deviceId
+  +string alarmName
+  +AlarmPriority priority
+  +string activationTime
+  +string | null resolutionTime
+  +string position
+  +number | null userId
+  +string | null userUsername
+}
+
+class AlarmListVm {
+  +ActiveAlarm[] alarms
+  +number currentPage
+  +number pageOffset
+  +boolean canGoPrevious
+  +boolean canGoNext
+  +boolean isResolving
+  +string | null resolvingId
+  +string | null resolveError
+}
+
+class AlarmRule {
+  +string id
+  +string name
+  +string thresholdOperator
+  +string thresholdValue
+  +AlarmPriority priority
+  +string | Date armingTime
+  +string | Date dearmingTime
+  +boolean isArmed
+  +string deviceId
+  +string datapointId
+  +string position
+}
+
+class CreateAlarmRuleRequestDto {
+  +string name
+  +string deviceId
+  +string datapointId
+  +string plantId
+  +number priority
+  +string thresholdOperator
+  +string thresholdValue
+  +string armingTime
+  +string dearmingTime
+}
+
+class UpdateAlarmRuleRequestDto {
+  +string name
+  +number priority
+  +string thresholdOperator
+  +string thresholdValue
+  +string armingTime
+  +string dearmingTime
+  +boolean isArmed
+}
+
+class AlarmEvent {
+  +string id
+  +string alarmRuleId
+  +string alarmName
+  +AlarmPriority priority
+  +string activationTime
+  +string | null resolutionTime
+}
+
+class NotificationEvent {
+  +string notificationId
+  +string title
+  +string sentAt
+  +string eventType
+}
+
+class ActiveAlarmsSnapshotMode {
+  merge
+  replace
+}
+
+class ApiErrorDisplayOptions {
+  +string fallbackMessage
+  +string actionLabel
+  +string forbiddenMessage
+  +string nonHttpStrategy
+}
+
+class AlarmActionButtonTone {
+  neutral
+  danger
+  primary
+}
+
+class PriorityUi {
+  +string label
+  +string bubbleClass
+  +string symbolClass
+  +string symbol
+}
+
+class AlarmTableColumn {
+  +string id
+  +string label
+}
+
+class ActiveAlarmTableRow {
+  +string id
+  +AlarmPriority priority
+  +string name
+  +string device
+  +string location
+  +string status
+  +string openedAt
+  +boolean isManaged
+  +boolean isResolving
+  +boolean isActionDisabled
+  +string actionLabel
+  +string actionAriaLabel
+}
+
+class PipeTransform
+class OnInit
+
+class InternalAuthService {
+  -HttpClient http
+  -string baseUrl
+  -BehaviorSubject<UserSession | null> currentUser$
+  -string | null token
+  -Observable<boolean> | null restoreSessionInFlight$
+  +Observable<UserSession> login(string username, string password)
+  +Observable<UserSession> setFirstAccessPassword(string username, string temporaryPassword, string newPassword)
+  +Observable<string> refreshAccessToken()
+  +Observable<boolean> restoreSessionFromRefresh()
+  +Observable<void> logoutFromBackend()
+  +void logout()
+  +string | null getToken()
+  +Observable<UserSession | null> getCurrentUser$()
+  +UserRole | null getRole()
+  +boolean isAuthenticated()
+  +boolean hasRole(UserRole role)
+  -void setSession(UserSession session)
+  -UserSession buildSessionFromAccessToken(string accessToken)
+  -AuthClaims parseAccessToken(string accessToken)
+  -boolean isUserRole(string role)
+}
+
+class AlarmApiService {
+  -HttpClient http
+  -string baseUrl
+  -string alarmsBaseUrl
+  -string alarmEventsBaseUrl
+  +Observable<AlarmRule[]> getAlarmRules()
+  +Observable<AlarmRule> getAlarmRule(string id)
+  +Observable<AlarmRule> createAlarmRule(CreateAlarmRuleRequestDto payload)
+  +Observable<AlarmRule> updateAlarmRule(string id, UpdateAlarmRuleRequestDto payload)
+  +Observable<void> deleteAlarmRule(string id)
+  +Observable<ActiveAlarm[]> getActiveAlarms(number userId, number limit, number offset)
+  +Observable<ActiveAlarm[]> getResolvedAlarms(number userId, number limit, number offset)
+  +Observable<ActiveAlarm> getAlarmEventById(string alarmEventId)
+  +Observable<void> resolveAlarm(string alarmId, number userId)
+}
+
+class AlarmStateService {
+  -BehaviorSubject<ActiveAlarm[]> activeAlarms$
+  -BehaviorSubject<NotificationEvent[]> notifications$
+  -BehaviorSubject<ReadonlySet<string>> dismissedNotificationIds$
+  -Set<string> locallyResolvedActiveAlarmIds
+  +void setActiveAlarms(ActiveAlarm[] alarms, ActiveAlarmsSnapshotMode mode)
+  +void onAlarmTriggered(AlarmEvent event)
+  +void onAlarmResolved(string id)
+  +void onNotificationReceived(NotificationEvent event)
+  +void removeNotification(string notificationId)
+  +void clearNotifications()
+  +void dismissNotification(string notificationId)
+  +void dismissNotifications(ReadonlyArray<string> notificationIds)
+  +Observable<ActiveAlarm[]> getActiveAlarms$()
+  +Observable<number> getActiveAlarmsCount$()
+  +Observable<NotificationEvent[]> getNotifications$()
+  +Observable<ReadonlySet<string>> getDismissedNotificationIds$()
+  +Observable<number> getUnreadNotificationsCount$()
+}
+
+class ApiErrorDisplayService {
+  +string toMessage(unknown error, ApiErrorDisplayOptions options)
+  -string mapHttpError(HttpErrorResponse error, ApiErrorDisplayOptions options)
+  -string | null extractHttpMessage(HttpErrorResponse error)
+  -string | null extractUnknownMessage(unknown error)
+}
+
+class AlarmManagementPaginationService {
+  +number pageLimit
+  -BehaviorSubject<number> pageOffsetSubject
+  -BehaviorSubject<boolean> canGoNextSubject
+  +Observable<number> pageOffset$
+  +Observable<boolean> canGoNext$
+  +void reset()
+  +number getOffset()
+  +boolean canGoNext()
+  +boolean canGoPrevious()
+  +number getNextOffset()
+  +number getPreviousOffset()
+  +void update(number offset, boolean canGoNext)
+  +number toPageNumber(number offset)
+}
+
+class AlarmManagementService {
+  -AlarmStateService alarmStateService
+  -AlarmApiService alarmApiService
+  -InternalAuthService authService
+  -ApiErrorDisplayService apiErrorDisplayService
+  -AlarmManagementPaginationService paginationService
+  -BehaviorSubject<string | null> resolvingId$
+  -BehaviorSubject<string | null> resolveError$
+  -number pendingResolveRequests
+  +Observable<AlarmListVm> vm$
+  +void initialize()
+  +void nextPage()
+  +void previousPage()
+  +void resolveAlarm(string activeAlarmId)
+  -void loadPage(number offset, boolean fallbackToPreviousIfEmpty)
+  -Observable<ActiveAlarm[]> getActiveAlarmsForSession$(UserSession | null session, number offset)
+  -Observable<PageLoadState> loadPageState$(UserSession | null session, number offset, boolean fallbackToPreviousIfEmpty)
+}
+
+class PageLoadState {
+  +ActiveAlarm[] alarms
+  +number pageOffset
+  +boolean canGoNext
+}
+
+class AlarmManagementTablePresenterService {
+  +ActiveAlarmTableRow[] toRows(ActiveAlarm[] alarms, string | null resolvingId)
+  -string getSafeDevice(string | undefined deviceId)
+  -string getActionLabel(boolean isResolving, boolean isManaged)
+  -string getActionAriaLabel(string alarmName, boolean isManaged)
+  -string getSafeAlarmName(string | null | undefined alarmName)
+  -string getSafeLocation(string | null | undefined position)
+}
+
+class AlarmManagementRefreshService {
+  -Subject<void> refreshRequested$
+  +void requestRefresh()
+  +Observable<void> getRefreshRequested$()
+}
+
+class AlarmTableShellComponent {
+  +InputSignal<string> title
+  +InputSignal<string> caption
+  +InputSignal<readonly AlarmTableColumn[]> columns
+  +InputSignal<boolean> showCreateButton
+  +InputSignal<string> createButtonAriaLabel
+  +OutputEmitterRef<void> createRequested
+  +void onCreateRequest()
+}
+
+class AlarmPriorityIndicatorComponent {
+  +InputSignal<AlarmPriority> priority
+  +Signal<PriorityUi> ui
+}
+
+class AlarmActionButtonComponent {
+  +InputSignal<string> label
+  +InputSignal<string | null> ariaLabel
+  +InputSignal<AlarmActionButtonTone> tone
+  +InputSignal<boolean> disabled
+  +OutputEmitterRef<void> pressed
+  +Signal<string> buttonClass
+  +void onPressed()
+}
+
+class ElapsedTimePipe {
+  +string transform(string sentAt)
+}
+
+class AlarmPageManagementComponent {
+  -AlarmManagementService alarmManagementService
+  -AlarmManagementTablePresenterService tablePresenter
+  -AlarmManagementRefreshService alarmManagementRefreshService
+  -DestroyRef destroyRef
+  +readonly AlarmTableColumn[] columns
+  +Signal<AlarmListVm | null> vm
+  +Signal<ActiveAlarmTableRow[]> rows
+  +Signal<boolean> canGoPrevious
+  +Signal<boolean> canGoNext
+  +Signal<number> currentPage
+  +void ngOnInit()
+  +void onResolve(string activeAlarmId)
+  +void onNextPage()
+  +void onPreviousPage()
+}
+
+ElapsedTimePipe ..|> PipeTransform
+AlarmPageManagementComponent ..|> OnInit
+
+UserSession --> UserRole
+ActiveAlarm --> AlarmPriority
+AlarmRule --> AlarmPriority
+AlarmEvent --> AlarmPriority
+AlarmListVm --> ActiveAlarm
+ActiveAlarmTableRow --> AlarmPriority
+
+InternalAuthService --> UserSession
+InternalAuthService --> UserRole
+InternalAuthService ..> LoginResponse
+InternalAuthService ..> RefreshResponse
+InternalAuthService ..> TokenResponse
+InternalAuthService ..> AuthClaims
+
+AlarmApiService ..> AlarmRule
+AlarmApiService ..> CreateAlarmRuleRequestDto
+AlarmApiService ..> UpdateAlarmRuleRequestDto
+AlarmApiService ..> ActiveAlarm
+
+AlarmStateService --> ActiveAlarm
+AlarmStateService --> NotificationEvent
+AlarmStateService ..> AlarmEvent
+AlarmStateService ..> ActiveAlarmsSnapshotMode
+
+ApiErrorDisplayService ..> ApiErrorDisplayOptions
+
+AlarmManagementService --> AlarmStateService
+AlarmManagementService --> AlarmApiService
+AlarmManagementService --> InternalAuthService
+AlarmManagementService --> ApiErrorDisplayService
+AlarmManagementService --> AlarmManagementPaginationService
+AlarmManagementService ..> AlarmListVm
+AlarmManagementService ..> ActiveAlarm
+AlarmManagementService ..> UserSession
+AlarmManagementService ..> PageLoadState
+
+AlarmManagementTablePresenterService ..> ActiveAlarm
+AlarmManagementTablePresenterService ..> ActiveAlarmTableRow
+
+AlarmTableShellComponent ..> AlarmTableColumn
+AlarmPriorityIndicatorComponent ..> AlarmPriority
+AlarmPriorityIndicatorComponent ..> PriorityUi
+AlarmActionButtonComponent ..> AlarmActionButtonTone
+
+AlarmPageManagementComponent --> AlarmManagementService
+AlarmPageManagementComponent --> AlarmManagementTablePresenterService
+AlarmPageManagementComponent --> AlarmManagementRefreshService
+AlarmPageManagementComponent ..> AlarmListVm
+AlarmPageManagementComponent ..> ActiveAlarmTableRow
+AlarmPageManagementComponent ..> AlarmTableColumn
+AlarmPageManagementComponent ..> AlarmTableShellComponent
+AlarmPageManagementComponent ..> AlarmPriorityIndicatorComponent
+AlarmPageManagementComponent ..> AlarmActionButtonComponent
+AlarmPageManagementComponent ..> ElapsedTimePipe

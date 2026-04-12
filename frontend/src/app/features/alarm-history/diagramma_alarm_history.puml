@@ -1,0 +1,137 @@
+@startuml
+
+interface OnInit
+
+enum AlarmPriority {
+    WHITE = 1
+    GREEN
+    ORANGE
+    RED
+}
+
+interface ActiveAlarm {
+    +id: string
+    +alarmRuleId: string
+    +deviceId?: string
+    +alarmName: string
+    +priority: AlarmPriority
+    +activationTime: string
+    +resolutionTime: string | null
+    +position: string
+    +userId: number | null
+    +userUsername?: string | null
+}
+
+interface AlarmListVm {
+    +alarms: ActiveAlarm[]
+    +currentPage: number
+    +pageLimit: number
+    +pageOffset: number
+    +canGoPrevious: boolean
+    +canGoNext: boolean
+}
+
+interface AlarmTableRow {
+    +id: string
+    +priority: AlarmPriority
+    +name: string
+    +device: string
+    +location: string
+    +status: string
+    +openedAt: string
+    +closedAt: string
+    +handlerUsername: string
+}
+
+interface AlarmTableColumn {
+    +id: string
+    +label: string
+}
+
+interface UserSession {
+    +userId: string
+}
+
+class AlarmApiService {
+    +getResolvedAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
+}
+
+class InternalAuthService {
+    +getCurrentUser$(): Observable<UserSession | null>
+}
+
+class ApiErrorDisplayService {
+    +toMessage(error: unknown, options: unknown): string
+}
+
+class AlarmHistoryService {
+    -alarmApiService: AlarmApiService
+    -authService: InternalAuthService
+    -apiErrorDisplayService: ApiErrorDisplayService
+    -pageLimit: number
+    -pageOffset$: BehaviorSubject<number>
+    -canGoNext$: BehaviorSubject<boolean>
+    -alarms$: BehaviorSubject<ActiveAlarm[]>
+    +vm$: Observable<AlarmListVm>
+    +initialize(): void
+    +nextPage(): void
+    +previousPage(): void
+    -loadPage(offset: number): void
+}
+
+class AlarmPriorityIndicatorComponent {
+    +priority: InputSignal<AlarmPriority>
+}
+
+class AlarmTableShellComponent {
+    +columns: InputSignal<readonly AlarmTableColumn[]>
+}
+
+class DatePipe
+
+class AlarmHistoryPageComponent {
+    -alarmHistoryService: AlarmHistoryService
+    +columns: readonly AlarmTableColumn[]
+    +vm: Signal<AlarmListVm | null>
+    +rows: Signal<AlarmTableRow[]>
+    +canGoPrevious: Signal<boolean>
+    +canGoNext: Signal<boolean>
+    +currentPage: Signal<number>
+    +ngOnInit(): void
+    +onNextPage(): void
+    +onPreviousPage(): void
+    -toRow(alarm: ActiveAlarm): AlarmTableRow
+}
+
+class ALARM_HISTORY_ROUTES <<routes>>
+
+' Realizzazione
+AlarmHistoryPageComponent ..|> OnInit
+
+' Relazioni dominio
+ActiveAlarm --> AlarmPriority
+AlarmListVm --> ActiveAlarm
+AlarmTableRow --> AlarmPriority
+
+' Relazioni servizi
+AlarmHistoryService --> AlarmApiService
+AlarmHistoryService --> InternalAuthService
+AlarmHistoryService --> ApiErrorDisplayService
+AlarmHistoryService ..> AlarmListVm
+AlarmHistoryService ..> ActiveAlarm
+AlarmHistoryService ..> UserSession
+
+' Relazioni componenti
+AlarmHistoryPageComponent --> AlarmHistoryService
+AlarmHistoryPageComponent ..> AlarmListVm
+AlarmHistoryPageComponent ..> AlarmTableRow
+AlarmHistoryPageComponent ..> ActiveAlarm
+AlarmHistoryPageComponent ..> AlarmTableColumn
+AlarmHistoryPageComponent ..> AlarmPriorityIndicatorComponent
+AlarmHistoryPageComponent ..> AlarmTableShellComponent
+AlarmHistoryPageComponent ..> DatePipe
+
+' Route wiring
+ALARM_HISTORY_ROUTES ..> AlarmHistoryPageComponent
+
+@enduml

@@ -1,0 +1,242 @@
+@startuml
+
+interface OnInit
+interface OnDestroy
+
+enum AlarmPriority {
+    WHITE = 1
+    GREEN
+    ORANGE
+    RED
+}
+
+enum DeviceType {
+    UNKNOWN
+    THERMOSTAT
+    FALL_SENSOR
+    PRESENCE_SENSOR
+    LIGHT
+    ALARM_BUTTON
+    ENTRANCE_DOOR
+    BLIND
+}
+
+enum DeviceStatus {
+    ONLINE
+    OFFLINE
+    ALARM
+    UNKNOWN
+}
+
+interface UserSession {
+    +userId: string
+}
+
+interface ActiveAlarm {
+    +id: string
+    +alarmName: string
+    +priority: AlarmPriority
+    +activationTime: string
+    +resolutionTime: string | null
+    +position: string
+}
+
+interface Datapoint {
+    +id: string
+    +name: string
+    +readable: boolean
+    +writable: boolean
+    +valueType: string
+    +enum: string[]
+    +sfeType: string
+}
+
+interface DeviceAction {
+    +key: string
+    +label: string
+    +disabled?: boolean
+}
+
+interface Device {
+    +id: string
+    +name: string
+    +type: DeviceType
+    +status: DeviceStatus
+    +actions: DeviceAction[]
+    +datapoints: Datapoint[]
+}
+
+interface Room {
+    +id: string
+    +name: string
+    +hasActiveAlarm: boolean
+    +devices: Device[]
+}
+
+interface Apartment {
+    +id: string
+    +name: string
+    +isEnabled: boolean
+    +rooms: Room[]
+}
+
+interface ApartmentOption {
+    +id: string
+    +name: string
+}
+
+interface PlantDatapointDto {
+    +id: string
+    +name: string
+    +readable: boolean
+    +writable: boolean
+    +valueType: string
+    +enum?: string[]
+    +sfeType: string
+}
+
+interface PlantDeviceDto {
+    +id: string
+    +name: string
+    +type?: string
+    +subType?: string
+    +datapoints?: PlantDatapointDto[]
+}
+
+interface PlantRoomDto {
+    +id: string
+    +name: string
+    +devices: PlantDeviceDto[]
+}
+
+interface PlantDto {
+    +id: string
+    +name: string
+    +wardId?: number
+    +rooms: PlantRoomDto[]
+}
+
+interface AlarmLifecycleUpdateDetail {
+    +type: string
+    +alarmEventId: string
+}
+
+class DeviceTaxonomy <<utility>> {
+    +resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
+}
+
+interface DeviceTypeResolutionInput {
+    +rawType?: string
+    +rawSubType?: string
+    +rawName?: string
+    +sfeTypes?: readonly string[]
+}
+
+class InternalAuthService {
+    +getCurrentUser$(): Observable<UserSession | null>
+}
+
+class WardRealtimeCacheService {
+    +mergeWardIds(userId: string, wardIds: readonly string[]): string[]
+}
+
+class AlarmStateService {
+    +getActiveAlarms$(): Observable<ActiveAlarm[]>
+}
+
+class EndpointTableComponent
+
+class ApartmentApiService {
+    -http: HttpClient
+    -baseUrl: string
+    -authService: InternalAuthService
+    -wardRealtimeCache: WardRealtimeCacheService
+    -plantEndpoint: string
+    -apartmentsEndpoint: string
+    +getCurrentApartment(): Observable<Apartment>
+    +getAvailableApartments(): Observable<ApartmentOption[]>
+    +getApartmentByPlantId(plantId: string): Observable<Apartment>
+    +getAllPlants(): Observable<PlantDto[]>
+    +enableApartment(apartmentId: string): Observable<void>
+    +disableApartment(apartmentId: string): Observable<void>
+    +setActivePlantId(plantId: string): void
+}
+
+class AlarmMapComponent {
+    +rooms: InputSignal<Room[]>
+    +activeAlarms: InputSignal<ActiveAlarm[]>
+    +alarmedRoomsCount: Signal<number>
+}
+
+class RoomListComponent {
+    +rooms: InputSignal<Room[]>
+    +roomSelected: OutputEmitterRef<string>
+    +onRoomSelect(roomId: string): void
+}
+
+class ApartmentMonitorComponent {
+    -apartmentApi: ApartmentApiService
+    -alarmState: AlarmStateService
+    -refresh$: Subject<void>
+    -destroy$: Subject<void>
+    +activeAlarms$: Observable<ActiveAlarm[]>
+    +availableApartments$: Observable<ApartmentOption[]>
+    +apartment$: Observable<Apartment | null>
+    +error: string
+    +activeApartmentId: string
+    +ngOnInit(): void
+    +ngOnDestroy(): void
+    +onApartmentSelected(apartmentId: string): void
+}
+
+class APARTMENT_MONITOR_ROUTES <<routes>>
+
+' Realizzazioni
+ApartmentMonitorComponent ..|> OnInit
+ApartmentMonitorComponent ..|> OnDestroy
+
+' Composizione modelli
+Apartment *-- Room
+Room *-- Device
+Device *-- Datapoint
+Device *-- DeviceAction
+PlantDto *-- PlantRoomDto
+PlantRoomDto *-- PlantDeviceDto
+PlantDeviceDto *-- PlantDatapointDto
+
+' Relazioni dominio
+Device --> DeviceType
+Device --> DeviceStatus
+ActiveAlarm --> AlarmPriority
+
+' Relazioni servizi
+ApartmentApiService --> InternalAuthService
+ApartmentApiService --> WardRealtimeCacheService
+ApartmentApiService ..> UserSession
+ApartmentApiService ..> Apartment
+ApartmentApiService ..> ApartmentOption
+ApartmentApiService ..> PlantDto
+ApartmentApiService ..> PlantDeviceDto
+ApartmentApiService ..> Datapoint
+ApartmentApiService ..> DeviceType
+ApartmentApiService ..> DeviceTaxonomy
+
+' Relazioni componenti
+AlarmMapComponent ..> Room
+AlarmMapComponent ..> ActiveAlarm
+
+RoomListComponent ..> Room
+
+ApartmentMonitorComponent --> ApartmentApiService
+ApartmentMonitorComponent --> AlarmStateService
+ApartmentMonitorComponent ..> ActiveAlarm
+ApartmentMonitorComponent ..> Apartment
+ApartmentMonitorComponent ..> ApartmentOption
+ApartmentMonitorComponent ..> AlarmLifecycleUpdateDetail
+ApartmentMonitorComponent ..> AlarmMapComponent
+ApartmentMonitorComponent ..> EndpointTableComponent
+
+' Route wiring
+APARTMENT_MONITOR_ROUTES ..> ApartmentMonitorComponent
+
+@enduml

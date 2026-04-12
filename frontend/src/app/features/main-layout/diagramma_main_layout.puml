@@ -1,0 +1,212 @@
+@startuml
+
+interface OnInit
+interface OnDestroy
+interface AfterViewInit
+
+enum UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+
+interface NavItem {
+    +label: string
+    +icon: string
+    +route: string
+    +requiredRole?: UserRole
+}
+
+interface UserInfo {
+    +username: string
+    +firstName: string
+    +lastName: string
+    +role: UserRole
+}
+
+interface UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+
+interface NotificationEvent {
+    +notificationId: string
+    +title: string
+    +sentAt: string
+    +eventType?: "triggered" | "resolved"
+}
+
+interface MyVimarAccount {
+    +email: string
+    +isLinked: boolean
+}
+
+interface Breadcrumb {
+    +label: string
+    +url: string
+}
+
+class BreadcrumbService {
+    +breadcrumbs$: Observable<Breadcrumb[]>
+}
+
+class NavService {
+    +getNavItems(role: UserRole): NavItem[]
+}
+
+class SidebarComponent {
+    +navItems: NavItem[]
+    +isCollapsed: boolean
+    +isProfileMode: boolean
+    +canOpenProfile: boolean
+    +profileClicked: EventEmitter<void>
+    +collapsed: EventEmitter<void>
+    +navItemSelected: EventEmitter<string>
+}
+
+class TopbarComponent {
+    +user: UserInfo
+    +isProfileActive: boolean
+    +isNotificationActive: boolean
+    +unreadNotificationsCount: number
+    +showVimarWarning: boolean
+    +breadcrumbs$: Observable<Breadcrumb[]>
+    +profileClicked: EventEmitter<void>
+    +logoutClicked: EventEmitter<void>
+    +hamburgerClicked: EventEmitter<void>
+    +notificationClicked: EventEmitter<void>
+    +onNotificationClick(): void
+    +onProfileClick(): void
+}
+
+class NotificationTopbarPanelComponent
+
+class InternalAuthService {
+    +getCurrentUser$(): Observable<UserSession | null>
+    +logoutFromBackend(): Observable<void>
+}
+
+class AlarmStateService {
+    +getUnreadNotificationsCount$(): Observable<number>
+    +getNotifications$(): Observable<NotificationEvent[]>
+    +getActiveAlarmsCount$(): Observable<number>
+    +removeNotification(notificationId: string): void
+    +clearNotifications(): void
+}
+
+class AlarmManagementRefreshService {
+    +requestRefresh(): void
+}
+
+interface IVimarCloudApiService {
+    +getLinkedAccount(): Observable<MyVimarAccount>
+}
+
+class MyVimarCloudApiFeatureService
+class VIMAR_CLOUD_API_SERVICE <<injection-token>>
+class Router
+
+class MainLayoutComponent {
+    +isCollapsed: boolean
+    +navItems: NavItem[]
+    +isProfilePanelOpen: boolean
+    +isAdmin: boolean
+    +isVimarStatusLoading: boolean
+    +vimarStatusError: string
+    +vimarAccount: MyVimarAccount | null
+    +showVimarAssociationWarning: boolean
+    +isNotificationPanelOpen: boolean
+    +realtimeToastMessage: string | null
+    +realtimeToastKind: "alert" | "success"
+    +unreadNotificationsCount$: Observable<number>
+    +notifications$: Observable<NotificationEvent[]>
+    +currentUser: UserInfo
+    +activeAlarmCount$: Observable<number>
+    +ngOnInit(): void
+    +ngAfterViewInit(): void
+    +ngOnDestroy(): void
+    +toggleSidebar(): void
+    +toggleProfilePanel(): void
+    +closeProfilePanel(): void
+    +onNavItemSelected(route: string): void
+    +goToVimarLink(): void
+    +toggleNotificationPanel(): void
+    +closeNotificationPanel(): void
+    +openNotificationsArchive(): void
+    +openNotificationsArchiveFromPreview(notificationId: string): void
+    +removeTopbarNotification(notificationId: string): void
+    +clearTopbarNotifications(): void
+    +logout(): void
+    +canOpenProfilePanel(): boolean
+}
+
+class MAIN_LAYOUT_ROUTES <<routes>>
+class authGuard <<guard>>
+class roleGuard <<guard>>
+class DASHBOARD_ROUTES <<routes>>
+class ALARM_MANAGEMENT_ROUTES <<routes>>
+class ALARM_HISTORY_ROUTES <<routes>>
+class ALARM_CONFIGURATION_ROUTES <<routes>>
+class ANALYTICS_ROUTES <<routes>>
+class APARTMENT_MONITOR_ROUTES <<routes>>
+class DEVICE_INTERACTION_ROUTES <<routes>>
+class NOTIFICATION_ROUTES <<routes>>
+class WARD_MANAGEMENT_ROUTES <<routes>>
+class USER_MANAGEMENT_ROUTES <<routes>>
+
+' Realizzazioni
+MainLayoutComponent ..|> OnInit
+MainLayoutComponent ..|> OnDestroy
+MainLayoutComponent ..|> AfterViewInit
+MyVimarCloudApiFeatureService ..|> IVimarCloudApiService
+
+' Relazioni modello
+NavItem --> UserRole
+UserInfo --> UserRole
+UserSession --> UserRole
+TopbarComponent ..> UserInfo
+TopbarComponent ..> Breadcrumb
+SidebarComponent ..> NavItem
+
+' Relazioni servizi/componenti
+TopbarComponent --> BreadcrumbService
+NavService ..> NavItem
+NavService ..> UserRole
+
+MainLayoutComponent --> NavService
+MainLayoutComponent --> InternalAuthService
+MainLayoutComponent --> AlarmStateService
+MainLayoutComponent --> AlarmManagementRefreshService
+MainLayoutComponent --> Router
+MainLayoutComponent --> IVimarCloudApiService
+MainLayoutComponent ..> TopbarComponent
+MainLayoutComponent ..> SidebarComponent
+MainLayoutComponent ..> NotificationTopbarPanelComponent
+MainLayoutComponent ..> NavItem
+MainLayoutComponent ..> UserInfo
+MainLayoutComponent ..> UserSession
+MainLayoutComponent ..> NotificationEvent
+MainLayoutComponent ..> MyVimarAccount
+MainLayoutComponent ..> UserRole
+
+' Route wiring
+MAIN_LAYOUT_ROUTES ..> MainLayoutComponent : loadComponent()
+MAIN_LAYOUT_ROUTES ..> MyVimarCloudApiFeatureService : providers
+MAIN_LAYOUT_ROUTES ..> VIMAR_CLOUD_API_SERVICE : provide/useExisting
+MAIN_LAYOUT_ROUTES ..> authGuard
+MAIN_LAYOUT_ROUTES ..> roleGuard
+MAIN_LAYOUT_ROUTES ..> UserRole
+MAIN_LAYOUT_ROUTES ..> DASHBOARD_ROUTES
+MAIN_LAYOUT_ROUTES ..> ALARM_MANAGEMENT_ROUTES
+MAIN_LAYOUT_ROUTES ..> ALARM_HISTORY_ROUTES
+MAIN_LAYOUT_ROUTES ..> ALARM_CONFIGURATION_ROUTES
+MAIN_LAYOUT_ROUTES ..> ANALYTICS_ROUTES
+MAIN_LAYOUT_ROUTES ..> APARTMENT_MONITOR_ROUTES
+MAIN_LAYOUT_ROUTES ..> DEVICE_INTERACTION_ROUTES
+MAIN_LAYOUT_ROUTES ..> NOTIFICATION_ROUTES
+MAIN_LAYOUT_ROUTES ..> WARD_MANAGEMENT_ROUTES
+MAIN_LAYOUT_ROUTES ..> USER_MANAGEMENT_ROUTES
+
+@enduml

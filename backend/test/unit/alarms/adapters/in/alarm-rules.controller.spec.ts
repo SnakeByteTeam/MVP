@@ -12,7 +12,7 @@ import { UPDATE_ALARM_RULE_USE_CASE } from 'src/alarms/application/ports/in/upda
 describe('AlarmRulesController', () => {
   let controller: AlarmRulesController;
 
-  const mockCreateAlarmUseCase = {
+  const mockCreateAlarmRuleUseCase = {
     createAlarmRule: jest.fn(),
   };
 
@@ -38,7 +38,7 @@ describe('AlarmRulesController', () => {
       providers: [
         {
           provide: CREATE_ALARM_RULE_USE_CASE,
-          useValue: mockCreateAlarmUseCase,
+          useValue: mockCreateAlarmRuleUseCase,
         },
         {
           provide: DELETE_ALARM_RULE_USE_CASE,
@@ -90,7 +90,7 @@ describe('AlarmRulesController', () => {
         dearmingTime: ''
     }
     await controller.createAlarmRule(req);
-    expect(mockCreateAlarmUseCase.createAlarmRule).toHaveBeenCalled();
+    expect(mockCreateAlarmRuleUseCase.createAlarmRule).toHaveBeenCalled();
   });
 
   it('should call deleteAlarmRuleUseCase.deleteAlarmRule', async () => {

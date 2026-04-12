@@ -48,7 +48,7 @@ import { AdminGuard } from '../../../guard/admin/admin.guard';
 export class AlarmRulesController {
   constructor(
     @Inject(CREATE_ALARM_RULE_USE_CASE)
-    private readonly createAlarmUseCase: CreateAlarmRuleUseCase,
+    private readonly createAlarmRuleUseCase: CreateAlarmRuleUseCase,
     @Inject(DELETE_ALARM_RULE_USE_CASE)
     private readonly deleteAlarmRuleUseCase: DeleteAlarmRuleUseCase,
     @Inject(GET_ALARM_RULE_BY_ID_USE_CASE)
@@ -65,7 +65,7 @@ export class AlarmRulesController {
   async createAlarmRule(
     @Body() req: CreateAlarmRuleReqDto,
   ): Promise<CreateAlarmRuleResDto> {
-    const alarm = await this.createAlarmUseCase.createAlarmRule(
+    const alarm = await this.createAlarmRuleUseCase.createAlarmRule(
       new CreateAlarmRuleCmd(
         req.name,
         req.datapointId,

@@ -46,6 +46,8 @@ export class AlarmEventsService
     ResolveAlarmEventUseCase
 {
   constructor(
+    private readonly emitter: EventEmitter2,
+
     @Inject(GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT)
     private readonly getAllManagedAlarmEventsByUserIdPort: GetAllManagedAlarmEventsByUserIdPort,
 
@@ -63,8 +65,6 @@ export class AlarmEventsService
 
     @Inject(GET_WARD_ALARM_EVENT_PORT)
     private readonly getWardAlarmEventPort: GetWardAlarmEventPort,
-
-    private readonly emitter: EventEmitter2,
   ) {}
 
   getAlarmEventById(req: GetAlarmEventByIdCmd): Promise<AlarmEvent | null> {

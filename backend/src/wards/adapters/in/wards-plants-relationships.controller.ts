@@ -44,7 +44,7 @@ export class WardsPlantsRelationshipsController {
   async addPlantToWard(
     @Body() req: AddPlantToWardReqDto,
   ): Promise<AddPlantToWardResDto> {
-    const plant: Plant = this.addPlantToWardUseCase.addPlantToWard(
+    const plant: Plant = await this.addPlantToWardUseCase.addPlantToWard(
       new AddPlantToWardCmd(req.wardId, req.plantId),
     );
 

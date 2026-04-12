@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ADD_PLANT_TO_WARD_PORT } from 'src/wards/application/ports/out/add-plant-to-ward-port.interface';
+import { FIND_ALL_PLANTS_BY_WARD_ID_PORT } from 'src/wards/application/ports/out/find-all-plants-by-ward-id-port.interface';
+import { REMOVE_PLANT_FROM_WARD_PORT } from 'src/wards/application/ports/out/remove-plant-from-ward-port.interface';
 import { WardsPlantsRelationshipsService } from 'src/wards/application/services/wards-plants-relationships.service';
-import { ADD_PLANT_TO_WARD_PORT } from 'src/wards/adapters/out/add-plant-to-ward-adapter';
-import { FIND_ALL_PLANTS_BY_WARD_ID_PORT } from 'src/wards/adapters/out/find-all-plants-by-ward-id-adapter';
-import { REMOVE_PLANT_FROM_WARD_PORT } from 'src/wards/adapters/out/remove-plant-from-ward-adapter';
 
 describe('WardsPlantsRelationshipsService', () => {
   let service: WardsPlantsRelationshipsService;

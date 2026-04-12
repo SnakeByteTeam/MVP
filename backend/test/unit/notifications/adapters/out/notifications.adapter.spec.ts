@@ -17,7 +17,7 @@ describe('NotificationsAdapter', () => {
       notifyAlarmWard: jest.fn(),
       notifyAlarmResolution: jest.fn(),
       writeNotification: jest.fn(),
-    } as any;
+    };
 
     adapter = new NotificationsAdapter(notificationsRepository);
   });

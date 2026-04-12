@@ -113,7 +113,7 @@ export class AlarmEventsController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })
-  @UseGuards(UserGuard)
+  @UseGuards(UserGuard, AdminGuard)
   @Get('/:limit/:offset')
   async getAllAlarmEvents(
     @Param('limit', ParseIntPipe) limit: number,

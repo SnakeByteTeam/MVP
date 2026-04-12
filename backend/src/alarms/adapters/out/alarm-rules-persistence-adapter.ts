@@ -15,7 +15,6 @@ import {
 } from '../../application/repository/alarm-rules-repository.interface';
 import { CheckAlarmRuleCmd } from 'src/alarms/application/commands/check-alarm-rule-cmd';
 import { CheckAlarm } from 'src/alarms/domain/models/check-alarm';
-import { CheckAlarmEntity } from 'src/alarms/infrastructure/entities/check-alarm-entity';
 
 export class AlarmRulesPersistenceAdapter
   implements

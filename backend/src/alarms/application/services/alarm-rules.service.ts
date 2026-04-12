@@ -46,7 +46,7 @@ import { CheckAlarm } from '../../domain/models/check-alarm';
 import { plainToInstance } from 'class-transformer';
 
 @Injectable()
-export class AlarmRuleService
+export class AlarmRulesService
   implements
     CreateAlarmRuleUseCase,
     GetAlarmRuleByIdUseCase,
@@ -55,7 +55,7 @@ export class AlarmRuleService
     DeleteAlarmRuleUseCase,
     CheckAlarmRuleUseCase
 {
-  private readonly logger = new Logger(AlarmRuleService.name);
+  private readonly logger = new Logger(AlarmRulesService.name);
 
   constructor(
     private readonly emitter: EventEmitter2,

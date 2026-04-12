@@ -59,6 +59,7 @@ export class AlarmRulesService
 
   constructor(
     private readonly emitter: EventEmitter2,
+    
     @Inject(GET_ALL_ALARM_RULES_PORT)
     private readonly getAllAlarmRulesPort: GetAllAlarmRulesPort,
 

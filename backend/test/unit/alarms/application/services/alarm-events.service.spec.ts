@@ -1,37 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AlarmEventsService } from 'src/alarms/application/services/alarm-events.service';
-import { GetAllManagedAlarmEventsByUserIdPort } from 'src/alarms/application/ports/out/get-all-managed-alarm-events-by-user-id-port.interface';
-import { GetAllUnmanagedAlarmEventsByUserIdPort } from 'src/alarms/application/ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
-import { GetAlarmEventByIdPort } from 'src/alarms/application/ports/out/get-alarm-event-by-id-port.interface';
-import { GetAllAlarmEventsPort } from 'src/alarms/application/ports/out/get-all-alarm-events.port';
-import { ResolveAlarmEventPort } from 'src/alarms/application/ports/out/resolve-alarm-event-port.interface';
-import {
-  GET_WARD_ALARM_EVENT_PORT,
-  GetWardAlarmEventPort,
-} from 'src/alarms/application/ports/out/get-ward-alarm-event.port';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AlarmEvent } from 'src/alarms/domain/models/alarm-event.model';
-import { AlarmPriority } from 'src/alarms/domain/models/alarm-priority.enum';
-import { GetAlarmEventByIdCmd } from 'src/alarms/application/commands/get-alarm-event-by-id-cmd';
-import { GetAllAlarmEventsCmd } from 'src/alarms/application/commands/get-all-alarm-events-cmd';
-import { GetAllManagedAlarmEventsByUserIdCmd } from 'src/alarms/application/commands/get-all-managed-alarm-events-by-user-id-cmd';
-import { GetAllUnmanagedAlarmEventsByUserIdCmd } from 'src/alarms/application/commands/get-all-unmanaged-alarm-events-by-user-id-cmd';
-import { ResolveAlarmEventCmd } from 'src/alarms/application/commands/resolve-alarm-event-cmd';
-import {
-  GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
-} from 'src/alarms/application/ports/out/get-all-managed-alarm-events-by-user-id-port.interface';
-import {
-  GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT,
-} from 'src/alarms/application/ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface';
-import {
-  GET_ALARM_EVENT_BY_ID_PORT,
-} from 'src/alarms/application/ports/out/get-alarm-event-by-id-port.interface';
-import {
-  GET_ALL_ALARM_EVENTS_PORT,
-} from 'src/alarms/application/ports/out/get-all-alarm-events.port';
-import {
-  RESOLVE_ALARM_EVENT_PORT,
-} from 'src/alarms/application/ports/out/resolve-alarm-event-port.interface';
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { TestingModule, Test } from "@nestjs/testing";
+import { GetAlarmEventByIdCmd } from "src/alarms/application/commands/get-alarm-event-by-id-cmd";
+import { GetAllAlarmEventsCmd } from "src/alarms/application/commands/get-all-alarm-events-cmd";
+import { GetAllManagedAlarmEventsByUserIdCmd } from "src/alarms/application/commands/get-all-managed-alarm-events-by-user-id-cmd";
+import { GetAllUnmanagedAlarmEventsByUserIdCmd } from "src/alarms/application/commands/get-all-unmanaged-alarm-events-by-user-id-cmd";
+import { ResolveAlarmEventCmd } from "src/alarms/application/commands/resolve-alarm-event-cmd";
+import { GetAlarmEventByIdPort, GET_ALARM_EVENT_BY_ID_PORT } from "src/alarms/application/ports/out/get-alarm-event-by-id-port.interface";
+import { GetAllAlarmEventsPort, GET_ALL_ALARM_EVENTS_PORT } from "src/alarms/application/ports/out/get-all-alarm-events.port";
+import { GetAllManagedAlarmEventsByUserIdPort, GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from "src/alarms/application/ports/out/get-all-managed-alarm-events-by-user-id-port.interface";
+import { GetAllUnmanagedAlarmEventsByUserIdPort, GET_ALL_UNMANAGED_ALARM_EVENTS_BY_USER_ID_PORT } from "src/alarms/application/ports/out/get-all-unmanaged-alarm-events-by-user-id-port.interface";
+import { GetWardAlarmEventPort, GET_WARD_ALARM_EVENT_PORT } from "src/alarms/application/ports/out/get-ward-alarm-event.port";
+import { ResolveAlarmEventPort, RESOLVE_ALARM_EVENT_PORT } from "src/alarms/application/ports/out/resolve-alarm-event-port.interface";
+import { AlarmEventsService } from "src/alarms/application/services/alarm-events.service";
+import { AlarmEvent } from "src/alarms/domain/models/alarm-event.model";
+import { AlarmPriority } from "src/alarms/domain/models/alarm-priority.enum";
+
 
 describe('AlarmEventsService', () => {
   let service: AlarmEventsService;

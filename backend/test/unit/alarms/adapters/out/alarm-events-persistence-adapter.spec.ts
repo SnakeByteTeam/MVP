@@ -6,7 +6,6 @@ import { GetAllManagedAlarmEventsByUserIdCmd } from 'src/alarms/application/comm
 import { GetAllUnmanagedAlarmEventsByUserIdCmd } from 'src/alarms/application/commands/get-all-unmanaged-alarm-events-by-user-id-cmd';
 import { ResolveAlarmEventCmd } from 'src/alarms/application/commands/resolve-alarm-event-cmd';
 import { CreateAlarmEventCmd } from 'src/alarms/application/commands/create-alarm-event-cmd';
-import { GetWardAlarmEventCmd } from 'src/alarms/application/commands/get-ward-alarm-event.command';
 
 describe('AlarmEventsPersistenceAdapter', () => {
   let adapter: AlarmEventsPersistenceAdapter;

@@ -168,7 +168,10 @@ export class AlarmRulesPersistenceAdapter
       return null;
     }
 
-    return CheckAlarmEntity.toDomain(alarmRule);
+    if (alarmRule.ward_id == null)
+      return null;
+
+    return new CheckAlarm(alarmRule.alarm_rule_id, alarmRule.ward_id, alarmRule.alarm_event_id ?? undefined);
   }
 
   private normalizeValue(value: string): string {

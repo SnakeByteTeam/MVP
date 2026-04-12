@@ -43,6 +43,7 @@ import { CreateAlarmEventCmd } from '../commands/create-alarm-event-cmd';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CheckAlarmRuleResDto } from 'src/alarms/infrastructure/dtos/out/check-alarm-rule-res-dto';
 import { CheckAlarm } from '../../domain/models/check-alarm';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AlarmRuleService
@@ -115,11 +116,11 @@ export class AlarmRuleService
     }
 
     this.logger.log(
-      `[checkAlarmRule] Match found alarmRuleId=${checkAlarm.alarm_rule_id} wardId=${checkAlarm.ward_id}`,
+      `[checkAlarmRule] Match found alarmRuleId=${checkAlarm.alarmRuleId} wardId=${checkAlarm.wardId}`,
     );
 
     const alarmEventId = await this.createAlarmEventPort.createAlarmEvent(
-      new CreateAlarmEventCmd(checkAlarm.alarm_rule_id, req.activationTime),
+      new CreateAlarmEventCmd(checkAlarm.alarmRuleId, req.activationTime),
     );
 
     this.logger.log(
@@ -127,18 +128,14 @@ export class AlarmRuleService
     );
 
     const checkAlarmWithEventId = new CheckAlarm(
-      checkAlarm.alarm_rule_id,
-      checkAlarm.ward_id,
+      checkAlarm.alarmRuleId,
+      checkAlarm.wardId,
       alarmEventId,
     );
 
-    const checkAlarmDto: CheckAlarmRuleResDto = CheckAlarmRuleResDto.fromDomain(
-      checkAlarmWithEventId,
-    );
-
-    this.emitter.emit('alarm.activated', checkAlarmDto);
+    this.emitter.emit('alarm.activated', plainToInstance(CheckAlarmRuleResDto, checkAlarmWithEventId));
     this.logger.log(
-      `[checkAlarmRule] Event emitted alarm.activated alarmEventId=${checkAlarmDto.alarmEventId}`,
+      `[checkAlarmRule] Event emitted alarm.activated alarmEventId=${checkAlarmWithEventId.alarmEventId}`,
     );
   }
 }

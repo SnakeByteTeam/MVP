@@ -33,15 +33,15 @@ export class NotificationsService
   async notifyAlarmWard(cmd: NotifyAlarmWardCmd): Promise<void> {
     await this.notifyPort.notifyAlarmWard(cmd);
 
-    if (!cmd.alarm.alarm_event_id)
+    if (!cmd.alarm.alarmEventId)
       throw new Error("Can't write notification without alarm event id");
 
     const timeNow: string = new Date(Date.now()).toISOString();
 
     await this.writeNotificationPort.writeNotification({
-      alarm_event_id: cmd.alarm.alarm_event_id,
+      alarm_event_id: cmd.alarm.alarmEventId,
       timestamp: timeNow,
-      ward_id: cmd.alarm.ward_id,
+      ward_id: cmd.alarm.wardId,
     });
   }
 

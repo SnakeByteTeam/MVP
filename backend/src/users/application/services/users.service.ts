@@ -27,7 +27,6 @@ import { GENERATE_PASSWORD_PORT } from '../../infrastructure/password-generator/
 import { GeneratePasswordPort } from '../ports/out/password-generator-port.interface';
 import { HASH_PASSWORD_PORT } from '../../infrastructure/hash-password-impl/hash-password-impl';
 import { HashPasswordPort } from '../ports/out/hash-password-port.interface';
-import { UserEntity } from '../../infrastructure/entities/user-entity';
 import { CONVERT_BASE_64_PORT } from '../../infrastructure/convert-base-64-impl/convert-base-64-impl';
 import { ConvertBase64Port } from '../ports/out/converte-base-64-port.interface';
 import { CreatedUser } from '../../domain/created-user';

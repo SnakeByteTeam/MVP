@@ -4,9 +4,11 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { API_BASE_URL } from 'src/app/core/tokens/api-base-url.token';
 import { UserApiService } from 'src/app/features/user-management/services/user-api.service';
+import { DecoderPasswordService } from 'src/app/features/user-management/services/decoder-password-service';
 
 describe('UserApiService', () => {
     let service: UserApiService;
+    let decoderPasswordService: DecoderPasswordService;
     let httpController: HttpTestingController;
 
     const baseUrl = 'http://localhost:3000';
@@ -22,6 +24,7 @@ describe('UserApiService', () => {
         });
 
         service = TestBed.inject(UserApiService);
+        decoderPasswordService = TestBed.inject(DecoderPasswordService);
         httpController = TestBed.inject(HttpTestingController);
     });
 
@@ -72,43 +75,31 @@ describe('UserApiService', () => {
         request.flush({ tempPassword: 'TempPass123' });
     });
 
-    it('isBase64Encoded gestisce i casi validi e non validi', () => {
-        const internalService = service as unknown as {
-            isBase64Encoded(value: string): boolean;
-        };
-
-        expect(internalService.isBase64Encoded('VGVzdA==')).toBe(true);
-        expect(internalService.isBase64Encoded('')).toBe(false);
-        expect(internalService.isBase64Encoded('abc')).toBe(false);
-        expect(internalService.isBase64Encoded('@@@=')).toBe(false);
+    it('decodeTempPassword decodifica base64 valida e mantiene valori non validi', () => {
+        expect(decoderPasswordService.decodeTempPassword('VGVzdA==')).toBe('Test');
+        expect(decoderPasswordService.decodeTempPassword('')).toBe('');
+        expect(decoderPasswordService.decodeTempPassword('abc')).toBe('abc');
+        expect(decoderPasswordService.decodeTempPassword('@@@=')).toBe('@@@=');
     });
 
-    it('isBase64Encoded ritorna false se atob lancia eccezione', () => {
-        const internalService = service as unknown as {
-            isBase64Encoded(value: string): boolean;
-        };
-
+    it('decodeTempPassword mantiene il valore originale se atob lancia eccezione', () => {
         const atobSpy = vi.spyOn(globalThis, 'atob').mockImplementation(() => {
             throw new Error('decode-failed');
         });
 
-        expect(internalService.isBase64Encoded('VGVzdA==')).toBe(false);
+        expect(decoderPasswordService.decodeTempPassword('VGVzdA==')).toBe('VGVzdA==');
 
         atobSpy.mockRestore();
     });
 
-    it('decodeTempPassword gestisce valore non base64 e gestione errore atob', () => {
-        const internalService = service as unknown as {
-            decodeTempPassword(value: string): string;
-        };
-
-        expect(internalService.decodeTempPassword('plainText')).toBe('plainText');
+    it('decodeTempPassword supporta input con spazi ai margini', () => {
+        expect(decoderPasswordService.decodeTempPassword('  VGVzdA==  ')).toBe('Test');
 
         const atobSpy = vi.spyOn(globalThis, 'atob').mockImplementation(() => {
             throw new Error('decode-failed');
         });
 
-        expect(internalService.decodeTempPassword('VGVzdA==')).toBe('VGVzdA==');
+        expect(decoderPasswordService.decodeTempPassword('  VGVzdA==  ')).toBe('  VGVzdA==  ');
 
         atobSpy.mockRestore();
     });

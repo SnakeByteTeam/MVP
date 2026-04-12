@@ -90,7 +90,7 @@ export class UsersService
 
   async createUser(req: CreateUserCmd): Promise<CreatedUser> {
     const password: string = this.generatePasswordPort.generatePassword(128);
-    const userEntity: UserEntity = await this.createUserPort.createUser(
+    const user: User = await this.createUserPort.createUser(
       new CreateUserWithTempPasswordCmd(
         req.username,
         req.surname,
@@ -102,12 +102,12 @@ export class UsersService
     const base64Password: string = this.convertBase64Port.toBase64(password);
 
     return new CreatedUser(
-      userEntity.id,
-      userEntity.username,
-      userEntity.surname,
-      userEntity.name,
-      userEntity.role,
-      base64Password,
+      user.getId(),
+      user.getUsername(),
+      user.getSurname(),
+      user.getName(),
+      user.getRole(),
+      base64Password
     );
   }
   async deleteUser(req: DeleteUserCmd): Promise<void> {

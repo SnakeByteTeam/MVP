@@ -1,8 +1,10 @@
 @startuml
+
 enum UserRole {
     AMMINISTRATORE
     OPERATORE_SANITARIO
 }
+
 interface UserSession {
     +userId: string
     +username: string
@@ -10,12 +12,19 @@ interface UserSession {
     +accessToken: string
     +isFirstAccess: boolean
 }
+
 interface LoginResponse {
     +accessToken: string
 }
+
 interface RefreshResponse {
     +accessToken: string
 }
+
+interface TokenResponse {
+    +accessToken: string
+}
+
 interface AuthClaims {
     +userId?: string | number
     +sub?: string | number
@@ -25,37 +34,14 @@ interface AuthClaims {
     +isFirstAccess?: boolean
     +firstAccess?: boolean
 }
-interface TokenResponse {
-    +accessToken: string
-}
-class InternalAuthService {
-    -http: unknown
-    -baseUrl: string
-    -currentUser$: BehaviorSubject<UserSession>
-    -token: string
-    -restoreSessionInFlight$: Observable<boolean>
-    +login(username: string, password: string): Observable<UserSession>
-    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
-    +refreshAccessToken(): Observable<string>
-    +restoreSessionFromRefresh(): Observable<boolean>
-    +logoutFromBackend(): Observable<void>
-    +logout(): void
-    +getToken(): string
-    +getCurrentUser$(): Observable<UserSession>
-    +getRole(): UserRole
-    +isAuthenticated(): boolean
-    +hasRole(role: UserRole): boolean
-    -setSession(session: UserSession): void
-    -buildSessionFromAccessToken(accessToken: string): UserSession
-    -parseAccessToken(accessToken: string): AuthClaims
-    -isUserRole(role: string): boolean
-}
+
 enum AlarmPriority {
-    WHITE
+    WHITE = 1
     GREEN
     ORANGE
     RED
 }
+
 interface ActiveAlarm {
     +id: string
     +alarmRuleId: string
@@ -63,11 +49,12 @@ interface ActiveAlarm {
     +alarmName: string
     +priority: AlarmPriority
     +activationTime: string
-    +resolutionTime: string
+    +resolutionTime: string | null
     +position: string
-    +userId: number
-    +userUsername?: string
+    +userId: number | null
+    +userUsername?: string | null
 }
+
 interface AlarmListVm {
     +alarms: ActiveAlarm[]
     +currentPage: number
@@ -75,9 +62,10 @@ interface AlarmListVm {
     +canGoPrevious: boolean
     +canGoNext: boolean
     +isResolving: boolean
-    +resolvingId: string
-    +resolveError: string
+    +resolvingId: string | null
+    +resolveError: string | null
 }
+
 interface AlarmRule {
     +id: string
     +name: string
@@ -91,6 +79,7 @@ interface AlarmRule {
     +datapointId?: string
     +position: string
 }
+
 interface CreateAlarmRuleRequestDto {
     +name: string
     +deviceId: string
@@ -102,6 +91,7 @@ interface CreateAlarmRuleRequestDto {
     +armingTime: string
     +dearmingTime: string
 }
+
 interface UpdateAlarmRuleRequestDto {
     +name: string
     +priority: number
@@ -111,8 +101,96 @@ interface UpdateAlarmRuleRequestDto {
     +dearmingTime: string
     +isArmed: boolean
 }
+
+interface AlarmEvent {
+    +id: string
+    +alarmRuleId: string
+    +alarmName: string
+    +priority: AlarmPriority
+    +activationTime: string
+    +resolutionTime: string | null
+}
+
+interface NotificationEvent {
+    +notificationId: string
+    +title: string
+    +sentAt: string
+    +eventType?: "triggered" | "resolved"
+}
+
+enum ActiveAlarmsSnapshotMode {
+    merge
+    replace
+}
+
+interface ApiErrorDisplayOptions {
+    +fallbackMessage: string
+    +actionLabel?: string
+    +forbiddenMessage?: string
+    +nonHttpStrategy?: "fallback" | "message"
+}
+
+enum AlarmActionButtonTone {
+    neutral
+    danger
+    primary
+}
+
+interface PriorityUi {
+    +label: string
+    +bubbleClass: string
+    +symbolClass: string
+    +symbol: string
+}
+
+interface AlarmTableColumn {
+    +id: string
+    +label: string
+}
+
+interface ActiveAlarmTableRow {
+    +id: string
+    +priority: AlarmPriority
+    +name: string
+    +device: string
+    +location: string
+    +status: string
+    +openedAt: string
+    +isManaged: boolean
+    +isResolving: boolean
+    +isActionDisabled: boolean
+    +actionLabel: string
+    +actionAriaLabel: string
+}
+
+interface PipeTransform
+interface OnInit
+
+class InternalAuthService {
+    -http: HttpClient
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession | null>
+    -token: string | null
+    -restoreSessionInFlight$: Observable<boolean> | null
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string | null
+    +getCurrentUser$(): Observable<UserSession | null>
+    +getRole(): UserRole | null
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}
+
 class AlarmApiService {
-    -http: unknown
+    -http: HttpClient
     -baseUrl: string
     -alarmsBaseUrl: string
     -alarmEventsBaseUrl: string
@@ -126,20 +204,7 @@ class AlarmApiService {
     +getAlarmEventById(alarmEventId: string): Observable<ActiveAlarm>
     +resolveAlarm(alarmId: string, userId: number): Observable<void>
 }
-interface AlarmEvent {
-    +id: string
-    +alarmRuleId: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-}
-interface NotificationEvent {
-    +notificationId: string
-    +title: string
-    +sentAt: string
-    +eventType?: "triggered" | "resolved"
-}
+
 class AlarmStateService {
     -activeAlarms$: BehaviorSubject<ActiveAlarm[]>
     -notifications$: BehaviorSubject<NotificationEvent[]>
@@ -152,27 +217,23 @@ class AlarmStateService {
     +removeNotification(notificationId: string): void
     +clearNotifications(): void
     +dismissNotification(notificationId: string): void
-    +dismissNotifications(notificationIds: readonly string[]): void
+    +dismissNotifications(notificationIds: ReadonlyArray<string>): void
     +getActiveAlarms$(): Observable<ActiveAlarm[]>
     +getActiveAlarmsCount$(): Observable<number>
     +getNotifications$(): Observable<NotificationEvent[]>
     +getDismissedNotificationIds$(): Observable<ReadonlySet<string>>
     +getUnreadNotificationsCount$(): Observable<number>
 }
-interface ApiErrorDisplayOptions {
-    +fallbackMessage: string
-    +actionLabel?: string
-    +forbiddenMessage?: string
-    +nonHttpStrategy?: "fallback" | "message"
-}
+
 class ApiErrorDisplayService {
     +toMessage(error: unknown, options: ApiErrorDisplayOptions): string
     -mapHttpError(error: HttpErrorResponse, options: ApiErrorDisplayOptions): string
-    -extractHttpMessage(error: HttpErrorResponse): string
-    -extractUnknownMessage(error: unknown): string
+    -extractHttpMessage(error: HttpErrorResponse): string | null
+    -extractUnknownMessage(error: unknown): string | null
 }
+
 class AlarmManagementPaginationService {
-    +pageLimit: 6
+    +pageLimit: number
     -pageOffsetSubject: BehaviorSubject<number>
     -canGoNextSubject: BehaviorSubject<boolean>
     +pageOffset$: Observable<number>
@@ -186,14 +247,15 @@ class AlarmManagementPaginationService {
     +update(offset: number, canGoNext: boolean): void
     +toPageNumber(offset: number): number
 }
+
 class AlarmManagementService {
     -alarmStateService: AlarmStateService
     -alarmApiService: AlarmApiService
     -authService: InternalAuthService
     -apiErrorDisplayService: ApiErrorDisplayService
     -paginationService: AlarmManagementPaginationService
-    -resolvingId$: BehaviorSubject<string>
-    -resolveError$: BehaviorSubject<string>
+    -resolvingId$: BehaviorSubject<string | null>
+    -resolveError$: BehaviorSubject<string | null>
     -pendingResolveRequests: number
     +vm$: Observable<AlarmListVm>
     +initialize(): void
@@ -201,22 +263,25 @@ class AlarmManagementService {
     +previousPage(): void
     +resolveAlarm(activeAlarmId: string): void
     -loadPage(offset: number, fallbackToPreviousIfEmpty?: boolean): void
-    -getActiveAlarmsForSession$(session: UserSession, offset: number): Observable<ActiveAlarm[]>
-    -loadPageState$(session: UserSession, offset: number, fallbackToPreviousIfEmpty?: boolean): Observable<{ alarms: ActiveAlarm[]; pageOffset: number; canGoNext: boolean; }>
+    -getActiveAlarmsForSession$(session: UserSession | null, offset: number): Observable<ActiveAlarm[]>
+    -loadPageState$(session: UserSession | null, offset: number, fallbackToPreviousIfEmpty?: boolean): Observable<{ alarms: ActiveAlarm[]; pageOffset: number; canGoNext: boolean; }>
 }
+
 class AlarmManagementTablePresenterService {
-    +toRows(alarms: ActiveAlarm[], resolvingId: string): ActiveAlarmTableRow[]
-    -getSafeDevice(deviceId: string): string
+    +toRows(alarms: ActiveAlarm[], resolvingId: string | null): ActiveAlarmTableRow[]
+    -getSafeDevice(deviceId: string | undefined): string
     -getActionLabel(isResolving: boolean, isManaged: boolean): string
     -getActionAriaLabel(alarmName: string, isManaged: boolean): string
-    -getSafeAlarmName(alarmName: string): string
-    -getSafeLocation(position: string): string
+    -getSafeAlarmName(alarmName: string | null | undefined): string
+    -getSafeLocation(position: string | null | undefined): string
 }
+
 class AlarmManagementRefreshService {
     -refreshRequested$: Subject<void>
     +requestRefresh(): void
     +getRefreshRequested$(): Observable<void>
 }
+
 class AlarmTableShellComponent {
     +title: InputSignal<string>
     +caption: InputSignal<string>
@@ -226,42 +291,103 @@ class AlarmTableShellComponent {
     +createRequested: OutputEmitterRef<void>
     +onCreateRequest(): void
 }
+
 class AlarmPriorityIndicatorComponent {
     +priority: InputSignal<AlarmPriority>
     +ui: Signal<PriorityUi>
 }
+
 class AlarmActionButtonComponent {
     +label: InputSignal<string>
-    +ariaLabel: InputSignal<string>
+    +ariaLabel: InputSignal<string | null>
     +tone: InputSignal<AlarmActionButtonTone>
     +disabled: InputSignal<boolean>
     +pressed: OutputEmitterRef<void>
-    +buttonClass: Signal<"care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--primary focus-visible:outline-amber-400" | "care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--danger focus-visible:outline-red-500" | "care-btn care-...
+    +buttonClass: Signal<string>
     +onPressed(): void
 }
-class ElapsedTimePipe implements PipeTransform {
+
+class ElapsedTimePipe {
     +transform(sentAt: string): string
 }
-class AlarmPageManagementComponent implements OnInit {
+
+class AlarmPageManagementComponent {
     -alarmManagementService: AlarmManagementService
     -tablePresenter: AlarmManagementTablePresenterService
     -alarmManagementRefreshService: AlarmManagementRefreshService
     -destroyRef: DestroyRef
     +columns: readonly AlarmTableColumn[]
-    +vm: any
+    +vm: Signal<AlarmListVm | null>
     +rows: Signal<ActiveAlarmTableRow[]>
-    +canGoPrevious: Signal<any>
-    +canGoNext: Signal<any>
-    +currentPage: Signal<any>
+    +canGoPrevious: Signal<boolean>
+    +canGoNext: Signal<boolean>
+    +currentPage: Signal<number>
     +ngOnInit(): void
     +onResolve(activeAlarmId: string): void
     +onNextPage(): void
     +onPreviousPage(): void
 }
-class MockElapsedTimePipe implements PipeTransform {
-    +transform(value: string): string
-}
-class MockElapsedTimePipe implements PipeTransform {
-    +transform(value: string): string
-}
+
+' Realizzazioni
+ElapsedTimePipe ..|> PipeTransform
+AlarmPageManagementComponent ..|> OnInit
+
+' Relazioni modello/dominio
+UserSession --> UserRole
+ActiveAlarm --> AlarmPriority
+AlarmRule --> AlarmPriority
+AlarmEvent --> AlarmPriority
+AlarmListVm --> ActiveAlarm
+ActiveAlarmTableRow --> AlarmPriority
+
+' Relazioni Auth
+InternalAuthService --> UserSession
+InternalAuthService --> UserRole
+InternalAuthService ..> LoginResponse
+InternalAuthService ..> RefreshResponse
+InternalAuthService ..> TokenResponse
+InternalAuthService ..> AuthClaims
+
+' Relazioni API e stato
+AlarmApiService ..> AlarmRule
+AlarmApiService ..> CreateAlarmRuleRequestDto
+AlarmApiService ..> UpdateAlarmRuleRequestDto
+AlarmApiService ..> ActiveAlarm
+
+AlarmStateService --> ActiveAlarm
+AlarmStateService --> NotificationEvent
+AlarmStateService ..> AlarmEvent
+AlarmStateService ..> ActiveAlarmsSnapshotMode
+
+ApiErrorDisplayService ..> ApiErrorDisplayOptions
+
+' Relazioni feature alarm-management
+AlarmManagementService --> AlarmStateService
+AlarmManagementService --> AlarmApiService
+AlarmManagementService --> InternalAuthService
+AlarmManagementService --> ApiErrorDisplayService
+AlarmManagementService --> AlarmManagementPaginationService
+AlarmManagementService ..> AlarmListVm
+AlarmManagementService ..> ActiveAlarm
+AlarmManagementService ..> UserSession
+
+AlarmManagementTablePresenterService ..> ActiveAlarm
+AlarmManagementTablePresenterService ..> ActiveAlarmTableRow
+
+AlarmTableShellComponent ..> AlarmTableColumn
+AlarmPriorityIndicatorComponent ..> AlarmPriority
+AlarmPriorityIndicatorComponent ..> PriorityUi
+AlarmActionButtonComponent ..> AlarmActionButtonTone
+
+AlarmPageManagementComponent --> AlarmManagementService
+AlarmPageManagementComponent --> AlarmManagementTablePresenterService
+AlarmPageManagementComponent --> AlarmManagementRefreshService
+AlarmPageManagementComponent ..> AlarmListVm
+AlarmPageManagementComponent ..> ActiveAlarmTableRow
+AlarmPageManagementComponent ..> AlarmTableColumn
+AlarmPageManagementComponent ..> AlarmTableShellComponent
+AlarmPageManagementComponent ..> AlarmPriorityIndicatorComponent
+AlarmPageManagementComponent ..> AlarmActionButtonComponent
+AlarmPageManagementComponent ..> ElapsedTimePipe
+
 @enduml

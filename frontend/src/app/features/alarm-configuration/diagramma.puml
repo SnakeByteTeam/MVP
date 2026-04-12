@@ -1,74 +1,60 @@
 @startuml
-enum UserRole {
-    AMMINISTRATORE
-    OPERATORE_SANITARIO
-}
-interface UserSession {
-    +userId: string
-    +username: string
-    +role: UserRole
-    +accessToken: string
-    +isFirstAccess: boolean
-}
-interface LoginResponse {
-    +accessToken: string
-}
-interface RefreshResponse {
-    +accessToken: string
-}
-interface AuthClaims {
-    +userId?: string | number
-    +sub?: string | number
-    +id?: string | number
-    +username?: string
-    +role?: string
-    +isFirstAccess?: boolean
-    +firstAccess?: boolean
-}
-interface TokenResponse {
-    +accessToken: string
-}
-class InternalAuthService {
-    -http: unknown
-    -baseUrl: string
-    -currentUser$: BehaviorSubject<UserSession>
-    -token: string
-    -restoreSessionInFlight$: Observable<boolean>
-    +login(username: string, password: string): Observable<UserSession>
-    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
-    +refreshAccessToken(): Observable<string>
-    +restoreSessionFromRefresh(): Observable<boolean>
-    +logoutFromBackend(): Observable<void>
-    +logout(): void
-    +getToken(): string
-    +getCurrentUser$(): Observable<UserSession>
-    +getRole(): UserRole
-    +isAuthenticated(): boolean
-    +hasRole(role: UserRole): boolean
-    -setSession(session: UserSession): void
-    -buildSessionFromAccessToken(accessToken: string): UserSession
-    -parseAccessToken(accessToken: string): AuthClaims
-    -isUserRole(role: string): boolean
-}
+
+interface OnInit
+
 enum AlarmPriority {
-    WHITE
+    WHITE = 1
     GREEN
     ORANGE
     RED
 }
+
+enum ThresholdOperator {
+    GREATER_THAN
+    GREATER_THAN_OR_EQUAL
+    LESS_THAN
+    LESS_THAN_OR_EQUAL
+    EQUAL_TO
+}
+
+enum AlarmActionButtonTone {
+    neutral
+    danger
+    primary
+}
+
+enum DeviceType {
+    UNKNOWN
+    THERMOSTAT
+    FALL_SENSOR
+    PRESENCE_SENSOR
+    LIGHT
+    ALARM_BUTTON
+    ENTRANCE_DOOR
+    BLIND
+}
+
+enum DeviceStatus {
+    ONLINE
+    OFFLINE
+    ALARM
+    UNKNOWN
+}
+
 interface AlarmRule {
     +id: string
     +name: string
     +thresholdOperator: string
     +thresholdValue: string
     +priority: AlarmPriority
-    +armingTime: string | Date
-    +dearmingTime: string | Date
+    +armingTime: Date | string
+    +dearmingTime: Date | string
     +isArmed: boolean
     +deviceId: string
     +datapointId?: string
     +position: string
 }
+
 interface CreateAlarmRuleRequestDto {
     +name: string
     +deviceId: string
@@ -80,6 +66,7 @@ interface CreateAlarmRuleRequestDto {
     +armingTime: string
     +dearmingTime: string
 }
+
 interface UpdateAlarmRuleRequestDto {
     +name: string
     +priority: number
@@ -89,156 +76,36 @@ interface UpdateAlarmRuleRequestDto {
     +dearmingTime: string
     +isArmed: boolean
 }
-interface ActiveAlarm {
-    +id: string
-    +alarmRuleId: string
-    +deviceId?: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-    +position: string
-    +userId: number
-    +userUsername?: string
-}
-class AlarmApiService {
-    -http: unknown
-    -baseUrl: string
-    -alarmsBaseUrl: string
-    -alarmEventsBaseUrl: string
-    +getAlarmRules(): Observable<AlarmRule[]>
-    +getAlarmRule(id: string): Observable<AlarmRule>
-    +createAlarmRule(payload: CreateAlarmRuleRequestDto): Observable<AlarmRule>
-    +updateAlarmRule(id: string, payload: UpdateAlarmRuleRequestDto): Observable<AlarmRule>
-    +deleteAlarmRule(id: string): Observable<void>
-    +getActiveAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
-    +getResolvedAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
-    +getAlarmEventById(alarmEventId: string): Observable<ActiveAlarm>
-    +resolveAlarm(alarmId: string, userId: number): Observable<void>
-}
-class AlarmManagementRefreshService {
-    -refreshRequested$: Subject<void>
-    +requestRefresh(): void
-    +getRefreshRequested$(): Observable<void>
-}
-interface ApiErrorDisplayOptions {
-    +fallbackMessage: string
-    +actionLabel?: string
-    +forbiddenMessage?: string
-    +nonHttpStrategy?: "fallback" | "message"
-}
-class ApiErrorDisplayService {
-    +toMessage(error: unknown, options: ApiErrorDisplayOptions): string
-    -mapHttpError(error: HttpErrorResponse, options: ApiErrorDisplayOptions): string
-    -extractHttpMessage(error: HttpErrorResponse): string
-    -extractUnknownMessage(error: unknown): string
-}
-enum ThresholdOperator {
-    GREATER_THAN
-    GREATER_THAN_OR_EQUAL
-    LESS_THAN
-    LESS_THAN_OR_EQUAL
-    EQUAL_TO
-}
+
 interface AlarmConfigFormValue {
     +name: string
     +plantId: string
     +deviceId: string
     +datapointId?: string
-    +priority: AlarmPriority
-    +thresholdOperator: ThresholdOperator
+    +priority: AlarmPriority | null
+    +thresholdOperator: ThresholdOperator | null
     +thresholdValue: string
     +armingTime: string
     +dearmingTime: string
     +enabled: boolean
 }
-class AlarmTimeMapper {
-    +toFormTime(value: string | Date): string
-    -toHourMinute(value: string): string
+
+interface AlarmConfigTableRow {
+    +id: string
+    +name: string
+    +position: string
+    +priority: AlarmPriority
+    +threshold: string
+    +armingTime: string
+    +dearmingTime: string
+    +isEnabled: boolean
 }
-class AlarmRuleRequestMapper {
-    -alarmTimeMapper: AlarmTimeMapper
-    -hourMinutePattern: RegExp
-    +toCreateRequest(formValue: AlarmConfigFormValue): CreateAlarmRuleRequestDto
-    +toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto
-    +toToggleRequest(rule: AlarmRule, isArmed: boolean): UpdateAlarmRuleRequestDto
-    -toPriorityNumber(priority: AlarmPriority): number
-    -toThresholdOperatorCode(operator: ThresholdOperator): string
-    -requireField(value: T, fieldName: string): T
-    -requireNonEmptyString(value: string, fieldName: string): string
-    -normalizeOptionalString(value?: string): string
-    -requireHourMinuteString(value: string, fieldName: string): string
-    -requireThresholdOperator(operator: string): string
-    -toRequestThresholdValue(value: string, fieldName: string): string
+
+interface AlarmTableColumn {
+    +id: string
+    +label: string
 }
-class AlarmConfigStateService {
-    -api: AlarmApiService
-    -alarmManagementRefreshService: AlarmManagementRefreshService
-    -apiErrorDisplayService: ApiErrorDisplayService
-    -requestMapper: AlarmRuleRequestMapper
-    -alarmsSubject: BehaviorSubject<AlarmRule[]>
-    -errorSubject: BehaviorSubject<string>
-    +alarms$: Observable<AlarmRule[]>
-    +error$: Observable<string>
-    -clearError(): void
-    -handleError(message: string): Observable<T>
-    -handleApiError(fallbackMessage: string): OperatorFunction<T, T>
-    -reloadAlarmsAfterMutation(): void
-    +loadAlarmRules(): void
-    +getAlarmRuleById(id: string): Observable<AlarmRule>
-    +createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule>
-    +updateAlarmRule(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule>
-    +toggleEnabled(alarmId: string, enabled: boolean): Observable<AlarmRule>
-    +deleteAlarmRule(alarmId: string): Observable<void>
-}
-class AlarmTableShellComponent {
-    +title: InputSignal<string>
-    +caption: InputSignal<string>
-    +columns: InputSignal<readonly AlarmTableColumn[]>
-    +showCreateButton: InputSignal<boolean>
-    +createButtonAriaLabel: InputSignal<string>
-    +createRequested: OutputEmitterRef<void>
-    +onCreateRequest(): void
-}
-class AlarmPriorityIndicatorComponent {
-    +priority: InputSignal<AlarmPriority>
-    +ui: Signal<PriorityUi>
-}
-class AlarmActionButtonComponent {
-    +label: InputSignal<string>
-    +ariaLabel: InputSignal<string>
-    +tone: InputSignal<AlarmActionButtonTone>
-    +disabled: InputSignal<boolean>
-    +pressed: OutputEmitterRef<void>
-    +buttonClass: Signal<"care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--primary focus-visible:outline-amber-400" | "care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--danger focus-visible:outline-red-500" | "care-btn care-...
-    +onPressed(): void
-}
-class AlarmToggleSwitchComponent {
-    +checked: InputSignal<boolean>
-    +disabled: InputSignal<boolean>
-    +ariaLabel: InputSignal<string>
-    +toggled: OutputEmitterRef<boolean>
-    +trackClass: Signal<"relative inline-flex h-5 w-9 items-center rounded-full border transition focus-visible:outline-2 focus-visible:outline-offset-2 border-yellow-700 bg-yellow-400 focus-visible:outline-yellow-500 disabled:border-slate-400 disabled:bg-slate-300" | "relative inline-flex h-5 w-9 items-center rounded-full border tr...
-    +thumbClass: Signal<"inline-block h-4 w-4 transform rounded-full border border-slate-500 bg-white transition translate-x-4" | "inline-block h-4 w-4 transform rounded-full border border-slate-500 bg-white transition translate-x-0.5">
-    +onToggle(): void
-}
-class ConfirmDialogComponent {
-    +message: InputSignal<string>
-    +confirmLabel: InputSignal<string>
-    +cancelLabel: InputSignal<string>
-    +confirmed: OutputEmitterRef<void>
-    +cancelled: OutputEmitterRef<void>
-    +onConfirm(): void
-    +onCancel(): void
-}
-class ModalShellComponent {
-    +open: InputSignal<boolean>
-    +title: InputSignal<string>
-    +description: InputSignal<string>
-    +closeLabel: InputSignal<string>
-    +closed: OutputEmitterRef<void>
-    +onClose(): void
-}
+
 interface Datapoint {
     +id: string
     +name: string
@@ -248,26 +115,13 @@ interface Datapoint {
     +enum: string[]
     +sfeType: string
 }
-class AlarmRuleFormMapper {
-    -alarmTimeMapper: AlarmTimeMapper
-    +toFormValue(rule: AlarmRule): AlarmConfigFormValue
-    -toFormThresholdOperator(operator: string): ThresholdOperator
-}
-enum DeviceType {
-    UNKNOWN
-    THERMOSTAT
-    FALL_SENSOR
-    PRESENCE_SENSOR
-    LIGHT
-    ALARM_BUTTON
-    ENTRANCE_DOOR
-    BLIND
-}
+
 interface DeviceAction {
     +key: string
     +label: string
     +disabled?: boolean
 }
+
 interface Device {
     +id: string
     +name: string
@@ -276,18 +130,21 @@ interface Device {
     +actions: DeviceAction[]
     +datapoints: Datapoint[]
 }
+
 interface Room {
     +id: string
     +name: string
     +hasActiveAlarm: boolean
     +devices: Device[]
 }
+
 interface Apartment {
     +id: string
     +name: string
     +isEnabled: boolean
     +rooms: Room[]
 }
+
 interface PlantDatapointDto {
     +id: string
     +name: string
@@ -297,6 +154,7 @@ interface PlantDatapointDto {
     +enum?: string[]
     +sfeType: string
 }
+
 interface PlantDeviceDto {
     +id: string
     +name: string
@@ -304,178 +162,137 @@ interface PlantDeviceDto {
     +subType?: string
     +datapoints?: PlantDatapointDto[]
 }
+
 interface PlantRoomDto {
     +id: string
     +name: string
     +devices: PlantDeviceDto[]
 }
+
 interface PlantDto {
     +id: string
     +name: string
     +wardId?: number
     +rooms: PlantRoomDto[]
 }
-class DeviceDatapointExtractionService {
-    -numericThresholdPattern: RegExp
-    +extractDeviceOptions(apartment: Apartment): DeviceDatapointOption[]
-    +findReadableDatapoints(deviceId: string, deviceOptions: readonly DeviceDatapointOption[]): Datapoint[]
-    +findDatapointById(datapointId: string, datapoints: readonly Datapoint[]): Datapoint
-    +findDatapointByDeviceAndDatapointId(plants: readonly PlantDto[], deviceId: string, datapointId: string): Datapoint
-    +getAllowedOperators(datapoint: Datapoint): ThresholdOperator[]
-    +getEnumValues(datapoint: Datapoint): string[]
-    +usesEnumeratedThreshold(datapoint: Datapoint): boolean
-    +normalizeThresholdValue(datapoint: Datapoint, value: string): string
-    +isThresholdValueValid(datapoint: Datapoint, value: string): boolean
-    -normalizeDatapoints(datapoints: readonly Datapoint[]): Datapoint[]
-    -normalizeEnumValues(values: readonly string[]): string[]
-}
-class AlarmConfigFormValidationHelper {
-    -datapointExtraction: DeviceDatapointExtractionService
-    +applyThresholdConstraints(__0: ApplyThresholdConstraintsParams): void
-    -resolveAllowedOperators(mode: "create" | "edit", datapoint: Datapoint, currentOperator: ThresholdOperator): ThresholdOperator[]
-    -operatorAllowedValidator(allowedOperators: readonly ThresholdOperator[]): ValidatorFn
-    -enumThresholdValidator(enumValues: readonly string[]): ValidatorFn
-}
-interface CreateWardDto {
-    +name: string
-}
-interface UpdateWardDto {
-    +name: string
-}
-interface AssignOperatorDto {
-    +userId: number
-}
-interface AssignPlantDto {
-    +plantId: string
-}
-interface WardUserDto {
-    +id: number
-    +username: string
-}
+
 interface WardPlantDto {
     +id: string
     +name: string
 }
+
 interface WardSummaryDto {
     +id: number
     +name: string
 }
-interface Plant {
+
+interface DeviceDatapointOption {
     +id: string
-    +name: string
+    +label: string
+    +datapoints: Datapoint[]
 }
-interface User {
-    +id: number
-    +firstName: string
-    +lastName: string
-    +username: string
-    +role: UserRole
+
+interface AlarmConfigFormLike {
+    +controls: { name; plantId; deviceId; datapointId; thresholdOperator }
 }
-interface Ward {
-    +id: number
-    +name: string
-    +apartments: Plant[]
-    +operators: User[]
+
+interface DeviceSelectionResult {
+    +normalizedDeviceId: string
+    +readableDatapoints: Datapoint[]
+    +autoSelectedDatapointId: string | null
 }
+
+interface DatapointSelectionResult {
+    +normalizedDatapointId: string
+    +selectedDatapoint: Datapoint | null
+}
+
+interface ApplyThresholdConstraintsParams {
+    +mode: "create" | "edit"
+    +datapoint: Datapoint | null
+    +thresholdOperatorControl: AbstractControl
+    +thresholdValueControl: AbstractControl
+}
+
+interface ApiErrorDisplayOptions {
+    +fallbackMessage: string
+    +actionLabel?: string
+    +forbiddenMessage?: string
+    +nonHttpStrategy?: "fallback" | "message"
+}
+
+interface PriorityUi {
+    +label: string
+    +bubbleClass: string
+    +symbolClass: string
+    +symbol: string
+}
+
+class AlarmApiService {
+    +getAlarmRules(): Observable<AlarmRule[]>
+    +getAlarmRule(id: string): Observable<AlarmRule>
+    +createAlarmRule(payload: CreateAlarmRuleRequestDto): Observable<AlarmRule>
+    +updateAlarmRule(id: string, payload: UpdateAlarmRuleRequestDto): Observable<AlarmRule>
+    +deleteAlarmRule(id: string): Observable<void>
+}
+
+class AlarmManagementRefreshService {
+    +requestRefresh(): void
+    +getRefreshRequested$(): Observable<void>
+}
+
+class ApiErrorDisplayService {
+    +toMessage(error: unknown, options: ApiErrorDisplayOptions): string
+}
+
 class WardApiService {
-    -http: unknown
-    -baseUrl: string
-    -wardsEndpoint: string
-    -wardUsersRelationshipsEndpoint: string
-    -wardPlantsRelationshipsEndpoint: string
-    -plantEndpoint: string
-    -usersEndpoint: string
-    +getWards(): Observable<WardSummaryDto[]>
-    +createWard(dto: CreateWardDto): Observable<Ward>
-    +updateWard(wardId: number, dto: UpdateWardDto): Observable<Ward>
-    +deleteWard(wardId: number): Observable<void>
-    +getOperatorsByWardId(wardId: number): Observable<WardUserDto[]>
-    +getAvailableOperators(): Observable<WardUserDto[]>
-    +assignOperatorToWard(wardId: number, dto: AssignOperatorDto): Observable<void>
-    +removeOperatorFromWard(wardId: number, userId: number): Observable<void>
-    +getPlantsByWardId(wardId: number): Observable<WardPlantDto[]>
     +getAvailablePlants(): Observable<WardPlantDto[]>
-    +assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void>
-    +removePlantFromWard(plantId: string): Observable<void>
+    +getWards(): Observable<WardSummaryDto[]>
+    +getPlantsByWardId(wardId: number): Observable<WardPlantDto[]>
 }
-interface DeviceTypeRule {
-    +deviceType: DeviceType
-    +tokens: readonly string[]
-}
-interface DeviceTypeResolutionInput {
-    +rawType?: string
-    +rawSubType?: string
-    +rawName?: string
-    +sfeTypes?: readonly string[]
-}
-+resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
-+getDeviceTypeLabel(type: DeviceType): string
-+getEndpointLabel(sfeType: string): string
-+getDiscoveredUnmappedSfeCodes(): string[]
-+resolveFromRules(normalizedValues: readonly string[], rules: readonly DeviceTypeRule[]): DeviceType
-+includesAny(value: string, tokens: readonly string[]): boolean
-+normalize(value: string): string
-+humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): string
-+humanizeSfeSuffix(value: string): string
-class WardRealtimeCacheService {
-    +getWardIds(userId: string): string[]
-    +setWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
-    +mergeWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
-    +clearWardIds(userId: string): void
-    +clearAll(): void
-    -normalizeUserId(value: string): string
-    -normalizeWardIds(values: readonly WardIdInput[]): string[]
-    -readCache(): WardIdsByUser
-    -writeCache(cache: WardIdsByUser): void
-    -getStorage(): Storage
-    -isWardIdsByUser(value: unknown): boolean
-}
-interface ApartmentOption {
-    +id: string
-    +name: string
-}
+
 class ApartmentApiService {
-    -http: unknown
-    -baseUrl: string
-    -authService: InternalAuthService
-    -wardRealtimeCache: WardRealtimeCacheService
-    -plantEndpoint: string
-    -apartmentsEndpoint: string
-    +getCurrentApartment(): Observable<Apartment>
-    +getAvailableApartments(): Observable<ApartmentOption[]>
     +getApartmentByPlantId(plantId: string): Observable<Apartment>
     +getAllPlants(): Observable<PlantDto[]>
-    +enableApartment(apartmentId: string): Observable<void>
-    +disableApartment(apartmentId: string): Observable<void>
-    +setActivePlantId(plantId: string): void
-    -getActivePlantId(): string
-    -getAvailablePlants(): Observable<PlantDto[]>
-    -extractPlants(response: unknown): PlantDto[]
-    -asPlantArray(value: unknown): PlantDto[]
-    -cacheWardIdsForCurrentUser(plants: readonly PlantDto[]): void
-    -mapPlantToApartment(plant: PlantDto): Apartment
-    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
-    -normalizeDeviceName(name: string): string
-    -getDevicePriorityScore(device: PlantDeviceDto): number
-    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
-    -mapDeviceStatus(rawType: string): DeviceStatus
 }
-class AlarmConfigFormStateService {
-    -hasRequestedPlants: boolean
-    -wardApi: WardApiService
-    -apartmentApi: ApartmentApiService
+
+class AlarmTimeMapper {
+    +toFormTime(value: Date | string): string
+    -toHourMinute(value: string): string
+}
+
+class AlarmRuleFormMapper {
+    -alarmTimeMapper: AlarmTimeMapper
+    +toFormValue(rule: AlarmRule): AlarmConfigFormValue
+    -toFormThresholdOperator(operator: string): ThresholdOperator
+}
+
+class AlarmRuleRequestMapper {
+    -alarmTimeMapper: AlarmTimeMapper
+    -hourMinutePattern: RegExp
+    +toCreateRequest(formValue: AlarmConfigFormValue): CreateAlarmRuleRequestDto
+    +toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto
+    +toToggleRequest(rule: AlarmRule, isArmed: boolean): UpdateAlarmRuleRequestDto
+}
+
+class DeviceDatapointExtractionService {
+    -numericThresholdPattern: RegExp
+    +extractDeviceOptions(apartment: Apartment): DeviceDatapointOption[]
+    +findReadableDatapoints(deviceId: string, deviceOptions: readonly DeviceDatapointOption[]): Datapoint[]
+    +findDatapointById(datapointId: string, datapoints: readonly Datapoint[]): Datapoint | null
+    +findDatapointByDeviceAndDatapointId(plants: readonly PlantDto[], deviceId: string, datapointId: string): Datapoint | null
+    +getAllowedOperators(datapoint: Datapoint | null): ThresholdOperator[]
+    +getEnumValues(datapoint: Datapoint | null): string[]
+    +usesEnumeratedThreshold(datapoint: Datapoint | null): boolean
+    +normalizeThresholdValue(datapoint: Datapoint | null, value: string): string
+    +isThresholdValueValid(datapoint: Datapoint | null, value: string): boolean
+}
+
+class AlarmConfigFormValidationHelper {
     -datapointExtraction: DeviceDatapointExtractionService
-    +plants: WritableSignal<WardPlantDto[]>
-    +plantsLoadError: WritableSignal<string>
-    +devicesLoadError: WritableSignal<string>
-    +isDevicesLoading: WritableSignal<boolean>
-    +ensurePlantsLoaded(mode: "create" | "edit"): Observable<void>
-    +resetDevicesLoadState(): void
-    +loadDeviceOptionsByPlant(plantId: string): Observable<DeviceDatapointOption[]>
-    +resolveDatapointForEdit(deviceId: string, datapointId: string): Observable<Datapoint>
-    -loadAllPlants(): Observable<WardPlantDto[]>
-    -mergePlants(availablePlants: WardPlantDto[], assignedPlants: WardPlantDto[]): WardPlantDto[]
+    +applyThresholdConstraints(params: ApplyThresholdConstraintsParams): void
 }
+
 class AlarmConfigFormFieldOrchestratorHelper {
     -datapointExtraction: DeviceDatapointExtractionService
     +applyModeState(form: AlarmConfigFormLike, mode: "create" | "edit"): void
@@ -483,65 +300,70 @@ class AlarmConfigFormFieldOrchestratorHelper {
     +resolveDeviceSelection(deviceId: string, deviceOptions: readonly DeviceDatapointOption[]): DeviceSelectionResult
     +resolveDatapointSelection(datapointId: string, datapointOptions: readonly Datapoint[]): DatapointSelectionResult
 }
-+formatAlarmPositionLabel(position: string): string
+
+class AlarmConfigFormStateService {
+    -hasRequestedPlants: boolean
+    -wardApi: WardApiService
+    -apartmentApi: ApartmentApiService
+    -datapointExtraction: DeviceDatapointExtractionService
+    +plants: WritableSignal<WardPlantDto[]>
+    +plantsLoadError: WritableSignal<string | null>
+    +devicesLoadError: WritableSignal<string | null>
+    +isDevicesLoading: WritableSignal<boolean>
+    +ensurePlantsLoaded(mode: "create" | "edit"): Observable<void>
+    +resetDevicesLoadState(): void
+    +loadDeviceOptionsByPlant(plantId: string): Observable<DeviceDatapointOption[]>
+    +resolveDatapointForEdit(deviceId: string, datapointId: string): Observable<Datapoint | null>
+}
+
+class AlarmConfigStateService {
+    -api: AlarmApiService
+    -alarmManagementRefreshService: AlarmManagementRefreshService
+    -apiErrorDisplayService: ApiErrorDisplayService
+    -requestMapper: AlarmRuleRequestMapper
+    -alarmsSubject: BehaviorSubject<AlarmRule[]>
+    -errorSubject: BehaviorSubject<string | null>
+    +alarms$: Observable<AlarmRule[]>
+    +error$: Observable<string | null>
+    +loadAlarmRules(): void
+    +getAlarmRuleById(id: string): Observable<AlarmRule>
+    +createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule>
+    +updateAlarmRule(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule>
+    +toggleEnabled(alarmId: string, enabled: boolean): Observable<AlarmRule>
+    +deleteAlarmRule(alarmId: string): Observable<void>
+}
+
+class AlarmConfigTablePresenterService {
+    -alarmTimeMapper: AlarmTimeMapper
+    +toRows(rules: AlarmRule[]): AlarmConfigTableRow[]
+}
+
+class AlarmPositionLabelUtil <<utility>> {
+    +formatAlarmPositionLabel(position: string): string
+}
+
 class AlarmConfigFormComponent {
     +mode: InputSignal<"create" | "edit">
-    +initialRule: InputSignal<AlarmRule>
+    +initialRule: InputSignal<AlarmRule | null>
     +submittedForm: OutputEmitterRef<AlarmConfigFormValue>
     +cancelled: OutputEmitterRef<void>
-    -fb: FormBuilder
     -formMapper: AlarmRuleFormMapper
     -formState: AlarmConfigFormStateService
     -datapointExtraction: DeviceDatapointExtractionService
     -validationHelper: AlarmConfigFormValidationHelper
     -fieldOrchestrator: AlarmConfigFormFieldOrchestratorHelper
-    -destroyRef: DestroyRef
-    -editDatapointLookupVersion: number
-    +form: FormGroup<ɵNonNullableFormControls<{ name: string[]; plantId: string[]; deviceId: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; datapointId: string[]; priority: (AlarmPriority | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; ... 4 more ...; enabled: boolean[];...
-    +isEditMode: Signal<boolean>
-    +plants: WritableSignal<WardPlantDto[]>
-    +deviceOptions: WritableSignal<DeviceDatapointOption[]>
-    +datapointOptions: WritableSignal<Datapoint[]>
-    +plantsLoadError: WritableSignal<string>
-    +devicesLoadError: WritableSignal<string>
-    +isDevicesLoading: WritableSignal<boolean>
-    +selectedDeviceId: WritableSignal<string>
-    +selectedDatapointId: WritableSignal<string>
-    +selectedDatapoint: WritableSignal<Datapoint>
-    +isPlantSelectionVisible: Signal<boolean>
-    +editPosition: Signal<string>
-    +priorityOptions: AlarmPriority[]
-    +thresholdOperatorOptions: Signal<ThresholdOperator[]>
-    +thresholdValueEnumHints: Signal<string[]>
-    +thresholdValueHelpText: Signal<"Inserisci uno dei valori previsti dal datapoint associato alla regola." | "Inserisci un valore numerico (es. 10, 10.5, -3)." | "Seleziona prima il dispositivo." | "Seleziona un datapoint leggibile per impostare la soglia." | "Inserisci uno dei valori previsti dal datapoint selezionato.">
-    -buildForm(): FormGroup<ɵNonNullableFormControls<{ name: string[]; plantId: string[]; deviceId: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; datapointId: string[]; priority: (AlarmPriority | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; ... 4 more ...; enabled: boolean[];...
-    -createEmptyFormValue(): AlarmConfigFormValue
     +onSubmit(): void
-    -applyModeState(): void
-    -ensurePlantsLoaded(): void
-    -onPlantChanged(plantId: string): void
-    -onDeviceChanged(deviceId: string): void
-    -onDatapointChanged(datapointId: string): void
-    -applyThresholdConstraints(datapoint: Datapoint): void
-    -loadEditDatapointMetadata(deviceId: string, datapointId: string, lookupVersion: number): void
     +onCancel(): void
 }
-class AlarmConfigTablePresenterService {
-    -alarmTimeMapper: AlarmTimeMapper
-    +toRows(rules: AlarmRule[]): AlarmConfigTableRow[]
-}
-class AlarmConfigPageComponent implements OnInit {
+
+class AlarmConfigPageComponent {
     -stateService: AlarmConfigStateService
     -tablePresenter: AlarmConfigTablePresenterService
     +columns: readonly AlarmTableColumn[]
-    +alarms: any
-    +error: any
-    +isModalOpen: WritableSignal<boolean>
-    +editingRule: WritableSignal<AlarmRule>
-    +pendingDelete: WritableSignal<{ id: string; name: string; }>
-    +pendingToggleRuleId: WritableSignal<string>
+    +alarms: Signal<AlarmRule[]>
+    +error: Signal<string | null>
     +rows: Signal<AlarmConfigTableRow[]>
-    +modalTitle: Signal<"Modifica allarme" | "Creazione allarme">
+    +modalTitle: Signal<string>
     +ngOnInit(): void
     +onCreateNew(): void
     +onEdit(alarmRuleId: string): void
@@ -549,8 +371,159 @@ class AlarmConfigPageComponent implements OnInit {
     +onDelete(id: string, name: string): void
     +onDeleteConfirmed(): void
     +onDeleteCancelled(): void
-    +getDeleteConfirmMessage(): string
     +onFormSubmitted(formValue: AlarmConfigFormValue): void
     +onModalClosed(): void
 }
+
+class AlarmTableShellComponent {
+    +columns: InputSignal<readonly AlarmTableColumn[]>
+    +createRequested: OutputEmitterRef<void>
+}
+
+class AlarmPriorityIndicatorComponent {
+    +priority: InputSignal<AlarmPriority>
+    +ui: Signal<PriorityUi>
+}
+
+class AlarmActionButtonComponent {
+    +tone: InputSignal<AlarmActionButtonTone>
+    +pressed: OutputEmitterRef<void>
+}
+
+class AlarmToggleSwitchComponent {
+    +checked: InputSignal<boolean>
+    +disabled: InputSignal<boolean>
+    +toggled: OutputEmitterRef<boolean>
+}
+
+class ConfirmDialogComponent {
+    +confirmed: OutputEmitterRef<void>
+    +cancelled: OutputEmitterRef<void>
+}
+
+class ModalShellComponent {
+    +open: InputSignal<boolean>
+    +closed: OutputEmitterRef<void>
+}
+
+' Realizzazione
+AlarmConfigPageComponent ..|> OnInit
+
+' Composizione modelli
+Apartment *-- Room
+Room *-- Device
+Device *-- Datapoint
+Device *-- DeviceAction
+PlantDto *-- PlantRoomDto
+PlantRoomDto *-- PlantDeviceDto
+PlantDeviceDto *-- PlantDatapointDto
+
+' Associazioni dominio
+AlarmRule --> AlarmPriority
+AlarmConfigFormValue --> AlarmPriority
+AlarmConfigFormValue --> ThresholdOperator
+AlarmConfigTableRow --> AlarmPriority
+Device --> DeviceType
+Device --> DeviceStatus
+DeviceDatapointOption --> Datapoint
+DeviceSelectionResult --> Datapoint
+DatapointSelectionResult --> Datapoint
+ApplyThresholdConstraintsParams --> Datapoint
+
+' Core service deps
+AlarmApiService ..> AlarmRule
+AlarmApiService ..> CreateAlarmRuleRequestDto
+AlarmApiService ..> UpdateAlarmRuleRequestDto
+ApiErrorDisplayService ..> ApiErrorDisplayOptions
+
+' Feature services and mappers
+AlarmConfigStateService --> AlarmApiService
+AlarmConfigStateService --> AlarmManagementRefreshService
+AlarmConfigStateService --> ApiErrorDisplayService
+AlarmConfigStateService --> AlarmRuleRequestMapper
+AlarmConfigStateService ..> AlarmRule
+AlarmConfigStateService ..> AlarmConfigFormValue
+
+AlarmConfigFormStateService --> WardApiService
+AlarmConfigFormStateService --> ApartmentApiService
+AlarmConfigFormStateService --> DeviceDatapointExtractionService
+AlarmConfigFormStateService ..> WardPlantDto
+AlarmConfigFormStateService ..> Datapoint
+AlarmConfigFormStateService ..> DeviceDatapointOption
+
+AlarmConfigTablePresenterService --> AlarmTimeMapper
+AlarmConfigTablePresenterService ..> AlarmRule
+AlarmConfigTablePresenterService ..> AlarmConfigTableRow
+AlarmConfigTablePresenterService ..> AlarmPositionLabelUtil
+
+AlarmRuleFormMapper --> AlarmTimeMapper
+AlarmRuleFormMapper ..> AlarmRule
+AlarmRuleFormMapper ..> AlarmConfigFormValue
+AlarmRuleFormMapper ..> ThresholdOperator
+
+AlarmRuleRequestMapper --> AlarmTimeMapper
+AlarmRuleRequestMapper ..> AlarmConfigFormValue
+AlarmRuleRequestMapper ..> AlarmRule
+AlarmRuleRequestMapper ..> CreateAlarmRuleRequestDto
+AlarmRuleRequestMapper ..> UpdateAlarmRuleRequestDto
+AlarmRuleRequestMapper ..> AlarmPriority
+AlarmRuleRequestMapper ..> ThresholdOperator
+
+DeviceDatapointExtractionService ..> Apartment
+DeviceDatapointExtractionService ..> PlantDto
+DeviceDatapointExtractionService ..> Datapoint
+DeviceDatapointExtractionService ..> ThresholdOperator
+DeviceDatapointExtractionService ..> DeviceDatapointOption
+
+AlarmConfigFormValidationHelper --> DeviceDatapointExtractionService
+AlarmConfigFormValidationHelper ..> ApplyThresholdConstraintsParams
+AlarmConfigFormValidationHelper ..> ThresholdOperator
+
+AlarmConfigFormFieldOrchestratorHelper --> DeviceDatapointExtractionService
+AlarmConfigFormFieldOrchestratorHelper ..> AlarmConfigFormLike
+AlarmConfigFormFieldOrchestratorHelper ..> DeviceDatapointOption
+AlarmConfigFormFieldOrchestratorHelper ..> DeviceSelectionResult
+AlarmConfigFormFieldOrchestratorHelper ..> DatapointSelectionResult
+
+WardApiService ..> WardPlantDto
+WardApiService ..> WardSummaryDto
+ApartmentApiService ..> Apartment
+ApartmentApiService ..> PlantDto
+
+' Feature components and shared UI deps
+AlarmConfigFormComponent --> AlarmRuleFormMapper
+AlarmConfigFormComponent --> AlarmConfigFormStateService
+AlarmConfigFormComponent --> DeviceDatapointExtractionService
+AlarmConfigFormComponent --> AlarmConfigFormValidationHelper
+AlarmConfigFormComponent --> AlarmConfigFormFieldOrchestratorHelper
+AlarmConfigFormComponent ..> AlarmRule
+AlarmConfigFormComponent ..> AlarmConfigFormValue
+AlarmConfigFormComponent ..> AlarmPriority
+AlarmConfigFormComponent ..> ThresholdOperator
+AlarmConfigFormComponent ..> Datapoint
+AlarmConfigFormComponent ..> DeviceDatapointOption
+AlarmConfigFormComponent ..> WardPlantDto
+AlarmConfigFormComponent ..> AlarmPositionLabelUtil
+AlarmConfigFormComponent ..> AlarmPriorityIndicatorComponent
+AlarmConfigFormComponent ..> AlarmActionButtonComponent
+
+AlarmConfigPageComponent --> AlarmConfigStateService
+AlarmConfigPageComponent --> AlarmConfigTablePresenterService
+AlarmConfigPageComponent ..> AlarmRule
+AlarmConfigPageComponent ..> AlarmConfigFormValue
+AlarmConfigPageComponent ..> AlarmConfigTableRow
+AlarmConfigPageComponent ..> AlarmTableColumn
+AlarmConfigPageComponent ..> AlarmTableShellComponent
+AlarmConfigPageComponent ..> AlarmPriorityIndicatorComponent
+AlarmConfigPageComponent ..> AlarmActionButtonComponent
+AlarmConfigPageComponent ..> AlarmToggleSwitchComponent
+AlarmConfigPageComponent ..> ConfirmDialogComponent
+AlarmConfigPageComponent ..> ModalShellComponent
+AlarmConfigPageComponent ..> AlarmConfigFormComponent
+
+AlarmTableShellComponent ..> AlarmTableColumn
+AlarmPriorityIndicatorComponent ..> AlarmPriority
+AlarmPriorityIndicatorComponent ..> PriorityUi
+AlarmActionButtonComponent ..> AlarmActionButtonTone
+
 @enduml

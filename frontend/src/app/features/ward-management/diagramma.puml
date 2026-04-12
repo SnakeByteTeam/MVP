@@ -74,12 +74,10 @@ interface RemoveOperatorEvent {
     +userId: number
 }
 interface RemovePlantEvent {
-    +wardId: number
     +plantId: string
 }
 class WardRowComponent {
     +plant: InputSignal<Plant>
-    +wardId: InputSignal<number>
 }
 class WardCardComponent {
     +ward: InputSignal<Ward>
@@ -523,7 +521,15 @@ class WardApiService {
     +getPlantsByWardId(wardId: number): Observable<WardPlantDto[]>
     +getAvailablePlants(): Observable<WardPlantDto[]>
     +assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void>
-    +removePlantFromWard(wardId: number, plantId: string): Observable<void>
+    +removePlantFromWard(plantId: string): Observable<void>
+}
+class WardHydrationService {
+    -api: WardApiService
+    +loadHydratedWards(): Observable<Ward[]>
+    +hydrateWardSummaries(wardSummaries: WardSummaryDto[]): Observable<Ward[]>
+    +mapApartments(apartmentsDto: WardPlantDto[]): Plant[]
+    +mapOperators(operatorsDto: WardUserDto[]): User[]
+    -toWard(wardSummary: WardSummaryDto): Observable<Ward>
 }
 interface WardManagementState {
     +wards: Ward[]
@@ -541,12 +547,12 @@ class WardStore {
     +addWard(ward: Ward): void
     +replaceWard(ward: Ward): void
     +removeWard(wardId: number): void
-    +patchPlant(plantId: string, patch: Partial<Plant>): void
     +setLoading(value: boolean): void
     +setError(message: string): void
 }
 class AssignmentOperationsService {
     -api: WardApiService
+    -wardHydration: WardHydrationService
     -store: WardStore
     -eventSubscriptionService: EventSubscriptionService
     +getAvailablePlantsForWard(wardId: number): Observable<Plant[]>
@@ -554,24 +560,19 @@ class AssignmentOperationsService {
     +assignOperator(wardId: number, dto: AssignOperatorDto): Observable<void>
     +removeOperator(wardId: number, userId: number): Observable<void>
     +assignPlant(wardId: number, dto: AssignPlantDto): Observable<void>
-    +removePlant(wardId: number, plantId: string): Observable<void>
+    +removePlant(plantId: string): Observable<void>
     -reloadAfter(operation$: Observable<void>): Observable<void>
-    -toWard(wardSummary: WardSummaryDto): Observable<Ward>
-    -toApartments(apartmentsDto: WardPlantDto[]): Plant[]
-    -toOperators(operatorsDto: WardUserDto[]): User[]
     -getErrorMessage(error: unknown): string
 }
 class WardOperationsService {
     -api: WardApiService
+    -wardHydration: WardHydrationService
     -store: WardStore
     +loadWards(): Observable<void>
     +createWard(dto: CreateWardDto): Observable<void>
     +updateWard(wardId: number, dto: UpdateWardDto): Observable<void>
     +deleteWard(wardId: number): Observable<void>
-    -toWard(wardSummary: WardSummaryDto): Observable<Ward>
     -normalizeMutationWard(ward: Ward): Ward
-    -toApartments(apartmentsDto: WardPlantDto[]): Plant[]
-    -toOperators(operatorsDto: WardUserDto[]): User[]
     -getErrorMessage(error: unknown): string
 }
 class WardManagementStore implements OnDestroy {
@@ -590,7 +591,7 @@ class WardManagementStore implements OnDestroy {
     +assignOperator(wardId: number, dto: AssignOperatorDto): void
     +removeOperator(wardId: number, userId: number): void
     +assignPlant(wardId: number, dto: AssignPlantDto): void
-    +removePlant(wardId: number, plantId: string): void
+    +removePlant(plantId: string): void
     +getAvailablePlantsForWard(wardId: number): Observable<Plant[]>
     +getAvailableUsersForWard(wardId: number): Observable<User[]>
     -getErrorMessage(error: unknown): string
@@ -621,7 +622,7 @@ class WardManagementPageComponent implements OnInit, OnDestroy {
     +plantWardId: WritableSignal<number>
     +availablePlantsFromFetch: WritableSignal<Plant[]>
     +isLoadingAvailablePlants: WritableSignal<boolean>
-    +confirmState: WritableSignal<{ kind: 'delete-ward'; wardId: number; } | { kind: 'remove-operator'; wardId: number; userId: number; } | { kind: 'remove-plant'; wardId: number; plantId: string; }>
+    +confirmState: WritableSignal<{ kind: 'delete-ward'; wardId: number; } | { kind: 'remove-operator'; wardId: number; userId: number; } | { kind: 'remove-plant'; plantId: string; }>
     +wardsSnapshot: WritableSignal<Ward[]>
     +selectedWard: Signal<Ward>
     +selectedApartment: Signal<Plant>

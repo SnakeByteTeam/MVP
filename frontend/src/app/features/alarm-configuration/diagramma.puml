@@ -1,6 +1,4 @@
 @startuml
-hide circle
-skinparam classAttributeIconSize 0
 enum UserRole {
     AMMINISTRATORE
     OPERATORE_SANITARIO
@@ -154,40 +152,6 @@ interface AlarmConfigFormValue {
     +dearmingTime: string
     +enabled: boolean
 }
-interface DeviceDatapointOption {
-    +id: string
-    +label: string
-    +datapoints: Datapoint[]
-}
-interface DeviceSelectionResult {
-    +normalizedDeviceId: string
-    +readableDatapoints: Datapoint[]
-    +autoSelectedDatapointId: string | null
-}
-interface DatapointSelectionResult {
-    +normalizedDatapointId: string
-    +selectedDatapoint: Datapoint | null
-}
-interface ApplyThresholdConstraintsParams {
-    +mode: "create" | "edit"
-    +datapoint: Datapoint | null
-    +thresholdOperatorControl: AbstractControl
-    +thresholdValueControl: AbstractControl
-}
-interface AlarmConfigTableRow {
-    +id: string
-    +name: string
-    +position: string
-    +priority: AlarmPriority
-    +threshold: string
-    +armingTime: string
-    +dearmingTime: string
-    +isEnabled: boolean
-}
-interface AlarmTableColumn {
-    +id: string
-    +label: string
-}
 class AlarmTimeMapper {
     +toFormTime(value: string | Date): string
     -toHourMinute(value: string): string
@@ -218,6 +182,8 @@ class AlarmConfigStateService {
     +error$: Observable<string>
     -clearError(): void
     -handleError(message: string): Observable<T>
+    -handleApiError(fallbackMessage: string): OperatorFunction<T, T>
+    -reloadAlarmsAfterMutation(): void
     +loadAlarmRules(): void
     +getAlarmRuleById(id: string): Observable<AlarmRule>
     +createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule>
@@ -430,7 +396,7 @@ class WardApiService {
     +getPlantsByWardId(wardId: number): Observable<WardPlantDto[]>
     +getAvailablePlants(): Observable<WardPlantDto[]>
     +assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void>
-    +removePlantFromWard(wardId: number, plantId: string): Observable<void>
+    +removePlantFromWard(plantId: string): Observable<void>
 }
 interface DeviceTypeRule {
     +deviceType: DeviceType
@@ -442,7 +408,15 @@ interface DeviceTypeResolutionInput {
     +rawName?: string
     +sfeTypes?: readonly string[]
 }
-
++resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
++getDeviceTypeLabel(type: DeviceType): string
++getEndpointLabel(sfeType: string): string
++getDiscoveredUnmappedSfeCodes(): string[]
++resolveFromRules(normalizedValues: readonly string[], rules: readonly DeviceTypeRule[]): DeviceType
++includesAny(value: string, tokens: readonly string[]): boolean
++normalize(value: string): string
++humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): string
++humanizeSfeSuffix(value: string): string
 class WardRealtimeCacheService {
     +getWardIds(userId: string): string[]
     +setWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
@@ -509,6 +483,7 @@ class AlarmConfigFormFieldOrchestratorHelper {
     +resolveDeviceSelection(deviceId: string, deviceOptions: readonly DeviceDatapointOption[]): DeviceSelectionResult
     +resolveDatapointSelection(datapointId: string, datapointOptions: readonly Datapoint[]): DatapointSelectionResult
 }
++formatAlarmPositionLabel(position: string): string
 class AlarmConfigFormComponent {
     +mode: InputSignal<"create" | "edit">
     +initialRule: InputSignal<AlarmRule>
@@ -522,7 +497,7 @@ class AlarmConfigFormComponent {
     -fieldOrchestrator: AlarmConfigFormFieldOrchestratorHelper
     -destroyRef: DestroyRef
     -editDatapointLookupVersion: number
-    +form: FormGroup<NonNullableFormControls>
+    +form: FormGroup<ɵNonNullableFormControls<{ name: string[]; plantId: string[]; deviceId: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; datapointId: string[]; priority: (AlarmPriority | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; ... 4 more ...; enabled: boolean[];...
     +isEditMode: Signal<boolean>
     +plants: WritableSignal<WardPlantDto[]>
     +deviceOptions: WritableSignal<DeviceDatapointOption[]>
@@ -539,7 +514,7 @@ class AlarmConfigFormComponent {
     +thresholdOperatorOptions: Signal<ThresholdOperator[]>
     +thresholdValueEnumHints: Signal<string[]>
     +thresholdValueHelpText: Signal<"Inserisci uno dei valori previsti dal datapoint associato alla regola." | "Inserisci un valore numerico (es. 10, 10.5, -3)." | "Seleziona prima il dispositivo." | "Seleziona un datapoint leggibile per impostare la soglia." | "Inserisci uno dei valori previsti dal datapoint selezionato.">
-    -buildForm(): FormGroup<NonNullableFormControls>
+    -buildForm(): FormGroup<ɵNonNullableFormControls<{ name: string[]; plantId: string[]; deviceId: (string | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; datapointId: string[]; priority: (AlarmPriority | ((control: AbstractControl<any, any, any>) => ValidationErrors)[])[]; ... 4 more ...; enabled: boolean[];...
     -createEmptyFormValue(): AlarmConfigFormValue
     +onSubmit(): void
     -applyModeState(): void
@@ -549,13 +524,11 @@ class AlarmConfigFormComponent {
     -onDatapointChanged(datapointId: string): void
     -applyThresholdConstraints(datapoint: Datapoint): void
     -loadEditDatapointMetadata(deviceId: string, datapointId: string, lookupVersion: number): void
-    -toPositionLabel(position: string): string
     +onCancel(): void
 }
 class AlarmConfigTablePresenterService {
     -alarmTimeMapper: AlarmTimeMapper
     +toRows(rules: AlarmRule[]): AlarmConfigTableRow[]
-    -toPositionLabel(position: string): string
 }
 class AlarmConfigPageComponent implements OnInit {
     -stateService: AlarmConfigStateService
@@ -580,84 +553,4 @@ class AlarmConfigPageComponent implements OnInit {
     +onFormSubmitted(formValue: AlarmConfigFormValue): void
     +onModalClosed(): void
 }
-
-AlarmRule --> AlarmPriority
-ActiveAlarm --> AlarmPriority
-User --> UserRole
-AlarmConfigFormValue --> AlarmPriority
-AlarmConfigFormValue --> ThresholdOperator
-AlarmConfigTableRow --> AlarmPriority
-Device --> DeviceAction
-Device --> Datapoint
-Room --> Device
-Apartment --> Room
-PlantDto --> PlantRoomDto
-PlantRoomDto --> PlantDeviceDto
-PlantDeviceDto --> PlantDatapointDto
-AlarmTableShellComponent --> AlarmTableColumn
-AlarmPriorityIndicatorComponent --> AlarmPriority
-AlarmConfigTablePresenterService ..> AlarmTimeMapper
-AlarmConfigTablePresenterService ..> AlarmConfigTableRow
-AlarmConfigTablePresenterService ..> AlarmRule
-AlarmRuleFormMapper ..> AlarmTimeMapper
-AlarmRuleFormMapper ..> AlarmConfigFormValue
-AlarmRuleFormMapper ..> AlarmRule
-AlarmRuleFormMapper ..> ThresholdOperator
-AlarmRuleRequestMapper ..> AlarmTimeMapper
-AlarmRuleRequestMapper ..> AlarmConfigFormValue
-AlarmRuleRequestMapper ..> AlarmRule
-AlarmRuleRequestMapper ..> CreateAlarmRuleRequestDto
-AlarmRuleRequestMapper ..> UpdateAlarmRuleRequestDto
-AlarmRuleRequestMapper ..> AlarmPriority
-AlarmRuleRequestMapper ..> ThresholdOperator
-DeviceDatapointExtractionService ..> Apartment
-DeviceDatapointExtractionService ..> PlantDto
-DeviceDatapointExtractionService ..> Datapoint
-DeviceDatapointExtractionService ..> ThresholdOperator
-DeviceDatapointExtractionService ..> DeviceDatapointOption
-AlarmConfigFormValidationHelper ..> DeviceDatapointExtractionService
-AlarmConfigFormValidationHelper ..> Datapoint
-AlarmConfigFormValidationHelper ..> ThresholdOperator
-AlarmConfigFormValidationHelper ..> ApplyThresholdConstraintsParams
-AlarmConfigFormFieldOrchestratorHelper ..> DeviceDatapointExtractionService
-AlarmConfigFormFieldOrchestratorHelper ..> DeviceDatapointOption
-AlarmConfigFormFieldOrchestratorHelper ..> Datapoint
-AlarmConfigFormFieldOrchestratorHelper ..> DeviceSelectionResult
-AlarmConfigFormFieldOrchestratorHelper ..> DatapointSelectionResult
-AlarmConfigStateService ..> AlarmApiService
-AlarmConfigStateService ..> AlarmManagementRefreshService
-AlarmConfigStateService ..> ApiErrorDisplayService
-AlarmConfigStateService ..> AlarmRuleRequestMapper
-AlarmConfigStateService ..> AlarmConfigFormValue
-AlarmConfigStateService ..> AlarmRule
-AlarmConfigFormStateService ..> WardApiService
-AlarmConfigFormStateService ..> ApartmentApiService
-AlarmConfigFormStateService ..> DeviceDatapointExtractionService
-AlarmConfigFormStateService ..> WardPlantDto
-AlarmConfigFormStateService ..> Datapoint
-AlarmConfigFormComponent *-- AlarmConfigFormStateService
-AlarmConfigFormComponent ..> AlarmRuleFormMapper
-AlarmConfigFormComponent ..> DeviceDatapointExtractionService
-AlarmConfigFormComponent ..> AlarmConfigFormValidationHelper
-AlarmConfigFormComponent ..> AlarmConfigFormFieldOrchestratorHelper
-AlarmConfigFormComponent ..> AlarmPriorityIndicatorComponent
-AlarmConfigFormComponent ..> AlarmActionButtonComponent
-AlarmConfigFormComponent ..> AlarmConfigFormValue
-AlarmConfigFormComponent ..> AlarmRule
-AlarmConfigFormComponent ..> Datapoint
-AlarmConfigFormComponent ..> AlarmPriority
-AlarmConfigFormComponent ..> ThresholdOperator
-AlarmConfigFormComponent ..> WardPlantDto
-AlarmConfigPageComponent ..> AlarmConfigStateService
-AlarmConfigPageComponent ..> AlarmConfigTablePresenterService
-AlarmConfigPageComponent ..> AlarmConfigTableRow
-AlarmConfigPageComponent ..> AlarmTableColumn
-AlarmConfigPageComponent ..> AlarmConfigFormValue
-AlarmConfigPageComponent ..> AlarmPriorityIndicatorComponent
-AlarmConfigPageComponent ..> AlarmActionButtonComponent
-AlarmConfigPageComponent ..> AlarmToggleSwitchComponent
-AlarmConfigPageComponent *-- AlarmTableShellComponent
-AlarmConfigPageComponent *-- ModalShellComponent
-AlarmConfigPageComponent *-- ConfirmDialogComponent
-AlarmConfigPageComponent *-- AlarmConfigFormComponent
 @enduml

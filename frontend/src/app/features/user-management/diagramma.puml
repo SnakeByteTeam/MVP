@@ -1,4 +1,4 @@
-@startuml UserManagementDiagram
+@startuml
 interface CreateUserDto {
     +name: string
     +surname: string
@@ -76,6 +76,8 @@ class UserManagementPageStateService {
     +submitUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
     +deleteUser(id: number): Observable<void>
     +closeDialog(): void
+    -mapFormError(err: unknown): UserManagementErrorType
+    -isHttpStatus(err: unknown, status: number): boolean
 }
 class UserManagementPageComponent {
     -pageState: UserManagementPageStateService
@@ -90,6 +92,19 @@ class UserManagementPageComponent {
     +onFormSubmit(dto: CreateUserDto): void
     +onUserDeleted(id: number): void
     +onDialogClosed(): void
+}
+interface UserInfo {
+    +username: string
+    +firstName: string
+    +lastName: string
+    +role: UserRole
+}
+interface User {
+    +id: number
+    +firstName: string
+    +lastName: string
+    +username: string
+    +role: UserRole
 }
 interface UserSession {
     +userId: string
@@ -138,12 +153,4 @@ class InternalAuthService {
     -parseAccessToken(accessToken: string): AuthClaims
     -isUserRole(role: string): boolean
 }
-UserManagementPageStateService ..> UserApiService
-UserManagementPageComponent ..> UserManagementPageStateService
-UserManagementPageComponent ..> CreateUserFormComponent
-UserManagementPageComponent ..> UserListComponent
-UserManagementPageComponent ..> UserCreatedDialogComponent
-UserManagementPageComponent ..> UserDto
-UserManagementPageComponent ..> UserCreatedResponseDto
-UserManagementPageComponent ..> CreateUserDto
 @enduml

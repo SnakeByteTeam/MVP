@@ -1,11 +1,9 @@
 @startuml
-hide circle
-skinparam classAttributeIconSize 0
 enum UserRole {
     AMMINISTRATORE
     OPERATORE_SANITARIO
 }
-interface UserSession{
+interface UserSession {
     +userId: string
     +username: string
     +role: UserRole
@@ -30,7 +28,6 @@ interface AuthClaims {
 interface TokenResponse {
     +accessToken: string
 }
-
 class InternalAuthService {
     -http: unknown
     -baseUrl: string
@@ -143,39 +140,6 @@ interface NotificationEvent {
     +sentAt: string
     +eventType?: "triggered" | "resolved"
 }
-enum ActiveAlarmsSnapshotMode {
-    MERGE
-    REPLACE
-}
-interface ActiveAlarmTableRow {
-    +id: string
-    +priority: AlarmPriority
-    +name: string
-    +device: string
-    +location: string
-    +status: string
-    +openedAt: string
-    +isManaged: boolean
-    +isResolving: boolean
-    +isActionDisabled: boolean
-    +actionLabel: string
-    +actionAriaLabel: string
-}
-interface AlarmTableColumn {
-    +id: string
-    +label: string
-}
-interface PriorityUi {
-    +label: string
-    +bubbleClass: string
-    +symbolClass: string
-    +symbol: string
-}
-enum AlarmActionButtonTone {
-    NEUTRAL
-    DANGER
-    PRIMARY
-}
 class AlarmStateService {
     -activeAlarms$: BehaviorSubject<ActiveAlarm[]>
     -notifications$: BehaviorSubject<NotificationEvent[]>
@@ -207,6 +171,21 @@ class ApiErrorDisplayService {
     -extractHttpMessage(error: HttpErrorResponse): string
     -extractUnknownMessage(error: unknown): string
 }
+class AlarmManagementPaginationService {
+    +pageLimit: 6
+    -pageOffsetSubject: BehaviorSubject<number>
+    -canGoNextSubject: BehaviorSubject<boolean>
+    +pageOffset$: Observable<number>
+    +canGoNext$: Observable<boolean>
+    +reset(): void
+    +getOffset(): number
+    +canGoNext(): boolean
+    +canGoPrevious(): boolean
+    +getNextOffset(): number
+    +getPreviousOffset(): number
+    +update(offset: number, canGoNext: boolean): void
+    +toPageNumber(offset: number): number
+}
 class AlarmManagementService {
     -alarmStateService: AlarmStateService
     -alarmApiService: AlarmApiService
@@ -224,19 +203,6 @@ class AlarmManagementService {
     -loadPage(offset: number, fallbackToPreviousIfEmpty?: boolean): void
     -getActiveAlarmsForSession$(session: UserSession, offset: number): Observable<ActiveAlarm[]>
     -loadPageState$(session: UserSession, offset: number, fallbackToPreviousIfEmpty?: boolean): Observable<{ alarms: ActiveAlarm[]; pageOffset: number; canGoNext: boolean; }>
-}
-class AlarmManagementPaginationService {
-    +pageLimit: 6
-    +pageOffset$: Observable<number>
-    +canGoNext$: Observable<boolean>
-    +reset(): void
-    +getOffset(): number
-    +canGoNext(): boolean
-    +canGoPrevious(): boolean
-    +getNextOffset(): number
-    +getPreviousOffset(): number
-    +update(offset: number, canGoNext: boolean): void
-    +toPageNumber(offset: number): number
 }
 class AlarmManagementTablePresenterService {
     +toRows(alarms: ActiveAlarm[], resolvingId: string): ActiveAlarmTableRow[]
@@ -292,47 +258,10 @@ class AlarmPageManagementComponent implements OnInit {
     +onNextPage(): void
     +onPreviousPage(): void
 }
-UserSession --> UserRole
-LoginResponse --> TokenResponse
-RefreshResponse --> TokenResponse
-AuthClaims --> UserRole
-ActiveAlarm --> AlarmPriority
-AlarmEvent --> AlarmPriority
-AlarmListVm --> ActiveAlarm
-ActiveAlarmTableRow --> AlarmPriority
-AlarmManagementService ..> AlarmStateService
-AlarmManagementService ..> AlarmApiService
-AlarmManagementService ..> InternalAuthService
-AlarmManagementService ..> ApiErrorDisplayService
-AlarmManagementService ..> AlarmManagementPaginationService
-AlarmManagementService ..> AlarmListVm
-AlarmManagementService ..> ActiveAlarm
-AlarmManagementService ..> UserSession
-AlarmManagementTablePresenterService ..> ActiveAlarm
-AlarmManagementTablePresenterService ..> ActiveAlarmTableRow
-AlarmManagementTablePresenterService ..> AlarmPriority
-AlarmStateService ..> ActiveAlarm
-AlarmStateService ..> AlarmEvent
-AlarmStateService ..> NotificationEvent
-AlarmStateService ..> ActiveAlarmsSnapshotMode
-AlarmStateService ..> AlarmPriority
-ApiErrorDisplayService ..> ApiErrorDisplayOptions
-AlarmApiService ..> ActiveAlarm
-AlarmApiService ..> AlarmRule
-AlarmApiService ..> CreateAlarmRuleRequestDto
-AlarmApiService ..> UpdateAlarmRuleRequestDto
-AlarmTableShellComponent --> AlarmTableColumn
-AlarmPriorityIndicatorComponent --> AlarmPriority
-AlarmPriorityIndicatorComponent --> PriorityUi
-AlarmActionButtonComponent --> AlarmActionButtonTone
-AlarmPageManagementComponent ..> AlarmManagementService
-AlarmPageManagementComponent ..> AlarmManagementTablePresenterService
-AlarmPageManagementComponent ..> AlarmManagementRefreshService
-AlarmPageManagementComponent ..> AlarmListVm
-AlarmPageManagementComponent ..> ActiveAlarmTableRow
-AlarmPageManagementComponent ..> AlarmTableColumn
-AlarmPageManagementComponent ..> ElapsedTimePipe
-AlarmPageManagementComponent *-- AlarmTableShellComponent
-AlarmPageManagementComponent *-- AlarmPriorityIndicatorComponent
-AlarmPageManagementComponent *-- AlarmActionButtonComponent
+class MockElapsedTimePipe implements PipeTransform {
+    +transform(value: string): string
+}
+class MockElapsedTimePipe implements PipeTransform {
+    +transform(value: string): string
+}
 @enduml

@@ -1,0 +1,423 @@
+<svg version="1.1" baseProfile="full" width="5542.0" height="379.0" viewBox="0 0 5542 379" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events">
+<desc >#.interface: fill=lightblue
+#.enumeration: fill=lightgreen
+#.type: fill=lightgray
+
+[&lt;interface&gt;UserInfo|+username: string;+firstName: string;+lastName: string;+role: UserRole|]
+[&lt;enumeration&gt;UserManagementErrorType|USERNAME_ALREADY_IN_USE;OTHER_ERROR]
+[&lt;enumeration&gt;UserRole|AMMINISTRATORE;OPERATORE_SANITARIO]
+[&lt;interface&gt;User|+id: number;+firstName: string;+lastName: string;+username: string;+role: UserRole|]
+[DecoderPasswordService||+decodeTempPassword(): string]
+[UserApiService|-http: unknown;-baseUrl: string;-decoderPasswordService: DecoderPasswordService|+getUsers(): Observable&lt;UserDto\[\]&gt;;+createUser(): Observable&lt;UserCreatedResponseDto&gt;;+deleteUser(): Observable&lt;void&gt;]
+[UserManagementPageStateService|-userApi: UserApiService;-refreshTrigger$: BehaviorSubject&lt;void&gt;;+users$: Observable&lt;UserDto\[\]&gt;;+createdResponse: WritableSignal&lt;UserCreatedResponseDto&gt;;+createdUser: WritableSignal&lt;CreateUserDto&gt;;+formError: WritableSignal&lt;UserManagementErrorType&gt;;+isCreateFormOpen: WritableSignal&lt;boolean&gt;|+openCreateForm(): void;+closeCreateForm(): void;+submitUser(): Observable&lt;UserCreatedResponseDto&gt;;+deleteUser(): Observable&lt;void&gt;;+closeDialog(): void;-mapFormError(): UserManagementErrorType;-isHttpStatus(): boolean]
+[CreateUserFormComponent|+errorType: InputSignal&lt;UserManagementErrorType&gt;;+isOpen: InputSignal&lt;boolean&gt;;+formSubmit: OutputEmitterRef&lt;CreateUserDto&gt;;+openRequest: OutputEmitterRef&lt;void&gt;;+closeRequest: OutputEmitterRef&lt;void&gt;;-nameInput?: ElementRef&lt;HTMLInputElement&gt;;-fb: FormBuilder;+form: FormGroup&lt;ɵNonNullableFormControls&lt;{ name: (string \| ((control: AbstractControl&lt;any, any, any&gt;) =&gt; ValidationErrors)\[\])\[\]; surname: (string \| ((control: AbstractControl&lt;any, any, any&gt;) =&gt; ValidationErrors)\[\])\[\]; username: (string \| ((control: AbstractControl&lt;...&gt;) =&gt; ValidationErrors)\[\])\[\]; }&gt;&gt;|+submit(): void;+reset(): void;+resetAndFocus(): void;+requestClose(): void;+requestOpen(): void]
+[UserCreatedDialogComponent|+response: InputSignal&lt;UserCreatedResponseDto&gt;;+user: InputSignal&lt;CreateUserDto&gt;;+closed: OutputEmitterRef&lt;void&gt;|+closeDialog(): void]
+[UserListComponent|+users: InputSignal&lt;UserDto\[\]&gt;;+deleteUser: OutputEmitterRef&lt;number&gt;;+pendingDeleteUser: WritableSignal&lt;UserDto&gt;|+onDeleteRequest(): void;+onDeleteCancel(): void;+onDeleteConfirm(): void;+onDelete(): void]
+[UserManagementPageComponent|-pageState: UserManagementPageStateService;+users$: Observable&lt;UserDto\[\]&gt;;+createdResponse: WritableSignal&lt;UserCreatedResponseDto&gt;;+createdUser: WritableSignal&lt;CreateUserDto&gt;;+formError: WritableSignal&lt;UserManagementErrorType&gt;;+isCreateFormOpen: WritableSignal&lt;boolean&gt;;-createUserFormComponent?: CreateUserFormComponent|+openCreateForm(): void;+closeCreateForm(): void;+onFormSubmit(): void;+onUserDeleted(): void;+onDialogClosed(): void]
+[&lt;interface&gt;UserCreatedResponseDto|+tempPassword: string|]
+[&lt;interface&gt;UserDto|+id: number;+name: string;+surname: string;+username: string;+role: UserRole|]
+[&lt;interface&gt;CreateUserDto|+name: string;+surname: string;+username: string|]</desc>
+<g stroke-width="1.0" text-align="left" font="12pt Helvetica, Arial, sans-serif" font-size="12pt" font-family="Helvetica" font-weight="normal" font-style="normal">
+<g font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" stroke-width="3.0" stroke-linejoin="round" stroke-linecap="round" stroke="#33322E">
+<g stroke="transparent" fill="transparent">
+<rect x="0.0" y="0.0" height="379.0" width="5542.0" stroke="none"></rect>
+</g>
+<g transform="translate(8, 8)" fill="#33322E">
+<g transform="translate(20, 20)">
+<g data-name="UserInfo">
+<g fill="lightblue" stroke="#33322E" data-name="UserInfo">
+<rect x="0.0" y="101.0" height="121.0" width="159.0" data-name="UserInfo"></rect>
+<path d="M0.0 133.0 L159.0 133.0" fill="none" data-name="UserInfo"></path>
+<path d="M0.0 214.0 L159.0 214.0" fill="none" data-name="UserInfo"></path>
+</g>
+<g transform="translate(0, 101)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserInfo" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserInfo" data-compartment="0">
+<a id="src/app/features/user-management/models/user-info.model.ts.UserInfo" xlink:href="src/app/features/user-management/models/user-info.model.ts"><text x="71.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserInfo" data-compartment="0">UserInfo</text></a>
+
+</g>
+</g>
+<g transform="translate(0, 133)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserInfo" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserInfo" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserInfo" data-compartment="1">+username: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserInfo" data-compartment="1">+firstName: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserInfo" data-compartment="1">+lastName: string</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserInfo" data-compartment="1">+role: UserRole</text>
+
+</g>
+</g>
+<g transform="translate(0, 214)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserInfo" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="UserInfo" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="UserManagementErrorType">
+<g fill="lightgreen" stroke="#33322E" data-name="UserManagementErrorType">
+<rect x="199.0" y="121.5" height="80.0" width="269.0" data-name="UserManagementErrorType"></rect>
+<path d="M199.0 153.5 L468.0 153.5" fill="none" data-name="UserManagementErrorType"></path>
+</g>
+<g transform="translate(199, 121.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserManagementErrorType" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserManagementErrorType" data-compartment="0">
+<a id="src/app/features/user-management/models/user-management-error-type.enum.ts.UserManagementErrorType" xlink:href="src/app/features/user-management/models/user-management-error-type.enum.ts"><text x="126.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserManagementErrorType" data-compartment="0">UserManagementErrorType</text></a>
+
+</g>
+</g>
+<g transform="translate(199, 153.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserManagementErrorType" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserManagementErrorType" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserManagementErrorType" data-compartment="1">USERNAME_ALREADY_IN_USE</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserManagementErrorType" data-compartment="1">OTHER_ERROR</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserRole">
+<g fill="lightgreen" stroke="#33322E" data-name="UserRole">
+<rect x="508.0" y="121.5" height="80.0" width="220.0" data-name="UserRole"></rect>
+<path d="M508.0 153.5 L728.0 153.5" fill="none" data-name="UserRole"></path>
+</g>
+<g transform="translate(508, 121.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserRole" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserRole" data-compartment="0">
+<a id="src/app/features/user-management/models/user-role.enum.ts.UserRole" xlink:href="src/app/features/user-management/models/user-role.enum.ts"><text x="102.0" y="14.1" stroke="none" text-anchor="middle" data-name="UserRole" data-compartment="0">UserRole</text></a>
+
+</g>
+</g>
+<g transform="translate(508, 153.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserRole" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserRole" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserRole" data-compartment="1">AMMINISTRATORE</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserRole" data-compartment="1">OPERATORE_SANITARIO</text>
+
+</g>
+</g>
+</g>
+<g data-name="User">
+<g fill="lightblue" stroke="#33322E" data-name="User">
+<rect x="768.0" y="93.0" height="137.0" width="159.0" data-name="User"></rect>
+<path d="M768.0 125.0 L927.0 125.0" fill="none" data-name="User"></path>
+<path d="M768.0 222.0 L927.0 222.0" fill="none" data-name="User"></path>
+</g>
+<g transform="translate(768, 93)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="User" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="User" data-compartment="0">
+<a id="src/app/features/user-management/models/user.model.ts.User" xlink:href="src/app/features/user-management/models/user.model.ts"><text x="71.5" y="14.1" stroke="none" text-anchor="middle" data-name="User" data-compartment="0">User</text></a>
+
+</g>
+</g>
+<g transform="translate(768, 125)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="User" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="User" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="User" data-compartment="1">+id: number</text>
+<text x="0.0" y="30.3" stroke="none" data-name="User" data-compartment="1">+firstName: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="User" data-compartment="1">+lastName: string</text>
+<text x="0.0" y="62.7" stroke="none" data-name="User" data-compartment="1">+username: string</text>
+<text x="0.0" y="78.9" stroke="none" data-name="User" data-compartment="1">+role: UserRole</text>
+
+</g>
+</g>
+<g transform="translate(768, 222)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="User" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="User" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="DecoderPasswordService">
+<g fill="#eee8d5" stroke="#33322E" data-name="DecoderPasswordService">
+<rect x="967.0" y="125.5" height="72.0" width="272.0" data-name="DecoderPasswordService"></rect>
+<path d="M967.0 157.5 L1239.0 157.5" fill="none" data-name="DecoderPasswordService"></path>
+<path d="M967.0 165.5 L1239.0 165.5" fill="none" data-name="DecoderPasswordService"></path>
+</g>
+<g transform="translate(967, 125.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="DecoderPasswordService" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="DecoderPasswordService" data-compartment="0">
+<a id="src/app/features/user-management/services/decoder-password-service.ts.DecoderPasswordService" xlink:href="src/app/features/user-management/services/decoder-password-service.ts"><text x="128.0" y="14.1" stroke="none" text-anchor="middle" data-name="DecoderPasswordService" data-compartment="0">DecoderPasswordService</text></a>
+
+</g>
+</g>
+<g transform="translate(967, 157.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="DecoderPasswordService" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" data-name="DecoderPasswordService" data-compartment="1">
+
+</g>
+</g>
+<g transform="translate(967, 165.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="DecoderPasswordService" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="DecoderPasswordService" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="DecoderPasswordService" data-compartment="2">+decodeTempPassword(): string</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserApiService">
+<g fill="#eee8d5" stroke="#33322E" data-name="UserApiService">
+<rect x="1279.0" y="80.5" height="162.0" width="453.0" data-name="UserApiService"></rect>
+<path d="M1279.0 112.5 L1732.0 112.5" fill="none" data-name="UserApiService"></path>
+<path d="M1279.0 177.5 L1732.0 177.5" fill="none" data-name="UserApiService"></path>
+</g>
+<g transform="translate(1279, 80.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="UserApiService" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserApiService" data-compartment="0">
+<a id="src/app/features/user-management/services/user-api.service.ts.UserApiService" xlink:href="src/app/features/user-management/services/user-api.service.ts"><text x="218.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserApiService" data-compartment="0">UserApiService</text></a>
+
+</g>
+</g>
+<g transform="translate(1279, 112.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserApiService" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserApiService" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserApiService" data-compartment="1">-http: unknown</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserApiService" data-compartment="1">-baseUrl: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserApiService" data-compartment="1">-decoderPasswordService: DecoderPasswordService</text>
+
+</g>
+</g>
+<g transform="translate(1279, 177.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserApiService" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserApiService" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="UserApiService" data-compartment="2">+getUsers(): Observable&lt;UserDto[]&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserApiService" data-compartment="2">+createUser(): Observable&lt;UserCreatedResponseDto&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserApiService" data-compartment="2">+deleteUser(): Observable&lt;void&gt;</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserManagementPageStateService">
+<g fill="#eee8d5" stroke="#33322E" data-name="UserManagementPageStateService">
+<rect x="1772.0" y="16.5" height="290.0" width="517.0" data-name="UserManagementPageStateService"></rect>
+<path d="M1772.0 48.5 L2289.0 48.5" fill="none" data-name="UserManagementPageStateService"></path>
+<path d="M1772.0 177.5 L2289.0 177.5" fill="none" data-name="UserManagementPageStateService"></path>
+</g>
+<g transform="translate(1772, 16.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="UserManagementPageStateService" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserManagementPageStateService" data-compartment="0">
+<a id="src/app/features/user-management/services/user-management-page-state.service.ts.UserManagementPageStateService" xlink:href="src/app/features/user-management/services/user-management-page-state.service.ts"><text x="250.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserManagementPageStateService" data-compartment="0">UserManagementPageStateService</text></a>
+
+</g>
+</g>
+<g transform="translate(1772, 48.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserManagementPageStateService" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserManagementPageStateService" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">-userApi: UserApiService</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">-refreshTrigger$: BehaviorSubject&lt;void&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">+users$: Observable&lt;UserDto[]&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">+createdResponse: WritableSignal&lt;UserCreatedResponseDto&gt;</text>
+<text x="0.0" y="78.9" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">+createdUser: WritableSignal&lt;CreateUserDto&gt;</text>
+<text x="0.0" y="95.1" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">+formError: WritableSignal&lt;UserManagementErrorType&gt;</text>
+<text x="0.0" y="111.3" stroke="none" data-name="UserManagementPageStateService" data-compartment="1">+isCreateFormOpen: WritableSignal&lt;boolean&gt;</text>
+
+</g>
+</g>
+<g transform="translate(1772, 177.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserManagementPageStateService" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserManagementPageStateService" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">+openCreateForm(): void</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">+closeCreateForm(): void</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">+submitUser(): Observable&lt;UserCreatedResponseDto&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">+deleteUser(): Observable&lt;void&gt;</text>
+<text x="0.0" y="78.9" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">+closeDialog(): void</text>
+<text x="0.0" y="95.1" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">-mapFormError(): UserManagementErrorType</text>
+<text x="0.0" y="111.3" stroke="none" data-name="UserManagementPageStateService" data-compartment="2">-isHttpStatus(): boolean</text>
+
+</g>
+</g>
+</g>
+<g data-name="CreateUserFormComponent">
+<g fill="#eee8d5" stroke="#33322E" data-name="CreateUserFormComponent">
+<rect x="2329.0" y="0.0" height="323.0" width="1047.0" data-name="CreateUserFormComponent"></rect>
+<path d="M2329.0 32.0 L3376.0 32.0" fill="none" data-name="CreateUserFormComponent"></path>
+<path d="M2329.0 226.0 L3376.0 226.0" fill="none" data-name="CreateUserFormComponent"></path>
+</g>
+<g transform="translate(2329, 0)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="CreateUserFormComponent" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="CreateUserFormComponent" data-compartment="0">
+<a id="src/app/features/user-management/components/create-user-form/create-user-form.component.ts.CreateUserFormComponent" xlink:href="src/app/features/user-management/components/create-user-form/create-user-form.component.ts"><text x="515.5" y="14.1" stroke="none" text-anchor="middle" data-name="CreateUserFormComponent" data-compartment="0">CreateUserFormComponent</text></a>
+
+</g>
+</g>
+<g transform="translate(2329, 32)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="CreateUserFormComponent" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="CreateUserFormComponent" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">+errorType: InputSignal&lt;UserManagementErrorType&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">+isOpen: InputSignal&lt;boolean&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">+formSubmit: OutputEmitterRef&lt;CreateUserDto&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">+openRequest: OutputEmitterRef&lt;void&gt;</text>
+<text x="0.0" y="78.9" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">+closeRequest: OutputEmitterRef&lt;void&gt;</text>
+<text x="0.0" y="95.1" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">-nameInput?: ElementRef&lt;HTMLInputElement&gt;</text>
+<text x="0.0" y="111.3" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">-fb: FormBuilder</text>
+<text x="0.0" y="127.5" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">+form: FormGroup&lt;ɵNonNullableFormControls&lt;{ name: (string | ((control: AbstractControl&lt;any, any, any&gt;) =&gt; ValidationErrors)[])[]</text>
+<text x="0.0" y="143.7" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">surname: (string | ((control: AbstractControl&lt;any, any, any&gt;) =&gt; ValidationErrors)[])[]</text>
+<text x="0.0" y="159.9" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">username: (string | ((control: AbstractControl&lt;...&gt;) =&gt; ValidationErrors)[])[]</text>
+<text x="0.0" y="176.1" stroke="none" data-name="CreateUserFormComponent" data-compartment="1">}&gt;&gt;</text>
+
+</g>
+</g>
+<g transform="translate(2329, 226)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="CreateUserFormComponent" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="CreateUserFormComponent" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="CreateUserFormComponent" data-compartment="2">+submit(): void</text>
+<text x="0.0" y="30.3" stroke="none" data-name="CreateUserFormComponent" data-compartment="2">+reset(): void</text>
+<text x="0.0" y="46.5" stroke="none" data-name="CreateUserFormComponent" data-compartment="2">+resetAndFocus(): void</text>
+<text x="0.0" y="62.7" stroke="none" data-name="CreateUserFormComponent" data-compartment="2">+requestClose(): void</text>
+<text x="0.0" y="78.9" stroke="none" data-name="CreateUserFormComponent" data-compartment="2">+requestOpen(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserCreatedDialogComponent">
+<g fill="#eee8d5" stroke="#33322E" data-name="UserCreatedDialogComponent">
+<rect x="3416.0" y="97.0" height="129.0" width="426.0" data-name="UserCreatedDialogComponent"></rect>
+<path d="M3416.0 129.0 L3842.0 129.0" fill="none" data-name="UserCreatedDialogComponent"></path>
+<path d="M3416.0 194.0 L3842.0 194.0" fill="none" data-name="UserCreatedDialogComponent"></path>
+</g>
+<g transform="translate(3416, 97)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="UserCreatedDialogComponent" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserCreatedDialogComponent" data-compartment="0">
+<a id="src/app/features/user-management/components/user-created-dialog/user-created-dialog.ts.UserCreatedDialogComponent" xlink:href="src/app/features/user-management/components/user-created-dialog/user-created-dialog.ts"><text x="205.0" y="14.1" stroke="none" text-anchor="middle" data-name="UserCreatedDialogComponent" data-compartment="0">UserCreatedDialogComponent</text></a>
+
+</g>
+</g>
+<g transform="translate(3416, 129)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserCreatedDialogComponent" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserCreatedDialogComponent" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserCreatedDialogComponent" data-compartment="1">+response: InputSignal&lt;UserCreatedResponseDto&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserCreatedDialogComponent" data-compartment="1">+user: InputSignal&lt;CreateUserDto&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserCreatedDialogComponent" data-compartment="1">+closed: OutputEmitterRef&lt;void&gt;</text>
+
+</g>
+</g>
+<g transform="translate(3416, 194)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserCreatedDialogComponent" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserCreatedDialogComponent" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="UserCreatedDialogComponent" data-compartment="2">+closeDialog(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserListComponent">
+<g fill="#eee8d5" stroke="#33322E" data-name="UserListComponent">
+<rect x="3882.0" y="72.5" height="178.0" width="386.0" data-name="UserListComponent"></rect>
+<path d="M3882.0 104.5 L4268.0 104.5" fill="none" data-name="UserListComponent"></path>
+<path d="M3882.0 169.5 L4268.0 169.5" fill="none" data-name="UserListComponent"></path>
+</g>
+<g transform="translate(3882, 72.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="UserListComponent" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserListComponent" data-compartment="0">
+<a id="src/app/features/user-management/components/user-list/user-list.ts.UserListComponent" xlink:href="src/app/features/user-management/components/user-list/user-list.ts"><text x="185.0" y="14.1" stroke="none" text-anchor="middle" data-name="UserListComponent" data-compartment="0">UserListComponent</text></a>
+
+</g>
+</g>
+<g transform="translate(3882, 104.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserListComponent" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserListComponent" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserListComponent" data-compartment="1">+users: InputSignal&lt;UserDto[]&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserListComponent" data-compartment="1">+deleteUser: OutputEmitterRef&lt;number&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserListComponent" data-compartment="1">+pendingDeleteUser: WritableSignal&lt;UserDto&gt;</text>
+
+</g>
+</g>
+<g transform="translate(3882, 169.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserListComponent" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserListComponent" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="UserListComponent" data-compartment="2">+onDeleteRequest(): void</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserListComponent" data-compartment="2">+onDeleteCancel(): void</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserListComponent" data-compartment="2">+onDeleteConfirm(): void</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserListComponent" data-compartment="2">+onDelete(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserManagementPageComponent">
+<g fill="#eee8d5" stroke="#33322E" data-name="UserManagementPageComponent">
+<rect x="4308.0" y="32.5" height="258.0" width="517.0" data-name="UserManagementPageComponent"></rect>
+<path d="M4308.0 64.5 L4825.0 64.5" fill="none" data-name="UserManagementPageComponent"></path>
+<path d="M4308.0 193.5 L4825.0 193.5" fill="none" data-name="UserManagementPageComponent"></path>
+</g>
+<g transform="translate(4308, 32.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="UserManagementPageComponent" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserManagementPageComponent" data-compartment="0">
+<a id="src/app/features/user-management/components/user-management-page/user-management-page.component.ts.UserManagementPageComponent" xlink:href="src/app/features/user-management/components/user-management-page/user-management-page.component.ts"><text x="250.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserManagementPageComponent" data-compartment="0">UserManagementPageComponent</text></a>
+
+</g>
+</g>
+<g transform="translate(4308, 64.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserManagementPageComponent" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserManagementPageComponent" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">-pageState: UserManagementPageStateService</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">+users$: Observable&lt;UserDto[]&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">+createdResponse: WritableSignal&lt;UserCreatedResponseDto&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">+createdUser: WritableSignal&lt;CreateUserDto&gt;</text>
+<text x="0.0" y="78.9" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">+formError: WritableSignal&lt;UserManagementErrorType&gt;</text>
+<text x="0.0" y="95.1" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">+isCreateFormOpen: WritableSignal&lt;boolean&gt;</text>
+<text x="0.0" y="111.3" stroke="none" data-name="UserManagementPageComponent" data-compartment="1">-createUserFormComponent?: CreateUserFormComponent</text>
+
+</g>
+</g>
+<g transform="translate(4308, 193.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserManagementPageComponent" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserManagementPageComponent" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="UserManagementPageComponent" data-compartment="2">+openCreateForm(): void</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserManagementPageComponent" data-compartment="2">+closeCreateForm(): void</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserManagementPageComponent" data-compartment="2">+onFormSubmit(): void</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserManagementPageComponent" data-compartment="2">+onUserDeleted(): void</text>
+<text x="0.0" y="78.9" stroke="none" data-name="UserManagementPageComponent" data-compartment="2">+onDialogClosed(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="UserCreatedResponseDto">
+<g fill="lightblue" stroke="#33322E" data-name="UserCreatedResponseDto">
+<rect x="4865.0" y="125.5" height="72.0" width="223.0" data-name="UserCreatedResponseDto"></rect>
+<path d="M4865.0 157.5 L5088.0 157.5" fill="none" data-name="UserCreatedResponseDto"></path>
+<path d="M4865.0 189.5 L5088.0 189.5" fill="none" data-name="UserCreatedResponseDto"></path>
+</g>
+<g transform="translate(4865, 125.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserCreatedResponseDto" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserCreatedResponseDto" data-compartment="0">
+<a id="src/app/features/user-management/models/in/user-created-response.model.dto.ts.UserCreatedResponseDto" xlink:href="src/app/features/user-management/models/in/user-created-response.model.dto.ts"><text x="103.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserCreatedResponseDto" data-compartment="0">UserCreatedResponseDto</text></a>
+
+</g>
+</g>
+<g transform="translate(4865, 157.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserCreatedResponseDto" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserCreatedResponseDto" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserCreatedResponseDto" data-compartment="1">+tempPassword: string</text>
+
+</g>
+</g>
+<g transform="translate(4865, 189.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserCreatedResponseDto" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="UserCreatedResponseDto" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="UserDto">
+<g fill="lightblue" stroke="#33322E" data-name="UserDto">
+<rect x="5128.0" y="93.0" height="137.0" width="159.0" data-name="UserDto"></rect>
+<path d="M5128.0 125.0 L5287.0 125.0" fill="none" data-name="UserDto"></path>
+<path d="M5128.0 222.0 L5287.0 222.0" fill="none" data-name="UserDto"></path>
+</g>
+<g transform="translate(5128, 93)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserDto" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="UserDto" data-compartment="0">
+<a id="src/app/features/user-management/models/in/user.model.dto.ts.UserDto" xlink:href="src/app/features/user-management/models/in/user.model.dto.ts"><text x="71.5" y="14.1" stroke="none" text-anchor="middle" data-name="UserDto" data-compartment="0">UserDto</text></a>
+
+</g>
+</g>
+<g transform="translate(5128, 125)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserDto" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="UserDto" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="UserDto" data-compartment="1">+id: number</text>
+<text x="0.0" y="30.3" stroke="none" data-name="UserDto" data-compartment="1">+name: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="UserDto" data-compartment="1">+surname: string</text>
+<text x="0.0" y="62.7" stroke="none" data-name="UserDto" data-compartment="1">+username: string</text>
+<text x="0.0" y="78.9" stroke="none" data-name="UserDto" data-compartment="1">+role: UserRole</text>
+
+</g>
+</g>
+<g transform="translate(5128, 222)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="UserDto" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="UserDto" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="CreateUserDto">
+<g fill="lightblue" stroke="#33322E" data-name="CreateUserDto">
+<rect x="5327.0" y="109.0" height="105.0" width="159.0" data-name="CreateUserDto"></rect>
+<path d="M5327.0 141.0 L5486.0 141.0" fill="none" data-name="CreateUserDto"></path>
+<path d="M5327.0 206.0 L5486.0 206.0" fill="none" data-name="CreateUserDto"></path>
+</g>
+<g transform="translate(5327, 109)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="CreateUserDto" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="CreateUserDto" data-compartment="0">
+<a id="src/app/features/user-management/models/out/create-user.model.dto.ts.CreateUserDto" xlink:href="src/app/features/user-management/models/out/create-user.model.dto.ts"><text x="71.5" y="14.1" stroke="none" text-anchor="middle" data-name="CreateUserDto" data-compartment="0">CreateUserDto</text></a>
+
+</g>
+</g>
+<g transform="translate(5327, 141)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="CreateUserDto" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="CreateUserDto" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="CreateUserDto" data-compartment="1">+name: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="CreateUserDto" data-compartment="1">+surname: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="CreateUserDto" data-compartment="1">+username: string</text>
+
+</g>
+</g>
+<g transform="translate(5327, 206)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="CreateUserDto" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="CreateUserDto" data-compartment="2">
+
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>

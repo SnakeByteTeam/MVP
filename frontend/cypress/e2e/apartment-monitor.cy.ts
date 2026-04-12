@@ -90,6 +90,56 @@ describe('Apartment monitor e2e', () => {
                                     },
                                 ],
                             },
+                            {
+                                id: 'dev-blind-1',
+                                name: 'Tapparella cucina',
+                                type: 'SS_BLIND_CONTROLLER',
+                                subType: 'SF_WINDOW',
+                                datapoints: [
+                                    {
+                                        id: 'dp-blind-1',
+                                        name: 'Comando tapparella',
+                                        readable: true,
+                                        writable: true,
+                                        valueType: 'enum',
+                                        enum: ['UP', 'DOWN'],
+                                        sfeType: 'SFE_CMD_BLIND',
+                                    },
+                                ],
+                            },
+                            {
+                                id: 'dev-light-fallback',
+                                name: 'Hall Light',
+                                type: 'SS_GENERIC_DEVICE',
+                                subType: 'SF_MISC',
+                                datapoints: [
+                                    {
+                                        id: 'dp-light-fallback-1',
+                                        name: 'Comando hall',
+                                        readable: true,
+                                        writable: true,
+                                        valueType: 'enum',
+                                        enum: ['ON', 'OFF'],
+                                    },
+                                ],
+                            },
+                            {
+                                id: 'dev-unknown-1',
+                                name: 'Mystery Sensor',
+                                type: 'UNSUPPORTED_DEVICE',
+                                subType: 'SF_MISC',
+                                datapoints: [
+                                    {
+                                        id: 'dp-unknown-1',
+                                        name: 'Comando custom',
+                                        readable: true,
+                                        writable: true,
+                                        valueType: 'enum',
+                                        enum: ['X', 'Y'],
+                                        sfeType: 'SFE_CMD_CUSTOM_XYZ',
+                                    },
+                                ],
+                            },
                         ],
                     },
                     {
@@ -110,6 +160,23 @@ describe('Apartment monitor e2e', () => {
                                         valueType: 'enum',
                                         enum: ['18', '20', '22'],
                                         sfeType: 'SF_TEMPERATURE_CMD',
+                                    },
+                                ],
+                            },
+                            {
+                                id: 'dev-sfe-tier-1',
+                                name: 'Sonda reparto',
+                                type: 'GENERIC_SENSOR',
+                                subType: 'SF_MISC',
+                                datapoints: [
+                                    {
+                                        id: 'dp-sfe-tier-1',
+                                        name: 'Temperatura stanza',
+                                        readable: true,
+                                        writable: true,
+                                        valueType: 'enum',
+                                        enum: ['18', '20', '22'],
+                                        sfeType: 'SFE_STATE_TEMPERATURE',
                                     },
                                 ],
                             },
@@ -255,5 +322,37 @@ describe('Apartment monitor e2e', () => {
         cy.wait('@getPlantById');
         cy.get('@getPlantById.all').its('length').should('be.greaterThan', initialPlantCalls);
         cy.contains('h1', 'Appartamento Aurora').should('be.visible');
+    });
+
+    it('maps device type labels across primary, SFE, fallback, and unknown branches', () => {
+        cy.contains('tr', 'Termostato camera').within(() => {
+            cy.contains('td', 'Termostato').should('exist');
+        });
+
+        cy.contains('tr', 'Sonda reparto').within(() => {
+            cy.contains('td', 'Termostato').should('exist');
+        });
+
+        cy.contains('tr', 'Hall Light').within(() => {
+            cy.contains('td', 'Luce').should('exist');
+        });
+
+        cy.contains('tr', 'Mystery Sensor').within(() => {
+            cy.contains('td', 'Sconosciuto').should('exist');
+        });
+    });
+
+    it('maps known and unknown endpoint labels in endpoint taxonomy', () => {
+        cy.contains('tr', 'Tapparella cucina').within(() => {
+            cy.contains('td', 'Comando movimento tapparella').should('exist');
+        });
+
+        cy.contains('tr', 'Mystery Sensor').within(() => {
+            cy.contains('td', 'Comando custom xyz').should('exist');
+        });
+
+        cy.contains('tr', 'Hall Light').within(() => {
+            cy.contains('td', 'Endpoint sconosciuto').should('exist');
+        });
     });
 });

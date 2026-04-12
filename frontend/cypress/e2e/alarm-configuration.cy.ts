@@ -470,6 +470,42 @@ describe('Alarm configuration e2e', () => {
         cy.contains('tr', ruleName).should('contain', '21:15');
     });
 
+    it('encodes special rule ids when updating an alarm rule', () => {
+        const specialRuleId = 'rule/special id#A';
+        const specialRuleName = 'Regola ID speciale update';
+
+        rulesState = [
+            {
+                id: specialRuleId,
+                name: specialRuleName,
+                thresholdOperator: '=',
+                thresholdValue: 'on',
+                priority: 3,
+                armingTime: '08:00',
+                dearmingTime: '20:00',
+                isArmed: true,
+                deviceId: 'dev-presence',
+                datapointId: 'dp-presence-state',
+                position: 'Camera - Sensore presenza camera',
+            },
+        ];
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+        cy.get('a.sidebar-link').contains('Configurazione Allarmi').click({ force: true });
+        cy.location('pathname').should('eq', '/alarms/alarm-configuration');
+        cy.wait('@getAlarmRules');
+
+        openEditRuleModal(specialRuleName);
+        cy.get('#priority').select('1');
+        cy.contains('button', 'APPLICA MODIFICHE').click();
+
+        cy.wait('@updateAlarmRule').then(({ request }) => {
+            expect(request.url).to.include(`/alarm-rules/${encodeURIComponent(specialRuleId)}`);
+            expect(request.url).to.not.include(`/alarm-rules/${specialRuleId}`);
+        });
+    });
+
     it('RF99-OBL Amministratore deve poter abilitare un allarme del Sistema', () => {
         const ruleName = 'Regola abilita';
         createAlarmRuleFromModal(ruleName);
@@ -511,6 +547,41 @@ describe('Alarm configuration e2e', () => {
 
         cy.wait('@deleteAlarmRule');
         cy.contains('tr', ruleName).should('not.exist');
+    });
+
+    it('encodes special rule ids when deleting an alarm rule', () => {
+        const specialRuleId = 'rule/special id#B';
+        const specialRuleName = 'Regola ID speciale delete';
+
+        rulesState = [
+            {
+                id: specialRuleId,
+                name: specialRuleName,
+                thresholdOperator: '=',
+                thresholdValue: 'on',
+                priority: 3,
+                armingTime: '08:00',
+                dearmingTime: '20:00',
+                isArmed: true,
+                deviceId: 'dev-presence',
+                datapointId: 'dp-presence-state',
+                position: 'Camera - Sensore presenza camera',
+            },
+        ];
+
+        cy.get('a.sidebar-link').contains('Dashboard').click({ force: true });
+        cy.location('pathname').should('eq', '/dashboard');
+        cy.get('a.sidebar-link').contains('Configurazione Allarmi').click({ force: true });
+        cy.location('pathname').should('eq', '/alarms/alarm-configuration');
+        cy.wait('@getAlarmRules');
+
+        cy.get(`button[aria-label="Elimina regola ${specialRuleName}"]`).click();
+        cy.contains('button', 'Elimina').click();
+
+        cy.wait('@deleteAlarmRule').then(({ request }) => {
+            expect(request.url).to.include(`/alarm-rules/${encodeURIComponent(specialRuleId)}`);
+            expect(request.url).to.not.include(`/alarm-rules/${specialRuleId}`);
+        });
     });
 
     it('cancels alarm deletion from the confirmation dialog', () => {

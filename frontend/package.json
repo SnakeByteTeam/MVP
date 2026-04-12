@@ -19,6 +19,7 @@
     "test:integration:html": "ng run frontend:test-integration --watch=false --reporters=html --output-file=coverage/frontend/integration-html/index.html",
     "test:integration:html:open": "npx vite preview --outDir coverage/frontend/integration-html",
     "test:integration:sonar": "ng run frontend:test-integration --watch=false --coverage --coverage-reporters=lcovonly --coverage-reporters=text-summary && node scripts/filter-integration-lcov.mjs coverage/frontend/lcov.info",
+    "test:e2e:coverage": "cypress run && npx nyc report --reporter=lcovonly --reporter=text-summary --report-dir coverage/e2e --temp-dir .nyc_output && node scripts/filter-e2e-lcov.mjs coverage/e2e/lcov.info",
     "e2e": "ng e2e",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"

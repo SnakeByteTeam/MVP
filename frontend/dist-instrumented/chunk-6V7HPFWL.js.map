@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/services/vimar-cloud-api.service.interface.ts"],
+  "sourcesContent": ["import { InjectionToken } from '@angular/core';\nimport { Observable } from 'rxjs';\nimport { MyVimarAccount } from '../../features/my-vimar-integration/models/my-vimar-account.model';\n\nexport interface IVimarCloudApiService {\n\tgetLinkedAccount(): Observable<MyVimarAccount>;\n\tinitiateOAuth(): void;\n\tunlinkAccount(): Observable<void>;\n}\n\nexport const VIMAR_CLOUD_API_SERVICE = new InjectionToken<IVimarCloudApiService>('VimarCloudApiService');\n"],
+  "mappings": "wCAUO,IAAMA,EAA0B,IAAIC,EAAsC,sBAAsB",
+  "names": ["VIMAR_CLOUD_API_SERVICE", "InjectionToken"]
+}

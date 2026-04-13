@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/alarm-management/alarm-management.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const ALARM_MANAGEMENT_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard],\n    loadComponent: () =>\n      import('./components/alarm-page-management-component/alarm-page-management-component').then(\n        (m) => m.AlarmPageManagementComponent\n      )\n  }\n];\n"],
+  "mappings": "gNAGO,IAAMA,EAAkC,CAC7C,CACEC,KAAM,GACNC,YAAa,CAACC,CAAS,EACvBC,cAAeA,IACb,OAAO,qBAA8E,EAAEC,KACpFC,GAAMA,EAAEC,4BAA4B,EAE1C",
+  "names": ["ALARM_MANAGEMENT_ROUTES", "path", "canActivate", "authGuard", "loadComponent", "then", "m", "AlarmPageManagementComponent"]
+}

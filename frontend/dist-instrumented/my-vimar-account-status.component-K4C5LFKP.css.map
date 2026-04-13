@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/my-vimar-integration/components/my-vimar-account-status/my-vimar-account-status.component.css"],
+  "sourcesContent": [":host {\n  display: block;\n}"],
+  "mappings": "AAAA,MACE,QAAA,KACF",
+  "names": []
+}

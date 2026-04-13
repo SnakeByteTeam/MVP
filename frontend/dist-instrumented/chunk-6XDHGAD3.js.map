@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/dashboard/dashboard-page.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const DASHBOARD_ROUTES : Routes = [\n    {\n    path: '',\n    //canActivate: [authGuard],\n    loadComponent: () => import('./components/dashboard-page/dashboard-page.component').then((m) => m.DashboardComponent)\n    },\n];"],
+  "mappings": "4BAGO,IAAMA,EAA4B,CACrC,CACAC,KAAM,GAENC,cAAeA,IAAM,OAAO,qBAAsD,EAAEC,KAAMC,GAAMA,EAAEC,kBAAkB,EACnH",
+  "names": ["DASHBOARD_ROUTES", "path", "loadComponent", "then", "m", "DashboardComponent"]
+}

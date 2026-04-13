@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/notification/notification.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const NOTIFICATION_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard],\n    loadComponent: () =>\n      import('./components/notification-page-component/notification-page-component').then((m) => m.NotificationPageComponent)\n  }\n];\n"],
+  "mappings": "gNAGO,IAAMA,EAA8B,CACzC,CACEC,KAAM,GACNC,YAAa,CAACC,CAAS,EACvBC,cAAeA,IACb,OAAO,qBAAsE,EAAEC,KAAMC,GAAMA,EAAEC,yBAAyB,EACzH",
+  "names": ["NOTIFICATION_ROUTES", "path", "canActivate", "authGuard", "loadComponent", "then", "m", "NotificationPageComponent"]
+}

@@ -41,6 +41,20 @@ describe('RealtimeAlarmEventNormalizerService', () => {
 		});
 	});
 
+	it('parseBackendTriggeredPayload gestisce wardId stringa con spazi', () => {
+		const parsed = service.parseBackendTriggeredPayload({
+			alarmEventId: 'alarm-7',
+			wardId: ' 42 ',
+			alarmRuleId: 'rule-7',
+		});
+
+		expect(parsed).toEqual({
+			alarmEventId: 'alarm-7',
+			wardId: 42,
+			alarmRuleId: 'rule-7',
+		});
+	});
+
 	it('parseBackendResolvedPayload estrae alarmEventId e wardId opzionale', () => {
 		const withWardId = service.parseBackendResolvedPayload({
 			alarmEventId: 'alarm-4',
@@ -56,10 +70,28 @@ describe('RealtimeAlarmEventNormalizerService', () => {
 	});
 
 	it('restituisce null per payload backend malformati', () => {
+		expect(service.parseBackendTriggeredPayload(null)).toBeNull();
+
+		expect(
+			service.parseBackendTriggeredPayload({
+				alarmEventId: 'alarm-6',
+				wardId: 1.5,
+				alarmRuleId: 'rule-6',
+			})
+		).toBeNull();
+
 		expect(
 			service.parseBackendTriggeredPayload({
 				alarmEventId: 'alarm-6',
 				wardId: 'abc',
+				alarmRuleId: 'rule-6',
+			})
+		).toBeNull();
+
+		expect(
+			service.parseBackendTriggeredPayload({
+				alarmEventId: 'alarm-6',
+				wardId: '   ',
 				alarmRuleId: 'rule-6',
 			})
 		).toBeNull();
@@ -70,5 +102,25 @@ describe('RealtimeAlarmEventNormalizerService', () => {
 				wardId: 8,
 			})
 		).toBeNull();
+
+		expect(
+			service.parseBackendResolvedPayload({
+				alarmEventId: 'alarm-8',
+				wardId: 'x-9',
+			})
+		).toEqual({
+			alarmEventId: 'alarm-8',
+			wardId: undefined,
+		});
+
+		expect(
+			service.parseBackendResolvedPayload({
+				alarmEventId: 'alarm-9',
+				wardId: ' 9 ',
+			})
+		).toEqual({
+			alarmEventId: 'alarm-9',
+			wardId: 9,
+		});
 	});
 });

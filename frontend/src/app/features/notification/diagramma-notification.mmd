@@ -1,210 +1,184 @@
 classDiagram
-class NotificationBadgeComponent {
-    +count: InputSignal<number>
-    -unreadCount: Signal<number>
-    +isVisible: Signal<boolean>
-    +displayCount: Signal<string>
-    +ariaLabel: Signal<string>
-}
-class NotificationEvent {
-    +notificationId: string
-    +title: string
-    +sentAt: string
-    +eventType?: "triggered" | "resolved"
-}
-<<Interface>> NotificationEvent
-PipeTransform <|.. ElapsedTimePipe
-class ElapsedTimePipe {
-    +transform(sentAt: string): string
-}
-class AlarmPriority {
-    WHITE
-    GREEN
-    ORANGE
-    RED
-}
-<<enumeration>> AlarmPriority
-class AlarmPriorityIndicatorComponent {
-    +priority: InputSignal<AlarmPriority>
-    +ui: Signal<PriorityUi>
-}
-+extractPriorityFromNotificationTitle(title: unknown): AlarmPriority
-+stripPriorityFromNotificationTitle(title: unknown): string
-class NotificationItemComponent {
-    +notification: InputSignal<NotificationEvent>
-    +showRemoveAction: InputSignal<boolean>
-    +isHighlighted: InputSignal<boolean>
-    +removeClicked: OutputEmitterRef<string>
-    +sentAt: Signal<string>
-    +isResolved: Signal<any>
-    +priority: Signal<AlarmPriority>
-    +displayTitle: Signal<string>
-    +ariaLabel: Signal<string>
-    +onRemove(): void
-}
-class NotificationListVm {
-    +notifications: NotificationEvent[]
-    +unreadCount: number
-}
-<<Interface>> NotificationListVm
-class ActiveAlarm {
-    +id: string
-    +alarmRuleId: string
-    +deviceId?: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-    +position: string
-    +userId: number
-    +userUsername?: string
-}
-<<Interface>> ActiveAlarm
-class AlarmEvent {
-    +id: string
-    +alarmRuleId: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-}
-<<Interface>> AlarmEvent
-class AlarmStateService {
-    -activeAlarms$: BehaviorSubject<ActiveAlarm[]>
-    -notifications$: BehaviorSubject<NotificationEvent[]>
-    -dismissedNotificationIds$: BehaviorSubject<ReadonlySet<string>>
-    -locallyResolvedActiveAlarmIds: any
-    +setActiveAlarms(alarms: ActiveAlarm[], mode?: ActiveAlarmsSnapshotMode): void
-    +onAlarmTriggered(event: AlarmEvent): void
-    +onAlarmResolved(id: string): void
-    +onNotificationReceived(event: NotificationEvent): void
-    +removeNotification(notificationId: string): void
-    +clearNotifications(): void
-    +dismissNotification(notificationId: string): void
-    +dismissNotifications(notificationIds: readonly string[]): void
-    +getActiveAlarms$(): Observable<ActiveAlarm[]>
-    +getActiveAlarmsCount$(): Observable<number>
-    +getNotifications$(): Observable<NotificationEvent[]>
-    +getDismissedNotificationIds$(): Observable<ReadonlySet<string>>
-    +getUnreadNotificationsCount$(): Observable<number>
-}
-class UserRole {
-    AMMINISTRATORE
-    OPERATORE_SANITARIO
-}
-<<enumeration>> UserRole
-class UserSession {
-    +userId: string
-    +username: string
-    +role: UserRole
-    +accessToken: string
-    +isFirstAccess: boolean
-}
-<<Interface>> UserSession
-class LoginResponse {
-    +accessToken: string
-}
-<<Interface>> LoginResponse
-class RefreshResponse {
-    +accessToken: string
-}
-<<Interface>> RefreshResponse
-class AuthClaims {
-    +userId?: string | number
-    +sub?: string | number
-    +id?: string | number
-    +username?: string
-    +role?: string
-    +isFirstAccess?: boolean
-    +firstAccess?: boolean
-}
-<<Interface>> AuthClaims
-class TokenResponse {
-    +accessToken: string
-}
-<<Interface>> TokenResponse
-class InternalAuthService {
-    -http: unknown
-    -baseUrl: string
-    -currentUser$: BehaviorSubject<UserSession>
-    -token: string
-    -restoreSessionInFlight$: Observable<boolean>
-    +login(username: string, password: string): Observable<UserSession>
-    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
-    +refreshAccessToken(): Observable<string>
-    +restoreSessionFromRefresh(): Observable<boolean>
-    +logoutFromBackend(): Observable<void>
-    +logout(): void
-    +getToken(): string
-    +getCurrentUser$(): Observable<UserSession>
-    +getRole(): UserRole
-    +isAuthenticated(): boolean
-    +hasRole(role: UserRole): boolean
-    -setSession(session: UserSession): void
-    -buildSessionFromAccessToken(accessToken: string): UserSession
-    -parseAccessToken(accessToken: string): AuthClaims
-    -isUserRole(role: string): boolean
-}
-+formatTriggeredNotificationTitle(alarmName: unknown, priority: unknown, maxLength?: number): string
-+normalizeAlarmName(value: unknown): string
-+toPrioritySymbol(value: unknown): string
-+normalizePriority(value: unknown): AlarmPriority
-+normalizePriorityFromString(compact: string): AlarmPriority
-+toEnumPriority(compact: string): AlarmPriority
-+isKnownPriority(value: number): boolean
-class AlarmEventHistoryDto {
-    +id?: unknown
-    +activationTime?: unknown
-    +resolutionTime?: unknown
-    +alarmName?: unknown
-    +priority?: unknown
-}
-<<Interface>> AlarmEventHistoryDto
-class NotificationApiService {
-    -http: unknown
-    -baseUrl: string
-    -authService: InternalAuthService
-    +getNotificationsHistory(): Observable<NotificationEvent[]>
-    -fetchManagedAlarmEvents(encodedUserId: string): Observable<AlarmEventHistoryDto[]>
-    -fetchUnmanagedAlarmEvents(encodedUserId: string): Observable<AlarmEventHistoryDto[]>
-    -mapAlarmEventsToNotifications(alarmEvents: readonly AlarmEventHistoryDto[]): NotificationEvent[]
-    -mapAlarmEventToNotification(alarmEvent: AlarmEventHistoryDto): NotificationEvent
-    -toIsoString(value: unknown): string
-    -HISTORY_LIMIT$: 100
-    -HISTORY_OFFSET$: 0
-}
-class NotificationService {
-    -alarmStateService: AlarmStateService
-    -notificationApiService: NotificationApiService
-    +removeNotification(notificationId: string): void
-    +clearAllNotifications(notifications: readonly NotificationEvent[]): void
-    +vm$: Observable<NotificationListVm>
-    -toUnixTimestamp(dateValue: string): number
-}
-class NotificationPageComponent {
-    -notificationService: NotificationService
-    -route: ActivatedRoute
-    +vm$: Observable<NotificationListVm>
-    +highlightedNotificationId$: Observable<string>
-    +skeletonRows: number[]
-    +onNotificationRemoved(notificationId: string): void
-    +onClearAllNotifications(vm: NotificationListVm): void
-    +unreadSummaryLabel(unreadCount: number): string
-}
-class NotificationTopbarPanelComponent {
-    +notifications: readonly NotificationEvent[]
-    +viewAllClicked: EventEmitter<void>
-    +notificationSelected: EventEmitter<string>
-    +removeClicked: EventEmitter<string>
-    +clearAllClicked: EventEmitter<void>
-    -maxVisibleNotifications: 6
-    +visibleNotifications: readonly NotificationEvent[]
-    +onNotificationSelected(notificationId: string): void
-    +onRemove(notificationId: string, event?: Event): void
-    +onClearAll(): void
-    +getPriority(notification: NotificationEvent): AlarmPriority
-    +getDisplayTitle(notification: NotificationEvent): string
-    +getPrioritySymbol(priority: AlarmPriority): string
-    +getPriorityBubbleClass(priority: AlarmPriority): string
-    +getPrioritySymbolClass(priority: AlarmPriority): string
-}
+
+    class AlarmPriority {
+        <<enumeration>>
+        WHITE = 1
+        GREEN
+        ORANGE
+        RED
+    }
+
+    class NotificationEvent {
+        <<interface>>
+        +string notificationId
+        +string title
+        +string sentAt
+        +string eventType
+    }
+
+    class NotificationListVm {
+        <<interface>>
+        +NotificationEvent[] notifications
+        +number unreadCount
+    }
+
+    class AlarmEventHistoryDto {
+        <<interface>>
+        +unknown id
+        +unknown activationTime
+        +unknown resolutionTime
+        +unknown alarmName
+        +unknown priority
+    }
+
+    class UserSession {
+        <<interface>>
+        +string userId
+    }
+
+    class NotificationPriorityDisplayUtil {
+        <<utility>>
+        +extractPriorityFromNotificationTitle(title unknown) AlarmPriority|null
+        +stripPriorityFromNotificationTitle(title unknown) string
+    }
+
+    class NotificationTitleUtil {
+        <<utility>>
+        +formatTriggeredNotificationTitle(alarmName unknown, priority unknown, maxLength number) string
+    }
+
+    class ElapsedTimePipe {
+    }
+
+    class AlarmPriorityIndicatorComponent {
+    }
+
+    class DatePipe {
+    }
+
+    class ActivatedRoute {
+    }
+
+    class InternalAuthService {
+        +getCurrentUser$() Observable~UserSession|null~
+    }
+
+    class AlarmStateService {
+        +dismissNotification(notificationId string) void
+        +dismissNotifications(notificationIds readonly string[]) void
+        +removeNotification(notificationId string) void
+        +clearNotifications() void
+        +getNotifications$() Observable~NotificationEvent[]~
+        +getUnreadNotificationsCount$() Observable~number~
+        +getDismissedNotificationIds$() Observable~ReadonlySet~string~~
+    }
+
+    class NotificationApiService {
+        -HttpClient http
+        -string baseUrl
+        -InternalAuthService authService
+        +getNotificationsHistory() Observable~NotificationEvent[]~
+        -fetchManagedAlarmEvents(encodedUserId string) Observable~AlarmEventHistoryDto[]~
+        -fetchUnmanagedAlarmEvents(encodedUserId string) Observable~AlarmEventHistoryDto[]~
+        -mapAlarmEventsToNotifications(alarmEvents readonly AlarmEventHistoryDto[]) NotificationEvent[]
+        -mapAlarmEventToNotification(alarmEvent AlarmEventHistoryDto) NotificationEvent|null
+        -toIsoString(value unknown) string|null
+    }
+
+    class NotificationService {
+        -AlarmStateService alarmStateService
+        -NotificationApiService notificationApiService
+        +Observable~NotificationListVm~ vm$
+        +removeNotification(notificationId string) void
+        +clearAllNotifications(notifications readonly NotificationEvent[]) void
+        -toUnixTimestamp(dateValue string) number
+    }
+
+    class NotificationBadgeComponent {
+        +InputSignal~number~ count
+        +Signal~boolean~ isVisible
+        +Signal~string~ displayCount
+        +Signal~string~ ariaLabel
+    }
+
+    class NotificationItemComponent {
+        +InputSignal~NotificationEvent~ notification
+        +InputSignal~boolean~ showRemoveAction
+        +InputSignal~boolean~ isHighlighted
+        +OutputEmitterRef~string~ removeClicked
+        +Signal~string~ sentAt
+        +Signal~boolean~ isResolved
+        +Signal~AlarmPriority|null~ priority
+        +Signal~string~ displayTitle
+        +Signal~string~ ariaLabel
+        +onRemove() void
+    }
+
+    class NotificationTopbarPanelComponent {
+        +readonly NotificationEvent[] notifications
+        +EventEmitter~void~ viewAllClicked
+        +EventEmitter~string~ notificationSelected
+        +EventEmitter~string~ removeClicked
+        +EventEmitter~void~ clearAllClicked
+        +readonly NotificationEvent[] visibleNotifications
+        +onNotificationSelected(notificationId string) void
+        +onRemove(notificationId string, event Event) void
+        +onClearAll() void
+        +getPriority(notification NotificationEvent) AlarmPriority|null
+        +getDisplayTitle(notification NotificationEvent) string
+        +getPrioritySymbol(priority AlarmPriority) string
+        +getPriorityBubbleClass(priority AlarmPriority) string
+        +getPrioritySymbolClass(priority AlarmPriority) string
+    }
+
+    class NotificationPageComponent {
+        -NotificationService notificationService
+        -ActivatedRoute route
+        +Observable~NotificationListVm~ vm$
+        +Observable~string|null~ highlightedNotificationId$
+        +number[] skeletonRows
+        +onNotificationRemoved(notificationId string) void
+        +onClearAllNotifications(vm NotificationListVm) void
+        +unreadSummaryLabel(unreadCount number) string
+    }
+
+    class NOTIFICATION_ROUTES {
+        <<routes>>
+    }
+
+    class authGuard {
+        <<guard>>
+    }
+
+    %% Relazioni modello
+    NotificationListVm *-- NotificationEvent
+
+    %% Relazioni servizi
+    NotificationApiService --> InternalAuthService
+    NotificationApiService ..> UserSession
+    NotificationApiService ..> NotificationEvent
+    NotificationApiService ..> AlarmEventHistoryDto
+    NotificationApiService ..> NotificationTitleUtil
+    NotificationService --> AlarmStateService
+    NotificationService --> NotificationApiService
+    NotificationService ..> NotificationEvent
+    NotificationService ..> NotificationListVm
+
+    %% Relazioni componenti
+    NotificationItemComponent ..> NotificationEvent
+    NotificationItemComponent ..> AlarmPriority
+    NotificationItemComponent ..> ElapsedTimePipe
+    NotificationItemComponent ..> AlarmPriorityIndicatorComponent
+    NotificationItemComponent ..> NotificationPriorityDisplayUtil
+    NotificationTopbarPanelComponent ..> NotificationEvent
+    NotificationTopbarPanelComponent ..> AlarmPriority
+    NotificationTopbarPanelComponent ..> DatePipe
+    NotificationTopbarPanelComponent ..> NotificationPriorityDisplayUtil
+    NotificationPageComponent --> NotificationService
+    NotificationPageComponent ..> NotificationListVm
+    NotificationPageComponent ..> NotificationItemComponent
+    NotificationPageComponent ..> ActivatedRoute
+
+    %% Route wiring
+    NOTIFICATION_ROUTES ..> NotificationPageComponent : loadComponent()
+    NOTIFICATION_ROUTES ..> authGuard : canActivate

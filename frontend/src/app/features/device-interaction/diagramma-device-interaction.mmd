@@ -1,359 +1,379 @@
 classDiagram
-class DeviceType {
-    UNKNOWN
-    THERMOSTAT
-    FALL_SENSOR
-    PRESENCE_SENSOR
-    LIGHT
-    ALARM_BUTTON
-    ENTRANCE_DOOR
-    BLIND
-}
-<<enumeration>> DeviceType
-class DeviceAction {
-    +key: string
-    +label: string
-    +disabled?: boolean
-}
-<<Interface>> DeviceAction
-class Datapoint {
-    +id: string
-    +name: string
-    +readable: boolean
-    +writable: boolean
-    +valueType: string
-    +enum: string[]
-    +sfeType: string
-}
-<<Interface>> Datapoint
-class Device {
-    +id: string
-    +name: string
-    +type: DeviceType
-    +status: DeviceStatus
-    +actions: DeviceAction[]
-    +datapoints: Datapoint[]
-}
-<<Interface>> Device
-class IDeviceCard {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-}
-<<Interface>> IDeviceCard
-class ExecuteActionDto {
-    +roomId: string
-    +deviceId: string
-    +action: string
-}
-<<Interface>> ExecuteActionDto
-IDeviceCard <|.. AlarmButtonCardComponent
-class AlarmButtonCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +onAction(action: string): void
-}
-IDeviceCard <|.. BlindCardComponent
-class BlindCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +onAction(action: string): void
-}
-class WriteDatapointRequest {
-    +roomId: string
-    +deviceId: string
-    +datapointId: string
-    +value: string
-}
-<<Interface>> WriteDatapointRequest
-class WriteDatapointDto {
-    +datapointId: string
-    +value: string
-}
-<<Interface>> WriteDatapointDto
-class DeviceValuePointDto {
-    +datapointId: string
-    +name: string
-    +value: string | number
-}
-<<Interface>> DeviceValuePointDto
-class DeviceValueDto {
-    +deviceId: string
-    +values: DeviceValuePointDto[]
-}
-<<Interface>> DeviceValueDto
-class DeviceTypeRule {
-    +deviceType: DeviceType
-    +tokens: readonly string[]
-}
-<<Interface>> DeviceTypeRule
-class DeviceTypeResolutionInput {
-    +rawType?: string
-    +rawSubType?: string
-    +rawName?: string
-    +sfeTypes?: readonly string[]
-}
-<<Interface>> DeviceTypeResolutionInput
-+resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
-+getDeviceTypeLabel(type: DeviceType): string
-+getEndpointLabel(sfeType: string): string
-+getDiscoveredUnmappedSfeCodes(): string[]
-+resolveFromRules(normalizedValues: readonly string[], rules: readonly DeviceTypeRule[]): DeviceType
-+includesAny(value: string, tokens: readonly string[]): boolean
-+normalize(value: string): string
-+humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): string
-+humanizeSfeSuffix(value: string): string
-IDeviceCard <|.. DeviceCardComponent
-class DeviceCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +datapointWriteRequested: OutputEmitterRef<WriteDatapointRequest>
-    -selectedValues: any
-    +getTypeLabel(type: DeviceType): string
-    +getDatapointLabel(datapoint: Datapoint): string
-    +getWritableEnumDatapoints(): Datapoint[]
-    +hasWritableDatapoints(): boolean
-    +getSelectedValue(datapointId: string, values: string[]): string
-    +onSelectionChange(datapointId: string, value: string): void
-    +onWriteDatapoint(datapointId: string, values: string[]): void
-}
-class WritableEndpointRow {
-    +roomId: string
-    +roomName: string
-    +deviceId: string
-    +deviceName: string
-    +deviceType: DeviceType
-    +datapointId: string
-    +datapointName: string
-    +datapointSfeType: string
-    +enumValues: string[]
-}
-<<Interface>> WritableEndpointRow
-class PlantDatapointDto {
-    +id: string
-    +name: string
-    +readable: boolean
-    +writable: boolean
-    +valueType: string
-    +enum?: string[]
-    +sfeType: string
-}
-<<Interface>> PlantDatapointDto
-class PlantDeviceDto {
-    +id: string
-    +name: string
-    +type?: string
-    +subType?: string
-    +datapoints?: PlantDatapointDto[]
-}
-<<Interface>> PlantDeviceDto
-class PlantRoomDto {
-    +id: string
-    +name: string
-    +devices: PlantDeviceDto[]
-}
-<<Interface>> PlantRoomDto
-class PlantDto {
-    +id: string
-    +name: string
-    +wardId?: number
-    +rooms: PlantRoomDto[]
-}
-<<Interface>> PlantDto
-class Room {
-    +id: string
-    +name: string
-    +hasActiveAlarm: boolean
-    +devices: Device[]
-}
-<<Interface>> Room
-class DeviceApiService {
-    -http: unknown
-    -baseUrl: string
-    -plantEndpoint: string
-    -deviceEndpoint: string
-    +getWritableEndpointRows(): Observable<WritableEndpointRow[]>
-    +getRoom(roomId: string): Observable<Room>
-    +writeDatapointValue(dto: WriteDatapointDto): Observable<void>
-    +getDatapointCurrentValuesByDeviceIds(deviceIds: readonly string[]): Observable<Map<string, string | number>>
-    +getCurrentValuePointsByDeviceIds(deviceIds: readonly string[]): Observable<Map<string, DeviceValuePointDto[]>>
-    -resolveActivePlantId(): Observable<string>
-    -fetchPlantById(plantId: string): Observable<PlantDto>
-    -fetchAllPlants(): Observable<PlantDto[]>
-    -getActivePlantId(): string
-    -setActivePlantId(plantId: string): void
-    -mapRoomFromPlant(plant: PlantDto, roomId: string): Room
-    -mapDatapoints(datapoints: PlantDatapointDto[]): Datapoint[]
-    -mapWritableEndpointRows(plant: PlantDto): WritableEndpointRow[]
-    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
-    -normalizeDeviceName(name: string): string
-    -getDevicePriorityScore(device: PlantDeviceDto): number
-    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
-}
-class EndpointRoomGroup {
-    +roomId: string
-    +roomName: string
-    +rows: WritableEndpointRow[]
-}
-<<Interface>> EndpointRoomGroup
-class RowFeedback {
-    +type: "success" | "error"
-    +message: string
-}
-<<Interface>> RowFeedback
-OnInit <|.. EndpointTableComponent
-OnDestroy <|.. EndpointTableComponent
-class EndpointTableComponent {
-    -deviceApi: DeviceApiService
-    -refresh$: Subject<void>
-    -selectedValuesByRow: any
-    -executingRows: any
-    -feedbackByRow: any
-    -feedbackTimerByRow: any
-    -currentValuesByDevice: any
-    -latestRows: WritableEndpointRow[]
-    -activePlantChangeSubscription: Subscription
-    -currentValuesPollingSubscription: Subscription
-    +roomGroups$: Observable<EndpointRoomGroup[]>
-    +loadError: string
-    +ngOnInit(): void
-    +ngOnDestroy(): void
-    +trackByGroup(_: number, group: EndpointRoomGroup): string
-    +trackByRow(_: number, row: WritableEndpointRow): string
-    +getTypeLabel(type: DeviceType): string
-    +getEndpointLabel(row: WritableEndpointRow): string
-    +getCurrentValue(row: WritableEndpointRow): string
-    +getSelectedValue(row: WritableEndpointRow): string
-    +onSelectionChange(row: WritableEndpointRow, value: string): void
-    +isRowExecuting(row: WritableEndpointRow): boolean
-    +getRowFeedback(row: WritableEndpointRow): RowFeedback
-    +onWriteRow(row: WritableEndpointRow): void
-    -groupRowsByRoom(rows: WritableEndpointRow[]): EndpointRoomGroup[]
-    -buildRowKey(row: WritableEndpointRow): string
-    -clearRowFeedback(rowKey: string): void
-    -setRowFeedback(rowKey: string, type: "success" | "error", message: string): void
-    -subscribeToActivePlantChanges(): void
-    -startCurrentValuesPolling(): void
-    -loadCurrentValues(rows: readonly WritableEndpointRow[]): Observable<void>
-    -getSemanticCandidates(row: WritableEndpointRow): Set<string>
-    -convertCmdToState(value: string): string
-    -normalizeKey(value: string): string
-    -syncSelectedValues(rows: readonly WritableEndpointRow[]): void
-    -resetTransientState(): void
-    -clearAllRowFeedback(): void
-    -CURRENT_VALUES_POLL_MS$: 15000
-}
-IDeviceCard <|.. EntranceDoorCardComponent
-class EntranceDoorCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +onAction(action: string): void
-}
-IDeviceCard <|.. FallSensorCardComponent
-class FallSensorCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +onAction(action: string): void
-}
-IDeviceCard <|.. LightCardComponent
-class LightCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +onAction(action: string): void
-}
-IDeviceCard <|.. PresenceSensorCardComponent
-class PresenceSensorCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +onAction(action: string): void
-}
-class RoomDetailComponent {
-}
-class EndpointTableStubComponent {
-}
-IDeviceCard <|.. ThermostatCardComponent
-class ThermostatCardComponent {
-    +roomId: InputSignal<string>
-    +device: InputSignal<Device>
-    +isExecuting: InputSignal<boolean>
-    +error: InputSignal<string>
-    +actionRequested: OutputEmitterRef<ExecuteActionDto>
-    +getTypeLabel(type: DeviceType): string
-    +onAction(action: string): void
-}
-class UserRole {
-    AMMINISTRATORE
-    OPERATORE_SANITARIO
-}
-<<enumeration>> UserRole
-class UserSession {
-    +userId: string
-    +username: string
-    +role: UserRole
-    +accessToken: string
-    +isFirstAccess: boolean
-}
-<<Interface>> UserSession
-class LoginResponse {
-    +accessToken: string
-}
-<<Interface>> LoginResponse
-class RefreshResponse {
-    +accessToken: string
-}
-<<Interface>> RefreshResponse
-class AuthClaims {
-    +userId?: string | number
-    +sub?: string | number
-    +id?: string | number
-    +username?: string
-    +role?: string
-    +isFirstAccess?: boolean
-    +firstAccess?: boolean
-}
-<<Interface>> AuthClaims
-class TokenResponse {
-    +accessToken: string
-}
-<<Interface>> TokenResponse
-class InternalAuthService {
-    -http: unknown
-    -baseUrl: string
-    -currentUser$: BehaviorSubject<UserSession>
-    -token: string
-    -restoreSessionInFlight$: Observable<boolean>
-    +login(username: string, password: string): Observable<UserSession>
-    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
-    +refreshAccessToken(): Observable<string>
-    +restoreSessionFromRefresh(): Observable<boolean>
-    +logoutFromBackend(): Observable<void>
-    +logout(): void
-    +getToken(): string
-    +getCurrentUser$(): Observable<UserSession>
-    +getRole(): UserRole
-    +isAuthenticated(): boolean
-    +hasRole(role: UserRole): boolean
-    -setSession(session: UserSession): void
-    -buildSessionFromAccessToken(accessToken: string): UserSession
-    -parseAccessToken(accessToken: string): AuthClaims
-    -isUserRole(role: string): boolean
-}
+
+    class OnInit {
+        <<interface>>
+    }
+
+    class OnDestroy {
+        <<interface>>
+    }
+
+    class DeviceType {
+        <<enumeration>>
+        UNKNOWN
+        THERMOSTAT
+        FALL_SENSOR
+        PRESENCE_SENSOR
+        LIGHT
+        ALARM_BUTTON
+        ENTRANCE_DOOR
+        BLIND
+    }
+
+    class DeviceStatus {
+        <<enumeration>>
+        ONLINE
+        OFFLINE
+        ALARM
+        UNKNOWN
+    }
+
+    class DeviceAction {
+        <<interface>>
+        +string key
+        +string label
+        +boolean disabled
+    }
+
+    class Datapoint {
+        <<interface>>
+        +string id
+        +string name
+        +boolean readable
+        +boolean writable
+        +string valueType
+        +string[] enum
+        +string sfeType
+    }
+
+    class Device {
+        <<interface>>
+        +string id
+        +string name
+        +DeviceType type
+        +DeviceStatus status
+        +DeviceAction[] actions
+        +Datapoint[] datapoints
+    }
+
+    class Room {
+        <<interface>>
+        +string id
+        +string name
+        +boolean hasActiveAlarm
+        +Device[] devices
+    }
+
+    class PlantDatapointDto {
+        <<interface>>
+        +string id
+        +string name
+        +boolean readable
+        +boolean writable
+        +string valueType
+        +string[] enum
+        +string sfeType
+    }
+
+    class PlantDeviceDto {
+        <<interface>>
+        +string id
+        +string name
+        +string type
+        +string subType
+        +PlantDatapointDto[] datapoints
+    }
+
+    class PlantRoomDto {
+        <<interface>>
+        +string id
+        +string name
+        +PlantDeviceDto[] devices
+    }
+
+    class PlantDto {
+        <<interface>>
+        +string id
+        +string name
+        +number wardId
+        +PlantRoomDto[] rooms
+    }
+
+    class DeviceTypeResolutionInput {
+        <<interface>>
+        +string rawType
+        +string rawSubType
+        +string rawName
+        +readonly string[] sfeTypes
+    }
+
+    class DeviceTaxonomy {
+        <<utility>>
+        +resolveDeviceType(input DeviceTypeResolutionInput) DeviceType
+        +getDeviceTypeLabel(type DeviceType) string
+        +getEndpointLabel(sfeType string) string
+    }
+
+    class IDeviceCard {
+        <<interface>>
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+    }
+
+    class ExecuteActionDto {
+        <<interface>>
+        +string roomId
+        +string deviceId
+        +string action
+    }
+
+    class WriteDatapointRequest {
+        <<interface>>
+        +string roomId
+        +string deviceId
+        +string datapointId
+        +string value
+    }
+
+    class WriteDatapointDto {
+        <<interface>>
+        +string datapointId
+        +string value
+    }
+
+    class DeviceValuePointDto {
+        <<interface>>
+        +string datapointId
+        +string name
+        +string|number value
+    }
+
+    class DeviceValueDto {
+        <<interface>>
+        +string deviceId
+        +DeviceValuePointDto[] values
+    }
+
+    class WritableEndpointRow {
+        <<interface>>
+        +string roomId
+        +string roomName
+        +string deviceId
+        +string deviceName
+        +DeviceType deviceType
+        +string datapointId
+        +string datapointName
+        +string datapointSfeType
+        +string[] enumValues
+    }
+
+    class EndpointRoomGroup {
+        <<interface>>
+        +string roomId
+        +string roomName
+        +WritableEndpointRow[] rows
+    }
+
+    class RowFeedback {
+        <<interface>>
+        +string type
+        +string message
+    }
+
+    class DeviceApiService {
+        -HttpClient http
+        -string baseUrl
+        -string plantEndpoint
+        -string deviceEndpoint
+        +getWritableEndpointRows() Observable~WritableEndpointRow[]~
+        +getRoom(roomId string) Observable~Room~
+        +writeDatapointValue(dto WriteDatapointDto) Observable~void~
+        +getDatapointCurrentValuesByDeviceIds(deviceIds readonly string[]) Observable~Map~
+        +getCurrentValuePointsByDeviceIds(deviceIds readonly string[]) Observable~Map~
+        -resolveActivePlantId() Observable~string~
+        -fetchPlantById(plantId string) Observable~PlantDto~
+        -fetchAllPlants() Observable~PlantDto[]~
+        -mapRoomFromPlant(plant PlantDto, roomId string) Room
+        -mapDatapoints(datapoints PlantDatapointDto[]) Datapoint[]
+        -mapWritableEndpointRows(plant PlantDto) WritableEndpointRow[]
+    }
+
+    class DeviceCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~WriteDatapointRequest~ datapointWriteRequested
+        +getTypeLabel(type DeviceType) string
+        +getDatapointLabel(datapoint Datapoint) string
+        +getWritableEnumDatapoints() Datapoint[]
+        +hasWritableDatapoints() boolean
+        +getSelectedValue(datapointId string, values string[]) string
+        +onSelectionChange(datapointId string, value string) void
+        +onWriteDatapoint(datapointId string, values string[]) void
+    }
+
+    class AlarmButtonCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +onAction(action string) void
+    }
+
+    class BlindCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +onAction(action string) void
+    }
+
+    class EntranceDoorCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +onAction(action string) void
+    }
+
+    class FallSensorCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +onAction(action string) void
+    }
+
+    class LightCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +onAction(action string) void
+    }
+
+    class PresenceSensorCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +onAction(action string) void
+    }
+
+    class ThermostatCardComponent {
+        +InputSignal~string~ roomId
+        +InputSignal~Device~ device
+        +InputSignal~boolean~ isExecuting
+        +InputSignal~string|null~ error
+        +OutputEmitterRef~ExecuteActionDto~ actionRequested
+        +getTypeLabel(type DeviceType) string
+        +onAction(action string) void
+    }
+
+    class EndpointTableComponent {
+        -DeviceApiService deviceApi
+        -Subject~void~ refresh$
+        -Map~string-string~ selectedValuesByRow
+        -Set~string~ executingRows
+        -Map~string-RowFeedback~ feedbackByRow
+        -Map~string-Timeout~ feedbackTimerByRow
+        -Map~string-DeviceValuePointDto[]~ currentValuesByDevice
+        -WritableEndpointRow[] latestRows
+        +Observable~EndpointRoomGroup[]~ roomGroups$
+        +string loadError
+        +ngOnInit() void
+        +ngOnDestroy() void
+        +onWriteRow(row WritableEndpointRow) void
+    }
+
+    class RoomDetailComponent {
+    }
+
+    class DEVICE_INTERACTION_ROUTES {
+        <<routes>>
+    }
+
+    class authGuard {
+        <<guard>>
+    }
+
+    %% Realizzazioni
+    EndpointTableComponent ..|> OnInit
+    EndpointTableComponent ..|> OnDestroy
+    DeviceCardComponent ..|> IDeviceCard
+    AlarmButtonCardComponent ..|> IDeviceCard
+    BlindCardComponent ..|> IDeviceCard
+    EntranceDoorCardComponent ..|> IDeviceCard
+    FallSensorCardComponent ..|> IDeviceCard
+    LightCardComponent ..|> IDeviceCard
+    PresenceSensorCardComponent ..|> IDeviceCard
+    ThermostatCardComponent ..|> IDeviceCard
+
+    %% Composizione modelli
+    Device *-- DeviceAction
+    Device *-- Datapoint
+    Room *-- Device
+    PlantDto *-- PlantRoomDto
+    PlantRoomDto *-- PlantDeviceDto
+    PlantDeviceDto *-- PlantDatapointDto
+    EndpointRoomGroup *-- WritableEndpointRow
+    DeviceValueDto *-- DeviceValuePointDto
+
+    %% Relazioni dominio
+    Device --> DeviceType
+    Device --> DeviceStatus
+    WritableEndpointRow --> DeviceType
+
+    %% Relazioni servizi
+    DeviceApiService ..> Room
+    DeviceApiService ..> PlantDto
+    DeviceApiService ..> PlantDeviceDto
+    DeviceApiService ..> PlantDatapointDto
+    DeviceApiService ..> Datapoint
+    DeviceApiService ..> WritableEndpointRow
+    DeviceApiService ..> WriteDatapointDto
+    DeviceApiService ..> DeviceValueDto
+    DeviceApiService ..> DeviceValuePointDto
+    DeviceApiService ..> DeviceTaxonomy
+
+    %% Relazioni componenti
+    DeviceCardComponent ..> Device
+    DeviceCardComponent ..> Datapoint
+    DeviceCardComponent ..> DeviceType
+    DeviceCardComponent ..> WriteDatapointRequest
+    DeviceCardComponent ..> DeviceTaxonomy
+    AlarmButtonCardComponent ..> Device
+    AlarmButtonCardComponent ..> ExecuteActionDto
+    BlindCardComponent ..> Device
+    BlindCardComponent ..> ExecuteActionDto
+    EntranceDoorCardComponent ..> Device
+    EntranceDoorCardComponent ..> ExecuteActionDto
+    FallSensorCardComponent ..> Device
+    FallSensorCardComponent ..> ExecuteActionDto
+    LightCardComponent ..> Device
+    LightCardComponent ..> ExecuteActionDto
+    PresenceSensorCardComponent ..> Device
+    PresenceSensorCardComponent ..> ExecuteActionDto
+    ThermostatCardComponent ..> Device
+    ThermostatCardComponent ..> DeviceType
+    ThermostatCardComponent ..> ExecuteActionDto
+    ThermostatCardComponent ..> DeviceTaxonomy
+    EndpointTableComponent --> DeviceApiService
+    EndpointTableComponent ..> EndpointRoomGroup
+    EndpointTableComponent ..> WritableEndpointRow
+    EndpointTableComponent ..> RowFeedback
+    EndpointTableComponent ..> DeviceValuePointDto
+    EndpointTableComponent ..> DeviceType
+    EndpointTableComponent ..> DeviceTaxonomy
+    RoomDetailComponent ..> EndpointTableComponent
+
+    %% Route wiring
+    DEVICE_INTERACTION_ROUTES ..> RoomDetailComponent : loadComponent()
+    DEVICE_INTERACTION_ROUTES ..> authGuard : canActivate

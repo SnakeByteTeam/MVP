@@ -1,1581 +1,270 @@
 classDiagram
-class UserRole {
-    AMMINISTRATORE
-    OPERATORE_SANITARIO
-}
-<<enumeration>> UserRole
-class NavItem {
-    +label: string
-    +icon: string
-    +route: string
-    +requiredRole?: UserRole
-}
-<<Interface>> NavItem
-class SidebarComponent {
-    +navItems: NavItem[]
-    +isCollapsed: boolean
-    +isProfileMode: boolean
-    +canOpenProfile: boolean
-    +profileClicked: EventEmitter<void>
-    +collapsed: EventEmitter<void>
-    +navItemSelected: EventEmitter<string>
-}
-class UserInfo {
-    +username: string
-    +firstName: string
-    +lastName: string
-    +role: UserRole
-}
-<<Interface>> UserInfo
-class Breadcrumb {
-    +label: string
-    +url: string
-}
-<<Interface>> Breadcrumb
-class BreadcrumbService {
-    +breadcrumbs$: Observable<Breadcrumb[]>
-    -router: Router
-    -activatedRoute: ActivatedRoute
-    -buildBreadcrumbs(route: ActivatedRoute, url?: string, crumbs?: Breadcrumb[]): Breadcrumb[]
-}
-class TopbarComponent {
-    +user: UserInfo
-    +isProfileActive: boolean
-    +isNotificationActive: boolean
-    +unreadNotificationsCount: number
-    +showVimarWarning: boolean
-    +profileClicked: EventEmitter<void>
-    +logoutClicked: EventEmitter<void>
-    +hamburgerClicked: EventEmitter<void>
-    +notificationClicked: EventEmitter<void>
-    +breadcrumbs$: Observable<Breadcrumb[]>
-    -breadcrumbService: BreadcrumbService
-    +onNotificationClick(): void
-    +onProfileClick(): void
-}
-class NavService {
-    +getNavItems(role: UserRole): NavItem[]
-}
-class UserSession {
-    +userId: string
-    +username: string
-    +role: UserRole
-    +accessToken: string
-    +isFirstAccess: boolean
-}
-<<Interface>> UserSession
-class LoginResponse {
-    +accessToken: string
-}
-<<Interface>> LoginResponse
-class RefreshResponse {
-    +accessToken: string
-}
-<<Interface>> RefreshResponse
-class AuthClaims {
-    +userId?: string | number
-    +sub?: string | number
-    +id?: string | number
-    +username?: string
-    +role?: string
-    +isFirstAccess?: boolean
-    +firstAccess?: boolean
-}
-<<Interface>> AuthClaims
-class TokenResponse {
-    +accessToken: string
-}
-<<Interface>> TokenResponse
-class InternalAuthService {
-    -http: unknown
-    -baseUrl: string
-    -currentUser$: BehaviorSubject<UserSession>
-    -token: string
-    -restoreSessionInFlight$: Observable<boolean>
-    +login(username: string, password: string): Observable<UserSession>
-    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
-    +refreshAccessToken(): Observable<string>
-    +restoreSessionFromRefresh(): Observable<boolean>
-    +logoutFromBackend(): Observable<void>
-    +logout(): void
-    +getToken(): string
-    +getCurrentUser$(): Observable<UserSession>
-    +getRole(): UserRole
-    +isAuthenticated(): boolean
-    +hasRole(role: UserRole): boolean
-    -setSession(session: UserSession): void
-    -buildSessionFromAccessToken(accessToken: string): UserSession
-    -parseAccessToken(accessToken: string): AuthClaims
-    -isUserRole(role: string): boolean
-}
-class AlarmPriority {
-    WHITE
-    GREEN
-    ORANGE
-    RED
-}
-<<enumeration>> AlarmPriority
-class ActiveAlarm {
-    +id: string
-    +alarmRuleId: string
-    +deviceId?: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-    +position: string
-    +userId: number
-    +userUsername?: string
-}
-<<Interface>> ActiveAlarm
-class AlarmEvent {
-    +id: string
-    +alarmRuleId: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-}
-<<Interface>> AlarmEvent
-class NotificationEvent {
-    +notificationId: string
-    +title: string
-    +sentAt: string
-    +eventType?: "triggered" | "resolved"
-}
-<<Interface>> NotificationEvent
-class AlarmStateService {
-    -activeAlarms$: BehaviorSubject<ActiveAlarm[]>
-    -notifications$: BehaviorSubject<NotificationEvent[]>
-    -dismissedNotificationIds$: BehaviorSubject<ReadonlySet<string>>
-    -locallyResolvedActiveAlarmIds: any
-    +setActiveAlarms(alarms: ActiveAlarm[], mode?: ActiveAlarmsSnapshotMode): void
-    +onAlarmTriggered(event: AlarmEvent): void
-    +onAlarmResolved(id: string): void
-    +onNotificationReceived(event: NotificationEvent): void
-    +removeNotification(notificationId: string): void
-    +clearNotifications(): void
-    +dismissNotification(notificationId: string): void
-    +dismissNotifications(notificationIds: readonly string[]): void
-    +getActiveAlarms$(): Observable<ActiveAlarm[]>
-    +getActiveAlarmsCount$(): Observable<number>
-    +getNotifications$(): Observable<NotificationEvent[]>
-    +getDismissedNotificationIds$(): Observable<ReadonlySet<string>>
-    +getUnreadNotificationsCount$(): Observable<number>
-}
-+extractPriorityFromNotificationTitle(title: unknown): AlarmPriority
-+stripPriorityFromNotificationTitle(title: unknown): string
-class NotificationTopbarPanelComponent {
-    +notifications: readonly NotificationEvent[]
-    +viewAllClicked: EventEmitter<void>
-    +notificationSelected: EventEmitter<string>
-    +removeClicked: EventEmitter<string>
-    +clearAllClicked: EventEmitter<void>
-    -maxVisibleNotifications: 6
-    +visibleNotifications: readonly NotificationEvent[]
-    +onNotificationSelected(notificationId: string): void
-    +onRemove(notificationId: string, event?: Event): void
-    +onClearAll(): void
-    +getPriority(notification: NotificationEvent): AlarmPriority
-    +getDisplayTitle(notification: NotificationEvent): string
-    +getPrioritySymbol(priority: AlarmPriority): string
-    +getPriorityBubbleClass(priority: AlarmPriority): string
-    +getPrioritySymbolClass(priority: AlarmPriority): string
-}
-class MyVimarAccount {
-    +email: string
-    +isLinked: boolean
-}
-<<Interface>> MyVimarAccount
-class IVimarCloudApiService {
-    +getLinkedAccount(): Observable<MyVimarAccount>
-    +initiateOAuth(): void
-    +unlinkAccount(): Observable<void>
-}
-<<Interface>> IVimarCloudApiService
-class AlarmManagementRefreshService {
-    -refreshRequested$: Subject<void>
-    +requestRefresh(): void
-    +getRefreshRequested$(): Observable<void>
-}
-OnInit <|.. MainLayoutComponent
-OnDestroy <|.. MainLayoutComponent
-AfterViewInit <|.. MainLayoutComponent
-class MainLayoutComponent {
-    +topbarRef: ElementRef<any>
-    +isCollapsed: boolean
-    +navItems: NavItem[]
-    +isProfilePanelOpen: boolean
-    +isAdmin: boolean
-    +isVimarStatusLoading: boolean
-    +vimarStatusError: string
-    +vimarAccount: MyVimarAccount
-    +showVimarAssociationWarning: boolean
-    +isNotificationPanelOpen: boolean
-    +realtimeToastMessage: string
-    +realtimeToastKind: "alert" | "success"
-    -navService: NavService
-    -internalAuthService: InternalAuthService
-    -alarmStateService: AlarmStateService
-    -alarmManagementRefreshService: AlarmManagementRefreshService
-    -router: Router
-    -myVimarService: IVimarCloudApiService
-    +unreadNotificationsCount$: Observable<number>
-    +notifications$: Observable<NotificationEvent[]>
-    -cdr: ChangeDetectorRef
-    -destroy$: Subject<void>
-    -toastTimer: number
-    -latestRealtimeNotificationId: string
-    +currentUser: UserInfo
-    +activeAlarmCount$: Observable<number>
-    -resizeObserver: ResizeObserver
-    +ngOnInit(): void
-    +ngAfterViewInit(): void
-    +ngOnDestroy(): void
-    +toggleSidebar(): void
-    +toggleProfilePanel(): void
-    +closeProfilePanel(): void
-    +onNavItemSelected(route: string): void
-    +goToVimarLink(): void
-    +toggleNotificationPanel(): void
-    +closeNotificationPanel(): void
-    +openNotificationsArchive(): void
-    +openNotificationsArchiveFromPreview(notificationId: string): void
-    +removeTopbarNotification(notificationId: string): void
-    +clearTopbarNotifications(): void
-    +logout(): void
-    +canOpenProfilePanel(): boolean
-    -bindRealtimeAlarmNotifications(): void
-    -openRealtimeNotificationPanel(): void
-    -showRealtimeToast(message: string, kind: "alert" | "success"): void
-    -clearToastTimer(): void
-    -loadVimarStatus(): void
-}
-class DummyRouteComponent {
-}
-class ApiErrorDisplayOptions {
-    +fallbackMessage: string
-    +actionLabel?: string
-    +forbiddenMessage?: string
-    +nonHttpStrategy?: "fallback" | "message"
-}
-<<Interface>> ApiErrorDisplayOptions
-class ApiErrorDisplayService {
-    +toMessage(error: unknown, options: ApiErrorDisplayOptions): string
-    -mapHttpError(error: HttpErrorResponse, options: ApiErrorDisplayOptions): string
-    -extractHttpMessage(error: HttpErrorResponse): string
-    -extractUnknownMessage(error: unknown): string
-}
-class PrepareOAuthTicketResponse {
-    +ticket: string
-}
-<<Interface>> PrepareOAuthTicketResponse
-IVimarCloudApiService <|.. MyVimarCloudApiFeatureService
-class MyVimarCloudApiFeatureService {
-    -http: unknown
-    -baseUrl: string
-    -apiErrorDisplayService: ApiErrorDisplayService
-    -prepareAuthorizeEndpoint: string
-    -authorizeEndpoint: string
-    -accountEndpoints: string[]
-    -fallbackAccount: MyVimarAccount
-    -document: Document
-    +getLinkedAccount(): Observable<MyVimarAccount>
-    +initiateOAuth(): void
-    +unlinkAccount(): Observable<void>
-    -getLinkedAccountFromEndpoint(index: number): Observable<MyVimarAccount>
-    -unlinkAccountFromEndpoint(index: number): Observable<void>
-    -isNotFound(error: unknown): boolean
-    -showOAuthError(message: string, browser: Window): void
-}
-class dashboardComponent {
-}
-class AlarmListVm {
-    +alarms: ActiveAlarm[]
-    +currentPage: number
-    +pageOffset: number
-    +canGoPrevious: boolean
-    +canGoNext: boolean
-    +isResolving: boolean
-    +resolvingId: string
-    +resolveError: string
-}
-<<Interface>> AlarmListVm
-class AlarmRule {
-    +id: string
-    +name: string
-    +thresholdOperator: string
-    +thresholdValue: string
-    +priority: AlarmPriority
-    +armingTime: string | Date
-    +dearmingTime: string | Date
-    +isArmed: boolean
-    +deviceId: string
-    +datapointId?: string
-    +position: string
-}
-<<Interface>> AlarmRule
-class CreateAlarmRuleRequestDto {
-    +name: string
-    +deviceId: string
-    +datapointId?: string
-    +plantId: string
-    +priority: number
-    +thresholdOperator: string
-    +thresholdValue: string
-    +armingTime: string
-    +dearmingTime: string
-}
-<<Interface>> CreateAlarmRuleRequestDto
-class UpdateAlarmRuleRequestDto {
-    +name: string
-    +priority: number
-    +thresholdOperator: string
-    +thresholdValue: string
-    +armingTime: string
-    +dearmingTime: string
-    +isArmed: boolean
-}
-<<Interface>> UpdateAlarmRuleRequestDto
-class AlarmApiService {
-    -http: unknown
-    -baseUrl: string
-    -alarmsBaseUrl: string
-    -alarmEventsBaseUrl: string
-    +getAlarmRules(): Observable<AlarmRule[]>
-    +getAlarmRule(id: string): Observable<AlarmRule>
-    +createAlarmRule(payload: CreateAlarmRuleRequestDto): Observable<AlarmRule>
-    +updateAlarmRule(id: string, payload: UpdateAlarmRuleRequestDto): Observable<AlarmRule>
-    +deleteAlarmRule(id: string): Observable<void>
-    +getActiveAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
-    +getResolvedAlarms(userId: number, limit?: number, offset?: number): Observable<ActiveAlarm[]>
-    +getAlarmEventById(alarmEventId: string): Observable<ActiveAlarm>
-    +resolveAlarm(alarmId: string, userId: number): Observable<void>
-}
-class AlarmManagementPaginationService {
-    +pageLimit: 6
-    -pageOffsetSubject: BehaviorSubject<number>
-    -canGoNextSubject: BehaviorSubject<boolean>
-    +pageOffset$: Observable<number>
-    +canGoNext$: Observable<boolean>
-    +reset(): void
-    +getOffset(): number
-    +canGoNext(): boolean
-    +canGoPrevious(): boolean
-    +getNextOffset(): number
-    +getPreviousOffset(): number
-    +update(offset: number, canGoNext: boolean): void
-    +toPageNumber(offset: number): number
-}
-class AlarmManagementService {
-    -alarmStateService: AlarmStateService
-    -alarmApiService: AlarmApiService
-    -authService: InternalAuthService
-    -apiErrorDisplayService: ApiErrorDisplayService
-    -paginationService: AlarmManagementPaginationService
-    -resolvingId$: BehaviorSubject<string>
-    -resolveError$: BehaviorSubject<string>
-    -pendingResolveRequests: number
-    +vm$: Observable<AlarmListVm>
-    +initialize(): void
-    +nextPage(): void
-    +previousPage(): void
-    +resolveAlarm(activeAlarmId: string): void
-    -loadPage(offset: number, fallbackToPreviousIfEmpty?: boolean): void
-    -getActiveAlarmsForSession$(session: UserSession, offset: number): Observable<ActiveAlarm[]>
-    -loadPageState$(session: UserSession, offset: number, fallbackToPreviousIfEmpty?: boolean): Inline
-}
-class AlarmManagementTablePresenterService {
-    +toRows(alarms: ActiveAlarm[], resolvingId: string): ActiveAlarmTableRow[]
-    -getSafeDevice(deviceId: string): string
-    -getActionLabel(isResolving: boolean, isManaged: boolean): string
-    -getActionAriaLabel(alarmName: string, isManaged: boolean): string
-    -getSafeAlarmName(alarmName: string): string
-    -getSafeLocation(position: string): string
-}
-class AlarmTableShellComponent {
-    +title: InputSignal<string>
-    +caption: InputSignal<string>
-    +columns: InputSignal<readonly AlarmTableColumn[]>
-    +showCreateButton: InputSignal<boolean>
-    +createButtonAriaLabel: InputSignal<string>
-    +createRequested: OutputEmitterRef<void>
-    +onCreateRequest(): void
-}
-class AlarmPriorityIndicatorComponent {
-    +priority: InputSignal<AlarmPriority>
-    +ui: Signal<PriorityUi>
-}
-class AlarmActionButtonComponent {
-    +label: InputSignal<string>
-    +ariaLabel: InputSignal<string>
-    +tone: InputSignal<AlarmActionButtonTone>
-    +disabled: InputSignal<boolean>
-    +pressed: OutputEmitterRef<void>
-    +buttonClass: Signal<"care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--primary focus-visible:outline-amber-400" | "care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--danger focus-visible:outline-red-500" | "care-btn care-...
-    +onPressed(): void
-}
-PipeTransform <|.. ElapsedTimePipe
-class ElapsedTimePipe {
-    +transform(sentAt: string): string
-}
-OnInit <|.. AlarmPageManagementComponent
-class AlarmPageManagementComponent {
-    -alarmManagementService: AlarmManagementService
-    -tablePresenter: AlarmManagementTablePresenterService
-    -alarmManagementRefreshService: AlarmManagementRefreshService
-    -destroyRef: DestroyRef
-    +columns: readonly AlarmTableColumn[]
-    +vm: any
-    +rows: Signal<ActiveAlarmTableRow[]>
-    +canGoPrevious: Signal<any>
-    +canGoNext: Signal<any>
-    +currentPage: Signal<any>
-    +ngOnInit(): void
-    +onResolve(activeAlarmId: string): void
-    +onNextPage(): void
-    +onPreviousPage(): void
-}
-class AlarmListVm {
-    +alarms: ActiveAlarm[]
-    +currentPage: number
-    +pageLimit: number
-    +pageOffset: number
-    +canGoPrevious: boolean
-    +canGoNext: boolean
-}
-<<Interface>> AlarmListVm
-class AlarmHistoryService {
-    -alarmApiService: AlarmApiService
-    -authService: InternalAuthService
-    -apiErrorDisplayService: ApiErrorDisplayService
-    -pageLimit: 6
-    -pageOffset$: BehaviorSubject<number>
-    -canGoNext$: BehaviorSubject<boolean>
-    -alarms$: BehaviorSubject<ActiveAlarm[]>
-    +vm$: Observable<AlarmListVm>
-    +initialize(): void
-    +nextPage(): void
-    +previousPage(): void
-    -loadPage(offset: number): void
-}
-OnInit <|.. AlarmHistoryPageComponent
-class AlarmHistoryPageComponent {
-    -alarmHistoryService: AlarmHistoryService
-    +columns: readonly AlarmTableColumn[]
-    +ngOnInit(): void
-    +vm: any
-    +rows: Signal<AlarmTableRow[]>
-    +canGoPrevious: Signal<any>
-    +canGoNext: Signal<any>
-    +currentPage: Signal<any>
-    +onNextPage(): void
-    +onPreviousPage(): void
-    -toRow(alarm: ActiveAlarm): AlarmTableRow
-}
-class ThresholdOperator {
-    GREATER_THAN
-    GREATER_THAN_OR_EQUAL
-    LESS_THAN
-    LESS_THAN_OR_EQUAL
-    EQUAL_TO
-}
-<<enumeration>> ThresholdOperator
-class AlarmConfigFormValue {
-    +name: string
-    +plantId: string
-    +deviceId: string
-    +datapointId?: string
-    +priority: AlarmPriority
-    +thresholdOperator: ThresholdOperator
-    +thresholdValue: string
-    +armingTime: string
-    +dearmingTime: string
-    +enabled: boolean
-}
-<<Interface>> AlarmConfigFormValue
-class AlarmTimeMapper {
-    +toFormTime(value: string | Date): string
-    -toHourMinute(value: string): string
-}
-class AlarmRuleRequestMapper {
-    -alarmTimeMapper: AlarmTimeMapper
-    -hourMinutePattern: RegExp
-    +toCreateRequest(formValue: AlarmConfigFormValue): CreateAlarmRuleRequestDto
-    +toUpdateRequest(formValue: AlarmConfigFormValue): UpdateAlarmRuleRequestDto
-    +toToggleRequest(rule: AlarmRule, isArmed: boolean): UpdateAlarmRuleRequestDto
-    -toPriorityNumber(priority: AlarmPriority): number
-    -toThresholdOperatorCode(operator: ThresholdOperator): string
-    -requireField(value: T, fieldName: string): T
-    -requireNonEmptyString(value: string, fieldName: string): string
-    -normalizeOptionalString(value?: string): string
-    -requireHourMinuteString(value: string, fieldName: string): string
-    -requireThresholdOperator(operator: string): string
-    -toRequestThresholdValue(value: string, fieldName: string): string
-}
-class AlarmConfigStateService {
-    -api: AlarmApiService
-    -alarmManagementRefreshService: AlarmManagementRefreshService
-    -apiErrorDisplayService: ApiErrorDisplayService
-    -requestMapper: AlarmRuleRequestMapper
-    -alarmsSubject: BehaviorSubject<AlarmRule[]>
-    -errorSubject: BehaviorSubject<string>
-    +alarms$: Observable<AlarmRule[]>
-    +error$: Observable<string>
-    -clearError(): void
-    -handleError(message: string): Observable<T>
-    -handleApiError(fallbackMessage: string): OperatorFunction<T, T>
-    -reloadAlarmsAfterMutation(): void
-    +loadAlarmRules(): void
-    +getAlarmRuleById(id: string): Observable<AlarmRule>
-    +createAlarmRule(formValue: AlarmConfigFormValue): Observable<AlarmRule>
-    +updateAlarmRule(alarmId: string, formValue: AlarmConfigFormValue): Observable<AlarmRule>
-    +toggleEnabled(alarmId: string, enabled: boolean): Observable<AlarmRule>
-    +deleteAlarmRule(alarmId: string): Observable<void>
-}
-class AlarmToggleSwitchComponent {
-    +checked: InputSignal<boolean>
-    +disabled: InputSignal<boolean>
-    +ariaLabel: InputSignal<string>
-    +toggled: OutputEmitterRef<boolean>
-    +trackClass: Signal<"relative inline-flex h-5 w-9 items-center rounded-full border transition focus-visible:outline-2 focus-visible:outline-offset-2 border-yellow-700 bg-yellow-400 focus-visible:outline-yellow-500 disabled:border-slate-400 disabled:bg-slate-300" | "relative inline-flex h-5 w-9 items-center rounded-full border tr...
-    +thumbClass: Signal<"inline-block h-4 w-4 transform rounded-full border border-slate-500 bg-white transition translate-x-4" | "inline-block h-4 w-4 transform rounded-full border border-slate-500 bg-white transition translate-x-0.5">
-    +onToggle(): void
-}
-class ConfirmDialogComponent {
-    +message: InputSignal<string>
-    +confirmLabel: InputSignal<string>
-    +cancelLabel: InputSignal<string>
-    +confirmed: OutputEmitterRef<void>
-    +cancelled: OutputEmitterRef<void>
-    +onConfirm(): void
-    +onCancel(): void
-}
-class ModalShellComponent {
-    +open: InputSignal<boolean>
-    +title: InputSignal<string>
-    +description: InputSignal<string>
-    +closeLabel: InputSignal<string>
-    +closed: OutputEmitterRef<void>
-    +onClose(): void
-}
-class Datapoint {
-    +id: string
-    +name: string
-    +readable: boolean
-    +writable: boolean
-    +valueType: string
-    +enum: string[]
-    +sfeType: string
-}
-<<Interface>> Datapoint
-class AlarmRuleFormMapper {
-    -alarmTimeMapper: AlarmTimeMapper
-    +toFormValue(rule: AlarmRule): AlarmConfigFormValue
-    -toFormThresholdOperator(operator: string): ThresholdOperator
-}
-class DeviceType {
-    UNKNOWN
-    THERMOSTAT
-    FALL_SENSOR
-    PRESENCE_SENSOR
-    LIGHT
-    ALARM_BUTTON
-    ENTRANCE_DOOR
-    BLIND
-}
-<<enumeration>> DeviceType
-class DeviceAction {
-    +key: string
-    +label: string
-    +disabled?: boolean
-}
-<<Interface>> DeviceAction
-class Device {
-    +id: string
-    +name: string
-    +type: DeviceType
-    +status: DeviceStatus
-    +actions: DeviceAction[]
-    +datapoints: Datapoint[]
-}
-<<Interface>> Device
-class Room {
-    +id: string
-    +name: string
-    +hasActiveAlarm: boolean
-    +devices: Device[]
-}
-<<Interface>> Room
-class Apartment {
-    +id: string
-    +name: string
-    +isEnabled: boolean
-    +rooms: Room[]
-}
-<<Interface>> Apartment
-class PlantDatapointDto {
-    +id: string
-    +name: string
-    +readable: boolean
-    +writable: boolean
-    +valueType: string
-    +enum?: string[]
-    +sfeType: string
-}
-<<Interface>> PlantDatapointDto
-class PlantDeviceDto {
-    +id: string
-    +name: string
-    +type?: string
-    +subType?: string
-    +datapoints?: PlantDatapointDto[]
-}
-<<Interface>> PlantDeviceDto
-class PlantRoomDto {
-    +id: string
-    +name: string
-    +devices: PlantDeviceDto[]
-}
-<<Interface>> PlantRoomDto
-class PlantDto {
-    +id: string
-    +name: string
-    +wardId?: number
-    +rooms: PlantRoomDto[]
-}
-<<Interface>> PlantDto
-class DeviceDatapointExtractionService {
-    -numericThresholdPattern: RegExp
-    +extractDeviceOptions(apartment: Apartment): DeviceDatapointOption[]
-    +findReadableDatapoints(deviceId: string, deviceOptions: readonly DeviceDatapointOption[]): Datapoint[]
-    +findDatapointById(datapointId: string, datapoints: readonly Datapoint[]): Datapoint
-    +findDatapointByDeviceAndDatapointId(plants: readonly PlantDto[], deviceId: string, datapointId: string): Datapoint
-    +getAllowedOperators(datapoint: Datapoint): ThresholdOperator[]
-    +getEnumValues(datapoint: Datapoint): string[]
-    +usesEnumeratedThreshold(datapoint: Datapoint): boolean
-    +normalizeThresholdValue(datapoint: Datapoint, value: string): string
-    +isThresholdValueValid(datapoint: Datapoint, value: string): boolean
-    -normalizeDatapoints(datapoints: readonly Datapoint[]): Datapoint[]
-    -normalizeEnumValues(values: readonly string[]): string[]
-}
-class AlarmConfigFormValidationHelper {
-    -datapointExtraction: DeviceDatapointExtractionService
-    +applyThresholdConstraints(__0: ApplyThresholdConstraintsParams): void
-    -resolveAllowedOperators(mode: "create" | "edit", datapoint: Datapoint, currentOperator: ThresholdOperator): ThresholdOperator[]
-    -operatorAllowedValidator(allowedOperators: readonly ThresholdOperator[]): ValidatorFn
-    -enumThresholdValidator(enumValues: readonly string[]): ValidatorFn
-}
-class CreateWardDto {
-    +name: string
-}
-<<Interface>> CreateWardDto
-class UpdateWardDto {
-    +name: string
-}
-<<Interface>> UpdateWardDto
-class AssignOperatorDto {
-    +userId: number
-}
-<<Interface>> AssignOperatorDto
-class AssignPlantDto {
-    +plantId: string
-}
-<<Interface>> AssignPlantDto
-class WardUserDto {
-    +id: number
-    +username: string
-}
-<<Interface>> WardUserDto
-class WardPlantDto {
-    +id: string
-    +name: string
-}
-<<Interface>> WardPlantDto
-class WardSummaryDto {
-    +id: number
-    +name: string
-}
-<<Interface>> WardSummaryDto
-class Plant {
-    +id: string
-    +name: string
-}
-<<Interface>> Plant
-class User {
-    +id: number
-    +firstName: string
-    +lastName: string
-    +username: string
-    +role: UserRole
-}
-<<Interface>> User
-class Ward {
-    +id: number
-    +name: string
-    +apartments: Plant[]
-    +operators: User[]
-}
-<<Interface>> Ward
-class WardApiService {
-    -http: unknown
-    -baseUrl: string
-    -wardsEndpoint: string
-    -wardUsersRelationshipsEndpoint: string
-    -wardPlantsRelationshipsEndpoint: string
-    -plantEndpoint: string
-    -usersEndpoint: string
-    +getWards(): Observable<WardSummaryDto[]>
-    +createWard(dto: CreateWardDto): Observable<Ward>
-    +updateWard(wardId: number, dto: UpdateWardDto): Observable<Ward>
-    +deleteWard(wardId: number): Observable<void>
-    +getOperatorsByWardId(wardId: number): Observable<WardUserDto[]>
-    +getAvailableOperators(): Observable<WardUserDto[]>
-    +assignOperatorToWard(wardId: number, dto: AssignOperatorDto): Observable<void>
-    +removeOperatorFromWard(wardId: number, userId: number): Observable<void>
-    +getPlantsByWardId(wardId: number): Observable<WardPlantDto[]>
-    +getAvailablePlants(): Observable<WardPlantDto[]>
-    +assignPlantToWard(wardId: number, dto: AssignPlantDto): Observable<void>
-    +removePlantFromWard(plantId: string): Observable<void>
-}
-class DeviceTypeRule {
-    +deviceType: DeviceType
-    +tokens: readonly string[]
-}
-<<Interface>> DeviceTypeRule
-class DeviceTypeResolutionInput {
-    +rawType?: string
-    +rawSubType?: string
-    +rawName?: string
-    +sfeTypes?: readonly string[]
-}
-<<Interface>> DeviceTypeResolutionInput
-+resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
-+getDeviceTypeLabel(type: DeviceType): string
-+getEndpointLabel(sfeType: string): string
-+getDiscoveredUnmappedSfeCodes(): string[]
-+resolveFromRules(normalizedValues: readonly string[], rules: readonly DeviceTypeRule[]): DeviceType
-+includesAny(value: string, tokens: readonly string[]): boolean
-+normalize(value: string): string
-+humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): string
-+humanizeSfeSuffix(value: string): string
-class WardRealtimeCacheService {
-    +getWardIds(userId: string): string[]
-    +setWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
-    +mergeWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
-    +clearWardIds(userId: string): void
-    +clearAll(): void
-    -normalizeUserId(value: string): string
-    -normalizeWardIds(values: readonly WardIdInput[]): string[]
-    -readCache(): WardIdsByUser
-    -writeCache(cache: WardIdsByUser): void
-    -getStorage(): Storage
-    -isWardIdsByUser(value: unknown): boolean
-}
-class ApartmentOption {
-    +id: string
-    +name: string
-}
-<<Interface>> ApartmentOption
-class ApartmentApiService {
-    -http: unknown
-    -baseUrl: string
-    -authService: InternalAuthService
-    -wardRealtimeCache: WardRealtimeCacheService
-    -plantEndpoint: string
-    -apartmentsEndpoint: string
-    +getCurrentApartment(): Observable<Apartment>
-    +getAvailableApartments(): Observable<ApartmentOption[]>
-    +getApartmentByPlantId(plantId: string): Observable<Apartment>
-    +getAllPlants(): Observable<PlantDto[]>
-    +enableApartment(apartmentId: string): Observable<void>
-    +disableApartment(apartmentId: string): Observable<void>
-    +setActivePlantId(plantId: string): void
-    -getActivePlantId(): string
-    -getAvailablePlants(): Observable<PlantDto[]>
-    -extractPlants(response: unknown): PlantDto[]
-    -asPlantArray(value: unknown): PlantDto[]
-    -cacheWardIdsForCurrentUser(plants: readonly PlantDto[]): void
-    -mapPlantToApartment(plant: PlantDto): Apartment
-    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
-    -normalizeDeviceName(name: string): string
-    -getDevicePriorityScore(device: PlantDeviceDto): number
-    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
-    -mapDeviceStatus(rawType: string): DeviceStatus
-}
-class AlarmConfigFormStateService {
-    -hasRequestedPlants: boolean
-    -wardApi: WardApiService
-    -apartmentApi: ApartmentApiService
-    -datapointExtraction: DeviceDatapointExtractionService
-    +plants: WritableSignal<WardPlantDto[]>
-    +plantsLoadError: WritableSignal<string>
-    +devicesLoadError: WritableSignal<string>
-    +isDevicesLoading: WritableSignal<boolean>
-    +ensurePlantsLoaded(mode: "create" | "edit"): Observable<void>
-    +resetDevicesLoadState(): void
-    +loadDeviceOptionsByPlant(plantId: string): Observable<DeviceDatapointOption[]>
-    +resolveDatapointForEdit(deviceId: string, datapointId: string): Observable<Datapoint>
-    -loadAllPlants(): Observable<WardPlantDto[]>
-    -mergePlants(availablePlants: WardPlantDto[], assignedPlants: WardPlantDto[]): WardPlantDto[]
-}
-class AlarmConfigFormFieldOrchestratorHelper {
-    -datapointExtraction: DeviceDatapointExtractionService
-    +applyModeState(form: AlarmConfigFormLike, mode: "create" | "edit"): void
-    +resetDatapointControl(form: AlarmConfigFormLike): void
-    +resolveDeviceSelection(deviceId: string, deviceOptions: readonly DeviceDatapointOption[]): DeviceSelectionResult
-    +resolveDatapointSelection(datapointId: string, datapointOptions: readonly Datapoint[]): DatapointSelectionResult
-}
-+formatAlarmPositionLabel(position: string): string
-class AlarmConfigFormComponent {
-    +mode: InputSignal<"create" | "edit">
-    +initialRule: InputSignal<AlarmRule>
-    +submittedForm: OutputEmitterRef<AlarmConfigFormValue>
-    +cancelled: OutputEmitterRef<void>
-    -fb: FormBuilder
-    -formMapper: AlarmRuleFormMapper
-    -formState: AlarmConfigFormStateService
-    -datapointExtraction: DeviceDatapointExtractionService
-    -validationHelper: AlarmConfigFormValidationHelper
-    -fieldOrchestrator: AlarmConfigFormFieldOrchestratorHelper
-    -destroyRef: DestroyRef
-    -editDatapointLookupVersion: number
-    +form: Inline
-    +isEditMode: Signal<boolean>
-    +plants: WritableSignal<WardPlantDto[]>
-    +deviceOptions: WritableSignal<DeviceDatapointOption[]>
-    +datapointOptions: WritableSignal<Datapoint[]>
-    +plantsLoadError: WritableSignal<string>
-    +devicesLoadError: WritableSignal<string>
-    +isDevicesLoading: WritableSignal<boolean>
-    +selectedDeviceId: WritableSignal<string>
-    +selectedDatapointId: WritableSignal<string>
-    +selectedDatapoint: WritableSignal<Datapoint>
-    +isPlantSelectionVisible: Signal<boolean>
-    +editPosition: Signal<string>
-    +priorityOptions: any
-    +thresholdOperatorOptions: Signal<any>
-    +thresholdValueEnumHints: Signal<string[]>
-    +thresholdValueHelpText: Signal<"Inserisci uno dei valori previsti dal datapoint associato alla regola." | "Inserisci un valore numerico (es. 10, 10.5, -3)." | "Seleziona prima il dispositivo." | "Seleziona un datapoint leggibile per impostare la soglia." | "Inserisci uno dei valori previsti dal datapoint selezionato.">
-    -buildForm(): Inline
-    -createEmptyFormValue(): AlarmConfigFormValue
-    +onSubmit(): void
-    -applyModeState(): void
-    -ensurePlantsLoaded(): void
-    -onPlantChanged(plantId: string): void
-    -onDeviceChanged(deviceId: string): void
-    -onDatapointChanged(datapointId: string): void
-    -applyThresholdConstraints(datapoint: Datapoint): void
-    -loadEditDatapointMetadata(deviceId: string, datapointId: string, lookupVersion: number): void
-    +onCancel(): void
-}
-class AlarmConfigTablePresenterService {
-    -alarmTimeMapper: AlarmTimeMapper
-    +toRows(rules: AlarmRule[]): AlarmConfigTableRow[]
-}
-OnInit <|.. AlarmConfigPageComponent
-class AlarmConfigPageComponent {
-    -stateService: AlarmConfigStateService
-    -tablePresenter: AlarmConfigTablePresenterService
-    +columns: readonly AlarmTableColumn[]
-    +alarms: any
-    +error: any
-    +isModalOpen: WritableSignal<boolean>
-    +editingRule: WritableSignal<AlarmRule>
-    +pendingDelete: Inline
-    +pendingToggleRuleId: WritableSignal<string>
-    +rows: Signal<AlarmConfigTableRow[]>
-    +modalTitle: Signal<"Modifica allarme" | "Creazione allarme">
-    +ngOnInit(): void
-    +onCreateNew(): void
-    +onEdit(alarmRuleId: string): void
-    +onToggleEnabled(alarmRuleId: string, enabled: boolean): void
-    +onDelete(id: string, name: string): void
-    +onDeleteConfirmed(): void
-    +onDeleteCancelled(): void
-    +getDeleteConfirmMessage(): string
-    +onFormSubmitted(formValue: AlarmConfigFormValue): void
-    +onModalClosed(): void
-}
-class ChartDatasetDto {
-    +id: string
-    +name: string
-    +data: number[]
-}
-<<Interface>> ChartDatasetDto
-class EnergySavingSuggestionDto {
-    +messages: string[]
-    +isSuggestion: boolean
-}
-<<Interface>> EnergySavingSuggestionDto
-class ChartInfoDto {
-    +labels: string[]
-    +datasets: ChartDatasetDto[]
-    +title: string
-    +unit: string
-    +suggestions: EnergySavingSuggestionDto
-    +metric: string
-}
-<<Interface>> ChartInfoDto
-class AnalyticsDto {
-    +apartmentId: string
-    +analyticsInfo: ChartInfoDto[]
-}
-<<Interface>> AnalyticsDto
-class AnalyticsApiService {
-    -http: HttpClient
-    -baseUrl: string
-    -analyticsEndpoint: string
-    -apartmentsEndpoint: string
-    +getAllApartments(): Observable<any[]>
-    +getAnalytics(apartmentId: string, refresh?: boolean): Observable<AnalyticsDto>
-}
-class ChartComponent {
-    +chartInfo: ChartInfoDto
-    +chartType*: keyof ChartTypeRegistry
-    +renderedChartData: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint)[], unknown>
-    +chartOptions: _DeepPartialObject<CoreChartOptions<keyof ChartTypeRegistry> & ElementChartOptions<keyof ChartTypeRegistry> & PluginChartOptions<...> & DatasetChartOptions<...> & ScaleChartOptions<...>>
-    +chartColors: Inline
-    +showSuggestions: boolean
-    +ngOnChanges(changes: Inline): void
-    #updateChart(data: ChartInfoDto): void
-    +showHideSugg(): void
-}
-<<abstract>> ChartComponent
-ChartComponent <|-- AlarmFrequencyChartComponent
-class AlarmFrequencyChartComponent {
-    +chartType: keyof ChartTypeRegistry
-}
-ChartComponent <|-- AlarmsSentResolvedChartComponent
-class AlarmsSentResolvedChartComponent {
-    +chartType: keyof ChartTypeRegistry
-}
-ChartComponent <|-- EnergyConsumptionChartComponent
-class EnergyConsumptionChartComponent {
-    +chartType: keyof ChartTypeRegistry
-    +chartColors: Inline
-    +updateChart(data: ChartInfoDto): void
-}
-ChartComponent <|-- FallFrequencyChartComponent
-class FallFrequencyChartComponent {
-    +chartType: keyof ChartTypeRegistry
-}
-ChartComponent <|-- PlantAnomaliesChartComponent
-class PlantAnomaliesChartComponent {
-    +chartType: keyof ChartTypeRegistry
-}
-ChartComponent <|-- PresenceDetectionChartComponent
-class PresenceDetectionChartComponent {
-    +chartType: keyof ChartTypeRegistry
-}
-ChartComponent <|-- ProlongedPresenceChartComponent
-class ProlongedPresenceChartComponent {
-    +chartType: keyof ChartTypeRegistry
-}
-ChartComponent <|-- TemperatureVariationsChartComponent
-class TemperatureVariationsChartComponent {
-    +chartType: keyof ChartTypeRegistry
-    +chartColors: Inline
-}
-OnInit <|.. AnalyticsComponent
-class AnalyticsComponent {
-    -refreshTrigger$: BehaviorSubject<boolean>
-    -analyticsApiService: AnalyticsApiService
-    -loadTrigger$: Inline
-    +selectedApartmentId$: BehaviorSubject<string>
-    +apartments$: Observable<any[]>
-    +analytics: Observable<AnalyticsDto>
-    +ngOnInit(): void
-    +getChartByMetric(data: AnalyticsDto, metric: string): ChartInfoDto
-    +onApartmentChange(event: Event): void
-    +onRefresh(): void
-}
-class AlarmMapComponent {
-    +rooms: InputSignal<Room[]>
-    +activeAlarms: InputSignal<ActiveAlarm[]>
-    +alarmedRoomsCount: Signal<number>
-}
-class WritableEndpointRow {
-    +roomId: string
-    +roomName: string
-    +deviceId: string
-    +deviceName: string
-    +deviceType: DeviceType
-    +datapointId: string
-    +datapointName: string
-    +datapointSfeType: string
-    +enumValues: string[]
-}
-<<Interface>> WritableEndpointRow
-class EndpointRoomGroup {
-    +roomId: string
-    +roomName: string
-    +rows: WritableEndpointRow[]
-}
-<<Interface>> EndpointRoomGroup
-class RowFeedback {
-    +type: "success" | "error"
-    +message: string
-}
-<<Interface>> RowFeedback
-class WriteDatapointRequest {
-    +roomId: string
-    +deviceId: string
-    +datapointId: string
-    +value: string
-}
-<<Interface>> WriteDatapointRequest
-class WriteDatapointDto {
-    +datapointId: string
-    +value: string
-}
-<<Interface>> WriteDatapointDto
-class DeviceValuePointDto {
-    +datapointId: string
-    +name: string
-    +value: string | number
-}
-<<Interface>> DeviceValuePointDto
-class DeviceValueDto {
-    +deviceId: string
-    +values: DeviceValuePointDto[]
-}
-<<Interface>> DeviceValueDto
-class DeviceApiService {
-    -http: unknown
-    -baseUrl: string
-    -plantEndpoint: string
-    -deviceEndpoint: string
-    +getWritableEndpointRows(): Observable<WritableEndpointRow[]>
-    +getRoom(roomId: string): Observable<Room>
-    +writeDatapointValue(dto: WriteDatapointDto): Observable<void>
-    +getDatapointCurrentValuesByDeviceIds(deviceIds: readonly string[]): Observable<Map<string, string | number>>
-    +getCurrentValuePointsByDeviceIds(deviceIds: readonly string[]): Observable<Map<string, DeviceValuePointDto[]>>
-    -resolveActivePlantId(): Observable<string>
-    -fetchPlantById(plantId: string): Observable<PlantDto>
-    -fetchAllPlants(): Observable<PlantDto[]>
-    -getActivePlantId(): string
-    -setActivePlantId(plantId: string): void
-    -mapRoomFromPlant(plant: PlantDto, roomId: string): Room
-    -mapDatapoints(datapoints: PlantDatapointDto[]): Datapoint[]
-    -mapWritableEndpointRows(plant: PlantDto): WritableEndpointRow[]
-    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
-    -normalizeDeviceName(name: string): string
-    -getDevicePriorityScore(device: PlantDeviceDto): number
-    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
-}
-OnInit <|.. EndpointTableComponent
-OnDestroy <|.. EndpointTableComponent
-class EndpointTableComponent {
-    -deviceApi: DeviceApiService
-    -refresh$: Subject<void>
-    -selectedValuesByRow: any
-    -executingRows: any
-    -feedbackByRow: any
-    -feedbackTimerByRow: any
-    -currentValuesByDevice: any
-    -latestRows: WritableEndpointRow[]
-    -activePlantChangeSubscription: Subscription
-    -currentValuesPollingSubscription: Subscription
-    +roomGroups$: Observable<EndpointRoomGroup[]>
-    +loadError: string
-    +ngOnInit(): void
-    +ngOnDestroy(): void
-    +trackByGroup(_: number, group: EndpointRoomGroup): string
-    +trackByRow(_: number, row: WritableEndpointRow): string
-    +getTypeLabel(type: DeviceType): string
-    +getEndpointLabel(row: WritableEndpointRow): string
-    +getCurrentValue(row: WritableEndpointRow): string
-    +getSelectedValue(row: WritableEndpointRow): string
-    +onSelectionChange(row: WritableEndpointRow, value: string): void
-    +isRowExecuting(row: WritableEndpointRow): boolean
-    +getRowFeedback(row: WritableEndpointRow): RowFeedback
-    +onWriteRow(row: WritableEndpointRow): void
-    -groupRowsByRoom(rows: WritableEndpointRow[]): EndpointRoomGroup[]
-    -buildRowKey(row: WritableEndpointRow): string
-    -clearRowFeedback(rowKey: string): void
-    -setRowFeedback(rowKey: string, type: "success" | "error", message: string): void
-    -subscribeToActivePlantChanges(): void
-    -startCurrentValuesPolling(): void
-    -loadCurrentValues(rows: readonly WritableEndpointRow[]): Observable<void>
-    -getSemanticCandidates(row: WritableEndpointRow): Set<string>
-    -convertCmdToState(value: string): string
-    -normalizeKey(value: string): string
-    -syncSelectedValues(rows: readonly WritableEndpointRow[]): void
-    -resetTransientState(): void
-    -clearAllRowFeedback(): void
-    -CURRENT_VALUES_POLL_MS$: 15000
-}
-class BackendTriggeredPayload {
-    +alarmEventId: string
-    +wardId: number
-    +alarmRuleId: string
-}
-<<Interface>> BackendTriggeredPayload
-class BackendResolvedPayload {
-    +alarmEventId: string
-    +wardId?: number
-}
-<<Interface>> BackendResolvedPayload
-class AlarmLifecycleUpdateDetail {
-    +type: AlarmLifecycleType
-    +alarmEventId: string
-}
-<<Interface>> AlarmLifecycleUpdateDetail
-OnInit <|.. ApartmentMonitorComponent
-OnDestroy <|.. ApartmentMonitorComponent
-class ApartmentMonitorComponent {
-    -apartmentApi: ApartmentApiService
-    -alarmState: AlarmStateService
-    -refresh$: Subject<void>
-    -destroy$: Subject<void>
-    +activeAlarms$: Observable<ActiveAlarm[]>
-    +availableApartments$: Observable<ApartmentOption[]>
-    +apartment$: Observable<Apartment>
-    +error: string
-    +activeApartmentId: string
-    +ngOnInit(): void
-    +ngOnDestroy(): void
-    +onApartmentSelected(apartmentId: string): void
-}
-class RoomDetailComponent {
-}
-class NotificationListVm {
-    +notifications: NotificationEvent[]
-    +unreadCount: number
-}
-<<Interface>> NotificationListVm
-+formatTriggeredNotificationTitle(alarmName: unknown, priority: unknown, maxLength?: number): string
-+normalizeAlarmName(value: unknown): string
-+toPrioritySymbol(value: unknown): string
-+normalizePriority(value: unknown): AlarmPriority
-+normalizePriorityFromString(compact: string): AlarmPriority
-+toEnumPriority(compact: string): AlarmPriority
-+isKnownPriority(value: number): boolean
-class AlarmEventHistoryDto {
-    +id?: unknown
-    +activationTime?: unknown
-    +resolutionTime?: unknown
-    +alarmName?: unknown
-    +priority?: unknown
-}
-<<Interface>> AlarmEventHistoryDto
-class NotificationApiService {
-    -http: unknown
-    -baseUrl: string
-    -authService: InternalAuthService
-    +getNotificationsHistory(): Observable<NotificationEvent[]>
-    -fetchManagedAlarmEvents(encodedUserId: string): Observable<AlarmEventHistoryDto[]>
-    -fetchUnmanagedAlarmEvents(encodedUserId: string): Observable<AlarmEventHistoryDto[]>
-    -mapAlarmEventsToNotifications(alarmEvents: readonly AlarmEventHistoryDto[]): NotificationEvent[]
-    -mapAlarmEventToNotification(alarmEvent: AlarmEventHistoryDto): NotificationEvent
-    -toIsoString(value: unknown): string
-    -HISTORY_LIMIT$: 100
-    -HISTORY_OFFSET$: 0
-}
-class NotificationService {
-    -alarmStateService: AlarmStateService
-    -notificationApiService: NotificationApiService
-    +removeNotification(notificationId: string): void
-    +clearAllNotifications(notifications: readonly NotificationEvent[]): void
-    +vm$: Observable<NotificationListVm>
-    -toUnixTimestamp(dateValue: string): number
-}
-class NotificationItemComponent {
-    +notification: InputSignal<NotificationEvent>
-    +showRemoveAction: InputSignal<boolean>
-    +isHighlighted: InputSignal<boolean>
-    +removeClicked: OutputEmitterRef<string>
-    +sentAt: Signal<string>
-    +isResolved: Signal<any>
-    +priority: Signal<AlarmPriority>
-    +displayTitle: Signal<string>
-    +ariaLabel: Signal<string>
-    +onRemove(): void
-}
-class NotificationPageComponent {
-    -notificationService: NotificationService
-    -route: ActivatedRoute
-    +vm$: Observable<NotificationListVm>
-    +highlightedNotificationId$: Observable<string>
-    +skeletonRows: number[]
-    +onNotificationRemoved(notificationId: string): void
-    +onClearAllNotifications(vm: NotificationListVm): void
-    +unreadSummaryLabel(unreadCount: number): string
-}
-class ConnectionStatus {
-    CONNECTED
-    DISCONNECTED
-    RECONNECTING
-}
-<<enumeration>> ConnectionStatus
-class RealtimeAlarmEventNormalizerPort {
-    +parseBackendTriggeredPayload(payload: unknown): BackendTriggeredPayload
-    +parseBackendResolvedPayload(payload: unknown): BackendResolvedPayload
-}
-<<Interface>> RealtimeAlarmEventNormalizerPort
-RealtimeAlarmEventNormalizerPort <|.. RealtimeAlarmEventNormalizerService
-class RealtimeAlarmEventNormalizerService {
-    +parseBackendTriggeredPayload(payload: unknown): BackendTriggeredPayload
-    +parseBackendResolvedPayload(payload: unknown): BackendResolvedPayload
-    -isObject(value: unknown): boolean
-    -parseWardId(value: unknown): number
-}
-class AlarmNotificationDetails {
-    +alarmName?: string
-    +priority?: unknown
-}
-<<Interface>> AlarmNotificationDetails
-class AlarmLifecycleNotifierPort {
-    +publish(type: AlarmLifecycleType, alarmEventId: string, timestamp: string, details?: AlarmNotificationDetails): void
-}
-<<Interface>> AlarmLifecycleNotifierPort
-AlarmLifecycleNotifierPort <|.. AlarmLifecycleNotifierService
-class AlarmLifecycleNotifierService {
-    -alarmStateService: AlarmStateService
-    +publish(type: AlarmLifecycleType, alarmEventId: string, timestamp: string, details?: AlarmNotificationDetails): void
-    -publishNotification(type: AlarmLifecycleType, alarmEventId: string, timestamp: string, details?: AlarmNotificationDetails): void
-    -publishLifecycleUpdate(type: AlarmLifecycleType, alarmEventId: string): void
-}
-class UserActivationActions {
-    +roomsToLeave: string[]
-    +roomsToJoin: string[]
-}
-<<Interface>> UserActivationActions
-class WardSocketRoomCoordinatorPort {
-    +activateUser(userId: string): UserActivationActions
-    +deactivateUser(): string[]
-    +requestJoinRoom(wardId: string): string
-    +requestLeaveRoom(wardId: string): string
-    +getJoinedRooms(): string[]
-    +resetRuntimeState(): void
-}
-<<Interface>> WardSocketRoomCoordinatorPort
-WardSocketRoomCoordinatorPort <|.. WardSocketRoomCoordinatorService
-class WardSocketRoomCoordinatorService {
-    -wardRealtimeCache: WardRealtimeCacheService
-    -joinedRooms: any
-    -currentUserId: string
-    +activateUser(userId: string): UserActivationActions
-    +deactivateUser(): string[]
-    +requestJoinRoom(wardId: string): string
-    +requestLeaveRoom(wardId: string): string
-    +getJoinedRooms(): string[]
-    +resetRuntimeState(): void
-    -persistJoinedRooms(): void
-}
-OnDestroy <|.. EventSubscriptionService
-class EventSubscriptionService {
-    -socketIoFactory: Inline
-    -http: unknown
-    -alarmApiService: AlarmApiService
-    -alarmStateService: AlarmStateService
-    -apiBaseUrl: string
-    -internalAuthService: InternalAuthService
-    -eventNormalizer: RealtimeAlarmEventNormalizerPort
-    -lifecycleNotifier: AlarmLifecycleNotifierPort
-    -roomCoordinator: WardSocketRoomCoordinatorPort
-    -connectionStatus$: BehaviorSubject<ConnectionStatus>
-    -destroy$: Subject<void>
-    -socket: Socket<DefaultEventsMap, DefaultEventsMap>
-    -authLifecycleInitialized: boolean
-    -activeUserId: string
-    -wardBootstrapInFlightUserIds: any
-    -wardBootstrapDoneUserIds: any
-    +initialize(wardIds: string[]): void
-    +refreshWardRoomSubscription(): void
-    +getConnectionStatus$(): Observable<ConnectionStatus>
-    +joinRoom(wardId: string): void
-    +leaveRoom(wardId: string): void
-    +ngOnDestroy(): void
-    -connect(): void
-    -disconnect(): void
-    -ensureAuthLifecycleSubscription(): void
-    -bootstrapWardRoomSubscription(userId: string, forceRefresh?: boolean): void
-    -syncJoinedRoomsWithWardIds(targetWardIds: readonly string[]): void
-    -handleBackendTriggeredRawEvent(raw: unknown): void
-    -handleBackendResolvedRawEvent(raw: unknown): void
-    -resolveTriggeredAlarmDetails(alarmEventId: string): Inline
-    -normalizeAlarmPriority(value: unknown): AlarmPriority
-    -isAlarmPriority(value: number): boolean
-    -rejoinAllRooms(): void
-    -emitJoinMany(wardIds: readonly string[]): void
-    -emitLeaveMany(wardIds: readonly string[]): void
-    -resolveSocketUrl(): string
-    -toWebsocketNamespaceUrl(baseUrl: string): string
-    -resolvePlantAllEndpoint(): string
-    -extractWardIdsFromPlantResponse(response: unknown): string[]
-    -extractPlantArray(response: unknown): Inline
-    -normalizeWardId(rawWardId: unknown): string
-}
-class WardHydrationService {
-    -api: WardApiService
-    +loadHydratedWards(): Observable<Ward[]>
-    +hydrateWardSummaries(wardSummaries: WardSummaryDto[]): Observable<Ward[]>
-    +mapApartments(apartmentsDto: WardPlantDto[]): Plant[]
-    +mapOperators(operatorsDto: WardUserDto[]): User[]
-    -toWard(wardSummary: WardSummaryDto): Observable<Ward>
-}
-class WardManagementState {
-    +wards: Ward[]
-    +isLoading: boolean
-    +error: string
-}
-<<Interface>> WardManagementState
-class WardStore {
-    -state$: BehaviorSubject<WardManagementState>
-    +wards$: Observable<Ward[]>
-    +isLoading$: Observable<boolean>
-    +error$: Observable<string>
-    -setState(partial: Partial<WardManagementState>): void
-    +setWards(wards: Ward[]): void
-    +getWardsSnapshot(): Ward[]
-    +addWard(ward: Ward): void
-    +replaceWard(ward: Ward): void
-    +removeWard(wardId: number): void
-    +setLoading(value: boolean): void
-    +setError(message: string): void
-}
-class AssignmentOperationsService {
-    -api: WardApiService
-    -wardHydration: WardHydrationService
-    -store: WardStore
-    -eventSubscriptionService: EventSubscriptionService
-    +getAvailablePlantsForWard(wardId: number): Observable<Plant[]>
-    +getAvailableUsersForWard(wardId: number): Observable<User[]>
-    +assignOperator(wardId: number, dto: AssignOperatorDto): Observable<void>
-    +removeOperator(wardId: number, userId: number): Observable<void>
-    +assignPlant(wardId: number, dto: AssignPlantDto): Observable<void>
-    +removePlant(plantId: string): Observable<void>
-    -reloadAfter(operation$: Observable<void>): Observable<void>
-    -getErrorMessage(error: unknown): string
-}
-class WardOperationsService {
-    -api: WardApiService
-    -wardHydration: WardHydrationService
-    -store: WardStore
-    +loadWards(): Observable<void>
-    +createWard(dto: CreateWardDto): Observable<void>
-    +updateWard(wardId: number, dto: UpdateWardDto): Observable<void>
-    +deleteWard(wardId: number): Observable<void>
-    -normalizeMutationWard(ward: Ward): Ward
-    -getErrorMessage(error: unknown): string
-}
-OnDestroy <|.. WardManagementStore
-class WardManagementStore {
-    -wardStore: WardStore
-    -wardOperations: WardOperationsService
-    -wardAssignmentOperations: AssignmentOperationsService
-    -destroy$: Subject<void>
-    +wards$: Observable<Ward[]>
-    +isLoading$: Observable<boolean>
-    +error$: Observable<string>
-    +ngOnDestroy(): void
-    +loadWards(): void
-    +createWard(dto: CreateWardDto): void
-    +updateWard(wardId: number, dto: UpdateWardDto): void
-    +deleteWard(wardId: number): void
-    +assignOperator(wardId: number, dto: AssignOperatorDto): void
-    +removeOperator(wardId: number, userId: number): void
-    +assignPlant(wardId: number, dto: AssignPlantDto): void
-    +removePlant(plantId: string): void
-    +getAvailablePlantsForWard(wardId: number): Observable<Plant[]>
-    +getAvailableUsersForWard(wardId: number): Observable<User[]>
-    -getErrorMessage(error: unknown): string
-}
-class RemoveOperatorEvent {
-    +wardId: number
-    +userId: number
-}
-<<Interface>> RemoveOperatorEvent
-class RemovePlantEvent {
-    +plantId: string
-}
-<<Interface>> RemovePlantEvent
-OnInit <|.. AssignWardDialogComponent
-class AssignWardDialogComponent {
-    -formBuilder: FormBuilder
-    +wardId: InputSignal<number>
-    +availableWards: InputSignal<Ward[]>
-    +availablePlants: InputSignal<Plant[]>
-    +submitted: OutputEmitterRef<AssignPlantDto>
-    +cancelled: OutputEmitterRef<void>
-    +form: Inline
-    +ngOnInit(): void
-    +onSubmit(): void
-    +onCancel(): void
-}
-OnInit <|.. AssignOperatorDialogComponent
-class AssignOperatorDialogComponent {
-    -formBuilder: FormBuilder
-    +wardId: InputSignal<number>
-    +availableWards: InputSignal<Ward[]>
-    +availableOperators: InputSignal<User[]>
-    +submitted: OutputEmitterRef<AssignOperatorDto>
-    +cancelled: OutputEmitterRef<void>
-    +form: Inline
-    +ngOnInit(): void
-    +onSubmit(): void
-    +onCancel(): void
-    +getOperatorLabel(operator: User): string
-}
-class WardFormDialogComponent {
-    -formBuilder: FormBuilder
-    +ward: InputSignal<Ward>
-    +submitted: OutputEmitterRef<CreateWardDto>
-    +cancelled: OutputEmitterRef<void>
-    +form: Inline
-    -syncFormWithWard: EffectRef
-    +isEditMode: Signal<boolean>
-    +onSubmit(): void
-    +onCancel(): void
-}
-OnInit <|.. WardManagementPageComponent
-OnDestroy <|.. WardManagementPageComponent
-class WardManagementPageComponent {
-    -store: WardManagementStore
-    -destroy$: Subject<void>
-    +wards$: Observable<Ward[]>
-    +isLoading$: Observable<boolean>
-    +error$: Observable<string>
-    +snackbarMessage: WritableSignal<string>
-    +wardDialogMode: WritableSignal<"create" | "edit" | "closed">
-    +selectedWardId: WritableSignal<number>
-    +selectedApartmentId: WritableSignal<string>
-    +mobileStep: WritableSignal<"apartments" | "operators" | "wards">
-    +operatorWardId: WritableSignal<number>
-    +availableOperatorsFromFetch: WritableSignal<User[]>
-    +isLoadingAvailableOperators: WritableSignal<boolean>
-    +plantWardId: WritableSignal<number>
-    +availablePlantsFromFetch: WritableSignal<Plant[]>
-    +isLoadingAvailablePlants: WritableSignal<boolean>
-    +confirmState: Inline
-    +wardsSnapshot: WritableSignal<Ward[]>
-    +selectedWard: Signal<Ward>
-    +selectedApartment: Signal<Plant>
-    +wardDialogValue: Signal<Ward>
-    +availablePlants: Signal<Plant[]>
-    +availableOperators: Signal<User[]>
-    +ngOnInit(): void
-    +ngOnDestroy(): void
-    +dismissSnackbar(): void
-    +selectWard(wardId: number): void
-    +selectApartment(apartmentId: string): void
-    +showWardListStep(): void
-    +showApartmentsStep(): void
-    +showOperatorsStep(): void
-    +onCreateWard(): void
-    +onCreateWardSubmit(dto: CreateWardDto): void
-    +onEditWard(ward: Ward): void
-    +onEditSelectedWard(): void
-    +onEditWardSubmit(dto: UpdateWardDto): void
-    +onCloseWardDialog(): void
-    +onDeleteWard(wardId: number): void
-    +onAssignOperator(wardId: number): void
-    +onAssignOperatorSubmit(dto: AssignOperatorDto): void
-    +onCloseAssignOperatorDialog(): void
-    +onRemoveOperator(event: RemoveOperatorEvent): void
-    +onAssignPlant(wardId: number): void
-    +onAssignPlantSubmit(dto: AssignPlantDto): void
-    +onCloseAssignPlantDialog(): void
-    +onRemovePlant(event: RemovePlantEvent): void
-    +onConfirmDialogConfirmed(): void
-    +onConfirmDialogCancelled(): void
-    +getConfirmMessage(): string
-    +getConfirmLabel(): string
-    +getOperatorDisplayName(firstName: string, lastName: string): string
-}
-class UserDto {
-    +id: number
-    +name: string
-    +surname: string
-    +username: string
-    +role: UserRole
-}
-<<Interface>> UserDto
-class UserListComponent {
-    +users: InputSignal<UserDto[]>
-    +deleteUser: OutputEmitterRef<number>
-    +pendingDeleteUser: WritableSignal<UserDto>
-    +onDeleteRequest(user: UserDto): void
-    +onDeleteCancel(): void
-    +onDeleteConfirm(): void
-    +onDelete(user: UserDto): void
-}
-class CreateUserDto {
-    +name: string
-    +surname: string
-    +username: string
-}
-<<Interface>> CreateUserDto
-class UserManagementErrorType {
-    USERNAME_ALREADY_IN_USE
-    OTHER_ERROR
-}
-<<enumeration>> UserManagementErrorType
-class CreateUserFormComponent {
-    +errorType: InputSignal<UserManagementErrorType>
-    +isOpen: InputSignal<boolean>
-    +formSubmit: OutputEmitterRef<CreateUserDto>
-    +openRequest: OutputEmitterRef<void>
-    +closeRequest: OutputEmitterRef<void>
-    -nameInput?: ElementRef<HTMLInputElement>
-    -fb: FormBuilder
-    +form: Inline
-    +submit(): void
-    +reset(): void
-    +resetAndFocus(): void
-    +requestClose(): void
-    +requestOpen(): void
-}
-class UserCreatedResponseDto {
-    +tempPassword: string
-}
-<<Interface>> UserCreatedResponseDto
-class UserCreatedDialogComponent {
-    +response: InputSignal<UserCreatedResponseDto>
-    +user: InputSignal<CreateUserDto>
-    +closed: OutputEmitterRef<void>
-    +closeDialog(): void
-}
-class DecoderPasswordService {
-    +decodeTempPassword(tempPassword: string): string
-}
-class UserApiService {
-    -http: unknown
-    -baseUrl: string
-    -decoderPasswordService: DecoderPasswordService
-    +getUsers(): Observable<UserDto[]>
-    +createUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
-    +deleteUser(id: number): Observable<void>
-}
-class UserManagementPageStateService {
-    -userApi: UserApiService
-    -refreshTrigger$: BehaviorSubject<void>
-    +users$: Observable<UserDto[]>
-    +createdResponse: WritableSignal<UserCreatedResponseDto>
-    +createdUser: WritableSignal<CreateUserDto>
-    +formError: WritableSignal<UserManagementErrorType>
-    +isCreateFormOpen: WritableSignal<boolean>
-    +openCreateForm(): void
-    +closeCreateForm(): void
-    +submitUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
-    +deleteUser(id: number): Observable<void>
-    +closeDialog(): void
-    -mapFormError(err: unknown): UserManagementErrorType
-    -isHttpStatus(err: unknown, status: number): boolean
-}
-class UserManagementPageComponent {
-    -pageState: UserManagementPageStateService
-    +users$: Observable<UserDto[]>
-    +createdResponse: WritableSignal<UserCreatedResponseDto>
-    +createdUser: WritableSignal<CreateUserDto>
-    +formError: WritableSignal<UserManagementErrorType>
-    +isCreateFormOpen: WritableSignal<boolean>
-    -createUserFormComponent?: CreateUserFormComponent
-    +openCreateForm(): void
-    +closeCreateForm(): void
-    +onFormSubmit(dto: CreateUserDto): void
-    +onUserDeleted(id: number): void
-    +onDialogClosed(): void
-}
+
+    class OnInit {
+        <<interface>>
+    }
+
+    class OnDestroy {
+        <<interface>>
+    }
+
+    class AfterViewInit {
+        <<interface>>
+    }
+
+    class UserRole {
+        <<enumeration>>
+        AMMINISTRATORE
+        OPERATORE_SANITARIO
+    }
+
+    class NavItem {
+        <<interface>>
+        +string label
+        +string icon
+        +string route
+        +UserRole requiredRole
+    }
+
+    class UserInfo {
+        <<interface>>
+        +string username
+        +string firstName
+        +string lastName
+        +UserRole role
+    }
+
+    class UserSession {
+        <<interface>>
+        +string userId
+        +string username
+        +UserRole role
+        +string accessToken
+        +boolean isFirstAccess
+    }
+
+    class NotificationEvent {
+        <<interface>>
+        +string notificationId
+        +string title
+        +string sentAt
+        +string eventType
+    }
+
+    class MyVimarAccount {
+        <<interface>>
+        +string email
+        +boolean isLinked
+    }
+
+    class Breadcrumb {
+        <<interface>>
+        +string label
+        +string url
+    }
+
+    class BreadcrumbService {
+        +Observable~Breadcrumb[]~ breadcrumbs$
+    }
+
+    class NavService {
+        +getNavItems(role UserRole) NavItem[]
+    }
+
+    class SidebarComponent {
+        +NavItem[] navItems
+        +boolean isCollapsed
+        +boolean isProfileMode
+        +boolean canOpenProfile
+        +EventEmitter~void~ profileClicked
+        +EventEmitter~void~ collapsed
+        +EventEmitter~string~ navItemSelected
+    }
+
+    class TopbarComponent {
+        +UserInfo user
+        +boolean isProfileActive
+        +boolean isNotificationActive
+        +number unreadNotificationsCount
+        +boolean showVimarWarning
+        +Observable~Breadcrumb[]~ breadcrumbs$
+        +EventEmitter~void~ profileClicked
+        +EventEmitter~void~ logoutClicked
+        +EventEmitter~void~ hamburgerClicked
+        +EventEmitter~void~ notificationClicked
+        +onNotificationClick() void
+        +onProfileClick() void
+    }
+
+    class NotificationTopbarPanelComponent {
+    }
+
+    class InternalAuthService {
+        +getCurrentUser$() Observable~UserSession|null~
+        +logoutFromBackend() Observable~void~
+    }
+
+    class AlarmStateService {
+        +getUnreadNotificationsCount$() Observable~number~
+        +getNotifications$() Observable~NotificationEvent[]~
+        +getActiveAlarmsCount$() Observable~number~
+        +removeNotification(notificationId string) void
+        +clearNotifications() void
+    }
+
+    class AlarmManagementRefreshService {
+        +requestRefresh() void
+    }
+
+    class IVimarCloudApiService {
+        <<interface>>
+        +getLinkedAccount() Observable~MyVimarAccount~
+    }
+
+    class MyVimarCloudApiFeatureService {
+    }
+
+    class VIMAR_CLOUD_API_SERVICE {
+        <<injection-token>>
+    }
+
+    class Router {
+    }
+
+    class MainLayoutComponent {
+        +boolean isCollapsed
+        +NavItem[] navItems
+        +boolean isProfilePanelOpen
+        +boolean isAdmin
+        +boolean isVimarStatusLoading
+        +string vimarStatusError
+        +MyVimarAccount|null vimarAccount
+        +boolean showVimarAssociationWarning
+        +boolean isNotificationPanelOpen
+        +string|null realtimeToastMessage
+        +string realtimeToastKind
+        +Observable~number~ unreadNotificationsCount$
+        +Observable~NotificationEvent[]~ notifications$
+        +UserInfo currentUser
+        +Observable~number~ activeAlarmCount$
+        +ngOnInit() void
+        +ngAfterViewInit() void
+        +ngOnDestroy() void
+        +toggleSidebar() void
+        +toggleProfilePanel() void
+        +closeProfilePanel() void
+        +onNavItemSelected(route string) void
+        +goToVimarLink() void
+        +toggleNotificationPanel() void
+        +closeNotificationPanel() void
+        +openNotificationsArchive() void
+        +openNotificationsArchiveFromPreview(notificationId string) void
+        +removeTopbarNotification(notificationId string) void
+        +clearTopbarNotifications() void
+        +logout() void
+        +canOpenProfilePanel() boolean
+    }
+
+    class MAIN_LAYOUT_ROUTES {
+        <<routes>>
+    }
+
+    class authGuard {
+        <<guard>>
+    }
+
+    class roleGuard {
+        <<guard>>
+    }
+
+    class DASHBOARD_ROUTES {
+        <<routes>>
+    }
+
+    class ALARM_MANAGEMENT_ROUTES {
+        <<routes>>
+    }
+
+    class ALARM_HISTORY_ROUTES {
+        <<routes>>
+    }
+
+    class ALARM_CONFIGURATION_ROUTES {
+        <<routes>>
+    }
+
+    class ANALYTICS_ROUTES {
+        <<routes>>
+    }
+
+    class APARTMENT_MONITOR_ROUTES {
+        <<routes>>
+    }
+
+    class DEVICE_INTERACTION_ROUTES {
+        <<routes>>
+    }
+
+    class NOTIFICATION_ROUTES {
+        <<routes>>
+    }
+
+    class WARD_MANAGEMENT_ROUTES {
+        <<routes>>
+    }
+
+    class USER_MANAGEMENT_ROUTES {
+        <<routes>>
+    }
+
+    %% Realizzazioni
+    MainLayoutComponent ..|> OnInit
+    MainLayoutComponent ..|> OnDestroy
+    MainLayoutComponent ..|> AfterViewInit
+    MyVimarCloudApiFeatureService ..|> IVimarCloudApiService
+
+    %% Relazioni modello
+    NavItem --> UserRole
+    UserInfo --> UserRole
+    UserSession --> UserRole
+    TopbarComponent ..> UserInfo
+    TopbarComponent ..> Breadcrumb
+    SidebarComponent ..> NavItem
+
+    %% Relazioni servizi/componenti
+    TopbarComponent --> BreadcrumbService
+    NavService ..> NavItem
+    NavService ..> UserRole
+    MainLayoutComponent --> NavService
+    MainLayoutComponent --> InternalAuthService
+    MainLayoutComponent --> AlarmStateService
+    MainLayoutComponent --> AlarmManagementRefreshService
+    MainLayoutComponent --> Router
+    MainLayoutComponent --> IVimarCloudApiService
+    MainLayoutComponent ..> TopbarComponent
+    MainLayoutComponent ..> SidebarComponent
+    MainLayoutComponent ..> NotificationTopbarPanelComponent
+    MainLayoutComponent ..> NavItem
+    MainLayoutComponent ..> UserInfo
+    MainLayoutComponent ..> UserSession
+    MainLayoutComponent ..> NotificationEvent
+    MainLayoutComponent ..> MyVimarAccount
+    MainLayoutComponent ..> UserRole
+
+    %% Route wiring
+    MAIN_LAYOUT_ROUTES ..> MainLayoutComponent : loadComponent()
+    MAIN_LAYOUT_ROUTES ..> MyVimarCloudApiFeatureService : providers
+    MAIN_LAYOUT_ROUTES ..> VIMAR_CLOUD_API_SERVICE : provide/useExisting
+    MAIN_LAYOUT_ROUTES ..> authGuard
+    MAIN_LAYOUT_ROUTES ..> roleGuard
+    MAIN_LAYOUT_ROUTES ..> UserRole
+    MAIN_LAYOUT_ROUTES ..> DASHBOARD_ROUTES
+    MAIN_LAYOUT_ROUTES ..> ALARM_MANAGEMENT_ROUTES
+    MAIN_LAYOUT_ROUTES ..> ALARM_HISTORY_ROUTES
+    MAIN_LAYOUT_ROUTES ..> ALARM_CONFIGURATION_ROUTES
+    MAIN_LAYOUT_ROUTES ..> ANALYTICS_ROUTES
+    MAIN_LAYOUT_ROUTES ..> APARTMENT_MONITOR_ROUTES
+    MAIN_LAYOUT_ROUTES ..> DEVICE_INTERACTION_ROUTES
+    MAIN_LAYOUT_ROUTES ..> NOTIFICATION_ROUTES
+    MAIN_LAYOUT_ROUTES ..> WARD_MANAGEMENT_ROUTES
+    MAIN_LAYOUT_ROUTES ..> USER_MANAGEMENT_ROUTES

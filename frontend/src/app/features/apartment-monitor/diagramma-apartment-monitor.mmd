@@ -1,412 +1,264 @@
 classDiagram
-class UserRole {
-    AMMINISTRATORE
-    OPERATORE_SANITARIO
-}
-<<enumeration>> UserRole
-class UserSession {
-    +userId: string
-    +username: string
-    +role: UserRole
-    +accessToken: string
-    +isFirstAccess: boolean
-}
-<<Interface>> UserSession
-class LoginResponse {
-    +accessToken: string
-}
-<<Interface>> LoginResponse
-class RefreshResponse {
-    +accessToken: string
-}
-<<Interface>> RefreshResponse
-class AuthClaims {
-    +userId?: string | number
-    +sub?: string | number
-    +id?: string | number
-    +username?: string
-    +role?: string
-    +isFirstAccess?: boolean
-    +firstAccess?: boolean
-}
-<<Interface>> AuthClaims
-class TokenResponse {
-    +accessToken: string
-}
-<<Interface>> TokenResponse
-class InternalAuthService {
-    -http: unknown
-    -baseUrl: string
-    -currentUser$: BehaviorSubject<UserSession>
-    -token: string
-    -restoreSessionInFlight$: Observable<boolean>
-    +login(username: string, password: string): Observable<UserSession>
-    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
-    +refreshAccessToken(): Observable<string>
-    +restoreSessionFromRefresh(): Observable<boolean>
-    +logoutFromBackend(): Observable<void>
-    +logout(): void
-    +getToken(): string
-    +getCurrentUser$(): Observable<UserSession>
-    +getRole(): UserRole
-    +isAuthenticated(): boolean
-    +hasRole(role: UserRole): boolean
-    -setSession(session: UserSession): void
-    -buildSessionFromAccessToken(accessToken: string): UserSession
-    -parseAccessToken(accessToken: string): AuthClaims
-    -isUserRole(role: string): boolean
-}
-class AlarmPriority {
-    WHITE
-    GREEN
-    ORANGE
-    RED
-}
-<<enumeration>> AlarmPriority
-class ActiveAlarm {
-    +id: string
-    +alarmRuleId: string
-    +deviceId?: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-    +position: string
-    +userId: number
-    +userUsername?: string
-}
-<<Interface>> ActiveAlarm
-class AlarmEvent {
-    +id: string
-    +alarmRuleId: string
-    +alarmName: string
-    +priority: AlarmPriority
-    +activationTime: string
-    +resolutionTime: string
-}
-<<Interface>> AlarmEvent
-class NotificationEvent {
-    +notificationId: string
-    +title: string
-    +sentAt: string
-    +eventType?: "triggered" | "resolved"
-}
-<<Interface>> NotificationEvent
-class AlarmStateService {
-    -activeAlarms$: BehaviorSubject<ActiveAlarm[]>
-    -notifications$: BehaviorSubject<NotificationEvent[]>
-    -dismissedNotificationIds$: BehaviorSubject<ReadonlySet<string>>
-    -locallyResolvedActiveAlarmIds: any
-    +setActiveAlarms(alarms: ActiveAlarm[], mode?: ActiveAlarmsSnapshotMode): void
-    +onAlarmTriggered(event: AlarmEvent): void
-    +onAlarmResolved(id: string): void
-    +onNotificationReceived(event: NotificationEvent): void
-    +removeNotification(notificationId: string): void
-    +clearNotifications(): void
-    +dismissNotification(notificationId: string): void
-    +dismissNotifications(notificationIds: readonly string[]): void
-    +getActiveAlarms$(): Observable<ActiveAlarm[]>
-    +getActiveAlarmsCount$(): Observable<number>
-    +getNotifications$(): Observable<NotificationEvent[]>
-    +getDismissedNotificationIds$(): Observable<ReadonlySet<string>>
-    +getUnreadNotificationsCount$(): Observable<number>
-}
-class DeviceType {
-    UNKNOWN
-    THERMOSTAT
-    FALL_SENSOR
-    PRESENCE_SENSOR
-    LIGHT
-    ALARM_BUTTON
-    ENTRANCE_DOOR
-    BLIND
-}
-<<enumeration>> DeviceType
-class DeviceAction {
-    +key: string
-    +label: string
-    +disabled?: boolean
-}
-<<Interface>> DeviceAction
-class Datapoint {
-    +id: string
-    +name: string
-    +readable: boolean
-    +writable: boolean
-    +valueType: string
-    +enum: string[]
-    +sfeType: string
-}
-<<Interface>> Datapoint
-class Device {
-    +id: string
-    +name: string
-    +type: DeviceType
-    +status: DeviceStatus
-    +actions: DeviceAction[]
-    +datapoints: Datapoint[]
-}
-<<Interface>> Device
-class Room {
-    +id: string
-    +name: string
-    +hasActiveAlarm: boolean
-    +devices: Device[]
-}
-<<Interface>> Room
-class AlarmMapComponent {
-    +rooms: InputSignal<Room[]>
-    +activeAlarms: InputSignal<ActiveAlarm[]>
-    +alarmedRoomsCount: Signal<number>
-}
-class WritableEndpointRow {
-    +roomId: string
-    +roomName: string
-    +deviceId: string
-    +deviceName: string
-    +deviceType: DeviceType
-    +datapointId: string
-    +datapointName: string
-    +datapointSfeType: string
-    +enumValues: string[]
-}
-<<Interface>> WritableEndpointRow
-class EndpointRoomGroup {
-    +roomId: string
-    +roomName: string
-    +rows: WritableEndpointRow[]
-}
-<<Interface>> EndpointRoomGroup
-class RowFeedback {
-    +type: "success" | "error"
-    +message: string
-}
-<<Interface>> RowFeedback
-class PlantDatapointDto {
-    +id: string
-    +name: string
-    +readable: boolean
-    +writable: boolean
-    +valueType: string
-    +enum?: string[]
-    +sfeType: string
-}
-<<Interface>> PlantDatapointDto
-class PlantDeviceDto {
-    +id: string
-    +name: string
-    +type?: string
-    +subType?: string
-    +datapoints?: PlantDatapointDto[]
-}
-<<Interface>> PlantDeviceDto
-class PlantRoomDto {
-    +id: string
-    +name: string
-    +devices: PlantDeviceDto[]
-}
-<<Interface>> PlantRoomDto
-class PlantDto {
-    +id: string
-    +name: string
-    +wardId?: number
-    +rooms: PlantRoomDto[]
-}
-<<Interface>> PlantDto
-class WriteDatapointRequest {
-    +roomId: string
-    +deviceId: string
-    +datapointId: string
-    +value: string
-}
-<<Interface>> WriteDatapointRequest
-class WriteDatapointDto {
-    +datapointId: string
-    +value: string
-}
-<<Interface>> WriteDatapointDto
-class DeviceValuePointDto {
-    +datapointId: string
-    +name: string
-    +value: string | number
-}
-<<Interface>> DeviceValuePointDto
-class DeviceValueDto {
-    +deviceId: string
-    +values: DeviceValuePointDto[]
-}
-<<Interface>> DeviceValueDto
-class DeviceTypeRule {
-    +deviceType: DeviceType
-    +tokens: readonly string[]
-}
-<<Interface>> DeviceTypeRule
-class DeviceTypeResolutionInput {
-    +rawType?: string
-    +rawSubType?: string
-    +rawName?: string
-    +sfeTypes?: readonly string[]
-}
-<<Interface>> DeviceTypeResolutionInput
-+resolveDeviceType(input: DeviceTypeResolutionInput): DeviceType
-+getDeviceTypeLabel(type: DeviceType): string
-+getEndpointLabel(sfeType: string): string
-+getDiscoveredUnmappedSfeCodes(): string[]
-+resolveFromRules(normalizedValues: readonly string[], rules: readonly DeviceTypeRule[]): DeviceType
-+includesAny(value: string, tokens: readonly string[]): boolean
-+normalize(value: string): string
-+humanizeUnknownSfeCode(rawValue: string, normalizedValue: string): string
-+humanizeSfeSuffix(value: string): string
-class DeviceApiService {
-    -http: unknown
-    -baseUrl: string
-    -plantEndpoint: string
-    -deviceEndpoint: string
-    +getWritableEndpointRows(): Observable<WritableEndpointRow[]>
-    +getRoom(roomId: string): Observable<Room>
-    +writeDatapointValue(dto: WriteDatapointDto): Observable<void>
-    +getDatapointCurrentValuesByDeviceIds(deviceIds: readonly string[]): Observable<Map<string, string | number>>
-    +getCurrentValuePointsByDeviceIds(deviceIds: readonly string[]): Observable<Map<string, DeviceValuePointDto[]>>
-    -resolveActivePlantId(): Observable<string>
-    -fetchPlantById(plantId: string): Observable<PlantDto>
-    -fetchAllPlants(): Observable<PlantDto[]>
-    -getActivePlantId(): string
-    -setActivePlantId(plantId: string): void
-    -mapRoomFromPlant(plant: PlantDto, roomId: string): Room
-    -mapDatapoints(datapoints: PlantDatapointDto[]): Datapoint[]
-    -mapWritableEndpointRows(plant: PlantDto): WritableEndpointRow[]
-    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
-    -normalizeDeviceName(name: string): string
-    -getDevicePriorityScore(device: PlantDeviceDto): number
-    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
-}
-OnInit <|.. EndpointTableComponent
-OnDestroy <|.. EndpointTableComponent
-class EndpointTableComponent {
-    -deviceApi: DeviceApiService
-    -refresh$: Subject<void>
-    -selectedValuesByRow: any
-    -executingRows: any
-    -feedbackByRow: any
-    -feedbackTimerByRow: any
-    -currentValuesByDevice: any
-    -latestRows: WritableEndpointRow[]
-    -activePlantChangeSubscription: Subscription
-    -currentValuesPollingSubscription: Subscription
-    +roomGroups$: Observable<EndpointRoomGroup[]>
-    +loadError: string
-    +ngOnInit(): void
-    +ngOnDestroy(): void
-    +trackByGroup(_: number, group: EndpointRoomGroup): string
-    +trackByRow(_: number, row: WritableEndpointRow): string
-    +getTypeLabel(type: DeviceType): string
-    +getEndpointLabel(row: WritableEndpointRow): string
-    +getCurrentValue(row: WritableEndpointRow): string
-    +getSelectedValue(row: WritableEndpointRow): string
-    +onSelectionChange(row: WritableEndpointRow, value: string): void
-    +isRowExecuting(row: WritableEndpointRow): boolean
-    +getRowFeedback(row: WritableEndpointRow): RowFeedback
-    +onWriteRow(row: WritableEndpointRow): void
-    -groupRowsByRoom(rows: WritableEndpointRow[]): EndpointRoomGroup[]
-    -buildRowKey(row: WritableEndpointRow): string
-    -clearRowFeedback(rowKey: string): void
-    -setRowFeedback(rowKey: string, type: "success" | "error", message: string): void
-    -subscribeToActivePlantChanges(): void
-    -startCurrentValuesPolling(): void
-    -loadCurrentValues(rows: readonly WritableEndpointRow[]): Observable<void>
-    -getSemanticCandidates(row: WritableEndpointRow): Set<string>
-    -convertCmdToState(value: string): string
-    -normalizeKey(value: string): string
-    -syncSelectedValues(rows: readonly WritableEndpointRow[]): void
-    -resetTransientState(): void
-    -clearAllRowFeedback(): void
-    -CURRENT_VALUES_POLL_MS$: 15000
-}
-class Apartment {
-    +id: string
-    +name: string
-    +isEnabled: boolean
-    +rooms: Room[]
-}
-<<Interface>> Apartment
-class WardRealtimeCacheService {
-    +getWardIds(userId: string): string[]
-    +setWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
-    +mergeWardIds(userId: string, wardIds: readonly WardIdInput[]): string[]
-    +clearWardIds(userId: string): void
-    +clearAll(): void
-    -normalizeUserId(value: string): string
-    -normalizeWardIds(values: readonly WardIdInput[]): string[]
-    -readCache(): WardIdsByUser
-    -writeCache(cache: WardIdsByUser): void
-    -getStorage(): Storage
-    -isWardIdsByUser(value: unknown): boolean
-}
-class ApartmentOption {
-    +id: string
-    +name: string
-}
-<<Interface>> ApartmentOption
-class ApartmentApiService {
-    -http: unknown
-    -baseUrl: string
-    -authService: InternalAuthService
-    -wardRealtimeCache: WardRealtimeCacheService
-    -plantEndpoint: string
-    -apartmentsEndpoint: string
-    +getCurrentApartment(): Observable<Apartment>
-    +getAvailableApartments(): Observable<ApartmentOption[]>
-    +getApartmentByPlantId(plantId: string): Observable<Apartment>
-    +getAllPlants(): Observable<PlantDto[]>
-    +enableApartment(apartmentId: string): Observable<void>
-    +disableApartment(apartmentId: string): Observable<void>
-    +setActivePlantId(plantId: string): void
-    -getActivePlantId(): string
-    -getAvailablePlants(): Observable<PlantDto[]>
-    -extractPlants(response: unknown): PlantDto[]
-    -asPlantArray(value: unknown): PlantDto[]
-    -cacheWardIdsForCurrentUser(plants: readonly PlantDto[]): void
-    -mapPlantToApartment(plant: PlantDto): Apartment
-    -deduplicateRoomDevices(devices: readonly PlantDeviceDto[]): PlantDeviceDto[]
-    -normalizeDeviceName(name: string): string
-    -getDevicePriorityScore(device: PlantDeviceDto): number
-    -isEnergyMeasureDevice(rawType: string, rawSubType: string): boolean
-    -mapDeviceStatus(rawType: string): DeviceStatus
-}
-class BackendTriggeredPayload {
-    +alarmEventId: string
-    +wardId: number
-    +alarmRuleId: string
-}
-<<Interface>> BackendTriggeredPayload
-class BackendResolvedPayload {
-    +alarmEventId: string
-    +wardId?: number
-}
-<<Interface>> BackendResolvedPayload
-class AlarmLifecycleUpdateDetail {
-    +type: AlarmLifecycleType
-    +alarmEventId: string
-}
-<<Interface>> AlarmLifecycleUpdateDetail
-OnInit <|.. ApartmentMonitorComponent
-OnDestroy <|.. ApartmentMonitorComponent
-class ApartmentMonitorComponent {
-    -apartmentApi: ApartmentApiService
-    -alarmState: AlarmStateService
-    -refresh$: Subject<void>
-    -destroy$: Subject<void>
-    +activeAlarms$: Observable<ActiveAlarm[]>
-    +availableApartments$: Observable<ApartmentOption[]>
-    +apartment$: Observable<Apartment>
-    +error: string
-    +activeApartmentId: string
-    +ngOnInit(): void
-    +ngOnDestroy(): void
-    +onApartmentSelected(apartmentId: string): void
-}
-class RoomListComponent {
-    +rooms: InputSignal<Room[]>
-    +roomSelected: OutputEmitterRef<string>
-    +onRoomSelect(roomId: string): void
-}
+
+    class OnInit {
+        <<interface>>
+    }
+
+    class OnDestroy {
+        <<interface>>
+    }
+
+    class AlarmPriority {
+        <<enumeration>>
+        WHITE
+        GREEN
+        ORANGE
+        RED
+    }
+
+    class DeviceType {
+        <<enumeration>>
+        UNKNOWN
+        THERMOSTAT
+        FALL_SENSOR
+        PRESENCE_SENSOR
+        LIGHT
+        ALARM_BUTTON
+        ENTRANCE_DOOR
+        BLIND
+    }
+
+    class DeviceStatus {
+        <<enumeration>>
+        ONLINE
+        OFFLINE
+        ALARM
+        UNKNOWN
+    }
+
+    class UserSession {
+        <<interface>>
+        +string userId
+    }
+
+    class ActiveAlarm {
+        <<interface>>
+        +string id
+        +string alarmName
+        +AlarmPriority priority
+        +string activationTime
+        +string|null resolutionTime
+        +string position
+    }
+
+    class Datapoint {
+        <<interface>>
+        +string id
+        +string name
+        +boolean readable
+        +boolean writable
+        +string valueType
+        +string[] enum
+        +string sfeType
+    }
+
+    class DeviceAction {
+        <<interface>>
+        +string key
+        +string label
+        +boolean disabled
+    }
+
+    class Device {
+        <<interface>>
+        +string id
+        +string name
+        +DeviceType type
+        +DeviceStatus status
+        +DeviceAction[] actions
+        +Datapoint[] datapoints
+    }
+
+    class Room {
+        <<interface>>
+        +string id
+        +string name
+        +boolean hasActiveAlarm
+        +Device[] devices
+    }
+
+    class Apartment {
+        <<interface>>
+        +string id
+        +string name
+        +boolean isEnabled
+        +Room[] rooms
+    }
+
+    class ApartmentOption {
+        <<interface>>
+        +string id
+        +string name
+    }
+
+    class PlantDatapointDto {
+        <<interface>>
+        +string id
+        +string name
+        +boolean readable
+        +boolean writable
+        +string valueType
+        +string[] enum
+        +string sfeType
+    }
+
+    class PlantDeviceDto {
+        <<interface>>
+        +string id
+        +string name
+        +string type
+        +string subType
+        +PlantDatapointDto[] datapoints
+    }
+
+    class PlantRoomDto {
+        <<interface>>
+        +string id
+        +string name
+        +PlantDeviceDto[] devices
+    }
+
+    class PlantDto {
+        <<interface>>
+        +string id
+        +string name
+        +number wardId
+        +PlantRoomDto[] rooms
+    }
+
+    class AlarmLifecycleUpdateDetail {
+        <<interface>>
+        +string type
+        +string alarmEventId
+    }
+
+    class DeviceTypeResolutionInput {
+        <<interface>>
+        +string rawType
+        +string rawSubType
+        +string rawName
+        +readonly string[] sfeTypes
+    }
+
+    class DeviceTaxonomy {
+        <<utility>>
+        +resolveDeviceType(input DeviceTypeResolutionInput) DeviceType
+    }
+
+    class InternalAuthService {
+        +getCurrentUser$() Observable~UserSession|null~
+    }
+
+    class WardRealtimeCacheService {
+        +mergeWardIds(userId string, wardIds readonly string[]) string[]
+    }
+
+    class AlarmStateService {
+        +getActiveAlarms$() Observable~ActiveAlarm[]~
+    }
+
+    class EndpointTableComponent {
+    }
+
+    class ApartmentApiService {
+        -HttpClient http
+        -string baseUrl
+        -InternalAuthService authService
+        -WardRealtimeCacheService wardRealtimeCache
+        -string plantEndpoint
+        -string apartmentsEndpoint
+        +getCurrentApartment() Observable~Apartment~
+        +getAvailableApartments() Observable~ApartmentOption[]~
+        +getApartmentByPlantId(plantId string) Observable~Apartment~
+        +getAllPlants() Observable~PlantDto[]~
+        +enableApartment(apartmentId string) Observable~void~
+        +disableApartment(apartmentId string) Observable~void~
+        +setActivePlantId(plantId string) void
+    }
+
+    class AlarmMapComponent {
+        +InputSignal~Room[]~ rooms
+        +InputSignal~ActiveAlarm[]~ activeAlarms
+        +Signal~number~ alarmedRoomsCount
+    }
+
+    class RoomListComponent {
+        +InputSignal~Room[]~ rooms
+        +OutputEmitterRef~string~ roomSelected
+        +onRoomSelect(roomId string) void
+    }
+
+    class ApartmentMonitorComponent {
+        -ApartmentApiService apartmentApi
+        -AlarmStateService alarmState
+        -Subject~void~ refresh$
+        -Subject~void~ destroy$
+        +Observable~ActiveAlarm[]~ activeAlarms$
+        +Observable~ApartmentOption[]~ availableApartments$
+        +Observable~Apartment|null~ apartment$
+        +string error
+        +string activeApartmentId
+        +ngOnInit() void
+        +ngOnDestroy() void
+        +onApartmentSelected(apartmentId string) void
+    }
+
+    class APARTMENT_MONITOR_ROUTES {
+        <<routes>>
+    }
+
+    %% Realizzazioni
+    ApartmentMonitorComponent ..|> OnInit
+    ApartmentMonitorComponent ..|> OnDestroy
+
+    %% Composizione modelli
+    Apartment *-- Room
+    Room *-- Device
+    Device *-- Datapoint
+    Device *-- DeviceAction
+    PlantDto *-- PlantRoomDto
+    PlantRoomDto *-- PlantDeviceDto
+    PlantDeviceDto *-- PlantDatapointDto
+
+    %% Relazioni dominio
+    Device --> DeviceType
+    Device --> DeviceStatus
+    ActiveAlarm --> AlarmPriority
+
+    %% Relazioni servizi
+    ApartmentApiService --> InternalAuthService
+    ApartmentApiService --> WardRealtimeCacheService
+    ApartmentApiService ..> UserSession
+    ApartmentApiService ..> Apartment
+    ApartmentApiService ..> ApartmentOption
+    ApartmentApiService ..> PlantDto
+    ApartmentApiService ..> PlantDeviceDto
+    ApartmentApiService ..> Datapoint
+    ApartmentApiService ..> DeviceType
+    ApartmentApiService ..> DeviceTaxonomy
+
+    %% Relazioni componenti
+    AlarmMapComponent ..> Room
+    AlarmMapComponent ..> ActiveAlarm
+    RoomListComponent ..> Room
+    ApartmentMonitorComponent --> ApartmentApiService
+    ApartmentMonitorComponent --> AlarmStateService
+    ApartmentMonitorComponent ..> ActiveAlarm
+    ApartmentMonitorComponent ..> Apartment
+    ApartmentMonitorComponent ..> ApartmentOption
+    ApartmentMonitorComponent ..> AlarmLifecycleUpdateDetail
+    ApartmentMonitorComponent ..> AlarmMapComponent
+    ApartmentMonitorComponent ..> EndpointTableComponent
+
+    %% Route wiring
+    APARTMENT_MONITOR_ROUTES ..> ApartmentMonitorComponent

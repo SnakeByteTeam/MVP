@@ -136,6 +136,107 @@ describe('InternalAuthService', () => {
     expect(service.getRole()).toBe(UserRole.AMMINISTRATORE);
   });
 
+  it('restituisce true senza chiamare refresh quando la sessione e gia attiva', async () => {
+    const loginPromise = firstValueFrom(service.login('mrossi', loginCredential));
+
+    const loginRequest = httpMock.expectOne('http://localhost:3000/auth/login');
+    loginRequest.flush({
+      accessToken: createAccessToken({
+        userId: 'user-1',
+        username: 'mrossi',
+        role: UserRole.OPERATORE_SANITARIO,
+        isFirstAccess: false,
+      }),
+    });
+
+    await loginPromise;
+
+    const restorePromise = firstValueFrom(service.restoreSessionFromRefresh());
+
+    expect(await restorePromise).toBe(true);
+    httpMock.expectNone('http://localhost:3000/auth/refresh');
+  });
+
+  it('esegue logout locale anche se il backend risponde con errore', async () => {
+    const loginPromise = firstValueFrom(service.login('mrossi', loginCredential));
+
+    const loginRequest = httpMock.expectOne('http://localhost:3000/auth/login');
+    loginRequest.flush({
+      accessToken: createAccessToken({
+        userId: 'user-1',
+        username: 'mrossi',
+        role: UserRole.AMMINISTRATORE,
+        isFirstAccess: false,
+      }),
+    });
+
+    await loginPromise;
+
+    const logoutPromise = firstValueFrom(service.logoutFromBackend());
+
+    const logoutRequest = httpMock.expectOne('http://localhost:3000/auth/logout');
+    expect(logoutRequest.request.method).toBe('POST');
+    expect(logoutRequest.request.withCredentials).toBe(true);
+    logoutRequest.flush(
+      { message: 'Server error' },
+      { status: 500, statusText: 'Server Error' }
+    );
+
+    await logoutPromise;
+
+    expect(service.getToken()).toBeNull();
+    expect(service.getRole()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('rifiuta token privi dei claim auth richiesti', async () => {
+    const loginPromise = firstValueFrom(service.login('mrossi', loginCredential));
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/login');
+    request.flush({
+      accessToken: createAccessToken({
+        username: 'mrossi',
+        role: UserRole.OPERATORE_SANITARIO,
+        isFirstAccess: false,
+      }),
+    });
+
+    await expect(loginPromise).rejects.toThrow('Access token missing required auth claims');
+    expect(service.getToken()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('rifiuta access token con formato non valido', async () => {
+    const loginPromise = firstValueFrom(service.login('mrossi', loginCredential));
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/login');
+    request.flush({
+      accessToken: 'not-a-jwt',
+    });
+
+    await expect(loginPromise).rejects.toThrow('Invalid access token format');
+    expect(service.getToken()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
+  it('rifiuta access token con ruolo non supportato', async () => {
+    const loginPromise = firstValueFrom(service.login('mrossi', loginCredential));
+
+    const request = httpMock.expectOne('http://localhost:3000/auth/login');
+    request.flush({
+      accessToken: createAccessToken({
+        userId: 'user-1',
+        username: 'mrossi',
+        role: 'VISITATORE',
+        isFirstAccess: false,
+      }),
+    });
+
+    await expect(loginPromise).rejects.toThrow('Access token has invalid role claim');
+    expect(service.getToken()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+  });
+
   it('restituisce false quando restore sessione fallisce', async () => {
     const restorePromise = firstValueFrom(service.restoreSessionFromRefresh());
 

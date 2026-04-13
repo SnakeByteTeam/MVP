@@ -5,7 +5,7 @@ import { InternalAuthService } from 'src/app/core/services/internal-auth.service
 import { NavService } from 'src/app/features/main-layout/services/nav.service';
 import { AlarmStateService } from 'src/app/core/alarm/services/alarm-state.service';
 import { UserRole } from 'src/app/core/models/user-role.enum';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { provideRouter, Router } from '@angular/router'; 
 import { VIMAR_CLOUD_API_SERVICE } from 'src/app/core/services/vimar-cloud-api.service.interface';
@@ -241,4 +241,181 @@ describe('MainLayoutComponent', () => {
         expect(component.isNotificationPanelOpen).toBe(true);
     });
 
+    it('dovrebbe gestire i toggle e le reazioni del template sui pannelli notifica e profilo', () => {
+        fixture.detectChanges();
+        
+        expect(component.isNotificationPanelOpen).toBe(false);
+        component.toggleNotificationPanel();
+        expect(component.isNotificationPanelOpen).toBe(true);
+        expect(component.isProfilePanelOpen).toBe(false); // profile should be closed
+        
+        component.closeNotificationPanel();
+        expect(component.isNotificationPanelOpen).toBe(false);
+    });
+
+    it('dovrebbe navigare all archivio notifiche e chiudere il pannello', () => {
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+        component.isNotificationPanelOpen = true;
+
+        component.openNotificationsArchive();
+        
+        expect(component.isNotificationPanelOpen).toBe(false);
+        expect(navigateSpy).toHaveBeenCalledWith(['/notifications']);
+    });
+
+    it('dovrebbe navigare all archivio con preview', () => {
+        const router = TestBed.inject(Router);
+        const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+        component.isNotificationPanelOpen = true;
+
+        component.openNotificationsArchiveFromPreview('notif-123');
+        
+        expect(component.isNotificationPanelOpen).toBe(false);
+        expect(navigateSpy).toHaveBeenCalledWith(['/notifications'], { queryParams: { focus: 'notif-123' }});
+    });
+
+    it('dovrebbe interagire con topbar notifications', () => {
+        (mockAlarmService as any).removeNotification = vi.fn();
+        (mockAlarmService as any).clearNotifications = vi.fn();
+
+        component.removeTopbarNotification('notif-123');
+        expect((mockAlarmService as any).removeNotification).toHaveBeenCalledWith('notif-123');
+        
+        component.clearTopbarNotifications();
+        expect((mockAlarmService as any).clearNotifications).toHaveBeenCalledTimes(1);
+    });
+    
+    it('dovrebbe creare e distruggere correttamente resizeObserver', () => {
+        component.topbarRef = { nativeElement: document.createElement('div') };
+        
+        component.ngAfterViewInit();
+        expect(component['resizeObserver']).toBeTruthy();
+        
+        // We simulate the observer callback directly on the mock if we could, 
+        // but here we just check it was created and observes the ref.
+        
+        const disconnectSpy = vi.spyOn(component['resizeObserver'], 'disconnect');
+        component.ngOnDestroy();
+        expect(disconnectSpy).toHaveBeenCalled();
+    });
+    
+    it('dovrebbe testare logica di visualizzazione Toast Realtime', () => {
+        vi.useFakeTimers();
+        
+        component['showRealtimeToast']('Test alert', 'alert');
+        expect(component.realtimeToastMessage).toBe('Test alert');
+        expect(component.realtimeToastKind).toBe('alert');
+        
+        vi.advanceTimersByTime(5000);
+        expect(component.realtimeToastMessage).toBeNull();
+        
+        vi.useRealTimers();
+    });
+    
+    it('dovrebbe gestire VimarStatus error quando chiamando il servizio fallisce', () => {
+        component.isProfilePanelOpen = true;
+        mockMyVimarService.getLinkedAccount.mockReturnValue(throwError(() => new Error('fail')));
+        
+        component['loadVimarStatus']();
+        
+        expect(component.vimarAccount?.isLinked).toBe(false);
+        expect(component.vimarStatusError).toContain('Impossibile recuperare');
+    });
+
+    describe('when myVimarService is null', () => {
+        let noVimarFixture: ComponentFixture<MainLayoutComponent>;
+        let noVimarComponent: MainLayoutComponent;
+
+        beforeEach(async () => {
+            TestBed.resetTestingModule();
+            await TestBed.configureTestingModule({
+                imports: [MainLayoutComponent],
+                providers: [
+                    { provide: InternalAuthService, useValue: mockAuthService },
+                    { provide: NavService, useValue: mockNavService },
+                    { provide: AlarmStateService, useValue: mockAlarmService },
+                    { provide: VIMAR_CLOUD_API_SERVICE, useValue: null },
+                    { provide: AlarmManagementRefreshService, useValue: mockAlarmManagementRefreshService },
+                    provideRouter([
+                        { path: 'auth/login', component: DummyRouteComponent },
+                    ])
+                ]
+            }).compileComponents();
+            noVimarFixture = TestBed.createComponent(MainLayoutComponent);
+            noVimarComponent = noVimarFixture.componentInstance;
+        });
+
+        it('dovrebbe saltare loadVimarStatus se myVimarService non e fornito', () => {
+            noVimarComponent['loadVimarStatus']();
+
+            expect(noVimarComponent.vimarStatusError).toContain('Servizio MyVimar non disponibile');
+            expect(noVimarComponent.isVimarStatusLoading).toBe(false);
+        });
+    });
+
+    it('ngAfterViewInit e no-op se ResizeObserver non esiste nel globalThis', () => {
+        const original = (globalThis as any).ResizeObserver;
+        delete (globalThis as any).ResizeObserver;
+
+        component.topbarRef = { nativeElement: document.createElement('div') };
+        expect(() => component.ngAfterViewInit()).not.toThrow();
+
+        (globalThis as any).ResizeObserver = original;
+    });
+
+    it('ResizeObserver callback aggiorna la variabile CSS --topbar-height', () => {
+        let capturedCallback: ((entries: any[]) => void) | null = null;
+        (globalThis as any).ResizeObserver = class {
+            constructor(cb: (entries: any[]) => void) { capturedCallback = cb; }
+            observe = vi.fn();
+            unobserve = vi.fn();
+            disconnect = vi.fn();
+        };
+
+        fixture.detectChanges();
+        component.topbarRef = { nativeElement: document.createElement('div') };
+        component.ngAfterViewInit();
+
+        capturedCallback!([{ contentRect: { height: 72 } }]);
+        expect(document.documentElement.style.getPropertyValue('--topbar-height')).toBe('72px');
+    });
+
+    it('onNavItemSelected non chiama requestRefresh se il route non e alarm-management', () => {
+        fixture.detectChanges();
+        component.onNavItemSelected('dashboard');
+        expect(mockAlarmManagementRefreshService.requestRefresh).not.toHaveBeenCalled();
+    });
+
+    it('onNavItemSelected non chiama requestRefresh se la URL corrente non include alarm-management', () => {
+        fixture.detectChanges();
+        // Router url is '/' by default in testing
+        component.onNavItemSelected('alarms/alarm-management');
+        expect(mockAlarmManagementRefreshService.requestRefresh).not.toHaveBeenCalled();
+    });
+
+    it('openRealtimeNotificationPanel non duplica se il pannello e gia aperto', () => {
+        fixture.detectChanges();
+        component.isNotificationPanelOpen = true;
+
+        notificationsSubject.next([{ notificationId: 'n-xyz', title: 'Test', sentAt: new Date().toISOString() }]);
+
+        // panel was already open, it should remain open (no error)
+        expect(component.isNotificationPanelOpen).toBe(true);
+    });
+
+    it('clearToastTimer cancella il timer attivo quando viene chiamato due volte', () => {
+        vi.useFakeTimers();
+        fixture.detectChanges();
+
+        // Start two toasts → second should cancel the first timer
+        component['showRealtimeToast']('primo', 'alert');
+        component['showRealtimeToast']('secondo', 'success');
+        expect(component.realtimeToastMessage).toBe('secondo');
+
+        // Only the second timer should remain, advance to clear it
+        vi.advanceTimersByTime(5000);
+        expect(component.realtimeToastMessage).toBeNull();
+        vi.useRealTimers();
+    });
 });

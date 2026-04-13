@@ -1,9 +1,7 @@
 classDiagram
-
     class OnInit {
         <<interface>>
     }
-
     class OnDestroy {
         <<interface>>
     }
@@ -32,7 +30,7 @@ classDiagram
         <<interface>>
         +string key
         +string label
-        +boolean disabled
+        +boolean? disabled
     }
 
     class Datapoint {
@@ -71,7 +69,7 @@ classDiagram
         +boolean readable
         +boolean writable
         +string valueType
-        +string[] enum
+        +string[]? enum
         +string sfeType
     }
 
@@ -79,9 +77,9 @@ classDiagram
         <<interface>>
         +string id
         +string name
-        +string type
-        +string subType
-        +PlantDatapointDto[] datapoints
+        +string? type
+        +string? subType
+        +PlantDatapointDto[]? datapoints
     }
 
     class PlantRoomDto {
@@ -95,23 +93,23 @@ classDiagram
         <<interface>>
         +string id
         +string name
-        +number wardId
+        +number? wardId
         +PlantRoomDto[] rooms
     }
 
     class DeviceTypeResolutionInput {
         <<interface>>
-        +string rawType
-        +string rawSubType
-        +string rawName
-        +readonly string[] sfeTypes
+        +string? rawType
+        +string? rawSubType
+        +string? rawName
+        +readonly string[]? sfeTypes
     }
 
     class DeviceTaxonomy {
         <<utility>>
-        +resolveDeviceType(input DeviceTypeResolutionInput) DeviceType
-        +getDeviceTypeLabel(type DeviceType) string
-        +getEndpointLabel(sfeType string) string
+        +resolveDeviceType(input:DeviceTypeResolutionInput) DeviceType
+        +getDeviceTypeLabel(type:DeviceType) string
+        +getEndpointLabel(sfeType:string) string
     }
 
     class IDeviceCard {
@@ -176,7 +174,7 @@ classDiagram
 
     class RowFeedback {
         <<interface>>
-        +string type
+        +"success"|"error" type
         +string message
     }
 
@@ -186,16 +184,16 @@ classDiagram
         -string plantEndpoint
         -string deviceEndpoint
         +getWritableEndpointRows() Observable~WritableEndpointRow[]~
-        +getRoom(roomId string) Observable~Room~
-        +writeDatapointValue(dto WriteDatapointDto) Observable~void~
-        +getDatapointCurrentValuesByDeviceIds(deviceIds readonly string[]) Observable~Map~
-        +getCurrentValuePointsByDeviceIds(deviceIds readonly string[]) Observable~Map~
+        +getRoom(roomId:string) Observable~Room~
+        +writeDatapointValue(dto:WriteDatapointDto) Observable~void~
+        +getDatapointCurrentValuesByDeviceIds(deviceIds:readonly string[]) Observable~Map~string,string|number~~
+        +getCurrentValuePointsByDeviceIds(deviceIds:readonly string[]) Observable~Map~string,DeviceValuePointDto[]~~
         -resolveActivePlantId() Observable~string~
-        -fetchPlantById(plantId string) Observable~PlantDto~
+        -fetchPlantById(plantId:string) Observable~PlantDto~
         -fetchAllPlants() Observable~PlantDto[]~
-        -mapRoomFromPlant(plant PlantDto, roomId string) Room
-        -mapDatapoints(datapoints PlantDatapointDto[]) Datapoint[]
-        -mapWritableEndpointRows(plant PlantDto) WritableEndpointRow[]
+        -mapRoomFromPlant(plant:PlantDto, roomId:string) Room
+        -mapDatapoints(datapoints:PlantDatapointDto[]|undefined) Datapoint[]
+        -mapWritableEndpointRows(plant:PlantDto) WritableEndpointRow[]
     }
 
     class DeviceCardComponent {
@@ -204,13 +202,13 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~WriteDatapointRequest~ datapointWriteRequested
-        +getTypeLabel(type DeviceType) string
-        +getDatapointLabel(datapoint Datapoint) string
+        +getTypeLabel(type:DeviceType) string
+        +getDatapointLabel(datapoint:Datapoint) string
         +getWritableEnumDatapoints() Datapoint[]
         +hasWritableDatapoints() boolean
-        +getSelectedValue(datapointId string, values string[]) string
-        +onSelectionChange(datapointId string, value string) void
-        +onWriteDatapoint(datapointId string, values string[]) void
+        +getSelectedValue(datapointId:string, values:string[]) string
+        +onSelectionChange(datapointId:string, value:string) void
+        +onWriteDatapoint(datapointId:string, values:string[]) void
     }
 
     class AlarmButtonCardComponent {
@@ -219,7 +217,7 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +onAction(action string) void
+        +onAction(action:string) void
     }
 
     class BlindCardComponent {
@@ -228,7 +226,7 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +onAction(action string) void
+        +onAction(action:string) void
     }
 
     class EntranceDoorCardComponent {
@@ -237,7 +235,7 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +onAction(action string) void
+        +onAction(action:string) void
     }
 
     class FallSensorCardComponent {
@@ -246,7 +244,7 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +onAction(action string) void
+        +onAction(action:string) void
     }
 
     class LightCardComponent {
@@ -255,7 +253,7 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +onAction(action string) void
+        +onAction(action:string) void
     }
 
     class PresenceSensorCardComponent {
@@ -264,7 +262,7 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +onAction(action string) void
+        +onAction(action:string) void
     }
 
     class ThermostatCardComponent {
@@ -273,24 +271,24 @@ classDiagram
         +InputSignal~boolean~ isExecuting
         +InputSignal~string|null~ error
         +OutputEmitterRef~ExecuteActionDto~ actionRequested
-        +getTypeLabel(type DeviceType) string
-        +onAction(action string) void
+        +getTypeLabel(type:DeviceType) string
+        +onAction(action:string) void
     }
 
     class EndpointTableComponent {
         -DeviceApiService deviceApi
         -Subject~void~ refresh$
-        -Map~string-string~ selectedValuesByRow
+        -Map~string,string~ selectedValuesByRow
         -Set~string~ executingRows
-        -Map~string-RowFeedback~ feedbackByRow
-        -Map~string-Timeout~ feedbackTimerByRow
-        -Map~string-DeviceValuePointDto[]~ currentValuesByDevice
+        -Map~string,RowFeedback~ feedbackByRow
+        -Map~string,NodeJS.Timeout~ feedbackTimerByRow
+        -Map~string,DeviceValuePointDto[]~ currentValuesByDevice
         -WritableEndpointRow[] latestRows
         +Observable~EndpointRoomGroup[]~ roomGroups$
         +string loadError
         +ngOnInit() void
         +ngOnDestroy() void
-        +onWriteRow(row WritableEndpointRow) void
+        +onWriteRow(row:WritableEndpointRow) void
     }
 
     class RoomDetailComponent {
@@ -349,6 +347,7 @@ classDiagram
     DeviceCardComponent ..> DeviceType
     DeviceCardComponent ..> WriteDatapointRequest
     DeviceCardComponent ..> DeviceTaxonomy
+
     AlarmButtonCardComponent ..> Device
     AlarmButtonCardComponent ..> ExecuteActionDto
     BlindCardComponent ..> Device
@@ -365,6 +364,7 @@ classDiagram
     ThermostatCardComponent ..> DeviceType
     ThermostatCardComponent ..> ExecuteActionDto
     ThermostatCardComponent ..> DeviceTaxonomy
+
     EndpointTableComponent --> DeviceApiService
     EndpointTableComponent ..> EndpointRoomGroup
     EndpointTableComponent ..> WritableEndpointRow
@@ -372,6 +372,7 @@ classDiagram
     EndpointTableComponent ..> DeviceValuePointDto
     EndpointTableComponent ..> DeviceType
     EndpointTableComponent ..> DeviceTaxonomy
+
     RoomDetailComponent ..> EndpointTableComponent
 
     %% Route wiring

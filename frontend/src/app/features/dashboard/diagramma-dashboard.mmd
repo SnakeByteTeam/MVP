@@ -1,5 +1,4 @@
 classDiagram
-
     class AlarmPriority {
         <<enumeration>>
         WHITE
@@ -8,18 +7,36 @@ classDiagram
         RED
     }
 
+    class UserRole {
+        <<enumeration>>
+        AMMINISTRATORE
+        OPERATORE_SANITARIO
+    }
+
+    class DeviceType {
+        <<enumeration>>
+        UNKNOWN
+        THERMOSTAT
+        FALL_SENSOR
+        PRESENCE_SENSOR
+        LIGHT
+        ALARM_BUTTON
+        ENTRANCE_DOOR
+        BLIND
+    }
+
     class ActiveAlarm {
         <<interface>>
         +string id
         +string alarmRuleId
-        +string deviceId
+        +string? deviceId
         +string alarmName
         +AlarmPriority priority
         +string activationTime
         +string resolutionTime
         +string position
         +number userId
-        +string userUsername
+        +string? userUsername
     }
 
     class AlarmListVm {
@@ -46,7 +63,7 @@ classDiagram
         +string|Date dearmingTime
         +boolean isArmed
         +string deviceId
-        +string datapointId
+        +string? datapointId
         +string position
     }
 
@@ -54,7 +71,7 @@ classDiagram
         <<interface>>
         +string name
         +string deviceId
-        +string datapointId
+        +string? datapointId
         +string plantId
         +number priority
         +string thresholdOperator
@@ -63,41 +80,16 @@ classDiagram
         +string dearmingTime
     }
 
-    class UpdateAlarmRuleRequestDto {
-        <<interface>>
-        +string name
-        +number priority
-        +string thresholdOperator
-        +string thresholdValue
-        +string armingTime
-        +string dearmingTime
-        +boolean isArmed
-    }
-
     class AlarmApiService {
         -unknown http
         -string baseUrl
         -string alarmsBaseUrl
         -string alarmEventsBaseUrl
         +getAlarmRules() Observable~AlarmRule[]~
-        +getAlarmRule(id string) Observable~AlarmRule~
-        +createAlarmRule(payload CreateAlarmRuleRequestDto) Observable~AlarmRule~
-        +updateAlarmRule(id string, payload UpdateAlarmRuleRequestDto) Observable~AlarmRule~
-        +deleteAlarmRule(id string) Observable~void~
-        +getActiveAlarms(userId number, limit number, offset number) Observable~ActiveAlarm[]~
-        +getResolvedAlarms(userId number, limit number, offset number) Observable~ActiveAlarm[]~
-        +getAlarmEventById(alarmEventId string) Observable~ActiveAlarm~
-        +resolveAlarm(alarmId string, userId number) Observable~void~
-    }
-
-    class AlarmEvent {
-        <<interface>>
-        +string id
-        +string alarmRuleId
-        +string alarmName
-        +AlarmPriority priority
-        +string activationTime
-        +string resolutionTime
+        +getAlarmRule(id:string) Observable~AlarmRule~
+        +createAlarmRule(payload:CreateAlarmRuleRequestDto) Observable~AlarmRule~
+        +getActiveAlarms(userId:number, limit?:number, offset?:number) Observable~ActiveAlarm[]~
+        +resolveAlarm(alarmId:string, userId:number) Observable~void~
     }
 
     class NotificationEvent {
@@ -105,33 +97,16 @@ classDiagram
         +string notificationId
         +string title
         +string sentAt
-        +string eventType
+        +string? eventType
     }
 
     class AlarmStateService {
         -BehaviorSubject~ActiveAlarm[]~ activeAlarms$
         -BehaviorSubject~NotificationEvent[]~ notifications$
-        -BehaviorSubject~ReadonlySet~string~~ dismissedNotificationIds$
-        -any locallyResolvedActiveAlarmIds
-        +setActiveAlarms(alarms ActiveAlarm[], mode ActiveAlarmsSnapshotMode) void
-        +onAlarmTriggered(event AlarmEvent) void
-        +onAlarmResolved(id string) void
-        +onNotificationReceived(event NotificationEvent) void
-        +removeNotification(notificationId string) void
-        +clearNotifications() void
-        +dismissNotification(notificationId string) void
-        +dismissNotifications(notificationIds readonly string[]) void
+        -BehaviorSubject~ReadonlySet~string~ ~ dismissedNotificationIds$
+        +onAlarmTriggered(event:AlarmEvent) void
+        +onNotificationReceived(event:NotificationEvent) void
         +getActiveAlarms$() Observable~ActiveAlarm[]~
-        +getActiveAlarmsCount$() Observable~number~
-        +getNotifications$() Observable~NotificationEvent[]~
-        +getDismissedNotificationIds$() Observable~ReadonlySet~string~~
-        +getUnreadNotificationsCount$() Observable~number~
-    }
-
-    class UserRole {
-        <<enumeration>>
-        AMMINISTRATORE
-        OPERATORE_SANITARIO
     }
 
     class UserSession {
@@ -143,165 +118,44 @@ classDiagram
         +boolean isFirstAccess
     }
 
-    class LoginResponse {
-        <<interface>>
-        +string accessToken
-    }
-
-    class RefreshResponse {
-        <<interface>>
-        +string accessToken
-    }
-
-    class AuthClaims {
-        <<interface>>
-        +string|number userId
-        +string|number sub
-        +string|number id
-        +string username
-        +string role
-        +boolean isFirstAccess
-        +boolean firstAccess
-    }
-
-    class TokenResponse {
-        <<interface>>
-        +string accessToken
-    }
-
     class InternalAuthService {
         -unknown http
-        -string baseUrl
         -BehaviorSubject~UserSession~ currentUser$
-        -string token
-        -Observable~boolean~ restoreSessionInFlight$
-        +login(username string, password string) Observable~UserSession~
-        +setFirstAccessPassword(username string, temporaryPassword string, newPassword string) Observable~UserSession~
-        +refreshAccessToken() Observable~string~
-        +restoreSessionFromRefresh() Observable~boolean~
-        +logoutFromBackend() Observable~void~
-        +logout() void
-        +getToken() string
+        +login(username:string, password:string) Observable~UserSession~
         +getCurrentUser$() Observable~UserSession~
         +getRole() UserRole
         +isAuthenticated() boolean
-        +hasRole(role UserRole) boolean
-        -setSession(session UserSession) void
-        -buildSessionFromAccessToken(accessToken string) UserSession
-        -parseAccessToken(accessToken string) AuthClaims
-        -isUserRole(role string) boolean
-    }
-
-    class ApiErrorDisplayOptions {
-        <<interface>>
-        +string fallbackMessage
-        +string actionLabel
-        +string forbiddenMessage
-        +string nonHttpStrategy
-    }
-
-    class ApiErrorDisplayService {
-        +toMessage(error unknown, options ApiErrorDisplayOptions) string
-        -mapHttpError(error HttpErrorResponse, options ApiErrorDisplayOptions) string
-        -extractHttpMessage(error HttpErrorResponse) string
-        -extractUnknownMessage(error unknown) string
     }
 
     class AlarmManagementService {
         -AlarmStateService alarmStateService
         -AlarmApiService alarmApiService
         -InternalAuthService authService
-        -ApiErrorDisplayService apiErrorDisplayService
-        -number pageLimit
         -BehaviorSubject~string~ resolvingId$
-        -BehaviorSubject~string~ resolveError$
-        -BehaviorSubject~number~ pageOffset$
-        -BehaviorSubject~boolean~ canGoNext$
-        -number pendingResolveRequests
         +Observable~AlarmListVm~ vm$
-        +initialize() void
         +nextPage() void
-        +previousPage() void
-        +resolveAlarm(activeAlarmId string) void
-        -loadPage(offset number, fallbackToPreviousIfEmpty boolean) void
-        -getActiveAlarmsForSession$(session UserSession, offset number) Observable~ActiveAlarm[]~
-        -loadPageState$(session UserSession, offset number, fallbackToPreviousIfEmpty boolean) Observable~object~
-    }
-
-    class AlarmManagementTablePresenterService {
-        +toRows(alarms ActiveAlarm[], resolvingId string) ActiveAlarmTableRow[]
-        -getSafeDevice(deviceId string) string
-        -getActionLabel(isResolving boolean, isManaged boolean) string
-        -getActionAriaLabel(alarmName string, isManaged boolean) string
-        -getSafeAlarmName(alarmName string) string
-        -getSafeLocation(position string) string
-    }
-
-    class AlarmManagementRefreshService {
-        -Subject~void~ refreshRequested$
-        +requestRefresh() void
-        +getRefreshRequested$() Observable~void~
+        +resolveAlarm(activeAlarmId:string) void
     }
 
     class AlarmTableShellComponent {
         +InputSignal~string~ title
-        +InputSignal~string~ caption
         +InputSignal~readonly AlarmTableColumn[]~ columns
-        +InputSignal~boolean~ showCreateButton
-        +InputSignal~string~ createButtonAriaLabel
         +OutputEmitterRef~void~ createRequested
-        +onCreateRequest() void
-    }
-
-    class AlarmPriorityIndicatorComponent {
-        +InputSignal~AlarmPriority~ priority
-        +Signal~PriorityUi~ ui
     }
 
     class AlarmActionButtonComponent {
         +InputSignal~string~ label
-        +InputSignal~string~ ariaLabel
         +InputSignal~AlarmActionButtonTone~ tone
         +InputSignal~boolean~ disabled
         +OutputEmitterRef~void~ pressed
         +Signal~string~ buttonClass
-        +onPressed() void
-    }
-
-    class ElapsedTimePipe {
-        +transform(sentAt string) string
     }
 
     class AlarmWidgetComponent {
         -AlarmManagementService alarmManagementService
-        -AlarmManagementTablePresenterService tablePresenter
-        -AlarmManagementRefreshService alarmManagementRefreshService
-        -DestroyRef destroyRef
-        +readonly AlarmTableColumn[] columns
-        +any vm
         +Signal~ActiveAlarmTableRow[]~ rows
-        +Signal~any~ canGoPrevious
-        +Signal~any~ canGoNext
-        +Signal~any~ currentPage
         +ngOnInit() void
-        +onResolve(activeAlarmId string) void
-    }
-
-    class MockElapsedTimePipe {
-        +transform(value any) string
-    }
-
-    class ChartDatasetDto {
-        <<interface>>
-        +string id
-        +string name
-        +number[] data
-    }
-
-    class EnergySavingSuggestionDto {
-        <<interface>>
-        +string[] messages
-        +boolean isSuggestion
+        +onResolve(activeAlarmId:string) void
     }
 
     class ChartInfoDto {
@@ -314,138 +168,26 @@ classDiagram
         +string metric
     }
 
-    class AnalyticsDto {
-        <<interface>>
-        +string apartmentId
-        +ChartInfoDto[] analyticsInfo
-    }
-
-    class PlantDatapointDto {
-        <<interface>>
-        +string id
-        +string name
-        +boolean readable
-        +boolean writable
-        +string valueType
-        +string[] enum
-        +string sfeType
-    }
-
-    class PlantDeviceDto {
-        <<interface>>
-        +string id
-        +string name
-        +string type
-        +string subType
-        +PlantDatapointDto[] datapoints
-    }
-
-    class PlantRoomDto {
-        <<interface>>
-        +string id
-        +string name
-        +PlantDeviceDto[] devices
-    }
-
-    class PlantDto {
-        <<interface>>
-        +string id
-        +string name
-        +number wardId
-        +PlantRoomDto[] rooms
-    }
-
     class AnalyticsApiService {
         -HttpClient http
-        -string baseUrl
-        -string analyticsEndpoint
-        -string apartmentsEndpoint
-        +getAllApartments() Observable~any[]~
-        +getAnalytics(apartmentId string, refresh boolean) Observable~AnalyticsDto~
+        +getAnalytics(apartmentId:string, refresh?:boolean) Observable~AnalyticsDto~
     }
 
     class ChartComponent {
         <<abstract>>
         +ChartInfoDto chartInfo
-        +ChartType chartType
-        +string description
+        +string chartType
         +boolean showSuggestions
-        #boolean fillArea
-        +ChartData renderedChartData
-        +ChartOptions chartOptions
-        +object[] chartColors
-        +ngOnChanges(changes object) void
-        #updateChart(data ChartInfoDto) void
-    }
-
-    class AlarmsSentResolvedChartComponent {
-        +ChartType chartType
-        +string description
-    }
-
-    class EnergyConsumptionChartComponent {
-        +string description
-        +ChartType chartType
-        +boolean fillArea
-        +object[] chartColors
-    }
-
-    class PlantOverviewComponent {
-        +PlantDto apartment
+        +ChartColor[] chartColors
+        +ngOnChanges(changes:any) void
+        #updateChart(data:ChartInfoDto) void
     }
 
     class AnalyticsWidgetComponent {
-        -BehaviorSubject~boolean~ refreshTrigger$
-        +Observable~PlantDto~ selectedApartment$
         -AnalyticsApiService analyticsApiService
-        -BehaviorSubject~object~ loadTrigger$
-        +BehaviorSubject~string~ selectedApartmentId$
-        +Observable~PlantDto[]~ apartments$
         +Observable~AnalyticsDto~ analytics
         +ngOnInit() void
-        +getChartByMetric(data AnalyticsDto, metric string) ChartInfoDto
-        +onApartmentChange(event Event) void
         +onRefresh() void
-    }
-
-    class DeviceType {
-        <<enumeration>>
-        UNKNOWN
-        THERMOSTAT
-        FALL_SENSOR
-        PRESENCE_SENSOR
-        LIGHT
-        ALARM_BUTTON
-        ENTRANCE_DOOR
-        BLIND
-    }
-
-    class DeviceAction {
-        <<interface>>
-        +string key
-        +string label
-        +boolean disabled
-    }
-
-    class Datapoint {
-        <<interface>>
-        +string id
-        +string name
-        +boolean readable
-        +boolean writable
-        +string valueType
-        +string[] enum
-        +string sfeType
-    }
-
-    class Device {
-        <<interface>>
-        +string id
-        +string name
-        +DeviceType type
-        +DeviceStatus status
-        +DeviceAction[] actions
-        +Datapoint[] datapoints
     }
 
     class Room {
@@ -464,75 +206,15 @@ classDiagram
         +Room[] rooms
     }
 
-    class DashboardComponent {
-    }
-
-    class FakeAlarmWidgetComponent {
-    }
-
-    class FakeAnalyticsWidgetComponent {
-    }
-
-    %% Relazioni dominio
-    ActiveAlarm --> AlarmPriority
-    AlarmRule --> AlarmPriority
-    AlarmEvent --> AlarmPriority
-    UserSession --> UserRole
-    Device --> DeviceType
-    Device *-- DeviceAction
-    Device *-- Datapoint
-    Room *-- Device
-    Apartment *-- Room
-    PlantDto *-- PlantRoomDto
-    PlantRoomDto *-- PlantDeviceDto
-    PlantDeviceDto *-- PlantDatapointDto
-    ChartInfoDto *-- ChartDatasetDto
-    ChartInfoDto --> EnergySavingSuggestionDto
-    AnalyticsDto *-- ChartInfoDto
-
-    %% Relazioni servizi
-    AlarmApiService ..> AlarmRule
-    AlarmApiService ..> ActiveAlarm
-    AlarmApiService ..> CreateAlarmRuleRequestDto
-    AlarmApiService ..> UpdateAlarmRuleRequestDto
-    AlarmStateService ..> ActiveAlarm
-    AlarmStateService ..> AlarmEvent
-    AlarmStateService ..> NotificationEvent
-    InternalAuthService ..> UserSession
-    InternalAuthService ..> AuthClaims
-    InternalAuthService ..> UserRole
+    %% Relazioni
+    AlarmWidgetComponent --> AlarmManagementService
     AlarmManagementService --> AlarmStateService
     AlarmManagementService --> AlarmApiService
     AlarmManagementService --> InternalAuthService
-    AlarmManagementService --> ApiErrorDisplayService
-    AlarmManagementService ..> AlarmListVm
-    AlarmManagementService ..> ActiveAlarm
-    AlarmManagementService ..> UserSession
-    AlarmManagementTablePresenterService ..> ActiveAlarm
-    AlarmManagementRefreshService ..> AlarmManagementService
-    AnalyticsApiService ..> AnalyticsDto
-
-    %% Ereditarietà chart
+    AnalyticsWidgetComponent --> AnalyticsApiService
     ChartComponent <|-- AlarmsSentResolvedChartComponent
     ChartComponent <|-- EnergyConsumptionChartComponent
-    ChartComponent ..> ChartInfoDto
-
-    %% Relazioni componenti
-    AlarmWidgetComponent --> AlarmManagementService
-    AlarmWidgetComponent --> AlarmManagementTablePresenterService
-    AlarmWidgetComponent --> AlarmManagementRefreshService
-    AlarmWidgetComponent ..> AlarmTableShellComponent
-    AlarmWidgetComponent ..> AlarmPriorityIndicatorComponent
-    AlarmWidgetComponent ..> AlarmActionButtonComponent
-    AlarmWidgetComponent ..> ElapsedTimePipe
-    AnalyticsWidgetComponent --> AnalyticsApiService
-    AnalyticsWidgetComponent ..> AnalyticsDto
-    AnalyticsWidgetComponent ..> ChartInfoDto
-    AnalyticsWidgetComponent ..> PlantDto
-    AnalyticsWidgetComponent ..> AlarmsSentResolvedChartComponent
-    AnalyticsWidgetComponent ..> EnergyConsumptionChartComponent
-    AnalyticsWidgetComponent ..> PlantOverviewComponent
-    DashboardComponent ..> AlarmWidgetComponent
-    DashboardComponent ..> AnalyticsWidgetComponent
-    DashboardComponent ..> FakeAlarmWidgetComponent
-    DashboardComponent ..> FakeAnalyticsWidgetComponent
+    Apartment *-- Room
+    ActiveAlarm --> AlarmPriority
+    AlarmRule --> AlarmPriority
+    UserSession --> UserRole

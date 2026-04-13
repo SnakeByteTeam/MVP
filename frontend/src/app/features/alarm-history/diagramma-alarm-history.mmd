@@ -1,5 +1,4 @@
 classDiagram
-
     class OnInit {
         <<interface>>
     }
@@ -16,14 +15,14 @@ classDiagram
         <<interface>>
         +string id
         +string alarmRuleId
-        +string deviceId
+        +string? deviceId
         +string alarmName
         +AlarmPriority priority
         +string activationTime
         +string|null resolutionTime
         +string position
         +number|null userId
-        +string|null userUsername
+        +string|null? userUsername
     }
 
     class AlarmListVm {
@@ -61,7 +60,7 @@ classDiagram
     }
 
     class AlarmApiService {
-        +getResolvedAlarms(userId number, limit number, offset number) Observable~ActiveAlarm[]~
+        +getResolvedAlarms(userId:number, limit?:number, offset?:number) Observable~ActiveAlarm[]~
     }
 
     class InternalAuthService {
@@ -69,7 +68,7 @@ classDiagram
     }
 
     class ApiErrorDisplayService {
-        +toMessage(error unknown, options unknown) string
+        +toMessage(error:unknown, options:unknown) string
     }
 
     class AlarmHistoryService {
@@ -84,7 +83,7 @@ classDiagram
         +initialize() void
         +nextPage() void
         +previousPage() void
-        -loadPage(offset number) void
+        -loadPage(offset:number) void
     }
 
     class AlarmPriorityIndicatorComponent {
@@ -92,7 +91,7 @@ classDiagram
     }
 
     class AlarmTableShellComponent {
-        +InputSignal~readonly AlarmTableColumn[]~ columns
+        +InputSignal~AlarmTableColumn[]~ columns
     }
 
     class DatePipe {
@@ -100,7 +99,7 @@ classDiagram
 
     class AlarmHistoryPageComponent {
         -AlarmHistoryService alarmHistoryService
-        +readonly AlarmTableColumn[] columns
+        +AlarmTableColumn[] columns
         +Signal~AlarmListVm|null~ vm
         +Signal~AlarmTableRow[]~ rows
         +Signal~boolean~ canGoPrevious
@@ -109,22 +108,19 @@ classDiagram
         +ngOnInit() void
         +onNextPage() void
         +onPreviousPage() void
-        -toRow(alarm ActiveAlarm) AlarmTableRow
+        -toRow(alarm:ActiveAlarm) AlarmTableRow
     }
 
     class ALARM_HISTORY_ROUTES {
         <<routes>>
     }
 
-    %% Realizzazione
     AlarmHistoryPageComponent ..|> OnInit
 
-    %% Relazioni dominio
     ActiveAlarm --> AlarmPriority
     AlarmListVm --> ActiveAlarm
     AlarmTableRow --> AlarmPriority
 
-    %% Relazioni servizi
     AlarmHistoryService --> AlarmApiService
     AlarmHistoryService --> InternalAuthService
     AlarmHistoryService --> ApiErrorDisplayService
@@ -132,7 +128,6 @@ classDiagram
     AlarmHistoryService ..> ActiveAlarm
     AlarmHistoryService ..> UserSession
 
-    %% Relazioni componenti
     AlarmHistoryPageComponent --> AlarmHistoryService
     AlarmHistoryPageComponent ..> AlarmListVm
     AlarmHistoryPageComponent ..> AlarmTableRow
@@ -142,5 +137,4 @@ classDiagram
     AlarmHistoryPageComponent ..> AlarmTableShellComponent
     AlarmHistoryPageComponent ..> DatePipe
 
-    %% Route wiring
     ALARM_HISTORY_ROUTES ..> AlarmHistoryPageComponent

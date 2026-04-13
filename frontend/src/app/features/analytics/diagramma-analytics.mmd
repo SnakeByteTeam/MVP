@@ -1,5 +1,4 @@
 classDiagram
-
     class OnInit {
         <<interface>>
     }
@@ -39,7 +38,7 @@ classDiagram
         -string analyticsEndpoint
         -string apartmentsEndpoint
         +getAllApartments() Observable~any[]~
-        +getAnalytics(apartmentId string, refresh boolean) Observable~AnalyticsDto~
+        +getAnalytics(apartmentId:string, refresh?:boolean) Observable~AnalyticsDto~
     }
 
     class ChartComponent {
@@ -50,8 +49,8 @@ classDiagram
         +ChartOptions chartOptions
         +object[] chartColors
         +boolean showSuggestions
-        +ngOnChanges(changes SimpleChanges) void
-        #updateChart(data ChartInfoDto) void
+        +ngOnChanges(changes:SimpleChanges) void
+        #updateChart(data:ChartInfoDto) void
         +showHideSugg() void
     }
 
@@ -66,7 +65,7 @@ classDiagram
     class EnergyConsumptionChartComponent {
         +ChartType chartType
         +object[] chartColors
-        +updateChart(data ChartInfoDto) void
+        +updateChart(data:ChartInfoDto) void
     }
 
     class FallFrequencyChartComponent {
@@ -98,8 +97,8 @@ classDiagram
         +Observable~any[]~|null apartments$
         +Observable~AnalyticsDto|null~|null analytics
         +ngOnInit() void
-        +getChartByMetric(data AnalyticsDto|null, metric string) ChartInfoDto|undefined
-        +onApartmentChange(event Event) void
+        +getChartByMetric(data:AnalyticsDto|null, metric:string) ChartInfoDto|undefined
+        +onApartmentChange(event:Event) void
         +onRefresh() void
     }
 

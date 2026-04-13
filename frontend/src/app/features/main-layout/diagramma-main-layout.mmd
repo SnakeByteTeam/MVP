@@ -1,13 +1,10 @@
 classDiagram
-
     class OnInit {
         <<interface>>
     }
-
     class OnDestroy {
         <<interface>>
     }
-
     class AfterViewInit {
         <<interface>>
     }
@@ -23,7 +20,7 @@ classDiagram
         +string label
         +string icon
         +string route
-        +UserRole requiredRole
+        +UserRole? requiredRole
     }
 
     class UserInfo {
@@ -48,7 +45,7 @@ classDiagram
         +string notificationId
         +string title
         +string sentAt
-        +string eventType
+        +"triggered"|"resolved"? eventType
     }
 
     class MyVimarAccount {
@@ -68,7 +65,7 @@ classDiagram
     }
 
     class NavService {
-        +getNavItems(role UserRole) NavItem[]
+        +getNavItems(role:UserRole) NavItem[]
     }
 
     class SidebarComponent {
@@ -108,7 +105,7 @@ classDiagram
         +getUnreadNotificationsCount$() Observable~number~
         +getNotifications$() Observable~NotificationEvent[]~
         +getActiveAlarmsCount$() Observable~number~
-        +removeNotification(notificationId string) void
+        +removeNotification(notificationId:string) void
         +clearNotifications() void
     }
 
@@ -142,7 +139,7 @@ classDiagram
         +boolean showVimarAssociationWarning
         +boolean isNotificationPanelOpen
         +string|null realtimeToastMessage
-        +string realtimeToastKind
+        +"alert"|"success" realtimeToastKind
         +Observable~number~ unreadNotificationsCount$
         +Observable~NotificationEvent[]~ notifications$
         +UserInfo currentUser
@@ -153,67 +150,19 @@ classDiagram
         +toggleSidebar() void
         +toggleProfilePanel() void
         +closeProfilePanel() void
-        +onNavItemSelected(route string) void
+        +onNavItemSelected(route:string) void
         +goToVimarLink() void
         +toggleNotificationPanel() void
         +closeNotificationPanel() void
         +openNotificationsArchive() void
-        +openNotificationsArchiveFromPreview(notificationId string) void
-        +removeTopbarNotification(notificationId string) void
+        +openNotificationsArchiveFromPreview(notificationId:string) void
+        +removeTopbarNotification(notificationId:string) void
         +clearTopbarNotifications() void
         +logout() void
         +canOpenProfilePanel() boolean
     }
 
     class MAIN_LAYOUT_ROUTES {
-        <<routes>>
-    }
-
-    class authGuard {
-        <<guard>>
-    }
-
-    class roleGuard {
-        <<guard>>
-    }
-
-    class DASHBOARD_ROUTES {
-        <<routes>>
-    }
-
-    class ALARM_MANAGEMENT_ROUTES {
-        <<routes>>
-    }
-
-    class ALARM_HISTORY_ROUTES {
-        <<routes>>
-    }
-
-    class ALARM_CONFIGURATION_ROUTES {
-        <<routes>>
-    }
-
-    class ANALYTICS_ROUTES {
-        <<routes>>
-    }
-
-    class APARTMENT_MONITOR_ROUTES {
-        <<routes>>
-    }
-
-    class DEVICE_INTERACTION_ROUTES {
-        <<routes>>
-    }
-
-    class NOTIFICATION_ROUTES {
-        <<routes>>
-    }
-
-    class WARD_MANAGEMENT_ROUTES {
-        <<routes>>
-    }
-
-    class USER_MANAGEMENT_ROUTES {
         <<routes>>
     }
 
@@ -235,6 +184,7 @@ classDiagram
     TopbarComponent --> BreadcrumbService
     NavService ..> NavItem
     NavService ..> UserRole
+
     MainLayoutComponent --> NavService
     MainLayoutComponent --> InternalAuthService
     MainLayoutComponent --> AlarmStateService
@@ -255,16 +205,4 @@ classDiagram
     MAIN_LAYOUT_ROUTES ..> MainLayoutComponent : loadComponent()
     MAIN_LAYOUT_ROUTES ..> MyVimarCloudApiFeatureService : providers
     MAIN_LAYOUT_ROUTES ..> VIMAR_CLOUD_API_SERVICE : provide/useExisting
-    MAIN_LAYOUT_ROUTES ..> authGuard
-    MAIN_LAYOUT_ROUTES ..> roleGuard
     MAIN_LAYOUT_ROUTES ..> UserRole
-    MAIN_LAYOUT_ROUTES ..> DASHBOARD_ROUTES
-    MAIN_LAYOUT_ROUTES ..> ALARM_MANAGEMENT_ROUTES
-    MAIN_LAYOUT_ROUTES ..> ALARM_HISTORY_ROUTES
-    MAIN_LAYOUT_ROUTES ..> ALARM_CONFIGURATION_ROUTES
-    MAIN_LAYOUT_ROUTES ..> ANALYTICS_ROUTES
-    MAIN_LAYOUT_ROUTES ..> APARTMENT_MONITOR_ROUTES
-    MAIN_LAYOUT_ROUTES ..> DEVICE_INTERACTION_ROUTES
-    MAIN_LAYOUT_ROUTES ..> NOTIFICATION_ROUTES
-    MAIN_LAYOUT_ROUTES ..> WARD_MANAGEMENT_ROUTES
-    MAIN_LAYOUT_ROUTES ..> USER_MANAGEMENT_ROUTES

@@ -1,9 +1,7 @@
 classDiagram
-
     class OnInit {
         <<interface>>
     }
-
     class OnDestroy {
         <<interface>>
     }
@@ -104,7 +102,7 @@ classDiagram
         +ngOnInit() void
         +onSubmit() void
         +onCancel() void
-        +getOperatorLabel(operator User) string
+        +getOperatorLabel(operator:User) string
     }
 
     class AssignWardDialogComponent {
@@ -138,9 +136,9 @@ classDiagram
         +onEditWardClick() void
         +onDeleteWardClick() void
         +onAssignOperatorClick() void
-        +onRemoveOperatorClick(userId number) void
+        +onRemoveOperatorClick(userId:number) void
         +onAssignPlantClick() void
-        +onRemovePlantClick(plantId string) void
+        +onRemovePlantClick(plantId:string) void
     }
 
     class WardFormDialogComponent {
@@ -164,26 +162,26 @@ classDiagram
         -string plantEndpoint
         -string usersEndpoint
         +getWards() Observable~WardSummaryDto[]~
-        +createWard(dto CreateWardDto) Observable~Ward~
-        +updateWard(wardId number, dto UpdateWardDto) Observable~Ward~
-        +deleteWard(wardId number) Observable~void~
-        +getOperatorsByWardId(wardId number) Observable~WardUserDto[]~
+        +createWard(dto:CreateWardDto) Observable~Ward~
+        +updateWard(wardId:number, dto:UpdateWardDto) Observable~Ward~
+        +deleteWard(wardId:number) Observable~void~
+        +getOperatorsByWardId(wardId:number) Observable~WardUserDto[]~
         +getAvailableOperators() Observable~WardUserDto[]~
-        +assignOperatorToWard(wardId number, dto AssignOperatorDto) Observable~void~
-        +removeOperatorFromWard(wardId number, userId number) Observable~void~
-        +getPlantsByWardId(wardId number) Observable~WardPlantDto[]~
+        +assignOperatorToWard(wardId:number, dto:AssignOperatorDto) Observable~void~
+        +removeOperatorFromWard(wardId:number, userId:number) Observable~void~
+        +getPlantsByWardId(wardId:number) Observable~WardPlantDto[]~
         +getAvailablePlants() Observable~WardPlantDto[]~
-        +assignPlantToWard(wardId number, dto AssignPlantDto) Observable~void~
-        +removePlantFromWard(plantId string) Observable~void~
+        +assignPlantToWard(wardId:number, dto:AssignPlantDto) Observable~void~
+        +removePlantFromWard(plantId:string) Observable~void~
     }
 
     class WardHydrationService {
         -WardApiService api
         +loadHydratedWards() Observable~Ward[]~
-        +hydrateWardSummaries(wardSummaries WardSummaryDto[]) Observable~Ward[]~
-        +mapApartments(apartmentsDto WardPlantDto[]) Plant[]
-        +mapOperators(operatorsDto WardUserDto[]) User[]
-        -toWard(wardSummary WardSummaryDto) Observable~Ward~
+        +hydrateWardSummaries(wardSummaries:WardSummaryDto[]) Observable~Ward[]~
+        +mapApartments(apartmentsDto:WardPlantDto[]) Plant[]
+        +mapOperators(operatorsDto:WardUserDto[]) User[]
+        -toWard(wardSummary:WardSummaryDto) Observable~Ward~
     }
 
     class WardStore {
@@ -191,14 +189,14 @@ classDiagram
         +Observable~Ward[]~ wards$
         +Observable~boolean~ isLoading$
         +Observable~string|null~ error$
-        -setState(partial Partial~WardManagementState~) void
-        +setWards(wards Ward[]) void
+        -setState(partial:Partial~WardManagementState~) void
+        +setWards(wards:Ward[]) void
         +getWardsSnapshot() Ward[]
-        +addWard(ward Ward) void
-        +replaceWard(ward Ward) void
-        +removeWard(wardId number) void
-        +setLoading(value boolean) void
-        +setError(message string|null) void
+        +addWard(ward:Ward) void
+        +replaceWard(ward:Ward) void
+        +removeWard(wardId:number) void
+        +setLoading(value:boolean) void
+        +setError(message:string|null) void
     }
 
     class EventSubscriptionService {
@@ -210,14 +208,14 @@ classDiagram
         -WardHydrationService wardHydration
         -WardStore store
         -EventSubscriptionService eventSubscriptionService
-        +getAvailablePlantsForWard(wardId number) Observable~Plant[]~
-        +getAvailableUsersForWard(wardId number) Observable~User[]~
-        +assignOperator(wardId number, dto AssignOperatorDto) Observable~void~
-        +removeOperator(wardId number, userId number) Observable~void~
-        +assignPlant(wardId number, dto AssignPlantDto) Observable~void~
-        +removePlant(plantId string) Observable~void~
-        -reloadAfter(operation$ Observable~void~) Observable~void~
-        -getErrorMessage(error unknown) string
+        +getAvailablePlantsForWard(wardId:number) Observable~Plant[]~
+        +getAvailableUsersForWard(wardId:number) Observable~User[]~
+        +assignOperator(wardId:number, dto:AssignOperatorDto) Observable~void~
+        +removeOperator(wardId:number, userId:number) Observable~void~
+        +assignPlant(wardId:number, dto:AssignPlantDto) Observable~void~
+        +removePlant(plantId:string) Observable~void~
+        -reloadAfter(operation$:Observable~void~) Observable~void~
+        -getErrorMessage(error:unknown) string
     }
 
     class WardOperationsService {
@@ -225,11 +223,11 @@ classDiagram
         -WardHydrationService wardHydration
         -WardStore store
         +loadWards() Observable~void~
-        +createWard(dto CreateWardDto) Observable~void~
-        +updateWard(wardId number, dto UpdateWardDto) Observable~void~
-        +deleteWard(wardId number) Observable~void~
-        -normalizeMutationWard(ward Ward) Ward
-        -getErrorMessage(error unknown) string
+        +createWard(dto:CreateWardDto) Observable~void~
+        +updateWard(wardId:number, dto:UpdateWardDto) Observable~void~
+        +deleteWard(wardId:number) Observable~void~
+        -normalizeMutationWard(ward:Ward) Ward
+        -getErrorMessage(error:unknown) string
     }
 
     class WardManagementStore {
@@ -242,16 +240,16 @@ classDiagram
         +Observable~string|null~ error$
         +ngOnDestroy() void
         +loadWards() void
-        +createWard(dto CreateWardDto) void
-        +updateWard(wardId number, dto UpdateWardDto) void
-        +deleteWard(wardId number) void
-        +assignOperator(wardId number, dto AssignOperatorDto) void
-        +removeOperator(wardId number, userId number) void
-        +assignPlant(wardId number, dto AssignPlantDto) void
-        +removePlant(plantId string) void
-        +getAvailablePlantsForWard(wardId number) Observable~Plant[]|null~
-        +getAvailableUsersForWard(wardId number) Observable~User[]|null~
-        -getErrorMessage(error unknown) string
+        +createWard(dto:CreateWardDto) void
+        +updateWard(wardId:number, dto:UpdateWardDto) void
+        +deleteWard(wardId:number) void
+        +assignOperator(wardId:number, dto:AssignOperatorDto) void
+        +removeOperator(wardId:number, userId:number) void
+        +assignPlant(wardId:number, dto:AssignPlantDto) void
+        +removePlant(plantId:string) void
+        +getAvailablePlantsForWard(wardId:number) Observable~Plant[]|null~
+        +getAvailableUsersForWard(wardId:number) Observable~User[]|null~
+        -getErrorMessage(error:unknown) string
     }
 
     class ConfirmDialogComponent {
@@ -271,10 +269,10 @@ classDiagram
         +Observable~boolean~ isLoading$
         +Observable~string|null~ error$
         +WritableSignal~string|null~ snackbarMessage
-        +WritableSignal~string~ wardDialogMode
+        +WritableSignal~"closed"|"create"|"edit"~ wardDialogMode
         +WritableSignal~number|null~ selectedWardId
         +WritableSignal~string|null~ selectedApartmentId
-        +WritableSignal~string~ mobileStep
+        +WritableSignal~"wards"|"apartments"|"operators"~ mobileStep
         +WritableSignal~number|null~ operatorWardId
         +WritableSignal~User[]|null~ availableOperatorsFromFetch
         +WritableSignal~boolean~ isLoadingAvailableOperators
@@ -291,31 +289,31 @@ classDiagram
         +ngOnInit() void
         +ngOnDestroy() void
         +dismissSnackbar() void
-        +selectWard(wardId number) void
-        +selectApartment(apartmentId string) void
+        +selectWard(wardId:number) void
+        +selectApartment(apartmentId:string) void
         +showWardListStep() void
         +showApartmentsStep() void
         +showOperatorsStep() void
         +onCreateWard() void
-        +onCreateWardSubmit(dto CreateWardDto) void
-        +onEditWard(ward Ward) void
+        +onCreateWardSubmit(dto:CreateWardDto) void
+        +onEditWard(ward:Ward) void
         +onEditSelectedWard() void
-        +onEditWardSubmit(dto UpdateWardDto) void
+        +onEditWardSubmit(dto:UpdateWardDto) void
         +onCloseWardDialog() void
-        +onDeleteWard(wardId number) void
-        +onAssignOperator(wardId number) void
-        +onAssignOperatorSubmit(dto AssignOperatorDto) void
+        +onDeleteWard(wardId:number) void
+        +onAssignOperator(wardId:number) void
+        +onAssignOperatorSubmit(dto:AssignOperatorDto) void
         +onCloseAssignOperatorDialog() void
-        +onRemoveOperator(event RemoveOperatorEvent) void
-        +onAssignPlant(wardId number) void
-        +onAssignPlantSubmit(dto AssignPlantDto) void
+        +onRemoveOperator(event:RemoveOperatorEvent) void
+        +onAssignPlant(wardId:number) void
+        +onAssignPlantSubmit(dto:AssignPlantDto) void
         +onCloseAssignPlantDialog() void
-        +onRemovePlant(event RemovePlantEvent) void
+        +onRemovePlant(event:RemovePlantEvent) void
         +onConfirmDialogConfirmed() void
         +onConfirmDialogCancelled() void
         +getConfirmMessage() string
         +getConfirmLabel() string
-        +getOperatorDisplayName(firstName string, lastName string) string
+        +getOperatorDisplayName(firstName:string, lastName:string) string
     }
 
     class WARD_MANAGEMENT_ROUTES {
@@ -339,16 +337,21 @@ classDiagram
     AssignOperatorDialogComponent ..> Ward
     AssignOperatorDialogComponent ..> User
     AssignOperatorDialogComponent ..> AssignOperatorDto
+
     AssignWardDialogComponent ..> Ward
     AssignWardDialogComponent ..> Plant
     AssignWardDialogComponent ..> AssignPlantDto
+
     WardRowComponent ..> Plant
+
     WardCardComponent ..> Ward
     WardCardComponent ..> RemoveOperatorEvent
     WardCardComponent ..> RemovePlantEvent
     WardCardComponent ..> WardRowComponent
+
     WardFormDialogComponent ..> Ward
     WardFormDialogComponent ..> CreateWardDto
+
     WardManagementPageComponent --> WardManagementStore
     WardManagementPageComponent ..> Ward
     WardManagementPageComponent ..> User
@@ -373,6 +376,7 @@ classDiagram
     WardApiService ..> AssignOperatorDto
     WardApiService ..> AssignPlantDto
     WardApiService ..> Ward
+
     WardHydrationService --> WardApiService
     WardHydrationService ..> WardSummaryDto
     WardHydrationService ..> WardUserDto
@@ -381,14 +385,17 @@ classDiagram
     WardHydrationService ..> Plant
     WardHydrationService ..> User
     WardHydrationService ..> UserRole
+
     WardStore --> WardManagementState
     WardStore ..> Ward
+
     WardOperationsService --> WardApiService
     WardOperationsService --> WardHydrationService
     WardOperationsService --> WardStore
     WardOperationsService ..> CreateWardDto
     WardOperationsService ..> UpdateWardDto
     WardOperationsService ..> Ward
+
     AssignmentOperationsService --> WardApiService
     AssignmentOperationsService --> WardHydrationService
     AssignmentOperationsService --> WardStore
@@ -398,6 +405,7 @@ classDiagram
     AssignmentOperationsService ..> Ward
     AssignmentOperationsService ..> Plant
     AssignmentOperationsService ..> User
+
     WardManagementStore --> WardStore
     WardManagementStore --> WardOperationsService
     WardManagementStore --> AssignmentOperationsService

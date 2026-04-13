@@ -1,5 +1,4 @@
 classDiagram
-
     class UserRole {
         <<enumeration>>
         AMMINISTRATORE
@@ -35,13 +34,13 @@ classDiagram
 
     class AuthClaims {
         <<interface>>
-        +string|number userId
-        +string|number sub
-        +string|number id
-        +string username
-        +string role
-        +boolean isFirstAccess
-        +boolean firstAccess
+        +string|number? userId
+        +string|number? sub
+        +string|number? id
+        +string? username
+        +string? role
+        +boolean? isFirstAccess
+        +boolean? firstAccess
     }
 
     class TokenResponse {
@@ -75,8 +74,8 @@ classDiagram
         -BehaviorSubject~UserSession|null~ currentUser$
         -string|null token
         -Observable~boolean~|null restoreSessionInFlight$
-        +login(username string, password string) Observable~UserSession~
-        +setFirstAccessPassword(username string, temporaryPassword string, newPassword string) Observable~UserSession~
+        +login(username:string, password:string) Observable~UserSession~
+        +setFirstAccessPassword(username:string, temporaryPassword:string, newPassword:string) Observable~UserSession~
         +refreshAccessToken() Observable~string~
         +restoreSessionFromRefresh() Observable~boolean~
         +logoutFromBackend() Observable~void~
@@ -85,11 +84,11 @@ classDiagram
         +getCurrentUser$() Observable~UserSession|null~
         +getRole() UserRole|null
         +isAuthenticated() boolean
-        +hasRole(role UserRole) boolean
-        -setSession(session UserSession) void
-        -buildSessionFromAccessToken(accessToken string) UserSession
-        -parseAccessToken(accessToken string) AuthClaims
-        -isUserRole(role string) boolean
+        +hasRole(role:UserRole) boolean
+        -setSession(session:UserSession) void
+        -buildSessionFromAccessToken(accessToken:string) UserSession
+        -parseAccessToken(accessToken:string) AuthClaims
+        -isUserRole(role:string) boolean
     }
 
     class AuthBaseComponent {
@@ -102,17 +101,17 @@ classDiagram
         +AuthErrorType|null errorType
         +boolean isLoading
         +string|null loginErrorMessage
-        +onUsernameChange(value string) void
-        +onSubmit() void
-        #handleSuccess(session UserSession) void
-        #handleError(error unknown) void
+        +onUsernameChange(value:string) void*
+        +onSubmit() void*
+        #handleSuccess(session:UserSession) void
+        #handleError(error:unknown) void
     }
 
     class LoginComponent {
         -FormBuilder fb
         +FormGroup loginForm
-        +onUsernameChange(value string) void
-        +onPasswordChange(value string) void
+        +onUsernameChange(value:string) void
+        +onPasswordChange(value:string) void
         +onSubmit() void
     }
 
@@ -124,9 +123,9 @@ classDiagram
     class FirstAccessComponent {
         -FormBuilder fb
         +FormGroup firstAccessForm
-        +onUsernameChange(value string) void
-        +onTempPasswordChange(value string) void
-        +onNewPasswordChange(value string) void
+        +onUsernameChange(value:string) void
+        +onTempPasswordChange(value:string) void
+        +onNewPasswordChange(value:string) void
         +onSubmit() void
     }
 
@@ -157,7 +156,9 @@ classDiagram
     AuthBaseComponent ..> AuthErrorType
     AuthBaseComponent ..> UserSession
     AuthBaseComponent ..> HttpErrorResponse
+
     LoginComponent ..> FormBuilder
+
     FirstAccessPasswordValidator ..> ValidatorFn
     FirstAccessComponent ..> FormBuilder
     FirstAccessComponent ..> AuthErrorType

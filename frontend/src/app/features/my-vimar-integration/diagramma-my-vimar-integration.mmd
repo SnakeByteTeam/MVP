@@ -1,25 +1,18 @@
 classDiagram
-
-    class MyVimarAccount {
+    class OnInit {
         <<interface>>
-        +string email
-        +boolean isLinked
-    }
-
-    class MyVimarAccountStatusComponent {
-        +InputSignal~MyVimarAccount~ account
-        +InputSignal~boolean~ isLoading
-        +InputSignal~string~ error
-        +OutputEmitterRef~void~ linkClicked
-        +OutputEmitterRef~void~ unlinkClicked
-        +onLinkAccount() void
-        +onUnlinkAccount() void
     }
 
     class UserRole {
         <<enumeration>>
         AMMINISTRATORE
         OPERATORE_SANITARIO
+    }
+
+    class MyVimarAccount {
+        <<interface>>
+        +string email
+        +boolean isLinked
     }
 
     class UserSession {
@@ -43,41 +36,18 @@ classDiagram
 
     class AuthClaims {
         <<interface>>
-        +string|number userId
-        +string|number sub
-        +string|number id
-        +string username
-        +string role
-        +boolean isFirstAccess
-        +boolean firstAccess
+        +string|number? userId
+        +string|number? sub
+        +string|number? id
+        +string? username
+        +string? role
+        +boolean? isFirstAccess
+        +boolean? firstAccess
     }
 
     class TokenResponse {
         <<interface>>
         +string accessToken
-    }
-
-    class InternalAuthService {
-        -unknown http
-        -string baseUrl
-        -BehaviorSubject~UserSession~ currentUser$
-        -string token
-        -Observable~boolean~ restoreSessionInFlight$
-        +login(username string, password string) Observable~UserSession~
-        +setFirstAccessPassword(username string, temporaryPassword string, newPassword string) Observable~UserSession~
-        +refreshAccessToken() Observable~string~
-        +restoreSessionFromRefresh() Observable~boolean~
-        +logoutFromBackend() Observable~void~
-        +logout() void
-        +getToken() string
-        +getCurrentUser$() Observable~UserSession~
-        +getRole() UserRole
-        +isAuthenticated() boolean
-        +hasRole(role UserRole) boolean
-        -setSession(session UserSession) void
-        -buildSessionFromAccessToken(accessToken string) UserSession
-        -parseAccessToken(accessToken string) AuthClaims
-        -isUserRole(role string) boolean
     }
 
     class IVimarCloudApiService {
@@ -90,21 +60,54 @@ classDiagram
     class ApiErrorDisplayOptions {
         <<interface>>
         +string fallbackMessage
-        +string actionLabel
-        +string forbiddenMessage
-        +string nonHttpStrategy
-    }
-
-    class ApiErrorDisplayService {
-        +toMessage(error unknown, options ApiErrorDisplayOptions) string
-        -mapHttpError(error HttpErrorResponse, options ApiErrorDisplayOptions) string
-        -extractHttpMessage(error HttpErrorResponse) string
-        -extractUnknownMessage(error unknown) string
+        +string? actionLabel
+        +string? forbiddenMessage
+        +"fallback"|"message"? nonHttpStrategy
     }
 
     class PrepareOAuthTicketResponse {
         <<interface>>
         +string ticket
+    }
+
+    class MyVimarAccountStatusComponent {
+        +InputSignal~MyVimarAccount~ account
+        +InputSignal~boolean~ isLoading
+        +InputSignal~string~ error
+        +OutputEmitterRef~void~ linkClicked
+        +OutputEmitterRef~void~ unlinkClicked
+        +onLinkAccount() void
+        +onUnlinkAccount() void
+    }
+
+    class InternalAuthService {
+        -unknown http
+        -string baseUrl
+        -BehaviorSubject~UserSession~ currentUser$
+        -string token
+        -Observable~boolean~ restoreSessionInFlight$
+        +login(username:string, password:string) Observable~UserSession~
+        +setFirstAccessPassword(username:string, temporaryPassword:string, newPassword:string) Observable~UserSession~
+        +refreshAccessToken() Observable~string~
+        +restoreSessionFromRefresh() Observable~boolean~
+        +logoutFromBackend() Observable~void~
+        +logout() void
+        +getToken() string
+        +getCurrentUser$() Observable~UserSession~
+        +getRole() UserRole
+        +isAuthenticated() boolean
+        +hasRole(role:UserRole) boolean
+        -setSession(session:UserSession) void
+        -buildSessionFromAccessToken(accessToken:string) UserSession
+        -parseAccessToken(accessToken:string) AuthClaims
+        -isUserRole(role:string) boolean
+    }
+
+    class ApiErrorDisplayService {
+        +toMessage(error:unknown, options:ApiErrorDisplayOptions) string
+        -mapHttpError(error:HttpErrorResponse, options:ApiErrorDisplayOptions) string
+        -extractHttpMessage(error:HttpErrorResponse) string
+        -extractUnknownMessage(error:unknown) string
     }
 
     class MyVimarCloudApiFeatureService {
@@ -119,10 +122,10 @@ classDiagram
         +getLinkedAccount() Observable~MyVimarAccount~
         +initiateOAuth() void
         +unlinkAccount() Observable~void~
-        -getLinkedAccountFromEndpoint(index number) Observable~MyVimarAccount~
-        -unlinkAccountFromEndpoint(index number) Observable~void~
-        -isNotFound(error unknown) boolean
-        -showOAuthError(message string, browser Window) void
+        -getLinkedAccountFromEndpoint(index:number) Observable~MyVimarAccount~
+        -unlinkAccountFromEndpoint(index:number) Observable~void~
+        -isNotFound(error:unknown) boolean
+        -showOAuthError(message:string, browser:Window) void
     }
 
     class MyVimarPageComponent {
@@ -137,22 +140,16 @@ classDiagram
         +onUnlinkAccount() void
     }
 
-    %% Realizzazioni
+    %% Realizzazioni e Relazioni
     MyVimarCloudApiFeatureService ..|> IVimarCloudApiService
-
-    %% Relazioni modello
+    MyVimarPageComponent ..|> OnInit
+    
+    MyVimarAccountStatusComponent ..> MyVimarAccount
     UserSession --> UserRole
-
-    %% Relazioni servizi
     InternalAuthService ..> UserSession
-    InternalAuthService ..> AuthClaims
     InternalAuthService ..> UserRole
+    InternalAuthService ..> AuthClaims
     MyVimarCloudApiFeatureService --> ApiErrorDisplayService
     MyVimarCloudApiFeatureService ..> MyVimarAccount
-    MyVimarCloudApiFeatureService ..> PrepareOAuthTicketResponse
-
-    %% Relazioni componenti
-    MyVimarAccountStatusComponent ..> MyVimarAccount
     MyVimarPageComponent --> IVimarCloudApiService
     MyVimarPageComponent ..> MyVimarAccount
-    MyVimarPageComponent ..> MyVimarAccountStatusComponent

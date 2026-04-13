@@ -1,9 +1,7 @@
 classDiagram
-
     class OnInit {
         <<interface>>
     }
-
     class OnDestroy {
         <<interface>>
     }
@@ -66,7 +64,7 @@ classDiagram
         <<interface>>
         +string key
         +string label
-        +boolean disabled
+        +boolean? disabled
     }
 
     class Device {
@@ -108,7 +106,7 @@ classDiagram
         +boolean readable
         +boolean writable
         +string valueType
-        +string[] enum
+        +string[]? enum
         +string sfeType
     }
 
@@ -116,9 +114,9 @@ classDiagram
         <<interface>>
         +string id
         +string name
-        +string type
-        +string subType
-        +PlantDatapointDto[] datapoints
+        +string? type
+        +string? subType
+        +PlantDatapointDto[]? datapoints
     }
 
     class PlantRoomDto {
@@ -132,7 +130,7 @@ classDiagram
         <<interface>>
         +string id
         +string name
-        +number wardId
+        +number? wardId
         +PlantRoomDto[] rooms
     }
 
@@ -144,15 +142,15 @@ classDiagram
 
     class DeviceTypeResolutionInput {
         <<interface>>
-        +string rawType
-        +string rawSubType
-        +string rawName
-        +readonly string[] sfeTypes
+        +string? rawType
+        +string? rawSubType
+        +string? rawName
+        +readonly string[]? sfeTypes
     }
 
     class DeviceTaxonomy {
         <<utility>>
-        +resolveDeviceType(input DeviceTypeResolutionInput) DeviceType
+        +resolveDeviceType(input:DeviceTypeResolutionInput) DeviceType
     }
 
     class InternalAuthService {
@@ -160,7 +158,7 @@ classDiagram
     }
 
     class WardRealtimeCacheService {
-        +mergeWardIds(userId string, wardIds readonly string[]) string[]
+        +mergeWardIds(userId:string, wardIds:readonly string[]) string[]
     }
 
     class AlarmStateService {
@@ -179,11 +177,11 @@ classDiagram
         -string apartmentsEndpoint
         +getCurrentApartment() Observable~Apartment~
         +getAvailableApartments() Observable~ApartmentOption[]~
-        +getApartmentByPlantId(plantId string) Observable~Apartment~
+        +getApartmentByPlantId(plantId:string) Observable~Apartment~
         +getAllPlants() Observable~PlantDto[]~
-        +enableApartment(apartmentId string) Observable~void~
-        +disableApartment(apartmentId string) Observable~void~
-        +setActivePlantId(plantId string) void
+        +enableApartment(apartmentId:string) Observable~void~
+        +disableApartment(apartmentId:string) Observable~void~
+        +setActivePlantId(plantId:string) void
     }
 
     class AlarmMapComponent {
@@ -195,7 +193,7 @@ classDiagram
     class RoomListComponent {
         +InputSignal~Room[]~ rooms
         +OutputEmitterRef~string~ roomSelected
-        +onRoomSelect(roomId string) void
+        +onRoomSelect(roomId:string) void
     }
 
     class ApartmentMonitorComponent {
@@ -210,18 +208,16 @@ classDiagram
         +string activeApartmentId
         +ngOnInit() void
         +ngOnDestroy() void
-        +onApartmentSelected(apartmentId string) void
+        +onApartmentSelected(apartmentId:string) void
     }
 
     class APARTMENT_MONITOR_ROUTES {
         <<routes>>
     }
 
-    %% Realizzazioni
     ApartmentMonitorComponent ..|> OnInit
     ApartmentMonitorComponent ..|> OnDestroy
 
-    %% Composizione modelli
     Apartment *-- Room
     Room *-- Device
     Device *-- Datapoint
@@ -230,12 +226,10 @@ classDiagram
     PlantRoomDto *-- PlantDeviceDto
     PlantDeviceDto *-- PlantDatapointDto
 
-    %% Relazioni dominio
     Device --> DeviceType
     Device --> DeviceStatus
     ActiveAlarm --> AlarmPriority
 
-    %% Relazioni servizi
     ApartmentApiService --> InternalAuthService
     ApartmentApiService --> WardRealtimeCacheService
     ApartmentApiService ..> UserSession
@@ -247,10 +241,11 @@ classDiagram
     ApartmentApiService ..> DeviceType
     ApartmentApiService ..> DeviceTaxonomy
 
-    %% Relazioni componenti
     AlarmMapComponent ..> Room
     AlarmMapComponent ..> ActiveAlarm
+
     RoomListComponent ..> Room
+
     ApartmentMonitorComponent --> ApartmentApiService
     ApartmentMonitorComponent --> AlarmStateService
     ApartmentMonitorComponent ..> ActiveAlarm
@@ -260,5 +255,4 @@ classDiagram
     ApartmentMonitorComponent ..> AlarmMapComponent
     ApartmentMonitorComponent ..> EndpointTableComponent
 
-    %% Route wiring
     APARTMENT_MONITOR_ROUTES ..> ApartmentMonitorComponent

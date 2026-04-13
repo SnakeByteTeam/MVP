@@ -7,6 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -42,6 +43,7 @@ export class PlantController {
     private readonly findAllPlants: FindAllPlantsUseCase,
   ) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get()
   @ApiOperation({
@@ -76,6 +78,7 @@ export class PlantController {
     }
   }
   
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('available')
   @ApiOperation({
@@ -101,6 +104,7 @@ export class PlantController {
     }
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('all')
   async getAllPlants() {

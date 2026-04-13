@@ -37,6 +37,7 @@ async function bootstrap() {
       },
       'access-token',
     )
+    .addServer(process.env.BACKEND_URL ?? '')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

@@ -4,6 +4,7 @@ import { GetAnalyticsUseCase } from '../../application/ports/in/get-analytics.us
 import { GetAnalyticsDto } from '../../infrastructure/dtos/get-analytics.dto';
 import { PlotDto } from '../../infrastructure/dtos/plot.dto';
 import {
+  ApiBearerAuth,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -21,6 +22,7 @@ export class AnalyticsController {
     private readonly getAnalyticsUseCase: GetAnalyticsUseCase,
   ) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get('/:plantId')
   @ApiOperation({

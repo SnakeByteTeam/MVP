@@ -9,7 +9,7 @@ import {
   Inject,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CreateAlarmRuleCmd } from '../../application/commands/create-alarm-rule.cmd';
 import { UpdateAlarmRuleCmd } from '../../application/commands/update-alarm-rule.cmd';
 import {
@@ -60,6 +60,7 @@ export class AlarmRulesController {
   ) {}
 
   @ApiOkResponse({ type: CreateAlarmRuleResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Post()
   async createAlarmRule(
@@ -82,6 +83,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmRulesResDto, isArray: true })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get()
   async getAllAlarmRules(): Promise<GetAllAlarmRulesResDto[]> {
@@ -90,6 +92,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: GetAlarmRuleByIdResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get(':id')
   async getAlarmRuleById(
@@ -102,6 +105,7 @@ export class AlarmRulesController {
   }
 
   @ApiOkResponse({ type: UpdateAlarmRuleResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Put(':id')
   async updateAlarmRule(
@@ -124,6 +128,7 @@ export class AlarmRulesController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   async deleteAlarmRule(@Param('id') id: string): Promise<void> {
     return this.deleteAlarmRuleUseCase.deleteAlarmRule(

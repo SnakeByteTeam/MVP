@@ -9,6 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { AddUserToWardReqDto } from '../../infrastructure/dtos/in/add-user-to-ward-req.dto';
 import { AddUserToWardUseCase } from '../../application/ports/in/add-user-to-ward-use-case.interface';
 import { FindAllUsersByWardIdUseCase } from '../../application/ports/in/find-all-users-by-ward-id-use-case.interface';
@@ -39,6 +40,7 @@ export class WardsUsersRelationshipsController {
     private readonly removeUserFromWardUseCase: RemoveUserFromWardUseCase,
   ) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Post()
   async addUserToWard(
@@ -51,6 +53,7 @@ export class WardsUsersRelationshipsController {
     return plainToInstance(AddUserToWardResDto, user);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get('/:wardId')
   async findAllUsersByWardId(
@@ -64,6 +67,7 @@ export class WardsUsersRelationshipsController {
     return plainToInstance(FindAllUsersByWardIdResDto, users);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Delete('/:wardId/:userId')
   async removeUserFromWard(

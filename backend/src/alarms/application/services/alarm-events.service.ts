@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ResolveAlarmEventCmd } from '../commands/resolve-alarm-event-cmd';
-import { ResolveAlarmEventUseCase } from '../ports/in/resolve-active-alarm.use-case';
+import { ResolveAlarmEventUseCase } from '../ports/in/resolve-alarm-event.use-case';
 import {
   RESOLVE_ALARM_EVENT_PORT,
   ResolveAlarmEventPort,

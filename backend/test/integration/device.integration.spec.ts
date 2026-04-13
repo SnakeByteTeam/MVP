@@ -1,8 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  INestApplication,
+  ValidationPipe,
+} from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import * as http from 'node:http';
 import request from 'supertest';
+import { DeviceController } from 'src/device/adapters/in/device.controller';
 import { DeviceModule } from 'src/device/device.module';
 import { DatabaseModule, PG_POOL } from 'src/database/database.module';
 import { UserGuard } from 'src/guard/user/user.guard';
@@ -26,6 +31,10 @@ import {
   GetDeviceValuePort,
 } from 'src/device/application/ports/out/get-device-value.port';
 import {
+  GET_DEVICE_VALUE_USECASE,
+  GetDeviceValueUseCase,
+} from 'src/device/application/ports/in/get-device-value.usecase';
+import {
   WRITE_DATAPOINT_VALUE_PORT,
   WriteDatapointValuePort,
 } from 'src/device/application/ports/out/write-device-value.port';
@@ -33,6 +42,10 @@ import {
   FIND_DEVICE_BY_DATAPOINTID_PORT,
   FindDeviceByDatapointIdPort,
 } from 'src/device/application/ports/out/find-device-by-datapointId';
+import {
+  FIND_DEVICE_BY_DATAPOINTID_USECASE,
+  FindDeviceByDatapointIdUsecase,
+} from 'src/device/application/ports/in/find-device-by-datapointId.usecase';
 import {
   CHECK_ALARM_RULE_USECASE,
   CheckAlarmRuleUseCase,
@@ -85,6 +98,7 @@ function createMockDeviceValue(
 
 describe('Device Module Integration Test', () => {
   let app: INestApplication;
+  let deviceController: DeviceController;
   let findDeviceByIdPort: jest.Mocked<FindDeviceByIdPort>;
   let findDeviceByPlantIdPort: jest.Mocked<FindDeviceByPlantIdPort>;
   let ingestTimeseriesPort: jest.Mocked<IngestTimeseriesPort>;
@@ -92,6 +106,8 @@ describe('Device Module Integration Test', () => {
   let writeDatapointValuePort: jest.Mocked<WriteDatapointValuePort>;
   let findDeviceByDatapointIdPort: jest.Mocked<FindDeviceByDatapointIdPort>;
   let checkAlarmRuleUseCase: jest.Mocked<CheckAlarmRuleUseCase>;
+  let getDeviceValueUseCase: GetDeviceValueUseCase;
+  let findDeviceByDatapointIdUseCase: FindDeviceByDatapointIdUsecase;
 
   beforeEach(async () => {
     const mockClient = {
@@ -171,6 +187,14 @@ describe('Device Module Integration Test', () => {
       }),
     );
     await app.init();
+    deviceController = module.get<DeviceController>(DeviceController);
+
+    getDeviceValueUseCase = module.get<GetDeviceValueUseCase>(
+      GET_DEVICE_VALUE_USECASE,
+    );
+    findDeviceByDatapointIdUseCase = module.get<FindDeviceByDatapointIdUsecase>(
+      FIND_DEVICE_BY_DATAPOINTID_USECASE,
+    );
   });
 
   afterEach(async () => {
@@ -472,6 +496,56 @@ describe('Device Module Integration Test', () => {
   // ============================================================================
 
   describe('POST /device/update - Ingest Timeseries from Webhook', () => {
+    it('should handle Error objects in ingestion and alarm catches', async () => {
+      ingestTimeseriesPort.ingestTimeseries.mockRejectedValue(
+        new Error('ingestion error'),
+      );
+      checkAlarmRuleUseCase.checkAlarmRule.mockRejectedValue(
+        new Error('alarm error'),
+      );
+
+      await request(app.getHttpServer() as http.Server)
+        .post('/device/update')
+        .send({
+          data: [
+            {
+              id: 'dp-1',
+              type: 'datapoint',
+              attributes: {
+                value: 12,
+                timestamp: new Date().toISOString(),
+              },
+            },
+          ],
+        })
+        .expect(202);
+
+      await new Promise((resolve) => setTimeout(resolve, 60));
+    });
+
+    it('should handle non-Error values in ingestion and alarm catches', async () => {
+      ingestTimeseriesPort.ingestTimeseries.mockRejectedValue('ingestion string');
+      checkAlarmRuleUseCase.checkAlarmRule.mockRejectedValue('alarm string');
+
+      await request(app.getHttpServer() as http.Server)
+        .post('/device/update')
+        .send({
+          data: [
+            {
+              id: 'dp-1',
+              type: 'datapoint',
+              attributes: {
+                value: 11,
+                timestamp: new Date().toISOString(),
+              },
+            },
+          ],
+        })
+        .expect(202);
+
+      await new Promise((resolve) => setTimeout(resolve, 60));
+    });
+
     it('should accept webhook payload with datapoint updates', async () => {
       // Arrange
       const device = createMockDevice();
@@ -873,6 +947,26 @@ describe('Device Module Integration Test', () => {
   // ============================================================================
 
   describe('Error Handling & Edge Cases', () => {
+    it('should execute guard clauses for missing params in controller methods', async () => {
+      await expect(deviceController.findByPlantId('')).rejects.toBe(
+        BadRequestException,
+      );
+
+      await expect(deviceController.getDeviceValue('')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+    });
+
+    it('should reject service calls when required identifiers are missing', async () => {
+      await expect(
+        getDeviceValueUseCase.getDeviceValue({ deviceId: '' }),
+      ).rejects.toThrow('[Device Controller] Device id is missing');
+
+      await expect(
+        findDeviceByDatapointIdUseCase.findByDatapointId({ datapointId: '' }),
+      ).rejects.toThrow('[Device Controller] DatapointId is missing');
+    });
+
     it('should handle port failures without crashing', async () => {
       // Arrange
       findDeviceByIdPort.findById.mockRejectedValue(

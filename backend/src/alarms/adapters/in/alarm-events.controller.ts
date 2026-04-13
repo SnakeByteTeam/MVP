@@ -14,7 +14,7 @@ import { ResolveAlarmEventCmd } from '../../application/commands/resolve-alarm-e
 import {
   RESOLVE_ALARM_EVENT_USE_CASE,
   ResolveAlarmEventUseCase,
-} from '../../application/ports/in/resolve-active-alarm.use-case';
+} from '../../application/ports/in/resolve-alarm-event.use-case';
 import { GetAllManagedAlarmEventsByUserIdResDto } from '../../infrastructure/dtos/out/get-all-managed-alarm-events-by-user-id-res-dto';
 import {
   GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,

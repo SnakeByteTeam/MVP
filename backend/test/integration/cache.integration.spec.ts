@@ -5,6 +5,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import * as http from 'node:http';
 import request from 'supertest';
 import { of } from 'rxjs';
+import { EventCacheController } from 'src/cache/adapters/in/event/event-cache.controller';
+import { HttpCacheController } from 'src/cache/adapters/in/http/http-cache.controller';
+import {
+  UPDATE_CACHE_USE_CASE,
+  UpdateCacheUseCase,
+} from 'src/cache/application/ports/in/update-cache.usecase';
 import { CacheModule } from 'src/cache/cache.module';
 import { DatabaseModule, PG_POOL } from 'src/database/database.module';
 import { createMockPgPool, normalizeSql } from './helpers/mock-pg';
@@ -12,6 +18,9 @@ import { createMockPgPool, normalizeSql } from './helpers/mock-pg';
 describe('Cache Integration Test', () => {
   let app: INestApplication;
   let eventEmitter: EventEmitter2;
+  let eventCacheController: EventCacheController;
+  let httpCacheController: HttpCacheController;
+  let updateCacheUseCase: UpdateCacheUseCase;
 
   const state = {
     tokenCache: {
@@ -22,6 +31,8 @@ describe('Cache Integration Test', () => {
       email: 'linked@example.com',
     },
     plants: new Map<string, any>(),
+    failWritePlantIds: new Set<string>(),
+    failWriteAsString: false,
   };
 
   beforeEach(async () => {
@@ -29,6 +40,8 @@ describe('Cache Integration Test', () => {
     process.env.PLANT_DOMAIN = 'https://vimar.example.com/.well-known/knx';
 
     state.plants.clear();
+    state.failWritePlantIds.clear();
+    state.failWriteAsString = false;
 
     const pool = createMockPgPool(async (rawSql, params) => {
       const sql = normalizeSql(rawSql);
@@ -61,6 +74,14 @@ describe('Cache Integration Test', () => {
 
       if (sql.includes('insert into plant') && sql.includes('on conflict (id) do update')) {
         const [id, rawData, wardId] = params as [string, unknown, number | null];
+
+        if (state.failWritePlantIds.has(id)) {
+          if (state.failWriteAsString) {
+            throw 'simulated write failure';
+          }
+          throw new Error('simulated write failure');
+        }
+
         state.plants.set(id, {
           id,
           data: typeof rawData === 'string' ? JSON.parse(rawData) : rawData,
@@ -178,6 +199,9 @@ describe('Cache Integration Test', () => {
     await app.init();
 
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+    eventCacheController = module.get<EventCacheController>(EventCacheController);
+    httpCacheController = module.get<HttpCacheController>(HttpCacheController);
+    updateCacheUseCase = module.get<UpdateCacheUseCase>(UPDATE_CACHE_USE_CASE);
   });
 
   afterEach(async () => {
@@ -215,5 +239,120 @@ describe('Cache Integration Test', () => {
 
     expect(state.plants.has('plant-1')).toBe(true);
     expect(state.plants.has('plant-2')).toBe(true);
+  });
+
+  it('should reject updateCache use case when plantId is missing', async () => {
+    await expect(
+      updateCacheUseCase.updateCache({} as { plantId: string }),
+    ).rejects.toThrow('PlantId is null');
+  });
+
+  it('should handle webhook update failure with Error without crashing', async () => {
+    const response = await request(app.getHttpServer() as http.Server)
+      .post('/cache/update')
+      .send({
+        data: [
+          {
+            id: 'plant-missing',
+            type: 'service',
+            attributes: { lastModified: new Date().toISOString() },
+            links: { self: '' },
+          },
+        ],
+      })
+      .expect(202);
+
+    expect(response.body.success).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 80));
+  });
+
+  it('should handle webhook update failure with non-Error value', async () => {
+    state.failWritePlantIds.add('plant-1');
+    state.failWriteAsString = true;
+
+    const response = await request(app.getHttpServer() as http.Server)
+      .post('/cache/update')
+      .send({
+        data: [
+          {
+            id: 'plant-1',
+            type: 'service',
+            attributes: { lastModified: new Date().toISOString() },
+            links: { self: '' },
+          },
+        ],
+      })
+      .expect(202);
+
+    expect(response.body.success).toBe(true);
+    await new Promise((resolve) => setTimeout(resolve, 60));
+  });
+
+  it('should mark updateAllCache flow as failed when one plant write fails', async () => {
+    state.failWritePlantIds.add('plant-1');
+
+    eventEmitter.emit('fetched.tokens');
+
+    await new Promise((resolve) => setTimeout(resolve, 120));
+
+    expect(state.plants.has('plant-2')).toBe(true);
+  });
+
+  it('should skip duplicate cache sync events while one sync is already running', async () => {
+    (eventCacheController as any).isCacheSyncRunning = true;
+
+    await eventCacheController.updateCache();
+
+    expect(state.plants.size).toBe(0);
+  });
+
+  it('should throw when cache write operation fails in updateCache use case', async () => {
+    state.failWritePlantIds.add('plant-1');
+
+    await expect(
+      updateCacheUseCase.updateCache({ plantId: 'plant-1' }),
+    ).rejects.toThrow('Failed to write cache');
+  });
+
+  it('should execute queue catch branch with Error in HttpCacheController', async () => {
+    const rejected = Promise.reject(new Error('queued error'));
+    rejected.catch(() => undefined);
+    (httpCacheController as any).webhookQueue = rejected;
+
+    await httpCacheController.updateCache({ data: [] } as any);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  });
+
+  it('should execute queue catch branch with non-Error in HttpCacheController', async () => {
+    const rejected = Promise.reject('queued-string-error');
+    rejected.catch(() => undefined);
+    (httpCacheController as any).webhookQueue = rejected;
+
+    await httpCacheController.updateCache({ data: [] } as any);
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  });
+
+  it('should execute webhook per-plant catch with real Error instance', async () => {
+    const localController = new HttpCacheController({
+      updateCache: jest.fn().mockRejectedValue(new Error('local-update-error')),
+    } as any);
+
+    await localController.updateCache({
+      data: [{ id: 'plant-local-1', type: 'service' }],
+    } as any);
+
+    await new Promise((resolve) => setTimeout(resolve, 40));
+  });
+
+  it('should execute webhook per-plant catch with non-Error value', async () => {
+    const localController = new HttpCacheController({
+      updateCache: jest.fn().mockRejectedValue('local-string-error'),
+    } as any);
+
+    await localController.updateCache({
+      data: [{ id: 'plant-local-2', type: 'service' }],
+    } as any);
+
+    await new Promise((resolve) => setTimeout(resolve, 40));
   });
 });

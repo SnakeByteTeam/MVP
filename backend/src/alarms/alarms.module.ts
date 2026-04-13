@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AlarmRulesController } from './adapters/in/alarm-rules.controller';
 import { AlarmEventsController } from './adapters/in/alarm-events.controller';
 import { AlarmRulesService } from './application/services/alarm-rules.service';
-import { RESOLVE_ALARM_EVENT_USE_CASE } from './application/ports/in/resolve-active-alarm.use-case';
+import { RESOLVE_ALARM_EVENT_USE_CASE } from './application/ports/in/resolve-alarm-event.use-case';
 import { CREATE_ALARM_RULE_USE_CASE } from './application/ports/in/create-alarm-rule.use-case';
 import { DELETE_ALARM_RULE_USE_CASE } from './application/ports/in/delete-alarm-rule.use-case';
 import { GET_ALARM_RULE_BY_ID_USE_CASE } from './application/ports/in/get-alarm-rule-by-id.use-case';

@@ -4,7 +4,9 @@ import * as http from 'node:http';
 import request from 'supertest';
 import { AnalyticsController } from 'src/analytics/adapters/in/analytics.controller';
 import { AnalyticsService } from 'src/analytics/application/services/analytics.service';
+import { SuggestionService } from 'src/analytics/application/services/suggestion.service';
 import { AnalyticsStrategy } from 'src/analytics/application/strategy/analytics.strategy';
+import { GetSuggestionCmd } from 'src/analytics/application/commands/get-suggestion.cmd';
 import { Plot } from 'src/analytics/domain/plot.model';
 import {
   GET_SUGGESTION_USECASE,
@@ -233,5 +235,17 @@ describe('Analytics Integration Test', () => {
     await request(app.getHttpServer() as http.Server)
       .get('/analytics')
       .expect(404);
+  });
+
+  it('should throw when suggestion service receives no suggestion from LLM port', async () => {
+    const suggestionService = new SuggestionService({
+      generateSuggestion: jest.fn().mockResolvedValue(null),
+    } as any);
+
+    await expect(
+      suggestionService.getSuggestion(
+        new GetSuggestionCmd('Title', 'plant-consumption', 'Wh', ['t1'], []),
+      ),
+    ).rejects.toThrow('No suggestion found for this metric: plant-consumption');
   });
 });

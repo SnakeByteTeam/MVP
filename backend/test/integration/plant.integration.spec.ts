@@ -115,4 +115,47 @@ describe('Plant Integration Test', () => {
 
     expect(response.body).toHaveLength(2);
   });
+
+  it('should return 404 when plantid query param is missing', async () => {
+    await request(app.getHttpServer() as http.Server)
+      .get('/plant')
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(404);
+  });
+
+  it('should return 404 when plant is not found', async () => {
+    await request(app.getHttpServer() as http.Server)
+      .get('/plant')
+      .query({ plantid: 'missing-plant' })
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(404);
+  });
+
+  it('should return fallback message when no available plants are found', async () => {
+    state.plants = [];
+
+    const response = await request(app.getHttpServer() as http.Server)
+      .get('/plant/available')
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(200);
+
+    expect(response.body).toEqual({
+      message: 'No available plants found',
+      statusCode: 202,
+    });
+  });
+
+  it('should return fallback message when no plants are found', async () => {
+    state.plants = [];
+
+    const response = await request(app.getHttpServer() as http.Server)
+      .get('/plant/all')
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(200);
+
+    expect(response.body).toEqual({
+      message: 'No plants found',
+      statusCode: 202,
+    });
+  });
 });

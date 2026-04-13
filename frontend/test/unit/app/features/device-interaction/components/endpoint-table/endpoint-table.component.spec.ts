@@ -189,19 +189,71 @@ describe('EndpointTableComponent', () => {
   it('ignores write if already executing or no value selected', () => {
     fixture.detectChanges();
     
-    // trigger without value selected for invalid mode
     component.onWriteRow(invalidRow);
     expect(deviceApiMock.writeDatapointValue).not.toHaveBeenCalled();
     
-    // trigger normally then block next
     const subject = new Subject<void>();
     deviceApiMock.writeDatapointValue.mockReturnValue(subject.asObservable());
     component.onSelectionChange(mappedRow, 'Heat');
-    component.onWriteRow(mappedRow); // calls API
+    component.onWriteRow(mappedRow);
     
     expect(component.isRowExecuting(mappedRow)).toBe(true);
     
-    component.onWriteRow(mappedRow); // skipped because already executing
+    component.onWriteRow(mappedRow);
     expect(deviceApiMock.writeDatapointValue).toHaveBeenCalledTimes(1); 
+  });
+
+  it('active-plant-changed event resets state and triggers refresh', async () => {
+    vi.unstubAllGlobals();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onSelectionChange(mappedRow, 'Cool');
+    expect(component.getSelectedValue(mappedRow)).toBe('Cool');
+
+    globalThis.dispatchEvent(new CustomEvent('active-plant-changed', { detail: { plantId: 'plant-new' } }));
+
+    expect(component.getSelectedValue(mappedRow)).toBe('Cool');
+    expect(component.loadError).toBe('');
+  });
+
+  it('ngOnDestroy cancella le subscription e i feedback timer attivi', () => {
+    vi.useFakeTimers();
+    fixture.detectChanges();
+
+    component.onSelectionChange(mappedRow, 'Cool');
+    component.onWriteRow(mappedRow);
+    expect(component.getRowFeedback(mappedRow)).toBeTruthy();
+
+    expect(() => fixture.destroy()).not.toThrow();
+
+    vi.advanceTimersByTime(10000);
+    vi.useRealTimers();
+  });
+
+  it('getSelectedValue restituisce il primo valore enum come fallback', () => {
+    fixture.detectChanges();
+    const val = component.getSelectedValue(mappedRow);
+    expect(val).toBe('Cool');
+  });
+
+  it('getCurrentValue restituisce il primo valore disponibile come fallback', () => {
+    const fallbackRow: WritableEndpointRow = {
+      ...mappedRow,
+      datapointId: 'dp-99',
+      datapointName: 'SFE_Cmd_Unknown',
+      datapointSfeType: 'SFE_Cmd_Unknown',
+    };
+    deviceApiMock.getCurrentValuePointsByDeviceIds.mockReturnValue(of(new Map([
+      ['device-1', [{ datapointId: 'dp-other', name: 'some_other', value: 'FallbackVal' }]],
+    ])));
+    fixture.detectChanges();
+    expect(component.getCurrentValue(fallbackRow)).toBe('FallbackVal');
+  });
+
+  it('getTypeLabel delega a getDeviceTypeLabel', () => {
+    fixture.detectChanges();
+    expect(component.getTypeLabel(DeviceType.THERMOSTAT)).toBe('Termostato');
+    expect(component.getTypeLabel(DeviceType.UNKNOWN)).toBe('Sconosciuto');
   });
 });

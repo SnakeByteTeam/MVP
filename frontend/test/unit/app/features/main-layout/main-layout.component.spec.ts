@@ -353,4 +353,69 @@ describe('MainLayoutComponent', () => {
             expect(noVimarComponent.isVimarStatusLoading).toBe(false);
         });
     });
+
+    it('ngAfterViewInit e no-op se ResizeObserver non esiste nel globalThis', () => {
+        const original = (globalThis as any).ResizeObserver;
+        delete (globalThis as any).ResizeObserver;
+
+        component.topbarRef = { nativeElement: document.createElement('div') };
+        expect(() => component.ngAfterViewInit()).not.toThrow();
+
+        (globalThis as any).ResizeObserver = original;
+    });
+
+    it('ResizeObserver callback aggiorna la variabile CSS --topbar-height', () => {
+        let capturedCallback: ((entries: any[]) => void) | null = null;
+        (globalThis as any).ResizeObserver = class {
+            constructor(cb: (entries: any[]) => void) { capturedCallback = cb; }
+            observe = vi.fn();
+            unobserve = vi.fn();
+            disconnect = vi.fn();
+        };
+
+        fixture.detectChanges();
+        component.topbarRef = { nativeElement: document.createElement('div') };
+        component.ngAfterViewInit();
+
+        capturedCallback!([{ contentRect: { height: 72 } }]);
+        expect(document.documentElement.style.getPropertyValue('--topbar-height')).toBe('72px');
+    });
+
+    it('onNavItemSelected non chiama requestRefresh se il route non e alarm-management', () => {
+        fixture.detectChanges();
+        component.onNavItemSelected('dashboard');
+        expect(mockAlarmManagementRefreshService.requestRefresh).not.toHaveBeenCalled();
+    });
+
+    it('onNavItemSelected non chiama requestRefresh se la URL corrente non include alarm-management', () => {
+        fixture.detectChanges();
+        // Router url is '/' by default in testing
+        component.onNavItemSelected('alarms/alarm-management');
+        expect(mockAlarmManagementRefreshService.requestRefresh).not.toHaveBeenCalled();
+    });
+
+    it('openRealtimeNotificationPanel non duplica se il pannello e gia aperto', () => {
+        fixture.detectChanges();
+        component.isNotificationPanelOpen = true;
+
+        notificationsSubject.next([{ notificationId: 'n-xyz', title: 'Test', sentAt: new Date().toISOString() }]);
+
+        // panel was already open, it should remain open (no error)
+        expect(component.isNotificationPanelOpen).toBe(true);
+    });
+
+    it('clearToastTimer cancella il timer attivo quando viene chiamato due volte', () => {
+        vi.useFakeTimers();
+        fixture.detectChanges();
+
+        // Start two toasts → second should cancel the first timer
+        component['showRealtimeToast']('primo', 'alert');
+        component['showRealtimeToast']('secondo', 'success');
+        expect(component.realtimeToastMessage).toBe('secondo');
+
+        // Only the second timer should remain, advance to clear it
+        vi.advanceTimersByTime(5000);
+        expect(component.realtimeToastMessage).toBeNull();
+        vi.useRealTimers();
+    });
 });

@@ -417,4 +417,77 @@ describe('DeviceApiService', () => {
     expect(values.get('dp-ok')).toBe('Off');
   });
 
+  it('getCurrentValuePointsByDeviceIds restituisce mappa vuota per lista vuota', async () => {
+    const result = await firstValueFrom(service.getCurrentValuePointsByDeviceIds([]));
+    expect(result.size).toBe(0);
+    httpMock.expectNone('http://localhost:3000/device');
+  });
+
+  it('getCurrentValuePointsByDeviceIds filtra device id vuoti o solo spazi', async () => {
+    const result = await firstValueFrom(service.getCurrentValuePointsByDeviceIds(['', '   ', '  ']));
+    expect(result.size).toBe(0);
+  });
+
+  it('resolveActivePlantId fallisce se /plant/all non ha plants', async () => {
+    storage.removeItem('activePlantId');
+    const promise = firstValueFrom(service.getWritableEndpointRows());
+
+    const allReq = httpMock.expectOne('http://localhost:3000/plant/all');
+    allReq.flush([]); // empty array → no plants
+
+    await expect(promise).rejects.toThrow('No plants available');
+  });
+
+  it('resolveActivePlantId gestisce risposta non-array da /plant/all', async () => {
+    storage.removeItem('activePlantId');
+    const promise = firstValueFrom(service.getWritableEndpointRows());
+
+    const allReq = httpMock.expectOne('http://localhost:3000/plant/all');
+    allReq.flush({ statusCode: 500, message: 'Internal error' }); // non-array
+
+    await expect(promise).rejects.toThrow('No plants available');
+  });
+
+  it('writeDatapointValue rigetta quando la risposta contiene testo di errore', async () => {
+    const writePromise = firstValueFrom(
+      service.writeDatapointValue({ datapointId: 'dp-1', value: 'On' }),
+    );
+
+    const request = httpMock.expectOne('http://localhost:3000/device');
+    request.flush({ message: 'Impossibile completare operazione', statusCode: 200 });
+
+    await expect(writePromise).rejects.toThrow();
+  });
+
+  it('writeDatapointValue rigetta quando statusCode >= 400', async () => {
+    const writePromise = firstValueFrom(
+      service.writeDatapointValue({ datapointId: 'dp-1', value: 'On' }),
+    );
+
+    const request = httpMock.expectOne('http://localhost:3000/device');
+    request.flush({ message: 'Bad request', statusCode: 400 });
+
+    await expect(writePromise).rejects.toThrow();
+  });
+
+  it('getRoom lancia errore se la stanza non e trovata nel plant', async () => {
+    const roomPromise = firstValueFrom(service.getRoom('stanza-inesistente'));
+
+    const request = httpMock.expectOne('http://localhost:3000/plant?plantid=plant-1');
+    request.flush({ id: 'plant-1', name: 'Plant Demo', rooms: [] });
+
+    await expect(roomPromise).rejects.toThrow('stanza-inesistente');
+  });
+
+  it('getCurrentValuePointsByDeviceIds ignora response con deviceId non stringa', async () => {
+    const promise = firstValueFrom(
+      service.getCurrentValuePointsByDeviceIds(['device-x']),
+    );
+
+    const req = httpMock.expectOne('http://localhost:3000/device/device-x/value');
+    req.flush({ deviceId: 123, values: [] }); // numeric deviceId → skipped
+
+    const result = await promise;
+    expect(result.size).toBe(0);
+  });
 });

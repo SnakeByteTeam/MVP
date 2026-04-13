@@ -98,4 +98,89 @@ describe('CreateUserForm', () => {
 
     expect(openSpy).toHaveBeenCalledTimes(1);
   });
+
+  it('il pannello form e nascosto quando isOpen=false', () => {
+    fixture.componentRef.setInput('isOpen', false);
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('[data-testid="create-user-panel"]');
+    expect(panel.className).toContain('opacity-0');
+  });
+
+  it('il pannello form e visibile quando isOpen=true', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    const panel = fixture.nativeElement.querySelector('[data-testid="create-user-panel"]');
+    expect(panel.className).toContain('opacity-100');
+  });
+
+  it('mostra bottone Inserisci Nuovo Operatore quando isOpen=false', () => {
+    fixture.componentRef.setInput('isOpen', false);
+    fixture.detectChanges();
+    const btn = fixture.nativeElement.querySelector('button');
+    expect(btn.textContent).toContain('Inserisci Nuovo Operatore');
+  });
+
+  it('mostra bottone Chiudi quando isOpen=true', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    const closeBtn = buttons.find(b => b.textContent?.trim() === 'Chiudi');
+    expect(closeBtn).toBeTruthy();
+  });
+
+  it('mostra messaggio errore USERNAME_ALREADY_IN_USE nel template', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('errorType', 'USERNAME_ALREADY_IN_USE');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Username già in uso');
+  });
+
+  it('mostra messaggio errore OTHER_ERROR nel template', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.componentRef.setInput('errorType', 'OTHER_ERROR');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Errore durante la creazione utente');
+  });
+
+  it('mostra errori di validazione nome dopo submit invalido', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    component.form.controls['name'].setValue('');
+    component.form.controls['surname'].setValue('Rossi');
+    component.form.controls['username'].setValue('mrossi');
+    component.submit();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Il nome è obbligatorio');
+  });
+
+  it('mostra errori minlength cognome dopo submit invalido', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    component.form.controls['name'].setValue('Mario');
+    component.form.controls['surname'].setValue('R');
+    component.form.controls['username'].setValue('mrossi');
+    component.submit();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Il cognome deve essere di almeno 2 caratteri');
+  });
+
+  it('mostra errori minlength username dopo submit invalido', () => {
+    fixture.componentRef.setInput('isOpen', true);
+    fixture.detectChanges();
+    component.form.controls['name'].setValue('Mario');
+    component.form.controls['surname'].setValue('Rossi');
+    component.form.controls['username'].setValue('abc');
+    component.submit();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain("L'username deve essere di almeno 4");
+  });
+
+  it('resetAndFocus resetta e pulisce lo stato del form', async () => {
+    component.form.setValue({ name: 'Mario', surname: 'Rossi', username: 'mrossi' });
+    component.form.markAllAsTouched();
+    component.resetAndFocus();
+    await new Promise<void>(resolve => queueMicrotask(() => resolve()));
+    expect(component.form.untouched).toBe(true);
+    expect(component.form.value).toEqual({ name: '', surname: '', username: '' });
+  });
 });

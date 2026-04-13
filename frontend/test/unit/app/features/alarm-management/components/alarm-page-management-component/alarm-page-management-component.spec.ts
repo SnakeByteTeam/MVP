@@ -416,5 +416,87 @@ describe('AlarmPageManagementComponent', () => {
       nextButton.click();
       expect(alarmManagementStub.nextPage).toHaveBeenCalled();
     });
+
+    it('mostra il badge con il contatore allarmi quando rows > 0', () => {
+      vmSubject.next({
+        alarms: [alarm1, alarm2],
+        currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: false, resolvingId: null, resolveError: null,
+      });
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('2 in tabella');
+    });
+
+    it('non mostra il badge quando la lista e vuota', () => {
+      vmSubject.next({
+        alarms: [], currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: false, resolvingId: null, resolveError: null,
+      });
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).not.toContain('in tabella');
+    });
+
+    it('mostra il messaggio di errore resolve nel template', () => {
+      vmSubject.next({
+        alarms: [alarm1], currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: false, resolvingId: null, resolveError: 'Errore di rete',
+      });
+      fixture.detectChanges();
+      const errorAlert = fixture.nativeElement.querySelector('[role="alert"]');
+      expect(errorAlert).toBeTruthy();
+      expect(errorAlert.textContent).toContain('Errore di rete');
+    });
+
+    it('mostra il banner di risoluzione in corso', () => {
+      vmSubject.next({
+        alarms: [alarm1], currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: true, resolvingId: 'active-1', resolveError: null,
+      });
+      fixture.detectChanges();
+      const statusBanner = fixture.nativeElement.querySelector('[aria-live="polite"]');
+      expect(statusBanner).toBeTruthy();
+      expect(statusBanner.textContent).toContain('Risoluzione allarme in corso');
+    });
+
+    it('mostra lo stato vuoto quando non ci sono allarmi', () => {
+      vmSubject.next({
+        alarms: [], currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: false, resolvingId: null, resolveError: null,
+      });
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('Nessun allarme attivo al momento');
+    });
+
+    it('i bottoni prev/next sono disabilitati quando non si puo navigare', () => {
+      vmSubject.next({
+        alarms: [alarm1], currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: false, resolvingId: null, resolveError: null,
+      });
+      fixture.detectChanges();
+      const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+      const prevBtn = buttons.find(b => b.getAttribute('aria-label') === 'Pagina precedente allarmi attivi');
+      const nextBtn = buttons.find(b => b.getAttribute('aria-label') === 'Pagina successiva allarmi attivi');
+      expect(prevBtn?.disabled).toBe(true);
+      expect(nextBtn?.disabled).toBe(true);
+    });
+
+    it('renderizza le righe della tabella con i dati degli allarmi', () => {
+      vmSubject.next({
+        alarms: [alarm1, alarm2], currentPage: 1, pageLimit: 6, pageOffset: 0,
+        canGoPrevious: false, canGoNext: false,
+        isResolving: false, resolvingId: null, resolveError: null,
+      });
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('Antipanico');
+      expect(fixture.nativeElement.textContent).toContain('Porta aperta');
+      expect(fixture.nativeElement.textContent).toContain('Camera 201');
+      expect(fixture.nativeElement.textContent).toContain('Corridoio Nord');
+    });
   });
 });

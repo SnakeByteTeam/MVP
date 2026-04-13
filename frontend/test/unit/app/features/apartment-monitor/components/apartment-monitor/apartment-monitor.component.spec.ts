@@ -50,6 +50,10 @@ describe('ApartmentMonitorComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    // Restore default implementations after clearAllMocks (which clears call history but NOT implementations)
+    apartmentApiStub.getCurrentApartment.mockReturnValue(apartmentSubject.asObservable());
+    apartmentApiStub.getAvailableApartments.mockReturnValue(of([{ id: 'ap-1', name: 'Appartamento 1' }]));
+    alarmStateStub.getActiveAlarms$.mockReturnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [ApartmentMonitorComponent],
@@ -101,5 +105,60 @@ describe('ApartmentMonitorComponent', () => {
 
     expect(component.error).toBe('');
     expect(apartmentApiStub.getCurrentApartment.mock.calls.length).toBeGreaterThan(callsBefore);
+  });
+
+  it('renderizza il nome appartamento nel titolo quando apartment$ emette', () => {
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Appartamento 1');
+  });
+
+  it('renderizza titolo generico quando apartment$ e null', () => {
+    apartmentApiStub.getCurrentApartment.mockReturnValue(of(null));
+    fixture = TestBed.createComponent(ApartmentMonitorComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain('Panoramica casa connessa');
+  });
+
+  it('mostra il dropdown di selezione appartamento quando ci sono opzioni', () => {
+    const select = fixture.nativeElement.querySelector('select#active-apartment');
+    expect(select).toBeTruthy();
+    const options = select.querySelectorAll('option');
+    expect(options.length).toBe(1);
+    expect(options[0].textContent).toContain('Appartamento 1');
+  });
+
+  it('nasconde il dropdown quando la lista appartamenti e vuota', () => {
+    apartmentApiStub.getAvailableApartments.mockReturnValue(of([]));
+    fixture = TestBed.createComponent(ApartmentMonitorComponent);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('select#active-apartment')).toBeNull();
+  });
+
+  it('mostra errore nel template quando component.error e impostato', () => {
+    // Set error before first detectChanges by using a fresh fixture
+    const errorFixture = TestBed.createComponent(ApartmentMonitorComponent);
+    const errorComponent = errorFixture.componentInstance;
+    errorComponent.error = 'Errore di caricamento';
+    errorFixture.detectChanges();
+    const alert = errorFixture.nativeElement.querySelector('[role="alert"]');
+    expect(alert).toBeTruthy();
+    expect(alert.textContent).toContain('Errore di caricamento');
+  });
+
+  it('mostra alarm-map e endpoint-table quando apartment e alarms sono disponibili', () => {
+    expect(fixture.nativeElement.querySelector('.alarm-map-stub')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.endpoint-table-stub')).toBeTruthy();
+  });
+
+  it('mostra stato caricamento quando apartment$ emette null e non c e errore', () => {
+    apartmentApiStub.getCurrentApartment.mockReturnValue(of(null));
+    fixture = TestBed.createComponent(ApartmentMonitorComponent);
+    component = fixture.componentInstance;
+    component.error = '';
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Caricamento appartamento');
+  });
+
+  it('ngOnDestroy completa il destroy$ senza errori', () => {
+    expect(() => component.ngOnDestroy()).not.toThrow();
   });
 });

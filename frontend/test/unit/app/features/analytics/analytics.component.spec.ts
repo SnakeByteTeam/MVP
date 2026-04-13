@@ -5,11 +5,12 @@ import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AnalyticsDto } from 'src/app/features/analytics/models/analytics.model';
 import { Apartment } from 'src/app/features/apartment-monitor/models/apartment.model';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 describe('AnalyticsComponent', () => {
   let component: AnalyticsComponent;
   let fixture: ComponentFixture<AnalyticsComponent>;
-  
+
   // Mock dei dati
   const mockApartments: Apartment[] = [
     { id: '1', name: 'Appartamento 1', isEnabled: true, rooms: [] },
@@ -17,26 +18,26 @@ describe('AnalyticsComponent', () => {
   ];
 
   const mockAnalyticsData: AnalyticsDto = {
-    apartmentId:"1",
+    apartmentId: "1",
     analyticsInfo: [
       {
-            title: "Analisi Anomalie Impianto",
-            metric: "plant-anomalies",
-            unit: "anomalie",
-            labels: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago"],
-            datasets: [
-              {
-                id: "anomalies",
-                name: "Anomalie Rilevate",
-                data: [1, 0, 2, 1, 0, 3, 1, 0]
-              }
-            ],
-            suggestions:
-              {
-                messages:[],
-                isSuggestion: false
-              }
+        title: "Analisi Anomalie Impianto",
+        metric: "plant-anomalies",
+        unit: "anomalie",
+        labels: ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago"],
+        datasets: [
+          {
+            id: "anomalies",
+            name: "Anomalie Rilevate",
+            data: [1, 0, 2, 1, 0, 3, 1, 0]
           }
+        ],
+        suggestions:
+        {
+          messages: [],
+          isSuggestion: false
+        }
+      }
     ]
   };
 
@@ -46,18 +47,19 @@ describe('AnalyticsComponent', () => {
     getAnalytics: vi.fn((id: string) => of(mockAnalyticsData))
   };
 
-  beforeEach(async () => { 
+  beforeEach(async () => {
 
     await TestBed.configureTestingModule({
       imports: [AnalyticsComponent],
       providers: [
+        provideCharts(withDefaultRegisterables()),
         { provide: AnalyticsApiService, useValue: mockAnalyticsService }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AnalyticsComponent);
     component = fixture.componentInstance;
-    
+
     vi.clearAllMocks();
   });
 
@@ -66,7 +68,7 @@ describe('AnalyticsComponent', () => {
   });
 
   it('carica il primo appartmento di default', () => {
-    fixture.detectChanges(); 
+    fixture.detectChanges();
 
     expect(mockAnalyticsService.getAllApartments).toHaveBeenCalled();
 
@@ -75,7 +77,7 @@ describe('AnalyticsComponent', () => {
 
   it('aggiorna grafici al cambio appartamento', () => {
     fixture.detectChanges();
-    
+
     const mockEvent = { target: { value: '2' } } as unknown as Event;
     component.onApartmentChange(mockEvent);
 

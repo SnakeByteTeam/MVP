@@ -157,4 +157,36 @@ describe('NotificationPageComponent', () => {
     expect(items[0].componentInstance.isHighlighted()).toBe(false);
     expect(items[1].componentInstance.isHighlighted()).toBe(true);
   });
+
+  it('dovrebbe propagare la rimozione quando il componente figlio emette removed', () => {
+    vmSubject.next({
+      notifications: [notificationA],
+      unreadCount: 1,
+    });
+    fixture.detectChanges();
+
+    const items = fixture.debugElement.queryAll(By.directive(NotificationItemComponent));
+    expect(items).toHaveLength(1);
+    
+    // Trigger output
+    items[0].componentInstance.removeClicked.emit(notificationA.notificationId);
+
+    expect(notificationServiceStub.removeNotification).toHaveBeenCalledWith(notificationA.notificationId);
+    expect(notificationServiceStub.removeNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('dovrebbe gestire stringe vuote su focus query param', () => {
+    queryParamMapSubject.next(convertToParamMap({ focus: '   ' })); // space padded
+    fixture.detectChanges();
+
+    component.highlightedNotificationId$.subscribe(val => {
+       expect(val).toBeNull();
+    });
+  });
+
+  it('dovrebbe renderizzare il corretto numero di skeleton se null/loading in teoria', () => {
+    // If we set a state where loading is simulated, let's verify skeleton count if it were ever added.
+    // The component hardcodes skeletonRows = [0, 1, 2]
+    expect(component.skeletonRows).toHaveLength(3);
+  });
 });

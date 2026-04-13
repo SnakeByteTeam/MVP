@@ -130,4 +130,55 @@ describe('AlarmConfigFormStateService', () => {
 
         expect(result).toBeNull();
     });
+
+    it('ensurePlantsLoaded non fa nulla se plants sono gia caricati', async () => {
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(of([{ id: 'p1', name: 'P1' }]));
+        wardApiStub.getWards.mockReturnValueOnce(of([]));
+        await firstValueFrom(service.ensurePlantsLoaded('create'));
+        expect(service.plants().length).toBe(1);
+
+        // Second call should be no-op (hasRequestedPlants = true)
+        await firstValueFrom(service.ensurePlantsLoaded('create'));
+        expect(wardApiStub.getAvailablePlants).toHaveBeenCalledTimes(1);
+    });
+
+    it('ensurePlantsLoaded imposta errore quando loadAllPlants fallisce completamente', async () => {
+        vi.spyOn(service as any, 'loadAllPlants').mockReturnValue(throwError(() => new Error('fail')));
+
+        await firstValueFrom(service.ensurePlantsLoaded('create'));
+
+        expect(service.plantsLoadError()).toBe('Errore durante il caricamento degli impianti disponibili.');
+        expect(service.plants()).toEqual([]);
+    });
+
+    it('loadDeviceOptionsByPlant con plantId vuoto restituisce lista vuota senza chiamate', async () => {
+        const result = await firstValueFrom(service.loadDeviceOptionsByPlant('   '));
+        expect(result).toEqual([]);
+        expect(service.isDevicesLoading()).toBe(false);
+        expect(apartmentApiStub.loadApartmentViewForPlantId).not.toHaveBeenCalled();
+    });
+
+    it('resolveDatapointForEdit ritorna null se deviceId o datapointId sono vuoti', async () => {
+        const r1 = await firstValueFrom(service.resolveDatapointForEdit('', 'dp-1'));
+        expect(r1).toBeNull();
+
+        const r2 = await firstValueFrom(service.resolveDatapointForEdit('device-1', ''));
+        expect(r2).toBeNull();
+
+        expect(apartmentApiStub.getAllPlants).not.toHaveBeenCalled();
+    });
+
+    it('loadAllPlants con wards non vuoti esegue forkJoin per ogni ward', async () => {
+        wardApiStub.getWards.mockReturnValueOnce(of([{ id: 1, name: 'Reparto A' }, { id: 2, name: 'Reparto B' }]));
+        wardApiStub.getAvailablePlants.mockReturnValueOnce(of([{ id: 'p0', name: 'ZZZ' }]));
+        wardApiStub.getPlantsByWardId
+            .mockReturnValueOnce(of([{ id: 'p1', name: 'Appartamento A' }]))
+            .mockReturnValueOnce(of([{ id: 'p2', name: 'Appartamento B' }]));
+
+        await firstValueFrom(service.ensurePlantsLoaded('create'));
+
+        expect(wardApiStub.getPlantsByWardId).toHaveBeenCalledTimes(2);
+        expect(service.plants().map((p) => p.id)).toContain('p1');
+        expect(service.plants().map((p) => p.id)).toContain('p2');
+    });
 });

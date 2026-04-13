@@ -60,4 +60,37 @@ describe('Main Layout Routes', () => {
         const wildcard = MAIN_LAYOUT_ROUTES.find(r => r.path === '**');
         expect(wildcard?.redirectTo).toBe('dashboard');
     });
+
+    describe('Dynamic Imports', () => {
+        it('dovrebbe caricare i moduli e componenti lazy in modo asincrono', async () => {
+            if (rootRoute?.loadComponent) {
+                const cmp = await (rootRoute.loadComponent as any)();
+                expect(cmp).toBeDefined();
+            }
+
+            const testRoutes = [
+                'dashboard', 'analytics', 'apartment-monitor', 'device-interaction',
+                'notifications', 'ward-management', 'user-management'
+            ];
+
+            for (const path of testRoutes) {
+                const route = children.find(c => c.path === path);
+                if (route?.loadChildren) {
+                    const mod = await (route.loadChildren as any)();
+                    expect(mod).toBeDefined();
+                }
+            }
+
+            const alarmsRoute = children.find(c => c.path === 'alarms');
+            if (alarmsRoute?.children) {
+                for (const path of ['alarm-management', 'alarm-history', 'alarm-configuration']) {
+                    const route = alarmsRoute.children.find(c => c.path === path);
+                    if (route?.loadChildren) {
+                        const mod = await (route.loadChildren as any)();
+                        expect(mod).toBeDefined();
+                    }
+                }
+            }
+        });
+    });
 });

@@ -42,6 +42,16 @@ describe('ApiErrorDisplayService', () => {
         expect(message).toBe('Impossibile contattare il server durante caricare gli allarmi.');
     });
 
+    it('mappa status 0 senza actionLabel', () => {
+        const error = new HttpErrorResponse({ status: 0, statusText: 'Unknown Error' });
+
+        const message = service.toMessage(error, {
+            fallbackMessage: 'Messaggio fallback',
+        });
+
+        expect(message).toBe('Impossibile contattare il server. Verifica la connessione e riprova.');
+    });
+
     it('mappa status 401 con actionLabel', () => {
         const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
 
@@ -51,6 +61,16 @@ describe('ApiErrorDisplayService', () => {
         });
 
         expect(message).toBe('Sessione scaduta o non valida. Effettua nuovamente il login per aggiornare la vista.');
+    });
+
+    it('mappa status 401 senza actionLabel', () => {
+        const error = new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' });
+
+        const message = service.toMessage(error, {
+            fallbackMessage: 'Messaggio fallback',
+        });
+
+        expect(message).toBe('Sessione scaduta o non valida. Effettua nuovamente il login.');
     });
 
     it('mappa status 403 con forbiddenMessage custom se presente', () => {
@@ -76,6 +96,16 @@ describe('ApiErrorDisplayService', () => {
         expect(message).toBe('Non hai i permessi necessari per eseguire l operazione.');
     });
 
+    it('mappa status 403 senza actionLabel', () => {
+        const error = new HttpErrorResponse({ status: 403, statusText: 'Forbidden' });
+
+        const message = service.toMessage(error, {
+            fallbackMessage: 'Messaggio fallback',
+        });
+
+        expect(message).toBe('Non hai i permessi necessari per questa operazione.');
+    });
+
     it('mappa status 500 con actionLabel', () => {
         const error = new HttpErrorResponse({ status: 500, statusText: 'Server Error' });
 
@@ -85,6 +115,16 @@ describe('ApiErrorDisplayService', () => {
         });
 
         expect(message).toBe('Errore interno del server durante completare la richiesta. Riprova tra poco.');
+    });
+
+    it('mappa status 500 senza actionLabel', () => {
+        const error = new HttpErrorResponse({ status: 500, statusText: 'Server Error' });
+
+        const message = service.toMessage(error, {
+            fallbackMessage: 'Messaggio fallback',
+        });
+
+        expect(message).toBe('Errore interno del server. Riprova tra qualche istante.');
     });
 
     it('usa error.error string quando disponibile per status non speciali', () => {
@@ -127,5 +167,14 @@ describe('ApiErrorDisplayService', () => {
         });
 
         expect(message).toBe('Messaggio fallback');
+    });
+
+    it('usa error.message di oggetti plain quando nonHttpStrategy e message', () => {
+        const message = service.toMessage({ message: 'errore applicativo' }, {
+            fallbackMessage: 'Messaggio fallback',
+            nonHttpStrategy: 'message',
+        });
+
+        expect(message).toBe('errore applicativo');
     });
 });

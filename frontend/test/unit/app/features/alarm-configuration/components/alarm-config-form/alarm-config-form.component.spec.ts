@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AlarmPriority } from 'src/app/core/alarm/models/alarm-priority.enum';
 import { ThresholdOperator } from 'src/app/core/alarm/models/threshold-operator.enum';
 import { ApartmentApiService } from 'src/app/features/apartment-monitor/services/apartment-api.service';
 import { WardApiService } from 'src/app/features/ward-management/services/ward-api.service';
 import type { AlarmRule } from 'src/app/core/alarm/models/alarm-rule.model';
+import type { Datapoint } from 'src/app/features/apartment-monitor/models/datapoint.model';
 import { AlarmConfigFormComponent } from 'src/app/features/alarm-configuration/components/alarm-config-form/alarm-config-form.component';
 
 describe('AlarmConfigFormComponent', () => {
@@ -533,5 +534,170 @@ describe('AlarmConfigFormComponent', () => {
 
         expect(component.devicesLoadError()).toBe('Errore durante il caricamento dei dispositivi.');
         expect(component.form.controls.deviceId.disabled).toBe(true);
+    });
+
+    it('editPosition restituisce - in create mode', () => {
+        setInputs('create', null);
+        expect(component.editPosition()).toBe('-');
+    });
+
+    it('editPosition restituisce - in edit mode quando position e vuota', () => {
+        setInputs('edit', { ...existingRule, position: '' });
+        expect(component.editPosition()).toBe('-');
+    });
+
+    it('editPosition normalizza spazi intorno al trattino', () => {
+        setInputs('edit', { ...existingRule, position: 'Piano - Stanza-Dispositivo' });
+        expect(component.editPosition()).toBe('Piano - Stanza - Dispositivo');
+    });
+
+    it('thresholdValueHelpText: device non selezionato in create mode', () => {
+        setInputs('create', null);
+        expect(component.thresholdValueHelpText()).toBe('Seleziona prima il dispositivo.');
+    });
+
+    it('thresholdValueHelpText: datapoint non selezionato in create mode', () => {
+        setInputs('create', null);
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.deviceId.setValue('sensor-1');
+        component.form.controls.datapointId.setValue('');
+        expect(component.thresholdValueHelpText()).toBe('Seleziona un datapoint leggibile per impostare la soglia.');
+    });
+
+    it('thresholdValueHelpText: datapoint con enum selezionato in create mode', () => {
+        setInputs('create', null);
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.deviceId.setValue('sensor-1');
+        component.form.controls.datapointId.setValue('dp-readable-1'); // has enum
+        expect(component.thresholdValueHelpText()).toBe('Inserisci uno dei valori previsti dal datapoint selezionato.');
+    });
+
+    it('thresholdValueHelpText: datapoint numerico in create mode', () => {
+        setInputs('create', null);
+        component.form.controls.plantId.setValue('plant-1');
+        component.form.controls.deviceId.setValue('sensor-1');
+        component.form.controls.datapointId.setValue('dp-readable-2'); // no enum
+        expect(component.thresholdValueHelpText()).toBe('Inserisci un valore numerico (es. 10, 10.5, -3).');
+    });
+
+    it('thresholdValueHelpText: edit mode con enum', () => {
+        setInputs('edit', existingRule); // dp-readable-1 has enum
+        expect(component.thresholdValueHelpText()).toBe('Inserisci uno dei valori previsti dal datapoint associato alla regola.');
+    });
+
+    it('thresholdValueHelpText: edit mode senza enum (datapoint non risolto)', () => {
+        setInputs('edit', { ...existingRule, datapointId: 'dp-missing' });
+        expect(component.thresholdValueHelpText()).toBe('Inserisci un valore numerico (es. 10, 10.5, -3).');
+    });
+
+    it('in create mode, con device con singolo datapoint, viene auto-selezionato il datapoint', () => {
+        // sensor-1 with dp-readable-1 only (we mock a simpler apartment)
+        apartmentApiStub.loadApartmentViewForPlantId.mockReturnValueOnce(of({
+            id: 'plant-single',
+            name: 'Appartamento singolo',
+            isEnabled: true,
+            rooms: [{
+                id: 'room-s',
+                name: 'Soggiorno',
+                hasActiveAlarm: false,
+                devices: [{
+                    id: 'device-single',
+                    name: 'Sensore unico',
+                    status: 'ONLINE',
+                    type: 'LIGHT',
+                    actions: [],
+                    datapoints: [{
+                        id: 'dp-only',
+                        name: 'SFE_State_OnOff',
+                        readable: true,
+                        writable: false,
+                        valueType: 'string',
+                        enum: [],
+                        sfeType: 'SFE_State_OnOff',
+                    }],
+                }],
+            }],
+        }));
+
+        setInputs('create', null);
+        component.form.controls.plantId.setValue('plant-single');
+        component.form.controls.deviceId.setValue('device-single');
+
+        // Single datapoint should be auto-selected
+        expect(component.selectedDatapointId()).toBe('dp-only');
+    });
+
+    it('in create mode, selezionare un plant con zero dispositivi blocca il deviceId', () => {
+        apartmentApiStub.loadApartmentViewForPlantId.mockReturnValueOnce(of({
+            id: 'plant-empty',
+            name: 'Appartamento vuoto',
+            isEnabled: true,
+            rooms: [{
+                id: 'room-e',
+                name: 'Soggiorno',
+                hasActiveAlarm: false,
+                devices: [],
+            }],
+        }));
+
+        setInputs('create', null);
+        component.form.controls.plantId.setValue('plant-empty');
+
+        expect(component.deviceOptions().length).toBe(0);
+        expect(component.form.controls.deviceId.disabled).toBe(true);
+    });
+
+    describe('thresholdOperatorOptions e metadata edge cases', () => {
+        it('in edit mode con datapoint mancante, restituisce operator corrente', () => {
+            setInputs('edit', { ...existingRule, datapointId: 'missing-dp', thresholdOperator: '=' });
+            expect(component.thresholdOperatorOptions()).toEqual([ThresholdOperator.EQUAL_TO]);
+        });
+
+        it('in edit mode con datapoint mancante e operator null, restituisce tutti', () => {
+            setInputs('edit', { ...existingRule, datapointId: 'missing-dp' });
+            
+            component.form.controls.thresholdOperator.setValue(null);
+
+            component.selectedDatapoint.set({ id: 'dummy' } as any);
+            component.thresholdOperatorOptions();
+            component.selectedDatapoint.set(null);
+
+            expect(component.thresholdOperatorOptions()).toEqual(Object.values(ThresholdOperator));
+        });
+
+        it('loadEditDatapointMetadata e no-op se chiamato in create mode', () => {
+            setInputs('create', null);
+            const spy = vi.spyOn(component['formState'], 'resolveDatapointForEdit');
+            component['loadEditDatapointMetadata']('device', 'dp', 1);
+            expect(spy).not.toHaveBeenCalled();
+        });
+
+        it('loadEditDatapointMetadata pulisce datapoint se id è vuoto', () => {
+            setInputs('edit', existingRule);
+            component['loadEditDatapointMetadata']('device', '   ', component['editDatapointLookupVersion']);
+            expect(component.selectedDatapoint()).toBeNull();
+        });
+
+        it('loadEditDatapointMetadata skip vuoto se lookupVersion e sbagliata o non in edit mode', () => {
+            setInputs('edit', existingRule);
+            component.selectedDatapoint.set({ id: 'old-dp' } as any);
+            component['loadEditDatapointMetadata']('device', '   ', -999);
+            expect(component.selectedDatapoint()?.id).toBe('old-dp');
+        });
+
+        it('loadEditDatapointMetadata async callback skip se lookupVersion e cambiata nel mentre', () => {
+            setInputs('edit', existingRule);
+            
+            const subject = new BehaviorSubject<Datapoint | null>(null);
+            vi.spyOn(component['formState'], 'resolveDatapointForEdit').mockReturnValueOnce(subject.asObservable());
+
+            component['loadEditDatapointMetadata']('device-1', 'dp-1', component['editDatapointLookupVersion']);
+            
+            component['editDatapointLookupVersion']++;
+            
+            subject.next({ id: 'new-dp' } as any);
+            
+            expect(component.selectedDatapoint()?.id).not.toBe('new-dp');
+        });
     });
 });

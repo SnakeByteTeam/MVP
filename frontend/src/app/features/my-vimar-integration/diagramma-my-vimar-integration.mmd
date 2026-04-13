@@ -1,0 +1,125 @@
+classDiagram
+class MyVimarAccount {
+    +email: string
+    +isLinked: boolean
+}
+<<Interface>> MyVimarAccount
+class MyVimarAccountStatusComponent {
+    +account: InputSignal<MyVimarAccount>
+    +isLoading: InputSignal<boolean>
+    +error: InputSignal<string>
+    +linkClicked: OutputEmitterRef<void>
+    +unlinkClicked: OutputEmitterRef<void>
+    +onLinkAccount(): void
+    +onUnlinkAccount(): void
+}
+class UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+<<enumeration>> UserRole
+class UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+<<Interface>> UserSession
+class LoginResponse {
+    +accessToken: string
+}
+<<Interface>> LoginResponse
+class RefreshResponse {
+    +accessToken: string
+}
+<<Interface>> RefreshResponse
+class AuthClaims {
+    +userId?: string | number
+    +sub?: string | number
+    +id?: string | number
+    +username?: string
+    +role?: string
+    +isFirstAccess?: boolean
+    +firstAccess?: boolean
+}
+<<Interface>> AuthClaims
+class TokenResponse {
+    +accessToken: string
+}
+<<Interface>> TokenResponse
+class InternalAuthService {
+    -http: unknown
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession>
+    -token: string
+    -restoreSessionInFlight$: Observable<boolean>
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string
+    +getCurrentUser$(): Observable<UserSession>
+    +getRole(): UserRole
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}
+class IVimarCloudApiService {
+    +getLinkedAccount(): Observable<MyVimarAccount>
+    +initiateOAuth(): void
+    +unlinkAccount(): Observable<void>
+}
+<<Interface>> IVimarCloudApiService
+class ApiErrorDisplayOptions {
+    +fallbackMessage: string
+    +actionLabel?: string
+    +forbiddenMessage?: string
+    +nonHttpStrategy?: "fallback" | "message"
+}
+<<Interface>> ApiErrorDisplayOptions
+class ApiErrorDisplayService {
+    +toMessage(error: unknown, options: ApiErrorDisplayOptions): string
+    -mapHttpError(error: HttpErrorResponse, options: ApiErrorDisplayOptions): string
+    -extractHttpMessage(error: HttpErrorResponse): string
+    -extractUnknownMessage(error: unknown): string
+}
+class PrepareOAuthTicketResponse {
+    +ticket: string
+}
+<<Interface>> PrepareOAuthTicketResponse
+IVimarCloudApiService <|.. MyVimarCloudApiFeatureService
+class MyVimarCloudApiFeatureService {
+    -http: unknown
+    -baseUrl: string
+    -apiErrorDisplayService: ApiErrorDisplayService
+    -prepareAuthorizeEndpoint: string
+    -authorizeEndpoint: string
+    -accountEndpoints: string[]
+    -fallbackAccount: MyVimarAccount
+    -document: Document
+    +getLinkedAccount(): Observable<MyVimarAccount>
+    +initiateOAuth(): void
+    +unlinkAccount(): Observable<void>
+    -getLinkedAccountFromEndpoint(index: number): Observable<MyVimarAccount>
+    -unlinkAccountFromEndpoint(index: number): Observable<void>
+    -isNotFound(error: unknown): boolean
+    -showOAuthError(message: string, browser: Window): void
+}
+OnInit <|.. MyVimarPageComponent
+class MyVimarPageComponent {
+    -destroyRef: DestroyRef
+    -refresh$: Subject<void>
+    +account$: Observable<MyVimarAccount>
+    +isLoading: boolean
+    +error: string
+    -service: IVimarCloudApiService
+    +ngOnInit(): void
+    +onLinkAccount(): void
+    +onUnlinkAccount(): void
+}

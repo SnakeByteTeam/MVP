@@ -1,0 +1,202 @@
+classDiagram
+class ChartDatasetDto {
+    +id: string
+    +name: string
+    +data: number[]
+}
+<<Interface>> ChartDatasetDto
+class EnergySavingSuggestionDto {
+    +messages: string[]
+    +isSuggestion: boolean
+}
+<<Interface>> EnergySavingSuggestionDto
+class ChartInfoDto {
+    +labels: string[]
+    +datasets: ChartDatasetDto[]
+    +title: string
+    +unit: string
+    +suggestions: EnergySavingSuggestionDto
+    +metric: string
+}
+<<Interface>> ChartInfoDto
+class AnalyticsDto {
+    +apartmentId: string
+    +analyticsInfo: ChartInfoDto[]
+}
+<<Interface>> AnalyticsDto
+class AnalyticsApiService {
+    -http: HttpClient
+    -baseUrl: string
+    -analyticsEndpoint: string
+    -apartmentsEndpoint: string
+    +getAllApartments(): Observable<any[]>
+    +getAnalytics(apartmentId: string, refresh?: boolean): Observable<AnalyticsDto>
+}
+class ChartComponent {
+    +chartInfo: ChartInfoDto
+    +chartType*: keyof ChartTypeRegistry
+    +renderedChartData: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint)[], unknown>
+    +chartOptions: _DeepPartialObject<CoreChartOptions<keyof ChartTypeRegistry> & ElementChartOptions<keyof ChartTypeRegistry> & PluginChartOptions<...> & DatasetChartOptions<...> & ScaleChartOptions<...>>
+    +chartColors: Inline
+    +showSuggestions: boolean
+    +ngOnChanges(changes: Inline): void
+    #updateChart(data: ChartInfoDto): void
+    +showHideSugg(): void
+}
+<<abstract>> ChartComponent
+ChartComponent <|-- AlarmFrequencyChartComponent
+class AlarmFrequencyChartComponent {
+    +chartType: keyof ChartTypeRegistry
+}
+ChartComponent <|-- AlarmsSentResolvedChartComponent
+class AlarmsSentResolvedChartComponent {
+    +chartType: keyof ChartTypeRegistry
+}
+ChartComponent <|-- EnergyConsumptionChartComponent
+class EnergyConsumptionChartComponent {
+    +chartType: keyof ChartTypeRegistry
+    +chartColors: Inline
+    +updateChart(data: ChartInfoDto): void
+}
+ChartComponent <|-- FallFrequencyChartComponent
+class FallFrequencyChartComponent {
+    +chartType: keyof ChartTypeRegistry
+}
+ChartComponent <|-- PlantAnomaliesChartComponent
+class PlantAnomaliesChartComponent {
+    +chartType: keyof ChartTypeRegistry
+}
+ChartComponent <|-- PresenceDetectionChartComponent
+class PresenceDetectionChartComponent {
+    +chartType: keyof ChartTypeRegistry
+}
+ChartComponent <|-- ProlongedPresenceChartComponent
+class ProlongedPresenceChartComponent {
+    +chartType: keyof ChartTypeRegistry
+}
+ChartComponent <|-- TemperatureVariationsChartComponent
+class TemperatureVariationsChartComponent {
+    +chartType: keyof ChartTypeRegistry
+    +chartColors: Inline
+}
+OnInit <|.. AnalyticsComponent
+class AnalyticsComponent {
+    -refreshTrigger$: BehaviorSubject<boolean>
+    -analyticsApiService: AnalyticsApiService
+    -loadTrigger$: Inline
+    +selectedApartmentId$: BehaviorSubject<string>
+    +apartments$: Observable<any[]>
+    +analytics: Observable<AnalyticsDto>
+    +ngOnInit(): void
+    +getChartByMetric(data: AnalyticsDto, metric: string): ChartInfoDto
+    +onApartmentChange(event: Event): void
+    +onRefresh(): void
+}
+class DeviceType {
+    UNKNOWN
+    THERMOSTAT
+    FALL_SENSOR
+    PRESENCE_SENSOR
+    LIGHT
+    ALARM_BUTTON
+    ENTRANCE_DOOR
+    BLIND
+}
+<<enumeration>> DeviceType
+class DeviceAction {
+    +key: string
+    +label: string
+    +disabled?: boolean
+}
+<<Interface>> DeviceAction
+class Datapoint {
+    +id: string
+    +name: string
+    +readable: boolean
+    +writable: boolean
+    +valueType: string
+    +enum: string[]
+    +sfeType: string
+}
+<<Interface>> Datapoint
+class Device {
+    +id: string
+    +name: string
+    +type: DeviceType
+    +status: DeviceStatus
+    +actions: DeviceAction[]
+    +datapoints: Datapoint[]
+}
+<<Interface>> Device
+class Room {
+    +id: string
+    +name: string
+    +hasActiveAlarm: boolean
+    +devices: Device[]
+}
+<<Interface>> Room
+class Apartment {
+    +id: string
+    +name: string
+    +isEnabled: boolean
+    +rooms: Room[]
+}
+<<Interface>> Apartment
+class UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+<<enumeration>> UserRole
+class UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+<<Interface>> UserSession
+class LoginResponse {
+    +accessToken: string
+}
+<<Interface>> LoginResponse
+class RefreshResponse {
+    +accessToken: string
+}
+<<Interface>> RefreshResponse
+class AuthClaims {
+    +userId?: string | number
+    +sub?: string | number
+    +id?: string | number
+    +username?: string
+    +role?: string
+    +isFirstAccess?: boolean
+    +firstAccess?: boolean
+}
+<<Interface>> AuthClaims
+class TokenResponse {
+    +accessToken: string
+}
+<<Interface>> TokenResponse
+class InternalAuthService {
+    -http: unknown
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession>
+    -token: string
+    -restoreSessionInFlight$: Observable<boolean>
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string
+    +getCurrentUser$(): Observable<UserSession>
+    +getRole(): UserRole
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}
++runSharedChartTests(componentType: any): void

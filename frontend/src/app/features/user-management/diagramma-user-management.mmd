@@ -1,0 +1,167 @@
+classDiagram
+class CreateUserDto {
+    +name: string
+    +surname: string
+    +username: string
+}
+<<Interface>> CreateUserDto
+class UserManagementErrorType {
+    USERNAME_ALREADY_IN_USE
+    OTHER_ERROR
+}
+<<enumeration>> UserManagementErrorType
+class CreateUserFormComponent {
+    +errorType: InputSignal<UserManagementErrorType>
+    +isOpen: InputSignal<boolean>
+    +formSubmit: OutputEmitterRef<CreateUserDto>
+    +openRequest: OutputEmitterRef<void>
+    +closeRequest: OutputEmitterRef<void>
+    -nameInput?: ElementRef<HTMLInputElement>
+    -fb: FormBuilder
+    +form: Inline
+    +submit(): void
+    +reset(): void
+    +resetAndFocus(): void
+    +requestClose(): void
+    +requestOpen(): void
+}
+class UserCreatedResponseDto {
+    +tempPassword: string
+}
+<<Interface>> UserCreatedResponseDto
+class UserCreatedDialogComponent {
+    +response: InputSignal<UserCreatedResponseDto>
+    +user: InputSignal<CreateUserDto>
+    +closed: OutputEmitterRef<void>
+    +closeDialog(): void
+}
+class UserRole {
+    AMMINISTRATORE
+    OPERATORE_SANITARIO
+}
+<<enumeration>> UserRole
+class UserDto {
+    +id: number
+    +name: string
+    +surname: string
+    +username: string
+    +role: UserRole
+}
+<<Interface>> UserDto
+class UserListComponent {
+    +users: InputSignal<UserDto[]>
+    +deleteUser: OutputEmitterRef<number>
+    +pendingDeleteUser: WritableSignal<UserDto>
+    +onDeleteRequest(user: UserDto): void
+    +onDeleteCancel(): void
+    +onDeleteConfirm(): void
+    +onDelete(user: UserDto): void
+}
+class DecoderPasswordService {
+    +decodeTempPassword(tempPassword: string): string
+}
+class UserApiService {
+    -http: unknown
+    -baseUrl: string
+    -decoderPasswordService: DecoderPasswordService
+    +getUsers(): Observable<UserDto[]>
+    +createUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
+    +deleteUser(id: number): Observable<void>
+}
+class UserManagementPageStateService {
+    -userApi: UserApiService
+    -refreshTrigger$: BehaviorSubject<void>
+    +users$: Observable<UserDto[]>
+    +createdResponse: WritableSignal<UserCreatedResponseDto>
+    +createdUser: WritableSignal<CreateUserDto>
+    +formError: WritableSignal<UserManagementErrorType>
+    +isCreateFormOpen: WritableSignal<boolean>
+    +openCreateForm(): void
+    +closeCreateForm(): void
+    +submitUser(dto: CreateUserDto): Observable<UserCreatedResponseDto>
+    +deleteUser(id: number): Observable<void>
+    +closeDialog(): void
+    -mapFormError(err: unknown): UserManagementErrorType
+    -isHttpStatus(err: unknown, status: number): boolean
+}
+class UserManagementPageComponent {
+    -pageState: UserManagementPageStateService
+    +users$: Observable<UserDto[]>
+    +createdResponse: WritableSignal<UserCreatedResponseDto>
+    +createdUser: WritableSignal<CreateUserDto>
+    +formError: WritableSignal<UserManagementErrorType>
+    +isCreateFormOpen: WritableSignal<boolean>
+    -createUserFormComponent?: CreateUserFormComponent
+    +openCreateForm(): void
+    +closeCreateForm(): void
+    +onFormSubmit(dto: CreateUserDto): void
+    +onUserDeleted(id: number): void
+    +onDialogClosed(): void
+}
+class UserInfo {
+    +username: string
+    +firstName: string
+    +lastName: string
+    +role: UserRole
+}
+<<Interface>> UserInfo
+class User {
+    +id: number
+    +firstName: string
+    +lastName: string
+    +username: string
+    +role: UserRole
+}
+<<Interface>> User
+class UserSession {
+    +userId: string
+    +username: string
+    +role: UserRole
+    +accessToken: string
+    +isFirstAccess: boolean
+}
+<<Interface>> UserSession
+class LoginResponse {
+    +accessToken: string
+}
+<<Interface>> LoginResponse
+class RefreshResponse {
+    +accessToken: string
+}
+<<Interface>> RefreshResponse
+class AuthClaims {
+    +userId?: string | number
+    +sub?: string | number
+    +id?: string | number
+    +username?: string
+    +role?: string
+    +isFirstAccess?: boolean
+    +firstAccess?: boolean
+}
+<<Interface>> AuthClaims
+class TokenResponse {
+    +accessToken: string
+}
+<<Interface>> TokenResponse
+class InternalAuthService {
+    -http: unknown
+    -baseUrl: string
+    -currentUser$: BehaviorSubject<UserSession>
+    -token: string
+    -restoreSessionInFlight$: Observable<boolean>
+    +login(username: string, password: string): Observable<UserSession>
+    +setFirstAccessPassword(username: string, temporaryPassword: string, newPassword: string): Observable<UserSession>
+    +refreshAccessToken(): Observable<string>
+    +restoreSessionFromRefresh(): Observable<boolean>
+    +logoutFromBackend(): Observable<void>
+    +logout(): void
+    +getToken(): string
+    +getCurrentUser$(): Observable<UserSession>
+    +getRole(): UserRole
+    +isAuthenticated(): boolean
+    +hasRole(role: UserRole): boolean
+    -setSession(session: UserSession): void
+    -buildSessionFromAccessToken(accessToken: string): UserSession
+    -parseAccessToken(accessToken: string): AuthClaims
+    -isUserRole(role: string): boolean
+}

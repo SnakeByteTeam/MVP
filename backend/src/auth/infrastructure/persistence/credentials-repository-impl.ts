@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { CheckCredentialsRepository } from '../../application/repository/check-credentials-repository.interface';
 import { PayloadEntity } from '../entities/payload-entity';
 import { PG_POOL } from '../../../database/database.module';
+import { CredentialsRepository } from 'src/auth/application/repository/credentials-repository.interface';
 
-export class CheckCredentialsRepositoryImpl implements CheckCredentialsRepository {
+export class CredentialsRepositoryImpl implements CredentialsRepository {
   constructor(@Inject(PG_POOL) private readonly conn) {}
 
   async checkCredentials(
@@ -37,6 +37,17 @@ export class CheckCredentialsRepositoryImpl implements CheckCredentialsRepositor
       user.username,
       user.role,
       user.first_access,
+    );
+  }
+
+  async changeCredentials(
+    username: string,
+    newPassword: string,
+    firstAccess: boolean,
+  ): Promise<void> {
+    await this.conn.query(
+      'UPDATE "user" SET password = $1, first_access = $2 WHERE username = $3',
+      [newPassword, firstAccess, username],
     );
   }
 }

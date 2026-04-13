@@ -7,10 +7,6 @@ import {
   REFRESH_USE_CASE,
 } from './application/services/auth.service';
 import {
-  CHECK_CREDENTIALS_PORT,
-  CheckCredentialsAdapter,
-} from './adapters/out/check-credentials-adapter';
-import {
   JWT_ACCESS_TOKEN_EXTRACTOR,
   JWT_ACCESS_TOKEN_GENERATOR,
   JWT_CHANGE_PASSWORD_ACCESS_TOKEN_GENERATOR,
@@ -35,10 +31,6 @@ import {
   EXTRACT_FROM_REFRESH_TOKEN_PORT,
   ExtractFromRefreshTokenAdapter,
 } from './adapters/out/extract-from-refresh-token-adapter';
-import { CHECK_CREDENTIALS_REPOSITORY } from './application/repository/check-credentials-repository.interface';
-import { CheckCredentialsRepositoryImpl } from './infrastructure/persistence/check-credentials-repository-impl';
-import { CHANGE_CREDENTIALS_REPOSITORY } from './application/repository/change-credentials-repository.interface';
-import { ChangeCredentialsRepositoryImpl } from './infrastructure/persistence/change-credentials-repository-impl';
 import {
   GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT,
   GenerateChangePasswordAccessTokenAdapter,
@@ -48,9 +40,8 @@ import {
   GenerateChangePasswordRefreshTokenAdapter,
 } from './adapters/out/generate-change-password-refresh-token-adapter';
 import {
-  CHANGE_CREDENTIALS_PORT,
-  ChangeCredentialsAdapter,
-} from './adapters/out/change-credentials-adapter';
+  CredentialsPersistenceAdapter,
+} from './adapters/out/credentials-persistence-adapter';
 import {
   PASSWORD_HASHER,
   Sha512PasswordHasher,
@@ -59,6 +50,10 @@ import {
   HASH_PASSWORD_PORT,
   HashPasswordAdapter,
 } from './adapters/out/hash-password-adapter';
+import { CHECK_CREDENTIALS_PORT } from './application/ports/out/check-credentials-port.interface';
+import { CREDENTIALS_REPOSITORY } from './application/repository/credentials-repository.interface';
+import { CredentialsRepositoryImpl } from './infrastructure/persistence/credentials-repository-impl';
+import { CHANGE_CREDENTIALS_PORT } from './application/ports/out/change-credentials-port.interface';
 
 @Module({
   controllers: [AuthController],
@@ -77,11 +72,11 @@ import {
     },
     {
       provide: CHECK_CREDENTIALS_PORT,
-      useClass: CheckCredentialsAdapter,
+      useClass: CredentialsPersistenceAdapter,
     },
     {
       provide: CHANGE_CREDENTIALS_PORT,
-      useClass: ChangeCredentialsAdapter,
+      useClass: CredentialsPersistenceAdapter,
     },
     {
       provide: GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT,
@@ -132,12 +127,8 @@ import {
       useClass: ExtractFromRefreshTokenAdapter,
     },
     {
-      provide: CHECK_CREDENTIALS_REPOSITORY,
-      useClass: CheckCredentialsRepositoryImpl,
-    },
-    {
-      provide: CHANGE_CREDENTIALS_REPOSITORY,
-      useClass: ChangeCredentialsRepositoryImpl,
+      provide: CREDENTIALS_REPOSITORY,
+      useClass: CredentialsRepositoryImpl,
     },
     {
       provide: HASH_PASSWORD_PORT,

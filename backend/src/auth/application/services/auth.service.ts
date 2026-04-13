@@ -3,8 +3,7 @@ import { LoginUseCase } from '../ports/in/login-use-case.interface';
 import { LoginCmd } from '../commands/login-cmd';
 import { RefreshUseCase } from '../ports/in/refresh-use-case.interface';
 import { RefreshCmd } from '../commands/refresh-cmd';
-import { CHECK_CREDENTIALS_PORT } from '../../adapters/out/check-credentials-adapter';
-import { CheckCredentialsPort } from '../ports/out/check-credentials-port.interface';
+import { CHECK_CREDENTIALS_PORT, CheckCredentialsPort } from '../ports/out/check-credentials-port.interface';
 import { Tokens } from '../../domain/tokens';
 import { Payload } from '../../domain/payload';
 import { GENERATE_ACCESS_TOKEN_PORT } from '../../adapters/out/generate-access-token-adapter';
@@ -18,7 +17,6 @@ import { ExtractFromAccessTokenPort } from '../ports/out/extract-from-access-tok
 import { EXTRACT_FROM_REFRESH_TOKEN_PORT } from '../../adapters/out/extract-from-refresh-token-adapter';
 import { ExtractFromRefreshTokenPort } from '../ports/out/extract-from-refresh-token-port.interface';
 import { ExtractFromRefreshTokenCmd } from '../commands/extract-from-refresh-token-cmd';
-import { CHANGE_CREDENTIALS_PORT } from '../../adapters/out/change-credentials-adapter';
 import { GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT } from '../../adapters/out/generate-change-password-access-token-adapter';
 import { GenerateChangePasswordAccessTokenPort } from '../ports/out/generate-change-password-access-token-port.interface';
 import { GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT } from '../../adapters/out/generate-change-password-refresh-token-adapter';
@@ -28,7 +26,7 @@ import { GenerateChangePasswordRefreshTokenCmd } from '../commands/generate-chan
 import { FirstLoginUseCase } from '../ports/in/first-login-use-case.interface';
 import { FirstLoginCmd } from '../commands/first-login-cmd';
 import { CheckCredentialsCmd } from '../commands/check-credentials-cmd';
-import { ChangeCredentialsPort } from '../ports/out/change-credentials-port.interface';
+import { CHANGE_CREDENTIALS_PORT, ChangeCredentialsPort } from '../ports/out/change-credentials-port.interface';
 import { ChangeCredentialsCmd } from '../commands/change-credentials-cmd';
 import { HASH_PASSWORD_PORT } from '../../adapters/out/hash-password-adapter';
 import { HashPasswordPort } from '../ports/out/hash-password-port.interface';

@@ -17,7 +17,7 @@ describe('NotificationsAdapter', () => {
       notifyAlarmWard: jest.fn(),
       notifyAlarmResolution: jest.fn(),
       writeNotification: jest.fn(),
-    } as any;
+    };
 
     adapter = new NotificationsAdapter(notificationsRepository);
   });
@@ -25,10 +25,9 @@ describe('NotificationsAdapter', () => {
   describe('notifyAlarmWard', () => {
     it('should call notifyAlarmWard on repository with correct parameters', async () => {
       const mockAlarm = {
-        rule_id: 'rule-1',
-        ward_id: 5,
-        priority: 1,
-        description: 'Test Alarm',
+        alarmRuleId: 'rule-1',
+        wardId: 5,
+        alarmEventId: 'event-1',
       } as any;
 
       const cmd: NotifyAlarmWardCmd = {
@@ -41,7 +40,7 @@ describe('NotificationsAdapter', () => {
 
       expect(notificationsRepository.notifyAlarmWard).toHaveBeenCalledTimes(1);
       const callArgs = notificationsRepository.notifyAlarmWard.mock.calls[0];
-      expect(callArgs[0]).toBe(5); // ward_id
+      expect(callArgs[0]).toBe(5); // wardId
       expect(callArgs[1]).toBeInstanceOf(CheckAlarmRuleResDto);
     });
 

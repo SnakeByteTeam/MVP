@@ -5,12 +5,9 @@ import { RemoveUserFromWardUseCase } from '../ports/in/remove-user-from-ward-use
 import { AddUserToWardCmd } from '../commands/add-user-to-ward-cmd';
 import { FindAllUsersByWardIdCmd } from '../commands/find-all-users-by-ward-id-cmd';
 import { RemoveUserFromWardCmd } from '../commands/remove-user-from-ward-cmd';
-import { AddUserToWardPort } from '../ports/out/add-user-to-ward-port.interface';
-import { ADD_USER_TO_WARD_PORT } from '../../adapters/out/add-user-to-ward-adapter';
-import { FIND_ALL_USERS_BY_WARD_ID_PORT } from '../../adapters/out/find-all-users-by-ward-id-adapter';
-import { FindAllUsersByWardIdPort } from '../ports/out/find-all-users-by-ward-id-port.interface';
-import { REMOVE_USER_FROM_WARD_PORT } from '../../adapters/out/remove-user-from-ward-adapter';
-import { RemoveUserFromWardPort } from '../ports/out/remove-user-from-ward-port.interface';
+import { ADD_USER_TO_WARD_PORT, AddUserToWardPort } from '../ports/out/add-user-to-ward-port.interface';
+import { FIND_ALL_USERS_BY_WARD_ID_PORT, FindAllUsersByWardIdPort } from '../ports/out/find-all-users-by-ward-id-port.interface';
+import { REMOVE_USER_FROM_WARD_PORT, RemoveUserFromWardPort } from '../ports/out/remove-user-from-ward-port.interface';
 import { User } from '../../domain/user';
 
 @Injectable()

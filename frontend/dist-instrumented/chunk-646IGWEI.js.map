@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/device-interaction/device-interaction.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const DEVICE_INTERACTION_ROUTES: Routes = [\n  {\n    path: '',\n    canActivate: [authGuard],\n    loadComponent: () => import('./components/room-detail/room-detail.component').then((m) => m.RoomDetailComponent)\n  },\n  {\n    path: ':roomId',\n    canActivate: [authGuard],\n    loadComponent: () => import('./components/room-detail/room-detail.component').then((m) => m.RoomDetailComponent)\n  }\n];\n"],
+  "mappings": "gNAGO,IAAMA,EAAoC,CAC/C,CACEC,KAAM,GACNC,YAAa,CAACC,CAAS,EACvBC,cAAeA,IAAM,OAAO,qBAAgD,EAAEC,KAAMC,GAAMA,EAAEC,mBAAmB,GAEjH,CACEN,KAAM,UACNC,YAAa,CAACC,CAAS,EACvBC,cAAeA,IAAM,OAAO,qBAAgD,EAAEC,KAAMC,GAAMA,EAAEC,mBAAmB,EAChH",
+  "names": ["DEVICE_INTERACTION_ROUTES", "path", "canActivate", "authGuard", "loadComponent", "then", "m", "RoomDetailComponent"]
+}

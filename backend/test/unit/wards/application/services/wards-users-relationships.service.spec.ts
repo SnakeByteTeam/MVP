@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ADD_USER_TO_WARD_PORT } from 'src/wards/application/ports/out/add-user-to-ward-port.interface';
+import { FIND_ALL_USERS_BY_WARD_ID_PORT } from 'src/wards/application/ports/out/find-all-users-by-ward-id-port.interface';
+import { REMOVE_USER_FROM_WARD_PORT } from 'src/wards/application/ports/out/remove-user-from-ward-port.interface';
 import { WardsUsersRelationshipsService } from 'src/wards/application/services/wards-users-relationships.service';
-import { ADD_USER_TO_WARD_PORT } from 'src/wards/adapters/out/add-user-to-ward-adapter';
-import { FIND_ALL_USERS_BY_WARD_ID_PORT } from 'src/wards/adapters/out/find-all-users-by-ward-id-adapter';
-import { REMOVE_USER_FROM_WARD_PORT } from 'src/wards/adapters/out/remove-user-from-ward-adapter';
 
 describe('WardsUsersRelationshipsServiceService', () => {
   let service: WardsUsersRelationshipsService;

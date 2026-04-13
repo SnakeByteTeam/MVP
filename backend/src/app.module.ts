@@ -15,7 +15,6 @@ import { UsersModule } from './users/users.module';
 import { ValidationModule } from './validation/validation.module';
 import { GuardModule } from './guard/guard.module';
 import { NotificationModule } from './notifications/notification.module';
-import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -40,7 +39,7 @@ import { AppController } from './app.controller';
     ValidationModule,
     GuardModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}

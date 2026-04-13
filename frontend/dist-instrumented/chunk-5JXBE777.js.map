@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/analytics/analytics.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { authGuard } from '../../core/guards/auth.guard';\n\nexport const ANALYTICS_ROUTES: Routes = [\n  {\n    path: '',\n    //canActivate: [authGuard],\n    loadComponent: () => import('./analytics.component').then((m) => m.AnalyticsComponent)\n  }\n];\n"],
+  "mappings": "4BAGO,IAAMA,EAA2B,CACtC,CACEC,KAAM,GAENC,cAAeA,IAAM,OAAO,qBAAuB,EAAEC,KAAMC,GAAMA,EAAEC,kBAAkB,EACtF",
+  "names": ["ANALYTICS_ROUTES", "path", "loadComponent", "then", "m", "AnalyticsComponent"]
+}

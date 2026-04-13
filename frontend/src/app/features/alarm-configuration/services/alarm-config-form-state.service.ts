@@ -58,7 +58,7 @@ export class AlarmConfigFormStateService {
 
         this.isDevicesLoading.set(true);
 
-        return this.apartmentApi.getApartmentByPlantId(normalizedPlantId).pipe(
+        return this.apartmentApi.loadApartmentViewForPlantId(normalizedPlantId).pipe(
             map((apartment) => this.datapointExtraction.extractDeviceOptions(apartment)),
             tap(() => {
                 this.isDevicesLoading.set(false);

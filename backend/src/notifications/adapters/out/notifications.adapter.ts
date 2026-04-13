@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { CheckAlarmRuleResDto } from 'src/alarms/infrastructure/dtos/out/check-alarm-rule-res-dto';
 import { NotifyAlarmResolutionCmd } from 'src/notifications/application/commands/notify-alarm-resolution.command';
 import { NotifyAlarmWardCmd } from 'src/notifications/application/commands/notify-alarm-ward.command';
@@ -27,13 +28,9 @@ export class NotificationsAdapter
     if (!cmd?.alarm)
       throw new Error('Cannot notify alarm ward without informations');
 
-    const checkAlarmDto: CheckAlarmRuleResDto = CheckAlarmRuleResDto.fromDomain(
-      cmd.alarm,
-    );
-
     return this.notificationsRepository.notifyAlarmWard(
-      cmd.alarm.ward_id,
-      checkAlarmDto,
+      cmd.alarm.wardId,
+      plainToInstance(CheckAlarmRuleResDto, cmd.alarm),
     );
   }
 

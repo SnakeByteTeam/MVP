@@ -15,7 +15,6 @@ import {
 } from '../../application/repository/alarm-rules-repository.interface';
 import { CheckAlarmRuleCmd } from 'src/alarms/application/commands/check-alarm-rule-cmd';
 import { CheckAlarm } from 'src/alarms/domain/models/check-alarm';
-import { CheckAlarmEntity } from 'src/alarms/infrastructure/entities/check-alarm-entity';
 
 export class AlarmRulesPersistenceAdapter
   implements
@@ -168,7 +167,10 @@ export class AlarmRulesPersistenceAdapter
       return null;
     }
 
-    return CheckAlarmEntity.toDomain(alarmRule);
+    if (alarmRule.ward_id == null)
+      return null;
+
+    return new CheckAlarm(alarmRule.alarm_rule_id, alarmRule.ward_id, alarmRule.alarm_event_id ?? undefined);
   }
 
   private normalizeValue(value: string): string {

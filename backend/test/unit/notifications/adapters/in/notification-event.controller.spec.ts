@@ -44,9 +44,9 @@ describe('EventNotificationController', () => {
     expect(notifyService.notifyAlarmWard).toHaveBeenCalledTimes(1);
     expect(notifyService.notifyAlarmWard).toHaveBeenCalledWith({
       alarm: expect.objectContaining({
-        alarm_rule_id: 'rule-10',
-        ward_id: 8,
-        alarm_event_id: 'event-10',
+        alarmRuleId: 'rule-10',
+        wardId: 8,
+        alarmEventId: 'event-10',
       }),
     });
   });

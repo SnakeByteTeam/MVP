@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/alarm-history/components/alarm-history-page.component.css"],
+  "sourcesContent": [".alarm-management__status,\r\n.alarm-management__error,\r\n.alarm-management__empty {\r\n    margin-top: 0.75rem;\r\n}\r\n"],
+  "mappings": "AAAA,CAAA,2EAGI,WAAA,MACJ",
+  "names": []
+}

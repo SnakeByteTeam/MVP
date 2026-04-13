@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/ward-management/components/ward-form-dialog-component/ward-form-dialog-component.css"],
+  "sourcesContent": ["@media (min-width: 767px) {\r\n    dialog {\r\n        left: calc(50% + 80px);\r\n        top: 50%;\r\n        transform: translate(-50%, -50%);\r\n    }\r\n}"],
+  "mappings": "AAAA,OAAA,UAAA,OACI,OACI,KAAA,KAAA,IAAA,EAAA,MACA,IAAA,IACA,UAAA,UAAA,IAAA,CAAA,KACJ,CACJ",
+  "names": []
+}

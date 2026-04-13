@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/device-interaction/components/room-detail/room-detail.component.css"],
+  "sourcesContent": [".room-detail {\n  gap: 1.1rem;\n}\n\n.room-detail__back-button {\n  display: inline-flex;\n  align-items: center;\n  gap: 0.45rem;\n  margin-bottom: 0.7rem;\n  border: 1px solid rgba(217, 119, 6, 0.36);\n  border-radius: 0.8rem;\n  background: linear-gradient(120deg, #fcd34d 0%, #fbbf24 100%);\n  color: #1f2937;\n  font-size: 0.92rem;\n  font-weight: 700;\n  text-decoration: none;\n  padding: 0.48rem 0.72rem;\n  box-shadow: 0 8px 14px rgba(245, 158, 11, 0.24);\n  transition: background-color 140ms ease, border-color 140ms ease, transform 120ms ease;\n}\n\n.room-detail__back-button:hover {\n  background: rgba(254, 243, 199, 0.75);\n  border-color: rgba(245, 158, 11, 0.28);\n  transform: translateX(-1px);\n}\n\n.room-detail__back-button svg {\n  width: 0.95rem;\n  height: 0.95rem;\n}\n"],
+  "mappings": "AAAA,CAAA,YACE,IAAA,MACF,CAEA,CAAA,yBACE,QAAA,YACA,YAAA,OACA,IAAA,OACA,cAAA,MACA,OAAA,IAAA,MAAA,KAAA,GAAA,CAAA,GAAA,CAAA,CAAA,CAAA,KATF,cAUE,MACA,WAAA,gBAAA,MAAA,CAAA,OAAA,CAAA,SACA,MAAA,QACA,UAAA,OACA,YAAA,IACA,gBAAA,KAfF,QAgBE,OAAA,OACA,WAAA,EAAA,IAAA,KAAA,UACA,WAAA,iBAAA,KAAA,IAAA,CAAA,aAAA,KAAA,IAAA,CAAA,UAAA,KAAA,IACF,CAEA,CAjBA,wBAiBA,OACE,WAAA,UACA,aAAA,UACA,UAAA,UAAA,KACF,CAEA,CAvBA,yBAuBA,IACE,MAAA,OACA,OAAA,MACF",
+  "names": []
+}

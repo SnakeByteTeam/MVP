@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/device-interaction/components/alarm-button-card/alarm-button-card.component.css"],
+  "sourcesContent": [".device-card { border: 1px solid #d8dee3; border-radius: 0.5rem; padding: 0.75rem; display: grid; gap: 0.6rem; }\n.device-card h3, .device-card p { margin: 0; }\n.device-card__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }\n.device-card__error { color: #a40000; margin: 0; font-size: 0.85rem; }\n"],
+  "mappings": "AAAA,CAAA,YAAe,OAAA,IAAA,MAAA,QAAf,cAA0C,MAA1C,QAAiE,OAAkB,QAAA,KAAe,IAAA,KAAa,CAC/G,CADA,YACA,GAAA,CADA,YACA,EADA,OACkC,CAAW,CAC7C,CAAA,qBAAwB,QAAA,KAAe,IAAA,MAAa,UAAA,IAAiB,CACrE,CAAA,mBAAsB,MAAA,QAHtB,OAGsC,EAAW,UAAA,MAAoB",
+  "names": []
+}

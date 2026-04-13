@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
@@ -76,6 +77,7 @@ export class DeviceController {
     private readonly checkAlarmUseCase: CheckAlarmRuleUseCase,
   ) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('/:id')
   @ApiOperation({
@@ -109,6 +111,7 @@ export class DeviceController {
     }
   }
 
+  @ApiBearerAuth('access-token')
   @Post('')
   @HttpCode(202)
   @UseGuards(UserGuard)
@@ -137,6 +140,7 @@ export class DeviceController {
     }
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('/plant/:plantId')
   @ApiOperation({
@@ -247,6 +251,7 @@ export class DeviceController {
     return { message: 'Datapoints updated received', statusCode: 202 };
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get(':deviceId/value')
   @ApiOperation({

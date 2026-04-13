@@ -33,7 +33,7 @@ import { plainToInstance } from 'class-transformer';
 import { FindAllUserResDto } from '../../infrastructure/dtos/out/find-all-user-res.dto';
 import { FindAllAvailableUsersUseCase } from '../../application/ports/in/find-all-available-users-use-case.interface';
 import { FindAllAvailableUsersResDto } from '../../infrastructure/dtos/out/find-all-available-users-res-dto';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { FindUserByIdUseCase } from '../../application/ports/in/find-user-by-id-use-case.interface';
 import { FindUserByIdCmd } from '../../application/commands/find-user-by-id-cmd';
 import { FindUserByIdResDto } from '../../infrastructure/dtos/out/find-user-by-id-res-dto';
@@ -58,6 +58,7 @@ export class UsersController {
   ) {}
 
   @ApiOkResponse({ type: FindAllUserResDto, isArray: true })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get()
   async findAllUsers(): Promise<FindAllUserResDto[]> {
@@ -66,6 +67,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: FindAllAvailableUsersResDto, isArray: true })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get('/available')
   async findAllAvailableUsers(): Promise<FindAllAvailableUsersResDto[]> {
@@ -75,6 +77,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: FindUserByIdResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get('/:id')
   async findUserById(
@@ -87,6 +90,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: UpdateUserResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Put('/:id')
   async updateUser(
@@ -100,6 +104,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: CreateUserResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Post()
   async createUser(@Body() req: CreateUserReqDto): Promise<CreateUserResDto> {
@@ -110,6 +115,7 @@ export class UsersController {
   }
 
   @ApiOkResponse()
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Delete('/:id')
   async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {

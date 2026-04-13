@@ -9,6 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { AddPlantToWardReqDto } from '../../infrastructure/dtos/in/add-plant-to-ward-req.dto';
 import {
   ADD_PLANT_TO_WARD_USE_CASE,
@@ -39,18 +40,20 @@ export class WardsPlantsRelationshipsController {
     private readonly removePlantFromWardUseCase: RemovePlantFromWardUseCase,
   ) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Post()
   async addPlantToWard(
     @Body() req: AddPlantToWardReqDto,
   ): Promise<AddPlantToWardResDto> {
-    const plant: Plant = this.addPlantToWardUseCase.addPlantToWard(
+    const plant: Plant = await this.addPlantToWardUseCase.addPlantToWard(
       new AddPlantToWardCmd(req.wardId, req.plantId),
     );
 
     return plainToInstance(AddPlantToWardResDto, plant);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get('/:wardId')
   async findAllPlantsByWardId(
@@ -64,6 +67,7 @@ export class WardsPlantsRelationshipsController {
     return plainToInstance(FindAllPlantsByWardIdResDto, plants);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Delete('/:plantId')
   removePlantFromWard(@Param('plantId') plantId: string): Promise<void> {

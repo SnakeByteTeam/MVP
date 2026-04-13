@@ -27,7 +27,6 @@ import { GENERATE_PASSWORD_PORT } from '../../infrastructure/password-generator/
 import { GeneratePasswordPort } from '../ports/out/password-generator-port.interface';
 import { HASH_PASSWORD_PORT } from '../../infrastructure/hash-password-impl/hash-password-impl';
 import { HashPasswordPort } from '../ports/out/hash-password-port.interface';
-import { UserEntity } from '../../infrastructure/entities/user-entity';
 import { CONVERT_BASE_64_PORT } from '../../infrastructure/convert-base-64-impl/convert-base-64-impl';
 import { ConvertBase64Port } from '../ports/out/converte-base-64-port.interface';
 import { CreatedUser } from '../../domain/created-user';
@@ -90,7 +89,7 @@ export class UsersService
 
   async createUser(req: CreateUserCmd): Promise<CreatedUser> {
     const password: string = this.generatePasswordPort.generatePassword(128);
-    const userEntity: UserEntity = await this.createUserPort.createUser(
+    const user: User = await this.createUserPort.createUser(
       new CreateUserWithTempPasswordCmd(
         req.username,
         req.surname,
@@ -102,12 +101,12 @@ export class UsersService
     const base64Password: string = this.convertBase64Port.toBase64(password);
 
     return new CreatedUser(
-      userEntity.id,
-      userEntity.username,
-      userEntity.surname,
-      userEntity.name,
-      userEntity.role,
-      base64Password,
+      user.getId(),
+      user.getUsername(),
+      user.getSurname(),
+      user.getName(),
+      user.getRole(),
+      base64Password
     );
   }
   async deleteUser(req: DeleteUserCmd): Promise<void> {

@@ -1,4 +1,4 @@
-import { GetWardAlarmEventCmd } from '../../commands/get-ward-alarm-event.command';
+import { GetWardAlarmEventCmd } from '../../commands/get-ward-alarm-event-cmd';
 
 export interface GetWardAlarmEventPort {
   getWardAlarmEvent(cmd: GetWardAlarmEventCmd): Promise<number>;

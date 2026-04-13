@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/alarm/services/alarm-management-refresh.service.ts"],
+  "sourcesContent": ["import { Injectable } from '@angular/core';\nimport { Observable, Subject } from 'rxjs';\n\n@Injectable({ providedIn: 'root' })\nexport class AlarmManagementRefreshService {\n    private readonly refreshRequested$ = new Subject<void>();\n\n    public requestRefresh(): void {\n        this.refreshRequested$.next();\n    }\n\n    public getRefreshRequested$(): Observable<void> {\n        return this.refreshRequested$.asObservable();\n    }\n}\n"],
+  "mappings": "+CAIA,IAAaA,GAA6B,IAAA,CAApC,MAAOA,CAA6B,CACrBC,kBAAoB,IAAIC,EAElCC,gBAAc,CACjB,KAAKF,kBAAkBG,KAAI,CAC/B,CAEOC,sBAAoB,CACvB,OAAO,KAAKJ,kBAAkBK,aAAY,CAC9C,4CATSN,EAA6B,6BAA7BA,EAA6BO,QAA7BP,EAA6BQ,UAAAC,WADhB,MAAM,CAAA,SACnBT,CAA6B,GAAA",
+  "names": ["AlarmManagementRefreshService", "refreshRequested$", "Subject", "requestRefresh", "next", "getRefreshRequested$", "asObservable", "factory", "\u0275fac", "providedIn"]
+}

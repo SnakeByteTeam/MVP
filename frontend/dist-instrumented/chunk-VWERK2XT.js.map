@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/ward-management/ward-management.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\nimport { adminGuard } from '../../core/guards/admin.guard';\nimport { authGuard } from '../../core/guards/auth.guard';\nimport { AssignmentOperationsService } from './services/assignment-operations.service';\nimport { WardManagementStore } from './services/ward-management.store';\nimport { WardOperationsService } from './services/ward-operations.service';\nimport { WardStore } from './services/ward.store';\n\nexport const WARD_MANAGEMENT_ROUTES: Routes = [\n  {\n    path: '',\n    //canActivate: [authGuard, adminGuard],\n    providers: [WardStore, WardOperationsService, AssignmentOperationsService, WardManagementStore],\n    loadComponent: () =>\n      import('./components/ward-management-page-component/ward-management-page-component').then((m) => m.WardManagementPageComponent)\n  }\n];\n"],
+  "mappings": "6YAQO,IAAMA,EAAiC,CAC5C,CACEC,KAAM,GAENC,UAAW,CAACC,EAAWC,EAAuBC,EAA6BC,CAAmB,EAC9FC,cAAeA,IACb,OAAO,qBAA4E,EAAEC,KAAMC,GAAMA,EAAEC,2BAA2B,EACjI",
+  "names": ["WARD_MANAGEMENT_ROUTES", "path", "providers", "WardStore", "WardOperationsService", "AssignmentOperationsService", "WardManagementStore", "loadComponent", "then", "m", "WardManagementPageComponent"]
+}

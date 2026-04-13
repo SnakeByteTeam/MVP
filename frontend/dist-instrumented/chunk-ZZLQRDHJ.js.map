@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/core/alarm/models/alarm-priority.enum.ts"],
+  "sourcesContent": ["\n// Enumera i quattro livelli di priorità di un allarme definiti dai casi d'uso\n// UC33.4–UC33.7\n\nexport enum AlarmPriority {\n    WHITE = 1,\n    GREEN,\n    ORANGE,\n    RED\n}"],
+  "mappings": "AAIA,IAAYA,GAAZ,SAAYA,EAAa,CACrBA,OAAAA,EAAAA,EAAA,MAAA,CAAA,EAAA,QACAA,EAAAA,EAAA,MAAA,CAAA,EAAA,QACAA,EAAAA,EAAA,OAAA,CAAA,EAAA,SACAA,EAAAA,EAAA,IAAA,CAAA,EAAA,MAJQA,CAKZ,GALYA,GAAa,CAAA,CAAA",
+  "names": ["AlarmPriority"]
+}

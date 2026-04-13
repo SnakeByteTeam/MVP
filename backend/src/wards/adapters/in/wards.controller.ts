@@ -9,6 +9,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateWardReqDto } from '../../infrastructure/dtos/in/create-ward-req.dto';
 import { UpdateWardReqDto } from '../../infrastructure/dtos/in/update-ward-req.dto';
 import { CreateWardUseCase } from '../../application/ports/in/create-ward-use-case.interface';
@@ -44,6 +45,7 @@ export class WardsController {
     private readonly deleteWardUseCase: DeleteWardUseCase,
   ) {}
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Post()
   async createWard(@Body() req: CreateWardReqDto): Promise<CreateWardResDto> {
@@ -53,6 +55,7 @@ export class WardsController {
     return plainToInstance(CreateWardResDto, ward);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Get()
   async findAllWards(): Promise<FindAllWardsResDto[]> {
@@ -60,6 +63,7 @@ export class WardsController {
     return plainToInstance(FindAllWardsResDto, wards);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Put('/:id')
   async updateWard(
@@ -72,6 +76,7 @@ export class WardsController {
     return plainToInstance(UpdateWardResDto, ward);
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard, AdminGuard)
   @Delete('/:id')
   async deleteWard(@Param('id') id: number): Promise<void> {

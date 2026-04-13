@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CREATE_WARD_PORT } from 'src/wards/adapters/out/create-ward-adapter';
-import { DELETE_WARD_PORT } from 'src/wards/adapters/out/delete-ward-adapter';
-import { FIND_ALL_WARDS_PORT } from 'src/wards/adapters/out/find-all-wards-adapter';
-import { UPDATE_WARD_PORT } from 'src/wards/adapters/out/update-ward-adapter';
+import { CREATE_WARD_PORT } from 'src/wards/application/ports/out/create-ward-port.interface';
+import { DELETE_WARD_PORT } from 'src/wards/application/ports/out/delete-ward-port.interface';
+import { FIND_ALL_WARDS_PORT } from 'src/wards/application/ports/out/find-all-wards-port.interface';
+import { UPDATE_WARD_PORT } from 'src/wards/application/ports/out/update-ward-port.interface';
 import { WardService } from 'src/wards/application/services/ward.service';
 
 describe('WardService', () => {

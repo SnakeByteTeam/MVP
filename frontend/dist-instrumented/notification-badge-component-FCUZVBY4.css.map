@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/notification/components/notification-badge-component/notification-badge-component.css"],
+  "sourcesContent": ["@keyframes notification-badge-pop {\n    from {\n        opacity: 0;\n        transform: translateY(-4px) scale(0.94);\n    }\n\n    70% {\n        transform: translateY(0) scale(1.03);\n    }\n\n    to {\n        opacity: 1;\n        transform: translateY(0) scale(1);\n    }\n}\n\n.notification-badge {\n    animation: notification-badge-pop 180ms ease-out both;\n    transform-origin: center;\n}\n\n@media (prefers-reduced-motion: reduce) {\n    .notification-badge {\n        animation: none;\n    }\n}"],
+  "mappings": "AAAA,WAAA,uBACI,GACI,QAAA,EACA,UAAA,WAAA,MAAA,MAAA,IACJ,CAEA,IACI,UAAA,WAAA,GAAA,MAAA,KACJ,CAEA,GACI,QAAA,EACA,UAAA,WAAA,GAAA,MAAA,EACJ,CACJ,CAEA,CAAA,mBACI,UAAA,uBAAA,KAAA,SAAA,KACA,iBAAA,MACJ,CAEA,OAAA,uBAAA,QACI,CANJ,mBAOQ,UAAA,IACJ,CACJ",
+  "names": []
+}

@@ -3,47 +3,65 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as http from 'node:http';
 import request from 'supertest';
-import { DatabaseModule } from 'src/database/database.module';
-import { Plant } from 'src/plant/domain/models/plant.model';
-import { PlantEntity } from 'src/plant/infrastructure/persistence/entities/plant.entity';
+import { DatabaseModule, PG_POOL } from 'src/database/database.module';
 import { PlantModule } from 'src/plant/plant.module';
-import { PLANT_REPOSITORY_PORT } from 'src/plant/application/repository/plant.repository';
+import { createMockPgPool, normalizeSql } from './helpers/mock-pg';
 
 describe('Plant Integration Test', () => {
   let app: INestApplication;
   let jwtService: JwtService;
 
   const ACCESS_SECRET = 'integration-access-secret';
-  const PLANT_ID = 'plant-001';
 
-  const mockPlantRepository = {
-    findById: jest.fn<Promise<PlantEntity | null>, [string]>(),
-    findAllAvailablePlants: jest.fn<Promise<PlantEntity[] | null>, []>(),
-    findAllPlants: jest.fn<Promise<PlantEntity[] | null>, []>(),
+  const state = {
+    plants: [
+      {
+        id: 'plant-1',
+        cached_at: new Date('2026-04-01T10:00:00.000Z'),
+        data: { name: 'Main Plant', rooms: [] },
+        ward_id: null as number | null,
+      },
+      {
+        id: 'plant-2',
+        cached_at: new Date('2026-04-01T10:00:00.000Z'),
+        data: { name: 'Ward Plant', rooms: [] },
+        ward_id: 10,
+      },
+    ],
   };
-
-  const makePlantEntity = (id: string, name: string): PlantEntity =>
-    PlantEntity.fromDomain(new Plant(id, name, [], 1));
 
   beforeEach(async () => {
     process.env.ACCESS_SECRET = ACCESS_SECRET;
 
-    mockPlantRepository.findById.mockResolvedValue(
-      makePlantEntity(PLANT_ID, 'Main Plant'),
-    );
-    mockPlantRepository.findAllAvailablePlants.mockResolvedValue([
-      makePlantEntity('plant-available-1', 'Available Plant'),
-    ]);
-    mockPlantRepository.findAllPlants.mockResolvedValue([
-      makePlantEntity('plant-available-1', 'Available Plant'),
-      makePlantEntity('plant-other-2', 'Other Plant'),
-    ]);
+    const pool = createMockPgPool(async (rawSql, params) => {
+      const sql = normalizeSql(rawSql);
+
+      if (sql.includes('from plant') && sql.includes('where id = $1')) {
+        const [id] = params as [string];
+        const plant = state.plants.find((p) => p.id === id);
+        return { rows: plant ? [plant] : [], rowCount: plant ? 1 : 0 };
+      }
+
+      if (sql.includes('from plant') && sql.includes('where ward_id is null')) {
+        return { rows: state.plants.filter((p) => p.ward_id == null) };
+      }
+
+      if (sql.includes('from plant') && !sql.includes('where')) {
+        return { rows: [...state.plants] };
+      }
+
+      if (sql === 'begin' || sql === 'commit' || sql === 'rollback') {
+        return { rows: [] };
+      }
+
+      throw new Error(`Unhandled SQL in plant integration test: ${sql}`);
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, PlantModule],
     })
-      .overrideProvider(PLANT_REPOSITORY_PORT)
-      .useValue(mockPlantRepository)
+      .overrideProvider(PG_POOL)
+      .useValue(pool)
       .compile();
 
     app = module.createNestApplication();
@@ -66,39 +84,69 @@ describe('Plant Integration Test', () => {
   });
 
   const userToken = () =>
-    jwtService.sign({ id: 20, username: 'user', role: 'UTENTE' });
+    jwtService.sign({ id: 1, username: 'user', role: 'UTENTE' });
 
-  it('should retrieve a plant by plantid query parameter', async () => {
+  it('should retrieve plant by id with real repository', async () => {
     const response = await request(app.getHttpServer() as http.Server)
       .get('/plant')
-      .query({ plantid: PLANT_ID })
+      .query({ plantid: 'plant-1' })
       .set('Authorization', `Bearer ${userToken()}`)
       .expect(200);
 
-    expect(response.body).toHaveProperty('id', PLANT_ID);
+    expect(response.body).toHaveProperty('id', 'plant-1');
     expect(response.body).toHaveProperty('name', 'Main Plant');
-    expect(mockPlantRepository.findById).toHaveBeenCalledWith(PLANT_ID);
   });
 
-  it('should return 404 when plantid is missing', async () => {
-    await request(app.getHttpServer() as http.Server)
-      .get('/plant')
-      .set('Authorization', `Bearer ${userToken()}`)
-      .expect(404);
-  });
-
-  it('should return all available plants', async () => {
+  it('should return only available plants', async () => {
     const response = await request(app.getHttpServer() as http.Server)
       .get('/plant/available')
       .set('Authorization', `Bearer ${userToken()}`)
       .expect(200);
 
     expect(response.body).toHaveLength(1);
-    expect(response.body[0]).toHaveProperty('id', 'plant-available-1');
+    expect(response.body[0]).toHaveProperty('id', 'plant-1');
   });
 
-  it('should return fallback payload when all plants retrieval fails', async () => {
-    mockPlantRepository.findAllPlants.mockResolvedValue(null);
+  it('should return all plants', async () => {
+    const response = await request(app.getHttpServer() as http.Server)
+      .get('/plant/all')
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(200);
+
+    expect(response.body).toHaveLength(2);
+  });
+
+  it('should return 404 when plantid query param is missing', async () => {
+    await request(app.getHttpServer() as http.Server)
+      .get('/plant')
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(404);
+  });
+
+  it('should return 404 when plant is not found', async () => {
+    await request(app.getHttpServer() as http.Server)
+      .get('/plant')
+      .query({ plantid: 'missing-plant' })
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(404);
+  });
+
+  it('should return fallback message when no available plants are found', async () => {
+    state.plants = [];
+
+    const response = await request(app.getHttpServer() as http.Server)
+      .get('/plant/available')
+      .set('Authorization', `Bearer ${userToken()}`)
+      .expect(200);
+
+    expect(response.body).toEqual({
+      message: 'No available plants found',
+      statusCode: 202,
+    });
+  });
+
+  it('should return fallback message when no plants are found', async () => {
+    state.plants = [];
 
     const response = await request(app.getHttpServer() as http.Server)
       .get('/plant/all')

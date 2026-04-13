@@ -1,12 +1,12 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
+  "rootDir": "../",
+  "testMatch": ["<rootDir>/test/e2e/**/*.e2e-spec.ts"],
   "testEnvironment": "node",
-  "setupFiles": ["<rootDir>/setup-e2e-env.ts"],
-  "testRegex": "e2e/.*\\.e2e-spec.ts$",
+  "setupFiles": ["<rootDir>/test/setup-e2e-env.ts"],
   "preset": "ts-jest",
   "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/../src/$1"
+    "^src/(.*)$": "<rootDir>/src/$1"
   },
   "transform": {
     "^.+\\.(t|j)s$": ["ts-jest", {
@@ -16,13 +16,23 @@
     }]
   },
   "transformIgnorePatterns": ["node_modules/(?!(uuid)/)"],
+  "collectCoverageFrom": [
+    "src/**/application/ports/**/*.ts",
+    "src/**/application/repository/**/*.ts"
+  ],
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "\\.module\\.ts$",
+    "\\.entity\\.ts$",
+    "main\\.ts$"
+  ],
   "reporters": [
     "default",
     [
       "jest-html-reporters",
       {
         "pageTitle": "E2E Test Report",
-        "publicPath": "<rootDir>/../test/e2e/coverage",
+        "publicPath": "<rootDir>/test/e2e/coverage",
         "filename": "jest-e2e-report.html",
         "expand": false,
         "hideIcon": true

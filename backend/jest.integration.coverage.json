@@ -1,0 +1,37 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "coveragePathIgnorePatterns": [
+    ".module.ts",
+    ".entity.ts",
+    "main.ts"
+  ],
+  "rootDir": "./",
+  "testMatch": ["<rootDir>/test/integration/**/*.spec.ts"],
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "transformIgnorePatterns": ["node_modules/(?!(uuid)/)"],
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1"
+  },
+  "collectCoverageFrom": [
+    "src/**/adapters/in/**/*.ts",
+    "src/**/application/services/**/*.ts"
+  ],
+  "coverageDirectory": "test/coverage",
+  "testEnvironment": "node",
+  "setupFilesAfterEnv": ["<rootDir>/src/jest.setup.ts"],
+  "reporters": [
+    "default",
+    [
+      "jest-html-reporters",
+      {
+        "pageTitle": "Integration Test Report",
+        "publicPath": "./test/unit/coverage",
+        "filename": "jest-integration-report.html",
+        "expand": false,
+        "hideIcon": true
+      }
+    ]
+  ]
+}

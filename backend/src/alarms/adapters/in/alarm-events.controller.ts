@@ -8,13 +8,13 @@ import {
   Patch,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { ResolveAlarmEventCmd } from '../../application/commands/resolve-alarm-event-cmd';
 import {
   RESOLVE_ALARM_EVENT_USE_CASE,
   ResolveAlarmEventUseCase,
-} from '../../application/ports/in/resolve-active-alarm.use-case';
+} from '../../application/ports/in/resolve-alarm-event.use-case';
 import { GetAllManagedAlarmEventsByUserIdResDto } from '../../infrastructure/dtos/out/get-all-managed-alarm-events-by-user-id-res-dto';
 import {
   GET_ALL_MANAGED_ALARM_EVENTS_BY_USER_ID_USE_CASE,
@@ -59,6 +59,7 @@ export class AlarmEventsController {
   ) {}
 
   @ApiOkResponse({ type: GetAlarmEventByIdResDto })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('/:id')
   async getAlarmEventById(
@@ -74,6 +75,7 @@ export class AlarmEventsController {
     type: GetAllManagedAlarmEventsByUserIdResDto,
     isArray: true,
   })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('managed/:userId/:limit/:offset')
   async getAllManagedAlarmEventsByUserId(
@@ -95,6 +97,7 @@ export class AlarmEventsController {
     type: GetAllUnmanagedAlarmEventsByUserIdResDto,
     isArray: true,
   })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('unmanaged/:userId/:limit/:offset')
   async getAllUnmanagedAlarmEventsByUserId(
@@ -113,6 +116,7 @@ export class AlarmEventsController {
   }
 
   @ApiOkResponse({ type: GetAllAlarmEventsResDto, isArray: true })
+  @ApiBearerAuth('access-token')
   @UseGuards(UserGuard)
   @Get('/:limit/:offset')
   async getAllAlarmEvents(
@@ -125,6 +129,7 @@ export class AlarmEventsController {
     return plainToInstance(GetAllAlarmEventsResDto, alarmEvents);
   }
 
+  @ApiBearerAuth('access-token')
   @Patch('/resolve')
   @UseGuards(UserGuard)
   async resolveAlarmEvent(@Body() req: ResolveAlarmEventReqDto): Promise<void> {

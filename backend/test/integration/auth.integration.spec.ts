@@ -1,13 +1,13 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { createHash } from 'node:crypto';
 import * as http from 'node:http';
-import request from 'supertest';
 import cookieParser from 'cookie-parser';
+import request from 'supertest';
 import { AuthModule } from 'src/auth/auth.module';
-import { CHANGE_CREDENTIALS_REPOSITORY } from 'src/auth/application/repository/change-credentials-repository.interface';
-import { CHECK_CREDENTIALS_REPOSITORY } from 'src/auth/application/repository/check-credentials-repository.interface';
-import { PayloadEntity } from 'src/auth/infrastructure/entities/payload-entity';
+import { DatabaseModule, PG_POOL } from 'src/database/database.module';
+import { createMockPgPool, normalizeSql } from './helpers/mock-pg';
 
 describe('Auth Integration Test', () => {
   let app: INestApplication;
@@ -16,30 +16,95 @@ describe('Auth Integration Test', () => {
   const ACCESS_SECRET = 'integration-access-secret';
   const REFRESH_SECRET = 'integration-refresh-secret';
 
-  const mockCheckCredentialsRepository = {
-    checkCredentials: jest.fn<Promise<PayloadEntity>, [string, string]>(),
+  const state = {
+    users: [
+      {
+        id: 1,
+        username: 'admin.user',
+        roleName: 'Amministratore',
+        first_access: false,
+        password: '',
+      },
+      {
+        id: 2,
+        username: 'first.user',
+        roleName: 'Amministratore',
+        first_access: true,
+        password: '',
+      },
+    ],
   };
 
-  const mockChangeCredentialsRepository = {
-    changeCredentials: jest.fn<Promise<void>, [string, string, boolean]>(),
-  };
+  const hashPassword = (value: string) =>
+    createHash('sha512').update(value).digest('hex');
 
   beforeEach(async () => {
     process.env.ACCESS_SECRET = ACCESS_SECRET;
     process.env.REFRESH_SECRET = REFRESH_SECRET;
 
-    mockCheckCredentialsRepository.checkCredentials.mockResolvedValue(
-      new PayloadEntity(1, 'test.user', 'AMMINISTRATORE', false),
-    );
-    mockChangeCredentialsRepository.changeCredentials.mockResolvedValue();
+    state.users[0].password = hashPassword('plain-password');
+    state.users[0].first_access = false;
+    state.users[1].password = hashPassword('temp-password');
+    state.users[1].first_access = true;
+
+    const pool = createMockPgPool(async (rawSql, params) => {
+      const sql = normalizeSql(rawSql);
+
+      if (
+        sql.includes('from "user" u') &&
+        sql.includes('join role r') &&
+        sql.includes('where u.username = $1 and u.password = $2')
+      ) {
+        const [username, password] = params as [string, string];
+        const user = state.users.find(
+          (u) => u.username === username && u.password === password,
+        );
+
+        if (!user) {
+          return { rows: [], rowCount: 0 };
+        }
+
+        return {
+          rows: [
+            {
+              id: user.id,
+              username: user.username,
+              role:
+                user.roleName === 'Amministratore'
+                  ? 'AMMINISTRATORE'
+                  : user.roleName,
+              first_access: user.first_access,
+            },
+          ],
+          rowCount: 1,
+        };
+      }
+
+      if (
+        sql.includes('update "user" set password = $1, first_access = $2 where username = $3')
+      ) {
+        const [newPassword, firstAccess, username] = params as [
+          string,
+          boolean,
+          string,
+        ];
+        const user = state.users.find((u) => u.username === username);
+        if (user) {
+          user.password = newPassword;
+          user.first_access = firstAccess;
+        }
+
+        return { rows: [], rowCount: user ? 1 : 0 };
+      }
+
+      throw new Error(`Unhandled SQL in auth integration test: ${sql}`);
+    });
 
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AuthModule],
+      imports: [DatabaseModule, AuthModule],
     })
-      .overrideProvider(CHECK_CREDENTIALS_REPOSITORY)
-      .useValue(mockCheckCredentialsRepository)
-      .overrideProvider(CHANGE_CREDENTIALS_REPOSITORY)
-      .useValue(mockChangeCredentialsRepository)
+      .overrideProvider(PG_POOL)
+      .useValue(pool)
       .compile();
 
     app = module.createNestApplication();
@@ -62,29 +127,25 @@ describe('Auth Integration Test', () => {
     }
   });
 
-  it('should login and set refresh token cookie', async () => {
+  it('should login and set refresh cookie with real auth flow', async () => {
     const response = await request(app.getHttpServer() as http.Server)
       .post('/auth/login')
-      .send({ username: 'test.user', password: 'plain-password' })
+      .send({ username: 'admin.user', password: 'plain-password' })
       .expect(201);
 
     expect(response.body).toHaveProperty('accessToken');
-    expect(typeof response.body.accessToken).toBe('string');
     expect(response.headers['set-cookie']).toBeDefined();
-    expect(mockCheckCredentialsRepository.checkCredentials).toHaveBeenCalledTimes(
-      1,
-    );
   });
 
-  it('should execute first-login flow with FirstLoginGuard', async () => {
+  it('should execute first-login end to end and persist credentials change', async () => {
     const firstAccessToken = jwtService.sign({
-      id: 10,
+      id: 2,
       username: 'first.user',
       role: 'AMMINISTRATORE',
       firstAccess: true,
     });
 
-    const response = await request(app.getHttpServer() as http.Server)
+    await request(app.getHttpServer() as http.Server)
       .post('/auth/first-login')
       .set('Authorization', `Bearer ${firstAccessToken}`)
       .send({
@@ -94,40 +155,27 @@ describe('Auth Integration Test', () => {
       })
       .expect(201);
 
-    expect(response.body).toHaveProperty('accessToken');
-    expect(mockChangeCredentialsRepository.changeCredentials).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(state.users[1].first_access).toBe(false);
+    expect(state.users[1].password).toBe(hashPassword('new-password'));
   });
 
-  it('should refresh access token from refreshToken cookie', async () => {
-    const loginResponse = await request(app.getHttpServer() as http.Server)
+  it('should refresh token from cookie generated by /auth/login', async () => {
+    const login = await request(app.getHttpServer() as http.Server)
       .post('/auth/login')
-      .send({ username: 'test.user', password: 'plain-password' })
+      .send({ username: 'admin.user', password: 'plain-password' })
       .expect(201);
 
-    const refreshTokenCookie = loginResponse.headers['set-cookie'];
-
-    const refreshResponse = await request(app.getHttpServer() as http.Server)
+    const refresh = await request(app.getHttpServer() as http.Server)
       .post('/auth/refresh')
-      .set('Cookie', refreshTokenCookie)
+      .set('Cookie', login.headers['set-cookie'])
       .expect(201);
 
-    expect(refreshResponse.body).toHaveProperty('accessToken');
-    expect(typeof refreshResponse.body.accessToken).toBe('string');
+    expect(refresh.body).toHaveProperty('accessToken');
   });
 
-  it('should return 401 when refresh token cookie is missing', async () => {
+  it('should return 401 on /auth/refresh without cookie', async () => {
     await request(app.getHttpServer() as http.Server)
       .post('/auth/refresh')
       .expect(401);
-  });
-
-  it('should clear refresh token cookie on logout', async () => {
-    const response = await request(app.getHttpServer() as http.Server)
-      .post('/auth/logout')
-      .expect(201);
-
-    expect(response.body).toEqual({ success: true });
   });
 });

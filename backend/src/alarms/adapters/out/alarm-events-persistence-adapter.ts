@@ -16,7 +16,7 @@ import {
   AlarmEventsRepository,
 } from '../../application/repository/alarm-events-repository.interface';
 import { AlarmEvent } from '../../domain/models/alarm-event.model';
-import { GetWardAlarmEventCmd } from 'src/alarms/application/commands/get-ward-alarm-event.command';
+import { GetWardAlarmEventCmd } from 'src/alarms/application/commands/get-ward-alarm-event-cmd';
 
 export class AlarmEventsPersistenceAdapter
   implements

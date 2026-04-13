@@ -4,3 +4,5 @@ import { ExtractFromAccessTokenCmd } from '../../commands/extract-from-access-to
 export interface ExtractFromAccessTokenPort {
   extractFromAccessToken(req: ExtractFromAccessTokenCmd): Payload;
 }
+
+export const EXTRACT_FROM_ACCESS_TOKEN_PORT = 'EXTRACT_FROM_ACCESS_TOKEN_PORT';

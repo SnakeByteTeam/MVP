@@ -4,13 +4,15 @@
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "outDir": "./out-tsc/spec",
+        "baseUrl": ".",
         "types": [
             "vitest/globals"
         ]
     },
     "include": [
-        "src/**/*.spec.ts",
+        "test/unit/**/*.spec.ts",
+        "test/unit/setup/**/*.ts",
         "src/**/*.d.ts",
-        "src/app/features/dashboard/components/dashboard-page.component.spec.ts"
+        "test/unit/**/*.d.ts"
     ]
 }

@@ -389,4 +389,32 @@ describe('AlarmPageManagementComponent', () => {
 
     expect(alarmManagementStub.initialize).toHaveBeenCalledTimes(1);
   });
+
+  describe('Template and DOM interactions', () => {
+    it('dovrebbe navigare alle pagine prev e next con i bottoni', () => {
+      vmSubject.next({
+        alarms: [alarm1],
+        currentPage: 3,
+        pageLimit: 6,
+        pageOffset: 12,
+        canGoPrevious: true,
+        canGoNext: true,
+        isResolving: false,
+        resolvingId: null,
+        resolveError: null,
+      });
+      fixture.detectChanges();
+
+      const buttons = fixture.nativeElement.querySelectorAll('button');
+      
+      const prevButton = Array.from(buttons).find((b: any) => b.getAttribute('aria-label') === 'Pagina precedente allarmi attivi') as HTMLButtonElement;
+      const nextButton = Array.from(buttons).find((b: any) => b.getAttribute('aria-label') === 'Pagina successiva allarmi attivi') as HTMLButtonElement;
+      
+      prevButton.click();
+      expect(alarmManagementStub.previousPage).toHaveBeenCalled();
+
+      nextButton.click();
+      expect(alarmManagementStub.nextPage).toHaveBeenCalled();
+    });
+  });
 });

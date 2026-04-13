@@ -376,6 +376,106 @@ describe('EventSubscriptionService', () => {
     expect(fakeSocket.removeAllListeners).toHaveBeenCalled();
     expect(fakeSocket.disconnect).toHaveBeenCalled();
   });
+
+  describe('Internal priority, detail resolution and plant array extractors', () => {
+    it('uses fallback alarm details when API fails', () => {
+       alarmApiServiceSpy.getAlarmEventById.mockReturnValue(throwError(() => new Error('API failed')));
+       service.initialize([]);
+
+       fakeSocket.trigger('push-event', {
+          alarmRuleId: 'rule-test',
+          wardId: 10,
+          alarmEventId: 'fallback-event',
+        });
+        
+        expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alarmName: 'Allarme in corso',
+            priority: AlarmPriority.ORANGE // The hardcoded fallback priority
+          })
+        );
+    });
+
+    it('handles resolving triggers with malformed priority via API', () => {
+       alarmApiServiceSpy.getAlarmEventById.mockReturnValue(of({
+           id: '1',
+           alarmName: '   ', // blank name defaults to Allarme in corso
+           priority: 'INVALID_PRIORITY_STRING' // should normalize to fallback
+       }));
+       service.initialize([]);
+
+       fakeSocket.trigger('push-event', {
+          alarmRuleId: 'rule-test-2',
+          wardId: 10,
+          alarmEventId: 'malformed-priority-event',
+        });
+        
+        expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alarmName: 'Allarme in corso', // blank trimmed
+            priority: AlarmPriority.ORANGE // invalid resolves to fallback
+          })
+        );
+    });
+
+    it('handles numeric priorities in normalizeAlarmPriority', () => {
+       alarmApiServiceSpy.getAlarmEventById.mockReturnValue(of({
+           id: '1',
+           alarmName: 'Test num priority',
+           priority: 3 // AlarmPriority.RED = 3 usually
+       }));
+       service.initialize([]);
+
+       fakeSocket.trigger('push-event', {
+          alarmRuleId: 'rule-test-3',
+          wardId: 10,
+          alarmEventId: 'num-priority',
+        });
+        
+        expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+          expect.objectContaining({
+            priority: 3 
+          })
+        );
+    });
+    
+    it('handles string enum keys in normalizeAlarmPriority', () => {
+       alarmApiServiceSpy.getAlarmEventById.mockReturnValue(of({
+           id: '1',
+           alarmName: 'Test string enum',
+           priority: 'red' // Should normalize to RED
+       }));
+       service.initialize([]);
+
+       fakeSocket.trigger('push-event', {
+          alarmRuleId: 'rule-test-4',
+          wardId: 10,
+          alarmEventId: 'string-priority',
+        });
+        
+        expect(alarmStateSpy.onAlarmTriggered).toHaveBeenCalledWith(
+          expect.objectContaining({
+            priority: AlarmPriority.RED // 3
+          })
+        );
+    });
+
+    it('extracts plant array correctly from different response formats (data wrapper)', () => {
+      httpClientSpy.get.mockReturnValue(of({ data: [{ wardId: 50 }, { invalid: true }, null] }));
+      service.initialize([]);
+      currentUser$.next(buildSession('user-extract'));
+      
+      expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '50');
+    });
+
+    it('extracts plant array correctly from different response formats (plants wrapper)', () => {
+      httpClientSpy.get.mockReturnValue(of({ plants: [{ wardId: 60 }] }));
+      service.initialize([]);
+      currentUser$.next(buildSession('user-extract-2'));
+
+      expect(fakeSocket.emit).toHaveBeenCalledWith('join-ward', '60');
+    });
+  });
 });
 
 function createFakeSocket(): FakeSocket {

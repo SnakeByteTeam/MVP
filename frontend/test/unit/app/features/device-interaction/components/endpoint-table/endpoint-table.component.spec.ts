@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { of, throwError, Subject } from 'rxjs';
+import { beforeEach, describe, expect, it, vi, afterAll } from 'vitest';
 import { DeviceType } from 'src/app/features/device-interaction/models/device-type.enum';
 import { WritableEndpointRow } from 'src/app/features/device-interaction/models/writable-endpoint-row.model';
 import { DeviceApiService } from 'src/app/features/device-interaction/services/device-api.service';
@@ -34,6 +34,12 @@ describe('EndpointTableComponent', () => {
     datapointSfeType: 'SFE_Cmd_FutureFeature',
     enumValues: ['Off', 'On'],
   };
+  
+  const invalidRow: WritableEndpointRow = {
+      ...unknownRow,
+      deviceId: 'device-3',
+      enumValues: []
+  };
 
   const currentValuesByDevice = new Map<string, DeviceValuePointDto[]>([
     [
@@ -48,14 +54,24 @@ describe('EndpointTableComponent', () => {
     ],
   ]);
 
-  const deviceApiMock = {
-    getWritableEndpointRows: vi.fn().mockReturnValue(of([mappedRow, unknownRow])),
+  let deviceApiMock = {
+    getWritableEndpointRows: vi.fn().mockReturnValue(of([mappedRow, unknownRow, invalidRow])),
     getCurrentValuePointsByDeviceIds: vi.fn().mockReturnValue(of(currentValuesByDevice)),
     writeDatapointValue: vi.fn().mockReturnValue(of(void 0)),
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    
+    // reset mock
+    deviceApiMock = {
+      getWritableEndpointRows: vi.fn().mockReturnValue(of([mappedRow, unknownRow, invalidRow])),
+      getCurrentValuePointsByDeviceIds: vi.fn().mockReturnValue(of(currentValuesByDevice)),
+      writeDatapointValue: vi.fn().mockReturnValue(of(void 0)),
+    };
+
+    // stub Global dispatchEvent
+    vi.stubGlobal('addEventListener', vi.fn());
 
     await TestBed.configureTestingModule({
       imports: [EndpointTableComponent],
@@ -64,28 +80,128 @@ describe('EndpointTableComponent', () => {
 
     fixture = TestBed.createComponent(EndpointTableComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+  });
+  
+  afterAll(() => {
+     vi.unstubAllGlobals();
   });
 
-  it('creates component and loads writable endpoints', () => {
+  it('creates component and loads writable endpoints', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component).toBeTruthy();
     expect(deviceApiMock.getWritableEndpointRows).toHaveBeenCalledTimes(1);
     expect(deviceApiMock.getCurrentValuePointsByDeviceIds).toHaveBeenCalledTimes(1);
+    // test trackBy
+    expect(component.trackByGroup(0, {roomId: 'room-1', roomName: 'Soggiorno', rows: []})).toBe('room-1');
+    expect(component.trackByRow(0, mappedRow)).toBe('room-1::device-1::dp-1');
   });
 
   it('renders mapped endpoint label for known sfeType', () => {
+    fixture.detectChanges();
     expect(component.getEndpointLabel(mappedRow)).toBe('Comando cambio modalita HVAC');
   });
 
   it('falls back to a runtime humanized label when sfeType is unknown', () => {
+    fixture.detectChanges();
     expect(component.getEndpointLabel(unknownRow)).toBe('Comando future feature');
   });
 
   it('returns semantic current value by matching Cmd endpoint to State datapoint', () => {
+    fixture.detectChanges();
     expect(component.getCurrentValue(mappedRow)).toBe('Heat');
   });
 
+  it('returns exact match current value if found', () => {
+    deviceApiMock.getCurrentValuePointsByDeviceIds.mockReturnValue(of(new Map([
+        ['device-1', [{ datapointId: 'dp-1', name: 'some_name', value: 'ExactVal' }]]
+    ])));
+    fixture.detectChanges();
+    expect(component.getCurrentValue(mappedRow)).toBe('ExactVal');
+  });
+
   it('returns fallback when current datapoint value is unavailable', () => {
+    fixture.detectChanges();
     expect(component.getCurrentValue(unknownRow)).toBe('-');
+  });
+
+  it('populates error string if fetching endpoints fails', () => {
+    deviceApiMock.getWritableEndpointRows.mockReturnValue(throwError(() => new Error('Network error')));
+    // Subscribe directly to the stream - it's synchronous so the error handler runs immediately
+    component.roomGroups$.subscribe({ error: () => {} });
+    expect(component.loadError).toBe('Impossibile caricare i dispositivi con endpoint.');
+  });
+  
+  it('clear map when no unique device ids', async () => {
+    deviceApiMock.getWritableEndpointRows.mockReturnValue(of([]));
+    fixture.detectChanges();
+    component.roomGroups$.subscribe(); // trigger the stream manually
+    await fixture.whenStable();
+    // No errors thrown, code handles it correctly
+    expect(component.loadError).toBe('');
+  });
+
+  it('handles onSelectionChange correctly', () => {
+    fixture.detectChanges();
+    component.onSelectionChange(mappedRow, 'Cool');
+    expect(component.getSelectedValue(mappedRow)).toBe('Cool');
+  });
+  
+  it('handles write success correctly', () => {
+    vi.useFakeTimers();
+    fixture.detectChanges();
+    
+    expect(component.isRowExecuting(mappedRow)).toBe(false);
+    
+    component.onSelectionChange(mappedRow, 'Cool');
+    component.onWriteRow(mappedRow);
+    
+    // of() is synchronous — the write completes before we reach this line
+    expect(deviceApiMock.writeDatapointValue).toHaveBeenCalledWith({ datapointId: 'dp-1', value: 'Cool' });
+    
+    const feedback = component.getRowFeedback(mappedRow);
+    expect(feedback).toBeTruthy();
+    expect(feedback?.type).toBe('success');
+    
+    vi.advanceTimersByTime(5000);
+    expect(component.getRowFeedback(mappedRow)).toBeNull();
+    vi.useRealTimers();
+  });
+
+  it('handles write error correctly', async () => {
+    vi.useFakeTimers();
+    deviceApiMock.writeDatapointValue.mockReturnValue(throwError(() => new Error('Server limit')));
+    fixture.detectChanges();
+    
+    component.onSelectionChange(mappedRow, 'Cool');
+    component.onWriteRow(mappedRow);
+    await fixture.whenStable();
+    
+    const feedback = component.getRowFeedback(mappedRow);
+    expect(feedback?.type).toBe('error');
+    expect(feedback?.message).toContain('Errore invio');
+    
+    vi.advanceTimersByTime(5000);
+    expect(component.getRowFeedback(mappedRow)).toBeNull();
+    vi.useRealTimers();
+  });
+  
+  it('ignores write if already executing or no value selected', () => {
+    fixture.detectChanges();
+    
+    // trigger without value selected for invalid mode
+    component.onWriteRow(invalidRow);
+    expect(deviceApiMock.writeDatapointValue).not.toHaveBeenCalled();
+    
+    // trigger normally then block next
+    const subject = new Subject<void>();
+    deviceApiMock.writeDatapointValue.mockReturnValue(subject.asObservable());
+    component.onSelectionChange(mappedRow, 'Heat');
+    component.onWriteRow(mappedRow); // calls API
+    
+    expect(component.isRowExecuting(mappedRow)).toBe(true);
+    
+    component.onWriteRow(mappedRow); // skipped because already executing
+    expect(deviceApiMock.writeDatapointValue).toHaveBeenCalledTimes(1); 
   });
 });

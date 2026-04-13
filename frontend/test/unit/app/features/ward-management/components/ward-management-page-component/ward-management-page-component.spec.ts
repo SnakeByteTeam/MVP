@@ -432,4 +432,71 @@ describe('WardManagementPageComponent', () => {
     expect(component.availablePlants()).toEqual([]);
     expect(component.isLoadingAvailablePlants()).toBe(false);
   });
+
+  describe('Template Interactions', () => {
+    it('should render empty state if no wards exist', () => {
+      wardsSubject.next([]);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement;
+      expect(el.textContent).toContain('Nessun reparto disponibile');
+      expect(el.textContent).toContain('Crea il primo reparto dal pannello');
+    });
+
+    it('should render ward list and select ward on click', () => {
+      wardsSubject.next([wardA, wardB]);
+      fixture.detectChanges();
+
+      const items = Array.from(fixture.nativeElement.querySelectorAll('button')).filter((b: any) => 
+         b.textContent.includes(wardA.name) || b.textContent.includes(wardB.name)
+      ) as HTMLButtonElement[];
+      
+      expect(items.length).toBeGreaterThanOrEqual(2);
+      
+      // Select the second ward
+      items.find(b => b.textContent.includes(wardB.name))?.click();
+      fixture.detectChanges();
+      
+      expect(component.selectedWardId()).toBe(wardB.id);
+    });
+
+    it('should show apartments and operators for selected ward', () => {
+      wardsSubject.next([wardA, wardB]);
+      component.selectedWardId.set(wardA.id);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement;
+      expect(el.textContent).toContain('Appartamenti');
+      expect(el.textContent).toContain('Operatori');
+    });
+
+    it('should render create ward dialog when mode is create', () => {
+      component.wardDialogMode.set('create');
+      fixture.detectChanges();
+
+      const dialog = fixture.nativeElement.querySelector('app-ward-form-dialog-component');
+      expect(dialog).toBeTruthy();
+    });
+
+    it('should render assign operator dialog when operatorWardId is set', () => {
+      component.operatorWardId.set(wardA.id);
+      fixture.detectChanges();
+
+      const dialog = fixture.nativeElement.querySelector('app-assign-operator-dialog-component');
+      expect(dialog).toBeTruthy();
+    });
+
+    it('should show snackbar message when emitted', () => {
+      errorSubject.next('Test error');
+      fixture.detectChanges();
+
+      const errorDiv = fixture.nativeElement.querySelector('.bg-red-50');
+      expect(errorDiv.textContent).toContain('Test error');
+      
+      const dismissBtn = errorDiv.querySelector('button');
+      dismissBtn.click();
+      fixture.detectChanges();
+      expect(component.snackbarMessage()).toBeNull();
+    });
+  });
 });

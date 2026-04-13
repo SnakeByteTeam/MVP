@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { UserRole } from 'src/app/core/models/user-role.enum';
+import { By } from '@angular/platform-browser';
 
 import { WardCardComponent } from 'src/app/features/ward-management/components/ward-card-component/ward-card-component';
 
@@ -23,6 +24,13 @@ describe('WardCardComponent', () => {
     ],
   };
 
+  const emptyWard = {
+    id: 2,
+    name: 'Empty Ward',
+    apartments: [],
+    operators: [],
+  };
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WardCardComponent],
@@ -36,80 +44,107 @@ describe('WardCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('toggleExpanded dovrebbe alternare lo stato espanso', () => {
+  it('toggleExpanded dovrebbe alternare lo stato espanso e riflettersi nel DOM', () => {
+    fixture.componentRef.setInput('ward', ward);
+    fixture.detectChanges();
+    
     expect(component.isExpanded()).toBe(false);
+    expect(fixture.debugElement.query(By.css('.grid.gap-3'))).toBeNull(); // Expanded detail not visible
 
-    component.toggleExpanded();
+    // Trigger expand from button
+    const expandBtn = fixture.debugElement.queryAll(By.css('button'))[0];
+    expandBtn.triggerEventHandler('click', null);
+    fixture.detectChanges();
     expect(component.isExpanded()).toBe(true);
-
-    component.toggleExpanded();
-    expect(component.isExpanded()).toBe(false);
+    
+    // Expanded detail should be visible
+    expect(fixture.debugElement.query(By.css('.grid.gap-3'))).toBeTruthy();
   });
 
-  it('onEditWardClick dovrebbe emettere editWard con il ward corrente', () => {
+  it('should render ward properties and handle clicking edit/delete', () => {
     const editWardSpy = vi.spyOn(component.editWard, 'emit');
-    fixture.componentRef.setInput('ward', ward);
-
-    component.onEditWardClick();
-
-    expect(editWardSpy).toHaveBeenCalledWith(ward);
-    expect(editWardSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('onDeleteWardClick dovrebbe emettere deleteWard con ward.id', () => {
     const deleteWardSpy = vi.spyOn(component.deleteWard, 'emit');
+    
     fixture.componentRef.setInput('ward', ward);
+    fixture.detectChanges();
 
-    component.onDeleteWardClick();
+    // Verify template rendering
+    const nameStr = fixture.debugElement.query(By.css('h2')).nativeElement.textContent;
+    expect(nameStr).toContain('Cardiologia');
 
+    const buttons = fixture.debugElement.queryAll(By.css('button'));
+    // buttons[1] is edit, buttons[2] is delete
+    buttons[1].triggerEventHandler('click', null);
+    expect(editWardSpy).toHaveBeenCalledWith(ward);
+    
+    buttons[2].triggerEventHandler('click', null);
     expect(deleteWardSpy).toHaveBeenCalledWith(1);
-    expect(deleteWardSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('onAssignOperatorClick dovrebbe emettere assignOperator con ward.id', () => {
+  it('should render expanded operators and apartments list', () => {
+    fixture.componentRef.setInput('ward', ward);
+    component.toggleExpanded();
+    fixture.detectChanges();
+
+    // Verify operator listed
+    const opElement = fixture.debugElement.query(By.css('section[aria-label="Operatori assegnati"] span'));
+    expect(opElement.nativeElement.textContent).toContain('Mario Rossi');
+    
+    // Verify apartment listed
+    const aptSection = fixture.debugElement.query(By.css('section[aria-label="Appartamenti assegnati"]'));
+    expect(aptSection).toBeTruthy();
+  });
+
+  it('should render empty states when operators/apartments are empty', () => {
+    fixture.componentRef.setInput('ward', emptyWard);
+    component.toggleExpanded();
+    fixture.detectChanges();
+
+    const emptyOpText = fixture.debugElement.query(By.css('section[aria-label="Operatori assegnati"] p')).nativeElement.textContent;
+    expect(emptyOpText).toContain('Nessun operatore assegnato');
+
+    const emptyAptText = fixture.debugElement.query(By.css('section[aria-label="Appartamenti assegnati"] p')).nativeElement.textContent;
+    expect(emptyAptText).toContain('Nessun appartamento assegnato');
+  });
+
+  it('should trigger operator assignment/removal from DOM', () => {
     const assignOperatorSpy = vi.spyOn(component.assignOperator, 'emit');
-    fixture.componentRef.setInput('ward', ward);
-
-    component.onAssignOperatorClick();
-
-    expect(assignOperatorSpy).toHaveBeenCalledWith(1);
-    expect(assignOperatorSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('onRemoveOperatorClick dovrebbe emettere payload completo', () => {
     const removeOperatorSpy = vi.spyOn(component.removeOperator, 'emit');
+    
     fixture.componentRef.setInput('ward', ward);
+    component.toggleExpanded();
+    fixture.detectChanges();
 
-    component.onRemoveOperatorClick(2);
-
-    expect(removeOperatorSpy).toHaveBeenCalledWith({
-      wardId: 1,
-      userId: 2,
-    });
-    expect(removeOperatorSpy).toHaveBeenCalledTimes(1);
+    const opSection = fixture.debugElement.query(By.css('section[aria-label="Operatori assegnati"]'));
+    const buttons = opSection.queryAll(By.css('button'));
+    
+    // assign
+    buttons[0].triggerEventHandler('click', null);
+    expect(assignOperatorSpy).toHaveBeenCalledWith(1);
+    
+    // remove (the red x button)
+    buttons[1].triggerEventHandler('click', null);
+    expect(removeOperatorSpy).toHaveBeenCalledWith({ wardId: 1, userId: 1 });
   });
 
-  it('onAssignPlantClick dovrebbe emettere assignPlant con ward.id', () => {
+  it('should trigger apartment assignment/removal from DOM', () => {
     const assignPlantSpy = vi.spyOn(component.assignPlant, 'emit');
-    fixture.componentRef.setInput('ward', ward);
-
-    component.onAssignPlantClick();
-
-    expect(assignPlantSpy).toHaveBeenCalledWith(1);
-    expect(assignPlantSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('onRemovePlantClick dovrebbe emettere payload completo', () => {
     const removePlantSpy = vi.spyOn(component.removePlant, 'emit');
+    
     fixture.componentRef.setInput('ward', ward);
+    component.toggleExpanded();
+    fixture.detectChanges();
 
-    component.onRemovePlantClick('102');
-
-    expect(removePlantSpy).toHaveBeenCalledWith({
-      wardId: 1,
-      plantId: '102',
-    });
-    expect(removePlantSpy).toHaveBeenCalledTimes(1);
+    const aptSection = fixture.debugElement.query(By.css('section[aria-label="Appartamenti assegnati"]'));
+    const buttons = aptSection.queryAll(By.css('button'));
+    
+    // assign
+    buttons[0].triggerEventHandler('click', null);
+    expect(assignPlantSpy).toHaveBeenCalledWith(1);
+    
+    // remove
+    buttons[1].triggerEventHandler('click', null);
+    expect(removePlantSpy).toHaveBeenCalledWith({ wardId: 1, plantId: '101' });
   });
 
   it('non dovrebbe emettere eventi legati al ward quando ward e null', () => {

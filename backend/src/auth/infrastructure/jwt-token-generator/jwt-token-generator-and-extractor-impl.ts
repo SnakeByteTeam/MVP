@@ -1,21 +1,11 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { JwtAccessTokenExtractor } from '../../application/token/jwt-access-token-extractor.interface';
-import { JwtAccessTokenGenerator } from '../../application/token/jwt-access-token-generator.interface';
-import { JwtRefreshTokenExtractor } from '../../application/token/jwt-refresh-token-extractor.interface';
-import { JwtRefreshTokenGenerator } from '../../application/token/jwt-refresh-token-generator.interface';
 import { Payload } from '../../domain/payload';
 import { JwtService } from '@nestjs/jwt';
-import { JwtChangePasswordAccessTokenGenerator } from '../../application/token/jwt-change-password-access-token-generator.interface';
-import { JwtChangePasswordRefreshTokenGenerator } from '../../application/token/jwt-change-password-refresh-token-generator.interface';
+import { JwtTokenGeneratorAndExtractor } from 'src/auth/application/token/jwt-token-generator-and-extractor.interface';
 
-export class JwtTokenGenerator
+export class JwtTokenGeneratorAndExtractorImpl
   implements
-    JwtAccessTokenGenerator,
-    JwtRefreshTokenGenerator,
-    JwtAccessTokenExtractor,
-    JwtRefreshTokenExtractor,
-    JwtChangePasswordAccessTokenGenerator,
-    JwtChangePasswordRefreshTokenGenerator
+    JwtTokenGeneratorAndExtractor
 {
   private readonly jwtService = new JwtService();
 
@@ -74,11 +64,4 @@ export class JwtTokenGenerator
   }
 }
 
-export const JWT_CHANGE_PASSWORD_ACCESS_TOKEN_GENERATOR =
-  'JWT_CHANGE_PASSWORD_ACCESS_TOKEN_GENERATOR';
-export const JWT_CHANGE_PASSWORD_REFRESH_TOKEN_GENERATOR =
-  'JWT_CHANGE_PASSWORD_REFRESH_TOKEN_GENERATOR';
-export const JWT_ACCESS_TOKEN_GENERATOR = 'JWT_ACCESS_TOKEN_GENERATOR';
-export const JWT_REFRESH_TOKEN_GENERATOR = 'JWT_REFRESH_TOKEN_GENERATOR';
-export const JWT_ACCESS_TOKEN_EXTRACTOR = 'JWT_ACCESS_TOKEN_EXTRACTOR';
-export const JWT_REFRESH_TOKEN_EXTRACTOR = 'JWT_REFRESH_TOKEN_EXTRACTOR';
+export const JWT_TOKEN_GENERATOR_AND_EXTRACTOR_IMPL = 'JWT_TOKEN_GENERATOR_AND_EXTRACTOR_IMPL';

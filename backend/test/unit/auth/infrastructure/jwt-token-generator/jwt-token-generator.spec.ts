@@ -1,8 +1,8 @@
-import { JwtTokenGenerator } from 'src/auth/infrastructure/jwt-token-generator/jwt-token-generator';
+import { JwtTokenGeneratorAndExtractorImpl } from 'src/auth/infrastructure/jwt-token-generator/jwt-token-generator-and-extractor-impl';
 import { UnauthorizedException } from '@nestjs/common';
 
 describe('JwtTokenGenerator', () => {
-  let generator: JwtTokenGenerator;
+  let generator: JwtTokenGeneratorAndExtractorImpl;
   const payload = {
     id: 1,
     username: 'user',
@@ -13,7 +13,7 @@ describe('JwtTokenGenerator', () => {
   beforeEach(() => {
     process.env.ACCESS_SECRET = 'access-secret';
     process.env.REFRESH_SECRET = 'refresh-secret';
-    generator = new JwtTokenGenerator();
+    generator = new JwtTokenGeneratorAndExtractorImpl();
   });
 
   describe('generateAccessToken', () => {

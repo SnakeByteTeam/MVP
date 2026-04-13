@@ -5,3 +5,5 @@ export interface GenerateChangePasswordAccessTokenPort {
     req: GenerateChangePasswordAccessTokenCmd,
   ): string;
 }
+
+export const GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT = 'GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT';

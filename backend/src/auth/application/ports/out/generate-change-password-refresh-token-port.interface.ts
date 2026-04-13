@@ -5,3 +5,5 @@ export interface GenerateChangePasswordRefreshTokenPort {
     req: GenerateChangePasswordRefreshTokenCmd,
   ): string;
 }
+
+export const GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT = 'GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT';

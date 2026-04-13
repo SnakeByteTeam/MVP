@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from 'src/auth/application/services/auth.service';
-import { CHECK_CREDENTIALS_PORT } from 'src/auth/adapters/out/check-credentials-adapter';
-import { GENERATE_ACCESS_TOKEN_PORT } from 'src/auth/adapters/out/generate-access-token-adapter';
-import { GENERATE_REFRESH_TOKEN_PORT } from 'src/auth/adapters/out/generate-refresh-token-adapter';
-import { EXTRACT_FROM_ACCESS_TOKEN_PORT } from 'src/auth/adapters/out/extract-from-access-token-adapter';
-import { EXTRACT_FROM_REFRESH_TOKEN_PORT } from 'src/auth/adapters/out/extract-from-refresh-token-adapter';
-import { CHANGE_CREDENTIALS_PORT } from 'src/auth/adapters/out/change-credentials-adapter';
-import { GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT } from 'src/auth/adapters/out/generate-change-password-access-token-adapter';
-import { GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT } from 'src/auth/adapters/out/generate-change-password-refresh-token-adapter';
 import { HASH_PASSWORD_PORT } from 'src/auth/adapters/out/hash-password-adapter';
+import { CHANGE_CREDENTIALS_PORT } from 'src/auth/application/ports/out/change-credentials-port.interface';
+import { CHECK_CREDENTIALS_PORT } from 'src/auth/application/ports/out/check-credentials-port.interface';
+import { GENERATE_CHANGE_PASSWORD_ACCESS_TOKEN_PORT } from 'src/auth/application/ports/out/generate-change-password-access-token-port.interface';
+import { GENERATE_CHANGE_PASSWORD_REFRESH_TOKEN_PORT } from 'src/auth/application/ports/out/generate-change-password-refresh-token-port.interface';
+import { GENERATE_ACCESS_TOKEN_PORT } from 'src/auth/application/ports/out/generate-access-token-port.interface';
+import { GENERATE_REFRESH_TOKEN_PORT } from 'src/auth/adapters/out/generate-and-extract-token-adapter';
+import { EXTRACT_FROM_ACCESS_TOKEN_PORT } from 'src/auth/application/ports/out/extract-from-access-token-port.interface';
+import { EXTRACT_FROM_REFRESH_TOKEN_PORT } from 'src/auth/application/ports/out/extract-from-refresh-token-port.interface';
 
 describe('AuthService', () => {
   let service: AuthService;

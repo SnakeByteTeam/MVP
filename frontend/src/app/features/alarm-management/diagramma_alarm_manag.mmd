@@ -27,7 +27,7 @@ classDiagram
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
         +string username
         +UserRole role
@@ -36,22 +36,22 @@ classDiagram
     }
 
     class LoginResponse {
-        <<interface>>
+        <<abstract>>
         +string accessToken
     }
 
     class RefreshResponse {
-        <<interface>>
+        <<abstract>>
         +string accessToken
     }
 
     class TokenResponse {
-        <<interface>>
+        <<abstract>>
         +string accessToken
     }
 
     class AuthClaims {
-        <<interface>>
+        <<abstract>>
         +string|number? userId
         +string|number? sub
         +string|number? id
@@ -62,7 +62,7 @@ classDiagram
     }
 
     class ActiveAlarm {
-        <<interface>>
+        <<abstract>>
         +string id
         +string alarmRuleId
         +string? deviceId
@@ -76,7 +76,7 @@ classDiagram
     }
 
     class AlarmListVm {
-        <<interface>>
+        <<abstract>>
         +ActiveAlarm[] alarms
         +number currentPage
         +number pageOffset
@@ -88,7 +88,7 @@ classDiagram
     }
 
     class AlarmRule {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string thresholdOperator
@@ -103,7 +103,7 @@ classDiagram
     }
 
     class CreateAlarmRuleRequestDto {
-        <<interface>>
+        <<abstract>>
         +string name
         +string deviceId
         +string? datapointId
@@ -116,7 +116,7 @@ classDiagram
     }
 
     class UpdateAlarmRuleRequestDto {
-        <<interface>>
+        <<abstract>>
         +string name
         +number priority
         +string thresholdOperator
@@ -127,7 +127,7 @@ classDiagram
     }
 
     class AlarmEvent {
-        <<interface>>
+        <<abstract>>
         +string id
         +string alarmRuleId
         +string alarmName
@@ -137,7 +137,7 @@ classDiagram
     }
 
     class NotificationEvent {
-        <<interface>>
+        <<abstract>>
         +string notificationId
         +string title
         +string sentAt
@@ -145,7 +145,7 @@ classDiagram
     }
 
     class ApiErrorDisplayOptions {
-        <<interface>>
+        <<abstract>>
         +string fallbackMessage
         +string? actionLabel
         +string? forbiddenMessage
@@ -153,7 +153,7 @@ classDiagram
     }
 
     class PriorityUi {
-        <<interface>>
+        <<abstract>>
         +string label
         +string bubbleClass
         +string symbolClass
@@ -161,13 +161,13 @@ classDiagram
     }
 
     class AlarmTableColumn {
-        <<interface>>
+        <<abstract>>
         +string id
         +string label
     }
 
     class ActiveAlarmTableRow {
-        <<interface>>
+        <<abstract>>
         +string id
         +AlarmPriority priority
         +string name
@@ -183,11 +183,11 @@ classDiagram
     }
 
     class PipeTransform {
-        <<interface>>
+        <<abstract>>
     }
 
     class OnInit {
-        <<interface>>
+        <<abstract>>
     }
 
     class InternalAuthService {

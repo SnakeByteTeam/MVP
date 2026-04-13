@@ -26,7 +26,7 @@ classDiagram
     }
 
     class ActiveAlarm {
-        <<interface>>
+        <<abstract>>
         +string id
         +string alarmRuleId
         +string? deviceId
@@ -40,7 +40,7 @@ classDiagram
     }
 
     class AlarmListVm {
-        <<interface>>
+        <<abstract>>
         +ActiveAlarm[] alarms
         +number currentPage
         +number pageLimit
@@ -53,7 +53,7 @@ classDiagram
     }
 
     class AlarmRule {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string thresholdOperator
@@ -68,7 +68,7 @@ classDiagram
     }
 
     class CreateAlarmRuleRequestDto {
-        <<interface>>
+        <<abstract>>
         +string name
         +string deviceId
         +string? datapointId
@@ -93,7 +93,7 @@ classDiagram
     }
 
     class NotificationEvent {
-        <<interface>>
+        <<abstract>>
         +string notificationId
         +string title
         +string sentAt
@@ -110,7 +110,7 @@ classDiagram
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
         +string username
         +UserRole role
@@ -159,7 +159,7 @@ classDiagram
     }
 
     class ChartInfoDto {
-        <<interface>>
+        <<abstract>>
         +string[] labels
         +ChartDatasetDto[] datasets
         +string title
@@ -191,7 +191,7 @@ classDiagram
     }
 
     class Room {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean hasActiveAlarm
@@ -199,22 +199,35 @@ classDiagram
     }
 
     class Apartment {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean isEnabled
         +Room[] rooms
     }
 
-    %% Relazioni
-    AlarmWidgetComponent --> AlarmManagementService
-    AlarmManagementService --> AlarmStateService
-    AlarmManagementService --> AlarmApiService
-    AlarmManagementService --> InternalAuthService
-    AnalyticsWidgetComponent --> AnalyticsApiService
-    ChartComponent <|-- AlarmsSentResolvedChartComponent
-    ChartComponent <|-- EnergyConsumptionChartComponent
-    Apartment *-- Room
-    ActiveAlarm --> AlarmPriority
-    AlarmRule --> AlarmPriority
-    UserSession --> UserRole
+AlarmWidgetComponent o-- AlarmManagementService : "injects"
+AlarmWidgetComponent o-- AlarmManagementTablePresenterService : "injects"
+AlarmWidgetComponent o-- AlarmManagementRefreshService : "injects"
+AlarmWidgetComponent o-- DestroyRef : "injects"
+
+AlarmWidgetComponent *-- AlarmTableShellComponent : "uses"
+AlarmWidgetComponent *-- AlarmPriorityIndicatorComponent : "uses"
+AlarmWidgetComponent *-- AlarmActionButtonComponent : "uses"
+AlarmWidgetComponent ..> ElapsedTimePipe : "uses (pipe)"
+
+AlarmWidgetComponent ..> AlarmListVm : "consumes"
+AlarmWidgetComponent ..> AlarmTableColumn : "defines"
+
+AnalyticsWidgetComponent o-- AnalyticsApiService : "injects"
+
+AnalyticsWidgetComponent *-- AlarmsSentResolvedChartComponent : "uses"
+AnalyticsWidgetComponent *-- EnergyConsumptionChartComponent : "uses"
+AnalyticsWidgetComponent *-- PlantOverviewComponent : "uses"
+
+AnalyticsWidgetComponent ..> AnalyticsDto : "consumes"
+AnalyticsWidgetComponent ..> PlantDto : "manages"
+AnalyticsWidgetComponent ..> ChartInfoDto : "extracts"
+
+PlantOverviewComponent ..> PlantDto : "displays"
+

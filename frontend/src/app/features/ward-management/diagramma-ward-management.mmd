@@ -1,11 +1,4 @@
 classDiagram
-    class OnInit {
-        <<interface>>
-    }
-    class OnDestroy {
-        <<interface>>
-    }
-
     class UserRole {
         <<enumeration>>
         AMMINISTRATORE
@@ -13,7 +6,7 @@ classDiagram
     }
 
     class User {
-        <<interface>>
+        <<abstract>>
         +number id
         +string firstName
         +string lastName
@@ -22,51 +15,51 @@ classDiagram
     }
 
     class CreateWardDto {
-        <<interface>>
+        <<abstract>>
         +string name
     }
 
     class UpdateWardDto {
-        <<interface>>
+        <<abstract>>
         +string name
     }
 
     class AssignOperatorDto {
-        <<interface>>
+        <<abstract>>
         +number userId
     }
 
     class AssignPlantDto {
-        <<interface>>
+        <<abstract>>
         +string plantId
     }
 
     class WardUserDto {
-        <<interface>>
+        <<abstract>>
         +number id
         +string username
     }
 
     class WardPlantDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
     }
 
     class WardSummaryDto {
-        <<interface>>
+        <<abstract>>
         +number id
         +string name
     }
 
     class Plant {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
     }
 
     class Ward {
-        <<interface>>
+        <<abstract>>
         +number id
         +string name
         +Plant[] apartments
@@ -74,20 +67,20 @@ classDiagram
     }
 
     class WardManagementState {
-        <<interface>>
+        <<abstract>>
         +Ward[] wards
         +boolean isLoading
         +string|null error
     }
 
     class RemoveOperatorEvent {
-        <<interface>>
+        <<abstract>>
         +number wardId
         +number userId
     }
 
     class RemovePlantEvent {
-        <<interface>>
+        <<abstract>>
         +string plantId
     }
 

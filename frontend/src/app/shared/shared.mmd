@@ -1,0 +1,119 @@
+classDiagram
+    class PipeTransform {
+        <<interface>>
+    }
+
+    class AlarmPriority {
+        <<enumeration>>
+        WHITE
+        GREEN
+        ORANGE
+        RED
+    }
+
+    class DeviceType {
+        <<enumeration>>
+        UNKNOWN
+        THERMOSTAT
+        FALL_SENSOR
+        PRESENCE_SENSOR
+        LIGHT
+        ALARM_BUTTON
+        ENTRANCE_DOOR
+        BLIND
+    }
+
+    class AlarmActionButtonComponent {
+        +InputSignal~string~ label
+        +InputSignal~string~ ariaLabel
+        +InputSignal~AlarmActionButtonTone~ tone
+        +InputSignal~boolean~ disabled
+        +OutputEmitterRef~void~ pressed
+        +Signal~string~ buttonClass
+        +onPressed() void
+    }
+
+    class AlarmPriorityIndicatorComponent {
+        +InputSignal~AlarmPriority~ priority
+        +Signal~PriorityUi~ ui
+    }
+
+    class AlarmTableShellComponent {
+        +InputSignal~string~ title
+        +InputSignal~string~ caption
+        +InputSignal~readonly AlarmTableColumn[]~ columns
+        +InputSignal~boolean~ showCreateButton
+        +InputSignal~string~ createButtonAriaLabel
+        +OutputEmitterRef~void~ createRequested
+        +onCreateRequest() void
+    }
+
+    class HostComponent {
+        +readonly object[] columns
+        +boolean showCreateButton
+        +Mock~Procedure~ onCreateRequested
+    }
+
+    class AlarmToggleSwitchComponent {
+        +InputSignal~boolean~ checked
+        +InputSignal~boolean~ disabled
+        +InputSignal~string~ ariaLabel
+        +OutputEmitterRef~boolean~ toggled
+        +Signal~string~ trackClass
+        +Signal~string~ thumbClass
+        +onToggle() void
+    }
+
+    class ConfirmDialogComponent {
+        +InputSignal~string~ message
+        +InputSignal~string~ confirmLabel
+        +InputSignal~string~ cancelLabel
+        +OutputEmitterRef~void~ confirmed
+        +OutputEmitterRef~void~ cancelled
+        +onConfirm() void
+        +onCancel() void
+    }
+
+    class ModalShellComponent {
+        +InputSignal~boolean~ open
+        +InputSignal~string~ title
+        +InputSignal~string~ description
+        +InputSignal~string~ closeLabel
+        +OutputEmitterRef~void~ closed
+        +onClose() void
+    }
+
+    class DeviceTypeRule {
+        <<abstract>>
+        +DeviceType deviceType
+        +readonly string[] tokens
+    }
+
+    class DeviceTypeResolutionInput {
+        <<abstract>>
+        +string? rawType
+        +string? rawSubType
+        +string? rawName
+        +readonly string[]? sfeTypes
+    }
+
+    class ElapsedTimePipe {
+        +transform(sentAt:string) string
+    }
+
+    %% Relazioni
+    ElapsedTimePipe ..|> PipeTransform
+    AlarmActionButtonComponent ..> AlarmActionButtonTone : uses
+    AlarmPriorityIndicatorComponent ..> AlarmPriority : uses
+    AlarmPriorityIndicatorComponent ..> PriorityUi : renders
+    AlarmPriorityIndicatorComponent ..> PRIORITY_UI : maps with
+    AlarmTableShellComponent ..> AlarmTableColumn : uses
+    DeviceTypeRule --> DeviceType
+    
+    %% Relazioni ai file template (opzionali in Mermaid, incluse per completezza)
+    ModalShellComponent ..> Template : uses
+    ConfirmDialogComponent ..> Template : uses
+    AlarmActionButtonComponent ..> Template : uses
+    AlarmPriorityIndicatorComponent ..> Template : uses
+    AlarmTableShellComponent ..> Template : uses
+    AlarmToggleSwitchComponent ..> Template : uses

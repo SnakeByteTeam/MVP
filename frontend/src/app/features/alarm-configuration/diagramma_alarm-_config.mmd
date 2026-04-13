@@ -1,6 +1,6 @@
 classDiagram
     class OnInit {
-        <<interface>>
+        <<abstract>>
     }
 
     class AlarmPriority {
@@ -48,7 +48,7 @@ classDiagram
     }
 
     class AlarmRule {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string thresholdOperator
@@ -63,7 +63,7 @@ classDiagram
     }
 
     class CreateAlarmRuleRequestDto {
-        <<interface>>
+        <<abstract>>
         +string name
         +string deviceId
         +string datapointId
@@ -76,7 +76,7 @@ classDiagram
     }
 
     class UpdateAlarmRuleRequestDto {
-        <<interface>>
+        <<abstract>>
         +string name
         +number priority
         +string thresholdOperator
@@ -87,7 +87,7 @@ classDiagram
     }
 
     class AlarmConfigFormValue {
-        <<interface>>
+        <<abstract>>
         +string name
         +string plantId
         +string deviceId
@@ -101,7 +101,7 @@ classDiagram
     }
 
     class AlarmConfigTableRow {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string position
@@ -113,13 +113,13 @@ classDiagram
     }
 
     class AlarmTableColumn {
-        <<interface>>
+        <<abstract>>
         +string id
         +string label
     }
 
     class Datapoint {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean readable
@@ -130,14 +130,14 @@ classDiagram
     }
 
     class DeviceAction {
-        <<interface>>
+        <<abstract>>
         +string key
         +string label
         +boolean disabled
     }
 
     class Device {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +DeviceType type
@@ -147,7 +147,7 @@ classDiagram
     }
 
     class Room {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean hasActiveAlarm
@@ -155,7 +155,7 @@ classDiagram
     }
 
     class Apartment {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean isEnabled
@@ -163,7 +163,7 @@ classDiagram
     }
 
     class PlantDatapointDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean readable
@@ -174,7 +174,7 @@ classDiagram
     }
 
     class PlantDeviceDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string type
@@ -183,14 +183,14 @@ classDiagram
     }
 
     class PlantRoomDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +PlantDeviceDto[] devices
     }
 
     class PlantDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +number wardId
@@ -198,44 +198,44 @@ classDiagram
     }
 
     class WardPlantDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
     }
 
     class WardSummaryDto {
-        <<interface>>
+        <<abstract>>
         +number id
         +string name
     }
 
     class DeviceDatapointOption {
-        <<interface>>
+        <<abstract>>
         +string id
         +string label
         +Datapoint[] datapoints
     }
 
     class AlarmConfigFormLike {
-        <<interface>>
+        <<abstract>>
         +any controls
     }
 
     class DeviceSelectionResult {
-        <<interface>>
+        <<abstract>>
         +string normalizedDeviceId
         +Datapoint[] readableDatapoints
         +string|null autoSelectedDatapointId
     }
 
     class DatapointSelectionResult {
-        <<interface>>
+        <<abstract>>
         +string normalizedDatapointId
         +Datapoint|null selectedDatapoint
     }
 
     class ApplyThresholdConstraintsParams {
-        <<interface>>
+        <<abstract>>
         +string mode
         +Datapoint|null datapoint
         +AbstractControl thresholdOperatorControl
@@ -243,7 +243,7 @@ classDiagram
     }
 
     class ApiErrorDisplayOptions {
-        <<interface>>
+        <<abstract>>
         +string fallbackMessage
         +string actionLabel
         +string forbiddenMessage
@@ -251,7 +251,7 @@ classDiagram
     }
 
     class PriorityUi {
-        <<interface>>
+        <<abstract>>
         +string label
         +string bubbleClass
         +string symbolClass

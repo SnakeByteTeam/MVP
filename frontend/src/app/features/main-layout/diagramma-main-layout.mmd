@@ -1,12 +1,12 @@
 classDiagram
     class OnInit {
-        <<interface>>
+        <<abstract>>
     }
     class OnDestroy {
-        <<interface>>
+        <<abstract>>
     }
     class AfterViewInit {
-        <<interface>>
+        <<abstract>>
     }
 
     class UserRole {
@@ -16,7 +16,7 @@ classDiagram
     }
 
     class NavItem {
-        <<interface>>
+        <<abstract>>
         +string label
         +string icon
         +string route
@@ -24,7 +24,7 @@ classDiagram
     }
 
     class UserInfo {
-        <<interface>>
+        <<abstract>>
         +string username
         +string firstName
         +string lastName
@@ -32,7 +32,7 @@ classDiagram
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
         +string username
         +UserRole role
@@ -41,7 +41,7 @@ classDiagram
     }
 
     class NotificationEvent {
-        <<interface>>
+        <<abstract>>
         +string notificationId
         +string title
         +string sentAt
@@ -49,13 +49,13 @@ classDiagram
     }
 
     class MyVimarAccount {
-        <<interface>>
+        <<abstract>>
         +string email
         +boolean isLinked
     }
 
     class Breadcrumb {
-        <<interface>>
+        <<abstract>>
         +string label
         +string url
     }
@@ -114,7 +114,7 @@ classDiagram
     }
 
     class IVimarCloudApiService {
-        <<interface>>
+        <<abstract>>
         +getLinkedAccount() Observable~MyVimarAccount~
     }
 

@@ -1,0 +1,361 @@
+classDiagram
+    class AlarmPriority {
+        <<enumeration>>
+        WHITE
+        GREEN
+        ORANGE
+        RED
+    }
+
+    class ActiveAlarm {
+        <<abstract>>
+        +string id
+        +string alarmRuleId
+        +string? deviceId
+        +string alarmName
+        +AlarmPriority priority
+        +string activationTime
+        +string resolutionTime
+        +string position
+        +number userId
+        +string? userUsername
+    }
+
+    class AlarmEvent {
+        <<abstract>>
+        +string id
+        +string alarmRuleId
+        +string alarmName
+        +AlarmPriority priority
+        +string activationTime
+        +string resolutionTime
+    }
+
+    class AlarmRule {
+        <<abstract>>
+        +string id
+        +string name
+        +string thresholdOperator
+        +string thresholdValue
+        +AlarmPriority priority
+        +string|Date armingTime
+        +string|Date dearmingTime
+        +boolean isArmed
+        +string deviceId
+        +string? datapointId
+        +string position
+    }
+
+    class AlarmStatus {
+        <<enumeration>>
+        OPEN
+        IN_PROGRESS
+        RESOLVED
+    }
+
+    class ConnectionStatus {
+        <<enumeration>>
+        CONNECTED
+        DISCONNECTED
+        RECONNECTING
+    }
+
+    class CreateAlarmRuleRequestDto {
+        <<abstract>>
+        +string name
+        +string deviceId
+        +string? datapointId
+        +string plantId
+        +number priority
+        +string thresholdOperator
+        +string thresholdValue
+        +string armingTime
+        +string dearmingTime
+    }
+
+    class UpdateAlarmRuleRequestDto {
+        <<abstract>>
+        +string name
+        +number priority
+        +string thresholdOperator
+        +string thresholdValue
+        +string armingTime
+        +string dearmingTime
+        +boolean isArmed
+    }
+
+    class PushEventType {
+        <<enumeration>>
+        ALARM_TRIGGERED
+        ALARM_RESOLVED
+        NOTIFICATION
+    }
+
+    class PushEvent {
+        <<abstract>>
+        +PushEventType eventType
+        +unknown payload
+        +string timestamp
+    }
+
+    class BackendTriggeredPayload {
+        <<abstract>>
+        +string alarmEventId
+        +number wardId
+        +string alarmRuleId
+    }
+
+    class BackendResolvedPayload {
+        <<abstract>>
+        +string alarmEventId
+        +number? wardId
+    }
+
+    class AlarmLifecycleUpdateDetail {
+        <<abstract>>
+        +AlarmLifecycleType type
+        +string alarmEventId
+    }
+
+    class ThresholdOperator {
+        <<enumeration>>
+        GREATER_THAN
+        GREATER_THAN_OR_EQUAL
+        LESS_THAN
+        LESS_THAN_OR_EQUAL
+        EQUAL_TO
+    }
+
+    class AlarmApiService {
+        -unknown http
+        -string baseUrl
+        -string alarmsBaseUrl
+        -string alarmEventsBaseUrl
+        +getAlarmRules() Observable~AlarmRule[]~
+        +getAlarmRule(id:string) Observable~AlarmRule~
+        +createAlarmRule(payload:CreateAlarmRuleRequestDto) Observable~AlarmRule~
+        +updateAlarmRule(id:string, payload:UpdateAlarmRuleRequestDto) Observable~AlarmRule~
+        +deleteAlarmRule(id:string) Observable~void~
+        +getActiveAlarms(userId:number, limit?:number, offset?:number) Observable~ActiveAlarm[]~
+        +getResolvedAlarms(userId:number, limit?:number, offset?:number) Observable~ActiveAlarm[]~
+        +getAlarmEventById(alarmEventId:string) Observable~ActiveAlarm~
+        +resolveAlarm(alarmId:string, userId:number) Observable~void~
+    }
+
+    class NotificationEvent {
+        <<abstract>>
+        +string notificationId
+        +string title
+        +string sentAt
+        +"triggered"|"resolved"? eventType
+    }
+
+    class AlarmStateService {
+        -BehaviorSubject~ActiveAlarm[]~ activeAlarms$
+        -BehaviorSubject~NotificationEvent[]~ notifications$
+        -BehaviorSubject~ReadonlySet~string~~ dismissedNotificationIds$
+        -any locallyResolvedActiveAlarmIds
+        +setActiveAlarms(alarms:ActiveAlarm[], mode?:ActiveAlarmsSnapshotMode) void
+        +onAlarmTriggered(event:AlarmEvent) void
+        +onAlarmResolved(id:string) void
+        +onNotificationReceived(event:NotificationEvent) void
+        +removeNotification(notificationId:string) void
+        +clearNotifications() void
+        +dismissNotification(notificationId:string) void
+        +dismissNotifications(notificationIds:readonly string[]) void
+        +getActiveAlarms$() Observable~ActiveAlarm[]~
+        +getActiveAlarmsCount$() Observable~number~
+        +getNotifications$() Observable~NotificationEvent[]~
+        +getDismissedNotificationIds$() Observable~ReadonlySet~string~~
+        +getUnreadNotificationsCount$() Observable~number~
+    }
+
+    class AlarmLifecycleNotifierPort {
+        <<interface>>
+        +publish(type:AlarmLifecycleType, alarmEventId:string, timestamp:string, details?:AlarmNotificationDetails) void
+    }
+
+    class AlarmLifecycleNotifierService {
+        -AlarmStateService alarmStateService
+        +publish(type:AlarmLifecycleType, alarmEventId:string, timestamp:string, details?:AlarmNotificationDetails) void
+        -publishNotification(type:AlarmLifecycleType, alarmEventId:string, timestamp:string, details?:AlarmNotificationDetails) void
+        -publishLifecycleUpdate(type:AlarmLifecycleType, alarmEventId:string) void
+    }
+
+    class AlarmManagementRefreshService {
+        -Subject~void~ refreshRequested$
+        +requestRefresh() void
+        +getRefreshRequested$() Observable~void~
+    }
+
+    class InternalAuthService {
+        -unknown http
+        -string baseUrl
+        -BehaviorSubject~UserSession~ currentUser$
+        -string token
+        -Observable~boolean~ restoreSessionInFlight$
+        +login(username:string, password:string) Observable~UserSession~
+        +setFirstAccessPassword(username:string, temporaryPassword:string, newPassword:string) Observable~UserSession~
+        +refreshAccessToken() Observable~string~
+        +restoreSessionFromRefresh() Observable~boolean~
+        +logoutFromBackend() Observable~void~
+        +logout() void
+        +getToken() string
+        +getCurrentUser$() Observable~UserSession~
+        +getRole() UserRole
+        +isAuthenticated() boolean
+        +hasRole(role:UserRole) boolean
+        -setSession(session:UserSession) void
+        -buildSessionFromAccessToken(accessToken:string) UserSession
+        -parseAccessToken(accessToken:string) AuthClaims
+        -isUserRole(role:string) boolean
+    }
+
+    class RealtimeAlarmEventNormalizerPort {
+        <<interface>>
+        +parseBackendTriggeredPayload(payload:unknown) BackendTriggeredPayload
+        +parseBackendResolvedPayload(payload:unknown) BackendResolvedPayload
+    }
+
+    class RealtimeAlarmEventNormalizerService {
+        +parseBackendTriggeredPayload(payload:unknown) BackendTriggeredPayload
+        +parseBackendResolvedPayload(payload:unknown) BackendResolvedPayload
+        -isObject(value:unknown) boolean
+        -parseWardId(value:unknown) number
+    }
+
+    class WardRealtimeCacheService {
+        +getWardIds(userId:string) string[]
+        +setWardIds(userId:string, wardIds:readonly WardIdInput[]) string[]
+        +mergeWardIds(userId:string, wardIds:readonly WardIdInput[]) string[]
+        +clearWardIds(userId:string) void
+        +clearAll() void
+        -normalizeUserId(value:string) string
+        -normalizeWardIds(values:readonly WardIdInput[]) string[]
+        -readCache() WardIdsByUser
+        -writeCache(cache:WardIdsByUser) void
+        -getStorage() Storage
+        -isWardIdsByUser(value:unknown) boolean
+    }
+
+    class WardSocketRoomCoordinatorPort {
+        <<interface>>
+        +activateUser(userId:string) UserActivationActions
+        +deactivateUser() string[]
+        +requestJoinRoom(wardId:string) string
+        +requestLeaveRoom(wardId:string) string
+        +getJoinedRooms() string[]
+        +resetRuntimeState() void
+    }
+
+    class WardSocketRoomCoordinatorService {
+        -WardRealtimeCacheService wardRealtimeCache
+        -any joinedRooms
+        -string currentUserId
+        +activateUser(userId:string) UserActivationActions
+        +deactivateUser() string[]
+        +requestJoinRoom(wardId:string) string
+        +requestLeaveRoom(wardId:string) string
+        +getJoinedRooms() string[]
+        +resetRuntimeState() void
+        -persistJoinedRooms() void
+    }
+
+    class EventSubscriptionService {
+        -unknown socketIoFactory
+        -unknown http
+        -AlarmApiService alarmApiService
+        -AlarmStateService alarmStateService
+        -string apiBaseUrl
+        -InternalAuthService internalAuthService
+        -RealtimeAlarmEventNormalizerPort eventNormalizer
+        -AlarmLifecycleNotifierPort lifecycleNotifier
+        -WardSocketRoomCoordinatorPort roomCoordinator
+        -BehaviorSubject~ConnectionStatus~ connectionStatus$
+        -Subject~void~ destroy$
+        -Socket socket
+        -boolean authLifecycleInitialized
+        -string activeUserId
+        -any wardBootstrapInFlightUserIds
+        -any wardBootstrapDoneUserIds
+        +initialize(wardIds:string[]) void
+        +refreshWardRoomSubscription() void
+        +getConnectionStatus$() Observable~ConnectionStatus~
+        +joinRoom(wardId:string) void
+        +leaveRoom(wardId:string) void
+        +ngOnDestroy() void
+        -connect() void
+        -disconnect() void
+        -ensureAuthLifecycleSubscription() void
+        -bootstrapWardRoomSubscription(userId:string, forceRefresh?:boolean) void
+        -syncJoinedRoomsWithWardIds(targetWardIds:readonly string[]) void
+        -handleBackendTriggeredRawEvent(raw:unknown) void
+        -handleBackendResolvedRawEvent(raw:unknown) void
+        -resolveTriggeredAlarmDetails(alarmEventId:string) Observable~object~
+        -normalizeAlarmPriority(value:unknown) AlarmPriority
+        -isAlarmPriority(value:number) boolean
+        -rejoinAllRooms() void
+        -emitJoinMany(wardIds:readonly string[]) void
+        -emitLeaveMany(wardIds:readonly string[]) void
+        -resolveSocketUrl() string
+        -toWebsocketNamespaceUrl(baseUrl:string) string
+        -resolvePlantAllEndpoint() string
+        -extractWardIdsFromPlantResponse(response:unknown) string[]
+        -extractPlantArray(response:unknown) object[]
+        -normalizeWardId(rawWardId:unknown) string
+    }
+
+    class NotificationApiService {
+        -unknown http
+        -string baseUrl
+        -InternalAuthService authService
+        +getNotificationsHistory() Observable~NotificationEvent[]~
+        -fetchManagedAlarmEvents(encodedUserId:string) Observable~AlarmEventHistoryDto[]~
+        -fetchUnmanagedAlarmEvents(encodedUserId:string) Observable~AlarmEventHistoryDto[]~
+        -mapAlarmEventsToNotifications(alarmEvents:readonly AlarmEventHistoryDto[]) NotificationEvent[]
+        -mapAlarmEventToNotification(alarmEvent:AlarmEventHistoryDto) NotificationEvent
+        -toIsoString(value:unknown) string
+        -HISTORY_LIMIT number
+        -HISTORY_OFFSET number
+    }
+
+    class ApiErrorDisplayService {
+        +toMessage(error:unknown, options:ApiErrorDisplayOptions) string
+        -mapHttpError(error:HttpErrorResponse, options:ApiErrorDisplayOptions) string
+        -extractHttpMessage(error:HttpErrorResponse) string
+        -extractUnknownMessage(error:unknown) string
+    }
+
+    class BreadcrumbService {
+        +Observable~Breadcrumb[]~ breadcrumbs$
+        -Router router
+        -ActivatedRoute activatedRoute
+        -buildBreadcrumbs(route:ActivatedRoute, url?:string, crumbs?:Breadcrumb[]) Breadcrumb[]
+    }
+
+    %% Relazioni
+    AlarmApiService ..> AlarmRule : "uses"
+    AlarmApiService ..> CreateAlarmRuleRequestDto : "uses"
+    AlarmApiService ..> UpdateAlarmRuleRequestDto : "uses"
+    AlarmApiService ..> ActiveAlarm : "uses"
+
+    AlarmLifecycleNotifierService ..|> AlarmLifecycleNotifierPort
+    AlarmLifecycleNotifierService o-- AlarmStateService : "injects"
+
+    AlarmStateService ..> ActiveAlarm : "manages"
+    AlarmStateService ..> NotificationEvent : "manages"
+    AlarmStateService ..> AlarmEvent : "consumes"
+
+    EventSubscriptionService o-- AlarmApiService
+    EventSubscriptionService o-- AlarmStateService
+    EventSubscriptionService o-- InternalAuthService
+    EventSubscriptionService o-- RealtimeAlarmEventNormalizerPort
+    EventSubscriptionService o-- AlarmLifecycleNotifierPort
+    EventSubscriptionService o-- WardSocketRoomCoordinatorPort
+
+    RealtimeAlarmEventNormalizerService ..|> RealtimeAlarmEventNormalizerPort
+    WardSocketRoomCoordinatorService ..|> WardSocketRoomCoordinatorPort
+    WardSocketRoomCoordinatorService o-- WardRealtimeCacheService : "injects (opt)"
+
+    NotificationApiService o-- InternalAuthService
+    NotificationApiService ..> NotificationEvent : "produces"

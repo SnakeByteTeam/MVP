@@ -14,7 +14,7 @@ classDiagram
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
         +string username
         +UserRole role
@@ -23,17 +23,17 @@ classDiagram
     }
 
     class LoginResponse {
-        <<interface>>
+        <<abstract>>
         +string accessToken
     }
 
     class RefreshResponse {
-        <<interface>>
+        <<abstract>>
         +string accessToken
     }
 
     class AuthClaims {
-        <<interface>>
+        <<abstract>>
         +string|number? userId
         +string|number? sub
         +string|number? id
@@ -44,13 +44,11 @@ classDiagram
     }
 
     class TokenResponse {
-        <<interface>>
+        <<abstract>>
         +string accessToken
     }
 
-    class API_BASE_URL {
-        <<injection-token>>
-    }
+ 
 
     class Router {
     }
@@ -64,9 +62,7 @@ classDiagram
     class FormBuilder {
     }
 
-    class ValidatorFn {
-        <<interface>>
-    }
+   
 
     class InternalAuthService {
         -HttpClient http

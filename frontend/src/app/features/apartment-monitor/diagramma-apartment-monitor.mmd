@@ -1,10 +1,4 @@
 classDiagram
-    class OnInit {
-        <<interface>>
-    }
-    class OnDestroy {
-        <<interface>>
-    }
 
     class AlarmPriority {
         <<enumeration>>
@@ -35,12 +29,12 @@ classDiagram
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
     }
 
     class ActiveAlarm {
-        <<interface>>
+        <<abstract>>
         +string id
         +string alarmName
         +AlarmPriority priority
@@ -50,7 +44,7 @@ classDiagram
     }
 
     class Datapoint {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean readable
@@ -61,14 +55,14 @@ classDiagram
     }
 
     class DeviceAction {
-        <<interface>>
+        <<abstract>>
         +string key
         +string label
         +boolean? disabled
     }
 
     class Device {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +DeviceType type
@@ -78,7 +72,7 @@ classDiagram
     }
 
     class Room {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean hasActiveAlarm
@@ -86,7 +80,7 @@ classDiagram
     }
 
     class Apartment {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean isEnabled
@@ -94,13 +88,13 @@ classDiagram
     }
 
     class ApartmentOption {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
     }
 
     class PlantDatapointDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean readable
@@ -111,7 +105,7 @@ classDiagram
     }
 
     class PlantDeviceDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string? type
@@ -120,14 +114,14 @@ classDiagram
     }
 
     class PlantRoomDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +PlantDeviceDto[] devices
     }
 
     class PlantDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +number? wardId
@@ -135,13 +129,13 @@ classDiagram
     }
 
     class AlarmLifecycleUpdateDetail {
-        <<interface>>
+        <<abstract>>
         +string type
         +string alarmEventId
     }
 
     class DeviceTypeResolutionInput {
-        <<interface>>
+        <<abstract>>
         +string? rawType
         +string? rawSubType
         +string? rawName

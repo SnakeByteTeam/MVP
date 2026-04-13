@@ -142,19 +142,8 @@ class MainLayoutComponent {
     +canOpenProfilePanel(): boolean
 }
 
-class MAIN_LAYOUT_ROUTES <<routes>>
 class authGuard <<guard>>
 class roleGuard <<guard>>
-class DASHBOARD_ROUTES <<routes>>
-class ALARM_MANAGEMENT_ROUTES <<routes>>
-class ALARM_HISTORY_ROUTES <<routes>>
-class ALARM_CONFIGURATION_ROUTES <<routes>>
-class ANALYTICS_ROUTES <<routes>>
-class APARTMENT_MONITOR_ROUTES <<routes>>
-class DEVICE_INTERACTION_ROUTES <<routes>>
-class NOTIFICATION_ROUTES <<routes>>
-class WARD_MANAGEMENT_ROUTES <<routes>>
-class USER_MANAGEMENT_ROUTES <<routes>>
 
 ' Realizzazioni
 MainLayoutComponent ..|> OnInit

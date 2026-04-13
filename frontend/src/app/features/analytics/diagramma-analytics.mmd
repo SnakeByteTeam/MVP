@@ -1,23 +1,23 @@
 classDiagram
     class OnInit {
-        <<interface>>
+        <<abstract>>
     }
 
     class ChartDatasetDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +number[] data
     }
 
     class EnergySavingSuggestionDto {
-        <<interface>>
+        <<abstract>>
         +string[] messages
         +boolean isSuggestion
     }
 
     class ChartInfoDto {
-        <<interface>>
+        <<abstract>>
         +string[] labels
         +ChartDatasetDto[] datasets
         +string title
@@ -27,7 +27,7 @@ classDiagram
     }
 
     class AnalyticsDto {
-        <<interface>>
+        <<abstract>>
         +string apartmentId
         +ChartInfoDto[] analyticsInfo
     }

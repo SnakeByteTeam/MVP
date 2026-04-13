@@ -1,10 +1,5 @@
 classDiagram
-    class OnInit {
-        <<interface>>
-    }
-    class OnDestroy {
-        <<interface>>
-    }
+
 
     class DeviceType {
         <<enumeration>>
@@ -27,14 +22,14 @@ classDiagram
     }
 
     class DeviceAction {
-        <<interface>>
+        <<abstract>>
         +string key
         +string label
         +boolean? disabled
     }
 
     class Datapoint {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean readable
@@ -45,7 +40,7 @@ classDiagram
     }
 
     class Device {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +DeviceType type
@@ -55,7 +50,7 @@ classDiagram
     }
 
     class Room {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean hasActiveAlarm
@@ -63,7 +58,7 @@ classDiagram
     }
 
     class PlantDatapointDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +boolean readable
@@ -74,7 +69,7 @@ classDiagram
     }
 
     class PlantDeviceDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +string? type
@@ -83,14 +78,14 @@ classDiagram
     }
 
     class PlantRoomDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +PlantDeviceDto[] devices
     }
 
     class PlantDto {
-        <<interface>>
+        <<abstract>>
         +string id
         +string name
         +number? wardId
@@ -98,7 +93,7 @@ classDiagram
     }
 
     class DeviceTypeResolutionInput {
-        <<interface>>
+        <<abstract>>
         +string? rawType
         +string? rawSubType
         +string? rawName
@@ -113,20 +108,20 @@ classDiagram
     }
 
     class IDeviceCard {
-        <<interface>>
+        <<abstract>>
         +InputSignal~string~ roomId
         +InputSignal~Device~ device
     }
 
     class ExecuteActionDto {
-        <<interface>>
+        <<abstract>>
         +string roomId
         +string deviceId
         +string action
     }
 
     class WriteDatapointRequest {
-        <<interface>>
+        <<abstract>>
         +string roomId
         +string deviceId
         +string datapointId
@@ -134,26 +129,26 @@ classDiagram
     }
 
     class WriteDatapointDto {
-        <<interface>>
+        <<abstract>>
         +string datapointId
         +string value
     }
 
     class DeviceValuePointDto {
-        <<interface>>
+        <<abstract>>
         +string datapointId
         +string name
         +string|number value
     }
 
     class DeviceValueDto {
-        <<interface>>
+        <<abstract>>
         +string deviceId
         +DeviceValuePointDto[] values
     }
 
     class WritableEndpointRow {
-        <<interface>>
+        <<abstract>>
         +string roomId
         +string roomName
         +string deviceId
@@ -166,14 +161,14 @@ classDiagram
     }
 
     class EndpointRoomGroup {
-        <<interface>>
+        <<abstract>>
         +string roomId
         +string roomName
         +WritableEndpointRow[] rows
     }
 
     class RowFeedback {
-        <<interface>>
+        <<abstract>>
         +"success"|"error" type
         +string message
     }

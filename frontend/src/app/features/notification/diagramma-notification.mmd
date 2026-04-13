@@ -8,7 +8,7 @@ classDiagram
     }
 
     class NotificationEvent {
-        <<interface>>
+        <<abstract>>
         +string notificationId
         +string title
         +string sentAt
@@ -16,13 +16,13 @@ classDiagram
     }
 
     class NotificationListVm {
-        <<interface>>
+        <<abstract>>
         +NotificationEvent[] notifications
         +number unreadCount
     }
 
     class AlarmEventHistoryDto {
-        <<interface>>
+        <<abstract>>
         +unknown? id
         +unknown? activationTime
         +unknown? resolutionTime
@@ -31,7 +31,7 @@ classDiagram
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
     }
 

@@ -1,0 +1,105 @@
+@startuml
+class AlarmActionButtonComponent {
+    +label: InputSignal<string>
+    +ariaLabel: InputSignal<string>
+    +tone: InputSignal<AlarmActionButtonTone>
+    +disabled: InputSignal<boolean>
+    +pressed: OutputEmitterRef<void>
+    +buttonClass: Signal<"care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--primary focus-visible:outline-amber-400" | "care-btn care-btn--compact min-w-[96px] focus-visible:outline-2 focus-visible:outline-offset-2 care-btn--danger focus-visible:outline-red-500" | "care-btn care-...
+    +onPressed(): void
+}
+enum AlarmPriority {
+    WHITE
+    GREEN
+    ORANGE
+    RED
+}
+class AlarmPriorityIndicatorComponent {
+    +priority: InputSignal<AlarmPriority>
+    +ui: Signal<PriorityUi>
+}
+class AlarmTableShellComponent {
+    +title: InputSignal<string>
+    +caption: InputSignal<string>
+    +columns: InputSignal<readonly AlarmTableColumn[]>
+    +showCreateButton: InputSignal<boolean>
+    +createButtonAriaLabel: InputSignal<string>
+    +createRequested: OutputEmitterRef<void>
+    +onCreateRequest(): void
+}
+class HostComponent {
+    +columns: readonly [{ readonly id: "priority"; readonly label: "Priorita"; }, { readonly id: "name"; readonly label: "Nome"; }]
+    +showCreateButton: boolean
+    +onCreateRequested: Mock<Procedure>
+}
+class AlarmToggleSwitchComponent {
+    +checked: InputSignal<boolean>
+    +disabled: InputSignal<boolean>
+    +ariaLabel: InputSignal<string>
+    +toggled: OutputEmitterRef<boolean>
+    +trackClass: Signal<"relative inline-flex h-5 w-9 items-center rounded-full border transition focus-visible:outline-2 focus-visible:outline-offset-2 border-yellow-700 bg-yellow-400 focus-visible:outline-yellow-500 disabled:border-slate-400 disabled:bg-slate-300" | "relative inline-flex h-5 w-9 items-center rounded-full border tr...
+    +thumbClass: Signal<"inline-block h-4 w-4 transform rounded-full border border-slate-500 bg-white transition translate-x-4" | "inline-block h-4 w-4 transform rounded-full border border-slate-500 bg-white transition translate-x-0.5">
+    +onToggle(): void
+}
+class ConfirmDialogComponent {
+    +message: InputSignal<string>
+    +confirmLabel: InputSignal<string>
+    +cancelLabel: InputSignal<string>
+    +confirmed: OutputEmitterRef<void>
+    +cancelled: OutputEmitterRef<void>
+    +onConfirm(): void
+    +onCancel(): void
+}
+class ModalShellComponent {
+    +open: InputSignal<boolean>
+    +title: InputSignal<string>
+    +description: InputSignal<string>
+    +closeLabel: InputSignal<string>
+    +closed: OutputEmitterRef<void>
+    +onClose(): void
+}
+enum DeviceType {
+    UNKNOWN
+    THERMOSTAT
+    FALL_SENSOR
+    PRESENCE_SENSOR
+    LIGHT
+    ALARM_BUTTON
+    ENTRANCE_DOOR
+    BLIND
+}
+abstract class DeviceTypeRule {
+    +deviceType: DeviceType
+    +tokens: readonly string[]
+}
+abstract class DeviceTypeResolutionInput {
+    +rawType?: string
+    +rawSubType?: string
+    +rawName?: string
+    +sfeTypes?: readonly string[]
+}
+
+class ElapsedTimePipe implements PipeTransform {
+    +transform(sentAt: string): string
+}
+
+ElapsedTimePipe ..|> PipeTransform
+ModalShellComponent ..> "modal-shell.component.html" : "uses"
+ConfirmDialogComponent ..> "confirm-dialog.component.html" : "uses"
+ConfirmDialogComponent ..> "confirm-dialog.component.css" : "uses"
+AlarmActionButtonComponent ..> AlarmActionButtonTone : "uses"
+
+AlarmActionButtonComponent ..> "alarm-action-button.component.html" : "uses"
+AlarmPriorityIndicatorComponent ..> AlarmPriority : "uses"
+
+AlarmPriorityIndicatorComponent ..> PriorityUi : "renders"
+AlarmPriorityIndicatorComponent ..> PRIORITY_UI : "maps with"
+
+AlarmPriorityIndicatorComponent ..> "alarm-priority-indicator.component.html" : "uses"
+
+AlarmTableShellComponent ..> AlarmTableColumn : "uses"
+AlarmTableShellComponent ..> "alarm-table-shell.component.html" : "uses"
+
+AlarmToggleSwitchComponent ..> "alarm-toggle-switch.component.html" : "uses"
+
+@enduml

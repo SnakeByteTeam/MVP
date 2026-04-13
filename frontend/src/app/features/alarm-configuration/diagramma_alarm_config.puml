@@ -3,7 +3,7 @@
 interface OnInit
 
 enum AlarmPriority {
-    WHITE = 1
+    WHITE 
     GREEN
     ORANGE
     RED

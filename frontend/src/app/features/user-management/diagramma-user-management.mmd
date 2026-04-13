@@ -12,19 +12,19 @@ classDiagram
     }
 
     class CreateUserDto {
-        <<interface>>
+        <<abstract>>
         +string name
         +string surname
         +string username
     }
 
     class UserCreatedResponseDto {
-        <<interface>>
+        <<abstract>>
         +string tempPassword
     }
 
     class UserDto {
-        <<interface>>
+        <<abstract>>
         +number id
         +string name
         +string surname
@@ -33,7 +33,7 @@ classDiagram
     }
 
     class UserInfo {
-        <<interface>>
+        <<abstract>>
         +string username
         +string firstName
         +string lastName
@@ -41,7 +41,7 @@ classDiagram
     }
 
     class User {
-        <<interface>>
+        <<abstract>>
         +number id
         +string firstName
         +string lastName

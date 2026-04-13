@@ -1,6 +1,6 @@
 classDiagram
     class OnInit {
-        <<interface>>
+        <<abstract>>
     }
 
     class AlarmPriority {
@@ -12,7 +12,7 @@ classDiagram
     }
 
     class ActiveAlarm {
-        <<interface>>
+        <<abstract>>
         +string id
         +string alarmRuleId
         +string? deviceId
@@ -26,7 +26,7 @@ classDiagram
     }
 
     class AlarmListVm {
-        <<interface>>
+        <<abstract>>
         +ActiveAlarm[] alarms
         +number currentPage
         +number pageLimit
@@ -36,7 +36,7 @@ classDiagram
     }
 
     class AlarmTableRow {
-        <<interface>>
+        <<abstract>>
         +string id
         +AlarmPriority priority
         +string name
@@ -49,13 +49,13 @@ classDiagram
     }
 
     class AlarmTableColumn {
-        <<interface>>
+        <<abstract>>
         +string id
         +string label
     }
 
     class UserSession {
-        <<interface>>
+        <<abstract>>
         +string userId
     }
 

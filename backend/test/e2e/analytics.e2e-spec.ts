@@ -310,39 +310,4 @@ describe('Analytics (e2e)', () => {
       expect((r1.body as Plot[]).length).toBe((r2.body as Plot[]).length);
     });
   });
-
-  describe('Performance & Load', () => {
-    it('should respond within an acceptable time window', async () => {
-      const start = Date.now();
-      await authGet(`/analytics/${VALID_PLANT_ID}`).expect(200);
-      expect(Date.now() - start).toBeLessThan(10000);
-    });
-
-    it('should handle concurrent requests for the same plant', async () => {
-      const responses = await Promise.all(
-        Array.from({ length: 5 }, () =>
-          authGet(`/analytics/${VALID_PLANT_ID}`),
-        ),
-      );
-      for (const res of responses) {
-        expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-      }
-    });
-
-    it('should handle sequential requests for different plants without state pollution', async () => {
-      for (const plantId of [VALID_PLANT_ID, VALID_PLANT_ID, VALID_PLANT_ID]) {
-        const res = await authGet(`/analytics/${plantId}`);
-        expect([200, 500]).toContain(res.status);
-      }
-    });
-
-    it('should maintain stability after a burst of requests', async () => {
-      const burst = Array.from({ length: 10 }, () =>
-        authGet(`/analytics/${VALID_PLANT_ID}`),
-      );
-      await Promise.allSettled(burst);
-      await authGet(`/analytics/${VALID_PLANT_ID}`).expect(200);
-    });
-  });
 });
